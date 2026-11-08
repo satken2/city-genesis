@@ -4214,6 +4214,335 @@
             "8": "Avec les souvenirs de {{place}} en tête, nous allons chercher de nouveaux favoris !"
           }
         }
+      },
+      "shortage": {
+        "any": {
+          "0": {
+            "0": "{{product}} : impossible d'en trouver. Je fais tous les magasins, l'argent serré dans le poing.",
+            "1": "{{product}} : je veux en acheter, mais il n'y en a nulle part. Tu sais où en trouver, le maire ?",
+            "2": "{{product}} : je n'ai pu obtenir que {{percent}} % de ce qu'il me fallait.",
+            "3": "{{product}} : rupture de stock sur rupture de stock. Le quotidien ne suit plus."
+          },
+          "2": {
+            "0": "{{product}} : je n'en trouve qu'environ la moitié. Où est passé le reste ?",
+            "1": "{{product}} : j'ai écumé plusieurs boutiques. Bilan de la chasse : la moitié.",
+            "2": "{{product}} : seulement {{percent}} % de ce qu'il me fallait. Pour le reste, je me serre la ceinture.",
+            "3": "{{product}} : difficile d'avoir tout ce qu'il faut. Penche-toi un peu sur la question, le maire."
+          },
+          "4": {
+            "0": "{{product}} : j'en trouve presque toujours, mais il y a des ruptures de temps en temps.",
+            "1": "{{product}} : pas vraiment de souci. Il m'arrive juste de rater un achat.",
+            "2": "{{product}} : j'en ai eu environ {{percent}} %. On y est presque.",
+            "3": "{{product}} : parfois plus rien en rayon. Bon, ça reste tolérable."
+          }
+        },
+        "food_retail": {
+          "0": {
+            "0": "Au supermarché, les rayons alimentaires sont vides. J'ai de l'argent, mais pas de dîner.",
+            "1": "Impossible d'acheter à manger. Mon portefeuille s'arrondit, mais mon ventre crie famine, le maire.",
+            "2": "Je n'ai eu que {{percent}} % des produits alimentaires que je voulais. Le reste, je l'ai mangé en imagination."
+          },
+          "2": {
+            "0": "Je n'arrive à acheter qu'environ la moitié des produits alimentaires voulus. Le frigo sonne creux.",
+            "1": "Deux magasins pour faire les courses, et à peine la moitié de la liste. Ouvre plus de commerces, le maire.",
+            "2": "Seulement {{percent}} % des produits alimentaires voulus. Composer les menus, c'est un casse-tête tous les jours."
+          },
+          "4": {
+            "0": "Certains jours, les produits alimentaires sont en rupture. Mais dans l'ensemble, ça va.",
+            "1": "J'arrive à faire mes courses, mais en fin de journée, les rayons font un peu triste.",
+            "2": "J'ai eu {{percent}} % des produits alimentaires voulus. Le reste, ce sera le problème du moi de demain."
+          }
+        },
+        "clothing_retail": {
+          "0": {
+            "0": "Je vais acheter des vêtements, il n'y en a pas. Porter toujours la même chemise, ça a ses limites.",
+            "1": "Impossible de trouver le moindre vêtement. Regarde un peu mes chaussettes trouées, le maire.",
+            "2": "Je n'ai pu acheter que {{percent}} % des vêtements voulus. L'élégance sera intérieure ou ne sera pas."
+          },
+          "2": {
+            "0": "Je n'ai trouvé qu'à peu près la moitié des vêtements. J'ai une veste, mais pas de pantalon.",
+            "1": "Les boutiques de vêtements sont toujours en rupture. Les enfants ont tous des pantalons trop courts.",
+            "2": "Vêtements : {{percent}} % de ce qu'il me fallait. Pour le reste, on fait avec les habits des aînés."
+          },
+          "4": {
+            "0": "Je trouve presque toujours des vêtements, mais ma taille est parfois épuisée.",
+            "1": "Côté vêtements, il manque juste parfois ce que je voulais. Je ne vais pas faire le difficile.",
+            "2": "J'ai eu environ {{percent}} % des vêtements voulus. Il me manque juste une dernière pièce."
+          }
+        },
+        "household_goods_retail": {
+          "0": {
+            "0": "Ni papier toilette ni lessive en vente. Sans produits du quotidien, la vie ne tourne plus.",
+            "1": "Le rayon des produits du quotidien est vide depuis longtemps. Une seule brosse à dents suffirait, le maire.",
+            "2": "Je n'ai eu que {{percent}} % des produits du quotidien voulus. J'économise le savon au maximum."
+          },
+          "2": {
+            "0": "Je ne trouve qu'environ la moitié des produits du quotidien. Les mouchoirs, c'est le conseil de famille qui les rationne.",
+            "1": "Quand je trouve de la lessive, il n'y a plus de shampoing. Il manque toujours un produit du quotidien.",
+            "2": "Produits du quotidien : seulement {{percent}} %. Pour le reste, je compte sur la chance la semaine prochaine."
+          },
+          "4": {
+            "0": "Je trouve presque tous les produits du quotidien, mais la lessive est parfois en rupture.",
+            "1": "Les produits du quotidien, ça va. Seuls les sacs-poubelle sont parfois introuvables.",
+            "2": "Produits du quotidien : environ {{percent}} % de ce qu'il me fallait. Je ne me plains presque pas."
+          }
+        },
+        "pharmaceuticals_retail": {
+          "0": {
+            "0": "Je vais à la pharmacie, plus de médicaments. Un rhume, ça se soigne à la volonté, maintenant.",
+            "1": "Impossible de trouver des médicaments. Au moins un cachet contre le mal de tête, le maire.",
+            "2": "Je n'ai pu acheter que {{percent}} % des médicaments voulus. Le reste, je le soigne en dormant."
+          },
+          "2": {
+            "0": "Je ne trouve qu'à peu près la moitié des médicaments. L'armoire à pharmacie fait peine à voir.",
+            "1": "Il faut faire plusieurs pharmacies pour avoir tous ses médicaments. Pas idéal quand on est malade.",
+            "2": "Médicaments : {{percent}} % de ce qu'il me fallait. Pour le reste, je prie."
+          },
+          "4": {
+            "0": "Je trouve presque toujours mes médicaments, mais certains rayons sont parfois vides.",
+            "1": "Les médicaments, je les trouve presque tous. Seul le collyre était en rupture.",
+            "2": "J'ai eu environ {{percent}} % des médicaments voulus. On s'en sort."
+          }
+        },
+        "gasoline_retail": {
+          "0": {
+            "0": "À la station-service, impossible de faire le plein. Ma voiture est devenue une décoration.",
+            "1": "Impossible d'acheter de l'essence. Tu sais ce que c'est, pousser sa voiture pour aller au travail, le maire ?",
+            "2": "Je n'ai pu mettre que {{percent}} % de l'essence voulue. Je passe mon temps à fixer la jauge."
+          },
+          "2": {
+            "0": "Je ne peux mettre qu'à peu près la moitié de l'essence voulue. J'ai renoncé à tous les longs trajets.",
+            "1": "Même après la file d'attente à la pompe, je n'ai droit qu'à la moitié. À quoi bon avoir une voiture ?",
+            "2": "Essence : {{percent}} % de ce qu'il me fallait. Le reste du trajet, je le fais à pied."
+          },
+          "4": {
+            "0": "J'arrive presque toujours à faire le plein, mais les stations sont parfois à sec.",
+            "1": "Le plein, presque pas de souci. Parfois, il faut aller jusqu'à la station d'à côté.",
+            "2": "J'ai pu mettre environ {{percent}} % de l'essence voulue. Le plein est presque fait."
+          }
+        },
+        "water_supply": {
+          "0": {
+            "0": "J'ouvre le robinet, il ne coule presque rien. Les coupures d'eau, il y a des limites, le maire !",
+            "1": "L'eau reste coupée. Un bain ? Même me brosser les dents, c'est un exploit.",
+            "2": "Je n'ai eu que {{percent}} % de l'eau dont j'avais besoin. Le seau est devenu le trésor de la famille."
+          },
+          "2": {
+            "0": "Le robinet ne donne qu'environ la moitié de l'eau qu'il faudrait. Je garde la lessive pour le week-end.",
+            "1": "L'eau coule si faiblement que la douche ressemble à un brumisateur.",
+            "2": "Eau : {{percent}} % de ce qu'il me fallait. L'eau du bain de la veille fait des heures sup."
+          },
+          "4": {
+            "0": "L'eau, ça va presque toujours, mais à certaines heures, le débit est faible.",
+            "1": "L'eau coule presque toujours. Le débit baisse juste un peu en fin de journée.",
+            "2": "J'ai eu environ {{percent}} % de l'eau voulue. Pas de quoi s'inquiéter."
+          }
+        },
+        "electricity": {
+          "0": {
+            "0": "Coupures de courant à répétition : le soir, on vit à la bougie. De l'électricité, s'il te plaît, le maire.",
+            "1": "L'électricité n'arrive presque pas. Mon frigo est devenu une simple étagère.",
+            "2": "Je n'ai eu que {{percent}} % de l'électricité dont j'avais besoin. Je recharge mon téléphone au travail."
+          },
+          "2": {
+            "0": "Je n'ai qu'environ la moitié de l'électricité qu'il faudrait. La clim et le micro-ondes fonctionnent à tour de rôle.",
+            "1": "Les coupures de courant sont devenues quotidiennes. On dîne avant la tombée de la nuit.",
+            "2": "Électricité : {{percent}} % de ce qu'il me fallait. Les appareils font la queue pour la prise."
+          },
+          "4": {
+            "0": "L'électricité arrive presque toujours, mais parfois, ça clignote et ça coupe.",
+            "1": "Une coupure de courant de temps en temps. Le plus pénible, c'est de remettre les horloges à l'heure.",
+            "2": "J'ai eu environ {{percent}} % de l'électricité voulue. Presque aucun souci."
+          }
+        },
+        "sewage_service": {
+          "0": {
+            "0": "Les eaux usées ne s'écoulent plus, toute la maison sent mauvais. Pince-toi le nez si tu passes, le maire.",
+            "1": "Le traitement des eaux usées n'arrive pas à suivre. J'ai peur de tirer la chasse.",
+            "2": "Seuls {{percent}} % de nos eaux usées s'écoulent. En famille, on a établi un tour de rôle."
+          },
+          "2": {
+            "0": "Les eaux usées s'écoulent mal. J'ai l'impression que seule la moitié est traitée.",
+            "1": "Les canalisations se bouchent souvent. On ne peut pas faire mieux pour les eaux usées ?",
+            "2": "Eaux usées : à peine {{percent}} % s'écoulent. On vit en colocation avec l'odeur."
+          },
+          "4": {
+            "0": "Les eaux usées s'écoulent presque toujours, mais les jours de pluie, je m'inquiète un peu.",
+            "1": "L'évacuation, presque pas de souci. Juste un glouglou de temps en temps.",
+            "2": "Environ {{percent}} % de nos eaux usées s'écoulent. Rien de bien gênant."
+          }
+        },
+        "garbage_service": {
+          "0": {
+            "0": "Je sors les poubelles, personne ne les ramasse. L'entrée est devenue une montagne de sacs.",
+            "1": "La collecte des déchets ne passe jamais. Tu viens voir la montagne devant chez moi, le maire ?",
+            "2": "Seuls {{percent}} % de mes déchets ont été ramassés. Le balcon est devenu un entrepôt."
+          },
+          "2": {
+            "0": "Environ la moitié de mes déchets est ramassée. Le reste cohabite avec nous pour l'instant.",
+            "1": "Même le jour de collecte, il reste des sacs sur le trottoir. Les corbeaux sont ravis.",
+            "2": "Déchets : à peine {{percent}} % ramassés. Les sacs s'accumulent."
+          },
+          "4": {
+            "0": "Les déchets sont presque toujours ramassés, mais il reste parfois quelques sacs.",
+            "1": "La collecte, ça va. Seuls les encombrants ont été reportés à la prochaine fois.",
+            "2": "Environ {{percent}} % de mes déchets ont été ramassés. C'est bien assez."
+          }
+        }
+      },
+      "alert": {
+        "any": {
+          "0": {
+            "0": "Il paraît que le voyant d'alerte de la mairie reste allumé. Tu regardes, le maire ?",
+            "1": "On dit qu'il se passe quelque chose de grave quelque part en ville.",
+            "2": "Paraît que la ville ne va pas fort. Va voir tes notifications, le maire."
+          },
+          "1": {
+            "0": "Il paraît qu'un petit avertissement traîne à la mairie. Rien d'urgent, apparemment.",
+            "1": "J'ai entendu un truc préoccupant sur la ville. Jette un œil quand tu as un moment, le maire.",
+            "2": "On dit que les petits problèmes s'accumulent. Laissés de côté, ils finissent par grossir."
+          }
+        },
+        "collapse": {
+          "0": {
+            "0": "Il paraît qu'un bâtiment s'est effondré. Tu connais le mot « inspection », le maire ?",
+            "1": "On parle de {{count}} effondrements. Du coup, j'ai levé les yeux vers mon plafond.",
+            "2": "Il paraît que des effondrements ont fait {{deaths}} morts. Ce ne serait pas à force de rogner sur les réparations ?",
+            "3": "Je suis passé devant un bâtiment effondré : un tas de gravats. À qui le tour ?",
+            "4": "{{count}} effondrements aux infos. Les vieux bâtiments, on les répare vraiment ?",
+            "5": "On dit même qu'une route s'est effondrée. Dans cette ville, on ne peut plus se fier au sol."
+          }
+        },
+        "resource_runway": {
+          "0": {
+            "0": "Il paraît qu'il ne restera plus rien de « {{target}} » d'ici {{remaining_epochs}} époques environ. Et après, on fait quoi ?",
+            "1": "On dit qu'on verra bientôt le fond de « {{target}} ». Tu as un plan B, le maire ?",
+            "2": "Paraît qu'à force d'extraire « {{target}} », la montagne fait triste mine.",
+            "3": "À ce rythme, « {{target}} », ce sera bientôt fini, paraît-il. Pourvu que les emplois ne partent pas avec.",
+            "4": "On dit que les ressources s'épuisent. Une fois tout extrait, c'est fini, logique.",
+            "5": "Il reste peu de « {{target}} », à ce qu'on dit. Qu'est-ce qu'on va laisser aux générations futures ?"
+          }
+        },
+        "facility_inoperative_labor": {
+          "0": {
+            "0": "Il paraît que « {{target}} » manque tellement de bras que rien ne tourne.",
+            "1": "On dit que personne ne vient travailler à « {{target}} ». Quelqu'un pourrait postuler ?",
+            "2": "J'ai entendu que « {{target}} » ne tourne pas, faute de personnel. Tu as publié des offres d'emploi, le maire ?",
+            "3": "Il paraît qu'il n'y a presque pas d'employés à « {{target}} ». Un beau bâtiment, et c'est tout.",
+            "4": "On dit qu'un équipement public est à l'arrêt, faute de main-d'œuvre. Et c'est nous qui trinquons.",
+            "5": "Je suis passé devant « {{target}} » : personne au guichet."
+          }
+        },
+        "facility_inoperative_material": {
+          "0": {
+            "0": "Il paraît que « {{target}} » est à l'arrêt, les matériaux n'arrivent pas.",
+            "1": "On dit que ce dont « {{target}} » a besoin n'arrive jamais. La chaîne d'approvisionnement, ça va ?",
+            "2": "J'ai entendu que « {{target}} » ne tourne plus, faute de matières premières. Et les fournisseurs, le maire ?",
+            "3": "Il paraît que l'entrepôt de « {{target}} » est vide. Les employés se plaignaient de ne rien pouvoir faire.",
+            "4": "On dit que les matériaux n'arrivent pas aux équipements publics. C'est la faute des routes ? Des échanges ?",
+            "5": "Il paraît que les livraisons n'arrivent pas à « {{target}} » et que les employés se tournent les pouces."
+          }
+        },
+        "facility_inoperative_unknown": {
+          "0": {
+            "0": "Il paraît que « {{target}} » ne fonctionne pas bien. Et personne ne sait pourquoi.",
+            "1": "On dit que « {{target}} » est bien là, mais ne sert à rien.",
+            "2": "J'ai entendu que « {{target}} » allait mal. Va voir ce qui se passe, le maire.",
+            "3": "Il paraît qu'un équipement public tourne mal. Nos impôts servent vraiment à quelque chose ?",
+            "4": "« {{target}} », ouvert ou fermé ? Personne n'arrive à savoir, paraît-il.",
+            "5": "Dans le quartier, tout le monde dit que « {{target}} » ne sert à rien."
+          }
+        },
+        "infra_facility_down": {
+          "0": {
+            "0": "Il paraît que « {{target}} » est à l'arrêt. Pourvu que ça ne finisse pas en coupures de courant ou d'eau.",
+            "1": "J'ai entendu que « {{target}} » ne tourne plus. Tu n'as pas oublié d'appuyer sur l'interrupteur, le maire ?",
+            "2": "On dit que « {{target}} » est hors service. L'électricité et l'eau de la ville, ça va tenir ?",
+            "3": "Il paraît que les lumières de « {{target}} » restent éteintes. Ça ne me dit rien qui vaille.",
+            "4": "On dit qu'une installation d'infrastructure est à l'arrêt. Comme toujours, ce sont les habitants qui paient les pots cassés.",
+            "5": "Il paraît qu'avec « {{target}} » à l'arrêt, les employés s'arrachent les cheveux."
+          }
+        },
+        "infra_disconnected": {
+          "0": {
+            "0": "Il paraît que {{count}} installations ne sont pas raccordées au réseau d'infrastructure. Un câble coupé quelque part ?",
+            "1": "On dit que des installations ont été construites sans être raccordées. Tu as oublié de tirer les lignes, le maire ?",
+            "2": "Il paraît que certaines installations ne sont pas reliées au réseau d'infrastructure. Quel gâchis.",
+            "3": "{{count}} installations non raccordées, à ce qu'on dit. Ni électricité ni eau pour elles, alors.",
+            "4": "Il paraît que la nouvelle installation est construite, mais sans ligne électrique ni conduite d'eau.",
+            "5": "Tuyaux ou câbles, on dit que ça coupe quelque part."
+          }
+        },
+        "sanitation": {
+          "0": {
+            "0": "Il paraît que l'hygiène se dégrade pour {{count}} ménages. Pourvu qu'aucune épidémie ne se déclare.",
+            "1": "On dit que ni les eaux usées ni les déchets ne suivent, et que la ville sent mauvais.",
+            "2": "Il paraît que certains quartiers ont de gros problèmes d'hygiène. Tu vas distribuer des masques, le maire ?",
+            "3": "J'ai entendu que {{count}} ménages vivent dans l'insalubrité. Fais quelque chose pour les eaux usées.",
+            "4": "Déchets et eaux usées : si on laisse traîner, les maladies suivront.",
+            "5": "Il paraît que ça sent terriblement mauvais dans la rue d'à côté. Quelqu'un pourrait nettoyer ?"
+          }
+        },
+        "resource_depleted": {
+          "1": {
+            "0": "Il paraît que « {{target}} », c'est terminé : plus rien à extraire. La fin, ça arrive sans crier gare.",
+            "1": "On dit qu'on ne peut plus rien extraire de « {{target}} ». Que vont devenir les mineurs ?",
+            "2": "J'ai entendu que « {{target}} » est à sec. Il faudrait penser à un autre gagne-pain.",
+            "3": "On dit que les ressources sont épuisées. On va s'en sortir avec les importations, le maire ?",
+            "4": "Il paraît que le site d'extraction de « {{target}} » est devenu bien silencieux.",
+            "5": "« {{target}} », il n'en reste plus du tout, paraît-il. Fallait en prendre soin quand il y en avait."
+          }
+        },
+        "facility_inoperative_high_skill": {
+          "1": {
+            "0": "Il paraît que « {{target}} » tourne au ralenti, faute de spécialistes.",
+            "1": "On dit qu'il manque des gens qualifiés pour travailler à « {{target}} ». On construit plus d'universités ?",
+            "2": "Il paraît que « {{target}} » manque de personnel qualifié. Où sont passés les jeunes qui ont fait des études ?",
+            "3": "On dit que certains équipements ne peuvent pas tourner sans experts. Et ça ne se forme pas en un jour.",
+            "4": "J'ai entendu que « {{target}} » est dans l'embarras depuis le départ de ses meilleurs éléments.",
+            "5": "Les offres d'emploi de « {{target}} » sont si exigeantes que personne ne peut postuler, paraît-il."
+          }
+        },
+        "facility_inoperative_budget": {
+          "1": {
+            "0": "Il paraît que « {{target}} » réduit la voilure, faute de budget.",
+            "1": "On dit que « {{target}} » bâcle le travail faute d'argent. Revois la répartition du budget, le maire.",
+            "2": "Il paraît qu'avec les coupes budgétaires, « {{target}} » ouvre moins longtemps.",
+            "3": "On dit que les équipements publics manquent de budget. Où passent nos impôts ?",
+            "4": "Un employé de « {{target}} » se plaignait qu'il n'y avait plus de budget.",
+            "5": "Il paraît que « {{target}} » fait tellement d'économies que tout ne tourne qu'à moitié."
+          }
+        },
+        "education_low_enrollment": {
+          "1": {
+            "0": "Il paraît que « {{target}} » n'attire presque pas d'élèves. Pourtant, il y a {{max_students}} places.",
+            "1": "On dit que « {{target}} » n'a que {{enrolled}} inscrits. Les salles de classe sont vides.",
+            "2": "On a construit « {{target}} », mais les élèves ne viennent pas, à ce qu'on dit.",
+            "3": "Un enseignant de « {{target}} » disait s'ennuyer, faute d'élèves.",
+            "4": "Il paraît que l'école est presque vide. Pas assez d'enfants ? Ou c'est trop loin ?",
+            "5": "« {{target}} » a {{max_students}} places, mais les chaises restent vides, paraît-il. Quel dommage."
+          }
+        },
+        "tenant_blocked_by_parcel_size": {
+          "1": {
+            "0": "Il paraît qu'à {{zone_name}}, on ne peut pas construire de bâtiment pour « {{tenant_name}} ». Les parcelles sont trop petites.",
+            "1": "On dit que « {{tenant_name}} » voudrait s'installer, mais aucun bâtiment ne peut l'accueillir.",
+            "2": "Il paraît que les parcelles de {{zone_name}} sont trop petites pour de grands bâtiments.",
+            "3": "Il faudrait {{required}} m2, mais on ne peut construire que {{max_capacity}} m2, paraît-il. Des parcelles plus grandes, le maire !",
+            "4": "On dit que des commerces et des entreprises veulent s'installer, mais le terrain est trop morcelé pour construire.",
+            "5": "J'ai entendu que faute de grandes parcelles, la ville ne grandit plus."
+          }
+        },
+        "rail_capacity_exceeded": {
+          "1": {
+            "0": "Il paraît qu'il y a trop de trains sur {{count}} voies ferrées. L'horaire n'est pas un peu trop chargé ?",
+            "1": "On dit que les voies ferrées sont bondées de trains. Bientôt, ce seront les trains qui feront des bouchons.",
+            "2": "Il paraît que le nombre de trains dépasse la capacité des voies ferrées. Pose plus de voies, le maire.",
+            "3": "{{count}} voies ferrées saturées, à ce qu'on dit. C'est pour ça que les trains sont en retard ?",
+            "4": "Il paraît que les voies ferrées sont pleines à craquer. Pas de voyageurs, de trains.",
+            "5": "J'ai entendu qu'il y a trop de trains. Et une seule voie ferrée pour tout ça."
+          }
+        }
       }
     }
   }

@@ -4214,6 +4214,335 @@
             "8": "With the memories of {{place}} in mind, we will look for new favorites!"
           }
         }
+      },
+      "shortage": {
+        "any": {
+          "0": {
+            "0": "{{product}}? Can't get any. I'm running around with cash in hand and nowhere to spend it.",
+            "1": "{{product}}: I want some, but nobody's selling. Mayor, any idea where it's hiding?",
+            "2": "{{product}}: I only got {{percent}}% of what I needed.",
+            "3": "{{product}}: sold out every single time. Daily life is grinding to a halt."
+          },
+          "2": {
+            "0": "{{product}}: I can only get about half. Where's the other half hiding?",
+            "1": "{{product}}: I tried place after place and came home with about half.",
+            "2": "{{product}}: just {{percent}}% of what I wanted. I'm making do without the rest.",
+            "3": "{{product}}: I can never get quite enough. Mayor, maybe give it a little thought?"
+          },
+          "4": {
+            "0": "{{product}}: I can usually get it, but now and then it's sold out.",
+            "1": "{{product}}: hardly a problem. I just miss out once in a while.",
+            "2": "{{product}}: I got about {{percent}}%. Almost there.",
+            "3": "{{product}}: sold out sometimes. I can live with it."
+          }
+        },
+        "food_retail": {
+          "0": {
+            "0": "The grocery shelves at the supermarket are bare. I've got money, just no dinner.",
+            "1": "Can't buy groceries anywhere. My wallet's getting fat while my stomach growls, Mayor.",
+            "2": "I only got {{percent}}% of the groceries I wanted. I ate the rest in my imagination."
+          },
+          "2": {
+            "0": "I can only buy about half the groceries I need. My fridge echoes.",
+            "1": "Two stores into my grocery run and I'm only halfway there. Mayor, we need more shops.",
+            "2": "Only {{percent}}% of the groceries I wanted. Planning dinner is a daily puzzle now."
+          },
+          "4": {
+            "0": "Some days the groceries I want are sold out. Mostly fine, though.",
+            "1": "I can get most groceries, but the shelves look lonely by evening.",
+            "2": "Got {{percent}}% of the groceries I wanted. The rest is tomorrow-me's problem."
+          }
+        },
+        "clothing_retail": {
+          "0": {
+            "0": "I went clothes shopping and found nothing. There's a limit to how often I can rewear one shirt.",
+            "1": "Can't get clothing at all. Mayor, take a good look at these holey socks.",
+            "2": "I only got {{percent}}% of the clothing I wanted. Guess I'll be stylish on the inside."
+          },
+          "2": {
+            "0": "Only managed about half the clothing I needed. Got a jacket, still no pants.",
+            "1": "The clothes shops are always sold out. My kids' pants stop well above their ankles.",
+            "2": "{{percent}}% of the clothing I wanted. Hand-me-downs are covering the rest."
+          },
+          "4": {
+            "0": "I can usually find clothing, but sometimes my size is sold out.",
+            "1": "Clothes are fine. Sometimes the one I want isn't there, but I won't be picky.",
+            "2": "Got about {{percent}}% of the clothing I wanted. Still hunting for that last piece."
+          }
+        },
+        "household_goods_retail": {
+          "0": {
+            "0": "No toilet paper, no detergent. Life doesn't work without household basics.",
+            "1": "The household goods shelves have been empty forever. Mayor, just send me one toothbrush.",
+            "2": "I only got {{percent}}% of the household goods I needed. I'm rationing soap by the sliver."
+          },
+          "2": {
+            "0": "I can only buy about half the household goods we need. Tissue use is now decided at family meetings.",
+            "1": "If I find detergent, there's no shampoo. Household goods are always missing something.",
+            "2": "Only got {{percent}}% of my household goods. The rest is up to next week's luck."
+          },
+          "4": {
+            "0": "I can get most household goods, but detergent sells out now and then.",
+            "1": "Household goods? Mostly covered. Trash bags are the occasional mystery.",
+            "2": "About {{percent}}% of the household goods I wanted. Hardly a hardship."
+          }
+        },
+        "pharmaceuticals_retail": {
+          "0": {
+            "0": "The pharmacy's out of medicine. If I catch a cold, I'll have to beat it with sheer willpower.",
+            "1": "Can't get medicine anywhere. Mayor, could we at least stock headache pills?",
+            "2": "I only got {{percent}}% of the medicine I needed. I'll sleep off the rest."
+          },
+          "2": {
+            "0": "I can only buy about half the medicine I need. Our medicine cabinet is looking sparse.",
+            "1": "I have to visit several pharmacies to get all my medicine. Not fun when you're sick.",
+            "2": "{{percent}}% of the medicine I needed. For the rest, I'm praying."
+          },
+          "4": {
+            "0": "I can usually get my medicine, but a shelf or two is empty now and then.",
+            "1": "Medicine's mostly available. Only the eye drops were sold out.",
+            "2": "Got about {{percent}}% of my medicine. I'm getting by."
+          }
+        },
+        "gasoline_retail": {
+          "0": {
+            "0": "The gas station has nothing to pump. My car is now a very large ornament.",
+            "1": "Can't buy gas at all. Mayor, do you know what it's like to push your car to work?",
+            "2": "I only got {{percent}}% of the gas I wanted. I spend every drive staring at the fuel gauge."
+          },
+          "2": {
+            "0": "I can only fill up about halfway. I've given up on long drives.",
+            "1": "I wait in line at the pump and still only get half. Makes me wonder why I own a car.",
+            "2": "{{percent}}% of the gas I needed. I walk the rest of the way."
+          },
+          "4": {
+            "0": "I can usually fill up, but sometimes the station's run dry.",
+            "1": "Filling up is mostly fine. Sometimes I have to try the next station over.",
+            "2": "Got about {{percent}}% of the gas I wanted. Almost a full tank."
+          }
+        },
+        "water_supply": {
+          "0": {
+            "0": "I turn on the tap and barely a drip comes out. Mayor, this water outage has gone too far.",
+            "1": "The water's been cut off for ages. Forget baths, even brushing my teeth is a struggle.",
+            "2": "Only {{percent}}% of the water we needed came through. Our bucket is now a family heirloom."
+          },
+          "2": {
+            "0": "We only get about half the water we need. Laundry waits for the weekend.",
+            "1": "The water pressure is so weak my shower feels like a spray bottle.",
+            "2": "{{percent}}% of the water we need. Leftover bathwater is doing a lot of heavy lifting."
+          },
+          "4": {
+            "0": "The water's mostly fine, but some hours the pressure drops.",
+            "1": "Water runs almost all the time. It just trickles a bit in the evening.",
+            "2": "We got about {{percent}}% of the water we needed. Nothing to lose sleep over."
+          }
+        },
+        "electricity": {
+          "0": {
+            "0": "Power cuts nonstop. We live by candlelight at night. Mayor, electricity, please.",
+            "1": "We barely get any power. My fridge is now just a cupboard.",
+            "2": "We only got {{percent}}% of the electricity we needed. I charge my phone at work."
+          },
+          "2": {
+            "0": "We only get about half the power we need. The AC and the microwave take turns.",
+            "1": "Power cuts are part of the daily routine now. We eat dinner before dark.",
+            "2": "{{percent}}% of the power we need. The appliances are waiting in line."
+          },
+          "4": {
+            "0": "The power's mostly on, but every so often it flickers out.",
+            "1": "Just the occasional power cut. Resetting the clocks is the worst of it.",
+            "2": "Got about {{percent}}% of the electricity we wanted. Barely an inconvenience."
+          }
+        },
+        "sewage_service": {
+          "0": {
+            "0": "The sewage won't drain and the whole house stinks. Mayor, hold your nose if you visit.",
+            "1": "Sewage treatment can't keep up at all. I'm scared to flush.",
+            "2": "Only {{percent}}% of our sewage actually drains. The family has a flushing schedule."
+          },
+          "2": {
+            "0": "The drains are sluggish. Feels like only half of it gets treated.",
+            "1": "The drains keep clogging. Can't something be done about the sewers?",
+            "2": "Only about {{percent}}% of the sewage drains. The smell has basically moved in with us."
+          },
+          "4": {
+            "0": "The sewers mostly drain fine, but rainy days make me nervous.",
+            "1": "Drainage is mostly fine. Just the odd gurgle.",
+            "2": "About {{percent}}% of the sewage drains. Not enough to bother me."
+          }
+        },
+        "garbage_service": {
+          "0": {
+            "0": "I put the garbage out and nobody collects it. My doorway is a mountain of trash bags.",
+            "1": "The garbage truck never comes. Mayor, want to come see the pile outside my place?",
+            "2": "Only {{percent}}% of our garbage gets picked up. The balcony has become a storage unit."
+          },
+          "2": {
+            "0": "They collect about half our garbage. The rest is living with us for now.",
+            "1": "I put it out on collection day and it gets left behind. The crows are thrilled.",
+            "2": "Only about {{percent}}% of our garbage gets collected. The bags just keep piling up."
+          },
+          "4": {
+            "0": "Garbage mostly gets collected, but a bag gets left behind now and then.",
+            "1": "Collection is mostly fine. They just left the bulky stuff for next time.",
+            "2": "About {{percent}}% of our garbage got picked up. Good enough, I suppose."
+          }
+        }
+      },
+      "alert": {
+        "any": {
+          "0": {
+            "0": "Word is the warning lights at City Hall haven't gone off in ages. Mayor, are you watching?",
+            "1": "Rumor has it something serious is going on somewhere in town.",
+            "2": "People say the city's not doing so well. Mayor, check your notifications."
+          },
+          "1": {
+            "0": "Apparently there's a minor notice up at City Hall. Doesn't sound urgent, though.",
+            "1": "I heard something about the city that's been bugging me. Mayor, take a look when you're free.",
+            "2": "Rumor is the little problems are piling up. Leave them and they'll grow."
+          }
+        },
+        "collapse": {
+          "0": {
+            "0": "I heard a building came down. Mayor, does the word \"inspection\" ring a bell?",
+            "1": "Apparently the collapse count is up to {{count}}. I caught myself staring at my ceiling.",
+            "2": "They say the collapse death toll is {{deaths}}. That's what skimping on repairs gets you, isn't it?",
+            "3": "I walked past the building that collapsed. Just a pile of rubble. Where's next, I wonder?",
+            "4": "Collapses in the news: {{count}}. Is anyone actually fixing the old buildings?",
+            "5": "There's talk that a road caved in too. In this city you can't even trust the ground under your feet."
+          }
+        },
+        "resource_runway": {
+          "0": {
+            "0": "Apparently {{target}} will be tapped out in about {{remaining_epochs}} epochs. Then what?",
+            "1": "Rumor has it {{target}} is about to run dry. Mayor, got a plan B?",
+            "2": "I hear {{target}} has been picked nearly clean. The hills look kind of lonely now.",
+            "3": "Word is {{target}} won't last long at this rate. Hope my job doesn't go with it.",
+            "4": "People say our resources are running out. Once you dig it up, it's gone. Who knew?",
+            "5": "They say there's not much left at {{target}}. What are we leaving for the next generation?"
+          }
+        },
+        "facility_inoperative_labor": {
+          "0": {
+            "0": "Sounds like {{target}} is so short-staffed it's barely running.",
+            "1": "They say nobody wants to work at {{target}}. Someone please apply.",
+            "2": "I heard {{target}} can't keep going without more staff. Mayor, have you posted any job ads?",
+            "3": "Word is {{target}} has hardly any staff. A fancy building doesn't run itself.",
+            "4": "Rumor is a public facility has stalled for lack of workers. Guess who suffers? Us.",
+            "5": "I walked past {{target}} and there was nobody at the front desk."
+          }
+        },
+        "facility_inoperative_material": {
+          "0": {
+            "0": "Apparently {{target}} has stopped because its supplies never arrive.",
+            "1": "They say {{target}} can't get what it needs. Is the supply chain okay?",
+            "2": "I heard {{target}} ran out of materials and shut down. Mayor, who's the supplier?",
+            "3": "Word is the storeroom at {{target}} is empty. The staff were grumbling they can't get anything done.",
+            "4": "Rumor is a public facility isn't getting its materials. Bad roads? Bad deals?",
+            "5": "Supposedly deliveries to {{target}} keep not showing up, so the staff are twiddling their thumbs."
+          }
+        },
+        "facility_inoperative_unknown": {
+          "0": {
+            "0": "Apparently {{target}} isn't working properly, and nobody knows why.",
+            "1": "Rumor has it {{target}} is standing there but not actually doing anything.",
+            "2": "I heard {{target}} is acting up. Mayor, go check on it.",
+            "3": "Seems a public facility isn't running right. Are our taxes actually doing anything?",
+            "4": "Word is nobody can tell whether {{target}} is open or closed.",
+            "5": "The neighbors are all saying {{target}} is useless."
+          }
+        },
+        "infra_facility_down": {
+          "0": {
+            "0": "Apparently {{target}} is down. Hope that doesn't mean power cuts or water outages soon.",
+            "1": "I heard {{target}} isn't running. Mayor, did you forget to flip the switch?",
+            "2": "They say {{target}} is offline. Will the city's power and water hold up?",
+            "3": "Word is the lights at {{target}} are still off. I've got a bad feeling about this.",
+            "4": "Rumor is an infrastructure facility has shut down. It's always the residents who pay for it.",
+            "5": "{{target}} shut down, and I hear the staff are tearing their hair out."
+          }
+        },
+        "infra_disconnected": {
+          "0": {
+            "0": "Apparently {{count}} facilities aren't hooked up to the infrastructure network. Is a line broken somewhere?",
+            "1": "Rumor is some facilities got built but never connected. Mayor, did you forget to run the lines?",
+            "2": "They say some facilities aren't on the infrastructure network. What a waste of a perfectly good building.",
+            "3": "I hear {{count}} facilities are off the grid. So no power and no water for them, right?",
+            "4": "Supposedly the new facility got built, but no power lines or water pipes ever reached it.",
+            "5": "Word is there's a gap somewhere. A pipe or a power line, nobody's sure which."
+          }
+        },
+        "sanitation": {
+          "0": {
+            "0": "Apparently sanitation is getting worse for {{count}} households. Hope nothing starts going around.",
+            "1": "Rumor is the sewers and garbage collection can't keep up, and the city's starting to smell.",
+            "2": "They say some districts have bad sanitation. Mayor, handing out face masks?",
+            "3": "I heard {{count}} households are living in unsanitary conditions. Do something about the sewers.",
+            "4": "Ignore the garbage and sewage problem and people will get sick.",
+            "5": "Sounds like the street over there smells awful. Somebody clean it up."
+          }
+        },
+        "resource_depleted": {
+          "1": {
+            "0": "Apparently {{target}} is finally tapped out. That ended with barely a whimper.",
+            "1": "They say {{target}} has nothing left to give. What'll happen to the folks who worked there?",
+            "2": "I heard {{target}} has run dry. Better start thinking about the next way to make a living.",
+            "3": "Rumor has it a resource has run out. Mayor, are we importing our way through this?",
+            "4": "Word is it's gone very quiet at {{target}}.",
+            "5": "People say there's nothing left of {{target}}. Should've treasured it while we had it."
+          }
+        },
+        "facility_inoperative_high_skill": {
+          "1": {
+            "0": "Apparently {{target}} has scaled back because it can't find specialists.",
+            "1": "They say {{target}} is short on qualified staff. More universities, maybe?",
+            "2": "{{target}} is short on skilled workers, they say. Where did all the studious kids go?",
+            "3": "Seems some facility can't run without experts. And experts take a while to grow.",
+            "4": "I heard {{target}} is struggling since its best people quit.",
+            "5": "Word is the job ads at {{target}} ask for so much that nobody can apply."
+          }
+        },
+        "facility_inoperative_budget": {
+          "1": {
+            "0": "Apparently {{target}} has cut back because the budget won't stretch.",
+            "1": "Rumor is {{target}} is cutting corners for lack of money. Mayor, rethink the budget.",
+            "2": "They say {{target}} got its budget trimmed, so it's open fewer hours now.",
+            "3": "Heard the public facilities are underfunded. Where are our taxes disappearing to?",
+            "4": "The staff at {{target}} were complaining there's no money.",
+            "5": "Sounds like {{target}} is saving so hard it's only half running."
+          }
+        },
+        "education_low_enrollment": {
+          "1": {
+            "0": "Apparently {{target}} can't attract students. And it has room for {{max_students}}.",
+            "1": "They say {{target}} has only {{enrolled}} enrolled. The classrooms are practically empty.",
+            "2": "Rumor is {{target}} got built, but the students never showed up.",
+            "3": "A teacher at {{target}} told me there's nothing to do without students.",
+            "4": "Word is a school is nearly empty. Not enough kids, or just too far away?",
+            "5": "Supposedly {{target}} seats {{max_students}}, but it's mostly empty desks. What a waste."
+          }
+        },
+        "tenant_blocked_by_parcel_size": {
+          "1": {
+            "0": "Apparently {{zone_name}} can't fit a building for the {{tenant_name}} that wants in. The parcels are too cramped.",
+            "1": "Rumor has it the {{tenant_name}} is itching to move in, but there's no building that fits.",
+            "2": "They say the parcels in {{zone_name}} are too small for anything big.",
+            "3": "Supposedly they need {{required}} m2 of floor space, but {{max_capacity}} m2 is the most anyone can build. Mayor, bigger parcels, please.",
+            "4": "I hear shops and companies want to move in, but the land's chopped up too small to build on.",
+            "5": "I heard the city can't grow because there are no big parcels."
+          }
+        },
+        "rail_capacity_exceeded": {
+          "1": {
+            "0": "Apparently there are too many trains on {{count}} stretches of track. Isn't the timetable a little overstuffed?",
+            "1": "They say the tracks are jammed with trains. Next thing you know, we'll have rail traffic jams.",
+            "2": "Rumor is there are more trains than the tracks can handle. Mayor, lay more track.",
+            "3": "Word is {{count}} sections of track are overflowing. Is that why the trains are late?",
+            "4": "Sounds like the tracks are full. Not with passengers. With trains.",
+            "5": "I heard there are way too many train services. And there's only one track."
+          }
+        }
       }
     }
   }

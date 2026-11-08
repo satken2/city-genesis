@@ -4214,6 +4214,335 @@
             "8": "Con los recuerdos de {{place}} en mente, ¡buscaremos nuevos favoritos!"
           }
         }
+      },
+      "shortage": {
+        "any": {
+          "0": {
+            "0": "{{product}}: no consigo nada. Ando de tienda en tienda con el dinero en la mano.",
+            "1": "{{product}}: quiero comprar y nadie vende. ¿Sabes dónde hay, alcalde?",
+            "2": "{{product}}: solo conseguí el {{percent}}% de lo que necesitaba.",
+            "3": "{{product}}: en todas partes dice «agotado». Así no hay quien viva."
+          },
+          "2": {
+            "0": "{{product}}: consigo como la mitad. ¿Dónde se esconderá el resto?",
+            "1": "{{product}}: recorrí un montón de tiendas. Saldo final: la mitad.",
+            "2": "{{product}}: apenas el {{percent}}% de lo que quería. Lo demás, a aguantarse.",
+            "3": "{{product}}: nunca logro completar lo que necesito. Échale un ojo, alcalde."
+          },
+          "4": {
+            "0": "{{product}}: casi siempre consigo, pero de vez en cuando se agota.",
+            "1": "{{product}}: casi no hay problema. Solo a veces llego tarde y ya no hay.",
+            "2": "{{product}}: conseguí como el {{percent}}%. Ya casi.",
+            "3": "{{product}}: a veces se acaba. Dentro de lo tolerable, supongo."
+          }
+        },
+        "food_retail": {
+          "0": {
+            "0": "Voy al súper y los estantes de comida están vacíos. Tengo dinero, pero no tengo cena.",
+            "1": "No consigo comestibles por ningún lado. La cartera llena y la panza vacía, alcalde.",
+            "2": "Solo conseguí el {{percent}}% de la comida que quería comprar. El resto me lo comí en la imaginación."
+          },
+          "2": {
+            "0": "Solo alcanzo a comprar como la mitad de la comida que necesito. El refri está casi vacío.",
+            "1": "Fui de compras a dos tiendas y apenas junté la mitad. Que haya más tiendas, alcalde.",
+            "2": "De comestibles, solo el {{percent}}% de lo que quería. Armar el menú es un rompecabezas diario."
+          },
+          "4": {
+            "0": "Algunos días la comida se agota y no alcanzo. Pero casi siempre bien.",
+            "1": "Casi siempre consigo comida, pero por la tarde los estantes se ven tristes.",
+            "2": "Conseguí el {{percent}}% de la comida que quería. Lo que falta se lo dejo a mi yo de mañana."
+          }
+        },
+        "clothing_retail": {
+          "0": {
+            "0": "Voy a comprar ropa y no hay. Ya no puedo seguir repitiendo la misma camisa.",
+            "1": "No hay ropa por ningún lado. Mira estos calcetines agujereados, alcalde.",
+            "2": "Solo pude comprar el {{percent}}% de la ropa que quería. La elegancia tendrá que ser interior."
+          },
+          "2": {
+            "0": "Solo conseguí como la mitad de la ropa. Tengo chaqueta, pero no pantalón.",
+            "1": "Las tiendas de ropa siempre están vacías, y a los niños todo les queda chico.",
+            "2": "De ropa, apenas el {{percent}}% de lo que quería. Lo demás lo cubrimos con ropa heredada."
+          },
+          "4": {
+            "0": "Casi siempre encuentro ropa, aunque a veces se acaba mi talla.",
+            "1": "Con la ropa, solo a veces no está lo que busco. No me voy a poner exigente.",
+            "2": "Conseguí como el {{percent}}% de la ropa. Me falta una prenda y no aparece."
+          }
+        },
+        "household_goods_retail": {
+          "0": {
+            "0": "No hay papel higiénico ni detergente. Sin artículos de uso diario, la casa no funciona.",
+            "1": "El estante de artículos de uso diario sigue vacío. Alcalde, aunque sea un cepillo de dientes, por favor.",
+            "2": "Solo conseguí el {{percent}}% de los artículos de uso diario. Estoy estirando el jabón todo lo que se puede."
+          },
+          "2": {
+            "0": "Solo consigo como la mitad de los artículos de uso diario. El uso de pañuelos se decide en reunión familiar.",
+            "1": "Si consigo detergente, no hay champú. Con los artículos de uso diario siempre falta algo.",
+            "2": "De artículos de uso diario conseguí apenas el {{percent}}%. Lo demás queda en manos de la suerte de la próxima semana."
+          },
+          "4": {
+            "0": "Casi todos los artículos de uso diario se consiguen, pero a veces se acaba el detergente.",
+            "1": "Los artículos de uso diario, casi completos. Solo las bolsas de basura desaparecen a veces.",
+            "2": "Artículos de uso diario: como el {{percent}}% de lo que quería. Casi sin problemas."
+          }
+        },
+        "pharmaceuticals_retail": {
+          "0": {
+            "0": "Voy a la farmacia y no hay medicinas. Si me resfrío, me curo a pura fuerza de voluntad.",
+            "1": "No consigo medicamentos de ningún tipo. Alcalde, aunque sea algo para el dolor de cabeza.",
+            "2": "Solo pude comprar el {{percent}}% de los medicamentos que necesitaba. Lo demás lo curo durmiendo."
+          },
+          "2": {
+            "0": "Solo consigo como la mitad de las medicinas. El botiquín de la casa está medio vacío.",
+            "1": "Para juntar los medicamentos tengo que recorrer varias farmacias. Y eso cuando uno se siente mal, imagínate.",
+            "2": "De medicamentos, solo el {{percent}}% de lo que necesitaba. Para lo que falta, rezo."
+          },
+          "4": {
+            "0": "Las medicinas casi siempre se consiguen, pero a veces hay estantes vacíos.",
+            "1": "Medicamentos casi no me faltan. Solo las gotas para los ojos estaban agotadas.",
+            "2": "Conseguí como el {{percent}}% de los medicamentos. Ahí la vamos llevando."
+          }
+        },
+        "gasoline_retail": {
+          "0": {
+            "0": "Voy a la gasolinera y no hay gasolina. Mi auto ya es puro adorno.",
+            "1": "No consigo gasolina para nada. Alcalde, ¿sabes lo que es ir al trabajo empujando el auto?",
+            "2": "Solo pude cargar el {{percent}}% de la gasolina que quería. Me la paso mirando el indicador."
+          },
+          "2": {
+            "0": "Solo alcanzo a cargar como la mitad de gasolina. Ya cancelé todos los viajes largos.",
+            "1": "Hago fila en la gasolinera y me toca la mitad. Ya me pregunto para qué tengo auto.",
+            "2": "Gasolina, apenas el {{percent}}% de lo que quería. El resto del camino lo hago a pie."
+          },
+          "4": {
+            "0": "Casi siempre puedo cargar gasolina, pero a veces la gasolinera se queda sin nada.",
+            "1": "Cargar gasolina casi no es problema. A veces tengo que ir a la gasolinera de al lado.",
+            "2": "Pude cargar como el {{percent}}% de la gasolina. Falta poquito para el tanque lleno."
+          }
+        },
+        "water_supply": {
+          "0": {
+            "0": "Abro la llave y casi no sale agua. Alcalde, estos cortes de agua ya se pasaron de la raya.",
+            "1": "El agua sigue cortada. Ni hablar de bañarse; hasta lavarse los dientes es una hazaña.",
+            "2": "Solo salió el {{percent}}% del agua que necesitábamos. La cubeta es el tesoro de la familia."
+          },
+          "2": {
+            "0": "Del agua corriente llega como la mitad. La ropa la lavamos toda junta el fin de semana.",
+            "1": "Sale tan poquita agua que la ducha parece un atomizador.",
+            "2": "Agua corriente: apenas el {{percent}}% de lo que necesitamos. El agua del baño se reutiliza para todo."
+          },
+          "4": {
+            "0": "El agua casi siempre está bien, pero a ciertas horas baja la presión.",
+            "1": "Agua sí hay casi siempre. Solo en la tarde sale un chorrito más delgado.",
+            "2": "Tuvimos como el {{percent}}% del agua. No es para preocuparse."
+          }
+        },
+        "electricity": {
+          "0": {
+            "0": "Puros apagones; en las noches vivimos a la luz de las velas. Alcalde, danos luz, por favor.",
+            "1": "Casi no llega la luz. El refrigerador ahora es un simple estante.",
+            "2": "Solo nos llegó el {{percent}}% de la electricidad que necesitábamos. El celular lo cargo en el trabajo."
+          },
+          "2": {
+            "0": "Solo tenemos como la mitad de la electricidad. El aire acondicionado y el microondas se turnan.",
+            "1": "Los apagones ya son parte de la rutina. Cenamos antes de que oscurezca.",
+            "2": "Electricidad: apenas el {{percent}}% de lo que necesitamos. Los aparatos hacen fila para enchufarse."
+          },
+          "4": {
+            "0": "La luz casi siempre llega, pero de repente parpadea y se va.",
+            "1": "Apagones, solo de vez en cuando. Lo peor es volver a poner la hora en los relojes.",
+            "2": "Tuvimos como el {{percent}}% de la electricidad. Casi no nos afecta."
+          }
+        },
+        "sewage_service": {
+          "0": {
+            "0": "El drenaje no corre y toda la casa apesta. Alcalde, si vienes de visita, tápate la nariz.",
+            "1": "El tratamiento de aguas residuales no se da abasto. Ya me da miedo usar el baño.",
+            "2": "Solo se va por el drenaje el {{percent}}% de lo que debería. En casa hacemos turnos para el baño."
+          },
+          "2": {
+            "0": "El drenaje anda lento. Siento que solo se procesa como la mitad.",
+            "1": "El desagüe se tapa a cada rato. ¿No se puede arreglar algo del drenaje?",
+            "2": "Por el drenaje se va como el {{percent}}% y ya. Vivimos en convivencia con el olor."
+          },
+          "4": {
+            "0": "El drenaje casi siempre funciona, pero los días de lluvia me dan nervios.",
+            "1": "El desagüe va casi bien. Solo de vez en cuando gorgotea.",
+            "2": "El drenaje se lleva como el {{percent}}%. Ni se nota."
+          }
+        },
+        "garbage_service": {
+          "0": {
+            "0": "Saco la basura y nadie se la lleva. La entrada de la casa es una montaña de bolsas.",
+            "1": "El camión de la basura no pasa. Alcalde, ¿quieres venir a ver la montaña frente a mi casa?",
+            "2": "Solo se llevan el {{percent}}% de la basura que sacamos. El balcón ya es bodega."
+          },
+          "2": {
+            "0": "Recogen como la mitad de la basura. El resto vive con nosotros por un tiempo.",
+            "1": "Saco la basura el día que toca y la dejan ahí. Los cuervos están de fiesta.",
+            "2": "Solo recogen como el {{percent}}% de la basura. Las bolsas no dejan de acumularse."
+          },
+          "4": {
+            "0": "La basura casi siempre se la llevan, pero a veces dejan algunas bolsas.",
+            "1": "La recolección va casi bien. Solo dejaron los objetos grandes para la próxima vuelta.",
+            "2": "Se llevaron como el {{percent}}% de la basura. Con eso basta, supongo."
+          }
+        }
+      },
+      "alert": {
+        "any": {
+          "0": {
+            "0": "Dicen que en el palacio municipal la luz de alerta no se apaga. ¿Sí la estás viendo, alcalde?",
+            "1": "Se rumora que en algún lugar de la ciudad está pasando algo grave.",
+            "2": "Andan diciendo que la ciudad no anda bien. Revisa las notificaciones, alcalde."
+          },
+          "1": {
+            "0": "Parece que en el palacio municipal hay un aviso pendiente. Dicen que no es urgente.",
+            "1": "Escuché algo raro sobre la ciudad. Cuando tengas un rato, échale un vistazo, alcalde.",
+            "2": "Dicen que se están juntando problemitas. Si los dejas, crecen."
+          }
+        },
+        "collapse": {
+          "0": {
+            "0": "Escuché que se derrumbó un edificio. Alcalde, ¿conoces la palabra «inspección»?",
+            "1": "Dicen que la cuenta de derrumbes ya va en {{count}}. Me quedé mirando el techo de mi casa.",
+            "2": "Dicen que la cifra de muertos por los derrumbes va en {{deaths}}. ¿No será por ahorrarse el mantenimiento?",
+            "3": "Pasé por donde se derrumbó un edificio: puro escombro. ¿Cuál seguirá?",
+            "4": "Las noticias de derrumbes ya suman {{count}}. ¿Alguien está reparando los edificios viejos?",
+            "5": "También dicen que se hundió una calle. En esta ciudad no puedes confiar ni en el suelo que pisas."
+          }
+        },
+        "resource_runway": {
+          "0": {
+            "0": "Dicen que en unas {{remaining_epochs}} épocas ya no quedará nada de {{target}} para sacar. ¿Y luego qué?",
+            "1": "Se rumora que {{target}} está por tocar fondo. Alcalde, ¿ya tienes un plan B?",
+            "2": "Escuché que de tanto extraer {{target}} los cerros ya se ven tristes.",
+            "3": "{{target}}: dicen que a este ritmo se acaba pronto. Ojalá los empleos no se acaben también.",
+            "4": "Dicen que los recursos se están acabando. Lo que se excava no vuelve a crecer; era de esperarse.",
+            "5": "Dicen que queda poco de {{target}}. ¿Qué les vamos a dejar a los que vienen detrás?"
+          }
+        },
+        "facility_inoperative_labor": {
+          "0": {
+            "0": "{{target}}: dicen que por falta de personal no funciona como debe.",
+            "1": "Dicen que en {{target}} no consiguen gente para trabajar. ¿Alguien se anima a postularse?",
+            "2": "Escuché que {{target}} no da abasto por falta de personal. Alcalde, ¿ya publicaste las vacantes?",
+            "3": "En {{target}} casi no hay empleados, dicen. Un edificio bonito no atiende a nadie.",
+            "4": "Se rumora que una instalación pública está parada por falta de personal. Y los que sufrimos somos nosotros.",
+            "5": "Pasé por {{target}} y no había nadie en la ventanilla."
+          }
+        },
+        "facility_inoperative_material": {
+          "0": {
+            "0": "{{target}}: parece que no funciona porque no le llegan los insumos.",
+            "1": "Dicen que a {{target}} no le llega lo que necesita. ¿La cadena de suministro está bien?",
+            "2": "Escuché que en {{target}} todo se detuvo por falta de materia prima. Alcalde, ¿y los proveedores?",
+            "3": "Dicen que la bodega de {{target}} está vacía. Los empleados se quejan de que no pueden hacer nada.",
+            "4": "Se rumora que a una instalación pública no le llegan los insumos. ¿Son las calles o es el comercio?",
+            "5": "En {{target}} no llega lo que debería llegar, y dicen que los empleados ya no saben qué hacer con su tiempo."
+          }
+        },
+        "facility_inoperative_unknown": {
+          "0": {
+            "0": "Dicen que {{target}} no está funcionando bien. Y nadie sabe por qué.",
+            "1": "{{target}}: el edificio está ahí, pero se rumora que no funciona.",
+            "2": "Escuché que {{target}} anda fallando. Alcalde, date una vuelta a ver qué pasa.",
+            "3": "Parece que una instalación pública no está funcionando bien. ¿Nuestros impuestos sí están sirviendo de algo?",
+            "4": "De {{target}} dicen que nunca se sabe si abre o no.",
+            "5": "En el barrio comentan que {{target}} no le sirve a nadie."
+          }
+        },
+        "infra_facility_down": {
+          "0": {
+            "0": "Dicen que {{target}} dejó de funcionar. Ojalá no terminemos con apagones o cortes de agua.",
+            "1": "Escuché que {{target}} no está funcionando. Alcalde, ¿no se te olvidó prender el interruptor?",
+            "2": "{{target}}: dicen que está fuera de servicio. ¿Y la luz y el agua de la ciudad, qué?",
+            "3": "Dicen que en {{target}} las luces siguen apagadas. Esto me da muy mala espina.",
+            "4": "Se rumora que una instalación de infraestructura se detuvo. Al final, siempre salimos perdiendo los residentes.",
+            "5": "Dicen que {{target}} se detuvo y los empleados andan agarrándose la cabeza."
+          }
+        },
+        "infra_disconnected": {
+          "0": {
+            "0": "Dicen que las instalaciones sin conexión a la red de infraestructura ya suman {{count}}. ¿Se habrá cortado algo por ahí?",
+            "1": "Se rumora que construyeron instalaciones y nunca las conectaron. Alcalde, ¿no se te olvidó tender las líneas?",
+            "2": "Dicen que hay instalaciones que no están conectadas a la red de infraestructura. Tanto gasto para nada.",
+            "3": "Dicen que ya son {{count}} sin conectar. Así no llega ni la luz ni el agua.",
+            "4": "Parece que la instalación nueva solo la construyeron: no le llegan ni cables ni tubería de agua.",
+            "5": "Andan diciendo que algo está cortado en algún lado, ya sea un tubo o un cable."
+          }
+        },
+        "sanitation": {
+          "0": {
+            "0": "Dicen que el saneamiento empeoró en {{count}} hogares. Ojalá no se desate alguna enfermedad.",
+            "1": "Se rumora que ni el drenaje ni la recolección de basura dan abasto, y la ciudad ya huele.",
+            "2": "Dicen que hay un distrito con un saneamiento pésimo. Alcalde, ¿vas a repartir mascarillas?",
+            "3": "Escuché que {{count}} hogares viven en condiciones insalubres. Haz algo con el drenaje, alcalde.",
+            "4": "Si dejan así lo de la basura y el drenaje, la gente se va a enfermar.",
+            "5": "Dicen que en la calle de allá el olor está horrible. Que alguien limpie, por favor."
+          }
+        },
+        "resource_depleted": {
+          "1": {
+            "0": "Dicen que por fin se acabó {{target}}. El final llegó sin hacer ruido.",
+            "1": "Dicen que ya no se puede sacar más {{target}}. ¿Qué va a ser de los mineros?",
+            "2": "Escuché que {{target}} se agotó. Hay que ir pensando de qué vamos a vivir.",
+            "3": "Se rumora que se acabó un recurso. Alcalde, ¿ahora a vivir de importaciones?",
+            "4": "Dicen que en la mina de {{target}} ya no se oye nada.",
+            "5": "{{target}}: dicen que ya no queda nada. Hubiéramos cuidado lo que teníamos."
+          }
+        },
+        "facility_inoperative_high_skill": {
+          "1": {
+            "0": "{{target}}: dicen que anda a medio gas porque no hay especialistas.",
+            "1": "Dicen que en {{target}} faltan personas con la preparación necesaria. ¿Y si construimos más universidades?",
+            "2": "Dicen que a {{target}} le falta personal especializado. ¿A dónde se fueron los jóvenes que estudiaron?",
+            "3": "Parece que hay instalaciones que no funcionan sin expertos. Y formar uno toma su tiempo.",
+            "4": "Escuché que en {{target}} renunció la gente más capaz y ahora no saben qué hacer.",
+            "5": "Dicen que las vacantes de {{target}} piden tanto que nadie puede postularse."
+          }
+        },
+        "facility_inoperative_budget": {
+          "1": {
+            "0": "Dicen que {{target}} está recortando su operación por falta de presupuesto.",
+            "1": "Se rumora que en {{target}} hacen las cosas a medias por falta de dinero. Alcalde, revisa cómo repartes el presupuesto.",
+            "2": "{{target}}: dicen que por los recortes de presupuesto ahora atiende menos horas.",
+            "3": "Dicen que no alcanza el presupuesto de las instalaciones públicas. ¿Pues a dónde se van los impuestos?",
+            "4": "Los empleados de {{target}} se quejaban de que no hay presupuesto.",
+            "5": "Parece que {{target}} ahorra tanto que solo funciona a la mitad."
+          }
+        },
+        "education_low_enrollment": {
+          "1": {
+            "0": "Dicen que {{target}} no consigue alumnos. Y eso que tiene cupo para {{max_students}}.",
+            "1": "Dicen que los inscritos en {{target}} son apenas {{enrolled}}. Los salones están vacíos.",
+            "2": "Se rumora que en {{target}} todo está listo, menos los alumnos.",
+            "3": "Los maestros de {{target}} dicen que, sin alumnos, ya no saben qué hacer.",
+            "4": "Dicen que la escuela está vacía. ¿Habrá pocos niños, o quedará muy lejos?",
+            "5": "{{target}} tiene lugar para {{max_students}} y dicen que sobran pupitres vacíos por todos lados. Qué desperdicio."
+          }
+        },
+        "tenant_blocked_by_parcel_size": {
+          "1": {
+            "0": "Dicen que en {{zone_name}} no se puede construir un edificio para {{tenant_name}}. Las parcelas son demasiado chicas.",
+            "1": "{{tenant_name}}: se rumora que quieren instalarse aquí, pero no hay edificio donde quepan.",
+            "2": "Dicen que en {{zone_name}} las parcelas son tan pequeñas que no cabe ningún edificio grande.",
+            "3": "Dicen que hacen falta {{required}} m2 y solo se puede construir hasta {{max_capacity}} m2. Alcalde, parcelas más grandes, por favor.",
+            "4": "Hay tiendas y empresas con ganas de llegar, pero dicen que el terreno está tan repartido en pedacitos que no se puede construir nada.",
+            "5": "Escuché que la ciudad dejó de crecer porque no hay parcelas grandes."
+          }
+        },
+        "rail_capacity_exceeded": {
+          "1": {
+            "0": "Dicen que ya son {{count}} los tramos de vía férrea con demasiados trenes. ¿No estará muy apretado el horario?",
+            "1": "Dicen que las vías férreas están atiborradas de trenes. Un día de estos va a haber embotellamiento de trenes.",
+            "2": "Se rumora que hay más trenes de los que aguanta la vía férrea. Alcalde, construye más vías.",
+            "3": "Dicen que ya van {{count}} tramos de vía saturados. ¿Por eso se retrasan los trenes?",
+            "4": "Dicen que la vía férrea va llena. No de pasajeros: de trenes.",
+            "5": "Escuché que hay demasiados viajes de tren. Y eso que solo hay una vía."
+          }
+        }
       }
     }
   }

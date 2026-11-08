@@ -31,6 +31,15 @@ const TOPICS = {
     "population"].map(name => [`city.${name}`, [["count"], []]])),
   "city.unemployment": [["percent"], []], "city.consumption_tax": [["percent"], []], "city.income_tax": [["percent"], []],
   "city.opened": [PLACE, []], "city.closed": [PLACE, []],
+  "shortage.any": [["product", "percent"], []],
+  "alert.any": [[], []], "alert.collapse": [["count"], ["deaths"]],
+  "alert.resource_runway": [["target", "remaining_epochs"], []], "alert.resource_depleted": [["target"], []],
+  ...Object.fromEntries(["labor", "material", "unknown", "high_skill", "budget"]
+    .map(reason => [`alert.facility_inoperative_${reason}`, [["target"], []]])),
+  "alert.infra_facility_down": [["target"], []], "alert.infra_disconnected": [["count"], []],
+  "alert.sanitation": [["count"], []], "alert.rail_capacity_exceeded": [["count"], []],
+  "alert.education_low_enrollment": [["target", "max_students"], ["enrolled"]],
+  "alert.tenant_blocked_by_parcel_size": [[], ["tenant_name", "zone_name", "required", "max_capacity", "count"]],
 };
 
 const placeholders = text => [...text.matchAll(/\{\{\s*(\w+)/g)].map(([, name]) => name);
@@ -54,11 +63,11 @@ for (const [topic, [required, optional]] of Object.entries(TOPICS)) {
   }
 }
 
-// 品目ごとの文は goods.any と同じ値を使う。話題に挙げていない種類の文は、コアが返さない話題なので置かない。
+// 品目ごとの文は goods.any・shortage.any と同じ値を使う。話題に挙げていない種類の文は、コアが返さない話題なので置かない。
 for (const [group, topics] of Object.entries(voice.lines)) {
   for (const [name, tiers] of Object.entries(topics)) {
-    if (group === "goods") {
-      for (const [tier, texts] of Object.entries(tiers)) checkTexts(`goods.${name}.${tier}`, Object.values(texts), ["product", "percent"], []);
+    if (group === "goods" || group === "shortage") {
+      for (const [tier, texts] of Object.entries(tiers)) checkTexts(`${group}.${name}.${tier}`, Object.values(texts), ["product", "percent"], []);
     } else {
       assert.ok(`${group}.${name}` in TOPICS, `${group}.${name}: コアが返さない話題`);
     }
