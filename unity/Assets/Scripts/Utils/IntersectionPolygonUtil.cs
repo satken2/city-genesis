@@ -125,7 +125,9 @@ public static class IntersectionPolygonUtil
                 corner.Points.Add(left);
                 corner.Directions.Add(-s.Direction);
             }
-            int count = Mathf.Clamp(Mathf.CeilToInt(Vector2.Distance(arcStart, arcEnd) / 0.5f), 4, 32);
+            // Sample arcs at 0.5 m with no higher minimum: nearly straight corners have centimeter arcs, and crowding several
+            // almost collinear points there leaves ear clipping without a convex vertex.
+            int count = Mathf.Clamp(Mathf.CeilToInt(Vector2.Distance(arcStart, arcEnd) / 0.5f), 1, 32);
             for (int j = 0; j <= count; j++)
             {
                 float t = (float)j / count, u = 1f - t;
