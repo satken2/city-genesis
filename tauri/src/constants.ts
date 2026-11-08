@@ -93,6 +93,7 @@ export const MODEL_ROTARY: number = 11;
 export const MODEL_PARK: number = 12;
 export const MODEL_OPEN_PIT: number = 13;
 export const MASHUP_CELL_SIZE: number = 8.0;
+export const MASHUP_GRID_PHASE_STEP: number = 0.5;
 export const OPEN_PIT_YARD_DEPTH: number = 40.0;
 export const FAMILY_SINGLE: number = 1;
 export const FAMILY_COUPLE: number = 2;

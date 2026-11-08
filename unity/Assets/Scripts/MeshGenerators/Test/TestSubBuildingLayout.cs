@@ -33,7 +33,7 @@ public static class TestSubBuildingLayout
     private class MashupGrid
     {
         public HashSet<(int i, int j)> Cells = new HashSet<(int i, int j)>();
-        public Vector2 Origin;      // Grid origin (minimum bounding-box corner in grid axes).
+        public Vector2 Origin;      // Grid origin (bounding-box corner in grid axes, shifted to fit the most cells).
         public Vector2 U;           // Column direction unit vector (front-edge direction).
         public Vector2 V;           // Row direction unit vector (U rotated 90° counterclockwise).
         public float Angle;         // U direction angle (degrees, CCW from +X in XZ).
@@ -486,8 +486,9 @@ public static class TestSubBuildingLayout
 
     /// <summary>
     /// Deterministically divide polygons into cell-size squares.
-    /// Align grid to longest edge, origin at minimum bounding-box corner in grid axes.
-    /// Keep only fully contained cells; leave edge remainders as gaps.
+    /// Align grid to longest edge. Like the backend, shift the lattice from the minimum bounding-box corner
+    /// in MASHUP_GRID_PHASE_STEP increments up to one cell along U and V, and keep the shift fitting the most cells
+    /// (ties: smaller V shift, then smaller U shift). Keep only fully contained cells; leave edge remainders as gaps.
     /// </summary>
     private static MashupGrid BuildMashupCells(Vector2[] polygon, float cellSize)
     {
@@ -526,10 +527,36 @@ public static class TestSubBuildingLayout
             minV = Mathf.Min(minV, sv);
             maxV = Mathf.Max(maxV, sv);
         }
-        grid.Origin = grid.U * minU + grid.V * minV;
+        Vector2 corner = grid.U * minU + grid.V * minV;
+        int phases = Mathf.Max(1, Mathf.RoundToInt(cellSize / Constants.MASHUP_GRID_PHASE_STEP));
+        float step = cellSize / phases;
+        grid.Origin = corner;
+        for (int pv = 0; pv < phases; pv++)
+        {
+            for (int pu = 0; pu < phases; pu++)
+            {
+                Vector2 origin = corner + grid.U * (pu * step) + grid.V * (pv * step);
+                HashSet<(int i, int j)> cells = CollectCells(
+                    polygon, grid.U, grid.V, origin, maxU - minU - pu * step, maxV - minV - pv * step, cellSize);
+                if (cells.Count > grid.Cells.Count)
+                {
+                    grid.Cells = cells;
+                    grid.Origin = origin;
+                }
+            }
+        }
+        return grid;
+    }
 
-        int cols = Mathf.Max(0, Mathf.CeilToInt((maxU - minU) / cellSize - 1e-9f));
-        int rows = Mathf.Max(0, Mathf.CeilToInt((maxV - minV) / cellSize - 1e-9f));
+    /// <summary>
+    /// Collect cells of the lattice starting at origin that lie entirely inside the polygon.
+    /// </summary>
+    private static HashSet<(int i, int j)> CollectCells(
+        Vector2[] polygon, Vector2 u, Vector2 v, Vector2 origin, float extentU, float extentV, float cellSize)
+    {
+        var cells = new HashSet<(int i, int j)>();
+        int cols = Mathf.Max(0, Mathf.CeilToInt(extentU / cellSize - 1e-9f));
+        int rows = Mathf.Max(0, Mathf.CeilToInt(extentV / cellSize - 1e-9f));
 
         // Test slightly shrunken squares so floating-point errors do not reject boundary cells.
         // Convex-only test footprints make four-corner containment equivalent to full-cell containment.
@@ -543,16 +570,16 @@ public static class TestSubBuildingLayout
                 float c = j * cellSize + inset;
                 float d = (j + 1) * cellSize - inset;
                 bool allInside =
-                    PolygonUtils.Contains(polygon, grid.Origin + grid.U * a + grid.V * c) &&
-                    PolygonUtils.Contains(polygon, grid.Origin + grid.U * b + grid.V * c) &&
-                    PolygonUtils.Contains(polygon, grid.Origin + grid.U * b + grid.V * d) &&
-                    PolygonUtils.Contains(polygon, grid.Origin + grid.U * a + grid.V * d);
+                    PolygonUtils.Contains(polygon, origin + u * a + v * c) &&
+                    PolygonUtils.Contains(polygon, origin + u * b + v * c) &&
+                    PolygonUtils.Contains(polygon, origin + u * b + v * d) &&
+                    PolygonUtils.Contains(polygon, origin + u * a + v * d);
                 if (allInside)
                 {
-                    grid.Cells.Add((i, j));
+                    cells.Add((i, j));
                 }
             }
         }
-        return grid;
+        return cells;
     }
 }

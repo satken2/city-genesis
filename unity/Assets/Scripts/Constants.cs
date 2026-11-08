@@ -98,6 +98,7 @@ public static class Constants
     public const int MODEL_PARK = 12;
     public const int MODEL_OPEN_PIT = 13;
     public const float MASHUP_CELL_SIZE = 8.0f;
+    public const float MASHUP_GRID_PHASE_STEP = 0.5f;
     public const float OPEN_PIT_YARD_DEPTH = 40.0f;
     public const int FAMILY_SINGLE = 1;
     public const int FAMILY_COUPLE = 2;
