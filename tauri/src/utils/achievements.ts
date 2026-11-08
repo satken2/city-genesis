@@ -28,8 +28,3 @@ export async function showUnlockedAchievements(achievements: UnlockedAchievement
   });
   await invoke("sync_steam_achievements");
 }
-
-/** Take and show in one step, for operations that have no result window of their own. */
-export async function presentUnlockedAchievements(apiBaseUrl: string): Promise<void> {
-  await showUnlockedAchievements(await takeUnlockedAchievements(apiBaseUrl));
-}
