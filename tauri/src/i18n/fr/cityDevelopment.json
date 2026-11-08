@@ -5,7 +5,14 @@
     "patterns": {
       "grid": "Quadrillage sans tenir compte du relief",
       "terrain_grid": "Quadrillage suivant le relief",
-      "arterial": "Axes principaux et rues locales"
+      "arterial": "Axes principaux et rues locales",
+      "relaxed_grid": "Quadrillage adapté au relief",
+      "contour": "Suivre les courbes de niveau",
+      "organic": "Étalement organique",
+      "block_grid": "Grille dans l’îlot",
+      "block_strips": "Bandes parallèles",
+      "block_perimeter": "Suivre le périmètre",
+      "block": "Rues à l’intérieur des îlots"
     },
     "spacing": "Espacement des routes",
     "parcelArea": "Surface des parcelles",

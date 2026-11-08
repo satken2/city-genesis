@@ -5,7 +5,14 @@
     "patterns": {
       "grid": "Cuadrícula sin considerar el terreno",
       "terrain_grid": "Cuadrícula que sigue el terreno",
-      "arterial": "Vías principales con calles locales"
+      "arterial": "Vías principales con calles locales",
+      "relaxed_grid": "Cuadrícula adaptada al terreno",
+      "contour": "Seguir curvas de nivel",
+      "organic": "Expansión orgánica",
+      "block_grid": "Cuadrícula de manzana",
+      "block_strips": "Franjas paralelas",
+      "block_perimeter": "Seguir el perímetro",
+      "block": "Calles dentro de manzanas"
     },
     "spacing": "Separación de calles",
     "parcelArea": "Área de parcela",

@@ -5,7 +5,14 @@
     "patterns": {
       "grid": "无视地形的棋盘格",
       "terrain_grid": "顺应地形的棋盘格",
-      "arterial": "干道与小巷组合的开发区"
+      "arterial": "干道与小巷组合的开发区",
+      "relaxed_grid": "顺应地形的网格",
+      "contour": "优先沿等高线",
+      "organic": "自然蔓延式",
+      "block_grid": "街区网格",
+      "block_strips": "平行条带",
+      "block_perimeter": "沿外周布局",
+      "block": "街区内部小路"
     },
     "spacing": "道路间距",
     "parcelArea": "地块面积",

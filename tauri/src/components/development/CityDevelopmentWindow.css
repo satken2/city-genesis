@@ -86,10 +86,6 @@
   margin: 0;
 }
 
-.city-development__area {
-  font-variant-numeric: tabular-nums;
-}
-
 .city-development__actions {
   display: flex;
   flex-wrap: wrap;

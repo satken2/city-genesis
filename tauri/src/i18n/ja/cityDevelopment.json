@@ -5,7 +5,14 @@
     "patterns": {
       "grid": "地形を無視した碁盤",
       "terrain_grid": "地形を考慮した碁盤",
-      "arterial": "幹線と路地を組み合わせた開発地"
+      "arterial": "幹線と路地を組み合わせた開発地",
+      "relaxed_grid": "地形で曲がる格子",
+      "contour": "等高線を優先",
+      "organic": "スプロール風",
+      "block_grid": "街区内の格子",
+      "block_strips": "短冊",
+      "block_perimeter": "外周追従",
+      "block": "街区内の細街路"
     },
     "spacing": "道路の間隔",
     "parcelArea": "区画の面積",

@@ -654,7 +654,7 @@ function App() {
             ) : context.window_type === "scenario_tools" ? (
               <ScenarioToolsWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "city_development" ? (
-              <CityDevelopmentWindow apiBaseUrl={context.api_base_url} initialRoadsOnly={windowExtra(context)?.initialRoadsOnly === true} />
+              <CityDevelopmentWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "agent_creation" ? (
               // Scenario mode only. Create an already moved-in non-building agent in a shared building selected in the 3D view.
               <AgentCreationPanel apiBaseUrl={context.api_base_url} />

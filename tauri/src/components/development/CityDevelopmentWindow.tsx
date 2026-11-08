@@ -1,6 +1,5 @@
 /**
- * 都市の自動開発と道路だけの作成で、アルゴリズム選択と地図を共用する。
- * 範囲は入力方法ごとに保持し、アルゴリズムを切り替えても地図の位置と縮尺を保つ。
+ * 塗った範囲を保持したままアルゴリズムを切り替え、同じ場所で結果を比較できる。
  */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
@@ -12,25 +11,18 @@ import { buildablePathMaster, buildCategoryVariants, type PathVariantOption } fr
 import { clearHintbarTextIf, setHintbarText } from "../../utils/hintbar";
 import { IPC_EVENT_CAMERA_STATE, sendCameraQueryState, sendSessionReload } from "../../utils/ipc";
 import { CityMapCanvas, type CityMapCanvasHandle } from "../map/CityMapCanvas";
-import { DEVELOPMENT_PATTERNS, useDevelopmentBrush, type DevelopmentPattern } from "./useDevelopmentBrush";
-import { BLOCK_PATTERNS, STREET_PATTERNS, useStreetGrid, type StreetPattern } from "./useStreetGrid";
+import {
+  BLOCK_PATTERNS, DEVELOPMENT_PATTERNS, STREET_PATTERNS, useDevelopmentBrush,
+  type BlockPattern, type DevelopmentPattern, type StreetPattern,
+} from "./useDevelopmentBrush";
 import "./CityDevelopmentWindow.css";
 
-type Algorithm = DevelopmentPattern | StreetPattern;
-type Operation = "preview" | "create" | null;
-
-export type DevelopmentWorkflowOptions = {
-  apiBaseUrl: string;
-  variants: number[];
-  running: Operation;
-  setRunning: (operation: Operation) => void;
-  reload: () => Promise<void>;
-};
+type Algorithm = DevelopmentPattern | StreetPattern | "block";
+const ALGORITHMS = [...DEVELOPMENT_PATTERNS, ...STREET_PATTERNS, "block"] as const;
 
 const CAMERA_HALF_EXTENT_M = 600;
 const NO_VARIANTS: number[] = [];
-const DEVELOPMENT_LAYERS = { elevation: true, parcels: true, buildings: false };
-const STREET_LAYERS = { elevation: true, buildings: false };
+const MAP_LAYERS = { elevation: true, parcels: true, buildings: false };
 
 // APIの既定と同じく、勾配制限が厳しい規格を優先し、同じ制限なら幅が広い規格を選ぶ。
 function defaultRoad(choices: PathVariantOption[], lanes: number) {
@@ -43,17 +35,16 @@ function defaultRoad(choices: PathVariantOption[], lanes: number) {
   )[0];
 }
 
-export function CityDevelopmentWindow({ apiBaseUrl, initialRoadsOnly = false }: { apiBaseUrl: string; initialRoadsOnly?: boolean }) {
+export function CityDevelopmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t } = useTranslation();
   const masterData = useMasterData();
   const scenarioMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCENARIO;
   const mapRef = useRef<CityMapCanvasHandle>(null);
-  const [algorithm, setAlgorithm] = useState<Algorithm>(initialRoadsOnly ? "relaxed_grid" : "arterial");
-  const [running, setRunning] = useState<Operation>(null);
+  const [algorithm, setAlgorithm] = useState<Algorithm>("arterial");
+  const [blockPattern, setBlockPattern] = useState<BlockPattern>("block_grid");
   const [overlayVersion, setOverlayVersion] = useState(0);
-  const developmentPattern = DEVELOPMENT_PATTERNS.find(pattern => pattern === algorithm);
-  const blockMode = BLOCK_PATTERNS.some(pattern => pattern === algorithm);
-  const variantGroup = developmentPattern ?? (blockMode ? "block" : "street");
+  const blockMode = algorithm === "block";
+  const variantGroup = blockMode ? "block" : "standard";
   const [variantSelections, setVariantSelections] = useState<Partial<Record<typeof variantGroup, number[]>>>({});
 
   const choices = useMemo(() => buildCategoryVariants(buildablePathMaster(masterData, scenarioMode), PATH_STREET)
@@ -66,9 +57,9 @@ export function CityDevelopmentWindow({ apiBaseUrl, initialRoadsOnly = false }: 
     if (available && (available.length > 0 || selection?.length === 0)) return available;
     if (choices.length === 0) return NO_VARIANTS;
     const local = defaultRoad(choices, 1);
-    const arterial = algorithm === "arterial" ? defaultRoad(choices, 2) : undefined;
+    const arterial = defaultRoad(choices, 2);
     return local && arterial ? [local.id, arterial.id] : [(local ?? arterial ?? choices[0]).id];
-  }, [selection, choices, algorithm]);
+  }, [selection, choices]);
 
   const toggleVariant = (id: number, checked: boolean) => {
     setVariantSelections(prev => ({
@@ -82,13 +73,8 @@ export function CityDevelopmentWindow({ apiBaseUrl, initialRoadsOnly = false }: 
     mapRef.current?.reload();
   };
 
-  const options = { apiBaseUrl, running, setRunning, reload };
-  const development = useDevelopmentBrush(developmentPattern, { ...options, variants: developmentPattern ? variants : NO_VARIANTS });
-  const streetPattern = STREET_PATTERNS.find(pattern => pattern === algorithm)
-    ?? BLOCK_PATTERNS.find(pattern => pattern === algorithm);
-  const streetGrid = useStreetGrid(streetPattern, { ...options, variants: streetPattern ? variants : NO_VARIANTS });
-  const workflow = developmentPattern ? development : streetGrid;
-  const { hint, mapProps } = workflow;
+  const workflow = useDevelopmentBrush(blockMode ? blockPattern : algorithm, { apiBaseUrl, variants, reload });
+  const { hint, mapProps, running } = workflow;
   const busy = running !== null;
 
   useEffect(() => {
@@ -134,23 +120,26 @@ export function CityDevelopmentWindow({ apiBaseUrl, initialRoadsOnly = false }: 
             data-guide="city_development.pattern"
             onChange={event => setAlgorithm(event.currentTarget.value as Algorithm)}
           >
-            <optgroup label={t("windowType.city_development")}>
-              {DEVELOPMENT_PATTERNS.map(key => (
-                <option key={key} value={key}>{t(`cityDevelopment.patterns.${key}`)}</option>
-              ))}
-            </optgroup>
-            <optgroup label={t("scenarioTools.terrainPatterns")}>
-              {STREET_PATTERNS.map(key => (
-                <option key={key} value={key}>{t(`scenarioTools.patterns.${key}`)}</option>
-              ))}
-            </optgroup>
-            <optgroup label={t("scenarioTools.blockPatterns")}>
-              {BLOCK_PATTERNS.map(key => (
-                <option key={key} value={key}>{t(`scenarioTools.patterns.${key}`)}</option>
-              ))}
-            </optgroup>
+            {ALGORITHMS.map(key => (
+              <option key={key} value={key}>{t(`cityDevelopment.patterns.${key}`)}</option>
+            ))}
           </select>
         </label>
+        {blockMode && (
+          <label className="city-development__field">
+            <span>{t("scenarioTools.pattern")}</span>
+            <select
+              value={blockPattern}
+              disabled={busy}
+              data-guide="city_development.block_pattern"
+              onChange={event => setBlockPattern(event.currentTarget.value as BlockPattern)}
+            >
+              {BLOCK_PATTERNS.map(key => (
+                <option key={key} value={key}>{t(`cityDevelopment.patterns.${key}`)}</option>
+              ))}
+            </select>
+          </label>
+        )}
         <fieldset className="city-development__variants" disabled={busy}>
           <legend>{t("cityDevelopment.roadVariants")}</legend>
           {choices.map(({ id, data }) => (
@@ -188,7 +177,7 @@ export function CityDevelopmentWindow({ apiBaseUrl, initialRoadsOnly = false }: 
         <CityMapCanvas
           ref={mapRef}
           apiBaseUrl={apiBaseUrl}
-          layers={developmentPattern ? DEVELOPMENT_LAYERS : STREET_LAYERS}
+          layers={MAP_LAYERS}
           interactive
           showCompass
           overlayVersion={overlayVersion}

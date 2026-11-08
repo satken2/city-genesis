@@ -39,16 +39,14 @@ window.HTMLCanvasElement.prototype.getContext = () => new Proxy({}, { get: () =>
 const requests = [];
 globalThis.fetch = async (url, init) => {
   if (url.includes("/city-development")) {
-    requests.push(JSON.parse(init.body));
-    return Response.json({
-      roads: [{ path_variant: 221, points: [[0, 0], [100, 0]] }],
+    const body = JSON.parse(init.body);
+    requests.push(body);
+    return Response.json(url.endsWith("/preview") ? {
+      roads: [{ path_variant: body.path_variants[0], points: [[0, 0], [100, 0]] }],
       parcels: [], rejected: {}, area_m2: 10000,
-    });
+    } : { path_ids: [1], parcel_ids: [], rejected: {} });
   }
-  if (url.includes("/street-grid")) {
-    requests.push(JSON.parse(init.body));
-    return Response.json({ segments: [], created: 0, rejected: {}, pattern: "relaxed_grid" });
-  }
+  assert.ok(!url.includes("/street-grid"));
   return new Promise(() => {});
 };
 const { CityDevelopmentWindow, master } = await import(pathToFileURL(output).href);
@@ -61,89 +59,82 @@ const host = document.createElement("div");
 document.body.append(host);
 const root = createRoot(host);
 try {
-  const apiBaseUrl = "http://fixture";
-  await act(async () => root.render(createElement(CityDevelopmentWindow, { apiBaseUrl, initialRoadsOnly: true })));
+  await act(async () => root.render(createElement(CityDevelopmentWindow, { apiBaseUrl: "http://fixture" })));
   const canvas = host.querySelector("canvas");
-  const area = () => host.querySelector("output").textContent;
   const [clear, preview, create] = host.querySelectorAll("button");
   const pointer = (type, x, y, ctrlKey = false) => act(async () => {
     canvas.dispatchEvent(new window.PointerEvent(type, { bubbles: true, pointerId: 1, button: 0, clientX: x, clientY: y, ctrlKey }));
   });
-  const click = async (x, y) => { await pointer("pointerdown", x, y); await pointer("pointerup", x, y); };
-  const right = (x, y) => act(async () => {
-    canvas.dispatchEvent(new window.MouseEvent("contextmenu", { bubbles: true, button: 2, clientX: x, clientY: y }));
-  });
+  const paint = async (x, y) => {
+    await pointer("pointerdown", x, y, true);
+    await pointer("pointermove", x + 50, y + 50, true);
+    await pointer("pointerup", x + 50, y + 50, true);
+  };
   const showPlan = () => act(async () => preview.click());
-  const algorithm = host.querySelector('[data-guide="city_development.pattern"]');
-  const selectAlgorithm = value => act(async () => {
-    algorithm.value = value;
-    algorithm.dispatchEvent(new window.Event("change", { bubbles: true }));
+  const guide = name => host.querySelector(`[data-guide="city_development.${name}"]`);
+  const algorithm = guide("pattern");
+  const select = (input, value) => act(async () => {
+    input.value = value;
+    input.dispatchEvent(new window.Event("change", { bubbles: true }));
   });
   const roadTypes = () => host.querySelectorAll('input[type="checkbox"]');
-  assert.equal(algorithm.value, "relaxed_grid");
-  assert.equal(algorithm.options.length, 9);
+  assert.equal(algorithm.value, "arterial");
+  assert.equal(algorithm.querySelectorAll("optgroup").length, 0);
+  assert.deepEqual([...algorithm.options].map(option => option.value),
+    ["grid", "terrain_grid", "arterial", "relaxed_grid", "contour", "organic", "block"]);
+  assert.equal(guide("block_pattern"), null);
   assert.equal(roadTypes().length, 2);
-  await act(async () => roadTypes()[1].click());
-  await click(50, 50); await click(150, 50); await right(200, 200);
-  assert.ok(preview.disabled);
-  await pointer("pointermove", 150, 150);
-  assert.equal(area(), "選択面積 5,000 m²");
-  await click(150, 150);
-  assert.ok(preview.disabled);
-  await right(50, 50);
-  await showPlan();
-  assert.deepEqual(requests.at(-1).points, [[50,-50], [150,-50], [150,-150]]);
-  assert.deepEqual(requests.at(-1).path_variants, [212, 221]);
-  assert.ok(!create.disabled);
-
-  await click(98, 102); // 最後の頂点から最初の頂点に戻る辺への射影。
-  assert.ok(create.disabled);
-  await showPlan();
-  assert.deepEqual(requests.at(-1).points.at(-1), [100,-100]);
-  await pointer("pointerdown", 100, 100); await pointer("pointermove", 50, 150);
-  assert.equal(area(), "選択面積 0.01 km²");
-  assert.ok(create.disabled);
-  await pointer("pointerup", 50, 150);
-  await right(150, 50);
-  assert.equal(area(), "選択面積 5,000 m²");
-  await click(400, 400); await right(400, 400);
-  await pointer("pointerdown", 400, 400); await pointer("pointermove", 430, 420); await pointer("pointerup", 430, 420);
-  await showPlan();
-  assert.deepEqual(requests.at(-1).points, [[50,-50], [150,-150], [50,-150]]);
-  await right(80, 70); // パンした後も同じ頂点を拾い、2点になれば配置を再開する。
-  assert.ok(preview.disabled);
-  await click(150, 70); await right(400, 400);
-  assert.ok(!preview.disabled);
-  await showPlan();
-  await act(async () => create.click());
-  assert.equal(area(), "選択面積 0 m²");
-  assert.ok(preview.disabled);
-  await click(60, 60); await click(200, 60); await click(200, 160); await right(400, 400);
-  await act(async () => clear.click());
-  assert.equal(area(), "選択面積 0 m²");
-  assert.ok(preview.disabled);
-
-  await selectAlgorithm("block_grid");
-  assert.equal(roadTypes().length, 1);
-  assert.equal(host.querySelector('input[type="number"]').value, "20");
-  await selectAlgorithm("arterial");
-  assert.equal(host.querySelector("canvas"), canvas);
-  assert.ok(host.querySelector('[data-guide="city_development.parcel_area"]'));
   assert.deepEqual([...roadTypes()].map(input => input.checked), [true, true]);
-  await act(async () => roadTypes()[0].click());
-  await pointer("pointerdown", 50, 50, true);
-  await pointer("pointermove", 100, 100, true);
-  await pointer("pointerup", 100, 100, true);
-  await showPlan();
-  assert.equal(requests.at(-1).pattern, "arterial");
-  assert.equal(requests.at(-1).strokes.length, 1);
-  assert.deepEqual(requests.at(-1).path_variants, [221]);
-  assert.ok(!create.disabled);
-  await act(async () => roadTypes()[1].click());
+
+  await pointer("pointerdown", 50, 50);
+  await pointer("pointerup", 50, 50);
   assert.ok(preview.disabled);
+  await paint(50, 50);
+  await showPlan();
+  const first = requests.at(-1);
+  assert.equal(first.pattern, "arterial");
+  assert.equal(first.strokes.length, 1);
+  assert.deepEqual(first.strokes[0].points[0], [50, -50]);
+  assert.equal(first.parcel_area, 600);
+  assert.ok(!create.disabled);
+
+  await select(algorithm, "contour");
+  assert.equal(host.querySelector("canvas"), canvas);
+  assert.equal(guide("parcel_area"), null);
   assert.ok(create.disabled);
+  await showPlan();
+  assert.deepEqual(requests.at(-1), {
+    pattern: "contour", path_variants: first.path_variants, spacing: first.spacing, angle_deg: null, strokes: first.strokes,
+  });
+  await act(async () => roadTypes()[1].click());
+  assert.ok(create.disabled);
+  await paint(300, 300);
+  await showPlan();
+  assert.deepEqual(requests.at(-1).path_variants, [212]);
+  assert.equal(requests.at(-1).strokes.length, 2);
+
+  await select(algorithm, "block");
+  assert.ok(create.disabled);
+  assert.equal(roadTypes().length, 1);
+  const blockPattern = guide("block_pattern");
+  assert.deepEqual([...blockPattern.options].map(option => option.value), ["block_grid", "block_strips", "block_perimeter"]);
+  await select(blockPattern, "block_strips");
+  await showPlan();
+  const block = requests.at(-1);
+  assert.equal(block.pattern, "block_strips");
+  assert.equal(block.parcel_size, 20);
+  assert.equal(block.spacing, undefined);
+  assert.equal(block.strokes.length, 2);
+  await act(async () => create.click());
+  assert.deepEqual(requests.at(-1), block);
+  assert.ok(preview.disabled);
+
+  await paint(80, 80);
+  assert.ok(!preview.disabled);
+  await act(async () => clear.click());
+  assert.ok(preview.disabled);
 } finally {
   await act(async () => root.unmount());
   await window.happyDOM.close();
 }
-console.log("PASS: shared development window, algorithm switching, road types, area editing and preview");
+console.log("PASS: shared brush and preview across city development algorithms and block street styles");

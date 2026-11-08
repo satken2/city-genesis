@@ -5,7 +5,14 @@
     "patterns": {
       "grid": "지형을 무시한 바둑판",
       "terrain_grid": "지형을 고려한 바둑판",
-      "arterial": "간선과 골목을 조합한 개발지"
+      "arterial": "간선과 골목을 조합한 개발지",
+      "relaxed_grid": "지형을 따르는 격자",
+      "contour": "등고선 우선",
+      "organic": "자연 발생형 확장",
+      "block_grid": "블록 내부 격자",
+      "block_strips": "평행 띠",
+      "block_perimeter": "외곽선 따라 배치",
+      "block": "블록 내부 골목"
     },
     "spacing": "도로 간격",
     "parcelArea": "구획 면적",

@@ -5,7 +5,14 @@
     "patterns": {
       "grid": "Grid ignoring terrain",
       "terrain_grid": "Grid following terrain",
-      "arterial": "Arterials with local streets"
+      "arterial": "Arterials with local streets",
+      "relaxed_grid": "Terrain-adapted grid",
+      "contour": "Follow contours",
+      "organic": "Organic sprawl",
+      "block_grid": "Block grid",
+      "block_strips": "Parallel strips",
+      "block_perimeter": "Follow the perimeter",
+      "block": "Streets inside blocks"
     },
     "spacing": "Road spacing",
     "parcelArea": "Parcel area",
