@@ -24,7 +24,7 @@ For the front end, use PATCH for fixes, MINOR for added features, and MAJOR for 
 
 ## Saves and rule changes
 
-Ordinary loading accepts saves written by a core version no newer than the running core and with the same MAJOR. Loaded cities use the current rules, so load compatibility does not guarantee identical outcomes.
+Ordinary loading accepts saves with the same MAJOR as the running core whose saving core's `MAJOR.MINOR` is no newer than the running core. PATCH is not compared because it changes neither save compatibility nor rules. Loaded cities use the current rules, so load compatibility does not guarantee identical outcomes.
 
 Follow the core's `balance_changed` result for rule changes. The UI displays it and obtains player consent before loading when required. The front end does not derive this decision from version numbers. See [sessions and saves](sessions-and-saves.md).
 
