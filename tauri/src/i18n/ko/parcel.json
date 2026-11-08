@@ -22,6 +22,7 @@
     "frontPathNoCandidates": "접도로 지정할 수 있는 가로를 찾을 수 없습니다",
     "frontPathSaveError": "접도 변경에 실패했습니다",
     "owner": "소유자",
+    "allowPrivateConstruction": "민간 건설 허용",
     "shapeEditFailed": "형상 저장에 실패했습니다",
     "expandNoCandidates": "결합할 수 있는 인접 구획이 없습니다",
     "expandFailed": "구획 결합에 실패했습니다",

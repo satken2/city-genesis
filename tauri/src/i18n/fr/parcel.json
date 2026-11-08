@@ -22,6 +22,7 @@
     "frontPathNoCandidates": "Aucune rue ne peut servir de voie de desserte",
     "frontPathSaveError": "Échec du changement de voie de desserte",
     "owner": "Propriétaire",
+    "allowPrivateConstruction": "Autoriser la construction privée",
     "shapeEditFailed": "Échec de l'enregistrement de la forme",
     "expandNoCandidates": "Aucune parcelle adjacente ne peut être fusionnée",
     "expandFailed": "Échec de la fusion des parcelles",

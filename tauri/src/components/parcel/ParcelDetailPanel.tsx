@@ -9,6 +9,7 @@ import { describeError } from "../../utils/errors";
  * Displays parcel header (icon, status, name) and attributes.
  *
  * Editable fields:
+ * - allow_private_construction: whether private developers may build here (saved as soon as it is toggled).
  * - restriction_override: whether to override district building regulations individually.
  * - allowed_bd_mask: bitmask of buildable building types.
  * - limit_coverage_ratio: coverage limit (0-1 in API, % in inputs).
@@ -160,6 +161,10 @@ export function ParcelDetailPanel({
   const [frontPathSaving, setFrontPathSaving] = useState(false);
   /** Facing-path save error. */
   const [frontPathSaveError, setFrontPathSaveError] = useState<string | null>(null);
+  /** Whether a private-construction permission change is being saved. */
+  const [privateSaving, setPrivateSaving] = useState(false);
+  /** Private-construction permission save error. */
+  const [privateSaveError, setPrivateSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -363,6 +368,31 @@ export function ParcelDetailPanel({
       setFrontPathSaveError(describeError(err));
     } finally {
       setFrontPathSaving(false);
+    }
+  }
+
+  /**
+ * Save the private-construction permission as soon as the checkbox changes,
+ * independently of regulation and facing-path saving.
+ */
+  async function handleTogglePrivateConstruction(allowed: boolean) {
+    if (!parcelData) return;
+    setPrivateSaving(true);
+    setPrivateSaveError(null);
+    try {
+      const updated = await fetchApi<ParcelData>(
+        buildApiUrl(apiBaseUrl, `/api/v1/parcels/${parcelData.parcel_id}`),
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ allow_private_construction: allowed }),
+        }
+      );
+      setParcelData(updated);
+    } catch (err) {
+      setPrivateSaveError(describeError(err, t));
+    } finally {
+      setPrivateSaving(false);
     }
   }
 
@@ -590,6 +620,17 @@ export function ParcelDetailPanel({
               </span>
             </>
           )}
+
+          <span className="agent-detail-label">{t("parcel.allowPrivateConstruction")}</span>
+          <span className="agent-detail-value">
+            <input
+              type="checkbox"
+              checked={Boolean(parcelData.allow_private_construction)}
+              disabled={privateSaving}
+              onChange={(e) => void handleTogglePrivateConstruction(e.target.checked)}
+            />
+            {privateSaveError && <span className="parcel-save-error">{privateSaveError}</span>}
+          </span>
         </div>
       </section>
 

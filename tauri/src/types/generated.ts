@@ -588,6 +588,8 @@ export type ParcelData = {
   restriction_override: boolean;
   /** その土地区画を買収中かどうか */
   under_acquisition: boolean;
+  /** 民間がこの区画に建物を建てられるか。公共施設の敷地になるとfalseになり、プレイヤーが変更できる */
+  allow_private_construction: boolean;
   /** 建築可能な建物カテゴリのビットフラグ（bd_type値のOR） */
   allowed_bd_mask: number;
   /** 建蔽率の上限 */

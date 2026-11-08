@@ -9,6 +9,7 @@ The district outline on the map represents its roads and parcels. Membership dep
 ## 4.2. Parcels
 
 Parcels are units of land ownership and use. Every building occupies a parcel. Parcels have owners and land prices, and using private land for public works involves acquisition and compensation. Land prices reflect demand for the land and nearby rents.
+Each parcel records whether private construction is allowed (`allow_private_construction`). A newly created parcel allows it, but once the parcel becomes the site of a public facility it no longer does, and it remains city land where no private building is built even after the facility is gone. The player can switch this per parcel.
 
 Parcels have three categories based on their relationship to the coastline. Buildings require compatible parcel types: ports use shore parcels, and offshore structures use water parcels.
 

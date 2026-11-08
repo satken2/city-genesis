@@ -22,6 +22,7 @@
     "frontPathNoCandidates": "No street available as a front road",
     "frontPathSaveError": "Failed to change the front road",
     "owner": "Owner",
+    "allowPrivateConstruction": "Allow private construction",
     "shapeEditFailed": "Failed to save the parcel shape",
     "expandNoCandidates": "There are no adjacent parcels that can be merged",
     "expandFailed": "Failed to merge the parcels",

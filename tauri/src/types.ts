@@ -357,6 +357,8 @@ export type ParcelData = {
   restriction_override: boolean;
   /** Whether under acquisition negotiation with the city government for road construction, etc. Remains privately owned until agreement. */
   under_acquisition: boolean;
+  /** Whether private developers may build here. Turns off when the parcel becomes a public facility site; the player can toggle it. */
+  allow_private_construction: boolean;
   allowed_bd_mask: number;
   limit_coverage_ratio: number | null;
   limit_volume_ratio: number | null;

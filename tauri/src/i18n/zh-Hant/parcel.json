@@ -22,6 +22,7 @@
     "frontPathNoCandidates": "找不到可指定為臨街道路的街道",
     "frontPathSaveError": "臨街道路變更失敗",
     "owner": "所有者",
+    "allowPrivateConstruction": "允許民間建設",
     "shapeEditFailed": "形狀儲存失敗",
     "expandNoCandidates": "沒有可合併的相鄰地塊",
     "expandFailed": "地塊合併失敗",

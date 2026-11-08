@@ -609,6 +609,8 @@ namespace GeneratedModels
         public bool restriction_override;
         /// <summary>その土地区画を買収中かどうか</summary>
         public bool under_acquisition;
+        /// <summary>民間がこの区画に建物を建てられるか。公共施設の敷地になるとfalseになり、プレイヤーが変更できる</summary>
+        public bool allow_private_construction;
         /// <summary>建築可能な建物カテゴリのビットフラグ（bd_type値のOR）</summary>
         public int allowed_bd_mask;
         /// <summary>建蔽率の上限</summary>

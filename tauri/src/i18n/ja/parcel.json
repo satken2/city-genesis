@@ -22,6 +22,7 @@
     "frontPathNoCandidates": "接道に指定できる街路が見つかりません",
     "frontPathSaveError": "接道の変更に失敗しました",
     "owner": "所有者",
+    "allowPrivateConstruction": "民間の建設を許可",
     "shapeEditFailed": "形状の保存に失敗しました",
     "expandNoCandidates": "結合できる隣接区画がありません",
     "expandFailed": "区画の結合に失敗しました",
