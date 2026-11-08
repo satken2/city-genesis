@@ -25,7 +25,7 @@ Wings stack parts such as `mashup-{model_prefix}-base-prebuilt`, but keep each t
 
 ## Ground assets and open spaces
 
-Ground assets (`MODEL_MODULAR_GROUND`) serve fields, gardens, and paved squares without a building body. Fences and ground panels cover the parcel, actual-size tiles fill the positions that fit inside it, and the parcel also supplies selection geometry. The building footprint is used when the parcel is unavailable.
+Ground assets (`MODEL_MODULAR_GROUND`) serve fields, gardens, and paved squares without a building body. Fences and ground panels cover the parcel, actual-size tiles fill the positions that fit inside it on a grid along the footprint's front edge, and the parcel also supplies selection geometry. Tiles take the same heading as the distant model. The building footprint is used when the parcel is unavailable.
 
 Parking (`MODEL_PARKING`), station rotaries (`MODEL_ROTARY`), and parks (`MODEL_PARK`) derive layout plans from parcels and combine terrain-following surfaces with actual-size objects. Surfaces use materials such as `site_asphalt` and `site_grass`; objects use models such as `site_bench` and `site_tree`. Other open spaces, including paved squares or multistory parking, still follow their master's ground or modular `model_type`.
 

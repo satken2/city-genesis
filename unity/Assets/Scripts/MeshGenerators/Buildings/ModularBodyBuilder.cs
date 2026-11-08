@@ -546,7 +546,7 @@ public static class ModularBodyBuilder
         // --- Tile objects ---
         if (tilePolygon != null && tilePolygon.Length >= 3)
         {
-            GenerateTiles(tilePolygon, prefix, suffix, centerPointWorld, deformToTerrain,
+            GenerateTiles(tilePolygon, frontFootprint, prefix, suffix, centerPointWorld, deformToTerrain,
                           combineInstances, allMaterials, temporaryMeshes);
         }
 
@@ -705,14 +705,20 @@ public static class ModularBodyBuilder
         mesh.RecalculateBounds();
     }
 
+    /// <summary>Corners on the polygon's edge (rows flush with the front edge) are tested this far inside so float error does not drop them.</summary>
+    private const float TILE_CORNER_INSET = 0.01f;
+
     /// <summary>
     /// MODEL_MODULAR_GROUND only. Tile the footprint area with tile parts.
-    /// Do not rescale models; place them on grid positions fitting inside the polygon.
+    /// The grid takes the distant model's heading (<see cref="BuildingRoadAccess.PrebuiltRotation"/> of front's vertex 0→1 edge), so near and
+    /// distant views agree; rows run flush along the front edge. Without front, the polygon's own edge is used.
+    /// Do not rescale models; keep the grid positions whose four corners lie inside the polygon.
     /// With isDynamic, deform to terrain after placement.
     /// Do nothing if no tile part exists (only fences/ground panels render).
     /// </summary>
     private static void GenerateTiles(
         Vector2[] polygon,
+        Vector2[] front,
         string prefix,
         int suffix,
         Vector3 centerPointWorld,
@@ -774,25 +780,35 @@ public static class ModularBodyBuilder
 
         Material[] tileMaterials = BuildingMeshUtils.GetModuleMaterials(tileModule);
 
+        if (front == null || front.Length < 2) front = polygon;
+        Quaternion rotation = BuildingRoadAccess.PrebuiltRotation(front);
+        Vector2 frontEdge = front[1] - front[0];
+        float frontLength = frontEdge.magnitude;
+        // Center the front row on the front edge; anchoring at a corner that is not square would cut off the first column of long tiles.
+        // The 1 mm allowance keeps an edge that is an exact multiple of the tile from flipping between no margin and a half-tile shift.
+        float frontMargin = frontLength - Mathf.FloorToInt((frontLength + 0.001f) / stepZ) * stepZ;
+        Vector2 origin = front[0] + frontEdge.normalized * (frontMargin * 0.5f);
+        Matrix4x4 grid = Matrix4x4.TRS(new Vector3(origin.x, 0f, origin.y), rotation, Vector3.one);
+        Matrix4x4 toGrid = grid.inverse;
+
         float minX = float.MaxValue, maxX = float.MinValue;
         float minZ = float.MaxValue, maxZ = float.MinValue;
         foreach (Vector2 p in polygon)
         {
-            if (p.x < minX) minX = p.x;
-            if (p.x > maxX) maxX = p.x;
-            if (p.y < minZ) minZ = p.y;
-            if (p.y > maxZ) maxZ = p.y;
+            Vector3 local = toGrid.MultiplyPoint3x4(new Vector3(p.x, 0f, p.y));
+            minX = Mathf.Min(minX, local.x);
+            maxX = Mathf.Max(maxX, local.x);
+            minZ = Mathf.Min(minZ, local.z);
+            maxZ = Mathf.Max(maxZ, local.z);
         }
+        int firstColumn = Mathf.FloorToInt(minX / stepX), lastColumn = Mathf.FloorToInt((maxX + 0.001f) / stepX) - 1;
+        int firstRow = Mathf.FloorToInt(minZ / stepZ), lastRow = Mathf.FloorToInt((maxZ + 0.001f) / stepZ) - 1;
 
         // Estimate tile count from land area; skip excessive counts to prevent freezing.
-        float widthX = maxX - minX;
-        float widthZ = maxZ - minZ;
-        float stepsX = widthX / stepX;
-        float stepsZ = widthZ / stepZ;
-        long estimatedTiles = (long)Mathf.Ceil(stepsX) * (long)Mathf.Ceil(stepsZ);
+        long estimatedTiles = (long)Mathf.Max(0, lastColumn - firstColumn + 1) * Mathf.Max(0, lastRow - firstRow + 1);
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
-            () => $"[MBB] GenerateTiles: prefix={prefix}, suffix={suffix}, tileMeshSize={meshSize}, AABB=({widthX:F2}x{widthZ:F2}), steps=({stepsX:F1}x{stepsZ:F1}), estimatedTiles={estimatedTiles}, isDynamic={isDynamic}");
+            () => $"[MBB] GenerateTiles: prefix={prefix}, suffix={suffix}, tileMeshSize={meshSize}, gridExtent=({maxX - minX:F2}x{maxZ - minZ:F2}), heading={rotation.eulerAngles.y:F1}, estimatedTiles={estimatedTiles}, isDynamic={isDynamic}");
 
         if (estimatedTiles > 10000)
         {
@@ -805,7 +821,7 @@ public static class ModularBodyBuilder
 
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
             $"[MBB] タイル配置開始: meshSize=({meshSize.x:F3},{meshSize.y:F3},{meshSize.z:F3}), " +
-            $"AABB=({minX:F3},{minZ:F3})-({maxX:F3},{maxZ:F3}), isDynamic={isDynamic}");
+            $"grid=({minX:F3},{minZ:F3})-({maxX:F3},{maxZ:F3}), isDynamic={isDynamic}");
 
         bool canDeform = isDynamic && sourceMesh.isReadable;
         if (isDynamic && !sourceMesh.isReadable)
@@ -813,20 +829,26 @@ public static class ModularBodyBuilder
             Debug.LogWarning($"[MBB] tile mesh '{sourceMesh.name}' is not readable. Terrain deformation skipped.");
         }
 
-        for (float gx = minX; gx + stepX <= maxX + 0.001f; gx += stepX)
+        bool Inside(float x, float z)
         {
-            for (float gz = minZ; gz + stepZ <= maxZ + 0.001f; gz += stepZ)
+            Vector3 p = grid.MultiplyPoint3x4(new Vector3(x, 0f, z));
+            return PolygonUtils.Contains(polygon, new Vector2(p.x, p.z));
+        }
+
+        for (int column = firstColumn; column <= lastColumn; column++)
+        {
+            for (int row = firstRow; row <= lastRow; row++)
             {
-                if (!PolygonUtils.Contains(polygon, new Vector2(gx, gz))
-                    || !PolygonUtils.Contains(polygon, new Vector2(gx + stepX, gz))
-                    || !PolygonUtils.Contains(polygon, new Vector2(gx + stepX, gz + stepZ))
-                    || !PolygonUtils.Contains(polygon, new Vector2(gx, gz + stepZ)))
+                float gx = column * stepX, gz = row * stepZ;
+                float x0 = gx + TILE_CORNER_INSET, x1 = gx + stepX - TILE_CORNER_INSET;
+                float z0 = gz + TILE_CORNER_INSET, z1 = gz + stepZ - TILE_CORNER_INSET;
+                if (!Inside(x0, z0) || !Inside(x1, z0) || !Inside(x1, z1) || !Inside(x0, z1))
                 {
                     continue;
                 }
 
                 // Align the minimum bounding-box corner, not origin, to grid corner/ground. Underground extensions raise the entire tile by their depth.
-                Vector3 offset = new Vector3(gx - meshMin.x, GROUND_OFFSET - meshMin.y, gz - meshMin.z);
+                Matrix4x4 matrix = grid * Matrix4x4.Translate(new Vector3(gx - meshMin.x, GROUND_OFFSET - meshMin.y, gz - meshMin.z));
 
                 if (canDeform)
                 {
@@ -834,7 +856,7 @@ public static class ModularBodyBuilder
                     Vector3[] vertices = meshInstance.vertices;
                     for (int v = 0; v < vertices.Length; v++)
                     {
-                        vertices[v] += offset;
+                        vertices[v] = matrix.MultiplyPoint3x4(vertices[v]);
                     }
                     meshInstance.vertices = vertices;
                     meshInstance.RecalculateNormals();
@@ -851,7 +873,6 @@ public static class ModularBodyBuilder
                 }
                 else
                 {
-                    Matrix4x4 matrix = Matrix4x4.Translate(offset);
                     int subMeshCount = sourceMesh.subMeshCount;
                     for (int subMeshIndex = 0; subMeshIndex < subMeshCount; subMeshIndex++)
                     {
