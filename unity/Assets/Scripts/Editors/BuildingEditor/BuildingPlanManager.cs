@@ -25,6 +25,9 @@ public partial class BuildingPlanManager : MonoBehaviour
     /// </summary>
     public static int SelectedParcelType { get; private set; }
 
+    /// <summary>Variant selected in construction mode; 0 outside construction mode. Read by <see cref="VariantSiteGlowOverlay"/>.</summary>
+    public static int SelectedVariant { get; private set; }
+
     /// <summary>
     /// Required water depth just outside the quay (m) of the selected construction variant (agent_master.berth_depth); 0 means none.
     /// Paired with <see cref="SelectedParcelType"/> so highlighting and click validation apply the backend's site rule.
@@ -199,6 +202,7 @@ public partial class BuildingPlanManager : MonoBehaviour
     public void SetBuildingVariant(int variant)
     {
         agentVariant = variant;
+        SelectedVariant = variant;
         // Landmarks are selected only in scenario authoring mode, so clear the selection when the variant changes.
         currentLandmark = 0;
 
@@ -442,6 +446,7 @@ public partial class BuildingPlanManager : MonoBehaviour
         // do not retain the parcel type of the previous variant.
         SelectedParcelType = 0;
         SelectedBerthDepth = 0f;
+        SelectedVariant = 0;
 
         // Reset the current construction values to defaults.
         currentFloors = defaultFloors;

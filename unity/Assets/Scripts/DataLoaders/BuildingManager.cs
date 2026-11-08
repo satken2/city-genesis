@@ -229,8 +229,9 @@ public class BuildingManager : BaseApiDataManager
         BuildingMeshUtils.InitializeCache();
         TerrainManager.OnTerrainTileReady += OnTerrainTileReadyHandler;
         ReclaimedLandManager.OnContentChanged += OnReclaimedLandsChanged;
-        // Prepare the light overlay for public facility highlighting (persistent rendering that references building data).
+        // Prepare the site light overlays (persistent rendering that references building data).
         PublicFacilityGlowOverlay.Ensure();
+        VariantSiteGlowOverlay.Ensure();
         // Persistent worker processing detail meshes deferred because they were outside the view.
         RenderWorkScheduler.Start(this, DetailGenerationWorker(), "BuildingManager", () => HasPendingInitialDetails);
         // Persistent worker reevaluating per-building render LOD as the camera moves.
