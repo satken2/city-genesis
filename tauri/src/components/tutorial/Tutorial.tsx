@@ -15,7 +15,7 @@
  *
  * Visibility:
  * - Rust controls display through tutorial.show() and tutorial:show.
- * - On game exit, Rust calls hide() and emits tutorial:hide.
+ * - On game exit or when any city starts loading, Rust calls hide() and emits tutorial:hide.
  * - session-state supplies only API URL/save ID; repeated polling events with the same save ID do not restore
  *   progress.
  */

@@ -91,7 +91,10 @@ function observeBackend(success: boolean): boolean {
   return true;
 }
 
-/** ロード要求の世代を進め、前のセッションの完了通知を無視する。 */
+/**
+ * ロード要求の世代を進め、前のセッションの完了通知を無視する。
+ * チュートリアル窓は表示中ずっと開いている都市を案内し続けるので、ここで隠し、新しいセッションが教材のときだけ showGameControls が出し直す。
+ */
 export function beginInitialLoading(needsSetup: boolean): void {
   cancelEpochPresentation();
   state.loadingId += 1;
@@ -105,6 +108,8 @@ export function beginInitialLoading(needsSetup: boolean): void {
   state.introDialog = null;
   setHudVisible(false);
   host.hide("hintbar");
+  host.hide("tutorial");
+  emit("tutorial:hide", null);
   try {
     sendUiAction("", null, "game:loading", {});
     openTipsWindow();

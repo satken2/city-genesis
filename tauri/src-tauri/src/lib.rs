@@ -1183,6 +1183,8 @@ async fn resize_notification_window(
 }
 
 /// Advance the load request generation and ignore completion notifications from the previous session.
+/// The tutorial window keeps guiding whichever city is open while shown, so it is hidden here and shown again
+/// by show_game_controls only when the new session is a tutorial.
 fn begin_initial_loading(app: &tauri::AppHandle, state: &SharedState, needs_setup: bool) -> Result<(), String> {
     window::cancel_epoch_presentation(app, state);
     {
@@ -1199,6 +1201,8 @@ fn begin_initial_loading(app: &tauri::AppHandle, state: &SharedState, needs_setu
     }
     window::set_hud_visible(app, false);
     if let Some(hintbar) = app.get_webview_window("hintbar") { let _ = hintbar.hide(); }
+    if let Some(tutorial) = app.get_webview_window("tutorial") { let _ = tutorial.hide(); }
+    let _ = app.emit("tutorial:hide", ());
     let result = ipc::send_ui_action(state, "".into(), None, "game:loading".into(), serde_json::json!({}))
         .and_then(|_| window::open_tips_window(app, state));
     if result.is_err() { abort_initial_loading(app, state); }
