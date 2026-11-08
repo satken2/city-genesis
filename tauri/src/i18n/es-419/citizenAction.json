@@ -13,6 +13,8 @@
     },
     "expel": {
       "label": "Desearle mucho éxito fuera de la ciudad",
+      "message": "¿Expulsar a {{name}} de la ciudad?",
+      "confirm": "Expulsar",
       "results": {
         "0": "{{name}} empacó sus cosas y dejó la ciudad en silencio. Nadie fue a despedirse.",
         "1": "{{name}} cruzó el límite de la ciudad gritando: «¡No vuelvo nunca más!».",
@@ -26,6 +28,8 @@
     },
     "relocate": {
       "label": "Sugerir un nuevo hogar",
+      "message": "¿Desalojar al hogar de {{name}} de su vivienda actual?\nBuscará una nueva vivienda en el próximo período.",
+      "confirm": "Desalojar",
       "results": {
         "0": "La familia de {{name}} fue echada de su casa. Sus muebles están apilados junto a la calle.",
         "1": "Cambiaron la cerradura de la casa de {{name}}. La familia ya busca un nuevo lugar.",

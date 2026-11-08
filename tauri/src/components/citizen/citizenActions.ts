@@ -4,8 +4,7 @@
  * The core carries out each action at once (`/api/v1/citizens/{id}/<action>`).
  * - Reward and donation ask for the amount in the confirmation window, up to the payer's cash: the city's for a
  *   reward, the household's for a donation.
- * - Expel and relocate run without confirmation and report the result with only an OK button, one of several
- *   lines picked at random.
+ * - 追放と転居は実行前に確認し、完了後はランダムに選んだ結果を通知する。
  */
 import type { TFunction } from "i18next";
 import { emit } from "@tauri-apps/api/event";
@@ -13,7 +12,7 @@ import { emit } from "@tauri-apps/api/event";
 import type { AgentResponse } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { TRACKED_CITIZENS_CHANGED_EVENT } from "../../utils/citizenTracking";
-import { requestAmount, showNotice } from "../../utils/confirmDialog";
+import { requestAmount, requestConfirm, showNotice } from "../../utils/confirmDialog";
 import { resolveIntlLocale } from "../../utils/locale";
 import { formatExactAmount } from "../../utils/money";
 import rewardIcon from "../../assets/images/citizen-voice/reward.svg";
@@ -83,6 +82,14 @@ export async function runCitizenAction(
       await post(apiBaseUrl, target, action, { amount });
       return true;
     }
+    const confirmed = await requestConfirm({
+      titleKey: `citizenAction.${action}.label`,
+      message: t(`citizenAction.${action}.message`, { name: target.name }),
+      confirmLabel: t(`citizenAction.${action}.confirm`),
+      tone: "danger",
+    });
+    if (!confirmed) return false;
+
     await post(apiBaseUrl, target, action);
     if (action === "expel") await emit(TRACKED_CITIZENS_CHANGED_EVENT, { citizen_id: target.citizenId });
     await showNotice({ titleKey: `citizenAction.${action}.label`, message: randomResult(t, action, target.name) });

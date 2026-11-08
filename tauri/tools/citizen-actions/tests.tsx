@@ -106,10 +106,20 @@ assert.equal(dialogs().at(-1)!.amountMax, 0, "借金のある世帯には寄付�
 assert.equal(posts.length, 1, "取り消したら送らない");
 
 for (const action of ["expel", "relocate"] as const) {
-  const before = dialogs().length;
+  const dialogCount = dialogs().length;
+  const postCount = posts.length;
+  state.answer = { confirmed: false };
+  assert.equal(await run(action), false);
+  assert.equal(posts.length, postCount, "取り消したら送らない");
+  assert.equal(dialogs().length, dialogCount + 1, "取り消したら結果を出さない");
+  assert.equal(dialogs().at(-1)!.message, `citizenAction.${action}.message`);
+  assert.equal(dialogs().at(-1)!.confirmLabel, `citizenAction.${action}.confirm`);
+
+  state.answer = { confirmed: true };
   assert.equal(await run(action), true);
-  assert.deepEqual(posts.at(-1), { url: `http://core/api/v1/citizens/5/${action}`, body: undefined }, "確認なしで送る");
-  assert.equal(dialogs().length, before + 1);
+  assert.equal(posts.length, postCount + 1);
+  assert.deepEqual(posts.at(-1), { url: `http://core/api/v1/citizens/5/${action}`, body: undefined });
+  assert.equal(dialogs().length, dialogCount + 3);
   assert.equal(dialogs().at(-1)!.noticeOnly, true, "結果は OK だけのお知らせで出す");
   assert.match(dialogs().at(-1)!.message, new RegExp(`^citizenAction\\.${action}\\.results\\.[012]$`));
 }
@@ -118,6 +128,6 @@ assert.ok(state.emitted.some(({ event }) => event === "tracking:changed"), "追�
 rejectPosts = true;
 const before = dialogs().length;
 assert.equal(await run("relocate"), false);
-assert.equal(dialogs().length, before, "失敗したら結果を出さない");
+assert.equal(dialogs().length, before + 1, "失敗したら結果を出さない");
 
 console.log("PASS: amount, text and notice dialogs, citizen actions send, cancel and report results");

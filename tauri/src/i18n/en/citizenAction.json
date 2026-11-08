@@ -13,6 +13,8 @@
     },
     "expel": {
       "label": "Wish them every success outside the city",
+      "message": "Expel {{name}} from the city?",
+      "confirm": "Expel",
       "results": {
         "0": "{{name}} packed up and quietly left the city. Nobody came to see them off.",
         "1": "{{name}} crossed the city limits shouting, \"I'm never coming back!\"",
@@ -26,6 +28,8 @@
     },
     "relocate": {
       "label": "Suggest a new home",
+      "message": "Evict {{name}}'s household from their current home?\nThey will look for a new home in the next epoch.",
+      "confirm": "Evict",
       "results": {
         "0": "{{name}}'s family has been thrown out of their home. Their furniture is piled up by the road.",
         "1": "The locks on {{name}}'s home have been changed. The family has started looking for a new place.",
