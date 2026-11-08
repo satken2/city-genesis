@@ -43,6 +43,7 @@ public sealed class BuildingScatterRenderer : MonoBehaviour
         public Vector3 lastCamera = Vector3.positiveInfinity;
         public float lastProjection;
         public bool lastOrthographic;
+        public int lastDistanceVersion;
     }
 
     private sealed class Batch
@@ -160,7 +161,7 @@ public sealed class BuildingScatterRenderer : MonoBehaviour
         return changed;
     }
 
-    /// <summary>Resident worker reevaluating part LOD in groups the camera has moved relative to. Batches are rebuilt in LateUpdate.</summary>
+    /// <summary>Resident worker reevaluating part LOD in groups the camera has moved relative to, or all groups after a distance setting change. Batches are rebuilt in LateUpdate.</summary>
     private IEnumerator Worker()
     {
         var keys = new List<Vector2Int>();
@@ -178,10 +179,11 @@ public sealed class BuildingScatterRenderer : MonoBehaviour
                 float projection = DrawLodEvaluator.GetTanHalfFov(cam);
                 float move = DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE;
                 if ((position - group.lastCamera).sqrMagnitude < move * move && projection == group.lastProjection
-                    && cam.orthographic == group.lastOrthographic) continue;
+                    && cam.orthographic == group.lastOrthographic && group.lastDistanceVersion == GraphicsConfig.DistanceVersion) continue;
                 group.lastCamera = position;
                 group.lastProjection = projection;
                 group.lastOrthographic = cam.orthographic;
+                group.lastDistanceVersion = GraphicsConfig.DistanceVersion;
                 foreach (var member in group.members)
                     if (Evaluate(member, position, projection, cam.orthographic)) group.dirty = true;
                 if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return RenderWorkScheduler.Continue; timer.Restart(); }

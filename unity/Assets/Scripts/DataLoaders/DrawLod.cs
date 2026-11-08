@@ -24,6 +24,7 @@ public enum DrawLod
 /// Do not rely on distance alone, so rendering effort follows visible detail in overview, low views, and zoom.
 /// Separate promotion (approaching) and demotion (departing) thresholds prevent boundary oscillation (flicker).
 /// These are initial values intended for adjustment using phase 0 measurements.
+/// The Normal/Far switch follows GraphicsConfig.FarDistanceScale and the prop hiding distance follows GraphicsConfig.PropDistanceScale.
 /// </summary>
 public static class DrawLodConfig
 {
@@ -38,9 +39,9 @@ public static class DrawLodConfig
     public const float CLOSE_MAX_DISTANCE = 50f;
     /// <summary>Maximum distance (m) for keeping Close once shown.</summary>
     public const float CLOSE_EXIT_MAX_DISTANCE = CLOSE_MAX_DISTANCE * 1.15f;
-    /// <summary>Projected ratio promoting Far to Normal.</summary>
+    /// <summary>Projected ratio promoting Far to Normal at FarDistanceScale 1. LODGroups use the same ratios and follow the scale through QualitySettings.lodBias.</summary>
     public const float NORMAL_ENTER_RATIO = 0.045f;
-    /// <summary>Projected ratio demoting Normal to Far.</summary>
+    /// <summary>Projected ratio demoting Normal to Far at FarDistanceScale 1.</summary>
     public const float NORMAL_EXIT_RATIO = 0.03f;
 
     /// <summary>
@@ -49,16 +50,16 @@ public static class DrawLodConfig
     /// </summary>
     public const float PATH_CLOSE_ENTER_DISTANCE = 50f;
     public const float PATH_CLOSE_EXIT_DISTANCE = 65f;
-    public const float PATH_NORMAL_ENTER_DISTANCE = 450f;
-    public const float PATH_NORMAL_EXIT_DISTANCE = 550f;
+    public static float PathNormalEnterDistance => 450f * GraphicsConfig.FarDistanceScale;
+    public static float PathNormalExitDistance => 550f * GraphicsConfig.FarDistanceScale;
 
     /// <summary>
     /// Actual camera distance (m) beyond which props become Hidden. Use actual distance rather than projected ratio
     /// to exclude entire distant forests within the resident range (up to beyond ±2km) without adding low-poly models.
     /// Use actual distance for orthographic views too (hide more as the top-down camera rises). Separate entry/exit thresholds prevent flicker.
     /// </summary>
-    public const float PROP_HIDDEN_ENTER_DISTANCE = 1500f;
-    public const float PROP_HIDDEN_EXIT_DISTANCE = 1350f;
+    public static float PropHiddenEnterDistance => 1500f * GraphicsConfig.PropDistanceScale;
+    public static float PropHiddenExitDistance => 1350f * GraphicsConfig.PropDistanceScale;
 
     /// <summary>Tolerance when comparing clipping ranges in compatibility calls.</summary>
     public const float PATH_DETAIL_RANGE_REBUILD_TOLERANCE = 0.1f;
@@ -113,9 +114,11 @@ public static class DrawLodEvaluator
             : ratio >= DrawLodConfig.CLOSE_ENTER_RATIO && distance <= DrawLodConfig.CLOSE_MAX_DISTANCE);
         if (closeNow) return DrawLod.Close;
 
+        // The projected ratio falls in inverse proportion to distance, so this multiplication moves the Normal/Far boundary FarDistanceScale times farther.
+        float farRatio = ratio * GraphicsConfig.FarDistanceScale;
         bool normalNow = current >= DrawLod.Normal
-            ? ratio >= DrawLodConfig.NORMAL_EXIT_RATIO
-            : ratio >= DrawLodConfig.NORMAL_ENTER_RATIO;
+            ? farRatio >= DrawLodConfig.NORMAL_EXIT_RATIO
+            : farRatio >= DrawLodConfig.NORMAL_ENTER_RATIO;
         return normalNow ? DrawLod.Normal : DrawLod.Far;
     }
 
@@ -130,8 +133,8 @@ public static class DrawLodEvaluator
         if (closeNow) return DrawLod.Close;
 
         bool normalNow = current >= DrawLod.Normal
-            ? distance <= DrawLodConfig.PATH_NORMAL_EXIT_DISTANCE
-            : distance <= DrawLodConfig.PATH_NORMAL_ENTER_DISTANCE;
+            ? distance <= DrawLodConfig.PathNormalExitDistance
+            : distance <= DrawLodConfig.PathNormalEnterDistance;
         return normalNow ? DrawLod.Normal : DrawLod.Far;
     }
 
@@ -142,8 +145,8 @@ public static class DrawLodEvaluator
     public static bool PropHiddenByDistance(float distance, DrawLod current)
     {
         return current == DrawLod.Hidden
-            ? distance >= DrawLodConfig.PROP_HIDDEN_EXIT_DISTANCE
-            : distance >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE;
+            ? distance >= DrawLodConfig.PropHiddenExitDistance
+            : distance >= DrawLodConfig.PropHiddenEnterDistance;
     }
 
     /// <summary>

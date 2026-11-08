@@ -37,7 +37,7 @@ Use `Utils.GetGroundHeight` for CPU ground queries. It returns visible tile heig
 
 ## Object draw LOD
 
-Buildings and roads choose Close, Normal, or Far individually; props also support Hidden. Buildings use screen size, roads use distance to their anchor polyline, and props use both screen size and actual distance. Different promotion and demotion thresholds prevent oscillation. Expensive Close assembly is limited to a few nearby objects. Values live in `DrawLodConfig`. See [building meshes](F_building-meshes.md) for building parts and [road meshes](G_road-meshes.md) for far roads.
+Buildings and roads choose Close, Normal, or Far individually; props also support Hidden. Buildings use screen size, roads use distance to their anchor polyline, and props use both screen size and actual distance. Different promotion and demotion thresholds prevent oscillation. Expensive Close assembly is limited to a few nearby objects. Values live in `DrawLodConfig`; the distance for switching to Far and the distance beyond which props are not drawn scale with multipliers in the player's graphics settings. See [building meshes](F_building-meshes.md) for building parts and [road meshes](G_road-meshes.md) for far roads.
 
 Promotion from Far waits until the terrain tile beneath a building or crossed by a road is published, avoiding immediate reconstruction of detailed shapes built on coarse citywide elevation. Long normal roads divide surfaces into fixed spline sections with independent draw LOD.
 

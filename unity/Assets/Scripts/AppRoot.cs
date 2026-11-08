@@ -27,6 +27,7 @@ public class AppRoot : MonoBehaviour
 #endif
         GraphicsConfig.Load();
         GraphicsConfig.ApplyAmbientOcclusion();
+        GraphicsConfig.ApplyDistances();
         DontDestroyOnLoad(gameObject); 
     }
 

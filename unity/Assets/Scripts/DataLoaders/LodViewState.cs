@@ -1,6 +1,9 @@
 using UnityEngine;
 
-/// <summary>Camera change detection state. Use Update for fetch ranges/view checks, UpdateProjection for projected LOD, and UpdatePosition for distance LOD.</summary>
+/// <summary>
+/// Camera change detection state. Use Update for fetch ranges/view checks, UpdateProjection for projected LOD, and UpdatePosition for distance LOD.
+/// The LOD checks also report a change when GraphicsConfig.DistanceVersion advances, because the thresholds moved.
+/// </summary>
 public struct LodViewState
 {
     private bool initialized;
@@ -9,14 +12,17 @@ public struct LodViewState
     private float projection, aspect;
     private int pixels;
     private bool orthographic;
+    private int distanceVersion;
 
     /// <summary>For road LOD based only on distance. Rotation and projection changes do not affect distance.</summary>
     public bool UpdatePosition(Camera camera, float moveThreshold = 4f)
     {
         if (camera == null) return false;
-        if (initialized && (camera.transform.position-position).sqrMagnitude < moveThreshold*moveThreshold) return false;
+        if (initialized && distanceVersion == GraphicsConfig.DistanceVersion
+            && (camera.transform.position-position).sqrMagnitude < moveThreshold*moveThreshold) return false;
         initialized = true;
         position = camera.transform.position;
+        distanceVersion = GraphicsConfig.DistanceVersion;
         return true;
     }
 
@@ -28,13 +34,15 @@ public struct LodViewState
     {
         if (camera == null) return false;
         float nextProjection = camera.orthographic ? camera.orthographicSize : camera.fieldOfView;
-        bool changed = !initialized || (camera.transform.position-position).sqrMagnitude >= moveThreshold*moveThreshold
+        bool changed = !initialized || distanceVersion != GraphicsConfig.DistanceVersion
+            || (camera.transform.position-position).sqrMagnitude >= moveThreshold*moveThreshold
             || Mathf.Abs(projection-nextProjection) > 0.01f || orthographic != camera.orthographic;
         if (!changed) return false;
         initialized = true;
         position = camera.transform.position;
         projection = nextProjection;
         orthographic = camera.orthographic;
+        distanceVersion = GraphicsConfig.DistanceVersion;
         return true;
     }
 

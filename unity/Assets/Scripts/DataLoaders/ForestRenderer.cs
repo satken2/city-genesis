@@ -6,7 +6,7 @@ using UnityEngine.Rendering;
 /// <summary>Generate area-placed trees on the GPU. Retain only areas and patches on the CPU.</summary>
 public sealed class ForestRenderer : IDisposable
 {
-    public const float DetailDistance = 100f;
+    public static float DetailDistance => 100f * GraphicsConfig.FarDistanceScale; // Distance where trees switch from normal to far models.
     public const float TransitionWidth = 20f;
     public const int CandidateBudget = 2000000;
     readonly ComputeShader compute;
@@ -174,13 +174,13 @@ public sealed class ForestRenderer : IDisposable
         bool shadows = castShadows && PropRenderPolicy.WithinShadowDistance(p.bounds, camera.transform.position);
         if (!shadows && !GeometryUtility.TestPlanesAABB(planes, p.bounds)) return 0;
         float nearest = Mathf.Sqrt(p.bounds.SqrDistance(camera.transform.position));
-        if (nearest > DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE + p.model.Radius) return 0;
+        if (nearest > DrawLodConfig.PropHiddenEnterDistance + p.model.Radius) return 0;
         var properties = p.properties;
         properties.SetBuffer("_ForestPoints", p.points);
         properties.SetVector("_ForestCamera", camera.transform.position);
         properties.SetFloat("_DetailDistance", DetailDistance);
         properties.SetFloat("_TransitionWidth", TransitionWidth);
-        properties.SetFloat("_MaxDistance", DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE);
+        properties.SetFloat("_MaxDistance", DrawLodConfig.PropHiddenEnterDistance);
         int draws = 0;
         // Near and Far use the same fixed random values when switching, avoiding duplicate rendering or boundary bands.
         if (nearest < DetailDistance + TransitionWidth * .5f)

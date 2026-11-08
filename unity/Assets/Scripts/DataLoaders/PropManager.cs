@@ -143,6 +143,7 @@ public class PropManager : BaseApiDataManager
         public int revision;
         public Vector3 lastCamera = Vector3.positiveInfinity;
         public float lastProjection;
+        public int lastDistanceVersion;
         public Vector3 offset;
         public bool far;
         public bool hidden;      // Entire patch is beyond the distance entry threshold and all points are Hidden
@@ -163,6 +164,7 @@ public class PropManager : BaseApiDataManager
     private Vector3 lastPassCamera = Vector3.positiveInfinity, lastPassOffset;
     private float lastPassProjection;
     private bool lastPassOrtho;
+    private int lastPassDistanceVersion;
     // Per-frame GPU forest generated-point limit, avoiding concentrated compute dispatches in one frame.
     private const int ForestDispatchBudget = 262144;
     private int dispatchFrame = -1, dispatched;
@@ -622,7 +624,7 @@ public class PropManager : BaseApiDataManager
                     if (Blocked(sample.position, patch.model.Clearance(sample.scale), chunk.spec.obstacles, scatter.data.allow_water, sample.waterRank)) continue;
                     var position = new Vector3(sample.position.x, 0, sample.position.y); position.y = Height(position);
                     var cam = Camera.main;
-                    if (cam != null && Vector3.Distance(position + offset, cam.transform.position) >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE) continue;
+                    if (cam != null && Vector3.Distance(position + offset, cam.transform.position) >= DrawLodConfig.PropHiddenEnterDistance) continue;
                     var bounds = Utils.TransformBounds(patch.model.bounds,
                         Matrix4x4.TRS(position + offset, Quaternion.Euler(0,sample.rotation,0),Vector3.one*sample.scale));
                     if (!bounds.IntersectRay(ray, out float distance) || distance >= best) continue;
@@ -770,9 +772,10 @@ public class PropManager : BaseApiDataManager
             Vector3 passCamera = cam.transform.position, passOffset = Offset;
             float passProjection = DrawLodEvaluator.GetTanHalfFov(cam);
             bool passOrtho = cam.orthographic;
-            // With the same viewpoint as the last completed pass and no unprocessed patches, another pass changes nothing.
+            int passDistanceVersion = GraphicsConfig.DistanceVersion;
+            // With the same viewpoint and distance settings as the last completed pass and no unprocessed patches, another pass changes nothing.
             bool idle = passCamera == lastPassCamera && passOffset == lastPassOffset && passProjection == lastPassProjection
-                && passOrtho == lastPassOrtho && !HasPendingDrawWork;
+                && passOrtho == lastPassOrtho && passDistanceVersion == lastPassDistanceVersion && !HasPendingDrawWork;
             if (!idle)
             {
                 // Generation changes abort patch rebuilding midway, so do not mark that pass complete.
@@ -820,9 +823,10 @@ public class PropManager : BaseApiDataManager
                     float move = Mathf.Max(DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE, chunkDistance * 0.02f);
                     bool moved = (pos - chunk.lastCamera).sqrMagnitude >= move * move;
                     // Skip camera-movement rebuilds for patches hidden entirely by distance until they return inside the entry threshold.
-                    bool beyond = chunkDistance >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE;
+                    bool beyond = chunkDistance >= DrawLodConfig.PropHiddenEnterDistance;
                     if (chunk.hidden && beyond && !chunk.dirty && !chunk.heightDirty && chunk.offset == Offset) continue;
-                    if (chunk.dirty || chunk.heightDirty || chunk.offset != Offset || chunk.far != far || projection != chunk.lastProjection || moved)
+                    if (chunk.dirty || chunk.heightDirty || chunk.offset != Offset || chunk.far != far || projection != chunk.lastProjection || moved
+                        || chunk.lastDistanceVersion != GraphicsConfig.DistanceVersion)
                     {
                         if (chunk.heightDirty)
                         {
@@ -845,7 +849,10 @@ public class PropManager : BaseApiDataManager
                     if (timer.ElapsedMilliseconds > PerformanceConfig.SliceBudgetMs) { yield return RenderWorkScheduler.Continue; timer.Restart(); }
                 }
                 if (generation == passGeneration)
-                { lastPassCamera = passCamera; lastPassOffset = passOffset; lastPassProjection = passProjection; lastPassOrtho = passOrtho; }
+                {
+                    lastPassCamera = passCamera; lastPassOffset = passOffset; lastPassProjection = passProjection; lastPassOrtho = passOrtho;
+                    lastPassDistanceVersion = passDistanceVersion;
+                }
                 else lastPassCamera = Vector3.positiveInfinity;
             }
             for (int i = 1; i < DrawLodConfig.REEVALUATE_INTERVAL_FRAMES; i++) yield return null;
@@ -861,11 +868,12 @@ public class PropManager : BaseApiDataManager
         int revision = chunk.revision;
         Vector3 offset = Offset;
         Vector3 cameraPosition = cam.transform.position;
+        int distanceVersion = GraphicsConfig.DistanceVersion;
         var timer = System.Diagnostics.Stopwatch.StartNew();
         bool structural = chunk.dirty || chunk.offset != offset;
         bool changed = false;
         // XZ distance to the patch rectangle bounds actual point distances below; hide all points without individual checks beyond the entry threshold.
-        bool beyond = ChunkDistance(chunk, cameraPosition) >= DrawLodConfig.PROP_HIDDEN_ENTER_DISTANCE;
+        bool beyond = ChunkDistance(chunk, cameraPosition) >= DrawLodConfig.PropHiddenEnterDistance;
         int hiddenCount = 0;
         // Retain the starting array so budget truncation or near-scatter replacement midway cannot write LOD to different points.
         var points = chunk.points;
@@ -902,7 +910,7 @@ public class PropManager : BaseApiDataManager
             if (!committable) yield break;
             foreach (var batch in chunk.batches) batch.shadows = batch.shadowEligible && PropRenderPolicy.WithinShadowDistance(batch.bounds, cameraPosition);
             chunk.far = far; chunk.hidden = beyond; chunk.hiddenCount = hiddenCount;
-            chunk.lastCamera = cameraPosition; chunk.lastProjection = projection;
+            chunk.lastCamera = cameraPosition; chunk.lastProjection = projection; chunk.lastDistanceVersion = distanceVersion;
             yield break;
         }
         foreach (var list in groupScratch.Values) list.Clear();
@@ -948,7 +956,7 @@ public class PropManager : BaseApiDataManager
             chunk.batches.Clear(); chunk.batches.AddRange(batchScratch);
             chunk.dirty = false; chunk.offset = offset; chunk.far = far;
             chunk.hidden = beyond; chunk.hiddenCount = hiddenCount;
-            chunk.lastCamera = cameraPosition; chunk.lastProjection = projection;
+            chunk.lastCamera = cameraPosition; chunk.lastProjection = projection; chunk.lastDistanceVersion = distanceVersion;
         }
         batchScratch.Clear();
     }

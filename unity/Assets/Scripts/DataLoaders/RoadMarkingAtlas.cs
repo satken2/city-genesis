@@ -136,7 +136,7 @@ public sealed class RoadMarkingAtlas : MonoBehaviour
         cycle++; requests.Clear();
         GeometryUtility.CalculateFrustumPlanes(camera, planes);
         // Cell counts cannot limit density; use both spatial queries and frame budgets.
-        var nearby = new HashSet<RoadMarkingSurface>(spatial.Query(camera.transform.position, DrawLodConfig.PATH_NORMAL_EXIT_DISTANCE));
+        var nearby = new HashSet<RoadMarkingSurface>(spatial.Query(camera.transform.position, DrawLodConfig.PathNormalExitDistance));
         sliceWatch.Restart();
         foreach (var surface in nearby)
         {
@@ -149,7 +149,7 @@ public sealed class RoadMarkingAtlas : MonoBehaviour
             if (surface == null || !surface.isActiveAndEnabled || surface.Renderer == null || !surface.Renderer.enabled) continue;
             Bounds bounds = surface.Renderer.bounds;
             float distance = Mathf.Sqrt(bounds.SqrDistance(camera.transform.position));
-            if (distance > DrawLodConfig.PATH_NORMAL_EXIT_DISTANCE || !GeometryUtility.TestPlanesAABB(planes, bounds)) continue;
+            if (distance > DrawLodConfig.PathNormalExitDistance || !GeometryUtility.TestPlanesAABB(planes, bounds)) continue;
             surface.EnsureTable();
             foreach (var tile in surface.Tiles)
             {
