@@ -88,7 +88,36 @@ assert.ok(sanitationOnly.textContent.includes("下水・廃棄物処理"));
 const combined = render({ alert: constants.ALERT_AGENT_ON_FIRE, warning: facility | sanitation | infra });
 assert.equal(combined.querySelectorAll(".agent-detail-alert-card").length, 4,
   "既存の建物アラートと空間警告を併記する");
+for (const cause of [
+  constants.ALERT_AGENT_INFRA_DISCONNECTED,
+  constants.ALERT_AGENT_LABOR_SHORTAGE,
+  constants.ALERT_AGENT_MATERIAL_SHORTAGE,
+  constants.ALERT_AGENT_HIGH_SKILL_SHORTAGE,
+  constants.ALERT_AGENT_BUDGET_CAPPED,
+]) {
+  const explained = render({ alert: cause, warning: facility | sanitation | infra });
+  assert.equal(explained.querySelectorAll(".agent-detail-alert-card").length, 3,
+    "運営不能の原因と、衛生・インフラの独立した警告を残す");
+  assert.ok(!explained.textContent.includes(translations.agent.alerts.facilityWarning.title),
+    "原因を表示するときは運営不能の総括を重複表示しない");
+}
+const unexplained = render({ alert: undefined, warning: facility });
+assert.equal(unexplained.querySelectorAll(".agent-detail-alert-card").length, 1,
+  "原因ビットがない運営不能の警告は残す");
+assert.ok(unexplained.textContent.includes(translations.agent.alerts.facilityWarning.title));
+const multipleCauses = render({
+  alert: constants.ALERT_AGENT_MATERIAL_SHORTAGE | constants.ALERT_AGENT_LABOR_SHORTAGE,
+  warning: facility,
+});
+assert.equal(multipleCauses.querySelectorAll(".agent-detail-alert-card").length, 2,
+  "複数の原因はどちらも残す");
+const icon = props => render(props).querySelector(".agent-detail-alert-icon").getAttribute("src");
+assert.equal(new Set([
+  icon({ alert: constants.ALERT_AGENT_MATERIAL_SHORTAGE }),
+  icon({ alert: 0, warning: facility }),
+  icon({ alert: constants.ALERT_AGENT_BUDGET_CAPPED }),
+]).size, 3, "原材料不足・運営不能・予算不足を異なるアイコンで区別する");
 assert.equal(render({ alert: 0, warning: 0 }).innerHTML, "");
 assert.equal(render({ alert: sanitation, warning: 0 }).innerHTML, "",
   "alertとwarningのビット領域を混同しない");
-console.log("Agent alerts: API source, target IDs, sanitation-only and combined cards, cleared warnings OK");
+console.log("Agent alerts: API source, target IDs, combined cards, facility causes, distinct icons, cleared warnings OK");

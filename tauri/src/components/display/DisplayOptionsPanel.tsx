@@ -306,7 +306,7 @@ const ALERT_CARDS: { bit: number; icon: string; labelKey: string; iconFilter?: s
     .map((card) => ({ ...card, bit: card.bit << ALERT_PATH_MASK_SHIFT })),
   { bit: ALERT_DISPLAY_RUIN, icon: "alerts/rubble.png", labelKey: "display.alertDisplayRuin" },
   { bit: ALERT_DISPLAY_RESOURCE_WARNING, icon: "alerts/resource-warning.png", labelKey: "display.alertResourceWarning", iconFilter: "invert(1)" },
-  { bit: ALERT_DISPLAY_FACILITY_WARNING, icon: "alerts/bribery.png", labelKey: "display.alertFacilityWarning" },
+  { bit: ALERT_DISPLAY_FACILITY_WARNING, icon: "alerts/facility-inoperative.svg", labelKey: "display.alertFacilityWarning" },
   { bit: ALERT_DISPLAY_SANITATION_WARNING, icon: "alerts/sanitation.png", labelKey: "display.alertSanitationWarning" },
   { bit: ALERT_DISPLAY_INFRA_WARNING, icon: "alerts/electricity.png", labelKey: "display.alertInfraWarning" },
 ];

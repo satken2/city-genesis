@@ -15,7 +15,7 @@ Copy-Item -LiteralPath "$PSScriptRoot/AlertsQA.cs" -Destination "$qaRoot/Assets/
 Copy-Item -LiteralPath "$PSScriptRoot/TrafficAccidentsQA.cs" -Destination "$qaRoot/Assets/Editor" -Force
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Resources/Shaders" -Force | Out-Null
 Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/FireParticle.shader" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
-foreach ($name in @('sand-clock', 'sanitation', 'bribery', 'electricity', 'rubble')) {
+foreach ($name in @('sand-clock', 'sanitation', 'bribery', 'facility-inoperative', 'electricity', 'rubble')) {
     Copy-Item -LiteralPath "$unityRoot/Assets/Images/$name.png", "$unityRoot/Assets/Images/$name.png.meta" -Destination "$qaRoot/Assets/Images" -Force
 }
 Set-Content -LiteralPath "$qaRoot/Packages/manifest.json" -Value '{"dependencies":{"com.unity.render-pipelines.universal":"17.4.0","com.unity.nuget.newtonsoft-json":"3.2.2","com.unity.ugui":"2.0.0","com.unity.inputsystem":"1.19.0"}}'

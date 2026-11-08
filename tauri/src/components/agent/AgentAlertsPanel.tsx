@@ -7,8 +7,8 @@
  *
  * - Agent cards are defined in ALERT_CARDS, and spatial warnings in WARNING_CARDS.
  *   Text uses the i18n keys agent.alerts.<key>.
- * - This is independent of Unity billboard icons (ALERT_AGENT_ICON_BITS) and displays all bits,
- *   including production bottlenecks exclusive to the detail panel.
+ * - Unity のビルボード表示とは独立し、詳細画面専用の生産制約も表示する。
+ *   運営不能の原因を表示できる場合は、重複する公共施設の総括警告を省く。
  * - Spatial warnings use the same API evaluation results as Unity, in a separate bit field from alerts.
  * - Renders nothing when no bits are set.
  */
@@ -33,7 +33,8 @@ import {
 } from "../../constants";
 import shortageIcon from "../../assets/images/ui/agent_panel/bribery.png";
 import fireIcon from "../../assets/images/ui/agent_panel/fire.png";
-import facilityWarningIcon from "../../assets/images/alerts/bribery.png";
+import materialShortageIcon from "../../assets/images/alerts/material-shortage.svg";
+import facilityWarningIcon from "../../assets/images/alerts/facility-inoperative.svg";
 import sanitationWarningIcon from "../../assets/images/alerts/sanitation.png";
 import infraWarningIcon from "../../assets/images/alerts/electricity.png";
 import capacityTightIcon from "../../assets/images/alerts/capacity-tight.svg";
@@ -60,7 +61,7 @@ const ALERT_CARDS: AlertCardDef[] = [
   { bit: ALERT_AGENT_CAPACITY_TIGHT, icon: capacityTightIcon, key: "capacityTight" },
   { bit: ALERT_AGENT_NONCONFORMING, icon: nonconformingIcon, key: "nonconforming" },
   { bit: ALERT_AGENT_LABOR_SHORTAGE, icon: shortageIcon, key: "laborShortage" },
-  { bit: ALERT_AGENT_MATERIAL_SHORTAGE, icon: shortageIcon, key: "materialShortage" },
+  { bit: ALERT_AGENT_MATERIAL_SHORTAGE, icon: materialShortageIcon, key: "materialShortage" },
   { bit: ALERT_AGENT_HIGH_SKILL_SHORTAGE, icon: shortageIcon, key: "highSkillShortage" },
   { bit: ALERT_AGENT_BUDGET_CAPPED, icon: shortageIcon, key: "budgetCapped" },
 ];
@@ -70,6 +71,13 @@ const WARNING_CARDS: AlertCardDef[] = [
   { bit: ALERT_DISPLAY_SANITATION_WARNING, icon: sanitationWarningIcon, key: "sanitationWarning" },
   { bit: ALERT_DISPLAY_INFRA_WARNING, icon: infraWarningIcon, key: "infraWarning" },
 ];
+
+const FACILITY_CAUSE_ALERTS =
+  ALERT_AGENT_INFRA_DISCONNECTED |
+  ALERT_AGENT_LABOR_SHORTAGE |
+  ALERT_AGENT_MATERIAL_SHORTAGE |
+  ALERT_AGENT_HIGH_SKILL_SHORTAGE |
+  ALERT_AGENT_BUDGET_CAPPED;
 
 type AgentAlertsPanelProps = {
   /** Combined agent alert bits. Treat unset values (undefined/null) as 0. */
@@ -81,9 +89,13 @@ type AgentAlertsPanelProps = {
 export function AgentAlertsPanel({ alert, warning }: AgentAlertsPanelProps) {
   const { t } = useTranslation();
   const bits = alert ?? 0;
+  // 対処につながる原因カードを優先し、原因が不明なときだけ運営不能の総括を残す。
+  const warningBits = (bits & FACILITY_CAUSE_ALERTS) !== 0
+    ? (warning ?? 0) & ~ALERT_DISPLAY_FACILITY_WARNING
+    : warning ?? 0;
   const activeCards = [
     ...ALERT_CARDS.filter((card) => (bits & card.bit) !== 0),
-    ...WARNING_CARDS.filter((card) => ((warning ?? 0) & card.bit) !== 0),
+    ...WARNING_CARDS.filter((card) => (warningBits & card.bit) !== 0),
   ];
   if (activeCards.length === 0) return null;
 

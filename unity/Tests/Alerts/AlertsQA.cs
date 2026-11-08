@@ -69,7 +69,7 @@ public static class AlertsQA
             var icons = new Dictionary<string, string>
             {
                 ["resourceWarningIcon"] = "sand-clock",
-                ["facilityWarningIcon"] = "bribery",
+                ["facilityWarningIcon"] = "facility-inoperative",
                 ["sanitationWarningIcon"] = "sanitation",
                 ["infraWarningIcon"] = "electricity",
                 ["agentCrimeIcon"] = "bribery",
