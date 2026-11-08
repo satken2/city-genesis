@@ -121,6 +121,7 @@ export function Cockpit() {
   useEffect(() => {
     const appWindow = getCurrentWindow();
     let unlistenSelect: (() => void) | undefined;
+    let disposed = false;
 
     appWindow
       .listen<{ window_type: string; entity: { type: string; id: string } }>(
@@ -135,12 +136,11 @@ export function Cockpit() {
           }
         },
       )
-      .then((fn) => {
-        unlistenSelect = fn;
-      })
+      .then((fn) => (disposed ? fn() : (unlistenSelect = fn)))
       .catch(console.error);
 
     return () => {
+      disposed = true;
       unlistenSelect?.();
     };
   }, []);
@@ -155,6 +155,7 @@ export function Cockpit() {
   useEffect(() => {
     const appWindow = getCurrentWindow();
     let unlisten: (() => void) | undefined;
+    let disposed = false;
 
     appWindow
       .listen<{ object_type: string; id: number; prop_type?: number }>(
@@ -175,12 +176,11 @@ export function Cockpit() {
           void sendRemoveObjectConfirmResult(payload.object_type, payload.id, accepted).catch(console.error);
         },
       )
-      .then((fn) => {
-        unlisten = fn;
-      })
+      .then((fn) => (disposed ? fn() : (unlisten = fn)))
       .catch(console.error);
 
     return () => {
+      disposed = true;
       unlisten?.();
     };
   }, [masterData, t]);
@@ -212,6 +212,7 @@ export function Cockpit() {
   useEffect(() => {
     const appWindow = getCurrentWindow();
     let unlisten: (() => void) | undefined;
+    let disposed = false;
     appWindow
       .listen<{ status: string }>(IPC_EVENT_CITIZEN_PICK_FAILED, (event) => {
         const fallback = t("citizenTracking.pickFailed.error");
@@ -220,11 +221,10 @@ export function Cockpit() {
           durationMs: 5000,
         }).catch(console.error);
       })
-      .then((fn) => {
-        unlisten = fn;
-      })
+      .then((fn) => (disposed ? fn() : (unlisten = fn)))
       .catch(console.error);
     return () => {
+      disposed = true;
       unlisten?.();
     };
   }, [t]);
@@ -237,6 +237,9 @@ export function Cockpit() {
   useEffect(() => {
     const appWindow = getCurrentWindow();
     let unlisten: (() => void) | undefined;
+    // Unity treats a second drive:open as a close, so a listener left behind by a cleanup that ran before
+    // registration finished (as StrictMode does in development) would close the drive right after opening it.
+    let disposed = false;
     appWindow
       .listen(IPC_EVENT_DRIVE_REQUEST, () => {
         if (isLocked) return;
@@ -249,11 +252,10 @@ export function Cockpit() {
           await openDriveMode(t("drive", { returnObjects: true }) as Record<string, string>);
         })().catch(console.error);
       })
-      .then((fn) => {
-        unlisten = fn;
-      })
+      .then((fn) => (disposed ? fn() : (unlisten = fn)))
       .catch(console.error);
     return () => {
+      disposed = true;
       unlisten?.();
     };
   }, [isLocked, mode, t]);
