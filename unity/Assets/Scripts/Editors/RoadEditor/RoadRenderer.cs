@@ -278,6 +278,7 @@ public partial class RoadRenderer : MonoBehaviour
         {
             path_type = pathType,
             path_variant = pathSubtype,
+            width = MasterDataStore.Instance?.GetPathMaster(pathSubtype)?.width ?? 0f, // The core gives a new path its variant's width.
             waypoints = waypointsList,
             curved = curved,
             platform_side = platformSide,

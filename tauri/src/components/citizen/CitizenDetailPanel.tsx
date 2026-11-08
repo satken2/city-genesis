@@ -82,19 +82,13 @@ import "./CitizenDetailPanel.css";
 const WINDOW_TYPE = "citizen_detail";
 
 /**
- * High-skill threshold, matching the backend's HIGH_SKILL_BOUNDARY.
- * A citizen with any skill at or above this value is considered to have completed higher education (highly
- * skilled).
+ * Fields used here from GET /api/v1/parameters. HIGH_SKILL_BOUNDARY is the city's high-skill threshold: a citizen with
+ * any skill at or above it has completed higher education, and higher education raises skills up to it. The skill
+ * chart's radial maximum is fixed at it so every citizen is drawn on the same scale.
  */
-const HIGH_SKILL_BOUNDARY = 1.5;
-
-/**
- * Display maximum for skill values.
- * Backend skills grow up to MAX_BASE_SKILL (1.0) through basic education and HIGH_SKILL_BOUNDARY (1.5) through
- * higher education.
- * Fix the radar chart's radial maximum at 1.5 to keep comparisons on the same scale.
- */
-const SKILL_DISPLAY_MAX = HIGH_SKILL_BOUNDARY;
+type ParametersResponse = {
+  parameters: { GENERAL_PARAMS: { HIGH_SKILL_BOUNDARY: number } };
+};
 
 type CitizenDetailPanelProps = {
   apiBaseUrl: string;
@@ -152,6 +146,7 @@ export function CitizenDetailPanel({
   const masterData = useMasterData();
   const [citizenData, setCitizenData] = useState<CitizenData | null>(null);
   const [household, setHousehold] = useState<AgentData | null>(null);
+  const [highSkillBoundary, setHighSkillBoundary] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   /** undefined while loading, null when the citizen has no voice. */
@@ -296,8 +291,11 @@ export function CitizenDetailPanel({
     setLoading(true);
     setError(null);
 
-    fetchApi<CitizenResponse>(url, { signal: controller.signal })
-      .then(async ({ citizen }) => {
+    Promise.all([
+      fetchApi<CitizenResponse>(url, { signal: controller.signal }),
+      fetchApi<ParametersResponse>(buildApiUrl(apiBaseUrl, "/api/v1/parameters"), { signal: controller.signal }),
+    ])
+      .then(async ([{ citizen }, { parameters }]) => {
         const householdData = citizen.household_agent_id > 0
           ? (await fetchApi<AgentResponse>(
               buildApiUrl(apiBaseUrl, `/api/v1/agents/${citizen.household_agent_id}`),
@@ -307,6 +305,7 @@ export function CitizenDetailPanel({
         if (!controller.signal.aborted) {
           setCitizenData(citizen);
           setHousehold(householdData);
+          setHighSkillBoundary(parameters.GENERAL_PARAMS.HIGH_SKILL_BOUNDARY);
           setLoading(false);
         }
       })
@@ -328,7 +327,7 @@ export function CitizenDetailPanel({
     return <p className="agent-detail-muted">{t("common.loading")}</p>;
   }
 
-  if (error || !citizenData) {
+  if (error || !citizenData || highSkillBoundary === null) {
     return (
       <div className="agent-detail-error">
         <strong>{t("common.fetchError")}</strong>
@@ -350,7 +349,7 @@ export function CitizenDetailPanel({
 
   // Determine higher education completion by skill (any skill at or above the high-skill threshold).
   const isHigherEducated = Object.values(citizenData.skills ?? {}).some(
-    (value) => value >= HIGH_SKILL_BOUNDARY,
+    (value) => value >= highSkillBoundary,
   );
 
   const meterRows = (meters: { label: string; value: number | undefined; polarity?: MeterPolarity }[]) =>
@@ -591,7 +590,7 @@ export function CitizenDetailPanel({
                       />
                       <PolarRadiusAxis
                         angle={30}
-                        domain={[0, SKILL_DISPLAY_MAX]}
+                        domain={[0, highSkillBoundary]}
                         tick={false}
                         axisLine={false}
                       />

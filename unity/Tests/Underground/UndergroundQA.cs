@@ -30,6 +30,12 @@ public static class UndergroundQA
         return component;
     }
     private static void Check(bool condition, string message) { checks++; if (!condition) throw new Exception(message); }
+    // Like the core, a path takes its variant's width when created.
+    private static void TakeVariantWidth(object path)
+    {
+        var masters = (IDictionary)Field(T("MasterDataStore").GetProperty("Instance").GetValue(null), "pathMasterById");
+        Set(path, "width", Field(masters[(int)Field(path, "path_variant")], "width"));
+    }
 
     private static void Drain(IEnumerator routine)
     {
@@ -154,7 +160,7 @@ public static class UndergroundQA
             object MakePath(int id, int variant, int type, float z, float relativeY, string typeName = "GeneratedModels.PathSummary")
             {
                 object path = Activator.CreateInstance(T(typeName));
-                Set(path,"path_id",id); Set(path,"path_variant",variant); Set(path,"path_type",type);
+                Set(path,"path_id",id); Set(path,"path_variant",variant); Set(path,"path_type",type); TakeVariantWidth(path);
                 Set(path,"status",C("Constants","STATUS_ACTIVE")); Set(path,"follow_terrain",0);
                 Set(path,"start_point",new List<object>{-70d,(double)relativeY,(double)z});
                 Set(path,"end_point",new List<object>{70d,(double)relativeY,(double)z});
@@ -622,7 +628,7 @@ public static class UndergroundQA
         object MakePath(int variant, int type)
         {
             var path = Activator.CreateInstance(T("GeneratedModels.PathSummary"));
-            Set(path,"path_id",90000+variant); Set(path,"path_variant",variant); Set(path,"path_type",type);
+            Set(path,"path_id",90000+variant); Set(path,"path_variant",variant); Set(path,"path_type",type); TakeVariantWidth(path);
             Set(path,"status",C("Constants","STATUS_ACTIVE")); Set(path,"follow_terrain",0);
             Set(path,"start_point",new List<object>{-40d,-15d,-70d}); Set(path,"end_point",new List<object>{40d,-15d,-70d});
             return path;
@@ -824,7 +830,7 @@ public static class UndergroundQA
         object MakePath(int id, float z, float height, bool followsTerrain = true)
         {
             var path = Activator.CreateInstance(T("GeneratedModels.PathSummary"));
-            Set(path,"path_id",id); Set(path,"path_variant",221); Set(path,"path_type",C("Constants","PATH_STREET"));
+            Set(path,"path_id",id); Set(path,"path_variant",221); Set(path,"path_type",C("Constants","PATH_STREET")); TakeVariantWidth(path);
             Set(path,"status",C("Constants","STATUS_ACTIVE")); Set(path,"follow_terrain",followsTerrain ? 1 : 0);
             Set(path,"start_node_id",id); Set(path,"start_point",new List<object>{-40d,(double)height,(double)z});
             Set(path,"end_point",new List<object>{40d,(double)height,(double)z});

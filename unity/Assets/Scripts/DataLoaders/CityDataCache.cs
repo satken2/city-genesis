@@ -30,6 +30,12 @@ public sealed class CityDataCache : MonoBehaviour
     /// <summary>Advanced whenever records change, for callers that cache derived results.</summary>
     public int Revision { get; private set; }
     public float MotionActiveHours { get; private set; }
+    /// <summary>
+    /// The core's daily active hours (PATH_ACTIVE_HOURS) that convert daily traffic into flow: the value delivered with the
+    /// travel times, or the city's GENERAL_PARAMS until they first arrive.
+    /// </summary>
+    public static float ActiveHoursPerDay => Instance != null && Instance.MotionActiveHours > 0
+        ? Instance.MotionActiveHours : MasterDataStore.Instance.GeneralParams.PATH_ACTIVE_HOURS;
 
     private const int IdsPerRequest = 500;
     private const int MotionPerRequest = 4096;   // Upper bound accepted by POST /paths/motion.

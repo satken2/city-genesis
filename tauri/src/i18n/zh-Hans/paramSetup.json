@@ -99,14 +99,6 @@
         "label": "可支配收入下限比率",
         "desc": "家庭力求保留的最低裁量收入比例。过低会导致生活容易崩溃。"
       },
-      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
-        "label": "决定搬迁的纪元数",
-        "desc": "从对居住环境不满到决定搬迁所经过的纪元数。"
-      },
-      "HOUSEHOLD_SHACK_COUNT": {
-        "label": "沦为无家可归的纪元数",
-        "desc": "从失去住所到进入无家可归状态所经过的纪元数。"
-      },
       "AVERAGE_WAGE": {
         "label": "平均工资（基准值）",
         "desc": "模拟开始时的基准平均工资。"
@@ -162,18 +154,6 @@
       "MAX_BASE_SKILL": {
         "label": "基础技能最大值",
         "desc": "通过初等教育可达到的最大技能值。"
-      },
-      "MAX_SKILL": {
-        "label": "技能上限值",
-        "desc": "市民可习得的最大技能值（含高等教育与工作经验）。"
-      },
-      "WAGE_OVERSTAFFED_THRESHOLD": {
-        "label": "冗员时降薪阈值",
-        "desc": "冗员率超过该值时下调工资（以 labor_surplus / quota 评估）。"
-      },
-      "WAGE_UNDERSTAFFED_THRESHOLD": {
-        "label": "人手不足时涨薪阈值",
-        "desc": "人手不足且无人应聘的状态超过该值时上调工资。"
       },
       "ELEMENTARY_START_AGE": {
         "label": "初等教育开始年龄",

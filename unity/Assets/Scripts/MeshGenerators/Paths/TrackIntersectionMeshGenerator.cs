@@ -22,7 +22,7 @@ public sealed class TrackContinuousJoin
 ///   - RailsConnect allows the pair.
 ///   - Deflection (A arrival versus B departure; straight=0°, reversal=180°) meets the threshold.
 ///     Mirrors backend turn constraints (transit_route edge-based Dijkstra + geo_paths.path_end_tangent +
-///     parameters.yaml RAIL_MAX_TURN_ANGLE_DEG); street LRT may turn left/right.
+///     the city's GENERAL_PARAMS RAIL_MAX_TURN_ANGLE_DEG); street LRT may turn left/right.
 ///   - A permits arrival and B permits departure (travel_direction).
 ///     Station-platform tracks allow stopped trains in either direction, so physical rails treat them as bidirectional.
 /// Join A's arriving-direction track end to B's departing-direction track end;
@@ -188,7 +188,7 @@ public static class TrackIntersectionMeshGenerator
     {
         var links = new List<Link>();
         // Deflection threshold compared by cos (angle ≤ threshold ⇔ cos(angle) ≥ cos(threshold)).
-        float cosLimit = Mathf.Cos(LocalConstants.RAIL_MAX_TURN_ANGLE_DEG * Mathf.Deg2Rad);
+        float cosLimit = Mathf.Cos(MasterDataStore.Instance.GeneralParams.RAIL_MAX_TURN_ANGLE_DEG * Mathf.Deg2Rad);
         for (int a = 0; a < entries.Count; a++)
         {
             for (int b = 0; b < entries.Count; b++)
@@ -373,8 +373,8 @@ public static class TrackIntersectionMeshGenerator
             float lateralB = lateralsB[j] + (shiftB != null ? shiftB.Shift(j, 0f) : 0f);
             if (Mathf.Abs(lateralA - (aligned ? lateralB : -lateralB)) > LocalConstants.TRACK_JOIN_LATERAL_TOLERANCE) return null;
         }
-        float widthA = MasterWidth(a) + (shiftA != null ? 2f * shiftA.OuterShift(0f) : 0f);
-        float widthB = MasterWidth(b) + (shiftB != null ? 2f * shiftB.OuterShift(0f) : 0f);
+        float widthA = a.width + (shiftA != null ? 2f * shiftA.OuterShift(0f) : 0f);
+        float widthB = b.width + (shiftB != null ? 2f * shiftB.OuterShift(0f) : 0f);
         if (Mathf.Abs(widthA - widthB) > LocalConstants.TRACK_JOIN_LATERAL_TOLERANCE) return null;
 
         connectionPoints = new Dictionary<int, Vector3> { { a.path_id, nodeA }, { b.path_id, nodeB } };
@@ -393,12 +393,6 @@ public static class TrackIntersectionMeshGenerator
         nodeEnd = points[0];
         outward = IntersectionPolygonUtil.AtDistance(points, 0f).Direction;
         return outward.sqrMagnitude > 1e-6f;
-    }
-
-    private static float MasterWidth(PathSummary path)
-    {
-        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(path.path_variant) : null;
-        return master != null && master.width > 0f ? master.width : path.width;
     }
 
     /// <summary>

@@ -324,7 +324,7 @@ public sealed class CitizenFollow : MonoBehaviour
             if (!Drawable(step.type))
             {
                 run = null;
-                AddPathSegment(step.path_id, step.forward, Car ? CarSpeed : LocalConstants.PEDESTRIAN_WALK_SPEED);
+                AddPathSegment(step.path_id, step.forward, Car ? CarSpeed : PedestrianManager.WalkSpeed);
                 continue;
             }
             if (run == null)
@@ -374,7 +374,7 @@ public sealed class CitizenFollow : MonoBehaviour
             point.y = Utils.GetGroundHeight(point);
             points.Add(point);
         }
-        float speed = leg.minutes > .01f ? leg.distance_m / (leg.minutes * 60f) : LocalConstants.PEDESTRIAN_WALK_SPEED;
+        float speed = leg.minutes > .01f ? leg.distance_m / (leg.minutes * 60f) : PedestrianManager.WalkSpeed;
         return AddVirtual(points, Mathf.Clamp(speed, .5f, 80f));
     }
 
@@ -464,7 +464,7 @@ public sealed class CitizenFollow : MonoBehaviour
     {
         var rest = new List<Segment>(segments);
         segments.Clear(); segment = null;
-        float speed = Car ? CarSpeed : LocalConstants.PEDESTRIAN_WALK_SPEED;
+        float speed = Car ? CarSpeed : PedestrianManager.WalkSpeed;
         for (int i = 0; i < run.paths.Count; i++) AddPathSegment(run.paths[i], run.forwards[i], speed);
         foreach (var item in rest) segments.Enqueue(item);
         // If path geometry is also unavailable and nothing can be queued, treat the trip as arrived instead of leaving it stuck.

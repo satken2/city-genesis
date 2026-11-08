@@ -15,6 +15,7 @@ public static class PowerLinesQA
     static IList neighbors;
     static readonly Dictionary<int,List<Vector3>> trackPoints = new();
     static IList adjacentTracks;
+    static Component cityMaster;
     static object Field(object value,string name)=>value.GetType().GetField(name).GetValue(value);
     static void Set(object value,string name,object field)=>value.GetType().GetField(name).SetValue(value,field);
     public static List<TPath> Neighbors<TPath>(int node)=>neighbors.Cast<TPath>().Where(p=>(int)Field(p,"start_node_id")==node||(int)Field(p,"end_node_id")==node).ToList();
@@ -39,11 +40,40 @@ public static class PowerLinesQA
         var p=Activator.CreateInstance(T("GeneratedModels.PathSummary"));
         void Set(string k,object v)=>p.GetType().GetField(k).SetValue(p,v);
         Set("path_id",id); Set("path_variant",variant); Set("path_type",11);
+        SetVariant(p,variant);
         Set("start_node_id",start); Set("end_node_id",end);
         Set("status",T("Constants").GetField("STATUS_ACTIVE").GetValue(null));
         float height=variant==1101?20:10;
         Set("start_point",new List<object>{0f,height,0f}); Set("end_point",new List<object>{0f,height,240f});
         return p;
+    }
+    // Like the core, a path takes its variant's width when created and when its variant changes.
+    static void SetVariant(object path,int variant)
+    {
+        Set(path,"path_variant",variant);
+        var masters=(IDictionary)T("MasterDataStore").GetField("pathMasterById",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(cityMaster);
+        if(masters.Contains(variant))Set(path,"width",Field(masters[variant],"width"));
+    }
+    // The path masters the renderer reads. Power lines draw with model_type "power_line".
+    static Component CityMaster()
+    {
+        var store = new GameObject("QA_Master").AddComponent(T("MasterDataStore"));
+        var masters = (IDictionary)T("MasterDataStore").GetField("pathMasterById",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(store);
+        foreach (int variant in new[] {1101,1102,411,421,401,501})
+        {
+            var master = Activator.CreateInstance(T("PathMasterItem"));
+            Set(master,"width",variant==421?10f:5f);
+            Set(master,"lanes",variant==421?2:1);
+            Set(master,"base_height",variant==1101?20f:variant==1102?10f:0f);
+            Set(master,"pillar_spacing",120f);
+            Set(master,"height_editable",variant==1101||variant==1102);
+            Set(master,"infra_products",variant==401?null:new List<int>{1});
+            if(variant==411||variant==421)Set(master,"wire_spacing",35f);
+            if(variant==1101||variant==1102)Set(master,"model_type","power_line");
+            masters[variant]=master;
+        }
+        T("MasterDataStore").GetField("<IsInitialized>k__BackingField",BindingFlags.NonPublic|BindingFlags.Instance).SetValue(store,true);
+        return store;
     }
     static GameObject Generate(object path,string lod,List<Vector3> points=null)
     {
@@ -71,6 +101,7 @@ public static class PowerLinesQA
             var manager=new GameObject("Models").AddComponent(T("ModelManager"));
             T("ModelManager").GetField("<Instance>k__BackingField",BindingFlags.NonPublic|BindingFlags.Static).SetValue(null,manager);
             var cache=(IDictionary)T("ModelManager").GetField("_modelCache",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(manager);
+            cityMaster=CityMaster();
             foreach(int variant in new[]{1101,1102})
             {
                 Mesh normal=null;
@@ -139,21 +170,7 @@ public static class PowerLinesQA
 
     static void VerifyRailGantries(IDictionary modelCache)
     {
-        var store = new GameObject("QA_Master").AddComponent(T("MasterDataStore"));
-        var masters = (IDictionary)T("MasterDataStore").GetField("pathMasterById",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(store);
-        foreach (int variant in new[] {1101,1102,411,421,401,501})
-        {
-            var master = Activator.CreateInstance(T("PathMasterItem"));
-            Set(master,"width",variant==421?10f:5f);
-            Set(master,"lanes",variant==421?2:1);
-            Set(master,"base_height",variant==1101?20f:variant==1102?10f:0f);
-            Set(master,"pillar_spacing",120f);
-            Set(master,"height_editable",variant==1101||variant==1102);
-            Set(master,"infra_products",variant==401?null:new List<int>{1});
-            if(variant==411||variant==421)Set(master,"wire_spacing",35f);
-            masters[variant]=master;
-        }
-        T("MasterDataStore").GetField("<IsInitialized>k__BackingField",BindingFlags.NonPublic|BindingFlags.Instance).SetValue(store,true);
+        var store = cityMaster;
         var provider = T("PowerLinePath").GetField("ConnectedPaths");
         provider.SetValue(null,typeof(PowerLinesQA).GetMethod("Neighbors").MakeGenericMethod(T("GeneratedModels.PathSummary")).CreateDelegate(provider.FieldType));
         var polyline = T("PowerLineRailGantry").GetField("TrackPolyline");
@@ -225,7 +242,7 @@ public static class PowerLinesQA
             UnityEngine.Object.DestroyImmediate(line);
         }
         neighbors=new ArrayList{rail,main,branch};
-        Set(rail,"path_variant",421);
+        SetVariant(rail,421);
         Check((float)Field(Endpoint(main),"railRight")>=6.2f,"Gantry spans bundled double track");
         trackPoints[100]=new List<Vector3>{new Vector3(0,6,0),new Vector3(0,6,100)};
         support=Endpoint(main);
@@ -238,11 +255,11 @@ public static class PowerLinesQA
         Check(Vector3.Angle((Quaternion)Field(support,"rotation")*Vector3.forward,new Vector3(1,0,1))<.01f,"Oblique rail rotates gantry");
         trackPoints[100]=new List<Vector3>{new Vector3(0,0,100),Vector3.zero};Set(rail,"start_node_id",101);Set(rail,"end_node_id",1);
         Check(Quaternion.Angle((Quaternion)Field(Endpoint(main),"rotation"),Quaternion.identity)<.01f,"Reversed rail retains gantry direction");
-        Set(rail,"path_variant",401);
+        SetVariant(rail,401);
         Check(!(bool)Endpoint(main).GetType().GetProperty("IsGantry").GetValue(Endpoint(main)),"Non-electrical rail keeps regular support");
-        Set(rail,"path_variant",501);Set(rail,"path_type",5);
+        SetVariant(rail,501);Set(rail,"path_type",5);
         Check((bool)Endpoint(main).GetType().GetProperty("IsGantry").GetValue(Endpoint(main)),"Electrical monorail uses gantry");
-        Set(rail,"path_variant",421);Set(rail,"path_type",4);Set(rail,"start_node_id",1);Set(rail,"end_node_id",101);
+        SetVariant(rail,421);Set(rail,"path_type",4);Set(rail,"start_node_id",1);Set(rail,"end_node_id",101);
         trackPoints[100]=new List<Vector3>{Vector3.zero,new Vector3(0,0,100)};
         Check(!(bool)Call("PowerLinePath","Endpoint",main,0,Vector3.zero,Vector3.forward).GetType().GetProperty("IsGantry").GetValue(Call("PowerLinePath","Endpoint",main,0,Vector3.zero,Vector3.forward)),"Unconnected crossing has no gantry");
         neighbors=new ArrayList{rail,main};

@@ -72,7 +72,7 @@ public sealed class MotorwayMergeLayout
             {
                 Path = path, Points = points, Master = master,
                 Direction = IntersectionPolygonUtil.AtDistance(points, 0f).Direction,
-                Width = master != null && master.width > 0f ? master.width : path.width,
+                Width = path.width,
             });
         }
         arms.Sort((x, y) => x.Path.path_id.CompareTo(y.Path.path_id));

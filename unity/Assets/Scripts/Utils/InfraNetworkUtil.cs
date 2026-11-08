@@ -26,6 +26,8 @@ public static class InfraNetworkUtil
     // Cached infrastructure product IDs in ascending order for deterministic node-bit assignment.
     private static List<int> _infraProductIdsSorted;
 
+    static InfraNetworkUtil() => AssetPackStore.CityChanging += () => _infraProductIdsSorted = null;
+
     /// <summary>
     /// Return infrastructure product IDs that this path variant can carry.
     /// null for non-infrastructure variants or incomplete master data without infra_products.
@@ -56,22 +58,19 @@ public static class InfraNetworkUtil
     {
         if (_infraProductIdsSorted != null) return _infraProductIdsSorted;
         var result = new List<int>();
-        var store = MasterDataStore.Instance;
-        if (store != null)
+        var products = MasterDataStore.Instance?.GetProductMasterDictionary();
+        if (products == null || products.Count == 0) return result; // Not kept until the master arrives.
+        foreach (var kv in products)
         {
-            foreach (var kv in store.GetProductMasterDictionary())
+            if (int.TryParse(kv.Key, out var pid)
+                && kv.Value != null
+                && kv.Value.type == Constants.GOODS_INFRASTRUCTURE)
             {
-                if (int.TryParse(kv.Key, out var pid)
-                    && kv.Value != null
-                    && kv.Value.type == Constants.GOODS_INFRASTRUCTURE)
-                {
-                    result.Add(pid);
-                }
+                result.Add(pid);
             }
         }
         result.Sort();
-        _infraProductIdsSorted = result;
-        return result;
+        return _infraProductIdsSorted = result;
     }
 
     /// <summary>

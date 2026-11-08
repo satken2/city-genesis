@@ -27,6 +27,8 @@ public static class RoadAccessQA
         return instance;
     }
     static IDictionary Dictionary(object manager, string name) => (IDictionary)manager.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(manager);
+    // Like the core, a path takes its variant's width when created.
+    static void TakeVariantWidth(object path) => Set(path, "width", Get(pathMasters[(int)Get(path, "path_variant")], "width"));
     public static void Run()
     {
         var args = Environment.GetCommandLineArgs(); root = args[Array.IndexOf(args, "-sourceRoot") + 1]; output = root + "/Temp/BuildingAccessQA";
@@ -153,7 +155,7 @@ public static class RoadAccessQA
             Check(((IList)Get(curve,"Connections")).Count==candidates.Count,"Curve keeps openings");
             var reversed=new GameObject("Reversed");var rev=RoadPoints();rev.Reverse();var reversedPlan=Resolve(Spline(reversed,rev),candidates);
             Check(((IList)Get(reversedPlan,"Right")).Count>0 && ((IList)Get(reversedPlan,"Left")).Count==0,"Direction reversal swaps side");
-            var p=New("GeneratedModels.PathSummary");Set(p,"path_id",1);Set(p,"path_type",1);Set(p,"path_variant",221);Set(p,"status",1);Set(p,"curved",true);Set(p,"follow_terrain",-1);
+            var p=New("GeneratedModels.PathSummary");Set(p,"path_id",1);Set(p,"path_type",1);Set(p,"path_variant",221);Set(p,"status",1);Set(p,"curved",true);Set(p,"follow_terrain",-1);TakeVariantWidth(p);
             Set(p,"start_point",new List<object>{-100f,0f,-8f});Set(p,"end_point",new List<object>{100f,0f,-8f});Set(p,"street_tree_type",1);Set(p,"streetlight_type",1);Set(p,"fence_type",1);
             Check(((IList)Get(Call("RoadAccessPlan","Create",p,spline,RoadPoints(),16f),"Connections")).Count==candidates.Count,"Runtime access query");
             var setback=New("SidewalkSetback");var roadResult=T("RoadPath").GetMethod("Generate").Invoke(New("RoadPath"),new[]{p,RoadPoints(),setback,setback});
@@ -201,11 +203,11 @@ public static class RoadAccessQA
         const BindingFlags flags=BindingFlags.NonPublic|BindingFlags.Instance;
         // In isolated Editor verification, explicitly start the MonoBehaviour load lifecycle.
         T("PathManager").GetMethod("Awake",flags).Invoke(manager,null);
-        var path=New("GeneratedModels.PathSummary");Set(path,"path_id",7);Set(path,"path_type",1);Set(path,"path_variant",221);Set(path,"status",1);
+        var path=New("GeneratedModels.PathSummary");Set(path,"path_id",7);Set(path,"path_type",1);Set(path,"path_variant",221);Set(path,"status",1);TakeVariantWidth(path);
         Set(path,"start_point",new List<object>{-100f,0f,-8f});Set(path,"end_point",new List<object>{100f,0f,-8f});
         Dictionary(manager,"pathDataCache")[7]=path;
         T("PathManager").GetMethod("RegisterPathCells",flags).Invoke(manager,new[]{path});
-        var distant=New("GeneratedModels.PathSummary");Set(distant,"path_id",8);Set(distant,"path_type",1);Set(distant,"path_variant",221);Set(distant,"status",1);
+        var distant=New("GeneratedModels.PathSummary");Set(distant,"path_id",8);Set(distant,"path_type",1);Set(distant,"path_variant",221);Set(distant,"status",1);TakeVariantWidth(distant);
         Set(distant,"start_point",new List<object>{-100f,0f,200f});Set(distant,"end_point",new List<object>{100f,0f,200f});
         Dictionary(manager,"pathDataCache")[8]=distant;
         T("PathManager").GetMethod("RegisterPathCells",flags).Invoke(manager,new[]{distant});

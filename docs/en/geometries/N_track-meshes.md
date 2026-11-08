@@ -1,6 +1,6 @@
 # Track meshes
 
-`TrackPath` renders variants with master `model_type` equal to `track`, including `PATH_TRACK`, `PATH_MONORAIL`, and station paths with platforms. Centerlines, LOD, colliders, underground splitting, and part lookup follow [road meshes](G_road-meshes.md). Track gauge and overhead-wire cross-sections must not vary with variant width: beds stretch to total width, while tracks, wires, and platforms retain actual size.
+`TrackPath` renders variants with master `model_type` equal to `track`, including `PATH_TRACK`, `PATH_MONORAIL`, and station paths with platforms. Centerlines, LOD, colliders, underground splitting, and part lookup follow [road meshes](G_road-meshes.md). Track gauge and overhead-wire cross-sections must not vary with path width: beds stretch to total width, while tracks, wires, and platforms retain actual size.
 
 Appearance also depends on connected and nearby parallel paths. `PathManager` supplies this context; isolated mesh scenes without it render standalone tracks.
 
@@ -28,7 +28,7 @@ Anchor relative height, rather than variant, determines surface, elevated, and u
 
 ## Track positions
 
-Track positions derive from master `width`, `lanes`, and `center_width`, like road lanes, without dedicated position parameters. `lanes` equal to 2 means one path contains two tracks and always allows both directions. Path and travel direction select one track; two-track paths use the traffic-hand side in the direction of travel. Main tracks, connecting rails, buffers, and [vehicles](O_vehicle-rendering.md) share `TrackPath` position rules.
+Track positions derive from path `width` and master `lanes` and `center_width`, like road lanes, without dedicated position parameters. `lanes` equal to 2 means one path contains two tracks and always allows both directions. Path and travel direction select one track; two-track paths use the traffic-hand side in the direction of travel. Main tracks, connecting rails, buffers, and [vehicles](O_vehicle-rendering.md) share `TrackPath` position rules.
 
 ## Nodes
 

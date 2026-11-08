@@ -7,8 +7,8 @@
  * Choices are authoritative in data/transitVehicleModels.json (line type, i.e. section path
  * variant, mapped to appearance options). variant is the appearance number in Unity
  * model_weights.json; prop is the free-placement alias prop type ID depicting its leading car,
- * whose thumbnail is used as the preview. Match Unity's vehicle types in
- * Resources/Config/transit_vehicle_models.json and numbers in model_weights.json.
+ * whose thumbnail is used as the preview. Match the line type's transit_master vehicle_type and numbers in
+ * model_weights.json.
  * For out-of-catalog numbers, Unity falls back to selection based on line ID and train number.
  *
  * Used in both left-docked creation (bc-*) and right-side details (agent-detail-*),

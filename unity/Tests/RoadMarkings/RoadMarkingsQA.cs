@@ -269,6 +269,7 @@ public static class RoadMarkingsQA
         }
         var path=Activator.CreateInstance(Type("GeneratedModels.PathSummary"));
         foreach(var field in new[]{("path_id",19),("path_variant",101),("path_type",1),("start_node_id",1),("end_node_id",2)}) path.GetType().GetField(field.Item1).SetValue(path,field.Item2);
+        path.GetType().GetField("width").SetValue(path,item.GetType().GetField("width").GetValue(item)); // Like the core, a path takes its variant's width when created.
         path.GetType().GetField("start_point").SetValue(path,new List<object>{0f,0f,-70f});
         path.GetType().GetField("end_point").SetValue(path,new List<object>{0f,0f,70f});
         var generator=Activator.CreateInstance(Type("RoadPath"));
@@ -393,10 +394,12 @@ public static class RoadMarkingsQA
         Require(prefab.GetComponent<Renderer>().sharedMaterial.name=="PATH_CONCRETE","Real street FBX has concrete as its first material");
         var path=Activator.CreateInstance(Type("GeneratedModels.PathSummary"));
         foreach(var field in new[]{("path_id",900),("path_variant",231),("path_type",1),("start_node_id",901),("end_node_id",902)}) path.GetType().GetField(field.Item1).SetValue(path,field.Item2);
+        path.GetType().GetField("width").SetValue(path,item.GetType().GetField("width").GetValue(item)); // Like the core, a path takes its variant's width when created.
         path.GetType().GetField("start_point").SetValue(path,new List<object>{0f,0f,0f});
         path.GetType().GetField("end_point").SetValue(path,new List<object>{0f,20f,400f});
         var setback=Activator.CreateInstance(Type("SidewalkSetback"));
         Type("PathDrawContext").GetProperty("PathVariant").SetValue(null,231);
+        Type("PathDrawContext").GetProperty("PathWidth").SetValue(null,path.GetType().GetField("width").GetValue(path));
         var result=Method(Activator.CreateInstance(Type("RoadPath")),"Generate",path,new List<Vector3>{Vector3.zero,new Vector3(0,20,400)},setback,setback);
         var road=(GameObject)result.GetType().GetProperty("GeneratedObject").GetValue(result);
         var lod=road.GetComponentsInChildren(Type("SplinePartLod")).First(c=>(bool)c.GetType().GetField("body",BindingFlags.NonPublic|BindingFlags.Instance).GetValue(c));
@@ -430,6 +433,7 @@ public static class RoadMarkingsQA
         {
             item.GetType().GetField("body_material").SetValue(item,name);
             Type("PathDrawContext").GetProperty("PathVariant").SetValue(null,231); // Direct section builds above end the draw context and reset it to 0.
+            Type("PathDrawContext").GetProperty("PathWidth").SetValue(null,path.GetType().GetField("width").GetValue(path));
             var alternate=Method(Activator.CreateInstance(Type("RoadPath")),"Generate",path,new List<Vector3>{Vector3.zero,new Vector3(0,20,400)},setback,setback);
             var alternateRoad=(GameObject)alternate.GetType().GetProperty("GeneratedObject").GetValue(alternate);
             var alternateLod=alternateRoad.GetComponentsInChildren(Type("SplinePartLod")).First(c=>(bool)c.GetType().GetProperty("IsBody").GetValue(c));

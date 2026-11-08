@@ -28,6 +28,11 @@ public static class PreviewQA
             var masterType = asm.GetType("MasterDataStore");
             var master = new GameObject("Master").AddComponent(masterType);
             masterType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, master);
+            // The renderer reads these from the city's master; use the standard GENERAL_PARAMS.
+            var cityValues = Activator.CreateInstance(asm.GetType("MasterDataStore+GeneralParamsItem"));
+            foreach (var (field, value) in new[] { ("RAIL_MAX_TURN_ANGLE_DEG", 45f), ("PEDESTRIAN_SPEED", 4f), ("PATH_CURVATURE_WINDOW_M", 10f), ("PATH_ACTIVE_HOURS", 15f) })
+                cityValues.GetType().GetField(field).SetValue(cityValues, value);
+            masterType.GetField("<GeneralParams>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(master, cityValues);
             var dict = (IDictionary)masterType.GetField("pathMasterById", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(master);
             var itemType = asm.GetType("PathMasterItem");
             var item = Activator.CreateInstance(itemType);
@@ -988,6 +993,7 @@ public static class PreviewQA
         var itemType = asm.GetType("PathMasterItem");
         var item = Activator.CreateInstance(itemType);
         itemType.GetField("width").SetValue(item, 6f);
+        itemType.GetField("model_type").SetValue(item, "power_line");
         itemType.GetField("follow_terrain").SetValue(item, true);
         itemType.GetField("base_height").SetValue(item, baseHeight);
         itemType.GetField("pillar_spacing").SetValue(item, spacing);

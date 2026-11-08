@@ -109,24 +109,17 @@ public interface IPathMeshGenerator
 ///
 /// Select generators by path_master model_type:
 ///   "default" → RoadPath, "track" → TrackPath, "station_house" → StationHousePath, "pier" → PierPath,
-///   "outline" → OutlinePath, "none" → no mesh generation.
+///   "outline" → OutlinePath, "power_line" → PowerLinePath, "none" → no mesh generation.
 /// </summary>
 public static class PathMeshFactory
 {
-    // Power lines have per-span sag/shared towers, separate from repeated road-part placement.
-    private static Dictionary<int, IPathMeshGenerator> variantGenerators
-        = new Dictionary<int, IPathMeshGenerator>()
-        {
-            { Constants.PATH_VARIANT_GRID, new PowerLinePath() },
-            { 1102, new PowerLinePath() },
-        };
-
     // model_type → generator mapping.
     private static readonly RoadPath roadGenerator = new RoadPath();
     private static readonly TrackPath trackGenerator = new TrackPath();
     private static readonly StationHousePath stationHouseGenerator = new StationHousePath();
     private static readonly PierPath pierGenerator = new PierPath();
     private static readonly OutlinePath outlineGenerator = new OutlinePath();
+    private static readonly PowerLinePath powerLineGenerator = new PowerLinePath();
 
     public static PathMeshResult GeneratePathMesh(GeneratedModels.PathSummary pathData, List<Vector3> points, SidewalkSetback startSidewalkSetback = default, SidewalkSetback endSidewalkSetback = default)
     {
@@ -134,12 +127,6 @@ public static class PathMeshFactory
         {
             Debug.LogWarning("[PathMeshFactory] pathData is null.");
             return null;
-        }
-
-        // Variant-specific generators take highest priority.
-        if (variantGenerators.TryGetValue(pathData.path_variant, out IPathMeshGenerator variantGen))
-        {
-            return variantGen.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
         }
 
         // Select generator by model_type.
@@ -156,6 +143,9 @@ public static class PathMeshFactory
                 return pierGenerator.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
             case "outline":
                 return outlineGenerator.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
+            case "power_line":
+                // Per-span sag and towers shared at nodes, separate from repeated road-part placement.
+                return powerLineGenerator.Generate(pathData, points, startSidewalkSetback, endSidewalkSetback);
             case "none":
                 // No mesh generation (e.g. pathfinding-only paths).
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[PathMeshFactory] model_type=none: メッシュ生成スキップ (variant={pathData.path_variant})");

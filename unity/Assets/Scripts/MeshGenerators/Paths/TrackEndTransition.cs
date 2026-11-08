@@ -89,7 +89,7 @@ public static class TrackEndTransition
         }
         if (entries.Count < 2) return result;
 
-        float cosLimit = Mathf.Cos(LocalConstants.RAIL_MAX_TURN_ANGLE_DEG * Mathf.Deg2Rad);
+        float cosLimit = Mathf.Cos(MasterDataStore.Instance.GeneralParams.RAIL_MAX_TURN_ANGLE_DEG * Mathf.Deg2Rad);
         var pairs = new List<(Entry a, Entry b, float straightness)>();
         for (int i = 0; i < entries.Count; i++)
         {

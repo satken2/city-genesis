@@ -199,7 +199,7 @@ public partial class RoadPlanManager
         int n = samples.Count;
         if (n < 3) return violations;
 
-        int w = Mathf.Max(1, Mathf.RoundToInt(LocalConstants.PATH_CURVATURE_WINDOW_M / AlignmentSampleStep));
+        int w = Mathf.Max(1, Mathf.RoundToInt(MasterDataStore.Instance.GeneralParams.PATH_CURVATURE_WINDOW_M / AlignmentSampleStep));
         var radius = new float[n];
         for (int i = 0; i < n; i++)
         {

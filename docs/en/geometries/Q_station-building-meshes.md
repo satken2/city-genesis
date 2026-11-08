@@ -7,7 +7,7 @@
 Per-path `passage_mode` selects `elevated`, `ground`, or `underground`. New construction starts with the path master's `default_passage_mode` and saves the mode selected during placement on the path. Underground passages have neither rendering nor selection surfaces, so their stations are selected through entrance buildings.
 
 - Parts `passage_elevated` or `passage_ground` are searched in the same order as for roads ([road meshes](G_road-meshes.md)). The type folder (`Models/Paths/p{path_type}/`) is shared by all station buildings. Some variants use variant-specific `body` for supported modes.
-- Models have ground-level origins and actual dimensions. Deck height, supports, and parapets belong to models; code changes neither width nor height. Passage elevation comes from the model, not path Y, and is not adjusted to building connections. Master `width` applies only to occupancy and selection width.
+- Models have ground-level origins and actual dimensions. Deck height, supports, and parapets belong to models; code changes neither width nor height. Passage elevation comes from the model, not path Y, and is not adjusted to building connections. Path `width` applies only to occupancy and selection width.
 - Each start, waypoint, and end anchor is placed at the ground directly beneath it. Straight spans connect anchors using actual-length model tiles, without following intermediate terrain.
 
 ## Entrance buildings

@@ -57,7 +57,7 @@ public sealed partial class PedestrianManager
         var p = new Pedestrian
         {
             variant = Random.Range(0, MaxModelVariants),
-            speed = Mathf.Max(.1f, walkSpeed),
+            speed = Mathf.Max(.1f, WalkSpeed),
             walked = Random.value * stepLength * 2,
         };
         p.SetPath(walk.data.path_id, walk.line, forward, origin.HasValue ? walk.line.Project(origin.Value) : -1);

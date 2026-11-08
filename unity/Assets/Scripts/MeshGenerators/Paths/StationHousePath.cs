@@ -512,7 +512,7 @@ public class StationHousePath : IPathMeshGenerator
     private static void RailSideExtents(PathSummary rail, out float extLeft, out float extRight)
     {
         var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(rail.path_variant) : null;
-        float half = ((master != null && master.width > 0f) ? master.width : 5f) / 2f;
+        float half = (rail.width > 0f ? rail.width : 5f) / 2f;
         float platformWidth = (master != null && master.platform_width.HasValue) ? master.platform_width.Value : 0f;
         TrackPath.ResolvePlatformExtents(rail, platformWidth, out float platformLeft, out float platformRight);
         extLeft = half + platformLeft;

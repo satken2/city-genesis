@@ -4,7 +4,7 @@ using UnityEngine;
 
 /// <summary>
 /// Paths with no physical look (model_type="outline"), such as ferry lanes and ship routes.
-/// Draws dashed lines along both edges of the master width with constant screen thickness, following the drawn centerline including curves.
+/// Draws dashed lines along both edges of the path's width with constant screen thickness, following the drawn centerline including curves.
 /// Only Normal/Close paths draw them: constant-thickness lines do not shrink with distance, so Far paths and the overview draw nothing (PathFarModel).
 /// The look is the same at Normal and Close, so the whole path is drawn regardless of detail ranges.
 /// The lines are overlays and keep their own color in previews, plans, and highlights.
@@ -23,24 +23,22 @@ public sealed class OutlinePath : IPathMeshGenerator
         }
         PathDrawContext.SuppressDetailRange = true;
         var container = new GameObject($"Outline_{pathData.path_id}");
-        Create(container, points, pathData.path_variant);
-        Mesh colliderMesh = PathMeshFactory.BuildStripMesh(points, Width(pathData.path_variant));
+        Create(container, points, pathData.width);
+        Mesh colliderMesh = PathMeshFactory.BuildStripMesh(points, pathData.width);
         if (colliderMesh != null) colliderMesh.name = $"OutlineCollider_{pathData.path_id}";
         return new PathMeshResult(colliderMesh, true, container);
     }
 
-    /// <summary>Add the dashed edges of the variant's width along the centerline points under parent.</summary>
-    private static void Create(GameObject parent, List<Vector3> points, int variant)
+    /// <summary>Add the dashed edges of the width along the centerline points under parent.</summary>
+    private static void Create(GameObject parent, List<Vector3> points, float width)
     {
-        float half = Width(variant) * .5f;
+        float half = width * .5f;
         if (points == null || points.Count < 2 || half <= 0f) return;
         var overlay = OverlayMeshRenderer.CreateStatic("Outline", true, parent.transform);
         AddDashes(overlay, points, -half);
         AddDashes(overlay, points, half);
         overlay.EndStaticFrame();
     }
-
-    private static float Width(int variant) => MasterDataStore.Instance?.GetPathMaster(variant)?.width ?? 0f;
 
     /// <summary>Dashes along the line offset horizontally by lateral (right positive). The dash pattern continues across points so curves stay evenly dashed.</summary>
     private static void AddDashes(OverlayMeshRenderer overlay, List<Vector3> points, float lateral)

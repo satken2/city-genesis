@@ -45,6 +45,11 @@ const TABS = [
 
 type TabId = (typeof TABS)[number]["id"];
 
+/** Fields used here from GET /api/v1/parameters. */
+type ParametersResponse = {
+  parameters: { GENERAL_PARAMS: { HIGH_SKILL_BOUNDARY: number } };
+};
+
 export function CityRegulationWindow({
   apiBaseUrl,
   onClose,
@@ -88,6 +93,8 @@ export function CityRegulationWindow({
    */
   const [cityImmigration, setCityImmigration] = useState<ImmigrationRegulations | null>(null);
   const [pendingImmigration, setPendingImmigration] = useState<Partial<ImmigrationRegulations>>({});
+  /** The city's HIGH_SKILL_BOUNDARY, the top of the immigration skill requirement sliders. */
+  const [highSkillBoundary, setHighSkillBoundary] = useState<number | null>(null);
 
   /** Saved and draft social security policies (API units; benefit rates are 0–1 ratios). */
   const [cityWelfare, setCityWelfare] = useState<WelfareRegulations | null>(null);
@@ -121,11 +128,14 @@ export function CityRegulationWindow({
 
     async function loadCityData() {
       try {
-        const [cityRes, regulationsRes] = await Promise.all([
+        const [cityRes, regulationsRes, parametersRes] = await Promise.all([
           fetchApi<CityData>(buildApiUrl(apiBaseUrl, "/api/v1/city/"), {
             signal: controller.signal,
           }),
           fetchApi<RegulationsData>(buildApiUrl(apiBaseUrl, "/api/v1/city/regulations"), {
+            signal: controller.signal,
+          }),
+          fetchApi<ParametersResponse>(buildApiUrl(apiBaseUrl, "/api/v1/parameters"), {
             signal: controller.signal,
           }),
         ]);
@@ -161,6 +171,7 @@ export function CityRegulationWindow({
           immigration_quota: regulationsRes.immigration_quota,
         });
         setPendingImmigration({});
+        setHighSkillBoundary(parametersRes.parameters.GENERAL_PARAMS.HIGH_SKILL_BOUNDARY);
 
         setCityWelfare({
           retirement_age: regulationsRes.retirement_age,
@@ -389,7 +400,7 @@ export function CityRegulationWindow({
     return <div className="regulation-window__error">{error}</div>;
   }
 
-  if (pathVariants.length === 0 || !cityRegulations || !cityImmigration || !cityWelfare) {
+  if (pathVariants.length === 0 || !cityRegulations || !cityImmigration || !cityWelfare || highSkillBoundary === null) {
     return <div className="regulation-window__loading">{t("common.loading")}</div>;
   }
 
@@ -448,6 +459,7 @@ export function CityRegulationWindow({
           <ImmigrationTab
             cityImmigration={cityImmigration}
             pendingImmigration={pendingImmigration}
+            skillSliderMax={highSkillBoundary}
             onNumberChange={handleImmNumberChange}
             onBoolChange={handleImmBoolChange}
             onSkillThresholdChange={handleSkillThresholdChange}

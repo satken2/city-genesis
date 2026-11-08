@@ -7,7 +7,7 @@ using UnityEngine;
 /// Width/height stay actual size. Map vertices onto points with local X horizontal-right and Y vertical,
 /// keeping posts/towers upright while road surfaces follow grade. Section-boundary vertices coincide, preventing seams.
 /// Model origin lies on the rendered centerline (ground for base_height paths); author distant models around that origin.
-/// Variants without distant models tile master-width plates using the same rules.
+/// Variants without distant models tile plates of the path's width using the same rules.
 /// Plates stand in for a physical body, so paths without one (model_type="outline", such as ferry lanes) draw nothing at a distance.
 /// Elevated spans of those plates use the `body_elevated` material when the variant has that part, as detailed tracks do.
 /// Use DepthOffsetLit variants of model materials (road material for plates) to prevent burial in coarse distant terrain.
@@ -30,21 +30,21 @@ public static class PathFarModel
         public float minZ, length;
     }
 
-    // Models per variant, appearance, and elevation; null for variants with nothing to draw. Elevated entries share the ground tile
-    // when elevated spans look the same. Prefabs (asset packs) and masters may differ by city, so discard on city switches.
-    private static readonly Dictionary<(int variant, int appearance, bool elevated), Tile> tiles = new Dictionary<(int variant, int appearance, bool elevated), Tile>();
+    // Models per variant, appearance, path width (plates take it), and elevation; null for variants with nothing to draw. Elevated entries
+    // share the ground tile when elevated spans look the same. Prefabs (asset packs) and masters may differ by city, so discard on city switches.
+    private static readonly Dictionary<(int variant, int appearance, float width, bool elevated), Tile> tiles = new Dictionary<(int variant, int appearance, float width, bool elevated), Tile>();
 
     static PathFarModel() => AssetPackStore.CityChanging += tiles.Clear;
 
     /// <summary>Whether elevated spans of the variant draw differently from ground spans.</summary>
-    public static bool HasElevatedLook(int variant, int appearance) => GetTile(variant, appearance, true) != GetTile(variant, appearance, false);
+    public static bool HasElevatedLook(int variant, int appearance, float width) => GetTile(variant, appearance, width, true) != GetTile(variant, appearance, width, false);
 
     /// <summary>
     /// Mesh tiled along points. Null if nothing to draw. Caller releases returned meshes.
     /// elevated holds sorted, nonoverlapping length-fraction ranges drawn with the elevated tile; null for none.
     /// Each span is tiled separately, with one submesh per material.
     /// </summary>
-    public static Mesh Build(int variant, int appearance, List<Vector3> points, IReadOnlyList<TrackCorridorInfo.PercentRange> elevated, out Material[] materials)
+    public static Mesh Build(int variant, int appearance, float width, List<Vector3> points, IReadOnlyList<TrackCorridorInfo.PercentRange> elevated, out Material[] materials)
     {
         materials = null;
         if (points == null || points.Count < 2)
@@ -57,12 +57,12 @@ public static class PathFarModel
         {
             foreach (var range in elevated)
             {
-                builder.Append(variant, appearance, false, points, cursor, range.From);
-                builder.Append(variant, appearance, true, points, range.From, range.To);
+                builder.Append(variant, appearance, width, false, points, cursor, range.From);
+                builder.Append(variant, appearance, width, true, points, range.From, range.To);
                 cursor = range.To;
             }
         }
-        builder.Append(variant, appearance, false, points, cursor, 1.0);
+        builder.Append(variant, appearance, width, false, points, cursor, 1.0);
         return builder.ToMesh(out materials);
     }
 
@@ -74,13 +74,13 @@ public static class PathFarModel
         private readonly List<List<int>> triangles = new List<List<int>>();
         private bool hasUv;
 
-        public void Append(int variant, int appearance, bool elevated, List<Vector3> points, double from, double to)
+        public void Append(int variant, int appearance, float width, bool elevated, List<Vector3> points, double from, double to)
         {
             if (to - from <= 1e-6)
             {
                 return;
             }
-            Tile tile = GetTile(variant, appearance, elevated);
+            Tile tile = GetTile(variant, appearance, width, elevated);
             if (tile == null)
             {
                 return;
@@ -171,10 +171,10 @@ public static class PathFarModel
     }
 
     /// <summary>Create a tiled distant child object under parent. Null if nothing to draw.</summary>
-    public static GameObject Create(GameObject parent, string name, int variant, int appearance, List<Vector3> points,
+    public static GameObject Create(GameObject parent, string name, int variant, int appearance, float width, List<Vector3> points,
         IReadOnlyList<TrackCorridorInfo.PercentRange> elevated = null)
     {
-        Mesh mesh = Build(variant, appearance, points, elevated, out Material[] materials);
+        Mesh mesh = Build(variant, appearance, width, points, elevated, out Material[] materials);
         if (mesh == null)
         {
             return null;
@@ -203,9 +203,9 @@ public static class PathFarModel
         right = direction.sqrMagnitude > 1e-8f ? Vector3.Cross(Vector3.up, direction).normalized : Vector3.right;
     }
 
-    private static Tile GetTile(int variant, int appearance, bool elevated)
+    private static Tile GetTile(int variant, int appearance, float width, bool elevated)
     {
-        if (tiles.TryGetValue((variant, appearance, elevated), out Tile cached))
+        if (tiles.TryGetValue((variant, appearance, width, elevated), out Tile cached))
         {
             return cached;
         }
@@ -213,12 +213,12 @@ public static class PathFarModel
         GameObject prefab = ModelManager.Instance != null ? ModelManager.Instance.GetModel($"{folder}/far", true) : null;
         // Distant models cover elevated spans too; only plates take the elevated part's material.
         Material elevatedMaterial = elevated && prefab == null ? ElevatedBodyMaterial(folder) : null;
-        Tile tile = elevated && elevatedMaterial == null ? GetTile(variant, appearance, false)
-            : prefab != null ? ModelTile(prefab) : PlateTile(variant, appearance, elevatedMaterial);
+        Tile tile = elevated && elevatedMaterial == null ? GetTile(variant, appearance, width, false)
+            : prefab != null ? ModelTile(prefab) : PlateTile(variant, appearance, width, elevatedMaterial);
         // Caching results before models/masters are ready would leave that variant permanently absent in distant rendering.
         if (ModelManager.Instance != null && MasterDataStore.Instance != null && MasterDataStore.Instance.IsInitialized)
         {
-            tiles[(variant, appearance, elevated)] = tile;
+            tiles[(variant, appearance, width, elevated)] = tile;
         }
         return tile;
     }
@@ -259,14 +259,14 @@ public static class PathFarModel
     }
 
     /// <param name="material">Plate material; null resolves the variant's body material.</param>
-    private static Tile PlateTile(int variant, int appearance, Material material)
+    private static Tile PlateTile(int variant, int appearance, float width, Material material)
     {
         PathMasterItem master = MasterDataStore.Instance?.GetPathMaster(variant);
-        if (master == null || master.width <= 0f || master.model_type == "outline")
+        if (master == null || width <= 0f || master.model_type == "outline")
         {
             return null;
         }
-        float half = master.width * 0.5f;
+        float half = width * 0.5f;
         material ??= RoadPath.ResolveBodyMaterial(variant, appearance, master.type) ?? AssetPackStore.LoadNamedMaterial("Road");
         return new Tile
         {

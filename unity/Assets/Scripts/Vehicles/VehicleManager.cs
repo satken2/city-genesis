@@ -20,7 +20,6 @@ public partial class VehicleManager : MonoBehaviour
     [SerializeField] private float maxCenterLead = 300f;   // Maximum horizontal lead of the management center from the camera; nonpositive means unlimited.
     [Header("密度")]
     [SerializeField] private float renderFraction = 1f;
-    [SerializeField] private float activeHoursPerDay = LocalConstants.VEHICLE_ACTIVE_HOURS_PER_DAY;
     [SerializeField] private int maxActiveVehicles = 300;
     [SerializeField] private float rangeScanInterval = .5f;
     [SerializeField] private float spawnFillRate = 1f;
@@ -331,7 +330,7 @@ public partial class VehicleManager : MonoBehaviour
             // TransitVehicleManager renders buses/LRT along their lines, so do not spawn them as ambient traffic.
             if (type == Constants.VEHICLE_BUS || type == Constants.VEHICLE_TRAM) continue;
             long key = Key(road.data.path_id, type);
-            float target = Traffic(road.data, type) / Mathf.Max(1, ActiveHoursPerDay * 3600) * road.insideLength
+            float target = Traffic(road.data, type) / Mathf.Max(1, CityDataCache.ActiveHoursPerDay * 3600) * road.insideLength
                 / MeanSpeed(road.data.path_id,type) * Mathf.Clamp01(renderFraction);
             var bucket = new Bucket { road = road, type = type, target = target,
                 average = previous.TryGetValue(key, out var old) ? old.average : 0 };
@@ -663,9 +662,6 @@ public partial class VehicleManager : MonoBehaviour
         if (bucketByKey.TryGetValue(Key(selected.pathId, selected.vehicleType), out var chosen)) chosen.pending++;
         return true;
     }
-
-    /// <summary>The core's daily active hours (PATH_ACTIVE_HOURS) once travel times arrive; the serialized default before that.</summary>
-    private float ActiveHoursPerDay => CityDataCache.Instance != null && CityDataCache.Instance.MotionActiveHours > 0 ? CityDataCache.Instance.MotionActiveHours : activeHoursPerDay;
 
     /// <summary>Travel times of every road come with the city data (CityDataCache), synchronized with epochs and edits.</summary>
     private static bool TryGetMotion(int path,out RoadMotionData data)

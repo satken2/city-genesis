@@ -99,14 +99,6 @@
         "label": "可処分所得下限比率",
         "desc": "世帯が最低限確保しようとする裁量所得の比率。低すぎると生活が破綻しやすい。"
       },
-      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
-        "label": "転居判断エポック数",
-        "desc": "住環境に不満を持ってから転居を決断するまでのエポック数。"
-      },
-      "HOUSEHOLD_SHACK_COUNT": {
-        "label": "ホームレス転落エポック数",
-        "desc": "住居を失ってからホームレス状態になるまでのエポック数。"
-      },
       "AVERAGE_WAGE": {
         "label": "平均賃金（基準値）",
         "desc": "シミュレーション開始時の基準平均賃金。"
@@ -162,18 +154,6 @@
       "MAX_BASE_SKILL": {
         "label": "基礎スキル最大値",
         "desc": "初等教育で到達できる最大スキル値。"
-      },
-      "MAX_SKILL": {
-        "label": "スキル上限値",
-        "desc": "市民が習得できる最大スキル値（高等教育・就労経験を含む）。"
-      },
-      "WAGE_OVERSTAFFED_THRESHOLD": {
-        "label": "過剰雇用時の賃金引下げ閾値",
-        "desc": "過剰雇用率がこれを超えると賃金を引き下げる（labor_surplus / quota で評価）。"
-      },
-      "WAGE_UNDERSTAFFED_THRESHOLD": {
-        "label": "人手不足時の賃金引上げ閾値",
-        "desc": "人手不足かつ応募者ゼロの状態がこれを超えると賃金を引き上げる。"
       },
       "ELEMENTARY_START_AGE": {
         "label": "初等教育開始年齢",

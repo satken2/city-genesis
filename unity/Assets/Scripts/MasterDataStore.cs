@@ -110,6 +110,31 @@ public class MasterDataStore : MonoBehaviour
 		public Dictionary<int, TransitMasterItem> transit;
 	}
 
+	/// <summary>
+	/// GENERAL_PARAMS keys the renderer shares with the core's rules. Each city carries its own values, so read them
+	/// from here instead of copying the standard values.
+	/// </summary>
+	[Serializable]
+	public class GeneralParamsItem
+	{
+		public float RAIL_MAX_TURN_ANGLE_DEG;   // Maximum deflection a train can take at a node (degrees).
+		public float PEDESTRIAN_SPEED;          // km/h.
+		public float PATH_CURVATURE_WINDOW_M;   // Distance before/after each point used to measure curve radius (m).
+		public float PATH_ACTIVE_HOURS;         // Daily hours over which daily traffic flows (h).
+	}
+
+	[Serializable]
+	public class ParametersResponse
+	{
+		public ParametersBody parameters;
+	}
+
+	[Serializable]
+	public class ParametersBody
+	{
+		public GeneralParamsItem GENERAL_PARAMS;
+	}
+
 	[Serializable]
 	public class PathTypesResponse
 	{
@@ -225,6 +250,9 @@ public class MasterDataStore : MonoBehaviour
 
 	public bool IsInitialized { get; private set; } = false;
 
+	/// <summary>The current city's GENERAL_PARAMS (GET /parameters), fetched and replaced together with the master data.</summary>
+	public GeneralParamsItem GeneralParams { get; private set; }
+
 	private Dictionary<string, ProductItem> productMasterByKey = new Dictionary<string, ProductItem>();
 	private Dictionary<int, AgentMasterItem> agentMasterById = new Dictionary<int, AgentMasterItem>();
 	private Dictionary<int, SubBuildingMasterItem> subBuildingMasterById = new Dictionary<int, SubBuildingMasterItem>();
@@ -293,7 +321,8 @@ public class MasterDataStore : MonoBehaviour
 		var buildingTypesCall = ApiClient.Request("GET", "/master/bd_types").Begin();
 		var parcelTypesCall = ApiClient.Request("GET", "/master/parcel_types").Begin();
 		var agentTypesCall = ApiClient.Request("GET", "/master/agent_types").Begin();
-		var calls = new[] { productsCall, pathsCall, transitCall, pathTypesCall, agentsCall, subBuildingsCall, landmarksCall, buildingTypesCall, parcelTypesCall, agentTypesCall };
+		var parametersCall = ApiClient.Request("GET", "/parameters").Begin();
+		var calls = new[] { productsCall, pathsCall, transitCall, pathTypesCall, agentsCall, subBuildingsCall, landmarksCall, buildingTypesCall, parcelTypesCall, agentTypesCall, parametersCall };
 
 		// Wait for all requests to complete.
 		foreach (var call in calls) yield return call.Send();
@@ -308,6 +337,7 @@ public class MasterDataStore : MonoBehaviour
 		var buildingTypesReq = buildingTypesCall.Web;
 		var parcelTypesReq = parcelTypesCall.Web;
 		var agentTypesReq = agentTypesCall.Web;
+		var parametersReq = parametersCall.Web;
 
 		// Products
 		if (productsReq.result == UnityWebRequest.Result.Success)
@@ -499,6 +529,25 @@ public class MasterDataStore : MonoBehaviour
 			Debug.LogError($"MasterDataStore: Failed to load agent types master: {agentTypesReq.error}");
 		}
 
+		// GENERAL_PARAMS
+		if (parametersReq.result == UnityWebRequest.Result.Success)
+		{
+			try
+			{
+				var resp = JsonConvert.DeserializeObject<ParametersResponse>(parametersReq.downloadHandler.text);
+				GeneralParams = resp?.parameters?.GENERAL_PARAMS;
+				Debug.Log("MasterDataStore: GENERAL_PARAMS loaded");
+			}
+			catch (Exception e)
+			{
+				Debug.LogError($"MasterDataStore: Failed to parse parameters: {e.Message}");
+			}
+		}
+		else
+		{
+			Debug.LogError($"MasterDataStore: Failed to load parameters: {parametersReq.error}");
+		}
+
 		bool allSucceeded =
 			productsReq.result == UnityWebRequest.Result.Success &&
 			pathsReq.result == UnityWebRequest.Result.Success &&
@@ -509,7 +558,8 @@ public class MasterDataStore : MonoBehaviour
 			landmarksReq.result == UnityWebRequest.Result.Success &&
 			buildingTypesReq.result == UnityWebRequest.Result.Success &&
 			parcelTypesReq.result == UnityWebRequest.Result.Success &&
-			agentTypesReq.result == UnityWebRequest.Result.Success;
+			agentTypesReq.result == UnityWebRequest.Result.Success &&
+			parametersReq.result == UnityWebRequest.Result.Success;
 
 		foreach (var call in calls) call.Dispose();
 		onComplete(allSucceeded);

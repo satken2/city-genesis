@@ -99,14 +99,6 @@
         "label": "Part minimale de revenu disponible",
         "desc": "Part de revenu discrétionnaire que le ménage cherche à préserver au minimum. Trop basse, le budget familial se rompt facilement."
       },
-      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
-        "label": "Époques avant décision de déménager",
-        "desc": "Nombre d'époques entre l'insatisfaction du ménage vis-à-vis de son cadre de vie et sa décision de déménager."
-      },
-      "HOUSEHOLD_SHACK_COUNT": {
-        "label": "Époques avant de basculer sans domicile",
-        "desc": "Nombre d'époques entre la perte du logement et l'état de sans-abri."
-      },
       "AVERAGE_WAGE": {
         "label": "Salaire moyen (valeur de référence)",
         "desc": "Salaire moyen de référence au début de la simulation."
@@ -162,18 +154,6 @@
       "MAX_BASE_SKILL": {
         "label": "Compétence de base maximale",
         "desc": "Valeur de compétence maximale atteignable par l'enseignement primaire."
-      },
-      "MAX_SKILL": {
-        "label": "Plafond de compétence",
-        "desc": "Valeur de compétence maximale qu'un habitant peut acquérir (enseignement supérieur et expérience professionnelle inclus)."
-      },
-      "WAGE_OVERSTAFFED_THRESHOLD": {
-        "label": "Seuil de baisse salariale en cas de sureffectif",
-        "desc": "Au-delà de ce taux de sureffectif, les salaires sont abaissés (évalué par labor_surplus / quota)."
-      },
-      "WAGE_UNDERSTAFFED_THRESHOLD": {
-        "label": "Seuil de hausse salariale en cas de sous-effectif",
-        "desc": "Au-delà de ce seuil de sous-effectif sans aucun candidat, les salaires sont relevés."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Âge d'entrée dans l'enseignement primaire",

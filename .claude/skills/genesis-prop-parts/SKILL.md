@@ -158,7 +158,7 @@ description: City Genesisの地形プロップ3Dモデル(森の木・岩・茂�
 
 - 原点は接地面・水平中心、Blender -Yが前方。1FBX=1メッシュで既存の車両用 `PROP_*` 材質を共有する。
 - 先頭・後尾は数値バリアント、中間は `middle` / `middle_{外観}`(外観0が `middle`)。貨物22の貨車は `wagon` / `wagon_1` / `wagon_2`。最後尾の反転はUnityが行う。
-- 外観候補は `Resources/Config/model_weights.json`(Unity の `Tools/Asset Packs/Update Standard Model Weights` で実在のモデルから作り直す)、路線種別との対応は `transit_vehicle_models.json`。既存IDを確認して登録する。
+- 外観候補は `Resources/Config/model_weights.json`(Unity の `Tools/Asset Packs/Update Standard Model Weights` で実在のモデルから作り直す)、路線種別の車種は transit_master の `vehicle_type`、貨車の対応は `transit_vehicle_models.json`。既存IDを確認して登録する。
 - exportのカテゴリは `vehicles`、検証対象は `Assets/Models/Vehicles/{車種}`、ギャラリーは `Vehicles`。Unity回帰は `Tests/Vehicles/run.ps1 -TransitOnly`。自動生成されたResourcesラッパーとFBXのGUIDが対応することを確認する。
 - 再生成ジョブは非公開制作ツール `genesis-gallery/pipeline/jobs/vehicles.md`、LRTは同ディレクトリの `lrt_vehicles.md` を参照する。
 

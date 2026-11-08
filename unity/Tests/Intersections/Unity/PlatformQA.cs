@@ -136,6 +136,33 @@ public static class PlatformQA
     }
     static void Require(bool valid, string message) { if (!valid) throw new Exception(message); checks++; }
 
+    // The renderer reads these from the city's master; use the standard GENERAL_PARAMS.
+    static void StandardCityValues(Type storeType, object store)
+    {
+        var values = Activator.CreateInstance(assembly.GetType("MasterDataStore+GeneralParamsItem"));
+        foreach (var (field, value) in new[] { ("RAIL_MAX_TURN_ANGLE_DEG", 45f), ("PEDESTRIAN_SPEED", 4f), ("PATH_CURVATURE_WINDOW_M", 10f), ("PATH_ACTIVE_HOURS", 15f) })
+            values.GetType().GetField(field).SetValue(values, value);
+        storeType.GetField("<GeneralParams>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(store, values);
+    }
+
+    // Track ends resolve their connections with the city's RAIL_MAX_TURN_ANGLE_DEG, so they need a master. Unconfigured entries keep the drawing defaults.
+    static Component EndsMaster(params int[] variants)
+    {
+        var storeType = assembly.GetType("MasterDataStore");
+        var store = new GameObject("EndsMasterFixture").AddComponent(storeType);
+        storeType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, store);
+        StandardCityValues(storeType, store);
+        var masters = (IDictionary)storeType.GetField("pathMasterById", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(store);
+        foreach (int variant in variants) masters[variant] = Activator.CreateInstance(assembly.GetType("PathMasterItem"));
+        return store;
+    }
+
+    static void ReleaseMaster(Component store)
+    {
+        store.GetType().GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, null);
+        UnityEngine.Object.DestroyImmediate(store.gameObject);
+    }
+
     static float[] ClusterCenters(IEnumerable<float> locations)
     {
         var groups = new List<List<float>>();
@@ -235,7 +262,7 @@ public static class PlatformQA
             var parent = new GameObject("RailConnectorPeriodQA");
             parent.transform.position = new Vector3(12f, 6f, -15f);
             var points = new List<Vector3> { Vector3.up * .12f, new Vector3(0, .12f, length) };
-            var spec = Activator.CreateInstance(specType, new object[] { points, 411, 4 });
+            var spec = Activator.CreateInstance(specType, new object[] { points, "Models/Paths/p411", 4 });
             specType.GetField("HasWire").SetValue(spec, wire);
             var lod = Enum.Parse(assembly.GetType("DrawLod"), close ? "Close" : "Normal");
             context.GetMethod("Begin").Invoke(null, new object[] { lod, 0.0, 1.0 });
@@ -289,6 +316,7 @@ public static class PlatformQA
         var instance = storeType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic);
         var store = new GameObject("WireMasterFixture").AddComponent(storeType);
         instance.SetValue(null, store);
+        StandardCityValues(storeType, store);
         var masters = (IDictionary)storeType.GetField("pathMasterById", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(store);
         foreach (int variant in new[] { 401, 411 })
         {
@@ -372,8 +400,10 @@ public static class PlatformQA
         track.GetMethod("CreatePlatformSide", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {
             parent, spline, null, points, new[] { Vector3.right, Vector3.right }, new[] { 0f,32f }, false, 0f, 2.5f, 3f,
             material, "Models/Paths/p461", "Models/Paths/p4", path });
+        var store = EndsMaster(461);
         track.GetMethod("CreateTerminations", BindingFlags.Static|BindingFlags.NonPublic).Invoke(null, new object[] {
             parent, points, null, path, 5f, 1, 0f, 3f, "Models/Paths/p461", "Models/Paths/p4" });
+        ReleaseMaster(store);
         foreach (var comp in parent.GetComponentsInChildren<Component>()) {
             if (comp == null || comp.GetType().Name != "SplineMesh") continue;
             var rebuild = comp.GetType().GetMethod("RebuildImmediate");
@@ -403,6 +433,11 @@ public static class PlatformQA
             summary.GetField(pair.Item1).SetValue(path, pair.Item2);
         summary.GetField("start_point").SetValue(path, new List<object> { 0f, 0f, startZ });
         summary.GetField("end_point").SetValue(path, new List<object> { 0f, 0f, endZ });
+        // The core copies the variant's width onto the path.
+        var storeType = assembly.GetType("MasterDataStore");
+        var store = storeType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
+        var masters = store != null ? (IDictionary)storeType.GetField("pathMasterById", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(store) : null;
+        if (masters != null && masters.Contains(variant)) summary.GetField("width").SetValue(path, masters[variant].GetType().GetField("width").GetValue(masters[variant]));
         return path;
     }
 
@@ -410,6 +445,7 @@ public static class PlatformQA
     {
         var track = assembly.GetType("TrackPath");
         var summary = assembly.GetType("GeneratedModels.PathSummary");
+        var store = EndsMaster(0, 461, 502);
         var path = TrackData(summary, 1, 461, 1, 2, 0f, 32f);
         var provider = track.GetField("ConnectedPathsProvider");
         provider.SetValue(null, Delegate.CreateDelegate(provider.FieldType,
@@ -452,6 +488,7 @@ public static class PlatformQA
             Require(!parent.GetComponentsInChildren<Transform>().Any(t => t.name == "TrackBufferStop"), "Rail buffer stop on monorail");
             UnityEngine.Object.DestroyImmediate(parent);
         }
+        ReleaseMaster(store);
         CheckBundledTracks();
     }
 
@@ -464,6 +501,7 @@ public static class PlatformQA
         var instance = storeType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic);
         var store = new GameObject("MasterFixture").AddComponent(storeType);
         instance.SetValue(null, store);
+        StandardCityValues(storeType, store);
         var masters = (IDictionary)storeType.GetField("pathMasterById", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(store);
         foreach (var (id, width, lanes, platform, center) in new[] { (421, 10f, 2, 0f, 0f), (411, 5f, 1, 0f, 0f), (461, 5f, 1, 3f, 0f), (472, 16f, 2, 3f, 6f) })
         {

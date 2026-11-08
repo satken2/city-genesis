@@ -509,7 +509,7 @@ public class TransitPlanManager : MonoBehaviour
             Vector3 proj = Vector3.Lerp(seg.a, seg.b, t);
             float dist = Utils.XZDistance(worldPos, proj);
 
-            float width = pathManager.GetRoadWidth(seg.path.path_variant);
+            float width = seg.path.width;
             float margin = width * 0.5f + STOP_ON_PATH_MARGIN;
 
             if (dist <= margin && dist < bestDist)

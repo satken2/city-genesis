@@ -150,6 +150,7 @@ public static partial class VehicleQA
             var item=New("PathMasterItem");Set(item,"width",12f);Set(item,"sidewalk_width",(float?)2f);Set(item,"lanes",2);
             ((IDictionary)Get(master,"pathMasterById"))[7301]=item;
             var data=New("ConstructionPathSummary");Set(data,"path_id",7301);Set(data,"path_variant",7301);Set(data,"version",7);
+            Set(data,"width",Get(item,"width")); // Like the core, a path takes its variant's width when created.
             var constants=game.GetType("Constants");
             Set(data,"path_type",constants.GetField("PATH_STREET").GetRawConstantValue());
             Set(data,"status",constants.GetField("STATUS_ACTIVE").GetRawConstantValue());

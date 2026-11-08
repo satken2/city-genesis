@@ -9,8 +9,8 @@ using GeneratedModels;
 /// Ferries berth on the pier centerline, so the berth stays open water and the quay lies on one side only.
 /// body is the quay for the right side of the laying direction (start to end), placed at actual size with its origin on the
 /// centerline at road-surface height (no width stretching or pivot correction, unlike RoadPath bodies). Laying the pier
-/// the other way puts the quay on the other side. Author the quay inside the master width, which is the site and picking width.
-/// Without a body model, fall back to the master-width white strip like other paths.
+/// the other way puts the quay on the other side. Author the quay inside the path's width, which is the site and picking width.
+/// Without a body model, fall back to the path-width white strip like other paths.
 /// </summary>
 public class PierPath : IPathMeshGenerator
 {

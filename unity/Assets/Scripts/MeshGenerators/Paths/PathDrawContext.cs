@@ -50,6 +50,9 @@ public static class PathDrawContext
     /// <summary>Appearance of the current path, selecting distant models together with <see cref="PathVariant"/>.</summary>
     public static int PathAppearance { get; set; }
 
+    /// <summary>Width of the current path, for distant plates.</summary>
+    public static float PathWidth { get; set; }
+
     /// <summary>Paint color of the current path (API `color`) for RoadPath.GetOrCreatePartMaterial; null keeps model colors.</summary>
     public static Color? PaintColor { get; set; }
 
@@ -80,6 +83,7 @@ public static class PathDrawContext
         PartCreated = null;
         PathVariant = 0;
         PathAppearance = Constants.PATH_APPEARANCE_STANDARD;
+        PathWidth = 0f;
         PaintColor = null;
     }
 
@@ -94,14 +98,16 @@ public static class PathDrawContext
         PartCreated = null;
         PathVariant = 0;
         PathAppearance = Constants.PATH_APPEARANCE_STANDARD;
+        PathWidth = 0f;
         PaintColor = null;
     }
 
-    /// <summary>Set the path being drawn (its variant, appearance, and paint color) after <see cref="Begin"/>.</summary>
+    /// <summary>Set the path being drawn (its variant, appearance, width, and paint color) after <see cref="Begin"/>.</summary>
     public static void SetPath(GeneratedModels.PathSummary path)
     {
         PathVariant = path.path_variant;
         PathAppearance = path.appearance;
+        PathWidth = path.width;
         PaintColor = RoadPath.PaintColorOf(path);
     }
 

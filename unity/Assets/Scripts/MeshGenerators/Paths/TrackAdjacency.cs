@@ -88,7 +88,7 @@ public class TrackCorridorInfo
 
     public float TotalLength;
 
-    /// <summary>Own half-width (half master width).</summary>
+    /// <summary>Own half-width (half the path's width).</summary>
     public float OwnHalfWidth;
 
     /// <summary>Own per-point bed outer shifts (S curves, positive outward, symmetric). Null means zero throughout.</summary>

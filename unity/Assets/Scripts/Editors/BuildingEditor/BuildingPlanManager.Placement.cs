@@ -264,7 +264,7 @@ public partial class BuildingPlanManager
             if (tangent.sqrMagnitude < 0.0001f) continue;
             tangent.Normalize();
             Vector3 closest = BuildingPlacementGeometry.Closest(raw, segment.a, segment.b);
-            float halfRoad = placementPaths.GetRoadWidth(segment.path.path_variant) * 0.5f;
+            float halfRoad = segment.path.width * 0.5f;
             float fromCenterLine = Vector3.Distance(cursor, closest);
             if (!roadside && fromCenterLine > halfRoad) continue;
             Vector3 normal = new Vector3(-tangent.z, 0, tangent.x);
@@ -298,7 +298,7 @@ public partial class BuildingPlanManager
                 if (other.path == null || !visitedPlacementSegments.Add(SegmentKey(other))) continue;
                 if (!IsGroundRoad(other, false)) continue;
                 if (BuildingPlacementGeometry.OverlapsRoad(candidate.center, directWidth, directDepth, candidate.angle, other.a, other.b,
-                    placementPaths.GetRoadWidth(other.path.path_variant) * 0.5f)) { overlaps = true; break; }
+                    other.path.width * 0.5f)) { overlaps = true; break; }
             }
             if (overlaps) continue;
             roadAnchorActive = true;
@@ -306,7 +306,7 @@ public partial class BuildingPlanManager
             roadAnchorSegment = candidate.segment.segmentIndex;
             roadFront = candidate.front;
             roadOutward = candidate.outward;
-            float halfWidth = placementPaths.GetRoadWidth(candidate.segment.path.path_variant) * 0.5f;
+            float halfWidth = candidate.segment.path.width * 0.5f;
             roadGuideA = candidate.segment.a + candidate.outward * halfWidth;
             roadGuideB = candidate.segment.b + candidate.outward * halfWidth;
             directCenter = candidate.center;

@@ -99,14 +99,6 @@
         "label": "Minimum Disposable Income Ratio",
         "desc": "Minimum discretionary income ratio a household tries to maintain. If it is too low, household finances break down easily."
       },
-      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
-        "label": "Epochs to Decide to Move",
-        "desc": "Number of epochs of dissatisfaction with the living environment before a household decides to relocate."
-      },
-      "HOUSEHOLD_SHACK_COUNT": {
-        "label": "Epochs Before Homelessness",
-        "desc": "Number of epochs without housing before a household becomes homeless."
-      },
       "AVERAGE_WAGE": {
         "label": "Average Wage (baseline)",
         "desc": "Reference average wage at simulation start."
@@ -162,18 +154,6 @@
       "MAX_BASE_SKILL": {
         "label": "Maximum Base Skill",
         "desc": "Maximum skill level attainable through elementary education."
-      },
-      "MAX_SKILL": {
-        "label": "Maximum Skill",
-        "desc": "Maximum skill level a citizen can reach including higher education and work experience."
-      },
-      "WAGE_OVERSTAFFED_THRESHOLD": {
-        "label": "Overstaffed Wage Cut Threshold",
-        "desc": "Wages are reduced when the overstaffing ratio exceeds this value (labor_surplus / quota)."
-      },
-      "WAGE_UNDERSTAFFED_THRESHOLD": {
-        "label": "Understaffed Wage Raise Threshold",
-        "desc": "Wages are raised when understaffing with zero applicants exceeds this value."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Elementary Education Start Age",

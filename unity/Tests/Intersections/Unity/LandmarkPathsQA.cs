@@ -123,6 +123,7 @@ public static class LandmarkPathsQA
         bool track=id==404||id==414;
         var path=Activator.CreateInstance(assembly.GetType("GeneratedModels.PathSummary"));
         Set(path,"path_id",id); Set(path,"path_variant",id); Set(path,"path_type",track?4:2);
+        if(masters.Contains(id)) Set(path,"width",masters[id].GetType().GetField("width").GetValue(masters[id])); // Like the core, a path takes its variant's width when created.
         Set(path,"follow_terrain",0); Set(path,"curved",false); Set(path,"street_tree_type",trees?1:0);
         // Bridge towers and road markings read the anchors; the flat test ground is at 0, so relative and absolute heights agree.
         List<object> Anchor(Vector3 p) => new List<object>{p.x,p.y,p.z};

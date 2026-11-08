@@ -25,16 +25,6 @@ public static class LocalConstants
     /// </summary>
     public const float FLOOR_HEIGHT = 4f;
 
-    /// <summary>
-    /// Maximum turn deflection at PATH_TRACK/PATH_MONORAIL nodes (degrees; straight = 0, reversal = 180).
-    /// Rail connectors inside intersections are rendered only for traversable movements with deflection at or below this value.
-    /// Keep this equal to RAIL_MAX_TURN_ANGLE_DEG in the backend's parameters.yaml,
-    /// the turn constraint for underlying public transport route searches. A mismatch would allow visible rails
-    /// that cannot be traversed, or traversable connections without visible rails.
-    /// Divergence when a player edits parameters.yaml is a known limitation.
-    /// </summary>
-    public const float RAIL_MAX_TURN_ANGLE_DEG = 45.0f;
-
     // ------------------------------------------------------------------
     // Combined rendering of nearby tracks to make double track visible.
     // There is no internal double-track unit; two one-way single tracks represent double track.
@@ -79,8 +69,7 @@ public static class LocalConstants
     public const float TRACK_TRANSITION_DEFAULT_RADIUS = 100f; // S-curve radius for tracks without a master-data minimum curve radius (m).
     public const float TRACK_JOIN_MAX_BEND_DEG = 2.0f; // Allowed centerline bend at nodes joining tracks without an intersection slab (degrees), following ROAD_MERGE_MAX_MAIN_BEND_DEG for motorways.
     public const float TRACK_JOIN_LATERAL_TOLERANCE = 0.01f; // Tolerance for matching lateral track position and width at two ends joined without a slab (m).
-    public const float PROVISIONAL_TRACK_WELD_DISTANCE = 1.5f; // Horizontal distance for connecting node-less planned, under-construction, or preview track ends (m), matching the core's RAIL_NODE_SNAP_THRESHOLD.
-    public const float PROVISIONAL_TRACK_WELD_HEIGHT = 0.5f; // Maximum absolute-elevation difference for the same connection (m), matching the core's welding on completion.
+    public const float PROVISIONAL_TRACK_WELD_HEIGHT = 0.5f; // Maximum absolute-elevation difference for connecting node-less planned, under-construction, or preview track ends (m), matching the core's welding on completion.
 
     public const float ROAD_MERGE_MAX_EDGE_GAP = 2.0f; // Join motorway main-line and ramp surfaces when their edges are within this gap (m).
     public const float ROAD_MERGE_MAX_ANGLE_DEG = 30.0f; // Maximum angle difference for merging or incorporating a main line and ramp (degrees).
@@ -132,10 +121,7 @@ public static class LocalConstants
     public const string CONSTRUCTION_COMMON_PREFIX = "common";
 
     public const float VEHICLE_TIME_EXAGGERATION = 60f; // Time-compression factor for car rendering. 1 means physically accurate simultaneous vehicle counts, almost always 0.
-    public const float VEHICLE_ACTIVE_HOURS_PER_DAY = 15f; // Daily traffic activity hours (h). Keep equal to PATH_ACTIVE_HOURS in general_params.yaml.
-    public const float PEDESTRIAN_WALK_SPEED = 1.1f; // Average pedestrian speed (m/s). Keep equal to PEDESTRIAN_SPEED (4km/h) in general_params.yaml.
     public const float PEDESTRIAN_SIDEWALK_SURFACE = 0.2f; // Modeled sidewalk height from part bottom to top (m), using the standard sidewalk prefab's value.
-    public const float PATH_CURVATURE_WINDOW_M = 10f; // Curve-radius/grade evaluation window (meters before/after). Keep equal to PATH_CURVATURE_WINDOW_M in general_params.yaml.
     public const float PATH_GRADE_SMOOTH_MIN_M = 10f; // Elevation moving-average distance before grade evaluation (m). Keep equal to backend geo_path_alignment's _MIN_GRADE_SMOOTH_M.
 
     public const bool UNITY_LOG_BUILDING = false; // BuildingMeshBuilder and others.

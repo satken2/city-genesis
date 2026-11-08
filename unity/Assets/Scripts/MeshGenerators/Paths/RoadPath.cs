@@ -355,7 +355,7 @@ public class RoadPath : IPathMeshGenerator
             bool elevatedBody = prefabName.EndsWith("/body_elevated", StringComparison.Ordinal);
             bool isBody = elevatedBody || prefabName.EndsWith("/body", StringComparison.Ordinal);
             group.AddComponent<SplinePartLod>().Configure(spline, width, centerOffsetX, offsetY,
-                isBody, isBody ? PathDrawContext.PathVariant : 0, PathDrawContext.PathAppearance, elevatedBody, clipFrom, clipTo,
+                isBody, isBody ? PathDrawContext.PathVariant : 0, PathDrawContext.PathAppearance, PathDrawContext.PathWidth, elevatedBody, clipFrom, clipTo,
                 (lod, from, to) =>
                 {
                     PathDrawContext.Begin(lod, from, to);
@@ -1027,7 +1027,7 @@ public class RoadPath : IPathMeshGenerator
         // Sidewalks
         if (hasSidewalk)
         {
-            // Road bodies use full master width; overlay sidewalks on them.
+            // Road bodies use the path's full width; overlay sidewalks on them.
             // Sidewalks cover [width/2 - sidewalkWidth, width/2],
             // centered in that strip. Prefabs follow curb (road-center face) at +X=travel-right
             // (left-side part convention); retain source on left, X-mirror on right.
@@ -2007,9 +2007,10 @@ public class RoadPath : IPathMeshGenerator
     }
 
     // Public for PathManager construction generation (dirt-strip width/post-placement tests).
+    // Width is the path's own (the core copies the variant's width onto the path); the other values come from the variant.
     public static void GetPathMasterParams(PathSummary pathData, out float width, out float sidewalkWidth, out float sideWidth, out float? treeSpacing, out int lanes, out float wallWidth, out float centerWidth, out float? pillarSpacing, out bool heightEditable, out float baseHeight, out bool singleSpan)
     {
-        width = 4.0f;
+        width = pathData.width;
         sidewalkWidth = 0.5f;
         sideWidth = 0.5f;
         treeSpacing = null;
@@ -2023,14 +2024,13 @@ public class RoadPath : IPathMeshGenerator
 
         if (MasterDataStore.Instance == null)
         {
-            Debug.LogWarning("[RoadPath] MasterDataStore.Instance が null。デフォルト幅を使用。");
+            Debug.LogWarning("[RoadPath] MasterDataStore.Instance が null。デフォルト値を使用。");
             return;
         }
 
         var master = MasterDataStore.Instance.GetPathMaster(pathData.path_variant);
         if (master != null)
         {
-            width = master.width;
             if (master.sidewalk_width.HasValue) sidewalkWidth = master.sidewalk_width.Value;
             if (master.side_width.HasValue) sideWidth = master.side_width.Value;
             if (master.tree_spacing.HasValue) treeSpacing = master.tree_spacing.Value;
@@ -2046,7 +2046,7 @@ public class RoadPath : IPathMeshGenerator
         }
         else
         {
-            Debug.LogWarning($"[RoadPath] マスターデータなし (variant={pathData.path_variant})。デフォルト幅を使用。");
+            Debug.LogWarning($"[RoadPath] マスターデータなし (variant={pathData.path_variant})。デフォルト値を使用。");
             lanes = Mathf.Max(1, Mathf.RoundToInt(width / 3.5f));
         }
     }

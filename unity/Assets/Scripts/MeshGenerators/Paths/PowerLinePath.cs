@@ -8,7 +8,7 @@ public sealed class PowerLinePath : IPathMeshGenerator
 {
     public static Func<int, List<PathSummary>> ConnectedPaths;
     public static Func<int, Vector3?> FacilityTerminalPosition;
-    public static bool Handles(PathSummary path) => path != null && (path.path_variant == Constants.PATH_VARIANT_GRID || path.path_variant == 1102);
+    public static bool Handles(PathSummary path) => path != null && PathMeshFactory.GetModelType(path) == "power_line";
     public struct Support
     {
         public Vector3 position;

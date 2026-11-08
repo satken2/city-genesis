@@ -77,7 +77,7 @@ public sealed class BusStopManager : MonoBehaviour
                 paths.GetPathObject(road.path_id) == null ||
                 !masters.TryGetValue(road.path_variant, out var master) ||
                 !paths.TryGetPathPolyline(road.path_id, out var points, false)) continue;
-            if (!TryPlace(node.GetAbsolutePosition(), points, master.width, master.sidewalk_width ?? 0,
+            if (!TryPlace(node.GetAbsolutePosition(), points, road.width, master.sidewalk_width ?? 0,
                 out var position, out var rotation)) continue;
             if ((position - center).sqrMagnitude > Radius * Radius) continue;
             // Keep the shelter horizontal and align its base with the highest terrain at the four corners. Underground leg extensions cover the lower side.

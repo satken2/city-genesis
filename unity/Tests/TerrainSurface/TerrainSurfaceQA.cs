@@ -248,6 +248,7 @@ public static class TerrainSurfaceQA
         var path = Activator.CreateInstance(pathType);
         pathType.GetField("path_id").SetValue(path, 1);
         pathType.GetField("path_variant").SetValue(path, 100);
+        pathType.GetField("width").SetValue(path, itemType.GetField("width").GetValue(item)); // Like the core, a path takes its variant's width when created.
         pathType.GetField("path_type").SetValue(path, 1);
         pathType.GetField("curved").SetValue(path, false);
         pathType.GetField("start_point").SetValue(path, new List<object> { -20f, 0f, 0f });

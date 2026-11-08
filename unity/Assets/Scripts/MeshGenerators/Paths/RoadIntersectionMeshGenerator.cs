@@ -538,17 +538,8 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         return new RoadContinuousJoin { PathA = a.path_id, PathB = b.path_id };
     }
 
-    private static float ResolveRoadWidth(PathSummary path)
-    {
-        // Master data defines rendered road width. PathSummary.width comes from the backend;
-        // ordinary road meshes also use master data, so intersections must use the same basis.
-        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(path.path_variant) : null;
-        if (master != null && master.width > 0f)
-        {
-            return master.width;
-        }
-        return path.width > 0f ? path.width : 4.0f;
-    }
+    // The path's own width, as road meshes use (RoadPath.GetPathMasterParams).
+    private static float ResolveRoadWidth(PathSummary path) => path.width > 0f ? path.width : 4.0f;
 
     internal static float ResolveSidewalkWidth(PathSummary path)
     {

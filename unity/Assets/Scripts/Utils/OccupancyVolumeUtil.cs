@@ -112,6 +112,6 @@ public static class OccupancyVolumeUtil
         var offset = Vector3.up * ((master?.base_height ?? 0f) - RoadPartHeights.ROAD_SPLINE_OFFSET);
         for (int i = 0; i < points.Count; i++)
             points[i] += offset;
-        AddTube(triangles, points, manager.GetRoadWidth(path.path_variant), height);
+        AddTube(triangles, points, path.width, height);
     }
 }

@@ -99,14 +99,6 @@
         "label": "Proporción mínima de ingreso disponible",
         "desc": "Proporción de ingreso discrecional que el hogar intenta conservar como mínimo. Si es muy baja, la economía doméstica se quiebra con facilidad."
       },
-      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
-        "label": "Épocas hasta decidir la mudanza",
-        "desc": "Épocas que transcurren desde que el hogar se siente insatisfecho con su entorno residencial hasta que decide mudarse."
-      },
-      "HOUSEHOLD_SHACK_COUNT": {
-        "label": "Épocas hasta caer en situación de calle",
-        "desc": "Épocas que transcurren desde la pérdida de la vivienda hasta quedar en situación de calle."
-      },
       "AVERAGE_WAGE": {
         "label": "Salario promedio (valor de referencia)",
         "desc": "Salario promedio de referencia al iniciar la simulación."
@@ -162,18 +154,6 @@
       "MAX_BASE_SKILL": {
         "label": "Habilidad básica máxima",
         "desc": "Valor máximo de habilidad que se puede alcanzar con la educación básica."
-      },
-      "MAX_SKILL": {
-        "label": "Tope de habilidad",
-        "desc": "Valor máximo de habilidad que puede adquirir un ciudadano (incluyendo educación superior y experiencia laboral)."
-      },
-      "WAGE_OVERSTAFFED_THRESHOLD": {
-        "label": "Umbral de baja salarial por exceso de personal",
-        "desc": "Si la tasa de exceso de personal supera este valor, se bajan los salarios (se evalúa como labor_surplus / quota)."
-      },
-      "WAGE_UNDERSTAFFED_THRESHOLD": {
-        "label": "Umbral de alza salarial por falta de personal",
-        "desc": "Si la falta de personal sin postulantes supera este valor, se suben los salarios."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Edad de inicio de la educación básica",

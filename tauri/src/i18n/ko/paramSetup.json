@@ -99,14 +99,6 @@
         "label": "가처분 소득 하한 비율",
         "desc": "가구가 최소한 확보하려는 재량 소득의 비율. 너무 낮으면 생활이 파탄나기 쉽습니다."
       },
-      "HOUSEHOLD_DECIDE_MOVE_COUNT": {
-        "label": "이사 결정 에포크 수",
-        "desc": "주거 환경에 불만을 가진 뒤 이사를 결심하기까지의 에포크 수."
-      },
-      "HOUSEHOLD_SHACK_COUNT": {
-        "label": "노숙 전락 에포크 수",
-        "desc": "주거를 잃은 뒤 노숙 상태가 되기까지의 에포크 수."
-      },
       "AVERAGE_WAGE": {
         "label": "평균 임금(기준값)",
         "desc": "시뮬레이션 시작 시의 기준 평균 임금."
@@ -162,18 +154,6 @@
       "MAX_BASE_SKILL": {
         "label": "기초 스킬 최대값",
         "desc": "초등 교육으로 도달할 수 있는 최대 스킬 값."
-      },
-      "MAX_SKILL": {
-        "label": "스킬 상한값",
-        "desc": "시민이 습득할 수 있는 최대 스킬 값(고등 교육・취업 경험 포함)."
-      },
-      "WAGE_OVERSTAFFED_THRESHOLD": {
-        "label": "과잉 고용 시 임금 인하 임계값",
-        "desc": "과잉 고용률이 이 값을 넘으면 임금을 낮춥니다(labor_surplus / quota로 평가)."
-      },
-      "WAGE_UNDERSTAFFED_THRESHOLD": {
-        "label": "인력 부족 시 임금 인상 임계값",
-        "desc": "인력 부족이면서 지원자가 없는 상태가 이 값을 넘으면 임금을 올립니다."
       },
       "ELEMENTARY_START_AGE": {
         "label": "초등 교육 시작 연령",

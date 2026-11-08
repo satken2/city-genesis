@@ -304,7 +304,7 @@ public partial class RoadPlanManager
                     if (exEnd != null && exEnd.Count >= 2) risers.Add(new Vector2(exEnd[0], exEnd[exEnd.Count - 1]));
                 }
                 bool railInvolved = TrackIntersectionMeshGenerator.IsTrackType(PathType) || TrackIntersectionMeshGenerator.IsTrackType(exPath.path_type);
-                riserRadius = Mathf.Max(1f, railInvolved ? 0f : Mathf.Max(myWidth, pathManager.GetRoadWidth(exPath.path_variant)) * 0.5f);
+                riserRadius = Mathf.Max(1f, railInvolved ? 0f : Mathf.Max(myWidth, exPath.width) * 0.5f);
             }
 
             for (int i = 0; i < mySegments.Count; i++)
@@ -369,8 +369,9 @@ public partial class RoadPlanManager
             {
                 if (!drawn.Add((other.a, other.b))) continue;
                 int variant = other.path != null ? other.path.path_variant : PathSubtype;
+                float width = other.path != null ? other.path.width : pathManager.GetRoadWidth(PathSubtype);
                 OccupancyVolumeUtil.AddTube(cachedCollisionVolume, new List<Vector3> { other.a, other.b },
-                    pathManager.GetRoadWidth(variant), GetPathHeightFromMaster(variant));
+                    width, GetPathHeightFromMaster(variant));
             }
             // Show river areas near ground-level crossings as occupied boxes in the same warning color.
             foreach (var (river, violationPoints) in CheckRiverCrossings())

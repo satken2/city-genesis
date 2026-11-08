@@ -418,7 +418,8 @@ public class CityOverviewManager : MonoBehaviour
             bool known = CityDataCache.Instance != null && CityDataCache.Instance.TryGetPath(id, out path);
             chunk.readsCityData |= !known;
             List<TrackCorridorInfo.PercentRange> elevated = null;
-            int appearance = Constants.PATH_APPEARANCE_STANDARD; // The overview list carries no appearance; only the city copy does.
+            int appearance = Constants.PATH_APPEARANCE_STANDARD; // The overview list carries no appearance or width; only the city copy does.
+            float width = known ? path.width : MasterDataStore.Instance?.GetPathMaster(s.pathVariants[i])?.width ?? 0f;
             if (known && !PathManager.LiesOnTerrain(path) && pathManager != null)
             {
                 chunk.readsCityData = true;
@@ -433,7 +434,7 @@ public class CityOverviewManager : MonoBehaviour
                     SuspensionBridgeGenerator.GenerateFar(structures, points, path);
                 }
             }
-            Mesh mesh = PathFarModel.Build(s.pathVariants[i], appearance, points, elevated, out Material[] materials);
+            Mesh mesh = PathFarModel.Build(s.pathVariants[i], appearance, width, points, elevated, out Material[] materials);
             if (mesh == null) continue;
             temporary.Add(mesh);
             for (int sub = 0; sub < mesh.subMeshCount; sub++)

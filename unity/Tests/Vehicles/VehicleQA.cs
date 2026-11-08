@@ -20,6 +20,35 @@ public static partial class VehicleQA
     static void Check(bool ok, string message) { if (!ok) throw new Exception(message); }
     static void Near(float a, float b, float tolerance, string message) => Check(Mathf.Abs(a-b) <= tolerance, message + $" ({a} vs {b})");
     static object Line(params Vector3[] points) => New("VehiclePolyline", new object[] { points });
+    // The renderer reads these from the city's master; use the standard GENERAL_PARAMS and transit_master vehicle types.
+    static void StandardCityValues(object master)
+    {
+        var values = New("MasterDataStore+GeneralParamsItem");
+        Set(values, "RAIL_MAX_TURN_ANGLE_DEG", 45f); Set(values, "PEDESTRIAN_SPEED", 4f);
+        Set(values, "PATH_CURVATURE_WINDOW_M", 10f); Set(values, "PATH_ACTIVE_HOURS", 15f);
+        game.GetType("MasterDataStore").GetField("<GeneralParams>k__BackingField", Flags).SetValue(master, values);
+        var transit = (IDictionary)Get(master, "transitMasterById");
+        foreach (var (id, path, vehicle) in new[] { (1, 1001, 12), (2, 1003, 14), (3, 1002, 20), (4, 1005, 21), (5, 1004, 24), (6, 1006, 22), (7, 1007, 22), (8, 1008, 22), (9, 1009, 30) })
+        {
+            var item = New("MasterDataStore+TransitMasterItem");
+            Set(item, "transit_path_id", path); Set(item, "vehicle_type", vehicle);
+            if (path == 1003) Set(item, "route_path_variants", new List<int> { 222, 234, 242, 244, 303, 431 });
+            transit[id] = item;
+        }
+    }
+    // For checks that run without building their own master: add the standard values to the current one, or to a new one shaped like the other fixtures.
+    static void EnsureCityValues()
+    {
+        var type = game.GetType("MasterDataStore");
+        var master = type.GetProperty("Instance").GetValue(null);
+        if (master == null)
+        {
+            master = new GameObject("CityValuesMaster").AddComponent(type);
+            type.GetField("<Instance>k__BackingField", Flags).SetValue(null, master);
+            ((IDictionary)Get(master, "pathMasterById"))[0] = New("PathMasterItem");
+        }
+        StandardCityValues(master);
+    }
     static void Sample(object line, float s, bool forward, out Vector3 p, out Vector3 t)
     {
         object[] args = { s, forward, null, null };
@@ -158,19 +187,21 @@ public static partial class VehicleQA
             string kind = pedestrian ? "Pedestrian" : "Vehicle";
             var master = new GameObject(kind + "CoverageMaster").AddComponent(game.GetType("MasterDataStore"));
             game.GetType("MasterDataStore").GetField("<Instance>k__BackingField", Flags).SetValue(null, master);
+            StandardCityValues(master);
             ((IDictionary)Get(master, "pathMasterById"))[0] = New("PathMasterItem");
             var paths = new GameObject(kind + "CoveragePaths").AddComponent(game.GetType("PathManager"));
             var manager = new GameObject(kind + "Coverage").AddComponent(game.GetType(kind + "Manager"));
             Set(manager, "pathManager", paths); Set(manager, "renderRadius", 100f); Set(manager, "despawnMargin", 0f);
-            if (!pedestrian) { Set(manager, "motionInFlight", true); Set(manager, "spawnBudgetMs", 1000f); }
+            if (!pedestrian) Set(manager, "spawnBudgetMs", 1000f);
             var constants = game.GetType("Constants");
             int street = (int)constants.GetField("PATH_STREET").GetRawConstantValue();
             int status = (int)constants.GetField("STATUS_ACTIVE").GetRawConstantValue();
             var segmentType = manager.GetType().GetNestedType(pedestrian ? "Walk" : "Road", BindingFlags.NonPublic);
             var active = (IList)Get(manager, "active");
             var data = new List<object>(); var lines = new List<object>();
-            float speed = (float)Get(manager, pedestrian ? "walkSpeed" : "baseSpeed");
-            float traffic = 20f * (float)Get(manager, "activeHoursPerDay") * 3600f * speed / 200f;
+            float speed = pedestrian ? Convert.ToSingle(game.GetType("PedestrianManager").GetProperty("WalkSpeed").GetValue(null)) : (float)Get(manager, "baseSpeed");
+            float hours = Convert.ToSingle(game.GetType("CityDataCache").GetProperty("ActiveHoursPerDay").GetValue(null));
+            float traffic = 20f * hours * 3600f * speed / 200f;
             for (int i = 0; i < 2; i++)
             {
                 var path = New("GeneratedModels.PathSummary");
@@ -244,7 +275,6 @@ public static partial class VehicleQA
             Check(additions(before) == 0, kind + " repeated loaded snapshot duplicates population");
             Call(manager, pedestrian ? "ClearPedestrians" : "ClearVehicles");
             Set(manager, pedestrian ? "maxActivePedestrians" : "maxActiveVehicles", 5);
-            if (!pedestrian) Set(manager, "motionInFlight", true);
             commit(0, 2);
             Check(active.Count <= 5, kind + " coverage bypasses the hard cap");
             Call(manager, pedestrian ? "ClearPedestrians" : "ClearVehicles");
@@ -256,6 +286,7 @@ public static partial class VehicleQA
     }
     static void TransitPlacement()
     {
+        EnsureCityValues();
         var models=new GameObject("PlacementModels").AddComponent(game.GetType("ModelManager"));
         game.GetType("ModelManager").GetProperty("Instance").SetValue(null,models);
         var manager=new GameObject("TransitPlacement").AddComponent(game.GetType("TransitVehicleManager"));
@@ -538,6 +569,7 @@ public static partial class VehicleQA
             Call(model,"Dispose");
         }
         VehicleProps();
+        EnsureCityValues();
         Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1003})==14,"LRT model mapping missing");
         Check((int)game.GetType("VehicleModelConfig").GetMethod("GetTransitVehicleType").Invoke(null,new object[]{1004})==24,"Monorail model mapping missing");
         // For cargo 22, check only the locomotive (numeric name). Freight cars are selected independently of the locomotive's livery, so they do not have a middle-type name.
@@ -776,7 +808,9 @@ public static partial class VehicleQA
         // Road 1 takes 65 seconds including congestion versus 16.25 seconds in free-flow conditions (four times the travel time at 100% utilization).
         var timing=New("RoadMotionData");Set(timing,"path_id",1);Set(timing,"length_m",length(1));
         Set(timing,"free_seconds",length(1)/12f);Set(timing,"total_seconds",65f);
-        ((IDictionary)Get(manager,"motion"))[1]=timing;
+        var cityData=new GameObject("CongestionCityData").AddComponent(game.GetType("CityDataCache"));
+        game.GetType("CityDataCache").GetField("<Instance>k__BackingField",Flags).SetValue(null,cityData);
+        ((IDictionary)Get(cityData,"motion"))[1]=timing;
         var bodies=new List<GameObject>();
         Func<int,float,bool,object> car=(path,s,withBody)=>
         {
@@ -822,6 +856,7 @@ public static partial class VehicleQA
         Call(manager,"StopDrive");Call(manager,"ClearVehicles");
         foreach(var body in bodies)if(body!=null)UnityEngine.Object.DestroyImmediate(body);
         UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(paths.gameObject);UnityEngine.Object.DestroyImmediate(master.gameObject);
+        game.GetType("CityDataCache").GetField("<Instance>k__BackingField",Flags).SetValue(null,null);UnityEngine.Object.DestroyImmediate(cityData.gameObject);
     }
 
     static void DriveCamera()
@@ -1042,6 +1077,10 @@ public static partial class VehicleQA
         a=new object[]{walkway,301,4f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
         Check((bool)a[9] && (float)a[6]==0,"Walkway band not centred");Near((float)a[7],1.7f,.001f,"Walkway band outer");
         // Pedestrian-only road 303 with LRT has strips on both sides, clear of the double-track vehicles (track centers ±1.75 m plus half-width 1.27 m).
+        // Whether a road carries LRT comes from the master (transit_master's LRT routes and the path type).
+        EnsureCityValues();
+        var mall=New("PathMasterItem");Set(mall,"type",walkway);
+        ((IDictionary)Get(game.GetType("MasterDataStore").GetProperty("Instance").GetValue(null),"pathMasterById"))[303]=mall;
         a=new object[]{walkway,303,12f,0f,.3f,1f,null,null,null,null};resolve.Invoke(null,a);
         Check(!(bool)a[9],"LRT walkway band spans the tracks");Near((float)a[6],3.32f,.001f,"LRT walkway band inner");
         Near((float)a[7],5.7f,.001f,"LRT walkway band outer");Near((float)a[8],.1f,.001f,"LRT walkway on road surface");
@@ -1227,6 +1266,7 @@ public static partial class VehicleQA
     {
         var master=new GameObject("PedestrianMaster").AddComponent(game.GetType("MasterDataStore"));cleanup.Add(master.gameObject);
         game.GetType("MasterDataStore").GetField("<Instance>k__BackingField",Flags).SetValue(null,master);
+        StandardCityValues(master);
         var item=New("PathMasterItem");Set(item,"frontage_allowed",true);
         ((IDictionary)Get(master,"pathMasterById"))[0]=item;
         // Building registration looks up the variant's building master for the frontage index (throws if it is not registered).
@@ -1251,6 +1291,7 @@ public static partial class VehicleQA
     }
     static string PedestrianNetwork(int subdivisions, float target, int seconds, bool reduce, bool withAccess, int hz=4)
     {
+        EnsureCityValues();
         UnityEngine.Random.InitState(4321+subdivisions);
         var pathManager=new GameObject("PedestrianPaths").AddComponent(game.GetType("PathManager"));
         var manager=new GameObject("Pedestrians").AddComponent(game.GetType("PedestrianManager"));

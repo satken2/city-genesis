@@ -21,13 +21,11 @@ public sealed partial class PedestrianManager : MonoBehaviour
     [SerializeField] private float maxCenterLead = 180f;   // Maximum horizontal lead of the management center from the camera; nonpositive means unlimited.
     [Header("密度")]
     [SerializeField] private float renderFraction = 1f;   // Display multiplier relative to pedestrian traffic: 1=actual, 2/4=increased.
-    [SerializeField] private float activeHoursPerDay = LocalConstants.VEHICLE_ACTIVE_HOURS_PER_DAY;
     [SerializeField] private int maxActivePedestrians = 1000;
     [SerializeField] private float rangeScanInterval = .5f;
     [SerializeField] private float spawnFillRate = 1f;
     [SerializeField] private float minimumJourneyTime = 6f;
     [Header("歩行")]
-    [SerializeField] private float walkSpeed = LocalConstants.PEDESTRIAN_WALK_SPEED;
     [SerializeField] private float walkSpeedJitter = .25f;
     [SerializeField] private float bandMargin = .3f;
     [SerializeField] private float shoulderWidth = 1f;
@@ -35,6 +33,9 @@ public sealed partial class PedestrianManager : MonoBehaviour
     [SerializeField] private float fadeDuration = .4f;
     [SerializeField] private float stepLength = .65f;   // Stride length (m). Replace pose models every half-step.
     [SerializeField] private bool showDebugOverlay;
+
+    /// <summary>Average walking speed (m/s): the city's PEDESTRIAN_SPEED, given in km/h.</summary>
+    public static float WalkSpeed => MasterDataStore.Instance.GeneralParams.PEDESTRIAN_SPEED / 3.6f;
 
     private readonly List<Pedestrian> active = new List<Pedestrian>();
     private readonly Dictionary<int, Walk> walks = new Dictionary<int, Walk>();
@@ -326,8 +327,8 @@ public sealed partial class PedestrianManager : MonoBehaviour
         // Expected people = daily traffic / active seconds x length within circle / walking speed x display multiplier. Do not round up per road.
         foreach (var walk in walks.Values)
         {
-            float target = Traffic(walk.data) / Mathf.Max(1, activeHoursPerDay * 3600) * walk.insideLength
-                / Mathf.Max(.1f, walkSpeed) * Mathf.Max(0, renderFraction);
+            float target = Traffic(walk.data) / Mathf.Max(1, CityDataCache.ActiveHoursPerDay * 3600) * walk.insideLength
+                / Mathf.Max(.1f, WalkSpeed) * Mathf.Max(0, renderFraction);
             var bucket = new Bucket { walk = walk, target = target,
                 average = previous.TryGetValue(walk.data.path_id, out var old) ? old.average : 0 };
             buckets.Add(bucket); bucketByPath.Add(walk.data.path_id, bucket); total += target;
@@ -600,7 +601,7 @@ public sealed partial class PedestrianManager : MonoBehaviour
         var p = new Pedestrian
         {
             variant = Random.Range(0, MaxModelVariants),
-            speed = Mathf.Max(.1f, walkSpeed * (1 + Random.Range(-walkSpeedJitter, walkSpeedJitter))),
+            speed = Mathf.Max(.1f, WalkSpeed * (1 + Random.Range(-walkSpeedJitter, walkSpeedJitter))),
             walked = Random.value * stepLength * 2,
             age = seeding ? fadeDuration : 0,
             moving = seeding,

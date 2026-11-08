@@ -24,6 +24,8 @@ public static class NightLights
     private static HashSet<string> streetSurfaces;
     private static float level;
 
+    static NightLights() => AssetPackStore.CityChanging += () => streetSurfaces = null;
+
     /// <summary>
     /// Make a pool's copy glow at night when its source is window glass, a road surface, or a copy that already glows.
     /// Other materials, and shaders without emission, stay as they are.

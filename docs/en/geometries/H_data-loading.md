@@ -44,7 +44,7 @@ Generation and retirement progress within the shared [frame budget](E_lod.md). D
 
 ## Session switching
 
-Stop camera-driven retrieval from `session:reset` until `session:reload`, while the core prepares the next city. Discard terrain, rendering caches, spatial indices, and pending loads per session. Matching version numbers in another city do not permit reuse. Master data and the asset pack can differ per city, so reload them before redrawing after a city switch ([asset packs](X_asset-packs.md)).
+Stop camera-driven retrieval from `session:reset` until `session:reload`, while the core prepares the next city. Discard terrain, rendering caches, spatial indices, and pending loads per session. Matching version numbers in another city do not permit reuse. Master data, GENERAL_PARAMS, and the asset pack can differ per city, so reload them before redrawing after a city switch ([asset packs](X_asset-packs.md)).
 
 ## Initial-load completion
 

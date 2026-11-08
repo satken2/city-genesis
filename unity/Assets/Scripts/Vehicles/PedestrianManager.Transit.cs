@@ -115,7 +115,7 @@ public sealed partial class PedestrianManager
         var transit = TransitVehicleManager.Instance;
         var store = TransitDataStore.Instance;
         float radius = renderRadius + despawnMargin;
-        float dailyToRate = displayScale / Mathf.Max(1, activeHoursPerDay * 3600);   // Convert daily counts to displayed people per second.
+        float dailyToRate = displayScale / Mathf.Max(1, CityDataCache.ActiveHoursPerDay * 3600);   // Convert daily counts to displayed people per second.
         var houseRidership = new Dictionary<int, float>();
         if (transit != null && store != null)
             foreach (var data in store.Lines)
@@ -385,7 +385,7 @@ public sealed partial class PedestrianManager
         var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(road.path_variant) : null;
         if (!walks.TryGetValue(road.path_id, out var walk) || walk.centered || node == null || master == null
             || !pathManager.TryGetPathPolyline(road.path_id, out var points, false)
-            || !BusStopManager.TryPlace(node.GetAbsolutePosition(), points, master.width, master.sidewalk_width ?? 0, out var shelter, out _)) return false;
+            || !BusStopManager.TryPlace(node.GetAbsolutePosition(), points, road.width, master.sidewalk_width ?? 0, out var shelter, out _)) return false;
         float s = walk.line.Project(shelter);
         walk.line.Sample(s, true, out var axis, out var tangent);
         int side = Vector3.Dot(shelter - axis, Vector3.Cross(Vector3.up, tangent)) < 0 ? -1 : 1;
@@ -505,7 +505,7 @@ public sealed partial class PedestrianManager
         int count = Mathf.Min(stop.slots.Length, (int)(stop.rate * (float)(now - previous) + Random.value));
         for (int i = 0; i < count; i++)
             stop.riders.Add(new Rider { from = stop.slots[i].position, slot = stop.slots[i].position, facing = stop.slots[i].facing, start = now,
-                appear = now, speed = walkSpeed, walked = Random.value * stepLength * 2, variant = Random.Range(0, MaxModelVariants), index = i });
+                appear = now, speed = WalkSpeed, walked = Random.value * stepLength * 2, variant = Random.Range(0, MaxModelVariants), index = i });
     }
 
     /// <summary>On bus arrival, spawn alightings at doors during the first part of the dwell and send queued passengers to doors in order.</summary>
@@ -622,7 +622,7 @@ public sealed partial class PedestrianManager
         {
             int k = visit.order[i];
             float h = Hash01(stop.node, index * 7919 + i, service);
-            float speed = walkSpeed * (1 + walkSpeedJitter * (2 * h - 1));
+            float speed = WalkSpeed * (1 + walkSpeedJitter * (2 * h - 1));
             Vector3 exit = visit.exits[visit.slotExit[k]], slot = visit.slots[k].position;
             float approach = XZDistance(exit, slot) / speed;
             double appear = previous + Mathf.Max(0, window - approach - 1) * (i + h) / count;
@@ -656,7 +656,7 @@ public sealed partial class PedestrianManager
                 float h = Hash01(~stop.node, index * 7919 + j, key);
                 int d = Mathf.Min(visit.doors.Length - 1, (int)(h * visit.doors.Length));
                 Vector3 door = visit.doors[d], exit = visit.exits[visit.doorExit[d]];
-                float speed = walkSpeed * (1 + walkSpeedJitter * (2 * h - 1));
+                float speed = WalkSpeed * (1 + walkSpeedJitter * (2 * h - 1));
                 double appear = arrived + dwell * AlightSpan * (j + .5f) / alighting;
                 double gone = appear + XZDistance(door, exit) / speed;
                 if (now < appear || now >= gone + fade) continue;
@@ -722,7 +722,7 @@ public sealed partial class PedestrianManager
         var p = new Pedestrian
         {
             variant = Random.Range(0, MaxModelVariants),
-            speed = Mathf.Max(.1f, walkSpeed * (1 + Random.Range(-walkSpeedJitter, walkSpeedJitter))),
+            speed = Mathf.Max(.1f, WalkSpeed * (1 + Random.Range(-walkSpeedJitter, walkSpeedJitter))),
             walked = Random.value * stepLength * 2,
         };
         p.SetPath(walk.data.path_id, walk.line, Random.value < .5f, s);

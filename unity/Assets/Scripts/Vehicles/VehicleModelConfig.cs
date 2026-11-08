@@ -3,17 +3,17 @@ using Newtonsoft.Json;
 using UnityEngine;
 
 /// <summary>
-/// Rendering definitions for public transport vehicles: vehicle/wagon types per line type, and running sounds per appearance.
-/// ModelWeights stores appearance options and weights by vehicle type.
+/// Rendering definitions for public transport vehicles: vehicle type per line type from transit_master, wagon models per line
+/// type, and running sounds per appearance. ModelWeights stores appearance options and weights by vehicle type.
 /// </summary>
 public static class VehicleModelConfig
 {
     private static Dictionary<int, TransitDefinition> transitTypes;
     private static Dictionary<int, Dictionary<int, VehicleAmbience.TrainSound>> transitSounds;
 
+    /// <summary>Appearance choices the master does not carry, keyed by line type (section path variant).</summary>
     private sealed class TransitDefinition
     {
-        public int vehicle_type;
         public string wagon;
     }
 
@@ -37,7 +37,15 @@ public static class VehicleModelConfig
         return transitTypes.TryGetValue(pathVariant, out var definition) ? definition : null;
     }
 
-    public static int GetTransitVehicleType(int pathVariant) => GetTransitDefinition(pathVariant)?.vehicle_type ?? 0;
+    /// <summary>Vehicle type (Constants.VEHICLE_*) of the transit type whose section paths use the variant; 0 if none.</summary>
+    public static int GetTransitVehicleType(int pathVariant)
+    {
+        var transit = MasterDataStore.Instance?.GetTransitMasterDictionary();
+        if (transit == null) return 0;
+        foreach (var item in transit.Values)
+            if (item.transit_path_id == pathVariant) return item.vehicle_type ?? 0;
+        return 0;
+    }
 
     /// <summary>
     /// Running sounds by public transport appearance (vehicle type and option index), defined by Resources/Config/transit_vehicle_sounds.json.
@@ -62,6 +70,6 @@ public static class VehicleModelConfig
                 : new TransitCarModel(definition.wagon, -1, false);
         bool middle = identity > 0 && identity < cars - 1;
         string part = middle ? (variant == 0 ? "middle" : $"middle_{variant}") : variant.ToString();
-        return new TransitCarModel(part, variant, identity == cars - 1 && cars > 1 && definition?.vehicle_type != Constants.VEHICLE_BUS);
+        return new TransitCarModel(part, variant, identity == cars - 1 && cars > 1 && GetTransitVehicleType(pathVariant) != Constants.VEHICLE_BUS);
     }
 }

@@ -22,6 +22,12 @@ public static class IntersectionQA
  static Dictionary<int,List<Vector3>> bodyNormals=new Dictionary<int,List<Vector3>>();
  static Component shortPolylineManager;
  static List<Vector3> Samples<T>(T p) {return points[(int)p.GetType().GetField("path_id").GetValue(p)];}
+ // Like the core, a path takes its variant's width when created.
+ static void TakeVariantWidth(object path, IDictionary masters)
+ {
+  var master = masters[(int)path.GetType().GetField("path_variant").GetValue(path)];
+  path.GetType().GetField("width").SetValue(path, master.GetType().GetField("width").GetValue(master));
+ }
  static float ShortPolylineCutLimit<T>(T path) => (float)shortPolylineManager.GetType()
   .GetMethod("GetIntersectionCutLimit", BindingFlags.Instance | BindingFlags.NonPublic)
   .Invoke(shortPolylineManager, new object[] { path, 187, Samples(path) });
@@ -35,6 +41,10 @@ public static class IntersectionQA
    var masterType=asm.GetType("MasterDataStore");
    var master=new GameObject("Master").AddComponent(masterType);
    masterType.GetField("<Instance>k__BackingField",BindingFlags.Static|BindingFlags.NonPublic).SetValue(null,master);
+   // The renderer reads these from the city's master; use the standard GENERAL_PARAMS.
+   var cityValues=Activator.CreateInstance(asm.GetType("MasterDataStore+GeneralParamsItem"));
+   foreach(var (field,value) in new[]{("RAIL_MAX_TURN_ANGLE_DEG",45f),("PEDESTRIAN_SPEED",4f),("PATH_CURVATURE_WINDOW_M",10f),("PATH_ACTIVE_HOURS",15f)}) cityValues.GetType().GetField(field).SetValue(cityValues,value);
+   masterType.GetField("<GeneralParams>k__BackingField",BindingFlags.Instance|BindingFlags.NonPublic).SetValue(master,cityValues);
    Type itemType=asm.GetType("PathMasterItem");
    var dict=(IDictionary)masterType.GetField("pathMasterById",BindingFlags.Instance|BindingFlags.NonPublic).GetValue(master);
    masterType.GetProperty("IsInitialized").SetValue(master,true);
@@ -47,7 +57,7 @@ public static class IntersectionQA
     pathType.GetField("start_point").SetValue(p,new List<object>{0f,0f,0f});pathType.GetField("end_point").SetValue(p,new List<object>{end.x,end.y,end.z});paths.Add(p);
     var item=Activator.CreateInstance(itemType);itemType.GetField("width").SetValue(item,i==0?16f:8f);itemType.GetField("sidewalk_width").SetValue(item,i==2?0f:2f);itemType.GetField("wall_width").SetValue(item,0.4f);itemType.GetField("center_width").SetValue(item,0.6f);itemType.GetField("lanes").SetValue(item,2);itemType.GetField("follow_terrain").SetValue(item,false);itemType.GetField("side_width").SetValue(item,0.5f);
     // For the downhill section (depth 8 m) in the joint check, use clearance that keeps it out of the tunnel section where side walls are omitted.
-    itemType.GetField("height").SetValue(item,10f);dict.Add(100+i,item);
+    itemType.GetField("height").SetValue(item,10f);dict.Add(100+i,item);TakeVariantWidth(p,dict);
     foreach(string part in new[]{"body","sidewalk","wall","center","line"}) {var go=GameObject.CreatePrimitive(PrimitiveType.Cube);go.name=part;go.transform.position=Vector3.down*1000; var mesh=UnityEngine.Object.Instantiate(go.GetComponent<MeshFilter>().sharedMesh);var v=mesh.vertices;for(int j=0;j<v.Length;j++){v[j].y=part=="body"?v[j].y*.1f-.05f:(v[j].y+.5f)*(part=="wall"?2f:part=="sidewalk"?.2f:.1f);}mesh.vertices=v;mesh.RecalculateBounds();go.GetComponent<MeshFilter>().sharedMesh=mesh;var actual=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Paths/p"+(Array.IndexOf(Environment.GetCommandLineArgs(),"-pavedModels")>=0?2:1)+"/"+part+".fbx");cache.Add("Models/Paths/p"+(100+i)+"/"+part,actual!=null?actual:go);}
    }
    var provider=Delegate.CreateDelegate(typeof(Func<,>).MakeGenericType(pathType,typeof(List<Vector3>)),typeof(IntersectionQA).GetMethod("Samples",BindingFlags.Static|BindingFlags.NonPublic).MakeGenericMethod(pathType));
@@ -184,6 +194,7 @@ public static class IntersectionQA
    itemType.GetField("sidewalk_width").SetValue(master, wide ? 3f : 0f);
    itemType.GetField("follow_terrain").SetValue(master, false);
    masters[variant] = master;
+   TakeVariantWidth(path, masters);
    foreach (string part in new[] { "body", "sidewalk", "line" })
     cache["Models/Paths/p" + variant + "/" + part] = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Paths/p2/" + part + ".fbx");
   }
@@ -451,6 +462,7 @@ public static class IntersectionQA
    itemType.GetField("lanes").SetValue(master,i==0?2:1);
    itemType.GetField("follow_terrain").SetValue(master,false);
    masters.Add(variant,master);
+   TakeVariantWidth(path,masters);
    foreach(string part in new[]{"body","track"})
    {
     var prefab=AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Paths/p"+(rail?4:1)+"/"+part+".fbx");

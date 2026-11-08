@@ -53,6 +53,9 @@ public static class BuildingPlacementQA
         Set(road, "path_id", 777);
         Set(road, "path_variant", 88888);
         Set(road, "follow_terrain", -1);
+        // Like the core, a path takes its variant's width when created.
+        var masters = (IDictionary)Get(source.GetType("MasterDataStore").GetProperty("Instance").GetValue(null), "pathMasterById");
+        Set(road, "width", Get(masters[88888], "width"));
         Call(paths, "RegisterPathSegments", road, new System.Collections.Generic.List<Vector3> { new Vector3(0, 0, 0), new Vector3(200, 0, 0) });
         Set(manager, "placementPaths", paths);
         float depth = (float)Property(manager, "PlacementDepth");

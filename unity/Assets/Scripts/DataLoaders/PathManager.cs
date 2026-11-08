@@ -619,17 +619,17 @@ public partial class PathManager : BaseApiDataManager
 
     /// <summary>
     /// Real node to weld at the position (nearest track-connected node within completion welding distance/elevation tolerances).
-    /// Mirrors core find_nearby_node (RAIL_NODE_SNAP_THRESHOLD and elevation difference).
+    /// Mirrors the core's completion welding of track ends (RAIL_JUNCTION_POSITION_TOLERANCE and elevation difference).
     /// </summary>
     private NodeData FindWeldNode(Vector3 position)
     {
         NodeData best = null;
         float bestDistance = float.MaxValue;
-        foreach (NodeData node in QueryNearbyNodes(position, LocalConstants.PROVISIONAL_TRACK_WELD_DISTANCE))
+        foreach (NodeData node in QueryNearbyNodes(position, Constants.RAIL_JUNCTION_POSITION_TOLERANCE))
         {
             Vector3 nodePosition = node.GetAbsolutePosition();
             float distance = Vector2.Distance(new Vector2(nodePosition.x, nodePosition.z), new Vector2(position.x, position.z));
-            if (distance > LocalConstants.PROVISIONAL_TRACK_WELD_DISTANCE || distance >= bestDistance) continue;
+            if (distance > Constants.RAIL_JUNCTION_POSITION_TOLERANCE || distance >= bestDistance) continue;
             if (Mathf.Abs(nodePosition.y - position.y) >= LocalConstants.PROVISIONAL_TRACK_WELD_HEIGHT) continue;
             if (!GetPathsConnectedToNode(node.node_id).Exists(IsTrackTypePath)) continue;
             best = node;
@@ -643,7 +643,7 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     private void CollectProvisionalEnds(Vector3 position, int excludePathId, List<(PathSummary path, bool atStart)> result)
     {
-        float tolerance = LocalConstants.PROVISIONAL_TRACK_WELD_DISTANCE;
+        float tolerance = Constants.RAIL_JUNCTION_POSITION_TOLERANCE;
         bool Matches(PathSummary path, bool atStart)
         {
             if (!TryGetTrackEndPosition(path, atStart, out Vector3 end)) return false;
@@ -1016,7 +1016,7 @@ public partial class PathManager : BaseApiDataManager
     private static bool IsSegmentedLongRoad(PathSummary path)
     {
         if (PathMeshFactory.GetModelType(path) != "default") return false;
-        if (PowerLinePath.Handles(path) || RoadPath.IsRopewayVariant(path.path_variant)) return false;
+        if (RoadPath.IsRopewayVariant(path.path_variant)) return false;
         if (path.status == Constants.STATUS_CONSTRUCTING) return false;
         var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
         if ((master?.single_span ?? false) || (master?.base_height ?? 0f) > 0f) return false;
@@ -1190,8 +1190,8 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     private void AddFarRemainders(GameObject pathGO, PathSummary path, List<Vector3> points, double detailFrom, double detailTo)
     {
-        if (detailFrom > 1e-4) PathFarModel.Create(pathGO, "FarRemainder_Start", path.path_variant, path.appearance, PathDrawContext.SlicePolylineByFraction(points, 0.0, detailFrom));
-        if (1.0 - detailTo > 1e-4) PathFarModel.Create(pathGO, "FarRemainder_End", path.path_variant, path.appearance, PathDrawContext.SlicePolylineByFraction(points, detailTo, 1.0));
+        if (detailFrom > 1e-4) PathFarModel.Create(pathGO, "FarRemainder_Start", path.path_variant, path.appearance, path.width, PathDrawContext.SlicePolylineByFraction(points, 0.0, detailFrom));
+        if (1.0 - detailTo > 1e-4) PathFarModel.Create(pathGO, "FarRemainder_End", path.path_variant, path.appearance, path.width, PathDrawContext.SlicePolylineByFraction(points, detailTo, 1.0));
     }
 
     /// <summary>
@@ -2632,13 +2632,13 @@ public partial class PathManager : BaseApiDataManager
         {
             // Linear interpolation between thinned points deviates from terrain; split using the original centerline before thinning each section.
             List<Vector3> centerline = CalculateSectionCenterline(path, CalculatePathPoints(path));
-            bool elevatedLook = PathFarModel.HasElevatedLook(path.path_variant, path.appearance);
+            bool elevatedLook = PathFarModel.HasElevatedLook(path.path_variant, path.appearance, path.width);
             float baseHeight = GetPathBaseHeight(path.path_variant);
             foreach (var section in TunnelSectionUtil.GetDrawSections(centerline, TunnelSectionUtil.GetClearanceHeight(path.path_variant),
                 UndergroundView.IsActive))
             {
                 var elevated = elevatedLook ? TrackPath.GetElevatedPercentRanges(TrackPath.RenderPoints(path, section.Points), baseHeight) : null;
-                GameObject sectionGO = PathFarModel.Create(pathGO, "PathSection", path.path_variant, path.appearance, DecimatePolyline(section.Points, FAR_SAMPLE_INTERVAL), elevated);
+                GameObject sectionGO = PathFarModel.Create(pathGO, "PathSection", path.path_variant, path.appearance, path.width, DecimatePolyline(section.Points, FAR_SAMPLE_INTERVAL), elevated);
                 if (sectionGO != null)
                 {
                     var display = sectionGO.AddComponent<PathSection>();
@@ -2649,7 +2649,7 @@ public partial class PathManager : BaseApiDataManager
         }
         else
         {
-            mesh = PathFarModel.Build(path.path_variant, path.appearance, points, GetFarElevatedRanges(path), out Material[] farMaterials);
+            mesh = PathFarModel.Build(path.path_variant, path.appearance, path.width, points, GetFarElevatedRanges(path), out Material[] farMaterials);
             if (mesh != null)
             {
                 pathGO.AddComponent<MeshFilter>().mesh = mesh;
@@ -2757,7 +2757,7 @@ public partial class PathManager : BaseApiDataManager
     /// </summary>
     public List<TrackCorridorInfo.PercentRange> GetFarElevatedRanges(PathSummary path)
     {
-        if (LiesOnTerrain(path) || !PathFarModel.HasElevatedLook(path.path_variant, path.appearance)) return null;
+        if (LiesOnTerrain(path) || !PathFarModel.HasElevatedLook(path.path_variant, path.appearance, path.width)) return null;
         List<Vector3> points = CalculatePathPoints(path);
         if (points.Count < 2) return null;
         return TrackPath.GetElevatedPercentRanges(TrackPath.RenderPoints(path, points), GetPathBaseHeight(path.path_variant));
@@ -3509,7 +3509,7 @@ public partial class PathManager : BaseApiDataManager
                 if (!TunnelPortalBuilder.BuildsPortals(other) || !AnchorsWithin(other, position, radius)) continue;
                 if (!pathPointsCache.TryGetValue(id, out List<Vector3> points) || points == null || points.Count < 2) points = CalculatePathPoints(other);
                 if (points == null || points.Count < 2) continue;
-                result.Add(new TunnelPortalBuilder.Neighbor(id, points, GetRoadWidth(other.path_variant) * .5f));
+                result.Add(new TunnelPortalBuilder.Neighbor(id, points, other.width * .5f));
             }
         }
         return result;
@@ -3596,7 +3596,7 @@ public partial class PathManager : BaseApiDataManager
         TrackLateralProfile profile = GetTrackLateralProfile(other);
         float[] outerShifts = profile != null && !profile.IsUniform ? new TrackLateralSampler(profile, other, points).OuterShiftsAtPoints() : null;
 
-        float width = GetRoadWidth(other.path_variant);
+        float width = other.width;
         return new TrackNeighborInfo
         {
             PathId = other.path_id,
@@ -3714,7 +3714,7 @@ public partial class PathManager : BaseApiDataManager
             if (!pathDataCache.TryGetValue(id, out PathSummary other) || other.status != Constants.STATUS_ACTIVE) continue;
             var points = GetUntrimmedPoints(other, out _);
             if (points == null || points.Count < 2) continue;
-            result.Add(new RoadNeighborInfo { PathId = id, Points = points, Width = GetRoadWidth(other.path_variant) });
+            result.Add(new RoadNeighborInfo { PathId = id, Points = points, Width = other.width });
         }
         return result;
     }
@@ -4559,7 +4559,7 @@ public partial class PathManager : BaseApiDataManager
         var neighbors = GetAdjacentRoadNeighbors(path);
         if (neighbors.Count == 0) return points;
         var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
-        var corridor = RoadAdjacency.Compute(points, GetRoadWidth(path.path_variant), Mathf.Max(0f, master?.wall_width ?? 0f), true, neighbors);
+        var corridor = RoadAdjacency.Compute(points, path.width, Mathf.Max(0f, master?.wall_width ?? 0f), true, neighbors);
         return RoadAdjacency.ApplyRampHeights(points, corridor);
     }
 
@@ -4610,7 +4610,7 @@ public partial class PathManager : BaseApiDataManager
 
             if (waypointList != null && waypointList.Count > 0)
             {
-                float width = GetRoadWidth(path.path_variant);
+                float width = path.width;
                 var gf = new NetTopologySuite.Geometries.GeometryFactory();
 
                 Vector3 prevPos = startPos;
@@ -5114,7 +5114,7 @@ public partial class PathManager : BaseApiDataManager
         float platform = master?.platform_width ?? 0f;
         float left = 0f, right = 0f;
         if (IsTrackTypePath(path) && platform > 0f) TrackPath.ResolvePlatformExtents(path, platform, out left, out right);
-        return Mathf.Max(path.width, GetRoadWidth(path.path_variant)) * 0.5f + Mathf.Max(left, right);
+        return path.width * 0.5f + Mathf.Max(left, right);
     }
 
     private PillarClearance.Corridor BuildObstacleCorridor(PathSummary path)
@@ -5167,7 +5167,7 @@ public partial class PathManager : BaseApiDataManager
         {
             pathCorridor ??= BuildObstacleCorridor(path);
             return pathCorridor != null
-                && PillarClearance.NearXZ(GetUntrimmedPoints(road, out _), GetRoadWidth(road.path_variant), pathCorridor);
+                && PillarClearance.NearXZ(GetUntrimmedPoints(road, out _), road.width, pathCorridor);
         }
         foreach (int id in CollectPillarNeighborIds(cells, path.path_id))
         {
@@ -5227,7 +5227,7 @@ public partial class PathManager : BaseApiDataManager
                     if (!TryGetUntrimmedPolylineShared(path.path_id, out var points) || points.Count < 2)
                     { changed.Add(path.path_id); continue; }
                     // Cells only select candidates. Filter by distance including frontage sample spacing, avoiding regeneration of entire large cells.
-                    float reach = GetRoadWidth(path.path_variant) * .5f + RoadAccessPlan.MaxGap + 16f;
+                    float reach = path.width * .5f + RoadAccessPlan.MaxGap + 16f;
                     for (int i = 1; i < points.Count; i++)
                         if (Utils.XZDistanceSquared(position, PolylineUtils.ClosestPointOnSegmentXZ(position, points[i - 1], points[i])) <= reach * reach)
                         { changed.Add(path.path_id); break; }
@@ -6093,7 +6093,7 @@ public partial class PathManager : BaseApiDataManager
             ? IntersectionPolygonUtil.SamplePlan(path) ?? GetPathAnchorPositions(path) : GetPathAnchorPositions(path);
         if (anchors == null || anchors.Count == 0) return cells;
 
-        float halfWidth = Mathf.Max(GetRoadWidth(path.path_variant), path.width) * 0.5f;
+        float halfWidth = path.width * 0.5f;
         for (int i = 0; i < anchors.Count; i++)
         {
             AddCellsAroundPoint(cells, anchors[i], halfWidth);
@@ -6220,6 +6220,7 @@ public partial class PathManager : BaseApiDataManager
         }
     }
 
+    /// <summary>A variant's width, for paths being planned. Existing paths carry their own width (PathSummary.width).</summary>
     public float GetRoadWidth(int pathSubtype)
     {
         const float defaultBackendWidth = 4.0f;
@@ -6612,6 +6613,7 @@ public class PathMasterItem
     ///   "station_house" → StationHousePath
     ///   "pier"    → PierPath
     ///   "outline" → OutlinePath
+    ///   "power_line" → PowerLinePath
     ///   "none"    → no mesh generation (such as routing-only paths)
     /// Null or empty means "default".
     /// </summary>

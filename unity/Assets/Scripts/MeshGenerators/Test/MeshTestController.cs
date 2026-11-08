@@ -462,7 +462,7 @@ public class MeshTestController : MonoBehaviour
             path_id = pathId,
             path_type = type,
             path_variant = variant,
-            width = 4f,
+            width = GetPathWidth(variant),
             curved = curved,
             follow_terrain = Constants.VALUE_NONE, // Explicitly mark unset because int default 0 means non-following.
         };
@@ -494,7 +494,7 @@ public class MeshTestController : MonoBehaviour
     }
 
     /// <summary>Get selected variant full width (m) from master data; default 4m if unavailable.</summary>
-    private float GetPathWidth(int variant)
+    private static float GetPathWidth(int variant)
     {
         if (MasterDataStore.Instance != null && MasterDataStore.Instance.IsInitialized)
         {

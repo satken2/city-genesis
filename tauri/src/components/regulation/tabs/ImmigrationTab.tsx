@@ -47,12 +47,10 @@ const HOUSEHOLD_CHECKS: { key: ImmBoolKey; labelKey: string }[] = [
   { key: "immigration_allow_with_children", labelKey: "regulation.immigrationAllowWithChildren" },
 ];
 
-/** Skill requirement slider maximum, matching the realistic range of citizen skill values */
-const SKILL_SLIDER_MAX = 1.5;
-
 export function ImmigrationTab({
   cityImmigration,
   pendingImmigration,
+  skillSliderMax,
   onNumberChange,
   onBoolChange,
   onSkillThresholdChange,
@@ -61,6 +59,8 @@ export function ImmigrationTab({
   cityImmigration: ImmigrationRegulations;
   /** Draft values; absent keys display saved values. */
   pendingImmigration: Partial<ImmigrationRegulations>;
+  /** Skill requirement slider maximum: the city's HIGH_SKILL_BOUNDARY, the top citizen skills reach through higher education. */
+  skillSliderMax: number;
   onNumberChange: (key: ImmNumberKey, value: number) => void;
   onBoolChange: (key: ImmBoolKey, value: boolean) => void;
   onSkillThresholdChange: (skillId: number, value: number) => void;
@@ -290,7 +290,7 @@ export function ImmigrationTab({
                   <input
                     type="range"
                     min={0}
-                    max={SKILL_SLIDER_MAX}
+                    max={skillSliderMax}
                     step={0.05}
                     className="regulation-skill-slider"
                     value={value}

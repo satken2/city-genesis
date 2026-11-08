@@ -12,7 +12,7 @@ using GeneratedModels;
 ///   body  ... Track bed. Trapezoidal ballast cross-section for surface tracks; elevated/bridge variants
 ///             use girder+bed prefab cross-sections for elevated decks (no dedicated deck slot;
 ///             variants are fixed as surface/elevated, so prefab sections suffice).
-///             Stretch to full master width.
+///             Stretch to the path's full width.
 ///   track ... One track (two rails+sleepers). Preserve gauge by avoiding
 ///             X scaling; place lanes tracks at equal offsets, actual size.
 ///             Monorail uses the same slot with one guideway-beam model.
@@ -148,7 +148,7 @@ public class TrackPath : IPathMeshGenerator
 
     /// <summary>
     /// Platform track-side edge distance from its facing track centerline (m).
-    /// Fixed regardless of variant width; projects inward beyond bed-corridor edges
+    /// Fixed regardless of path width; projects inward beyond bed-corridor edges
     /// to approach the vehicle clearance limit. platform-prefab edge geometry, procedural deck track-side edges,
     /// and neighbor-edge calculations for island joins (TrackAdjacency) share this value.
     /// Centerline-relative distance is PlatformEdgeDistance (equal to this for single track).
@@ -1006,7 +1006,7 @@ public class TrackPath : IPathMeshGenerator
     /// prefab geometry supplies lateral positions beyond that (code offsets only to track position).
     /// Author right-side parts; X-mirror left (origin on track center makes reflection symmetric about it):
     ///   platform (edge) ... Author edge at X=+PLATFORM_EDGE_OFFSET (fixed 1.5m,
-    ///                      independent of variant width). Prefab supplies rise to platform top
+    ///                      independent of path width). Prefab supplies rise to platform top
     ///                      including vertical edge faces/support posts, and yellow lines/
     ///                      tactile paving above.
     ///                      Top details must match PLATFORM_SURFACE_ABOVE_SPLINE;
@@ -1015,7 +1015,7 @@ public class TrackPath : IPathMeshGenerator
     ///                     (single-track outer edge), rising from platform top. Combined double-track stations
     ///                     have the same distance from track to outer edge (width/2+platform_width).
     ///                     Omit vertical faces coplanar with deck outer sides (avoid Z-fighting).
-    /// Mismatch between prefab X and PLATFORM_EDGE_OFFSET/master width/lanes/platform_width
+    /// Mismatch between prefab X and PLATFORM_EDGE_OFFSET/path width/lanes/platform_width
     /// misaligns edges/decks; author models to these values.
     /// Both use actual-size placement (no X scaling/pivot correction); skip if absent.
     /// </summary>
@@ -1765,7 +1765,7 @@ public class TrackPath : IPathMeshGenerator
     /// </summary>
     public static void GetTrackMasterParams(PathSummary pathData, out float width, out int lanes, out float wallWidth, out float? pillarSpacing, out bool heightEditable, out float? wireSpacing, out float baseHeight, out float platformWidth)
     {
-        width = 5.0f;
+        width = pathData.width > 0f ? pathData.width : 5.0f;
         lanes = 1;
         wallWidth = 0f;
         pillarSpacing = null;
@@ -1781,7 +1781,6 @@ public class TrackPath : IPathMeshGenerator
             return;
         }
 
-        if (master.width > 0f) width = master.width;
         if (master.lanes.HasValue && master.lanes.Value > 0) lanes = master.lanes.Value;
         if (master.wall_width.HasValue) wallWidth = master.wall_width.Value;
         if (master.pillar_spacing.HasValue) pillarSpacing = master.pillar_spacing.Value;

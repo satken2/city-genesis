@@ -24,6 +24,20 @@ public static class LrtQA
         if (name == "MasterDataStore") type.GetProperty("IsInitialized").SetValue(component, true);
         return (IDictionary)type.GetField(field, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(component);
     }
+    // The renderer reads these from the city's master: the standard GENERAL_PARAMS and transit_master's LRT type (vehicle type and underlying paths).
+    static void CityValues()
+    {
+        var type = asm.GetType("MasterDataStore");
+        object store = type.GetProperty("Instance").GetValue(null);
+        var values = Activator.CreateInstance(asm.GetType("MasterDataStore+GeneralParamsItem"));
+        foreach (var (field, value) in new[] { ("RAIL_MAX_TURN_ANGLE_DEG", 45f), ("PEDESTRIAN_SPEED", 4f), ("PATH_CURVATURE_WINDOW_M", 10f), ("PATH_ACTIVE_HOURS", 15f) })
+            Set(values, field, value);
+        type.GetField("<GeneralParams>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(store, values);
+        var lrt = Activator.CreateInstance(asm.GetType("MasterDataStore+TransitMasterItem"));
+        Set(lrt, "transit_path_id", 1003); Set(lrt, "vehicle_type", 14);
+        Set(lrt, "route_path_variants", new List<int> { 222, 234, 242, 244, 303, 431 });
+        ((IDictionary)type.GetField("transitMasterById", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(store))[2] = lrt;
+    }
     public static void Run()
     {
         var args = Environment.GetCommandLineArgs();
@@ -40,6 +54,7 @@ public static class LrtQA
             };
             asm = Assembly.LoadFrom(root + "/Temp/bin/Debug/Assembly-CSharp.dll");
             masters = Manager("MasterDataStore", "pathMasterById");
+            CityValues();
             models = Manager("ModelManager", "_modelCache");
             foreach (string file in Directory.GetFiles("Assets/Paths", "*.fbx", SearchOption.AllDirectories))
             {
@@ -109,6 +124,7 @@ public static class LrtQA
     {
         var m = Activator.CreateInstance(asm.GetType("PathMasterItem"));
         Set(m, "width", id == 222 ? 24f : id == 242 ? 32f : id == 303 ? 12f : id == 431 ? 7f : 5f);
+        Set(m, "type", id < 300 ? 1 : id == 431 ? 4 : 3);
         Set(m, "lanes", id == 222 ? 4 : id == 242 ? 6 : id == 431 ? 2 : 1);
         Set(m, "sidewalk_width", id < 300 ? 3f : 0f);
         Set(m, "side_width", id < 300 ? .5f : 0f);
@@ -121,6 +137,7 @@ public static class LrtQA
     {
         var p = Activator.CreateInstance(asm.GetType("GeneratedModels.PathSummary"));
         Set(p, "path_id", key); Set(p, "path_variant", id);
+        if (masters.Contains(id)) Set(p, "width", masters[id].GetType().GetField("width").GetValue(masters[id])); // The core copies the variant's width onto the path.
         Set(p, "status", 1);
         Set(p, "path_type", id < 300 ? 1 : id == 303 ? 3 : 4);
         Set(p, "start_node_id", start ? 1 : key + 10); Set(p, "end_node_id", start ? key + 10 : 1);
@@ -405,50 +422,35 @@ public static class LrtQA
     }
     static void StopIndex()
     {
-        // From stop_points in the line summary, collect only lines whose vehicle type is LRT, grouped by base path. Exclude stops whose base path is unresolved (null), and
-        // the deck length is the number of cars × car length + 1 m at each end. The isolated project has no vehicle-type table, so inject LRT (1003→14) and bus (1→10).
-        var types = asm.GetType("VehicleModelConfig").GetField("transitTypes", BindingFlags.Static | BindingFlags.NonPublic);
-        object saved = types.GetValue(null);
-        var definitions = (IDictionary)Activator.CreateInstance(types.FieldType);
-        var definitionType = types.FieldType.GetGenericArguments()[1];
-        foreach (var entry in new[] { (1, 10), (1003, 14) })
+        // From stop_points in the line summary, collect only lines whose vehicle type (transit_master vehicle_type) is LRT, grouped by base path. Exclude stops whose base path
+        // is unresolved (null), and the deck length is the number of cars × car length + 1 m at each end. Line type 1 has no transit_master entry, so it is not LRT.
+        var summaryType = asm.GetType("GeneratedModels.TransitLineSummary");
+        var pointType = asm.GetType("GeneratedModels.TransitStopPoint");
+        object Point(int node, int? path, float? fraction)
         {
-            var definition = Activator.CreateInstance(definitionType, true);
-            Set(definition, "vehicle_type", entry.Item2);
-            definitions[entry.Item1] = definition;
+            var point = Activator.CreateInstance(pointType);
+            Set(point, "node_id", node); Set(point, "station_path_id", path); Set(point, "fraction", fraction);
+            return point;
         }
-        types.SetValue(null, definitions);
-        try
+        object Summary(int variant, int cars, params object[] points)
         {
-            var summaryType = asm.GetType("GeneratedModels.TransitLineSummary");
-            var pointType = asm.GetType("GeneratedModels.TransitStopPoint");
-            object Point(int node, int? path, float? fraction)
-            {
-                var point = Activator.CreateInstance(pointType);
-                Set(point, "node_id", node); Set(point, "station_path_id", path); Set(point, "fraction", fraction);
-                return point;
-            }
-            object Summary(int variant, int cars, params object[] points)
-            {
-                var summary = Activator.CreateInstance(summaryType);
-                Set(summary, "path_variant", variant); Set(summary, "cars_per_train", cars); Set(summary, "length_per_vehicle", 10f);
-                var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(pointType));
-                foreach (var point in points) list.Add(point);
-                Set(summary, "stop_points", list);
-                return summary;
-            }
-            var lines = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(summaryType));
-            lines.Add(Summary(1003, 3, Point(4, 7, .75f)));
-            lines.Add(Summary(1003, 2, Point(1, 7, .25f), Point(2, 8, .5f), Point(3, null, null)));
-            lines.Add(Summary(1, 1, Point(5, 9, .5f)));
-            var index = (IDictionary)asm.GetType("LrtStopPlatforms").GetMethod("Collect").Invoke(null, new object[] { lines });
-            Check(index.Count == 2 && index.Contains(7) && index.Contains(8), "stop index keeps LRT underlays only");
-            var shared = (IList)index[7];
-            Check(shared.Count == 2 && Mathf.Abs(Number(shared[0], "Fraction") - .25f) < 1e-6f && Mathf.Abs(Number(shared[0], "DeckLength") - 22f) < 1e-4f
-                && Mathf.Abs(Number(shared[1], "Fraction") - .75f) < 1e-6f && Mathf.Abs(Number(shared[1], "DeckLength") - 32f) < 1e-4f, "stop index sorted with deck length");
-            Check(((IList)index[8]).Count == 1, "stop index per underlay");
+            var summary = Activator.CreateInstance(summaryType);
+            Set(summary, "path_variant", variant); Set(summary, "cars_per_train", cars); Set(summary, "length_per_vehicle", 10f);
+            var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(pointType));
+            foreach (var point in points) list.Add(point);
+            Set(summary, "stop_points", list);
+            return summary;
         }
-        finally { types.SetValue(null, saved); }
+        var lines = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(summaryType));
+        lines.Add(Summary(1003, 3, Point(4, 7, .75f)));
+        lines.Add(Summary(1003, 2, Point(1, 7, .25f), Point(2, 8, .5f), Point(3, null, null)));
+        lines.Add(Summary(1, 1, Point(5, 9, .5f)));
+        var index = (IDictionary)asm.GetType("LrtStopPlatforms").GetMethod("Collect").Invoke(null, new object[] { lines });
+        Check(index.Count == 2 && index.Contains(7) && index.Contains(8), "stop index keeps LRT underlays only");
+        var shared = (IList)index[7];
+        Check(shared.Count == 2 && Mathf.Abs(Number(shared[0], "Fraction") - .25f) < 1e-6f && Mathf.Abs(Number(shared[0], "DeckLength") - 22f) < 1e-4f
+            && Mathf.Abs(Number(shared[1], "Fraction") - .75f) < 1e-6f && Mathf.Abs(Number(shared[1], "DeckLength") - 32f) < 1e-4f, "stop index sorted with deck length");
+        Check(((IList)index[8]).Count == 1, "stop index per underlay");
     }
     static List<Vector3> Line(float from, float to)
     {
