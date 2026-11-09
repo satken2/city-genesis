@@ -21,12 +21,14 @@ export type Action =
   | { type: "completeConstruction"; target: string }
   | { type: "scenarioAction"; scenario: string; action: string }
   | { type: "reload" };
-/** Camera destination on stage entry. target is ground-relative [x, y, z]; yaw is clockwise from north=0; pitch is the downward viewing angle in degrees. */
+/** Camera destination on stage entry. target is [x, y, z] relative to the path base plane (the water surface over water); yaw is clockwise from north=0; pitch is the downward viewing angle in degrees. */
 export type CameraGuide = { target: number[]; distance: number; yaw: number; pitch: number };
 export type WorldGuide = {
   mode: "observe" | "blocked" | "path";
   markers?: number[][];
   path?: { points: number[][]; radius: number; variant: Value; bind?: string };
+  /** Where the given building is placed. Unity places it freely and snaps the center onto point within radius. */
+  building?: { point: number[]; radius: number; variant: Value };
   camera?: CameraGuide;
 };
 export type Phase = {

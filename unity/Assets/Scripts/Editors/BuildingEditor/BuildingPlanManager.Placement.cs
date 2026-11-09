@@ -89,6 +89,22 @@ public partial class BuildingPlanManager
             isEditMode || PlacementMode == BuildingPlacementMode.Parcel ? InputMode.MODE_BUILDING_CONSTRUCTION : InputMode.MODE_NONE);
     }
 
+    /// <summary>Whether the tutorial guides where the selected building goes. Guided buildings are placed freely onto the guided point.</summary>
+    public bool TutorialGuided => TutorialRuntime.GuidesBuilding(agentVariant);
+
+    public void ApplyTutorialPlacement()
+    {
+        if (TutorialGuided && !isEditMode) SetPlacementMode(BuildingPlacementMode.Free);
+    }
+
+    /// <summary>Guided placement snaps the center onto the guided point within its radius and skips road snapping, which would pull it away.</summary>
+    private void GuideTutorialPlacement(Vector3 raw)
+    {
+        ResetRoadAnchor();
+        directAngle = freeAngle;
+        if (TutorialRuntime.TrySnapBuilding(raw, out Vector3 guided)) directCenter = new Vector3(guided.x, 0f, guided.z);
+    }
+
     public void SetPlacementMode(BuildingPlacementMode mode)
     {
         if (!PlacementActive || (!DirectAllowed && mode != BuildingPlacementMode.Parcel) || mode == PlacementMode) return;

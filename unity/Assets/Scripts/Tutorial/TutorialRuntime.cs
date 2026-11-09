@@ -7,8 +7,9 @@ using UnityEngine;
 public sealed class TutorialRuntime : MonoBehaviour
 {
     [Serializable] public sealed class PathRule { public float[][] points; public float radius; public int variant; public string bind; }
+    [Serializable] public sealed class BuildingRule { public float[] point; public float radius; public int variant; }
     [Serializable] public sealed class CameraRule { public float[] target; public float distance; public float yaw; public float pitch; }
-    [Serializable] public sealed class WorldRule { public string mode; public float[][] markers; public PathRule path; public CameraRule camera; }
+    [Serializable] public sealed class WorldRule { public string mode; public float[][] markers; public PathRule path; public BuildingRule building; public CameraRule camera; }
     [Serializable] public sealed class Directive { public bool active; public string runId; public int revision; public WorldRule world; }
     public static TutorialRuntime Instance { get; private set; }
     private Directive current;
@@ -21,6 +22,9 @@ public sealed class TutorialRuntime : MonoBehaviour
     public static bool BlocksWorldInput => Instance != null && Instance.current?.active == true && Instance.current.world.mode == "blocked";
     public static bool PathRestricted => Instance != null && Instance.current?.active == true && Instance.current.world.path != null;
     public static PathRule CurrentPath => PathRestricted ? Instance.current.world.path : null;
+    public static bool BuildingRestricted => Instance != null && Instance.current?.active == true && Instance.current.world.building != null;
+    /// <summary>Whether guidance places this building variant (freely, onto the guided point).</summary>
+    public static bool GuidesBuilding(int variant) => BuildingRestricted && Instance.current.world.building.variant == variant;
 
     public static void ApplyFromIpc(Dictionary<string, object> data)
     {
@@ -46,6 +50,7 @@ public sealed class TutorialRuntime : MonoBehaviour
         current = directive;
         if (!directive.active) { retiredRuns.Add(directive.runId); HideOverlay(); return; }
         if (PathRestricted) FindAnyObjectByType<RoadPlanManager>()?.ApplyTutorialPathSettings();
+        if (BuildingRestricted) FindAnyObjectByType<BuildingPlanManager>()?.ApplyTutorialPlacement();
         RequestCamera(directive.world.camera);
         IpcClient.Instance?.EmitTutorialApplied(directive.runId, directive.revision);
     }
@@ -58,13 +63,16 @@ public sealed class TutorialRuntime : MonoBehaviour
         if (rule.camera != null && !(ValidPoint(rule.camera.target) && Finite(rule.camera.distance) && rule.camera.distance > 0
             && Finite(rule.camera.yaw) && rule.camera.pitch >= 5 && rule.camera.pitch <= 89)) return false;
         if (rule.mode == "path" && rule.path == null) return false;
+        if (rule.building != null && !(ValidPoint(rule.building.point) && rule.building.radius > 0
+            && !float.IsInfinity(rule.building.radius) && rule.building.variant > 0)) return false;
         return rule.path == null || (rule.path.points?.Length == 2 && Array.TrueForAll(rule.path.points, ValidPoint)
             && rule.path.radius > 0 && !float.IsInfinity(rule.path.radius) && rule.path.variant > 0
             && Vector2.Distance(new Vector2(rule.path.points[0][0], rule.path.points[0][2]), new Vector2(rule.path.points[1][0], rule.path.points[1][2])) >= 1);
     }
-    private static Vector3 SurfacePoint(float[] p) { var pos = new Vector3(p[0], 0, p[2]); pos.y = Utils.GetGroundHeight(pos); return pos; }
+    /// <summary>Guide heights share the base plane of path relative Y (the water surface over water), so guided points match placed path points.</summary>
+    private static Vector3 SurfacePoint(float[] p) { var pos = new Vector3(p[0], 0, p[2]); pos.y = Utils.GetPathSurfaceHeight(pos); return pos; }
     private static Vector3 GroundPoint(float[] p) => SurfacePoint(p) + Vector3.up * p[1];
-    /// <summary>Ground-relative height of the next point (0=start, 1=end). Start and end may differ.</summary>
+    /// <summary>Surface-relative height of the next point (0=start, 1=end). Start and end may differ.</summary>
     public static float PointHeight(int index) => PathRestricted ? CurrentPath.points[Mathf.Clamp(index, 0, 1)][1] : 0f;
     /// <summary>Place start/end points with left-click, then confirm the shape with right-click after both are placed.</summary>
     public static bool AllowRoadClick(Vector3 raw, int count, bool rightClick, int variant, bool placing)
@@ -82,6 +90,20 @@ public sealed class TutorialRuntime : MonoBehaviour
         if (!PathRestricted || index < 0 || index > 1) return false;
         var p = CurrentPath.points[index];
         if (Vector2.Distance(new Vector2(raw.x, raw.z), new Vector2(p[0], p[2])) > CurrentPath.radius) return false;
+        position = GroundPoint(p); return true;
+    }
+    /// <summary>While a building is guided, only the guided variant may be placed, and only within the radius around the guided point.</summary>
+    public static bool AllowBuildingClick(Vector3 raw, int variant)
+    {
+        if (!BuildingRestricted) return !BlocksWorldInput;
+        return GuidesBuilding(variant) && TrySnapBuilding(raw, out _);
+    }
+    public static bool TrySnapBuilding(Vector3 raw, out Vector3 position)
+    {
+        position = raw;
+        if (!BuildingRestricted) return false;
+        var p = Instance.current.world.building.point;
+        if (Vector2.Distance(new Vector2(raw.x, raw.z), new Vector2(p[0], p[2])) > Instance.current.world.building.radius) return false;
         position = GroundPoint(p); return true;
     }
     public static bool AcceptsPath(IList<PathBuildPoint> points, int variant, bool curved)
@@ -119,22 +141,23 @@ public sealed class TutorialRuntime : MonoBehaviour
         overlay.BeginFrame();
         if (current.world.path != null)
         {
-            // Draw the actual acceptance radius on the ground, rather than a fixed screen size. Even for elevated points, acceptance uses horizontal ground distance.
+            // Draw the actual acceptance radius on the surface, rather than a fixed screen size. Even for elevated points, acceptance uses horizontal distance.
             for (int index = 0; index < 2; index++)
-            {
-                var center = SurfacePoint(current.world.path.points[index]) + Vector3.up * .1f;
-                var color = index == 0 ? Color.cyan : Color.yellow;
-                for (int i = 0; i < 48; i++)
-                {
-                    float a = i * Mathf.PI * 2 / 48, b = (i + 1) * Mathf.PI * 2 / 48;
-                    overlay.AddSolidLine(center + new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * current.world.path.radius,
-                        center + new Vector3(Mathf.Cos(b), 0, Mathf.Sin(b)) * current.world.path.radius, color, 3);
-                }
-            }
+                AddRing(SurfacePoint(current.world.path.points[index]) + Vector3.up * .1f, current.world.path.radius, index == 0 ? Color.cyan : Color.yellow);
             overlay.AddDashedLine(GroundPoint(current.world.path.points[0]) + Vector3.up * .1f, GroundPoint(current.world.path.points[1]) + Vector3.up * .1f, Color.yellow, 3);
         }
         else foreach (var marker in current.world.markers ?? Array.Empty<float[]>()) overlay.AddCircle(GroundPoint(marker) + Vector3.up * .1f, 14f, Color.yellow);
+        if (current.world.building != null) AddRing(SurfacePoint(current.world.building.point) + Vector3.up * .1f, current.world.building.radius, Color.yellow);
         overlay.EndFrame(Camera.main);
+    }
+    private void AddRing(Vector3 center, float radius, Color color)
+    {
+        for (int i = 0; i < 48; i++)
+        {
+            float a = i * Mathf.PI * 2 / 48, b = (i + 1) * Mathf.PI * 2 / 48;
+            overlay.AddSolidLine(center + new Vector3(Mathf.Cos(a), 0, Mathf.Sin(a)) * radius,
+                center + new Vector3(Mathf.Cos(b), 0, Mathf.Sin(b)) * radius, color, 3);
+        }
     }
     private void HideOverlay() { if (overlay != null) overlay.gameObject.SetActive(false); }
     public static void Clear()

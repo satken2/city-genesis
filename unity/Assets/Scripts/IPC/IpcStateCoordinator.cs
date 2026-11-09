@@ -727,6 +727,7 @@ public class IpcStateCoordinator : MonoBehaviour
             {
                 buildingPlanManager.SetPlacementMode(initialMode);
             }
+            buildingPlanManager.ApplyTutorialPlacement();
         }
     }
 

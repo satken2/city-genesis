@@ -515,55 +515,43 @@
         "description": "Un puerto o una terminal petrolera en el terreno ganado no sirve sin calle: nadie puede ir a trabajar y las mercancías no pueden moverse. Traza una calle desde el extremo de la calle del pueblo hasta el terreno ganado. En este tutorial, la calle se termina en cuanto la confirmas. Pulsa «Calles, ferrocarril e infraestructura» en el panel de iconos para abrir el panel de construcción."
       },
       "step4": {
-        "title": "Crea la parcela del muelle para petroleros",
-        "description": "Los petroleros que transportan crudo son barcos grandes, así que un puerto solo puede construirse donde el mar frente al muelle tiene suficiente profundidad. El muelle del terreno ganado da a aguas profundas, ideal para un puerto. Abre la herramienta de parcelas y elige Parcela única. Ajusta Fondo y Largo a 70 m, haz clic en el centro de los cuatro marcadores que cruzan el muelle y confirma."
+        "title": "Construye el muelle para petroleros",
+        "description": "Los petroleros que transportan crudo son barcos grandes, así que un puerto solo puede construirse donde el mar frente al muelle tiene suficiente profundidad. El muelle del terreno ganado da a aguas profundas, ideal para un puerto. Abre la herramienta de edificios, elige «Muelle para petroleros» en la categoría «Puertos», haz clic izquierdo dentro del círculo amarillo sobre el muelle para fijar su lugar y confirma en el panel de construcción. Al construir un puerto, se traza automáticamente un canal de conexión hasta la ruta oceánica mar adentro para que los barcos puedan entrar y salir. En esta lección se omite el plazo de obra."
       },
       "step5": {
-        "title": "Construye el muelle para petroleros",
-        "description": "Abre la herramienta de edificios, elige «Muelle para petroleros» en la categoría «Puertos» y constrúyelo en la parcela que acabas de crear. Al construir un puerto, se traza automáticamente un canal de conexión hasta la ruta oceánica mar adentro para que los barcos puedan entrar y salir. En esta lección se omite el plazo de obra."
-      },
-      "step6": {
         "title": "Tiende un puente sobre la boca de la bahía",
         "description": "La autopista se interrumpe a ambos lados de la boca de la bahía. La boca mide 1,6 km de ancho, demasiado para un puente común sobre hileras de pilares, así que únela con un puente colgante que cruce una gran distancia de un solo tramo. Por debajo pasan los barcos grandes por la ruta marítima, así que el puente debe estar lo bastante alto para que no choquen. Los extremos de la autopista en ambas orillas ya están a esa altura. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos, elige «Puente colgante de 4 carriles» en «Autopistas» y trázalo desde el extremo norte (círculo celeste) hasta el extremo sur (círculo amarillo). Finaliza la forma con clic derecho, confirma en el panel de construcción y pulsa «Siguiente»."
       },
-      "step7": {
+      "step6": {
         "title": "Busca el yacimiento submarino",
         "description": "Ahora vas a aprovechar los recursos del mar. Antes de construir una terminal petrolera, comprueba que haya un yacimiento de petróleo bajo el mar cercano. Pulsa «Visualización» en el panel de mando para abrir el panel.",
         "show": "Elige «Recursos naturales» en las pestañas verticales y cambia a «Visible». Verás un yacimiento de petróleo extendido bajo la bahía. Haz clic en el yacimiento junto al marcador amarillo para abrir sus detalles."
       },
+      "step7": {
+        "title": "Construye la terminal petrolera",
+        "description": "El crudo extraído del yacimiento submarino se envía por oleoducto a una terminal en la costa y desde allí se vende. La terminal se construye frente al muelle, por donde entra el oleoducto. Abre la herramienta de edificios, elige «Terminal de recepción de oleoducto» en la categoría «Puertos», haz clic izquierdo dentro del círculo amarillo sobre el muelle para fijar su lugar y confirma en el panel de construcción. En esta lección se omite el plazo de obra."
+      },
       "step8": {
-        "title": "Crea la parcela de la terminal petrolera",
-        "description": "El crudo extraído del yacimiento submarino se envía por oleoducto a una terminal en la costa y desde allí se vende. La terminal se construye frente al muelle, por donde entra el oleoducto. Abre la herramienta de parcelas y elige Parcela única. Ajusta Fondo y Largo a 60 m, haz clic en el centro de los cuatro marcadores y confirma."
+        "title": "Construye la plataforma petrolera",
+        "description": "La plataforma que extrae el crudo debe levantarse en el mar, justo encima del yacimiento. Abre la herramienta de edificios, elige «Plataforma petrolera marítima» en la categoría «Agricultura y recursos», haz clic izquierdo dentro del círculo amarillo sobre el mar para fijar su lugar y confirma en el panel de construcción. En esta lección se omite el plazo de obra."
       },
       "step9": {
-        "title": "Construye la terminal petrolera",
-        "description": "Abre la herramienta de edificios, elige «Terminal de recepción de oleoducto» en la categoría «Puertos» y constrúyela en la parcela que acabas de crear. En esta lección se omite el plazo de obra."
-      },
-      "step10": {
-        "title": "Crea una parcela sobre el yacimiento",
-        "description": "La plataforma que extrae el crudo debe levantarse en el mar, justo encima del yacimiento. Abre la herramienta de parcelas y elige Parcela única. Ajusta Fondo y Largo a 70 m, haz clic en el centro de los cuatro marcadores sobre el mar y confirma."
-      },
-      "step11": {
-        "title": "Construye la plataforma petrolera",
-        "description": "En una parcela sobre el mar solo pueden construirse instalaciones pensadas para el mar. Abre la herramienta de edificios, elige «Plataforma petrolera marítima» en la categoría «Agricultura y recursos» y constrúyela en la parcela del mar. En esta lección se omite el plazo de obra."
-      },
-      "step12": {
         "title": "Conéctalas con un oleoducto",
         "description": "Envía el crudo extraído por la plataforma hasta la terminal mediante un oleoducto submarino. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos, elige «Oleoducto submarino» en «Petróleo» y trázalo desde el terminal de conexión de la plataforma hasta el de la terminal petrolera. Después de confirmarlo, pulsa «Siguiente» y el oleoducto quedará terminado de inmediato."
       },
-      "step13": {
+      "step10": {
         "title": "Exporta el crudo",
         "description": "La terminal vende en el mercado el crudo que recibe, y el muelle para petroleros lo compra y lo exporta en barco. Pasarán algunos meses hasta que lleguen trabajadores y el crudo empiece a venderse. Avanza unos meses con Iniciar y pulsa «Siguiente». Si todavía no se ha exportado nada, avanza un poco más y vuelve a pulsarlo."
       },
-      "step14": {
+      "step11": {
         "title": "Construye un muelle de ferri",
         "description": "La isla cercana no tiene forma de llegar al pueblo. Abre un ferri para que sus habitantes puedan ir al pueblo. Primero construye un muelle de ferri en la costa del pueblo. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos, elige «Muelle de ferri» en «Vía navegable» y trázalo desde tierra (círculo celeste) hasta el mar (círculo amarillo). Finaliza la forma con clic derecho, confirma en el panel de construcción y pulsa «Siguiente»."
       },
-      "step15": {
+      "step12": {
         "title": "Traza el canal de ferri",
         "description": "Ahora traza el canal por el que navegará el ferri, desde el muelle de la isla hasta el muelle del pueblo. Un canal no puede cruzar tierra, así que rodea el norte de la isla, pasa bajo el puente colgante de la boca de la bahía y entra en la bahía, haciendo clic izquierdo por el camino para colocar puntos. Elige «Canal de ferri» en «Vía navegable», une la punta del muelle de la isla con la del muelle del pueblo, confirma y pulsa «Siguiente»."
       },
-      "step16": {
+      "step13": {
         "title": "Abre la línea de ferri",
         "description": "Por último, crea la línea de ferri que recorre el canal. Crea una línea de ferri, coloca paradas en el muelle de la isla y en el del pueblo, haz clic en la primera parada para cerrar el recorrido y confirma. Cuando exista la línea, el tutorial habrá terminado. Para que los barcos naveguen de verdad, también hace falta un dique de mantenimiento que los alquile."
       }

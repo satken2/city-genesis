@@ -220,6 +220,32 @@
                       ],
                       "additionalProperties": false
                     },
+                    "building": {
+                      "type": "object",
+                      "properties": {
+                        "point": {
+                          "type": "array",
+                          "items": {
+                            "type": "number"
+                          },
+                          "minItems": 3,
+                          "maxItems": 3
+                        },
+                        "radius": {
+                          "type": "number",
+                          "exclusiveMinimum": 0
+                        },
+                        "variant": {
+                          "$ref": "#/definitions/value"
+                        }
+                      },
+                      "required": [
+                        "point",
+                        "radius",
+                        "variant"
+                      ],
+                      "additionalProperties": false
+                    },
                     "camera": {
                       "type": "object",
                       "properties": {

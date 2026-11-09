@@ -519,77 +519,12 @@
       ]
     },
     {
-      "id": "marine.pier_lot",
+      "id": "marine.pier",
       "legacyStep": 4,
       "phases": [
         {
-          "id": "perform",
-          "textKey": "tutorial.marine.step4.description",
-          "ui": {
-            "policy": "highlight",
-            "allow": [],
-            "highlight": [
-              "hud.land"
-            ]
-          },
-          "world": {
-            "mode": "observe",
-            "markers": [
-              [
-                -380.0,
-                3,
-                925.0
-              ],
-              [
-                -310.0,
-                3,
-                925.0
-              ],
-              [
-                -310.0,
-                3,
-                995.0
-              ],
-              [
-                -380.0,
-                3,
-                995.0
-              ]
-            ],
-            "camera": {
-              "target": [
-                -345.0,
-                3,
-                960.0
-              ],
-              "distance": 140,
-              "yaw": 0,
-              "pitch": 55
-            }
-          },
-          "until": {
-            "type": "ack"
-          }
-        }
-      ],
-      "complete": {
-        "type": "entity",
-        "resource": "tutorial",
-        "where": [
-          {
-            "field": "checks.pier_lot",
-            "equals": true
-          }
-        ]
-      }
-    },
-    {
-      "id": "marine.pier",
-      "legacyStep": 5,
-      "phases": [
-        {
           "id": "open",
-          "textKey": "tutorial.marine.step5.description",
+          "textKey": "tutorial.marine.step4.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -601,13 +536,16 @@
           },
           "world": {
             "mode": "observe",
-            "markers": [
-              [
+            "markers": [],
+            "building": {
+              "point": [
                 -345,
-                3,
+                0,
                 960
-              ]
-            ],
+              ],
+              "radius": 25,
+              "variant": 402
+            },
             "camera": {
               "target": [
                 -345.0,
@@ -626,7 +564,7 @@
         },
         {
           "id": "select",
-          "textKey": "tutorial.marine.step5.description",
+          "textKey": "tutorial.marine.step4.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -645,13 +583,16 @@
           },
           "world": {
             "mode": "observe",
-            "markers": [
-              [
+            "markers": [],
+            "building": {
+              "point": [
                 -345,
-                3,
+                0,
                 960
-              ]
-            ],
+              ],
+              "radius": 25,
+              "variant": 402
+            },
             "camera": {
               "target": [
                 -345.0,
@@ -691,11 +632,11 @@
     },
     {
       "id": "marine.bridge",
-      "legacyStep": 6,
+      "legacyStep": 5,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.marine.step6.description",
+          "textKey": "tutorial.marine.step5.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -754,7 +695,7 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.marine.step6.description",
+          "textKey": "tutorial.marine.step5.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -816,7 +757,7 @@
         },
         {
           "id": "start",
-          "textKey": "tutorial.marine.step6.description",
+          "textKey": "tutorial.marine.step5.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -874,7 +815,7 @@
         },
         {
           "id": "end",
-          "textKey": "tutorial.marine.step6.description",
+          "textKey": "tutorial.marine.step5.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -932,7 +873,7 @@
         },
         {
           "id": "finalize",
-          "textKey": "tutorial.marine.step6.description",
+          "textKey": "tutorial.marine.step5.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -991,7 +932,7 @@
         },
         {
           "id": "confirm",
-          "textKey": "tutorial.marine.step6.description",
+          "textKey": "tutorial.marine.step5.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1073,11 +1014,11 @@
     },
     {
       "id": "marine.oil_field",
-      "legacyStep": 7,
+      "legacyStep": 6,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.marine.step7.description",
+          "textKey": "tutorial.marine.step6.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -1112,7 +1053,7 @@
         },
         {
           "id": "show",
-          "textKey": "tutorial.marine.step7.show",
+          "textKey": "tutorial.marine.step6.show",
           "ui": {
             "policy": "highlight",
             "allow": [
@@ -1151,77 +1092,12 @@
       ]
     },
     {
-      "id": "marine.oilbase_lot",
-      "legacyStep": 8,
-      "phases": [
-        {
-          "id": "perform",
-          "textKey": "tutorial.marine.step8.description",
-          "ui": {
-            "policy": "highlight",
-            "allow": [],
-            "highlight": [
-              "hud.land"
-            ]
-          },
-          "world": {
-            "mode": "observe",
-            "markers": [
-              [
-                -295.0,
-                3,
-                940.0
-              ],
-              [
-                -235.0,
-                3,
-                940.0
-              ],
-              [
-                -235.0,
-                3,
-                1000.0
-              ],
-              [
-                -295.0,
-                3,
-                1000.0
-              ]
-            ],
-            "camera": {
-              "target": [
-                -265.0,
-                3,
-                970.0
-              ],
-              "distance": 140,
-              "yaw": 0,
-              "pitch": 55
-            }
-          },
-          "until": {
-            "type": "ack"
-          }
-        }
-      ],
-      "complete": {
-        "type": "entity",
-        "resource": "tutorial",
-        "where": [
-          {
-            "field": "checks.oilbase_lot",
-            "equals": true
-          }
-        ]
-      }
-    },
-    {
       "id": "marine.oilbase",
-      "legacyStep": 9,
+      "legacyStep": 7,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.marine.step9.description",
+          "textKey": "tutorial.marine.step7.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1233,13 +1109,16 @@
           },
           "world": {
             "mode": "observe",
-            "markers": [
-              [
+            "markers": [],
+            "building": {
+              "point": [
                 -265,
-                3,
+                0,
                 970
-              ]
-            ],
+              ],
+              "radius": 25,
+              "variant": 1073
+            },
             "camera": {
               "target": [
                 -265.0,
@@ -1258,7 +1137,7 @@
         },
         {
           "id": "select",
-          "textKey": "tutorial.marine.step9.description",
+          "textKey": "tutorial.marine.step7.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1277,13 +1156,16 @@
           },
           "world": {
             "mode": "observe",
-            "markers": [
-              [
+            "markers": [],
+            "building": {
+              "point": [
                 -265,
-                3,
+                0,
                 970
-              ]
-            ],
+              ],
+              "radius": 25,
+              "variant": 1073
+            },
             "camera": {
               "target": [
                 -265.0,
@@ -1322,77 +1204,12 @@
       ]
     },
     {
-      "id": "marine.platform_lot",
-      "legacyStep": 10,
-      "phases": [
-        {
-          "id": "perform",
-          "textKey": "tutorial.marine.step10.description",
-          "ui": {
-            "policy": "highlight",
-            "allow": [],
-            "highlight": [
-              "hud.land"
-            ]
-          },
-          "world": {
-            "mode": "observe",
-            "markers": [
-              [
-                -373.0,
-                0,
-                420.0
-              ],
-              [
-                -303.0,
-                0,
-                420.0
-              ],
-              [
-                -303.0,
-                0,
-                490.0
-              ],
-              [
-                -373.0,
-                0,
-                490.0
-              ]
-            ],
-            "camera": {
-              "target": [
-                -338.0,
-                0,
-                455.0
-              ],
-              "distance": 140,
-              "yaw": 0,
-              "pitch": 55
-            }
-          },
-          "until": {
-            "type": "ack"
-          }
-        }
-      ],
-      "complete": {
-        "type": "entity",
-        "resource": "tutorial",
-        "where": [
-          {
-            "field": "checks.platform_lot",
-            "equals": true
-          }
-        ]
-      }
-    },
-    {
       "id": "marine.platform",
-      "legacyStep": 11,
+      "legacyStep": 8,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.marine.step11.description",
+          "textKey": "tutorial.marine.step8.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1404,13 +1221,16 @@
           },
           "world": {
             "mode": "observe",
-            "markers": [
-              [
+            "markers": [],
+            "building": {
+              "point": [
                 -338,
                 0,
                 455
-              ]
-            ],
+              ],
+              "radius": 25,
+              "variant": 1072
+            },
             "camera": {
               "target": [
                 -338.0,
@@ -1429,7 +1249,7 @@
         },
         {
           "id": "select",
-          "textKey": "tutorial.marine.step11.description",
+          "textKey": "tutorial.marine.step8.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1448,13 +1268,16 @@
           },
           "world": {
             "mode": "observe",
-            "markers": [
-              [
+            "markers": [],
+            "building": {
+              "point": [
                 -338,
                 0,
                 455
-              ]
-            ],
+              ],
+              "radius": 25,
+              "variant": 1072
+            },
             "camera": {
               "target": [
                 -338.0,
@@ -1494,11 +1317,11 @@
     },
     {
       "id": "marine.pipeline",
-      "legacyStep": 12,
+      "legacyStep": 9,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.marine.step12.description",
+          "textKey": "tutorial.marine.step9.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1510,18 +1333,7 @@
           },
           "world": {
             "mode": "observe",
-            "markers": [
-              [
-                -338,
-                0,
-                420
-              ],
-              [
-                -265,
-                0,
-                940
-              ]
-            ],
+            "markers": [],
             "camera": {
               "target": [
                 -301.5,
@@ -1540,7 +1352,7 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.marine.step12.description",
+          "textKey": "tutorial.marine.step9.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1556,18 +1368,7 @@
           },
           "world": {
             "mode": "observe",
-            "markers": [
-              [
-                -338,
-                0,
-                420
-              ],
-              [
-                -265,
-                0,
-                940
-              ]
-            ],
+            "markers": [],
             "camera": {
               "target": [
                 -301.5,
@@ -1586,7 +1387,7 @@
         },
         {
           "id": "draw",
-          "textKey": "tutorial.marine.step12.description",
+          "textKey": "tutorial.marine.step9.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1608,18 +1409,7 @@
           },
           "world": {
             "mode": "observe",
-            "markers": [
-              [
-                -338,
-                0,
-                420
-              ],
-              [
-                -265,
-                0,
-                940
-              ]
-            ],
+            "markers": [],
             "camera": {
               "target": [
                 -301.5,
@@ -1659,11 +1449,11 @@
     },
     {
       "id": "marine.export",
-      "legacyStep": 13,
+      "legacyStep": 10,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.marine.step13.description",
+          "textKey": "tutorial.marine.step10.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -1714,11 +1504,11 @@
     },
     {
       "id": "marine.ferry_pier",
-      "legacyStep": 14,
+      "legacyStep": 11,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.marine.step14.description",
+          "textKey": "tutorial.marine.step11.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1777,7 +1567,7 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.marine.step14.description",
+          "textKey": "tutorial.marine.step11.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1839,7 +1629,7 @@
         },
         {
           "id": "start",
-          "textKey": "tutorial.marine.step14.description",
+          "textKey": "tutorial.marine.step11.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1897,7 +1687,7 @@
         },
         {
           "id": "end",
-          "textKey": "tutorial.marine.step14.description",
+          "textKey": "tutorial.marine.step11.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1955,7 +1745,7 @@
         },
         {
           "id": "finalize",
-          "textKey": "tutorial.marine.step14.description",
+          "textKey": "tutorial.marine.step11.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2014,7 +1804,7 @@
         },
         {
           "id": "confirm",
-          "textKey": "tutorial.marine.step14.description",
+          "textKey": "tutorial.marine.step11.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2096,11 +1886,11 @@
     },
     {
       "id": "marine.ferry_route",
-      "legacyStep": 15,
+      "legacyStep": 12,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.marine.step15.description",
+          "textKey": "tutorial.marine.step12.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2142,7 +1932,7 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.marine.step15.description",
+          "textKey": "tutorial.marine.step12.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2188,7 +1978,7 @@
         },
         {
           "id": "draw",
-          "textKey": "tutorial.marine.step15.description",
+          "textKey": "tutorial.marine.step12.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2261,11 +2051,11 @@
     },
     {
       "id": "marine.ferry_line",
-      "legacyStep": 16,
+      "legacyStep": 13,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.marine.step16.description",
+          "textKey": "tutorial.marine.step13.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2316,7 +2106,7 @@
         },
         {
           "id": "new",
-          "textKey": "tutorial.marine.step16.description",
+          "textKey": "tutorial.marine.step13.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2359,7 +2149,7 @@
         },
         {
           "id": "create",
-          "textKey": "tutorial.marine.step16.description",
+          "textKey": "tutorial.marine.step13.description",
           "ui": {
             "policy": "strict",
             "allow": [

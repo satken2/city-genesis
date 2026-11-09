@@ -398,7 +398,7 @@ public partial class BuildingPlanManager : MonoBehaviour
     /// </summary>
     public void OnTerrainClickDirect(Vector3 position)
     {
-        if (!IsDirectPlacement || directCommitted || isMiddleDragging) return;
+        if (!IsDirectPlacement || directCommitted || isMiddleDragging || !TutorialRuntime.AllowBuildingClick(position, agentVariant)) return;
         OnTerrainHoverDirect(position);
         if (!directPreviewVisible) return;
         if (!isBuildingModeActive)
@@ -756,7 +756,8 @@ public partial class BuildingPlanManager : MonoBehaviour
         if (isMiddleDragging) return;
 
         directCenter = new Vector3(pos.x, 0f, pos.z);
-        ResolveRoadPlacement(pos);
+        if (TutorialGuided) GuideTutorialPlacement(pos);
+        else ResolveRoadPlacement(pos);
 
         // Throttle: rebuild only after moving a certain distance or changing angle since the last draw
         // (avoids GC/stutter from rebuilding the mesh every frame).

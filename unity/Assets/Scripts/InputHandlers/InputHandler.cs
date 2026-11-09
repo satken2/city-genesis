@@ -547,8 +547,9 @@ public class InputHandler : MonoBehaviour
             GameObject hitObject = hit.collider.gameObject;
             if (hitObject.GetComponent<Terrain>() != null || IsTerrainSurfaceObject(hitObject))
             {
-                posX = hit.point.x;
-                posZ = hit.point.z;
+                Vector3 point = PathSurfacePoint(ray, hit);
+                posX = point.x;
+                posZ = point.z;
 
                 // Call terrain hover processing.
                 HandleTerrainHover(hit);
@@ -568,6 +569,18 @@ public class InputHandler : MonoBehaviour
                 posZ = point.z;
             }
         }
+    }
+
+    /// <summary>
+    /// Pointer position on the base plane of path relative Y (Utils.GetPathSurfaceHeight): the ground on land, the water surface over water.
+    /// Things built on water and their terminals stand on the surface, so pointing at them must not slide to the bed seen through it.
+    /// </summary>
+    private static Vector3 PathSurfacePoint(Ray ray, RaycastHit terrainHit)
+    {
+        Vector3 bed = terrainHit.point;
+        if (ray.direction.y >= 0f || !Utils.IsOnWater(bed.x, bed.z, bed.y, out float waterY)) return bed;
+        float distance = (waterY - ray.origin.y) / ray.direction.y;
+        return distance > 0f && distance < terrainHit.distance ? ray.GetPoint(distance) : bed;
     }
 
     private void HandleObjectHit(GameObject hitObject, Vector3 hitPoint, int objectType)

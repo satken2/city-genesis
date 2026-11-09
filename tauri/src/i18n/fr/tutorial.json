@@ -515,55 +515,43 @@
         "description": "Un port ou un terminal pétrolier sur le remblai ne sert à rien sans route : personne ne peut venir y travailler et les marchandises ne peuvent pas circuler. Tracez une route depuis l’extrémité de la route de la ville jusqu’au remblai. Dans ce tutoriel, la route est achevée dès que vous la confirmez. Appuyez sur « Routes, voies ferrées et infrastructures » dans le panneau d’icônes pour ouvrir le panneau de construction."
       },
       "step4": {
-        "title": "Créer la parcelle du quai pétrolier",
-        "description": "Les pétroliers qui transportent le brut sont de grands navires : un port ne peut donc être construit que là où la mer devant le quai est assez profonde. Le quai du remblai donne sur des eaux profondes, idéales pour un port. Ouvrez l’outil de parcelles et choisissez Parcelle unique. Réglez Profondeur et Longueur à 70 m, cliquez au centre des quatre repères qui chevauchent le quai et confirmez."
+        "title": "Construire le quai pétrolier",
+        "description": "Les pétroliers qui transportent le brut sont de grands navires : un port ne peut donc être construit que là où la mer devant le quai est assez profonde. Le quai du remblai donne sur des eaux profondes, idéales pour un port. Ouvrez l’outil de bâtiments, choisissez « Quai pétrolier » dans la catégorie « Ports », faites un clic gauche dans le cercle jaune sur le quai pour fixer son emplacement, puis confirmez dans le panneau de construction. Une fois un port construit, un chenal de raccordement est tracé automatiquement jusqu’à la route océanique au large pour que les navires puissent aller et venir. Cette leçon ignore la durée du chantier."
       },
       "step5": {
-        "title": "Construire le quai pétrolier",
-        "description": "Ouvrez l’outil de bâtiments, choisissez « Quai pétrolier » dans la catégorie « Ports » et construisez-le sur la parcelle que vous venez de créer. Une fois un port construit, un chenal de raccordement est tracé automatiquement jusqu’à la route océanique au large pour que les navires puissent aller et venir. Cette leçon ignore la durée du chantier."
-      },
-      "step6": {
         "title": "Franchir l’entrée de la baie",
         "description": "L’autoroute s’interrompt de part et d’autre de l’entrée de la baie. Cette entrée mesure 1,6 km de large, trop pour un pont ordinaire posé sur des rangées de piles : reliez-la par un pont suspendu, capable de franchir une grande distance d’une seule portée. Les grands navires passent dessous par la route maritime, le pont doit donc être assez haut pour qu’ils ne le heurtent pas. Les extrémités de l’autoroute sur les deux rives sont déjà à cette hauteur. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Pont suspendu à 4 voies » sous « Autoroutes » et tracez-le de l’extrémité nord (cercle cyan) à l’extrémité sud (cercle jaune). Terminez le tracé avec un clic droit, confirmez dans le panneau de construction, puis appuyez sur « Suivant »."
       },
-      "step7": {
+      "step6": {
         "title": "Trouver le gisement sous-marin",
         "description": "Passons maintenant aux ressources de la mer. Avant de construire un terminal pétrolier, vérifiez qu’un gisement de pétrole se trouve sous la mer toute proche. Appuyez sur « Affichage » dans le cockpit pour ouvrir le panneau.",
         "show": "Choisissez « Ressources naturelles » dans les onglets verticaux et passez sur « Affiché ». Un gisement de pétrole s’étend sous la baie. Cliquez sur le gisement près du repère jaune pour ouvrir ses détails."
       },
+      "step7": {
+        "title": "Construire le terminal pétrolier",
+        "description": "Le brut pompé dans le gisement sous-marin est envoyé par oléoduc à un terminal sur la côte, d’où il est vendu. Le terminal se construit face au quai, par où arrive l’oléoduc. Ouvrez l’outil de bâtiments, choisissez « Terminal pétrolier d'oléoduc » dans la catégorie « Ports », faites un clic gauche dans le cercle jaune sur le quai pour fixer son emplacement, puis confirmez dans le panneau de construction. Cette leçon ignore la durée du chantier."
+      },
       "step8": {
-        "title": "Créer la parcelle du terminal pétrolier",
-        "description": "Le brut pompé dans le gisement sous-marin est envoyé par oléoduc à un terminal sur la côte, d’où il est vendu. Le terminal se construit face au quai, par où arrive l’oléoduc. Ouvrez l’outil de parcelles et choisissez Parcelle unique. Réglez Profondeur et Longueur à 60 m, cliquez au centre des quatre repères et confirmez."
+        "title": "Construire la plateforme pétrolière",
+        "description": "La plateforme qui pompe le brut doit se dresser en mer, juste au-dessus du gisement. Ouvrez l’outil de bâtiments, choisissez « Plateforme pétrolière offshore » dans la catégorie « Agriculture et ressources », faites un clic gauche dans le cercle jaune en mer pour fixer son emplacement, puis confirmez dans le panneau de construction. Cette leçon ignore la durée du chantier."
       },
       "step9": {
-        "title": "Construire le terminal pétrolier",
-        "description": "Ouvrez l’outil de bâtiments, choisissez « Terminal pétrolier d'oléoduc » dans la catégorie « Ports » et construisez-le sur la parcelle que vous venez de créer. Cette leçon ignore la durée du chantier."
-      },
-      "step10": {
-        "title": "Créer une parcelle au-dessus du gisement",
-        "description": "La plateforme qui pompe le brut doit se dresser en mer, juste au-dessus du gisement. Ouvrez l’outil de parcelles et choisissez Parcelle unique. Réglez Profondeur et Longueur à 70 m, cliquez au centre des quatre repères en mer et confirmez."
-      },
-      "step11": {
-        "title": "Construire la plateforme pétrolière",
-        "description": "Sur une parcelle en mer, seuls des équipements conçus pour la mer peuvent être construits. Ouvrez l’outil de bâtiments, choisissez « Plateforme pétrolière offshore » dans la catégorie « Agriculture et ressources » et construisez-la sur la parcelle en mer. Cette leçon ignore la durée du chantier."
-      },
-      "step12": {
         "title": "Les relier par un oléoduc",
         "description": "Envoyez le brut pompé par la plateforme jusqu’au terminal par un oléoduc sous-marin. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Oléoduc sous-marin » sous « Pétrole » et tracez-le de la borne de raccordement de la plateforme à celle du terminal pétrolier. Après l’avoir confirmé, appuyez sur « Suivant » : l’oléoduc est achevé aussitôt."
       },
-      "step13": {
+      "step10": {
         "title": "Exporter le brut",
         "description": "Le terminal vend sur le marché le brut qu’il reçoit, et le quai pétrolier l’achète pour l’exporter par navire. Il faut quelques mois pour que les employés arrivent et que le brut commence à se vendre. Avancez de quelques mois avec Démarrer, puis appuyez sur « Suivant ». Si rien n’a encore été exporté, avancez encore un peu et appuyez de nouveau."
       },
-      "step14": {
+      "step11": {
         "title": "Construire un embarcadère de ferry",
         "description": "L’île au large n’a aucun moyen de rejoindre la ville. Ouvrez un ferry pour que ses habitants puissent venir en ville. Construisez d’abord un embarcadère sur la rive de la ville. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Embarcadère de ferry » sous « Voie navigable » et tracez-le depuis la rive (cercle cyan) jusqu’au-dessus de la mer (cercle jaune). Terminez le tracé avec un clic droit, confirmez dans le panneau de construction, puis appuyez sur « Suivant »."
       },
-      "step15": {
+      "step12": {
         "title": "Tracer le couloir de ferry",
         "description": "Tracez ensuite le couloir que suivra le ferry, de l’embarcadère de l’île à celui de la ville. Un couloir ne peut pas passer sur la terre : contournez le nord de l’île, passez sous le pont suspendu de l’entrée de la baie et entrez dans la baie, en cliquant avec le bouton gauche en chemin pour placer des points. Choisissez « Couloir de ferry » sous « Voie navigable », reliez l’extrémité de l’embarcadère de l’île à celle de l’embarcadère de la ville, confirmez, puis appuyez sur « Suivant »."
       },
-      "step16": {
+      "step13": {
         "title": "Ouvrir la ligne de ferry",
         "description": "Enfin, créez la ligne de ferry qui circule sur le couloir. Créez une ligne de ferry, posez des arrêts sur l’embarcadère de l’île et sur celui de la ville, cliquez sur le premier arrêt pour fermer la boucle, puis confirmez. Une fois la ligne créée, le tutoriel est terminé. Pour faire réellement naviguer des navires, il faut aussi une cale de maintenance qui les loue."
       }

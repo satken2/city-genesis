@@ -45,6 +45,7 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
       const phase = step?.phases[index];
       const world = phase ? JSON.parse(JSON.stringify(phase.world)) : { mode: preparing ? "blocked" : "observe" };
       if (world.path) world.path.variant = resolve(world.path.variant, env);
+      if (world.building) world.building.variant = resolve(world.building.variant, env);
       current = { active: preparing || !!phase, runId, revision: (current?.revision ?? 0) + 1, saveId, scenario, stepId: step?.id ?? "", phaseId: phase?.id ?? "", ui: preparing ? { policy: "strict", allow: [], highlight: [] } : phase?.ui ?? idleUi, world };
       phaseIndex = index;
       acceptSnapshot(current);

@@ -48,7 +48,7 @@ public class BuildingEditControlMenu : MonoBehaviour
             menuOwned = false;
             manager.RefreshPlacementPreview();
         }
-        else if (pressed && Application.isFocused && !RadialMenuController.IsOpen &&
+        else if (pressed && Application.isFocused && !RadialMenuController.IsOpen && !manager.TutorialGuided &&
             !(CameraController.Instance?.IsFlyMode ?? false) && !InputUtil.LeftMouseIsPressed &&
             !InputUtil.RightMouseIsPressed && !InputUtil.MiddleMouseIsPressed)
         {

@@ -515,55 +515,43 @@
         "description": "A port or oil terminal on reclaimed land is useless without a road: people cannot come to work and goods cannot move. Build a road from the end of the town's road onto the reclaimed land. In this lesson, the road is completed as soon as you confirm it. Press “Roads, Rail & Infrastructure” on the icon panel to open the construction panel."
       },
       "step4": {
-        "title": "Make a parcel for the tanker pier",
-        "description": "Tankers that carry crude oil are large ships, so a port can only be built where the sea in front of the quay is deep enough. The quay of the reclaimed land faces deep water, which suits a port. Open the parcel tool and choose Single. Set both Depth and Length to 70 m, click the center of the four markers straddling the quay, and confirm."
+        "title": "Build the tanker pier",
+        "description": "Tankers that carry crude oil are large ships, so a port can only be built where the sea in front of the quay is deep enough. The quay of the reclaimed land faces deep water, which suits a port. Open the building tool, choose “Tanker Pier” in the “Ports” category, left-click inside the yellow circle on the quay to set its place, and confirm in the construction panel. When a port is built, a connecting lane is drawn automatically to the ocean shipping lane offshore so that ships can come and go. This lesson skips the construction period."
       },
       "step5": {
-        "title": "Build the tanker pier",
-        "description": "Open the building tool, choose “Tanker Pier” in the “Ports” category, and build it on the parcel you just made. When a port is built, a connecting lane is drawn automatically to the ocean shipping lane offshore so that ships can come and go. This lesson skips the construction period."
-      },
-      "step6": {
         "title": "Bridge the mouth of the bay",
         "description": "The motorway stops on both sides of the bay's mouth. The mouth is 1.6 km wide, too wide for an ordinary bridge on rows of piers, so connect it with a suspension bridge that can cross a long distance in one span. Large ships pass under it on the shipping lane, so the bridge must be high enough for them to clear. The ends of the motorway on both shores are already at that height. Open “Roads, Rail & Infrastructure” on the icon panel, choose “4-Lane Suspension Bridge” under “Motorways”, and draw it from the northern end (cyan circle) to the southern end (yellow circle). Right-click to finish the shape, confirm in the construction panel, then press Next."
       },
-      "step7": {
+      "step6": {
         "title": "Find the undersea oil field",
         "description": "Next, put the sea's resources to use. Before building an oil terminal, check that there is an oil field under the nearby sea. Press “View” in the cockpit to open the View panel.",
         "show": "Choose “Natural Resources” from the vertical tabs and switch it to “Visible”. You can see an oil field spreading under the bay. Click the oil field near the yellow marker to open its details."
       },
+      "step7": {
+        "title": "Build the oil terminal",
+        "description": "Crude oil pumped from the undersea field is sent by pipeline to an oil terminal on shore and sold from there. The terminal is built facing the quay, where the pipeline can come in. Open the building tool, choose “Oil Pipeline Terminal” in the “Ports” category, left-click inside the yellow circle on the quay to set its place, and confirm in the construction panel. This lesson skips the construction period."
+      },
       "step8": {
-        "title": "Make a parcel for the oil terminal",
-        "description": "Crude oil pumped from the undersea field is sent by pipeline to an oil terminal on shore and sold from there. The terminal is built facing the quay, where the pipeline can come in. Open the parcel tool and choose Single. Set both Depth and Length to 60 m, click the center of the four markers, and confirm."
+        "title": "Build the oil platform",
+        "description": "An oil platform that pumps crude oil has to stand in the sea directly above the oil field. Open the building tool, choose “Offshore Oil Platform” in the “Farming & Resources” category, left-click inside the yellow circle on the sea to set its place, and confirm in the construction panel. This lesson skips the construction period."
       },
       "step9": {
-        "title": "Build the oil terminal",
-        "description": "Open the building tool, choose “Oil Pipeline Terminal” in the “Ports” category, and build it on the parcel you just made. This lesson skips the construction period."
-      },
-      "step10": {
-        "title": "Make a parcel above the oil field",
-        "description": "An oil platform that pumps crude oil has to stand in the sea directly above the oil field. Open the parcel tool and choose Single. Set both Depth and Length to 70 m, click the center of the four markers on the sea, and confirm."
-      },
-      "step11": {
-        "title": "Build the oil platform",
-        "description": "Only facilities meant for the sea can be built on a parcel at sea. Open the building tool, choose “Offshore Oil Platform” in the “Farming & Resources” category, and build it on the parcel at sea. This lesson skips the construction period."
-      },
-      "step12": {
         "title": "Connect them with a pipeline",
         "description": "Send the crude oil pumped by the platform to the oil terminal through an undersea pipeline. Open “Roads, Rail & Infrastructure” on the icon panel, choose “Subsea Oil Pipeline” under “Oil”, and draw it from the platform's connection terminal to the oil terminal's connection terminal. After you confirm it, press Next and the pipeline is completed at once."
       },
-      "step13": {
+      "step10": {
         "title": "Export the crude oil",
         "description": "The oil terminal sells the crude oil it receives on the market, and the tanker pier buys it and exports it overseas by ship. It takes a few months for workers to arrive and for the oil to start selling. Use Start to advance a few months, then press Next. If nothing has been exported yet, advance a little further and press it again."
       },
-      "step14": {
+      "step11": {
         "title": "Build a ferry pier",
         "description": "The island offshore has no way to reach the town. Open a ferry so its residents can travel to the town. First, build a ferry pier on the town's shore. Open “Roads, Rail & Infrastructure” on the icon panel, choose “Ferry Pier” under “Waterway”, and draw it from the shore (cyan circle) out over the sea (yellow circle). Right-click to finish the shape, confirm in the construction panel, then press Next."
       },
-      "step15": {
+      "step12": {
         "title": "Draw the ferry lane",
         "description": "Next, draw the lane the ferry will sail from the island's pier to the town's pier. A lane cannot cross land, so go around the north side of the island, pass under the suspension bridge at the mouth of the bay, and enter the bay, left-clicking along the way to place points. Choose “Ferry Lane” under “Waterway”, connect the tip of the island's pier to the tip of the town's pier, confirm, then press Next."
       },
-      "step16": {
+      "step13": {
         "title": "Open the ferry line",
         "description": "Finally, create the ferry line that runs on the lane. Create a Ferry Line, place stops on the island's pier and the town's pier, click the first stop to close the loop, and confirm. Once the line exists, this tutorial is complete. To actually run ships, you will also need a Maintenance Dock that leases them."
       }
