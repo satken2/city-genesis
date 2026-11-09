@@ -758,7 +758,6 @@ public partial class RoadPlanManager : MonoBehaviour
             OnGridLeftClick(worldPos);
             return;
         }
-        var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [Freeze investigation] Remove after investigation.
         if (phase == RoadEditorPhase.Placing)
         {
             Vector3 snapped = ApplySnapping(worldPos);
@@ -792,7 +791,6 @@ public partial class RoadPlanManager : MonoBehaviour
         {
             HandleEditingClick(worldPos);
         }
-        Debug.Log($"[フリーズ調査] 左クリック処理 {freezeProbe.Elapsed.TotalMilliseconds:F1}ms (点数={points.Count}, 曲線={Curved})"); // Remove after investigation.
     }
 
     /// <summary>

@@ -115,8 +115,6 @@ public partial class RoadRenderer : MonoBehaviour
             return;
         }
 
-        var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [Freeze investigation] Remove after investigation.
-
         // Delete the previous preview object.
         if (currentPreviewObject != null)
         {
@@ -163,7 +161,6 @@ public partial class RoadRenderer : MonoBehaviour
         lastTravelDirections = travelDirections != null ? (int[])travelDirections.Clone() : null;
         lastProfiles = profiles;
         hasPreviewState = true;
-        Debug.Log($"[フリーズ調査] 詳細プレビュー生成 {freezeProbe.Elapsed.TotalMilliseconds:F1}ms (点数={subdividePoints.Count})");
     }
 
     /// <summary>

@@ -248,8 +248,6 @@ public partial class RoadPlanManager
         }
         float myWidth = pathManager.GetRoadWidth(PathSubtype);
 
-        var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [Freeze investigation] Remove after investigation.
-        int freezeProbeBuilt = 0; // [Freeze investigation] Remove after investigation.
         HashSet<int> candidatePathIds = new HashSet<int>();
         for (int i = 0; i < mySegments.Count; i++)
         {
@@ -281,7 +279,6 @@ public partial class RoadPlanManager
             {
                 exSegments = BuildExistingElevationSegments(exPath);
                 existingElevSegCache[otherPathId] = exSegments;
-                freezeProbeBuilt++; // [Freeze investigation] Remove after investigation.
             }
 
             float otherHeight = GetPathHeightFromMaster(exPath.path_variant);
@@ -343,9 +340,6 @@ public partial class RoadPlanManager
                 }
             }
         }
-
-        // [Freeze investigation] Emit only when existing path geometry is rebuilt, not every frame. Remove after investigation.
-        if (freezeProbeBuilt > 0) Debug.Log($"[フリーズ調査] 立体交差チェック {freezeProbe.Elapsed.TotalMilliseconds:F1}ms (候補パス{candidatePathIds.Count}件・形状を新規作成{freezeProbeBuilt}件)");
 
         cachedElevationViolations = violations;
         return cachedElevationViolations;

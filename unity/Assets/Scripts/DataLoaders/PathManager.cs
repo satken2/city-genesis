@@ -846,12 +846,9 @@ public partial class PathManager : BaseApiDataManager
     /// Only entry point for the terrain-following regeneration queue. changeSerial is pathBuildSerialCounter after applying the cause.
     /// Set terrain-only/pillar-only markers only on new entries; clear if another reason overlaps (skipping always stays conservative).
     /// </summary>
-    private void EnqueueTerrainFollowPath(int id, long changeSerial, TerrainFollowQueueReason reason,
-        [System.Runtime.CompilerServices.CallerMemberName] string caller = "") // [Camera freeze investigation] Remove caller after investigation
+    private void EnqueueTerrainFollowPath(int id, long changeSerial, TerrainFollowQueueReason reason)
     {
         bool added = queuedTerrainFollowPathIds.Add(id);
-        // [Camera freeze investigation] Remove after investigation
-        queuedTerrainFollowCallers[id] = !added && queuedTerrainFollowCallers.TryGetValue(id, out string callers) && !callers.Contains(caller) ? callers + "+" + caller : caller;
         if (added || !queuedTerrainFollowSerials.TryGetValue(id, out long queuedSerial) || queuedSerial < changeSerial)
             queuedTerrainFollowSerials[id] = changeSerial;
         if (added && reason == TerrainFollowQueueReason.Terrain) terrainOnlyQueuedPathIds.Add(id);
@@ -862,13 +859,9 @@ public partial class PathManager : BaseApiDataManager
         EnsureTerrainFollowRebuildWorker();
     }
 
-    /// <summary>[Camera freeze investigation] Methods that queued each path, shown in the regeneration log. Remove after investigation.</summary>
-    private readonly Dictionary<int, string> queuedTerrainFollowCallers = new Dictionary<int, string>();
-
     private void ClearTerrainFollowQueue()
     {
         queuedTerrainFollowPathIds.Clear();
-        queuedTerrainFollowCallers.Clear(); // [Camera freeze investigation] Remove after investigation
         queuedTerrainFollowNodeIds.Clear();
         terrainOnlyQueuedPathIds.Clear();
         queuedPillarOnlyIds.Clear();
@@ -1336,7 +1329,6 @@ public partial class PathManager : BaseApiDataManager
 
                 processed++;
                 queuedTerrainFollowPathIds.Remove(bestId);
-                queuedTerrainFollowCallers.Remove(bestId, out string queuedBy); // [Camera freeze investigation] Remove after investigation
                 bool terrainOnly = terrainOnlyQueuedPathIds.Remove(bestId);
                 bool pillarOnly = queuedPillarOnlyIds.Remove(bestId);
                 queuedTerrainFollowSerials.TryGetValue(bestId, out long queuedSerial);
@@ -1387,7 +1379,7 @@ public partial class PathManager : BaseApiDataManager
                 {
                     if (cellPathLod.TryGetValue(cell, out LodTier t) && t > tier) tier = t;
                 }
-                TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: $"地形追従(キュー:{queuedBy})", batchMember: false); // [Camera freeze investigation] Restore the fixed reason after investigation
+                TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: "地形追従", batchMember: false);
             }
 
             // If all remaining work waits for the active batch, wait for batch completion (or the sorting interval) instead of repeatedly sorting.
@@ -2365,21 +2357,10 @@ public partial class PathManager : BaseApiDataManager
         Vector3 drawCamPos = drawCam != null ? drawCam.transform.position : Vector3.zero;
         DrawLod drawLod = DeterminePathDrawLod(path, tier, drawCamPos, out double detailFrom, out double detailTo, out _);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"PathManager: 再描画 path{path.path_id} tier={tier} draw={drawLod} range=({detailFrom:F2}〜{detailTo:F2}) reason={reason}");
-        var freezeProbe = System.Diagnostics.Stopwatch.StartNew(); // [Camera freeze investigation] Remove after investigation
-        int freezeProbeWarnings = FreezeProbe.WarningCount; // [Camera freeze investigation] Remove after investigation
-        string freezeProbePrevious = pathObjectsCache.TryGetValue(path.path_id, out GameObject freezeProbeOld) && freezeProbeOld != null ? DrawLodInfo.GetDrawLod(freezeProbeOld, DrawLod.Normal).ToString() : "なし"; // [Camera freeze investigation] Remove after investigation
         if (drawLod == DrawLod.Far)
             CreateOrUpdateFarPath(path, forceRebuild);
         else
             CreateOrUpdatePath(path, updateIntersections, forceRebuild, drawLod, detailFrom, detailTo);
-        // [Camera freeze investigation] Remove after investigation
-        if (freezeProbe.Elapsed.TotalMilliseconds > 30)
-        {
-            GetAnchorPolyline(path, out float probeLength);
-            int probeMeshes = pathObjectsCache.TryGetValue(path.path_id, out GameObject probeGo) && probeGo != null ? probeGo.GetComponentsInChildren<MeshFilter>(true).Length : -1;
-            Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "[カメラフリーズ調査] パス再生成 {0:F0}ms path{1} variant={2} LOD={3}→{4} tier={5} 長さ={6:F0}m 経由点={7} メッシュ={8}個 警告ログ={9}件 reason={10}",
-                freezeProbe.Elapsed.TotalMilliseconds, path.path_id, path.path_variant, freezeProbePrevious, drawLod, tier, probeLength, path.waypoints?.Count ?? 0, probeMeshes, FreezeProbe.WarningCount - freezeProbeWarnings, reason);
-        }
 
         // Do not treat API reception or enqueueing as completed rendering. Regenerate after interruption even at the same version.
         if (HasPathRepresentation(path)) pathVersionCache[path.path_id] = path.version;
@@ -5533,40 +5514,8 @@ public partial class PathManager : BaseApiDataManager
         }
     }
 
-    // [Intersection measurement] Temporary stage markers (totalled by BuildingStageProbe) and a log of intersections taking 30ms or more. Remove after investigation.
-    private static class IntersectionProbe
-    {
-        public static readonly StageMarker Signature = new StageMarker("Path.Intersection.Signature");
-        public static readonly StageMarker Generate = new StageMarker("Path.Intersection.Generate");
-        public static readonly StageMarker Slab = new StageMarker("Path.Intersection.Slab");
-    }
-
-    private readonly struct IntersectionTimer : IDisposable
-    {
-        private readonly PathManager owner;
-        private readonly int nodeId;
-        private readonly long start;
-
-        public IntersectionTimer(PathManager owner, int nodeId)
-        {
-            this.owner = owner;
-            this.nodeId = nodeId;
-            start = System.Diagnostics.Stopwatch.GetTimestamp();
-        }
-
-        public void Dispose()
-        {
-            double ms = (System.Diagnostics.Stopwatch.GetTimestamp() - start) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
-            if (ms < 30) return;
-            var paths = owner.GetPathsConnectedToNode(nodeId);
-            string connected = string.Join(" ", paths.ConvertAll(p => $"path{p.path_id}(v{p.path_variant})"));
-            UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", $"[交差点計測] node{nodeId} {ms:F0}ms 接続={connected}");
-        }
-    }
-
     private void UpdateNodeIntersectionMesh(int nodeId)
     {
-        using var intersectionTimer = new IntersectionTimer(this, nodeId); // [Intersection measurement] Remove after investigation.
         if (!nodeDataCache.TryGetValue(nodeId, out var nodeData))
         {
             Debug.LogWarning($"[PathManager] nodeData not found for nodeId={nodeId}, fetching node...");
@@ -5608,9 +5557,7 @@ public partial class PathManager : BaseApiDataManager
         }
         overloadedIntersectionNodeIds.Remove(nodeId);
 
-        long signature;
-        bool signatureKnown;
-        using (IntersectionProbe.Signature.Auto()) signature = ComputeNodeIntersectionSignature(nodeId, nodeData, connectedPaths, out signatureKnown);
+        long signature = ComputeNodeIntersectionSignature(nodeId, nodeData, connectedPaths, out bool signatureKnown);
         if (signatureKnown && nodeIntersectionSignatures.TryGetValue(nodeId, out long builtSignature) && builtSignature == signature
             && ((nodeIntersectionMeshes.TryGetValue(nodeId, out GameObject unchangedMesh) && unchangedMesh != null) || slablessMergeNodes.Contains(nodeId)))
         {
@@ -5646,9 +5593,7 @@ public partial class PathManager : BaseApiDataManager
             ApplyStationGrade(gradedPath, nodePoints);
             absolutePos.y = nodePoints[0].y;
         }
-        NodeMeshResult meshResult;
-        using (IntersectionProbe.Generate.Auto())
-            meshResult = NodeMeshFactory.GenerateNodeMesh(nodeId, absolutePos, connectedPaths, nodeData.GetRelativeHeight(), p => originalPoints[p.path_id], p => GetIntersectionCutLimit(p, nodeId, originalPoints[p.path_id]));
+        NodeMeshResult meshResult = NodeMeshFactory.GenerateNodeMesh(nodeId, absolutePos, connectedPaths, nodeData.GetRelativeHeight(), p => originalPoints[p.path_id], p => GetIntersectionCutLimit(p, nodeId, originalPoints[p.path_id]));
         // Straight connections of same-type/width roads, highway merges absorbing ramps, and aligned track connections have no plates.
         bool slabless = meshResult != null && meshResult.Mesh == null
             && (meshResult.RoadJoin != null || meshResult.MotorwayMerge != null || meshResult.TrackJoin != null);
@@ -5683,7 +5628,7 @@ public partial class PathManager : BaseApiDataManager
         else
         {
             slablessMergeNodes.Remove(nodeId);
-            using (IntersectionProbe.Slab.Auto()) UpdateNodeSlab(nodeId, absolutePos, meshResult, markingSignature);
+            UpdateNodeSlab(nodeId, absolutePos, meshResult, markingSignature);
         }
         if (meshResult.MotorwayMerge != null) motorwayMerges[nodeId] = meshResult.MotorwayMerge;
         else motorwayMerges.Remove(nodeId);
