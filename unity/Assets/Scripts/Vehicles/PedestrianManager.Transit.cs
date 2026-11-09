@@ -255,7 +255,7 @@ public sealed partial class PedestrianManager
             if (!transit.TrySampleStop(stop.line, arrival.Step, positions, directions)) return false;
             stop.visits.Add(BuildVisit(stop, stop.visits.Count, arrival, platform, underlay, line, positions, directions, carLength));
         }
-        return stop.visits.Count > 0 && (!stop.bus || BuildBusStop(stop, underlay));
+        return stop.visits.Count > 0 && (!stop.bus || BuildBusStop(stop, motion, underlay));
     }
 
     private static bool ResolvePlatform(bool bus, PathSummary underlay, out Platform platform)
@@ -378,14 +378,17 @@ public sealed partial class PedestrianManager
         }
     }
 
-    /// <summary>Arrange waiting positions on the sidewalk beside the shelter, with an entrance in front. Resolve shelter position as BusStopManager does.</summary>
-    private bool BuildBusStop(TransitStop stop, PathSummary road)
+    /// <summary>
+    /// Arrange waiting positions on the sidewalk beside the shelter, with an entrance in front. Resolve shelter position as BusStopManager does;
+    /// a stop served in both directions queues only at the first arrival's shelter.
+    /// </summary>
+    private bool BuildBusStop(TransitStop stop, TransitMotionClock motion, PathSummary road)
     {
         var node = pathManager.GetNodeData(stop.node);
-        var master = MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(road.path_variant) : null;
-        if (!walks.TryGetValue(road.path_id, out var walk) || walk.centered || node == null || master == null
-            || !pathManager.TryGetPathPolyline(road.path_id, out var points, false)
-            || !BusStopManager.TryPlace(node.GetAbsolutePosition(), points, road.width, master.sidewalk_width ?? 0, out var shelter, out _)) return false;
+        var arrival = motion.Steps[stop.visits[0].arrival.Step];
+        if (!walks.TryGetValue(road.path_id, out var walk) || walk.centered || node == null
+            || !BusStopManager.TryPlace(pathManager, node.GetAbsolutePosition(), arrival.path_id, arrival.to_fraction > arrival.from_fraction,
+                out var shelter, out _)) return false;
         float s = walk.line.Project(shelter);
         walk.line.Sample(s, true, out var axis, out var tangent);
         int side = Vector3.Dot(shelter - axis, Vector3.Cross(Vector3.up, tangent)) < 0 ? -1 : 1;

@@ -10,6 +10,8 @@ public sealed class BusStopManager : MonoBehaviour
     private PropRenderModel model;
     private float nextScan;
     private int session = -1;
+    private int arrivalRevision = -1;
+    private readonly Dictionary<int, List<(int road, bool forward)>> dwellSides = new();   // Stop node → street and direction of each bus arrival.
     private readonly List<Matrix4x4[]> batches = new();
     private readonly List<Bounds> bounds = new();
 
@@ -43,6 +45,7 @@ public sealed class BusStopManager : MonoBehaviour
                 foreach (var part in model.normal)
                     if (part.material.name.StartsWith("PROP_SHELTER_GLASS")) ConfigureGlass(part.material);
             }
+            if (arrivalRevision != store.Revision) IndexArrivals(store);
             Rebuild(CameraCellChecker.Instance.CurrentWorldPosition);
         }
         for (int i = 0; i < batches.Count; i++)
@@ -61,8 +64,6 @@ public sealed class BusStopManager : MonoBehaviour
         if (model.normal.Count == 0) return;
         var placements = new List<Matrix4x4>();
         var seen = new HashSet<int>();
-        var masters = MasterDataStore.Instance?.GetPathMasterDictionary();
-        if (masters == null) return;
         foreach (var node in paths.QueryNearbyNodes(center, Radius))
         {
             if (!seen.Add(node.node_id) || !node.station_path_id.HasValue) continue;
@@ -72,24 +73,24 @@ public sealed class BusStopManager : MonoBehaviour
                     VehicleModelConfig.GetTransitVehicleType(link.path_variant) == Constants.VEHICLE_BUS)
                 { bus = true; break; }
             if (!bus) continue;
-            var road = paths.GetPathData(node.station_path_id.Value);
-            if (road == null || road.path_type != Constants.PATH_STREET ||
-                paths.GetPathObject(road.path_id) == null ||
-                !masters.TryGetValue(road.path_variant, out var master) ||
-                !paths.TryGetPathPolyline(road.path_id, out var points, false)) continue;
-            if (!TryPlace(node.GetAbsolutePosition(), points, road.width, master.sidewalk_width ?? 0,
-                out var position, out var rotation)) continue;
-            if ((position - center).sqrMagnitude > Radius * Radius) continue;
-            // Keep the shelter horizontal and align its base with the highest terrain at the four corners. Underground leg extensions cover the lower side.
-            float height = position.y;
-            for (int x = -1; x <= 1; x += 2)
-                for (int z = -1; z <= 1; z += 2)
-                {
-                    Vector3 corner = position + rotation * new Vector3(x * 2.7f, 0, z * 1.1f);
-                    height = Mathf.Max(height, Utils.GetGroundHeight(corner));
-                }
-            position.y = height;
-            placements.Add(Matrix4x4.TRS(position, rotation, Vector3.one));
+            // A line whose route does not connect has no journeys, so its shelters stay on the forward side of the stop's street.
+            var sides = dwellSides.TryGetValue(node.node_id, out var known) ? known
+                : new List<(int road, bool forward)> { (node.station_path_id.Value, true) };
+            foreach (var (road, forward) in sides)
+            {
+                if (!TryPlace(paths, node.GetAbsolutePosition(), road, forward, out var position, out var rotation)) continue;
+                if ((position - center).sqrMagnitude > Radius * Radius) continue;
+                // Keep the shelter horizontal and align its base with the highest terrain at the four corners. Underground leg extensions cover the lower side.
+                float height = position.y;
+                for (int x = -1; x <= 1; x += 2)
+                    for (int z = -1; z <= 1; z += 2)
+                    {
+                        Vector3 corner = position + rotation * new Vector3(x * 2.7f, 0, z * 1.1f);
+                        height = Mathf.Max(height, Utils.GetGroundHeight(corner));
+                    }
+                position.y = height;
+                placements.Add(Matrix4x4.TRS(position, rotation, Vector3.one));
+            }
         }
         for (int start = 0; start < placements.Count; start += 511)
             foreach (var part in model.normal)
@@ -106,8 +107,44 @@ public sealed class BusStopManager : MonoBehaviour
             }
     }
 
-    /// <summary>Project onto the actual centerline and move toward the sidewalk on the clicked side. For narrow sidewalks, place outside the road so the roof does not overhang the carriageway.</summary>
-    public static bool TryPlace(Vector3 stop, List<Vector3> points, float width, float sidewalk,
+    /// <summary>
+    /// One shelter per arrival direction, using the same arrivals as TransitMotionClock. A bus turning back at a stop also dwells on its
+    /// arrival side and U-turns only at the end of the dwell, so the shelter always faces the bus doors.
+    /// </summary>
+    private void IndexArrivals(TransitDataStore store)
+    {
+        arrivalRevision = store.Revision;
+        dwellSides.Clear();
+        foreach (var line in store.Lines)
+        {
+            if (line == null || VehicleModelConfig.GetTransitVehicleType(line.path_variant) != Constants.VEHICLE_BUS) continue;
+            var motion = new TransitMotionClock(line.journeys);
+            foreach (var arrival in motion.Arrivals)
+            {
+                var step = motion.Steps[arrival.Step];
+                var side = (step.path_id, step.to_fraction > step.from_fraction);
+                if (!dwellSides.TryGetValue(arrival.Stop, out var sides)) dwellSides[arrival.Stop] = sides = new();
+                if (!sides.Contains(side)) sides.Add(side);
+            }
+        }
+    }
+
+    /// <summary>Shelter beside a rendered street for buses dwelling on it; forward is travel toward the end of the street's polyline.</summary>
+    public static bool TryPlace(PathManager paths, Vector3 stop, int roadId, bool forward, out Vector3 position, out Quaternion rotation)
+    {
+        position = default; rotation = Quaternion.identity;
+        var road = paths.GetPathData(roadId);
+        var master = road != null && MasterDataStore.Instance != null ? MasterDataStore.Instance.GetPathMaster(road.path_variant) : null;
+        return master != null && road.path_type == Constants.PATH_STREET && paths.GetPathObject(roadId) != null
+            && paths.TryGetPathPolyline(roadId, out var points, false)
+            && TryPlace(stop, points, road.width, master.sidewalk_width ?? 0, forward, out position, out rotation);
+    }
+
+    /// <summary>
+    /// Project onto the actual centerline and move toward the traffic-hand sidewalk of the travel direction, where buses keep to.
+    /// For narrow sidewalks, place outside the road so the roof does not overhang the carriageway.
+    /// </summary>
+    public static bool TryPlace(Vector3 stop, List<Vector3> points, float width, float sidewalk, bool forward,
         out Vector3 position, out Quaternion rotation)
     {
         position = default; rotation = Quaternion.identity;
@@ -125,8 +162,7 @@ public sealed class BusStopManager : MonoBehaviour
             best = distance; position = candidate; tangent = flat.normalized;
         }
         if (float.IsPositiveInfinity(best)) return false;
-        Vector3 side = Vector3.Cross(Vector3.up, tangent);
-        if (Vector3.Dot(stop - position, side) < 0) side = -side;
+        Vector3 side = Vector3.Cross(Vector3.up, tangent) * ((forward ? 1 : -1) * (CityInfoStore.TrafficHand == Constants.TRAFFIC_HAND_LEFT ? -1 : 1));
         float offset = sidewalk >= 2.4f ? width * .5f - 1.2f : width * .5f + 1.2f;
         position += side * offset;
         position.y += RoadPartHeights.BODY_ABOVE_SPLINE + (sidewalk >= 2.4f ? .2f : 0);
