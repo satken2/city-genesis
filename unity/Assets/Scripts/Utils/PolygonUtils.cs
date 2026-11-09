@@ -86,7 +86,7 @@ public static class PolygonUtils
     /// Whether the +X ray from (x, z) intersects edge i-j.
     /// Use a half-open height interval to avoid double counting when the ray passes exactly through a vertex.
     /// </summary>
-    private static bool CrossesRay(float xi, float zi, float xj, float zj, float x, float z)
+    public static bool CrossesRay(float xi, float zi, float xj, float zj, float x, float z)
     {
         return ((zi > z) != (zj > z)) && (x < RayCrossingX(xi, zi, xj, zj, z));
     }

@@ -21,6 +21,9 @@ public static class CoastlineStore
     // Vector2 x=world X, y=world Z.
     private static readonly List<Vector2[]> rings = new List<Vector2[]>();
 
+    // Rebuilt together with rings and replaced as a whole, so a reader always sees one consistent index.
+    private static LandIndex landIndex;
+
     /// <summary>Whether coastline fetching has been attempted (regardless of success or empty results).</summary>
     public static bool IsLoaded { get; private set; }
 
@@ -40,6 +43,7 @@ public static class CoastlineStore
     public static void Clear()
     {
         rings.Clear();
+        landIndex = null;
         IsLoaded = false;
         Version++;
     }
@@ -58,6 +62,7 @@ public static class CoastlineStore
         {
             CollectRings(coordinates, rings);
         }
+        landIndex = new LandIndex(rings);
         IsLoaded = true;
         Version++;
     }
@@ -137,24 +142,104 @@ public static class CoastlineStore
     /// The backend coastline stores outer rings together with hole rings such as lakes;
     /// counting crossings across all rings naturally handles holes: inside only the outer ring is odd (land),
     /// while inside both outer and hole rings is even (sea/lake).
+    /// Only edges in the query's Z band are tested, so the cost does not grow with the total coastline length.
     /// Return false if coastline data is unloaded or there is no land (caller provides the fallback).
     /// </summary>
     public static bool IsLand(float x, float z)
     {
-        if (rings.Count == 0)
+        LandIndex index = landIndex;
+        return index != null && index.Contains(x, z);
+    }
+
+    /// <summary>
+    /// Edges of every ring with at least three vertices, bucketed by horizontal Z band.
+    /// Ring parities combine by XOR, so the total crossing count over all edges gives the same answer as testing each ring.
+    /// Edges keep the orientation of <see cref="PolygonUtils.Contains(IReadOnlyList{Vector2}, Vector2)"/> and use its
+    /// <see cref="PolygonUtils.CrossesRay"/>, so results agree with the per-ring test.
+    /// </summary>
+    private sealed class LandIndex
+    {
+        private const float BandHeight = 10f; // m. A band holds only the edges near the shoreline crossings of its strip.
+        private readonly float originZ;
+        private readonly int bandCount;
+        private readonly int[] bandStart;
+        private readonly float[] edgeXi, edgeZi, edgeXj, edgeZj;
+
+        public LandIndex(List<Vector2[]> rings)
         {
-            return false;
+            float minZ = float.PositiveInfinity, maxZ = float.NegativeInfinity;
+            foreach (Vector2[] ring in rings)
+            {
+                if (ring.Length < 3) continue;
+                foreach (Vector2 p in ring)
+                {
+                    if (p.y < minZ) minZ = p.y;
+                    if (p.y > maxZ) maxZ = p.y;
+                }
+            }
+            if (!(minZ <= maxZ))
+            {
+                bandStart = new int[1];
+                edgeXi = edgeZi = edgeXj = edgeZj = new float[0];
+                return;
+            }
+            originZ = minZ;
+            bandCount = Band(maxZ) + 1;
+
+            // Count entries per band, convert to offsets, then fill. Horizontal edges never cross the ray and are skipped.
+            bandStart = new int[bandCount + 1];
+            foreach (Vector2[] ring in rings)
+            {
+                if (ring.Length < 3) continue;
+                for (int i = 0, j = ring.Length - 1; i < ring.Length; j = i++)
+                {
+                    if (ring[i].y == ring[j].y) continue;
+                    int last = Band(Mathf.Max(ring[i].y, ring[j].y));
+                    for (int band = Band(Mathf.Min(ring[i].y, ring[j].y)); band <= last; band++) bandStart[band + 1]++;
+                }
+            }
+            for (int band = 0; band < bandCount; band++) bandStart[band + 1] += bandStart[band];
+
+            int total = bandStart[bandCount];
+            edgeXi = new float[total];
+            edgeZi = new float[total];
+            edgeXj = new float[total];
+            edgeZj = new float[total];
+            var next = (int[])bandStart.Clone();
+            foreach (Vector2[] ring in rings)
+            {
+                if (ring.Length < 3) continue;
+                for (int i = 0, j = ring.Length - 1; i < ring.Length; j = i++)
+                {
+                    if (ring[i].y == ring[j].y) continue;
+                    int last = Band(Mathf.Max(ring[i].y, ring[j].y));
+                    for (int band = Band(Mathf.Min(ring[i].y, ring[j].y)); band <= last; band++)
+                    {
+                        int slot = next[band]++;
+                        edgeXi[slot] = ring[i].x;
+                        edgeZi[slot] = ring[i].y;
+                        edgeXj[slot] = ring[j].x;
+                        edgeZj[slot] = ring[j].y;
+                    }
+                }
+            }
         }
 
-        // Combine ring parity: inside the outer ring, then outside again within its hole (lake).
-        Vector2 point = new Vector2(x, z);
-        bool inside = false;
-        for (int r = 0; r < rings.Count; r++)
+        // The same function places edges and queries, so a z inside an edge's Z range always lands in one of its bands.
+        private int Band(float z) => (int)System.Math.Floor(((double)z - originZ) / BandHeight);
+
+        public bool Contains(float x, float z)
         {
-            if (rings[r].Length < 3) continue;
-            if (PolygonUtils.Contains(rings[r], point)) inside = !inside;
+            if (!(z >= originZ)) return false;
+            int band = Band(z);
+            if (band >= bandCount) return false;
+            bool inside = false;
+            for (int k = bandStart[band], end = bandStart[band + 1]; k < end; k++)
+            {
+                if (PolygonUtils.CrossesRay(edgeXi[k], edgeZi[k], edgeXj[k], edgeZj[k], x, z)) inside = !inside;
+            }
+            return inside;
         }
-        return inside;
     }
 
     /// <summary>
