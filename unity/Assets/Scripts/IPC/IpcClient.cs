@@ -1437,13 +1437,16 @@ public class IpcClient : MonoBehaviour
     /// Sends edit_transit:update_points.
     /// Reports changes to traversal points (ordered stops/waypoints) during public transport line placement.
     /// Each point is {kind: "stop" or "waypoint", position: [x, y, z]} (y=0 because public transport paths use relative Y=0).
-    /// New/route edit panels (TransitCreationPanel) update stop/waypoint counts and the traversal points sent on confirmation.
+    /// finalized becomes true once the player closes the loop by clicking the first stop (route edits start closed).
+    /// New/route edit panels (TransitCreationPanel) update stop/waypoint counts and the traversal points sent on confirmation,
+    /// and enable confirmation only while finalized.
     /// </summary>
-    public void EmitEditTransitUpdatePoints(List<Dictionary<string, object>> points)
+    public void EmitEditTransitUpdatePoints(List<Dictionary<string, object>> points, bool finalized)
     {
         var payload = new Dictionary<string, object>
         {
-            ["points"] = points
+            ["points"] = points,
+            ["finalized"] = finalized
         };
 
         SendEnvelope("edit_transit:update_points", payload);

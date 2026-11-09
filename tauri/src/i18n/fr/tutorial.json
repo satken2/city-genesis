@@ -279,15 +279,15 @@
       },
       "step10": {
         "title": "Ouvrir la ligne ferroviaire",
-        "description": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
-        "open": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
-        "variant": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
-        "start": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
-        "end": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
-        "confirm": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
-        "town": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
-        "new": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
-        "east": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance et posez un arrêt sur chaque quai surélevé. Tarif 0 et intervalle cible de 5 minutes, puis confirmez."
+        "description": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance posez un arrêt sur chaque quai surélevé, puis cliquez sur le premier arrêt pour fermer la boucle. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "open": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance posez un arrêt sur chaque quai surélevé, puis cliquez sur le premier arrêt pour fermer la boucle. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "variant": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance posez un arrêt sur chaque quai surélevé, puis cliquez sur le premier arrêt pour fermer la boucle. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "start": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance posez un arrêt sur chaque quai surélevé, puis cliquez sur le premier arrêt pour fermer la boucle. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "end": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance posez un arrêt sur chaque quai surélevé, puis cliquez sur le premier arrêt pour fermer la boucle. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "confirm": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance posez un arrêt sur chaque quai surélevé, puis cliquez sur le premier arrêt pour fermer la boucle. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "town": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance posez un arrêt sur chaque quai surélevé, puis cliquez sur le premier arrêt pour fermer la boucle. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "new": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance posez un arrêt sur chaque quai surélevé, puis cliquez sur le premier arrêt pour fermer la boucle. Tarif 0 et intervalle cible de 5 minutes, puis confirmez.",
+        "east": "Ouvrez Transports publics → Nouvelle ligne, choisissez une ligne ferroviaire de moyenne distance posez un arrêt sur chaque quai surélevé, puis cliquez sur le premier arrêt pour fermer la boucle. Tarif 0 et intervalle cible de 5 minutes, puis confirmez."
       },
       "step11": {
         "title": "Vérifier les véhicules et le service",
@@ -374,7 +374,7 @@
         "title": "Alimenter le dépôt en électricité"
       },
       "step9": {
-        "description": "Dans « Transports publics », appuyez sur « ＋ Nouvelle ligne » et choisissez « Ligne de fret internationale » comme type de ligne. Placez des arrêts sur les quais de la gare de fret internationale et de la gare de fret frontalière, puis mettez la ligne en service. Les trains ne pouvant pas se croiser sur une voie unique, réglez l'intervalle cible sur 45 minutes pour qu'un seul train fasse l'aller-retour.",
+        "description": "Dans « Transports publics », appuyez sur « ＋ Nouvelle ligne » et choisissez « Ligne de fret internationale » comme type de ligne. Placez des arrêts sur les quais de la gare de fret internationale et de la gare de fret frontalière, cliquez sur le premier arrêt pour fermer la boucle, puis mettez la ligne en service. Les trains ne pouvant pas se croiser sur une voie unique, réglez l'intervalle cible sur 45 minutes pour qu'un seul train fasse l'aller-retour.",
         "title": "Mettre en service la ligne de fret internationale"
       },
       "step10": {
@@ -476,7 +476,7 @@
         "title": "Construire un terminal de passagers"
       },
       "step3": {
-        "description": "Les touristes n’ont pas de voiture personnelle : il faut donc mettre en place des transports publics. Ouvrez Transports publics → Nouvelle ligne et choisissez Ligne de bus. Placez les arrêts sur la route aux repères jaunes : port → logements → ruines → logements. Fixez le tarif à 0 et l’intervalle cible à 1 minute, puis confirmez.",
+        "description": "Les touristes n’ont pas de voiture personnelle : il faut donc mettre en place des transports publics. Ouvrez Transports publics → Nouvelle ligne et choisissez Ligne de bus. Placez les arrêts sur la route aux repères jaunes : port → logements → ruines → logements, puis cliquez sur l’arrêt du port pour fermer la boucle. Fixez le tarif à 0 et l’intervalle cible à 1 minute, puis confirmez.",
         "title": "Créer une ligne de bus du port aux ruines"
       },
       "step4": {
@@ -749,7 +749,7 @@
   "hint": {
     "buildingConstruction": "Sélectionnez une parcelle pour projeter un bâtiment. Un certain temps s'écoule entre le projet et l'achèvement du chantier.",
     "parcelCreation": "Maintenez Ctrl pour ouvrir le menu radial et choisir la méthode de création, puis cliquez dans la vue 3D pour désigner la cible. Ajustez les dimensions dans le panneau et validez.",
-    "transitCreation": "Clic gauche pour placer les arrêts dans l'ordre ; cliquez sur le premier arrêt pour fermer la boucle. Glissez un tronçon pour ajouter un point de passage, glissez un point pour le déplacer, clic droit pour supprimer. Pour un aller-retour, placez aussi les arrêts du retour.",
+    "transitCreation": "Clic gauche pour placer les arrêts dans l'ordre ; cliquez sur le premier arrêt pour fermer la boucle. Glissez un tronçon pour ajouter un point de passage, glissez un point pour le déplacer, clic droit pour supprimer. Pour un aller-retour, placez aussi les arrêts du retour. Cliquez à nouveau sur un arrêt déjà placé, ou déposez un arrêt sur un autre, pour s'y arrêter de nouveau.",
     "transitManagement": "Liste des lignes de transport public. Ajustez les tarifs et les fréquences, ou créez et supprimez des lignes. Le tarif influence le choix d'itinéraire des habitants. Un tarif trop élevé fait chuter la fréquentation et augmente la motorisation.",
     "pathConstruction": "Construisez des routes ou des voies ferrées. Cliquez sur le terrain dans la vue 3D. Le clic gauche ajoute des sommets, le clic droit valide la forme, et les sommets se déplacent par glisser. Maintenir Ctrl ouvre le menu de réglages (courbe/droite, accrochage). Les touches 3/4 modifient la hauteur de remblai et de déblai.",
     "pathConstructionElevated": "Construisez des routes ou des voies ferrées. Cliquez sur le terrain dans la vue 3D. Le clic gauche ajoute des sommets, le clic droit valide la forme, et les sommets se déplacent par glisser. Maintenir Ctrl ouvre le menu de réglages (courbe/droite, accrochage). Page préc./Page suiv. ou les touches 1/2 modifient la hauteur, et les touches 3/4 la hauteur de remblai et de déblai.",

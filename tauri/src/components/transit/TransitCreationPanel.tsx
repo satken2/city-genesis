@@ -20,8 +20,10 @@ import { describeError } from "../../utils/errors";
  * 3. Set fare, target headway, cars per train, and vehicle appearance (visual only; choices from
  *    TransitVehicleSelector). Once there are at least two stops, refetch TransitEstimateCard
  *    profitability estimates on point/settings changes.
- * 4. [Create] calls POST /api/v1/transit/lines with path_variant = transit_path_id of the selected
- *    type (section path variant), and points = visitation points received from Unity.
+ * 4. [Create] is enabled only after the player closes the loop by clicking the first stop (finalized from
+ *    Unity), so the return to the first stop is always an explicit choice. It calls POST /api/v1/transit/lines
+ *    with path_variant = transit_path_id of the selected type (section path variant), and points = visitation
+ *    points received from Unity.
  * Route editing retains type/fare/etc. (the details settings tab owns those), gives Unity the
  * current points to edit, then sends new points via PUT /api/v1/transit/lines/{id}/route.
  *
@@ -69,9 +71,10 @@ import {
 // sharing its bc-* style definitions.
 import "../building/BuildingConstructionPanel.css";
 
-/** edit_transit:update_points payload. Visitation points in traversal order. */
+/** edit_transit:update_points payload. Visitation points in traversal order; finalized = loop closed. */
 type TransitPointsPayload = {
   points: TransitRoutePoint[];
+  finalized: boolean;
 };
 
 /** Line being route-edited (only required fields from GET /api/v1/transit/lines/{id}). */
@@ -114,6 +117,7 @@ export function TransitCreationPanel({
   const [vehicleModel, setVehicleModel] = useState<number>(0);
   // Visitation points being placed in Unity (graphics).
   const [points, setPoints] = useState<TransitRoutePoint[]>([]);
+  const [loopClosed, setLoopClosed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -177,6 +181,7 @@ export function TransitCreationPanel({
     if (!selectedEntry) return;
     const initialPoints = isEdit && editedLine ? editedLine.route_points : [];
     setPoints(initialPoints);
+    setLoopClosed(false);
     if (!isEdit) {
       setVehicleModel(defaultTransitVehicleModel(selectedEntry.transit_path_id));
       setCarsPerTrain((cars) => Math.min(selectedEntry.max_cars_per_train, Math.max(selectedEntry.freight ? 2 : 1, cars)));
@@ -206,6 +211,7 @@ export function TransitCreationPanel({
     let unlisten: (() => void) | undefined;
     listen<TransitPointsPayload>(IPC_EVENT_EDIT_TRANSIT_UPDATE_POINTS, (event) => {
       setPoints(event.payload?.points ?? []);
+      setLoopClosed(event.payload?.finalized ?? false);
     })
       .then((fn) => {
         unlisten = fn;
@@ -443,7 +449,7 @@ export function TransitCreationPanel({
               className="bc-btn bc-btn-confirm"
               type="button"
               data-guide="transit.confirm"
-              disabled={isSaving || stopCount < 2}
+              disabled={isSaving || stopCount < 2 || !loopClosed}
               onClick={() => void handleConfirm()}
             >
               {isSaving ? t("common.processing") : t(isEdit ? "transit.confirmRouteUpdate" : "transit.confirmCreate")}

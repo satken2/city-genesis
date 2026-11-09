@@ -1522,9 +1522,10 @@ export const IPC_EVENT_EDIT_GRADING_UPDATE_SHAPE = "edit_grading:update_shape";
 
 /**
  * Line tour points (stops/waypoints) changed during public transport placement (Unity → UI). Payload: { points:
- * TransitRoutePoint[] } in traversal order; each point is {kind: "stop" | "waypoint", position: [x, y, z]}.
- * Public transport paths use relative Y=0, so y is zero. TransitCreationPanel updates point counts and the
- * points sent on confirmation.
+ * TransitRoutePoint[], finalized: boolean } with points in traversal order; each point is {kind: "stop" |
+ * "waypoint", position: [x, y, z]}. Public transport paths use relative Y=0, so y is zero. finalized becomes true
+ * once the player closes the loop by clicking the first stop (route edits start closed). TransitCreationPanel
+ * updates point counts and the points sent on confirmation, and enables confirmation only while finalized.
  */
 export const IPC_EVENT_EDIT_TRANSIT_UPDATE_POINTS = "edit_transit:update_points";
 

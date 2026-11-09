@@ -279,15 +279,15 @@
       },
       "step10": {
         "title": "Inaugura la línea",
-        "description": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
-        "open": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
-        "variant": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
-        "start": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
-        "end": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
-        "confirm": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
-        "town": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
-        "new": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
-        "east": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia y coloca paradas en las plataformas elevadas del oeste y el este. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma."
+        "description": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia, coloca paradas en las plataformas elevadas del oeste y el este y haz clic en la primera parada para cerrar el recorrido. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
+        "open": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia, coloca paradas en las plataformas elevadas del oeste y el este y haz clic en la primera parada para cerrar el recorrido. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
+        "variant": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia, coloca paradas en las plataformas elevadas del oeste y el este y haz clic en la primera parada para cerrar el recorrido. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
+        "start": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia, coloca paradas en las plataformas elevadas del oeste y el este y haz clic en la primera parada para cerrar el recorrido. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
+        "end": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia, coloca paradas en las plataformas elevadas del oeste y el este y haz clic en la primera parada para cerrar el recorrido. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
+        "confirm": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia, coloca paradas en las plataformas elevadas del oeste y el este y haz clic en la primera parada para cerrar el recorrido. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
+        "town": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia, coloca paradas en las plataformas elevadas del oeste y el este y haz clic en la primera parada para cerrar el recorrido. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
+        "new": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia, coloca paradas en las plataformas elevadas del oeste y el este y haz clic en la primera parada para cerrar el recorrido. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma.",
+        "east": "Abre Transporte público → Nueva línea, elige ferrocarril de media distancia, coloca paradas en las plataformas elevadas del oeste y el este y haz clic en la primera parada para cerrar el recorrido. Tarifa 0 e intervalo objetivo de 5 minutos, y confirma."
       },
       "step11": {
         "title": "Confirma los vehículos y el servicio",
@@ -374,7 +374,7 @@
         "title": "Llevar electricidad al depósito"
       },
       "step9": {
-        "description": "En «Transporte público», pulsa «＋ Nueva línea» y elige «Línea internacional de carga» como tipo de línea. Coloca paradas sobre los andenes de la estación internacional de carga y de la estación fronteriza de carga, e inaugura la línea. Como los trenes no pueden cruzarse en vía única, fija el intervalo objetivo en 45 minutos para que un solo tren haga el viaje de ida y vuelta.",
+        "description": "En «Transporte público», pulsa «＋ Nueva línea» y elige «Línea internacional de carga» como tipo de línea. Coloca paradas sobre los andenes de la estación internacional de carga y de la estación fronteriza de carga, haz clic en la primera parada para cerrar el recorrido e inaugura la línea. Como los trenes no pueden cruzarse en vía única, fija el intervalo objetivo en 45 minutos para que un solo tren haga el viaje de ida y vuelta.",
         "title": "Inaugurar la línea internacional de carga"
       },
       "step10": {
@@ -476,7 +476,7 @@
         "title": "Construye una terminal de pasajeros"
       },
       "step3": {
-        "description": "Los turistas no tienen vehículo propio, así que hay que preparar el transporte público. Abre Transporte público → Nueva línea y elige Ruta de autobús. Coloca paradas sobre las calles en los marcadores amarillos: puerto → viviendas → ruinas → viviendas. Fija la tarifa en 0 y el intervalo objetivo en 1 minuto, y confirma.",
+        "description": "Los turistas no tienen vehículo propio, así que hay que preparar el transporte público. Abre Transporte público → Nueva línea y elige Ruta de autobús. Coloca paradas sobre las calles en los marcadores amarillos: puerto → viviendas → ruinas → viviendas, y haz clic en la parada del puerto para cerrar el recorrido. Fija la tarifa en 0 y el intervalo objetivo en 1 minuto, y confirma.",
         "title": "Crea una ruta de autobús entre el puerto y las ruinas"
       },
       "step4": {
@@ -749,7 +749,7 @@
   "hint": {
     "buildingConstruction": "Selecciona una parcela para proyectar un edificio. Desde que lo proyectas hasta que la obra concluye pasa un tiempo.",
     "parcelCreation": "Abre el menú de rueda con Ctrl para elegir el método de creación y haz clic en la vista 3D para indicar el objetivo. Ajusta las dimensiones en el panel y confirma.",
-    "transitCreation": "Haz clic izquierdo para colocar las paradas en orden; haz clic en la primera parada para cerrar el circuito. Arrastra un tramo para agregar un punto de paso, arrastra un punto para moverlo y usa clic derecho para eliminar. Para ida y vuelta, coloca también las paradas del regreso.",
+    "transitCreation": "Haz clic izquierdo para colocar las paradas en orden; haz clic en la primera parada para cerrar el circuito. Arrastra un tramo para agregar un punto de paso, arrastra un punto para moverlo y usa clic derecho para eliminar. Para ida y vuelta, coloca también las paradas del regreso. Haz clic de nuevo en una parada ya colocada, o suelta una parada sobre otra, para volver a detenerse allí.",
     "transitManagement": "Listado de líneas de transporte público. Ajusta tarifas e intervalos, o crea y elimina líneas. La tarifa influye en la elección de ruta de los habitantes. Si es demasiado alta, bajan los usuarios y aumenta la posesión de automóviles.",
     "pathConstruction": "Construye calles y vías férreas. Haz clic en el terreno de la vista 3D. El clic izquierdo añade vértices, el derecho confirma la forma, y los vértices se mueven arrastrándolos. Manteniendo Ctrl se abre el menú de ajustes (curva/recta y anclaje). Con las teclas 3/4 cambias la altura de terraplén y desmonte.",
     "pathConstructionElevated": "Construye calles y vías férreas. Haz clic en el terreno de la vista 3D. El clic izquierdo añade vértices, el derecho confirma la forma, y los vértices se mueven arrastrándolos. Manteniendo Ctrl se abre el menú de ajustes (curva/recta y anclaje). Con RePág/AvPág o las teclas 1/2 cambias la altura, y con 3/4 la de terraplén y desmonte.",
