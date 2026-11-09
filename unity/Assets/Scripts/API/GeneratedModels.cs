@@ -19,687 +19,687 @@ namespace GeneratedModels
     [Serializable]
     public class CitizenSummary
     {
-        /// <summary>市民の一意なID</summary>
+        /// <summary>Unique citizen ID.</summary>
         public int citizen_id;
-        /// <summary>市民名（ランダム生成）</summary>
+        /// <summary>Randomly generated citizen name.</summary>
         public string name;
-        /// <summary>世帯内での立場（世帯主・配偶者・子など。共有定数の MEMBER_* を参照）</summary>
+        /// <summary>Role in the household, such as head of household, spouse, or child. See the shared MEMBER_* constants.</summary>
         public int citizen_type;
-        /// <summary>年齢（歳）</summary>
+        /// <summary>Age in years.</summary>
         public int age;
-        /// <summary>性別（0=男/1=女）</summary>
+        /// <summary>Gender (0 = male, 1 = female).</summary>
         public int gender;
     }
 
     [Serializable]
     public class CitizenData
     {
-        /// <summary>市民の一意なID</summary>
+        /// <summary>Unique citizen ID.</summary>
         public int citizen_id;
-        /// <summary>市民名（ランダム生成）</summary>
+        /// <summary>Randomly generated citizen name.</summary>
         public string name;
-        /// <summary>世帯内での立場（世帯主・配偶者・子など。共有定数の MEMBER_* を参照）</summary>
+        /// <summary>Role in the household, such as head of household, spouse, or child. See the shared MEMBER_* constants.</summary>
         public int citizen_type;
-        /// <summary>年齢（歳）</summary>
+        /// <summary>Age in years.</summary>
         public int age;
-        /// <summary>性別（0=男/1=女）</summary>
+        /// <summary>Gender (0 = male, 1 = female).</summary>
         public int gender;
-        /// <summary>通勤にかかる片道時間（分）</summary>
+        /// <summary>One-way commute time in minutes.</summary>
         public float commute_time;
-        /// <summary>都市外から流入した移民かどうか（0/1）</summary>
+        /// <summary>Whether the citizen immigrated from outside the city (0 or 1).</summary>
         public int is_immigrant;
-        /// <summary>所属する世帯エージェントのID</summary>
+        /// <summary>ID of the citizen's household agent.</summary>
         public int household_agent_id;
-        /// <summary>所属世帯の名称（household_agent_idの参照解決）</summary>
+        /// <summary>Name of the household identified by household_agent_id.</summary>
         public string household_agent_name;
-        /// <summary>勤務先エージェントのID（無職はVALUE_NONE）</summary>
+        /// <summary>ID of the employer agent (VALUE_NONE if unemployed).</summary>
         public int employer_agent_id;
-        /// <summary>勤務先の名称（employer_agent_idの参照解決）</summary>
+        /// <summary>Name of the employer identified by employer_agent_id.</summary>
         public string employer_agent_name;
-        /// <summary>在籍中の学校エージェントのID（非通学はVALUE_NONE）</summary>
+        /// <summary>ID of the school agent the citizen attends (VALUE_NONE if the citizen does not attend school).</summary>
         public int school_agent_id;
-        /// <summary>在籍校の名称（school_agent_idの参照解決）</summary>
+        /// <summary>Name of the school identified by school_agent_id.</summary>
         public string school_agent_name;
-        /// <summary>スキルID→習熟度の辞書。実質労働力とスキル段階の判定に使う</summary>
+        /// <summary>Maps skill IDs to proficiency levels. Used to determine effective labor and skill levels.</summary>
         public Dictionary<string, float> skills;
-        /// <summary>高等教育を修了したかどうか（0/1）</summary>
+        /// <summary>Whether the citizen has completed higher education (0 or 1).</summary>
         public bool educated;
-        /// <summary>高等教育で習得中のスキルID（非就学はVALUE_NONE）</summary>
+        /// <summary>ID of the skill the citizen is learning in higher education (VALUE_NONE if the citizen is not enrolled).</summary>
         public int education_skill;
-        /// <summary>犯罪性向（0.0〜1.0）。犯罪発生確率の元データ</summary>
+        /// <summary>Propensity to commit crime (0.0 to 1.0). Used to determine the probability of a crime occurring.</summary>
         public float potential_criminality;
     }
 
     [Serializable]
     public class AgentSummary
     {
-        /// <summary>経済主体の一意なID</summary>
+        /// <summary>Unique agent ID.</summary>
         public int agent_id;
-        /// <summary>経済主体名</summary>
+        /// <summary>Agent name.</summary>
         public string name;
-        /// <summary>所属地区ID</summary>
+        /// <summary>ID of the district this object belongs to.</summary>
         public int zone_id;
-        /// <summary>立地する土地区画のID</summary>
+        /// <summary>ID of the parcel where the agent is located.</summary>
         public int parcel_id;
-        /// <summary>見た目の更新版数。フロントの差分描画トリガーとして使う</summary>
+        /// <summary>Visual revision number. Clients use it to detect when an object needs to be redrawn.</summary>
         public int version;
-        /// <summary>経済主体の大分類（世帯・一般施設・公共施設など。TYPE_*）</summary>
+        /// <summary>Broad agent category, such as household, general facility, or public facility. See TYPE_*.</summary>
         public int type;
-        /// <summary>経済主体の小分類（agent_master のバリアントID）</summary>
+        /// <summary>Agent subcategory, given by the variant ID in agent_master.</summary>
         public int variant;
-        /// <summary>観光名所の種別（landmark_master のID。0=観光名所ではない）</summary>
+        /// <summary>Tourist attraction type, given by its ID in landmark_master (0 if the agent is not a tourist attraction).</summary>
         public int landmark;
-        /// <summary>建物底面ポリゴンの座標列 [[x, z], ...]</summary>
+        /// <summary>Building footprint polygon coordinates in the form [[x, z], ...].</summary>
         public List<object> polygon;
-        /// <summary>中心点座標 [x, z]</summary>
+        /// <summary>Center point coordinates [x, z].</summary>
         public List<object> center_point;
-        /// <summary>スラムの描画範囲の座標列 [[x, z], ...](polygon と同じく center_point 基準)。底面(polygon)の外まで広がる見た目だけの範囲で、底面の外の小屋はこの範囲の縁へ向かってまばらに描く。スラム以外は null</summary>
+        /// <summary>Slum rendering boundary coordinates [[x, z], ...], relative to center_point as with polygon. The boundary extends beyond the footprint for rendering only. Huts outside the footprint become sparser toward the rendering boundary. Null for other agents.</summary>
         public List<object> fringe_polygon;
-        /// <summary>立地区画の天然の海岸の岸壁の線 [A'x, A'z, B'x, B'z](A'→B' で海が左)。港の岸壁の描画と入港船の接岸に使う。沿岸区画以外・埋立地の岸壁に面する区画は null サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Quay line along the parcel's natural shoreline, given as [A'x, A'z, B'x, B'z]. The sea is on the left when looking from A' to B'. Used to render the port quay and position ships as they berth. Null for non-coastal parcels and parcels fronting a reclaimed-land quay. Computed on the server. The type may vary.</summary>
         public object berth_line;
-        /// <summary>ステータス（計画中・建設中・稼働中など。共有定数の STATUS_* を参照）</summary>
+        /// <summary>Status, such as planned, under construction, or active. See the shared STATUS_* constants.</summary>
         public int status;
-        /// <summary>ステータス遷移理由</summary>
+        /// <summary>Reason for the status transition.</summary>
         public int? status_reason;
-        /// <summary>マッシュアップ建物のサブ建物配置リスト。棟ごとの subbuilding_id / model_prefix / position[x,z] / rotation / floors / height_per_floor サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>List of sub-building placements for a composite building. Each entry contains subbuilding_id, model_prefix, position [x, z], rotation, floors, and height_per_floor. Computed on the server. The type may vary.</summary>
         public object sub_buildings;
-        /// <summary>階数</summary>
+        /// <summary>Number of floors.</summary>
         public int? floors;
-        /// <summary>建物カテゴリ（住宅・農場など。2の冪のカテゴリ値）</summary>
+        /// <summary>Building category, such as residential or farm. Each category value is a power of two.</summary>
         public int? bd_type;
-        /// <summary>建物が提供する床用途カテゴリのビットマスク（SPACE_* のOR） サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Bitmask of floor use categories the building provides, formed by combining SPACE_* flags with bitwise OR. Computed on the server. The type may vary.</summary>
         public object space_types;
-        /// <summary>耐久度（0.0〜1.0 1.0=新品）</summary>
+        /// <summary>Durability (0.0 to 1.0, with 1.0 representing new condition).</summary>
         public float? durability;
-        /// <summary>公共施設かどうか（0=民間/1=公共）</summary>
+        /// <summary>Whether the agent is a public facility (0 = private, 1 = public).</summary>
         public bool public_facility;
-        /// <summary>稼働率（直近エポックのスロット）</summary>
+        /// <summary>Utilization rate (most recent epoch's slot).</summary>
         public List<float> utilization;
-        /// <summary>建設進捗率（0〜100%） サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Construction progress (0% to 100%). Computed on the server. The type may vary.</summary>
         public object construction_progress;
-        /// <summary>インフラ網への接続端子ノードのID</summary>
+        /// <summary>ID of the terminal node that connects to the infrastructure network.</summary>
         public int infra_node_id;
-        /// <summary>車両基地など運輸系の接続ノードID</summary>
+        /// <summary>ID of a transport connection node, such as a depot connection.</summary>
         public int depot_node_id;
-        /// <summary>外観をランダム化するためのシード値（0.0〜1.0）</summary>
+        /// <summary>Seed for randomizing the object's appearance (0.0 to 1.0).</summary>
         public float? visual_variant;
-        /// <summary>外観をランダム化するためのシード値（0.0〜1.0）</summary>
+        /// <summary>Seed for randomizing the object's appearance (0.0 to 1.0).</summary>
         public float? visual_variant2;
-        /// <summary>外観をランダム化するためのシード値（0.0〜1.0）</summary>
+        /// <summary>Seed for randomizing the object's appearance (0.0 to 1.0).</summary>
         public float? visual_variant3;
     }
 
     [Serializable]
     public class AgentData
     {
-        /// <summary>経済主体の一意なID</summary>
+        /// <summary>Unique agent ID.</summary>
         public int agent_id;
-        /// <summary>経済主体名</summary>
+        /// <summary>Agent name.</summary>
         public string name;
-        /// <summary>見た目の更新版数。フロントの差分描画トリガーとして使う</summary>
+        /// <summary>Visual revision number. Clients use it to detect when an object needs to be redrawn.</summary>
         public int version;
-        /// <summary>経済主体の大分類（世帯・一般施設・公共施設など。TYPE_*）</summary>
+        /// <summary>Broad agent category, such as household, general facility, or public facility. See TYPE_*.</summary>
         public int type;
-        /// <summary>経済主体の小分類（agent_master のバリアントID）</summary>
+        /// <summary>Agent subcategory, given by the variant ID in agent_master.</summary>
         public int variant;
-        /// <summary>観光名所の種別（landmark_master のID。0=観光名所ではない）</summary>
+        /// <summary>Tourist attraction type, given by its ID in landmark_master (0 if the agent is not a tourist attraction).</summary>
         public int landmark;
-        /// <summary>ステータス（計画中・建設中・稼働中など。STATUS_*）</summary>
+        /// <summary>Status, such as planned, under construction, or active. See STATUS_*.</summary>
         public int status;
-        /// <summary>ステータス遷移理由</summary>
+        /// <summary>Reason for the status transition.</summary>
         public int? status_reason;
-        /// <summary>警告フラグのビット和（int16。共有定数の ALERT_AGENT_* を参照）</summary>
+        /// <summary>Bitmask of alert flags (int16). See the shared ALERT_AGENT_* constants.</summary>
         public int alert;
-        /// <summary>作成日</summary>
+        /// <summary>Creation date.</summary>
         public int created_date;
-        /// <summary>現在のステータスになった日</summary>
+        /// <summary>Date when the current status began.</summary>
         public int status_from;
-        /// <summary>手持ち資金（内部通貨建て）</summary>
+        /// <summary>Cash on hand in game currency.</summary>
         public int reserves;
-        /// <summary>収入の履歴（エポック別）</summary>
+        /// <summary>Revenue history by epoch.</summary>
         public List<float> revenues;
-        /// <summary>支出の履歴（エポック別）</summary>
+        /// <summary>Expense history by epoch.</summary>
         public List<float> expenses;
-        /// <summary>集客力・魅力度</summary>
+        /// <summary>Attractiveness and ability to draw visitors.</summary>
         public float attraction;
-        /// <summary>公共建物の放棄フラグ（0/1）。放棄すると自動修繕の対象外になる</summary>
+        /// <summary>Abandonment flag for public buildings (0 or 1). Abandoned buildings are excluded from automatic repairs.</summary>
         public bool? abandoned;
-        /// <summary>建物が立地する区画が買収交渉中であるか サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Whether land acquisition negotiations are in progress for the parcel the building occupies. Computed on the server. The type may vary.</summary>
         public object under_acquisition;
-        /// <summary>公共施設かどうか（0=民間/1=公共）</summary>
+        /// <summary>Whether the agent is a public facility (0 = private, 1 = public).</summary>
         public bool public_facility;
-        /// <summary>インフラ網への接続端子ノードのID</summary>
+        /// <summary>ID of the terminal node that connects to the infrastructure network.</summary>
         public int infra_node_id;
-        /// <summary>車両基地など運輸系の接続ノードID</summary>
+        /// <summary>ID of a transport connection node, such as a depot connection.</summary>
         public int depot_node_id;
-        /// <summary>プレイヤーが予約した操作のリスト（解体など）</summary>
+        /// <summary>List of actions scheduled by the player, such as demolition.</summary>
         public List<object> user_operations;
-        /// <summary>当エポックの製品別需要量（製品ID→量）</summary>
+        /// <summary>Maps product IDs to quantities demanded in the current epoch.</summary>
         public Dictionary<string, float> demand_amount;
-        /// <summary>当エポックに獲得した製品別数量（製品ID→量）</summary>
+        /// <summary>Maps product IDs to quantities received in the current epoch.</summary>
         public Dictionary<string, float> received_amount;
-        /// <summary>手持ち在庫として残っている製品別数量（製品ID→量）</summary>
+        /// <summary>Maps product IDs to quantities remaining in inventory.</summary>
         public Dictionary<string, float> remain_amount;
-        /// <summary>立地する土地区画のID</summary>
+        /// <summary>ID of the parcel where the agent is located.</summary>
         public int parcel_id;
-        /// <summary>所属地区ID</summary>
+        /// <summary>ID of the district this object belongs to.</summary>
         public int zone_id;
-        /// <summary>所属地区の名称（zone_idの参照解決）</summary>
+        /// <summary>Name of the district identified by zone_id.</summary>
         public string zone_name;
-        /// <summary>入居先の建物エージェントのID（テナントの場合）</summary>
+        /// <summary>For a tenant, ID of the building agent it occupies.</summary>
         public int? building_agent_id;
-        /// <summary>入居先建物の名称（building_agent_idの参照解決）</summary>
+        /// <summary>Name of the building identified by building_agent_id.</summary>
         public string building_agent_name;
-        /// <summary>占有・利用している床面積（不動産枠 m2）</summary>
+        /// <summary>Occupied floor area (m²).</summary>
         public float? realestate_amount;
-        /// <summary>立ち退き済みかどうか（0/1）</summary>
+        /// <summary>Whether the agent has been evicted (0 or 1).</summary>
         public bool? is_evicted;
-        /// <summary>建物かどうか（0/1）</summary>
+        /// <summary>Whether the agent is a building (0 or 1).</summary>
         public bool is_bd;
-        /// <summary>建物カテゴリ（住宅・農場など。2の冪のカテゴリ値）</summary>
+        /// <summary>Building category, such as residential or farm. Each category value is a power of two.</summary>
         public int? bd_type;
-        /// <summary>耐久度（0.0〜1.0 1.0=新品）</summary>
+        /// <summary>Durability (0.0 to 1.0, with 1.0 representing new condition).</summary>
         public float? durability;
-        /// <summary>階数</summary>
+        /// <summary>Number of floors.</summary>
         public int? floors;
-        /// <summary>建物の高さ（m）</summary>
+        /// <summary>Building height (m).</summary>
         public float? height;
-        /// <summary>延床面積（m2）</summary>
+        /// <summary>Total floor area (m²).</summary>
         public float? floor_area;
-        /// <summary>建築面積（1フロア分の面積 m2）</summary>
+        /// <summary>Building footprint area, equivalent to one floor (m²).</summary>
         public float? base_area;
-        /// <summary>容積率（延床面積/敷地面積）</summary>
+        /// <summary>Volume ratio (total floor area divided by site area).</summary>
         public float? volume_ratio;
-        /// <summary>修繕中かどうか（0/1）</summary>
+        /// <summary>Whether repairs are in progress (0 or 1).</summary>
         public bool? under_maintenance;
-        /// <summary>建設進捗率（0〜100%） サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Construction progress (0% to 100%). Computed on the server. The type may vary.</summary>
         public object construction_progress;
-        /// <summary>賃料（単価）</summary>
+        /// <summary>Rent per unit.</summary>
         public float? rent;
-        /// <summary>床用途カテゴリ別の総収容量（カテゴリ→量）</summary>
+        /// <summary>Maps floor use categories to their total capacity.</summary>
         public Dictionary<string, float> capacity;
-        /// <summary>床用途カテゴリ別の使用済み収容量（カテゴリ→量）</summary>
+        /// <summary>Maps floor use categories to their occupied capacity.</summary>
         public Dictionary<string, float> occupied;
-        /// <summary>この建物に入居しているエージェントのリスト</summary>
+        /// <summary>List of agents occupying this building as tenants.</summary>
         public List<RefItem> tenants;
-        /// <summary>世帯の栄養充足度（0.0〜1.0）</summary>
+        /// <summary>Degree to which the household's nutritional needs are met (0.0 to 1.0).</summary>
         public float? satis_nutrition;
-        /// <summary>世帯の医療充足度（0.0〜1.0）</summary>
+        /// <summary>Degree to which the household's healthcare needs are met (0.0 to 1.0).</summary>
         public float? satis_healthcare;
-        /// <summary>世帯の娯楽・余暇の充足度（0.0〜1.0）</summary>
+        /// <summary>Degree to which the household's entertainment and leisure needs are met (0.0 to 1.0).</summary>
         public float? satis_leisure;
-        /// <summary>世帯の住環境満足度（0.0〜1.0）</summary>
+        /// <summary>Household satisfaction with its living environment (0.0 to 1.0).</summary>
         public float? satis_residential;
-        /// <summary>観光体験充足度（0.0〜1.0。観光客世帯の観光満足度の要素）</summary>
+        /// <summary>Satisfaction with the tourism experience (0.0 to 1.0). Contributes to overall tourism satisfaction for tourist households.</summary>
         public float? satis_tourism;
-        /// <summary>世帯タイプ（単身・夫婦・子ありなど。共有定数の FAMILY_* を参照）</summary>
+        /// <summary>Household type, such as single person, couple, or household with children. See the shared FAMILY_* constants.</summary>
         public int? family_type;
-        /// <summary>この世帯に所属する市民のリスト</summary>
+        /// <summary>List of citizens in this household.</summary>
         public List<RefItem> members;
-        /// <summary>世帯の可処分所得</summary>
+        /// <summary>Household disposable income.</summary>
         public int? discretionary_income;
-        /// <summary>立地の環境スコア</summary>
+        /// <summary>Environmental score for the location.</summary>
         public float? env_score;
-        /// <summary>世帯の生活の質（QOL）スコア</summary>
+        /// <summary>Household quality-of-life (QOL) score.</summary>
         public float? qol_score;
-        /// <summary>世帯が自家用車を保有するか（0/1）</summary>
+        /// <summary>Whether the household owns a private car (0 or 1).</summary>
         public bool? has_automobile;
-        /// <summary>世帯の需要ティア（その世帯が注文した商品の最も高い demand_tier。0〜3。0は何も注文できなかった世帯）</summary>
+        /// <summary>Household demand tier (0 to 3). It is the highest demand_tier among the products the household ordered. Tier 0 means the household could not place any orders.</summary>
         public int? demand_tier;
-        /// <summary>世帯の所得ティア（0〜3。収入が届いた生活費の線の数。線は最低生活費、ティア1を需要の上限まで満たす費用、ティア1・2を満たす費用）</summary>
+        /// <summary>Household income tier (0 to 3). Counts how many cost-of-living thresholds its income meets. The thresholds are minimum living costs, the cost of meeting tier 1 demand up to its limit, and the cost of meeting tier 1 and tier 2 demand.</summary>
         public int? income_tier;
-        /// <summary>稼働率（直近エポックのスロット）</summary>
+        /// <summary>Utilization rate (most recent epoch's slot).</summary>
         public List<float> utilization;
-        /// <summary>稼働率の目標値（プレイヤー設定。0.0〜1.5）</summary>
+        /// <summary>Player-defined target utilization rate (0.0 to 1.5).</summary>
         public float? utilization_target;
-        /// <summary>賃金単価。実質労働力1単位・1日あたりの円で、各人の日給はこれに実質労働力を掛けた額</summary>
+        /// <summary>Wage rate in yen per unit of effective labor per day. A worker's daily pay is this rate multiplied by their effective labor.</summary>
         public float? wage;
-        /// <summary>1エポックの生産・サービス提供の目標数量</summary>
+        /// <summary>Target quantity of goods to produce or services to provide per epoch.</summary>
         public float? quota;
-        /// <summary>稼働に必要な総労働力</summary>
+        /// <summary>Total labor required for operation.</summary>
         public float? total_labor;
-        /// <summary>雇用に要求されるスキルID</summary>
+        /// <summary>ID of the skill required for employment.</summary>
         public int? required_skill;
-        /// <summary>この施設に雇用されている市民のリスト</summary>
+        /// <summary>List of citizens employed at this facility.</summary>
         public List<RefItem> employees;
-        /// <summary>当エポックに出荷可能な供給量</summary>
+        /// <summary>Quantity available to ship in the current epoch.</summary>
         public float? supply_amount;
-        /// <summary>この施設が供給する製品のID</summary>
+        /// <summary>ID of the product this facility supplies.</summary>
         public float? supply_product_id;
-        /// <summary>製品の販売価格（税込み）</summary>
+        /// <summary>Product selling price including tax.</summary>
         public float? supply_price;
-        /// <summary>当エポックの生産量</summary>
+        /// <summary>Quantity produced in the current epoch.</summary>
         public float? supply_production;
-        /// <summary>販売量の履歴（エポック別）</summary>
+        /// <summary>History of quantities sold by epoch.</summary>
         public List<float> supply_sold_amount;
-        /// <summary>利益率の履歴（エポック別）</summary>
+        /// <summary>Profit margin history by epoch.</summary>
         public List<float> profit_rates;
-        /// <summary>この施設が都市の観光客の受入可能人数に加える人数（人）。観光地・玄関口の施設のみで、稼働中でなければ0 サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Number of tourists this facility adds to the city's total visitor capacity. Applies only to tourist attractions and gateway facilities. Returns 0 when the facility is inactive. Computed on the server. The type may vary.</summary>
         public object tourist_capacity;
-        /// <summary>受け入れスキル別の定員（スキルID→人数）</summary>
+        /// <summary>Maps skill IDs to the number of students the school can admit for each skill.</summary>
         public Dictionary<string, object> education_type;
-        /// <summary>この学校に在籍している市民のリスト</summary>
+        /// <summary>List of citizens enrolled at this school.</summary>
         public List<RefItem> students;
-        /// <summary>敷地から決まる総定員（人）。学校のみ</summary>
+        /// <summary>Total enrollment capacity based on the site, measured in students. Schools only.</summary>
         public int? max_students;
-        /// <summary>スキル別の在籍者数（スキルID→人数）。学校のみ サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Maps skill IDs to the number of students currently enrolled for each skill. Schools only. Computed on the server. The type may vary.</summary>
         public object enrolled_by_skill;
-        /// <summary>建物の駐車容量（台）。建物の作成・更新時に確定する永続値。建物以外は0</summary>
+        /// <summary>Building parking capacity, measured in vehicles. This value is set when the building is created or updated and is saved. Returns 0 for agents other than buildings.</summary>
         public float parking_capacity;
-        /// <summary>当エポックの昼間駐車使用量（台）。通勤・通学・来客と、駐車施設が吸収した分</summary>
+        /// <summary>Daytime parking use in the current epoch, measured in vehicles. Includes work and school commuters, visitors, and vehicles accommodated by parking facilities.</summary>
         public float parking_use_day;
-        /// <summary>当エポックの夜間駐車使用量（台）。居住世帯の保有車と、駐車施設が吸収した分</summary>
+        /// <summary>Nighttime parking use in the current epoch, measured in vehicles. Includes vehicles owned by resident households and vehicles accommodated by parking facilities.</summary>
         public float parking_use_night;
-        /// <summary>駐車施設でも吸収しきれず路上へあふれた台数（昼夜の大きい方）。建物以外は0</summary>
+        /// <summary>Number of vehicles that overflow onto the street after parking facilities are accounted for. Uses the larger of the daytime and nighttime counts. Returns 0 for agents other than buildings.</summary>
         public float parking_overflow;
     }
 
     [Serializable]
     public class PathSummary
     {
-        /// <summary>パスの一意なID</summary>
+        /// <summary>Unique path ID.</summary>
         public int path_id;
-        /// <summary>パス名</summary>
+        /// <summary>Path name.</summary>
         public string name;
-        /// <summary>見た目の更新版数。フロントの差分描画トリガーとして使う</summary>
+        /// <summary>Visual revision number. Clients use it to detect when an object needs to be redrawn.</summary>
         public int version;
-        /// <summary>幹線道路かどうか（高速道路、または道路(road_id)に属する街路なら真）</summary>
+        /// <summary>Whether this is a trunk road. True for motorways and streets that belong to a named road (road_id).</summary>
         public bool trunk;
-        /// <summary>パスの大分類（道路・街路・線路・公共交通・インフラなど。PATH_*）</summary>
+        /// <summary>Broad path category, such as road, street, track, public transport, or infrastructure. See PATH_*.</summary>
         public int path_type;
-        /// <summary>パスの小分類（幅や規格を決めるバリアントID）</summary>
+        /// <summary>Path subcategory, given by the variant ID that determines its width and specifications.</summary>
         public int path_variant;
-        /// <summary>両面が同じ地区ならその地区ID。2地区の境界の道路と未所属は0</summary>
+        /// <summary>District ID when both sides belong to the same district. Returns 0 for roads on a district boundary or with no district.</summary>
         public int zone_id;
-        /// <summary>左の面（始点→終点の向き）の所属地区ID。0以下は未所属</summary>
+        /// <summary>District ID on the left side, looking from start to end. A value of 0 or less means no district.</summary>
         public int left_zone_id;
-        /// <summary>右の面の所属地区ID。0以下は未所属</summary>
+        /// <summary>District ID on the right side. A value of 0 or less means no district.</summary>
         public int right_zone_id;
-        /// <summary>パスの占有ポリゴンの座標列</summary>
+        /// <summary>Coordinates of the polygon occupied by the path.</summary>
         public List<object> polygon;
-        /// <summary>ステータス（計画中・建設中・稼働中など。STATUS_*）</summary>
+        /// <summary>Status, such as planned, under construction, or active. See STATUS_*.</summary>
         public int status;
-        /// <summary>ベジエ曲線かどうか（1=曲線/0=直線・折れ線）</summary>
+        /// <summary>Whether the path is a Bézier curve (1 = curve, 0 = straight line or polyline).</summary>
         public bool curved;
-        /// <summary>交通種別ごとの交通量（道路交通・鉄道交通など）</summary>
+        /// <summary>Traffic volume by traffic type, such as road or rail traffic.</summary>
         public Dictionary<string, float> path_traffic;
-        /// <summary>通行方向（双方向/start→end/end→start）</summary>
+        /// <summary>Travel direction (both ways, start to end, or end to start).</summary>
         public int travel_direction;
         public int? house_path_id;
-        /// <summary>駅ホームの設置側（外側/内側/両側）</summary>
+        /// <summary>Side on which the station platform is placed (outer, inner, or both sides).</summary>
         public int platform_side;
-        /// <summary>地形追従の個別設定。-1=未設定（バリアント既定に従う）、0=非追従、1=追従</summary>
+        /// <summary>Terrain-following setting for this path (-1 = use the variant default, 0 = disabled, 1 = enabled).</summary>
         public int follow_terrain;
-        /// <summary>始点ノードのID</summary>
+        /// <summary>Start node ID.</summary>
         public int start_node_id;
-        /// <summary>終点ノードのID</summary>
+        /// <summary>End node ID.</summary>
         public int end_node_id;
-        /// <summary>始点アンカー座標 [x, y, z]</summary>
+        /// <summary>Start anchor coordinates [x, y, z].</summary>
         public List<object> start_point;
-        /// <summary>終点アンカー座標 [x, y, z]</summary>
+        /// <summary>End anchor coordinates [x, y, z].</summary>
         public List<object> end_point;
-        /// <summary>始点の出口制御点（3次ベジエのP1）[x, y, z]。未指定は自動補完値</summary>
+        /// <summary>Outgoing control point at the start (P1 of a cubic Bézier curve), given as [x, y, z]. Filled in automatically if unspecified.</summary>
         public List<object> start_control;
-        /// <summary>終点の入口制御点（3次ベジエのP2）[x, y, z]。未指定は自動補完値</summary>
+        /// <summary>Incoming control point at the end (P2 of a cubic Bézier curve), given as [x, y, z]. Filled in automatically if unspecified.</summary>
         public List<object> end_control;
-        /// <summary>中間アンカー点と制御点のリスト</summary>
+        /// <summary>List of intermediate anchors and control points.</summary>
         public List<object> waypoints;
-        /// <summary>各アンカーの盛土オフセット（m -5〜+5）。着工時の地形変形に使う</summary>
+        /// <summary>Embankment offset at each anchor (-5 to +5 m). Used to reshape the terrain when construction starts.</summary>
         public List<object> embankment_heights;
-        /// <summary>中心点座標 [x, z]</summary>
+        /// <summary>Center point coordinates [x, z].</summary>
         public List<object> center_point;
-        /// <summary>幅（m）</summary>
+        /// <summary>Width (m).</summary>
         public float width;
-        /// <summary>騒音レベル</summary>
+        /// <summary>Noise level.</summary>
         public float noise;
-        /// <summary>利用率（交通量/キャパシティ）</summary>
+        /// <summary>Utilization rate (traffic volume divided by capacity).</summary>
         public float utilization;
-        /// <summary>耐久度（0.0〜1.0 1.0=新品）</summary>
+        /// <summary>Durability (0.0 to 1.0, with 1.0 representing new condition).</summary>
         public float durability;
-        /// <summary>街灯の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Streetlight type (0 = none, 1 = standard). Saved for each road.</summary>
         public int streetlight_type;
-        /// <summary>歩車道境界の柵。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Fence between the sidewalk and the roadway (0 = none, 1 = standard). Saved for each road.</summary>
         public int fence_type;
-        /// <summary>街路樹の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Street tree type (0 = none, 1 = standard). Saved for each road.</summary>
         public int street_tree_type;
-        /// <summary>配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。</summary>
+        /// <summary>Utility wiring mode (0 = none, 1 = overhead, 2 = underground). Saved for each road.</summary>
         public int utility_mode;
-        /// <summary>駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従</summary>
+        /// <summary>Shared station grade reference line in the form [x, absolute elevation, z]. If empty, normal terrain following applies.</summary>
         public List<object> station_grade_profile;
-        /// <summary>駅舎の建屋配置端（both/start/end）</summary>
+        /// <summary>Path ends with station buildings (both, start, or end).</summary>
         public string house_ends;
-        /// <summary>駅舎の通路方式（elevated/ground/underground）</summary>
+        /// <summary>Station building passage mode (elevated, ground, or underground).</summary>
         public string passage_mode;
-        /// <summary>ベンチの種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Bench type (0 = none, 1 = standard). Saved for each road.</summary>
         public int bench_type;
-        /// <summary>ゴミ箱の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Trash bin type (0 = none, 1 = standard). Saved for each road.</summary>
         public int bin_type;
-        /// <summary>植え込みの種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Planter type (0 = none, 1 = standard). Saved for each road.</summary>
         public int planter_type;
-        /// <summary>広告の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Advertising type (0 = none, 1 = standard). Saved for each road.</summary>
         public int advert_type;
-        /// <summary>外観。0=標準、1以上はバリアントの外観の番号。パスごとの保存値で、見た目だけに使う。</summary>
+        /// <summary>Appearance (0 = standard, 1 or greater = appearance number within the variant). Saved for each path and used only for rendering.</summary>
         public int appearance;
-        /// <summary>路上駐車台数（専用駐車枠内も含む。昼夜の大きい方）</summary>
+        /// <summary>Number of vehicles parked on the street, including vehicles in dedicated parking spaces. Uses the larger of the daytime and nighttime counts.</summary>
         public float parked_cars;
-        /// <summary>路駐率と台数配分の基準容量（台）。交通を妨げない専用駐車枠とは別。稼働中の地上街路以外は0</summary>
+        /// <summary>Reference capacity, measured in vehicles, for calculating the on-street parking ratio and allocating parked vehicles. This differs from dedicated parking spaces, which do not obstruct traffic. Returns 0 except on active surface streets.</summary>
         public float street_parking_capacity;
-        /// <summary>制限速度(km/h) サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Speed limit (km/h). Computed on the server. The type may vary.</summary>
         public object max_speed;
-        /// <summary>所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道</summary>
+        /// <summary>ID of the named road this path belongs to. A value of -1 (VALUE_NONE) identifies an unnamed path with no road assignment.</summary>
         public int? road_id;
-        /// <summary>形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配から算出し、交差点での減速・停止は含まない</summary>
+        /// <summary>Travel speed (km/h) based on the speed limit, curve radius, and longitudinal grade. Excludes slowing and stopping at intersections.</summary>
         public float base_speed;
-        /// <summary>色(#RRGGBB)。パス自身の色、無ければバリアントの既定色。色を使わないバリアントは null。描画はモデルの塗装部分(PATH_PAINT)をこの色で塗る</summary>
+        /// <summary>Color (#RRGGBB). Uses the path's own color if set, otherwise the variant default. Null for variants that do not use a color. This color is applied to the model's painted parts (PATH_PAINT).</summary>
         public string color;
     }
 
     [Serializable]
     public class PathData
     {
-        /// <summary>パスの一意なID</summary>
+        /// <summary>Unique path ID.</summary>
         public int path_id;
-        /// <summary>パス名</summary>
+        /// <summary>Path name.</summary>
         public string name;
-        /// <summary>見た目の更新版数。フロントの差分描画トリガーとして使う</summary>
+        /// <summary>Visual revision number. Clients use it to detect when an object needs to be redrawn.</summary>
         public int version;
-        /// <summary>パスの大分類（道路・街路・線路・公共交通・インフラなど。PATH_*）</summary>
+        /// <summary>Broad path category, such as road, street, track, public transport, or infrastructure. See PATH_*.</summary>
         public int path_type;
-        /// <summary>パスの小分類（幅や規格を決めるバリアントID）</summary>
+        /// <summary>Path subcategory, given by the variant ID that determines its width and specifications.</summary>
         public int path_variant;
-        /// <summary>ステータス（計画中・建設中・稼働中など。STATUS_*）</summary>
+        /// <summary>Status, such as planned, under construction, or active. See STATUS_*.</summary>
         public int status;
-        /// <summary>警告フラグのビット和（int16。共有定数の ALERT_PATH_* を参照）</summary>
+        /// <summary>Bitmask of alert flags (int16). See the shared ALERT_PATH_* constants.</summary>
         public int alert;
-        /// <summary>この区間パスが属する公共交通路線エージェントのID</summary>
+        /// <summary>ID of the public transport line agent that this section of path belongs to.</summary>
         public int line_agent_id;
-        /// <summary>パスの占有ポリゴンの座標列</summary>
+        /// <summary>Coordinates of the polygon occupied by the path.</summary>
         public List<object> polygon;
-        /// <summary>ベジエ曲線かどうか（1=曲線/0=直線・折れ線）</summary>
+        /// <summary>Whether the path is a Bézier curve (1 = curve, 0 = straight line or polyline).</summary>
         public bool curved;
-        /// <summary>通行方向（双方向/start→end/end→start）</summary>
+        /// <summary>Travel direction (both ways, start to end, or end to start).</summary>
         public int travel_direction;
-        /// <summary>修繕中かどうか（0/1）</summary>
+        /// <summary>Whether repairs are in progress (0 or 1).</summary>
         public int under_maintenance;
-        /// <summary>駅ホームの設置側（外側/内側/両側）</summary>
+        /// <summary>Side on which the station platform is placed (outer, inner, or both sides).</summary>
         public int platform_side;
-        /// <summary>地形追従の個別設定。-1=未設定（バリアント既定に従う）、0=非追従、1=追従</summary>
+        /// <summary>Terrain-following setting for this path (-1 = use the variant default, 0 = disabled, 1 = enabled).</summary>
         public int follow_terrain;
-        /// <summary>両面が同じ地区ならその地区ID。2地区の境界の道路と未所属は0</summary>
+        /// <summary>District ID when both sides belong to the same district. Returns 0 for roads on a district boundary or with no district.</summary>
         public int zone_id;
-        /// <summary>所属地区の名称（zone_idの参照解決。境界の道路と未所属はnull）</summary>
+        /// <summary>Name of the district identified by zone_id. Null for roads on a district boundary or with no district.</summary>
         public string zone_name;
-        /// <summary>左の面（始点→終点の向き）の所属地区ID。0以下は未所属</summary>
+        /// <summary>District ID on the left side, looking from start to end. A value of 0 or less means no district.</summary>
         public int left_zone_id;
-        /// <summary>右の面の所属地区ID。0以下は未所属</summary>
+        /// <summary>District ID on the right side. A value of 0 or less means no district.</summary>
         public int right_zone_id;
-        /// <summary>インフラ財の当エポック流量（符号付き。正=start→end方向）</summary>
+        /// <summary>Signed flow of infrastructure goods in the current epoch. Positive values indicate flow from start to end.</summary>
         public float infra_flow;
-        /// <summary>騒音レベル</summary>
+        /// <summary>Noise level.</summary>
         public float noise;
-        /// <summary>大気汚染レベル</summary>
+        /// <summary>Air pollution level.</summary>
         public float air_pollution;
-        /// <summary>制限速度(km/h) サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Speed limit (km/h). Computed on the server. The type may vary.</summary>
         public object max_speed;
-        /// <summary>制限速度をプレイヤー指定で上書きしているか（0/1）</summary>
+        /// <summary>Whether the player has overridden the speed limit (0 or 1).</summary>
         public bool override_max_speed;
-        /// <summary>形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配から算出し、交差点での減速・停止は含まない(geo_path_alignment)</summary>
+        /// <summary>Travel speed (km/h) based on the speed limit, curve radius, and longitudinal grade. Excludes slowing and stopping at intersections.</summary>
         public float base_speed;
-        /// <summary>パス内の最小曲線半径(m)。直線は上限値(1e6)</summary>
+        /// <summary>Minimum curve radius along the path (m). Straight paths use the upper limit (1e6).</summary>
         public float min_curve_radius;
-        /// <summary>パス内の最大縦断勾配(%)</summary>
+        /// <summary>Maximum longitudinal grade along the path (%).</summary>
         public float max_grade;
-        /// <summary>移動種別ごとの実通過時間（混雑込み）</summary>
+        /// <summary>Actual traversal time by travel mode, including congestion.</summary>
         public Dictionary<string, float> travel_time;
-        /// <summary>交通種別ごとの交通量（道路交通・鉄道交通など）</summary>
+        /// <summary>Traffic volume by traffic type, such as road or rail traffic.</summary>
         public Dictionary<string, float> path_traffic;
-        /// <summary>利用率（交通量/キャパシティ） サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Utilization rate (traffic volume divided by capacity). Computed on the server. The type may vary.</summary>
         public object utilization;
-        /// <summary>耐久度。デフォルトは 1.0 とする。</summary>
+        /// <summary>Durability. Defaults to 1.0.</summary>
         public int durability;
-        /// <summary>建設進捗率（0〜100%） サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Construction progress (0% to 100%). Computed on the server. The type may vary.</summary>
         public object construction_progress;
-        /// <summary>ノードを共有する隣接街路が属する地区の一覧 サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>List of districts to which adjacent streets sharing a node belong. Computed on the server. The type may vary.</summary>
         public object nearby_zones;
-        /// <summary>始点ノードのID</summary>
+        /// <summary>Start node ID.</summary>
         public int start_node_id;
-        /// <summary>終点ノードのID</summary>
+        /// <summary>End node ID.</summary>
         public int end_node_id;
-        /// <summary>始点アンカー座標 [x, y, z]</summary>
+        /// <summary>Start anchor coordinates [x, y, z].</summary>
         public List<object> start_point;
-        /// <summary>終点アンカー座標 [x, y, z]</summary>
+        /// <summary>End anchor coordinates [x, y, z].</summary>
         public List<object> end_point;
-        /// <summary>始点の出口制御点（3次ベジエのP1）[x, y, z]。未指定は自動補完値</summary>
+        /// <summary>Outgoing control point at the start (P1 of a cubic Bézier curve), given as [x, y, z]. Filled in automatically if unspecified.</summary>
         public List<object> start_control;
-        /// <summary>終点の入口制御点（3次ベジエのP2）[x, y, z]。未指定は自動補完値</summary>
+        /// <summary>Incoming control point at the end (P2 of a cubic Bézier curve), given as [x, y, z]. Filled in automatically if unspecified.</summary>
         public List<object> end_control;
-        /// <summary>中間アンカー点と制御点のリスト</summary>
+        /// <summary>List of intermediate anchors and control points.</summary>
         public List<object> waypoints;
-        /// <summary>各アンカーの盛土オフセット（m -5〜+5）。着工時の地形変形に使う</summary>
+        /// <summary>Embankment offset at each anchor (-5 to +5 m). Used to reshape the terrain when construction starts.</summary>
         public List<object> embankment_heights;
-        /// <summary>中心点座標 [x, z]</summary>
+        /// <summary>Center point coordinates [x, z].</summary>
         public List<object> center_point;
-        /// <summary>幅（m）</summary>
+        /// <summary>Width (m).</summary>
         public float width;
-        /// <summary>パスの物理長（m）</summary>
+        /// <summary>Physical path length (m).</summary>
         public float length;
-        /// <summary>街灯の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Streetlight type (0 = none, 1 = standard). Saved for each road.</summary>
         public int streetlight_type;
-        /// <summary>歩車道境界の柵。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Fence between the sidewalk and the roadway (0 = none, 1 = standard). Saved for each road.</summary>
         public int fence_type;
-        /// <summary>街路樹の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Street tree type (0 = none, 1 = standard). Saved for each road.</summary>
         public int street_tree_type;
-        /// <summary>配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。</summary>
+        /// <summary>Utility wiring mode (0 = none, 1 = overhead, 2 = underground). Saved for each road.</summary>
         public int utility_mode;
-        /// <summary>駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従</summary>
+        /// <summary>Shared station grade reference line in the form [x, absolute elevation, z]. If empty, normal terrain following applies.</summary>
         public List<object> station_grade_profile;
-        /// <summary>駅舎の建屋配置端（both/start/end）</summary>
+        /// <summary>Path ends with station buildings (both, start, or end).</summary>
         public string house_ends;
-        /// <summary>駅舎の通路方式（elevated/ground/underground）</summary>
+        /// <summary>Station building passage mode (elevated, ground, or underground).</summary>
         public string passage_mode;
-        /// <summary>ベンチの種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Bench type (0 = none, 1 = standard). Saved for each road.</summary>
         public int bench_type;
-        /// <summary>ゴミ箱の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Trash bin type (0 = none, 1 = standard). Saved for each road.</summary>
         public int bin_type;
-        /// <summary>植え込みの種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Planter type (0 = none, 1 = standard). Saved for each road.</summary>
         public int planter_type;
-        /// <summary>広告の種類。0=なし、1=標準。道路ごとの保存値。</summary>
+        /// <summary>Advertising type (0 = none, 1 = standard). Saved for each road.</summary>
         public int advert_type;
-        /// <summary>外観。0=標準、1以上はバリアントの外観の番号。パスごとの保存値で、見た目だけに使う。</summary>
+        /// <summary>Appearance (0 = standard, 1 or greater = appearance number within the variant). Saved for each path and used only for rendering.</summary>
         public int appearance;
-        /// <summary>路上駐車台数（専用駐車枠内も含む。昼夜の大きい方）</summary>
+        /// <summary>Number of vehicles parked on the street, including vehicles in dedicated parking spaces. Uses the larger of the daytime and nighttime counts.</summary>
         public float parked_cars;
-        /// <summary>路駐率と台数配分の基準容量（台）。交通を妨げない専用駐車枠とは別。稼働中の地上街路以外は0</summary>
+        /// <summary>Reference capacity, measured in vehicles, for calculating the on-street parking ratio and allocating parked vehicles. This differs from dedicated parking spaces, which do not obstruct traffic. Returns 0 except on active surface streets.</summary>
         public float street_parking_capacity;
-        /// <summary>路駐率（全路上駐車台数 / street_parking_capacity）。交通への妨げは専用駐車容量の比を差し引いて評価する。基準容量0のときは0</summary>
+        /// <summary>On-street parking ratio (total vehicles parked on the street divided by street_parking_capacity). To assess traffic obstruction, subtract the proportion represented by dedicated parking capacity. Returns 0 if the reference capacity is 0.</summary>
         public float parking_ratio;
-        /// <summary>所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道</summary>
+        /// <summary>ID of the named road this path belongs to. A value of -1 (VALUE_NONE) identifies an unnamed path with no road assignment.</summary>
         public int? road_id;
-        /// <summary>色(#RRGGBB)。パス自身の色、無ければバリアントの既定色。色を使わないバリアントは null。描画はモデルの塗装部分(PATH_PAINT)をこの色で塗る</summary>
+        /// <summary>Color (#RRGGBB). Uses the path's own color if set, otherwise the variant default. Null for variants that do not use a color. This color is applied to the model's painted parts (PATH_PAINT).</summary>
         public string color;
-        /// <summary>このパスの構造に付帯する子(吊り橋の下段)のパスID。-1(VALUE_NONE)は付帯なし</summary>
+        /// <summary>ID of the child path attached to this structure, such as the lower deck of a suspension bridge. A value of -1 (VALUE_NONE) means there is no attached path.</summary>
         public int? attached_path_id;
     }
 
     [Serializable]
     public class ParcelSummary
     {
-        /// <summary>土地区画の一意なID</summary>
+        /// <summary>Unique parcel ID.</summary>
         public int parcel_id;
-        /// <summary>見た目の更新版数。フロントの差分描画トリガーとして使う</summary>
+        /// <summary>Visual revision number. Clients use it to detect when an object needs to be redrawn.</summary>
         public int version;
-        /// <summary>区画タイプ（陸地/海岸など。PARCEL_*）</summary>
+        /// <summary>Parcel type, such as land or shoreline. See PARCEL_*.</summary>
         public int parcel_type;
-        /// <summary>ステータス（計画中/稼働中など。STATUS_*）</summary>
+        /// <summary>Status, such as planned or active. See STATUS_*.</summary>
         public int status;
-        /// <summary>基準標高（m）</summary>
+        /// <summary>Reference elevation (m).</summary>
         public float altitude;
-        /// <summary>区画ポリゴンの座標列 [[x, z], ...]</summary>
+        /// <summary>Parcel polygon coordinates in the form [[x, z], ...].</summary>
         public List<object> polygon;
-        /// <summary>中心点座標 [x, z]</summary>
+        /// <summary>Center point coordinates [x, z].</summary>
         public List<object> center_point;
-        /// <summary>接道している街路のID</summary>
+        /// <summary>ID of the street the parcel fronts.</summary>
         public int front_path_id;
-        /// <summary>区画が接道のどちらの面にあるか（PATH_SIDE_LEFT/RIGHT。-1=接道なし）。所属地区はこの面の地区</summary>
+        /// <summary>Side of the frontage street where the parcel lies (PATH_SIDE_LEFT or PATH_SIDE_RIGHT, or -1 for no frontage). The parcel belongs to the district on that side.</summary>
         public int front_path_side;
-        /// <summary>土地価格</summary>
+        /// <summary>Land price.</summary>
         public float land_price;
-        /// <summary>地区の法規制を区画側で上書きしているか（0/1）</summary>
+        /// <summary>Whether the parcel overrides district regulations (0 or 1).</summary>
         public bool restriction_override;
-        /// <summary>建築可能な建物カテゴリのビットフラグ（bd_type値のOR）</summary>
+        /// <summary>Bitmask of building categories allowed for construction, formed by combining bd_type values with bitwise OR.</summary>
         public int allowed_bd_mask;
-        /// <summary>建蔽率の上限</summary>
+        /// <summary>Maximum building coverage ratio.</summary>
         public float limit_coverage_ratio;
-        /// <summary>容積率の上限</summary>
+        /// <summary>Maximum volume ratio.</summary>
         public float limit_volume_ratio;
-        /// <summary>高さの上限（m）</summary>
+        /// <summary>Maximum height (m).</summary>
         public float limit_height;
-        /// <summary>この区画を使用している建物エージェントのID（0=空き地）</summary>
+        /// <summary>ID of the building agent using the parcel (0 if vacant).</summary>
         public int usage_id;
-        /// <summary>岸壁のすぐ外の水深(m)。港の必要水深(agent_master の berth_depth)以上の区画にだけ港が建つ。沿岸区画以外は0</summary>
+        /// <summary>Water depth just beyond the quay (m). A port can be built only if the parcel meets or exceeds the port's required depth (berth_depth in agent_master). Returns 0 for non-coastal parcels.</summary>
         public float water_depth;
     }
 
     [Serializable]
     public class ParcelData
     {
-        /// <summary>土地区画の一意なID</summary>
+        /// <summary>Unique parcel ID.</summary>
         public int parcel_id;
-        /// <summary>見た目の更新版数。フロントの差分描画トリガーとして使う</summary>
+        /// <summary>Visual revision number. Clients use it to detect when an object needs to be redrawn.</summary>
         public int version;
-        /// <summary>区画タイプ（陸地/海岸など。PARCEL_*）</summary>
+        /// <summary>Parcel type, such as land or shoreline. See PARCEL_*.</summary>
         public int parcel_type;
-        /// <summary>ステータス（計画中/稼働中など。STATUS_*）</summary>
+        /// <summary>Status, such as planned or active. See STATUS_*.</summary>
         public int status;
-        /// <summary>区画ポリゴンの座標列 [[x, z], ...]</summary>
+        /// <summary>Parcel polygon coordinates in the form [[x, z], ...].</summary>
         public List<object> polygon;
-        /// <summary>中心点座標 [x, z]</summary>
+        /// <summary>Center point coordinates [x, z].</summary>
         public List<object> center_point;
-        /// <summary>この区画を使用している建物エージェントのID（0=空き地）</summary>
+        /// <summary>ID of the building agent using the parcel (0 if vacant).</summary>
         public int usage_id;
-        /// <summary>所属地区ID</summary>
+        /// <summary>ID of the district this object belongs to.</summary>
         public int zone_id;
-        /// <summary>所属地区の名称（zone_idの参照解決）</summary>
+        /// <summary>Name of the district identified by zone_id.</summary>
         public string zone_name;
-        /// <summary>区画に重なる天然資源のID（資源種別→資源ID）</summary>
+        /// <summary>Maps resource types to the IDs of natural resources overlapping the parcel.</summary>
         public Dictionary<string, float> resource_id;
-        /// <summary>地形の平均勾配（無次元）。建設難易度の元データ</summary>
+        /// <summary>Average terrain slope (dimensionless). Used to determine construction difficulty.</summary>
         public float terrain_slope;
-        /// <summary>岸壁のすぐ外の水深(m)。港の必要水深(agent_master の berth_depth)以上の区画にだけ港が建つ。沿岸区画以外は0</summary>
+        /// <summary>Water depth just beyond the quay (m). A port can be built only if the parcel meets or exceeds the port's required depth (berth_depth in agent_master). Returns 0 for non-coastal parcels.</summary>
         public float water_depth;
-        /// <summary>区画に重なる天然資源の名称（資源種別→名称） サーバーサイドで計算されるフィールド。型は動的。</summary>
+        /// <summary>Maps resource types to the names of natural resources overlapping the parcel. Computed on the server. The type may vary.</summary>
         public object name_resource;
-        /// <summary>接道している街路のID</summary>
+        /// <summary>ID of the street the parcel fronts.</summary>
         public int front_path_id;
-        /// <summary>接道街路の名称（front_path_idの参照解決）</summary>
+        /// <summary>Name of the frontage street identified by front_path_id.</summary>
         public string front_path_name;
-        /// <summary>区画が接道のどちらの面にあるか（PATH_SIDE_LEFT/RIGHT。-1=接道なし）。所属地区はこの面の地区</summary>
+        /// <summary>Side of the frontage street where the parcel lies (PATH_SIDE_LEFT or PATH_SIDE_RIGHT, or -1 for no frontage). The parcel belongs to the district on that side.</summary>
         public int front_path_side;
-        /// <summary>道路に面する辺のインデックスの一覧</summary>
+        /// <summary>List of indices of the parcel edges that face a road.</summary>
         public List<object> facade_edge_index;
-        /// <summary>所有者エージェントのID（民間または市政府）</summary>
+        /// <summary>ID of the owner agent, either a private agent or the city government.</summary>
         public int owner_agent_id;
-        /// <summary>所有者の名称（owner_agent_idの参照解決）</summary>
+        /// <summary>Name of the owner identified by owner_agent_id.</summary>
         public string owner_agent_name;
-        /// <summary>土地価格</summary>
+        /// <summary>Land price.</summary>
         public float land_price;
-        /// <summary>バリアント別の立地倍率（agentバリアントID→倍率）</summary>
+        /// <summary>Maps agent variant IDs to location multipliers.</summary>
         public Dictionary<string, float> agent_multiplier;
-        /// <summary>地区の法規制を区画側で上書きしているか（0/1）</summary>
+        /// <summary>Whether the parcel overrides district regulations (0 or 1).</summary>
         public bool restriction_override;
-        /// <summary>その土地区画を買収中かどうか</summary>
+        /// <summary>Whether land acquisition for this parcel is in progress.</summary>
         public bool under_acquisition;
-        /// <summary>民間がこの区画に建物を建てられるか。公共施設の敷地になるとfalseになり、プレイヤーが変更できる</summary>
+        /// <summary>Whether private agents may build on the parcel. Set to false when the parcel becomes the site of a public facility. The player can change this setting.</summary>
         public bool allow_private_construction;
-        /// <summary>建築可能な建物カテゴリのビットフラグ（bd_type値のOR）</summary>
+        /// <summary>Bitmask of building categories allowed for construction, formed by combining bd_type values with bitwise OR.</summary>
         public int allowed_bd_mask;
-        /// <summary>建蔽率の上限</summary>
+        /// <summary>Maximum building coverage ratio.</summary>
         public float limit_coverage_ratio;
-        /// <summary>容積率の上限</summary>
+        /// <summary>Maximum volume ratio.</summary>
         public float limit_volume_ratio;
-        /// <summary>高さの上限（m）</summary>
+        /// <summary>Maximum height (m).</summary>
         public float limit_height;
-        /// <summary>区画面積（m2）</summary>
+        /// <summary>Parcel area (m²).</summary>
         public float area;
-        /// <summary>基準標高（m）</summary>
+        /// <summary>Reference elevation (m).</summary>
         public float altitude;
-        /// <summary>プレイヤーが予約した操作のリスト（買収など）</summary>
+        /// <summary>List of actions scheduled by the player, such as land acquisition.</summary>
         public List<object> user_operations;
     }
 
     [Serializable]
     public class ZoneData
     {
-        /// <summary>地区の一意なID</summary>
+        /// <summary>Unique district ID.</summary>
         public int zone_id;
-        /// <summary>見た目の更新版数。フロントの差分描画トリガーとして使う</summary>
+        /// <summary>Visual revision number. Clients use it to detect when an object needs to be redrawn.</summary>
         public int version;
-        /// <summary>地区ポリゴン（所属区画の形状を合算して導出）</summary>
+        /// <summary>District polygon derived by combining the shapes of its parcels.</summary>
         public List<object> polygon;
-        /// <summary>地区名</summary>
+        /// <summary>District name.</summary>
         public string name;
-        /// <summary>地区の識別色（#RRGGBB）</summary>
+        /// <summary>District identifier color (#RRGGBB).</summary>
         public string color;
-        /// <summary>ユーザーが形状確定前の地区か</summary>
+        /// <summary>Whether the district's shape has yet to be finalized by the player.</summary>
         public bool auto_managed;
-        /// <summary>地区面積（m2）</summary>
+        /// <summary>District area (m²).</summary>
         public float area;
-        /// <summary>中心点座標 [x, z]</summary>
+        /// <summary>Center point coordinates [x, z].</summary>
         public List<object> center_point;
-        /// <summary>建築可能な建物カテゴリのビットフラグ（bd_type値のOR）</summary>
+        /// <summary>Bitmask of building categories allowed for construction, formed by combining bd_type values with bitwise OR.</summary>
         public int allowed_bd_mask;
-        /// <summary>建蔽率の上限</summary>
+        /// <summary>Maximum building coverage ratio.</summary>
         public float limit_coverage_ratio;
-        /// <summary>容積率の上限</summary>
+        /// <summary>Maximum volume ratio.</summary>
         public float limit_volume_ratio;
-        /// <summary>高さの上限（m）</summary>
+        /// <summary>Maximum height (m).</summary>
         public float limit_height;
-        /// <summary>製品別の地区平均価格（税込み。製品ID→価格）</summary>
+        /// <summary>Maps product IDs to average prices in the district, including tax.</summary>
         public Dictionary<string, float> zone_average_prices;
-        /// <summary>地区の平均賃金単価の履歴</summary>
+        /// <summary>History of the district's average wage rate.</summary>
         public List<float> average_wage;
-        /// <summary>平均賃料の履歴</summary>
+        /// <summary>Average rent history.</summary>
         public List<float> average_rent;
-        /// <summary>地価の㎡単価（円/㎡）の履歴。民間が建てられる区画の地価の合計 ÷ 面積の合計</summary>
+        /// <summary>History of land prices per square meter (yen/m²). Calculated as the total land price of parcels open to private construction divided by their total area.</summary>
         public List<float> average_land_price;
-        /// <summary>地区人口の履歴</summary>
+        /// <summary>District population history.</summary>
         public List<float> zone_population;
-        /// <summary>昼間人口の履歴</summary>
+        /// <summary>Daytime population history.</summary>
         public List<float> daytime_population;
-        /// <summary>失業率の履歴</summary>
+        /// <summary>Unemployment rate history.</summary>
         public List<float> zone_unemployment_rate;
-        /// <summary>床用途カテゴリ別の需要量（カテゴリ→量）</summary>
+        /// <summary>Maps floor use categories to quantities demanded.</summary>
         public Dictionary<string, float> space_demands;
-        /// <summary>床用途カテゴリ別の供給量（カテゴリ→量）</summary>
+        /// <summary>Maps floor use categories to quantities supplied.</summary>
         public Dictionary<string, float> space_supplies;
-        /// <summary>製品別の地区供給量（製品ID→量）</summary>
+        /// <summary>Maps product IDs to quantities supplied in the district.</summary>
         public Dictionary<string, float> zone_supply;
-        /// <summary>製品別の地区需要量（製品ID→量）</summary>
+        /// <summary>Maps product IDs to quantities demanded in the district.</summary>
         public Dictionary<string, float> zone_demand;
     }
 
     [Serializable]
     public class ResourceData
     {
-        /// <summary>天然資源の一意なID</summary>
+        /// <summary>Unique natural resource ID.</summary>
         public int resource_id;
-        /// <summary>資源名</summary>
+        /// <summary>Resource name.</summary>
         public string name;
-        /// <summary>採取される製品のID</summary>
+        /// <summary>ID of the product extracted from the resource.</summary>
         public int product_id;
-        /// <summary>資源エリアのポリゴンの座標列</summary>
+        /// <summary>Coordinates of the resource area polygon.</summary>
         public List<object> polygon;
-        /// <summary>中心点座標 [x, z]</summary>
+        /// <summary>Center point coordinates [x, z].</summary>
         public List<object> center_point;
-        /// <summary>資源種別（master.yaml の resource_master キー）</summary>
+        /// <summary>Resource type (key in resource_master in master.yaml).</summary>
         public int resource_type;
-        /// <summary>採取量の履歴（新しい順）</summary>
+        /// <summary>Extraction quantity history, newest first.</summary>
         public List<float> consumption_amount;
-        /// <summary>埋蔵上限量</summary>
+        /// <summary>Maximum resource reserves.</summary>
         public float max_amount;
-        /// <summary>埋蔵量の履歴（新しい順）</summary>
+        /// <summary>Resource reserve history, newest first.</summary>
         public List<float> current_amount;
-        /// <summary>1エポックあたりの埋蔵量回復率</summary>
+        /// <summary>Rate at which resource reserves recover per epoch.</summary>
         public float recovery_rate;
     }
 

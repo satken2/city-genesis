@@ -12,669 +12,669 @@ export type RefItem = {
 };
 
 export type CitizenSummary = {
-  /** 市民の一意なID */
+  /** Unique citizen ID. */
   citizen_id: number;
-  /** 市民名（ランダム生成） */
+  /** Randomly generated citizen name. */
   name: string;
-  /** 世帯内での立場（世帯主・配偶者・子など。共有定数の MEMBER_* を参照） */
+  /** Role in the household, such as head of household, spouse, or child. See the shared MEMBER_* constants. */
   citizen_type: number;
-  /** 年齢（歳） */
+  /** Age in years. */
   age: number;
-  /** 性別（0=男/1=女） */
+  /** Gender (0 = male, 1 = female). */
   gender: number;
 };
 
 export type CitizenData = {
-  /** 市民の一意なID */
+  /** Unique citizen ID. */
   citizen_id: number;
-  /** 市民名（ランダム生成） */
+  /** Randomly generated citizen name. */
   name: string;
-  /** 世帯内での立場（世帯主・配偶者・子など。共有定数の MEMBER_* を参照） */
+  /** Role in the household, such as head of household, spouse, or child. See the shared MEMBER_* constants. */
   citizen_type: number;
-  /** 年齢（歳） */
+  /** Age in years. */
   age: number;
-  /** 性別（0=男/1=女） */
+  /** Gender (0 = male, 1 = female). */
   gender: number;
-  /** 通勤にかかる片道時間（分） */
+  /** One-way commute time in minutes. */
   commute_time: number;
-  /** 都市外から流入した移民かどうか（0/1） */
+  /** Whether the citizen immigrated from outside the city (0 or 1). */
   is_immigrant: number;
-  /** 所属する世帯エージェントのID */
+  /** ID of the citizen's household agent. */
   household_agent_id: number;
-  /** 所属世帯の名称（household_agent_idの参照解決） */
+  /** Name of the household identified by household_agent_id. */
   household_agent_name?: string;
-  /** 勤務先エージェントのID（無職はVALUE_NONE） */
+  /** ID of the employer agent (VALUE_NONE if unemployed). */
   employer_agent_id: number;
-  /** 勤務先の名称（employer_agent_idの参照解決） */
+  /** Name of the employer identified by employer_agent_id. */
   employer_agent_name?: string;
-  /** 在籍中の学校エージェントのID（非通学はVALUE_NONE） */
+  /** ID of the school agent the citizen attends (VALUE_NONE if the citizen does not attend school). */
   school_agent_id: number;
-  /** 在籍校の名称（school_agent_idの参照解決） */
+  /** Name of the school identified by school_agent_id. */
   school_agent_name?: string;
-  /** スキルID→習熟度の辞書。実質労働力とスキル段階の判定に使う */
+  /** Maps skill IDs to proficiency levels. Used to determine effective labor and skill levels. */
   skills: Record<string, number>;
-  /** 高等教育を修了したかどうか（0/1） */
+  /** Whether the citizen has completed higher education (0 or 1). */
   educated: boolean;
-  /** 高等教育で習得中のスキルID（非就学はVALUE_NONE） */
+  /** ID of the skill the citizen is learning in higher education (VALUE_NONE if the citizen is not enrolled). */
   education_skill: number;
-  /** 犯罪性向（0.0〜1.0）。犯罪発生確率の元データ */
+  /** Propensity to commit crime (0.0 to 1.0). Used to determine the probability of a crime occurring. */
   potential_criminality: number;
 };
 
 export type AgentSummary = {
-  /** 経済主体の一意なID */
+  /** Unique agent ID. */
   agent_id: number;
-  /** 経済主体名 */
+  /** Agent name. */
   name: string;
-  /** 所属地区ID */
+  /** ID of the district this object belongs to. */
   zone_id: number;
-  /** 立地する土地区画のID */
+  /** ID of the parcel where the agent is located. */
   parcel_id: number;
-  /** 見た目の更新版数。フロントの差分描画トリガーとして使う */
+  /** Visual revision number. Clients use it to detect when an object needs to be redrawn. */
   version: number;
-  /** 経済主体の大分類（世帯・一般施設・公共施設など。TYPE_*） */
+  /** Broad agent category, such as household, general facility, or public facility. See TYPE_*. */
   type: number;
-  /** 経済主体の小分類（agent_master のバリアントID） */
+  /** Agent subcategory, given by the variant ID in agent_master. */
   variant: number;
-  /** 観光名所の種別（landmark_master のID。0=観光名所ではない） */
+  /** Tourist attraction type, given by its ID in landmark_master (0 if the agent is not a tourist attraction). */
   landmark: number;
-  /** 建物底面ポリゴンの座標列 [[x, z], ...] */
+  /** Building footprint polygon coordinates in the form [[x, z], ...]. */
   polygon?: any[];
-  /** 中心点座標 [x, z] */
+  /** Center point coordinates [x, z]. */
   center_point?: any[];
-  /** スラムの描画範囲の座標列 [[x, z], ...](polygon と同じく center_point 基準)。底面(polygon)の外まで広がる見た目だけの範囲で、底面の外の小屋はこの範囲の縁へ向かってまばらに描く。スラム以外は null */
+  /** Slum rendering boundary coordinates [[x, z], ...], relative to center_point as with polygon. The boundary extends beyond the footprint for rendering only. Huts outside the footprint become sparser toward the rendering boundary. Null for other agents. */
   fringe_polygon?: any[];
-  /** 立地区画の天然の海岸の岸壁の線 [A'x, A'z, B'x, B'z](A'→B' で海が左)。港の岸壁の描画と入港船の接岸に使う。沿岸区画以外・埋立地の岸壁に面する区画は null (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Quay line along the parcel's natural shoreline, given as [A'x, A'z, B'x, B'z]. The sea is on the left when looking from A' to B'. Used to render the port quay and position ships as they berth. Null for non-coastal parcels and parcels fronting a reclaimed-land quay. (Computed on the server. The type may vary.) */
   berth_line?: any;
-  /** ステータス（計画中・建設中・稼働中など。共有定数の STATUS_* を参照） */
+  /** Status, such as planned, under construction, or active. See the shared STATUS_* constants. */
   status: number;
-  /** ステータス遷移理由 */
+  /** Reason for the status transition. */
   status_reason?: number;
-  /** マッシュアップ建物のサブ建物配置リスト。棟ごとの subbuilding_id / model_prefix / position[x,z] / rotation / floors / height_per_floor (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** List of sub-building placements for a composite building. Each entry contains subbuilding_id, model_prefix, position [x, z], rotation, floors, and height_per_floor. (Computed on the server. The type may vary.) */
   sub_buildings?: any;
-  /** 階数 */
+  /** Number of floors. */
   floors?: number;
-  /** 建物カテゴリ（住宅・農場など。2の冪のカテゴリ値） */
+  /** Building category, such as residential or farm. Each category value is a power of two. */
   bd_type?: number;
-  /** 建物が提供する床用途カテゴリのビットマスク（SPACE_* のOR） (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Bitmask of floor use categories the building provides, formed by combining SPACE_* flags with bitwise OR. (Computed on the server. The type may vary.) */
   space_types?: any;
-  /** 耐久度（0.0〜1.0 1.0=新品） */
+  /** Durability (0.0 to 1.0, with 1.0 representing new condition). */
   durability?: number;
-  /** 公共施設かどうか（0=民間/1=公共） */
+  /** Whether the agent is a public facility (0 = private, 1 = public). */
   public_facility: boolean;
-  /** 稼働率（直近エポックのスロット） */
+  /** Utilization rate (most recent epoch's slot). */
   utilization?: number[];
-  /** 建設進捗率（0〜100%） (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Construction progress (0% to 100%). (Computed on the server. The type may vary.) */
   construction_progress?: any;
-  /** インフラ網への接続端子ノードのID */
+  /** ID of the terminal node that connects to the infrastructure network. */
   infra_node_id: number;
-  /** 車両基地など運輸系の接続ノードID */
+  /** ID of a transport connection node, such as a depot connection. */
   depot_node_id: number;
-  /** 外観をランダム化するためのシード値（0.0〜1.0） */
+  /** Seed for randomizing the object's appearance (0.0 to 1.0). */
   visual_variant?: number;
-  /** 外観をランダム化するためのシード値（0.0〜1.0） */
+  /** Seed for randomizing the object's appearance (0.0 to 1.0). */
   visual_variant2?: number;
-  /** 外観をランダム化するためのシード値（0.0〜1.0） */
+  /** Seed for randomizing the object's appearance (0.0 to 1.0). */
   visual_variant3?: number;
 };
 
 export type AgentData = {
-  /** 経済主体の一意なID */
+  /** Unique agent ID. */
   agent_id: number;
-  /** 経済主体名 */
+  /** Agent name. */
   name: string;
-  /** 見た目の更新版数。フロントの差分描画トリガーとして使う */
+  /** Visual revision number. Clients use it to detect when an object needs to be redrawn. */
   version: number;
-  /** 経済主体の大分類（世帯・一般施設・公共施設など。TYPE_*） */
+  /** Broad agent category, such as household, general facility, or public facility. See TYPE_*. */
   type: number;
-  /** 経済主体の小分類（agent_master のバリアントID） */
+  /** Agent subcategory, given by the variant ID in agent_master. */
   variant: number;
-  /** 観光名所の種別（landmark_master のID。0=観光名所ではない） */
+  /** Tourist attraction type, given by its ID in landmark_master (0 if the agent is not a tourist attraction). */
   landmark: number;
-  /** ステータス（計画中・建設中・稼働中など。STATUS_*） */
+  /** Status, such as planned, under construction, or active. See STATUS_*. */
   status: number;
-  /** ステータス遷移理由 */
+  /** Reason for the status transition. */
   status_reason?: number;
-  /** 警告フラグのビット和（int16。共有定数の ALERT_AGENT_* を参照） */
+  /** Bitmask of alert flags (int16). See the shared ALERT_AGENT_* constants. */
   alert: number;
-  /** 作成日 */
+  /** Creation date. */
   created_date: number;
-  /** 現在のステータスになった日 */
+  /** Date when the current status began. */
   status_from: number;
-  /** 手持ち資金（内部通貨建て） */
+  /** Cash on hand in game currency. */
   reserves: number;
-  /** 収入の履歴（エポック別） */
+  /** Revenue history by epoch. */
   revenues: number[];
-  /** 支出の履歴（エポック別） */
+  /** Expense history by epoch. */
   expenses: number[];
-  /** 集客力・魅力度 */
+  /** Attractiveness and ability to draw visitors. */
   attraction: number;
-  /** 公共建物の放棄フラグ（0/1）。放棄すると自動修繕の対象外になる */
+  /** Abandonment flag for public buildings (0 or 1). Abandoned buildings are excluded from automatic repairs. */
   abandoned?: boolean;
-  /** 建物が立地する区画が買収交渉中であるか (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Whether land acquisition negotiations are in progress for the parcel the building occupies. (Computed on the server. The type may vary.) */
   under_acquisition?: any;
-  /** 公共施設かどうか（0=民間/1=公共） */
+  /** Whether the agent is a public facility (0 = private, 1 = public). */
   public_facility: boolean;
-  /** インフラ網への接続端子ノードのID */
+  /** ID of the terminal node that connects to the infrastructure network. */
   infra_node_id: number;
-  /** 車両基地など運輸系の接続ノードID */
+  /** ID of a transport connection node, such as a depot connection. */
   depot_node_id: number;
-  /** プレイヤーが予約した操作のリスト（解体など） */
+  /** List of actions scheduled by the player, such as demolition. */
   user_operations?: any[];
-  /** 当エポックの製品別需要量（製品ID→量） */
+  /** Maps product IDs to quantities demanded in the current epoch. */
   demand_amount: Record<string, number>;
-  /** 当エポックに獲得した製品別数量（製品ID→量） */
+  /** Maps product IDs to quantities received in the current epoch. */
   received_amount?: Record<string, number>;
-  /** 手持ち在庫として残っている製品別数量（製品ID→量） */
+  /** Maps product IDs to quantities remaining in inventory. */
   remain_amount: Record<string, number>;
-  /** 立地する土地区画のID */
+  /** ID of the parcel where the agent is located. */
   parcel_id: number;
-  /** 所属地区ID */
+  /** ID of the district this object belongs to. */
   zone_id: number;
-  /** 所属地区の名称（zone_idの参照解決） */
+  /** Name of the district identified by zone_id. */
   zone_name?: string;
-  /** 入居先の建物エージェントのID（テナントの場合） */
+  /** For a tenant, ID of the building agent it occupies. */
   building_agent_id?: number;
-  /** 入居先建物の名称（building_agent_idの参照解決） */
+  /** Name of the building identified by building_agent_id. */
   building_agent_name?: string;
-  /** 占有・利用している床面積（不動産枠 m2） */
+  /** Occupied floor area (m²). */
   realestate_amount?: number;
-  /** 立ち退き済みかどうか（0/1） */
+  /** Whether the agent has been evicted (0 or 1). */
   is_evicted?: boolean;
-  /** 建物かどうか（0/1） */
+  /** Whether the agent is a building (0 or 1). */
   is_bd: boolean;
-  /** 建物カテゴリ（住宅・農場など。2の冪のカテゴリ値） */
+  /** Building category, such as residential or farm. Each category value is a power of two. */
   bd_type?: number;
-  /** 耐久度（0.0〜1.0 1.0=新品） */
+  /** Durability (0.0 to 1.0, with 1.0 representing new condition). */
   durability?: number;
-  /** 階数 */
+  /** Number of floors. */
   floors?: number;
-  /** 建物の高さ（m） */
+  /** Building height (m). */
   height?: number;
-  /** 延床面積（m2） */
+  /** Total floor area (m²). */
   floor_area?: number;
-  /** 建築面積（1フロア分の面積 m2） */
+  /** Building footprint area, equivalent to one floor (m²). */
   base_area?: number;
-  /** 容積率（延床面積/敷地面積） */
+  /** Volume ratio (total floor area divided by site area). */
   volume_ratio?: number;
-  /** 修繕中かどうか（0/1） */
+  /** Whether repairs are in progress (0 or 1). */
   under_maintenance?: boolean;
-  /** 建設進捗率（0〜100%） (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Construction progress (0% to 100%). (Computed on the server. The type may vary.) */
   construction_progress?: any;
-  /** 賃料（単価） */
+  /** Rent per unit. */
   rent?: number;
-  /** 床用途カテゴリ別の総収容量（カテゴリ→量） */
+  /** Maps floor use categories to their total capacity. */
   capacity?: Record<string, number>;
-  /** 床用途カテゴリ別の使用済み収容量（カテゴリ→量） */
+  /** Maps floor use categories to their occupied capacity. */
   occupied?: Record<string, number>;
-  /** この建物に入居しているエージェントのリスト */
+  /** List of agents occupying this building as tenants. */
   tenants?: RefItem[];
-  /** 世帯の栄養充足度（0.0〜1.0） */
+  /** Degree to which the household's nutritional needs are met (0.0 to 1.0). */
   satis_nutrition?: number;
-  /** 世帯の医療充足度（0.0〜1.0） */
+  /** Degree to which the household's healthcare needs are met (0.0 to 1.0). */
   satis_healthcare?: number;
-  /** 世帯の娯楽・余暇の充足度（0.0〜1.0） */
+  /** Degree to which the household's entertainment and leisure needs are met (0.0 to 1.0). */
   satis_leisure?: number;
-  /** 世帯の住環境満足度（0.0〜1.0） */
+  /** Household satisfaction with its living environment (0.0 to 1.0). */
   satis_residential?: number;
-  /** 観光体験充足度（0.0〜1.0。観光客世帯の観光満足度の要素） */
+  /** Satisfaction with the tourism experience (0.0 to 1.0). Contributes to overall tourism satisfaction for tourist households. */
   satis_tourism?: number;
-  /** 世帯タイプ（単身・夫婦・子ありなど。共有定数の FAMILY_* を参照） */
+  /** Household type, such as single person, couple, or household with children. See the shared FAMILY_* constants. */
   family_type?: number;
-  /** この世帯に所属する市民のリスト */
+  /** List of citizens in this household. */
   members?: RefItem[];
-  /** 世帯の可処分所得 */
+  /** Household disposable income. */
   discretionary_income?: number;
-  /** 立地の環境スコア */
+  /** Environmental score for the location. */
   env_score?: number;
-  /** 世帯の生活の質（QOL）スコア */
+  /** Household quality-of-life (QOL) score. */
   qol_score?: number;
-  /** 世帯が自家用車を保有するか（0/1） */
+  /** Whether the household owns a private car (0 or 1). */
   has_automobile?: boolean;
-  /** 世帯の需要ティア（その世帯が注文した商品の最も高い demand_tier。0〜3。0は何も注文できなかった世帯） */
+  /** Household demand tier (0 to 3). It is the highest demand_tier among the products the household ordered. Tier 0 means the household could not place any orders. */
   demand_tier?: number;
-  /** 世帯の所得ティア（0〜3。収入が届いた生活費の線の数。線は最低生活費、ティア1を需要の上限まで満たす費用、ティア1・2を満たす費用） */
+  /** Household income tier (0 to 3). Counts how many cost-of-living thresholds its income meets. The thresholds are minimum living costs, the cost of meeting tier 1 demand up to its limit, and the cost of meeting tier 1 and tier 2 demand. */
   income_tier?: number;
-  /** 稼働率（直近エポックのスロット） */
+  /** Utilization rate (most recent epoch's slot). */
   utilization?: number[];
-  /** 稼働率の目標値（プレイヤー設定。0.0〜1.5） */
+  /** Player-defined target utilization rate (0.0 to 1.5). */
   utilization_target?: number;
-  /** 賃金単価。実質労働力1単位・1日あたりの円で、各人の日給はこれに実質労働力を掛けた額 */
+  /** Wage rate in yen per unit of effective labor per day. A worker's daily pay is this rate multiplied by their effective labor. */
   wage?: number;
-  /** 1エポックの生産・サービス提供の目標数量 */
+  /** Target quantity of goods to produce or services to provide per epoch. */
   quota?: number;
-  /** 稼働に必要な総労働力 */
+  /** Total labor required for operation. */
   total_labor?: number;
-  /** 雇用に要求されるスキルID */
+  /** ID of the skill required for employment. */
   required_skill?: number;
-  /** この施設に雇用されている市民のリスト */
+  /** List of citizens employed at this facility. */
   employees?: RefItem[];
-  /** 当エポックに出荷可能な供給量 */
+  /** Quantity available to ship in the current epoch. */
   supply_amount?: number;
-  /** この施設が供給する製品のID */
+  /** ID of the product this facility supplies. */
   supply_product_id?: number;
-  /** 製品の販売価格（税込み） */
+  /** Product selling price including tax. */
   supply_price?: number;
-  /** 当エポックの生産量 */
+  /** Quantity produced in the current epoch. */
   supply_production?: number;
-  /** 販売量の履歴（エポック別） */
+  /** History of quantities sold by epoch. */
   supply_sold_amount?: number[];
-  /** 利益率の履歴（エポック別） */
+  /** Profit margin history by epoch. */
   profit_rates?: number[];
-  /** この施設が都市の観光客の受入可能人数に加える人数（人）。観光地・玄関口の施設のみで、稼働中でなければ0 (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Number of tourists this facility adds to the city's total visitor capacity. Applies only to tourist attractions and gateway facilities. Returns 0 when the facility is inactive. (Computed on the server. The type may vary.) */
   tourist_capacity?: any;
-  /** 受け入れスキル別の定員（スキルID→人数） */
+  /** Maps skill IDs to the number of students the school can admit for each skill. */
   education_type?: Record<string, any>;
-  /** この学校に在籍している市民のリスト */
+  /** List of citizens enrolled at this school. */
   students?: RefItem[];
-  /** 敷地から決まる総定員（人）。学校のみ */
+  /** Total enrollment capacity based on the site, measured in students. Schools only. */
   max_students?: number;
-  /** スキル別の在籍者数（スキルID→人数）。学校のみ (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Maps skill IDs to the number of students currently enrolled for each skill. Schools only. (Computed on the server. The type may vary.) */
   enrolled_by_skill?: any;
-  /** 建物の駐車容量（台）。建物の作成・更新時に確定する永続値。建物以外は0 */
+  /** Building parking capacity, measured in vehicles. This value is set when the building is created or updated and is saved. Returns 0 for agents other than buildings. */
   parking_capacity: number;
-  /** 当エポックの昼間駐車使用量（台）。通勤・通学・来客と、駐車施設が吸収した分 */
+  /** Daytime parking use in the current epoch, measured in vehicles. Includes work and school commuters, visitors, and vehicles accommodated by parking facilities. */
   parking_use_day: number;
-  /** 当エポックの夜間駐車使用量（台）。居住世帯の保有車と、駐車施設が吸収した分 */
+  /** Nighttime parking use in the current epoch, measured in vehicles. Includes vehicles owned by resident households and vehicles accommodated by parking facilities. */
   parking_use_night: number;
-  /** 駐車施設でも吸収しきれず路上へあふれた台数（昼夜の大きい方）。建物以外は0 */
+  /** Number of vehicles that overflow onto the street after parking facilities are accounted for. Uses the larger of the daytime and nighttime counts. Returns 0 for agents other than buildings. */
   parking_overflow: number;
 };
 
 export type PathSummary = {
-  /** パスの一意なID */
+  /** Unique path ID. */
   path_id: number;
-  /** パス名 */
+  /** Path name. */
   name: string;
-  /** 見た目の更新版数。フロントの差分描画トリガーとして使う */
+  /** Visual revision number. Clients use it to detect when an object needs to be redrawn. */
   version: number;
-  /** 幹線道路かどうか（高速道路、または道路(road_id)に属する街路なら真） */
+  /** Whether this is a trunk road. True for motorways and streets that belong to a named road (road_id). */
   trunk: boolean;
-  /** パスの大分類（道路・街路・線路・公共交通・インフラなど。PATH_*） */
+  /** Broad path category, such as road, street, track, public transport, or infrastructure. See PATH_*. */
   path_type: number;
-  /** パスの小分類（幅や規格を決めるバリアントID） */
+  /** Path subcategory, given by the variant ID that determines its width and specifications. */
   path_variant: number;
-  /** 両面が同じ地区ならその地区ID。2地区の境界の道路と未所属は0 */
+  /** District ID when both sides belong to the same district. Returns 0 for roads on a district boundary or with no district. */
   zone_id: number;
-  /** 左の面（始点→終点の向き）の所属地区ID。0以下は未所属 */
+  /** District ID on the left side, looking from start to end. A value of 0 or less means no district. */
   left_zone_id: number;
-  /** 右の面の所属地区ID。0以下は未所属 */
+  /** District ID on the right side. A value of 0 or less means no district. */
   right_zone_id: number;
-  /** パスの占有ポリゴンの座標列 */
+  /** Coordinates of the polygon occupied by the path. */
   polygon: any[];
-  /** ステータス（計画中・建設中・稼働中など。STATUS_*） */
+  /** Status, such as planned, under construction, or active. See STATUS_*. */
   status: number;
-  /** ベジエ曲線かどうか（1=曲線/0=直線・折れ線） */
+  /** Whether the path is a Bézier curve (1 = curve, 0 = straight line or polyline). */
   curved: boolean;
-  /** 交通種別ごとの交通量（道路交通・鉄道交通など） */
+  /** Traffic volume by traffic type, such as road or rail traffic. */
   path_traffic: Record<string, number>;
-  /** 通行方向（双方向/start→end/end→start） */
+  /** Travel direction (both ways, start to end, or end to start). */
   travel_direction: number;
   house_path_id?: number;
-  /** 駅ホームの設置側（外側/内側/両側） */
+  /** Side on which the station platform is placed (outer, inner, or both sides). */
   platform_side: number;
-  /** 地形追従の個別設定。-1=未設定（バリアント既定に従う）、0=非追従、1=追従 */
+  /** Terrain-following setting for this path (-1 = use the variant default, 0 = disabled, 1 = enabled). */
   follow_terrain: number;
-  /** 始点ノードのID */
+  /** Start node ID. */
   start_node_id: number;
-  /** 終点ノードのID */
+  /** End node ID. */
   end_node_id: number;
-  /** 始点アンカー座標 [x, y, z] */
+  /** Start anchor coordinates [x, y, z]. */
   start_point: any[];
-  /** 終点アンカー座標 [x, y, z] */
+  /** End anchor coordinates [x, y, z]. */
   end_point: any[];
-  /** 始点の出口制御点（3次ベジエのP1）[x, y, z]。未指定は自動補完値 */
+  /** Outgoing control point at the start (P1 of a cubic Bézier curve), given as [x, y, z]. Filled in automatically if unspecified. */
   start_control: any[];
-  /** 終点の入口制御点（3次ベジエのP2）[x, y, z]。未指定は自動補完値 */
+  /** Incoming control point at the end (P2 of a cubic Bézier curve), given as [x, y, z]. Filled in automatically if unspecified. */
   end_control: any[];
-  /** 中間アンカー点と制御点のリスト */
+  /** List of intermediate anchors and control points. */
   waypoints: any[];
-  /** 各アンカーの盛土オフセット（m -5〜+5）。着工時の地形変形に使う */
+  /** Embankment offset at each anchor (-5 to +5 m). Used to reshape the terrain when construction starts. */
   embankment_heights: any[];
-  /** 中心点座標 [x, z] */
+  /** Center point coordinates [x, z]. */
   center_point: any[];
-  /** 幅（m） */
+  /** Width (m). */
   width: number;
-  /** 騒音レベル */
+  /** Noise level. */
   noise: number;
-  /** 利用率（交通量/キャパシティ） */
+  /** Utilization rate (traffic volume divided by capacity). */
   utilization: number;
-  /** 耐久度（0.0〜1.0 1.0=新品） */
+  /** Durability (0.0 to 1.0, with 1.0 representing new condition). */
   durability: number;
-  /** 街灯の種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Streetlight type (0 = none, 1 = standard). Saved for each road. */
   streetlight_type: number;
-  /** 歩車道境界の柵。0=なし、1=標準。道路ごとの保存値。 */
+  /** Fence between the sidewalk and the roadway (0 = none, 1 = standard). Saved for each road. */
   fence_type: number;
-  /** 街路樹の種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Street tree type (0 = none, 1 = standard). Saved for each road. */
   street_tree_type: number;
-  /** 配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。 */
+  /** Utility wiring mode (0 = none, 1 = overhead, 2 = underground). Saved for each road. */
   utility_mode: number;
-  /** 駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従 */
+  /** Shared station grade reference line in the form [x, absolute elevation, z]. If empty, normal terrain following applies. */
   station_grade_profile: any[];
-  /** 駅舎の建屋配置端（both/start/end） */
+  /** Path ends with station buildings (both, start, or end). */
   house_ends: string;
-  /** 駅舎の通路方式（elevated/ground/underground） */
+  /** Station building passage mode (elevated, ground, or underground). */
   passage_mode: string;
-  /** ベンチの種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Bench type (0 = none, 1 = standard). Saved for each road. */
   bench_type: number;
-  /** ゴミ箱の種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Trash bin type (0 = none, 1 = standard). Saved for each road. */
   bin_type: number;
-  /** 植え込みの種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Planter type (0 = none, 1 = standard). Saved for each road. */
   planter_type: number;
-  /** 広告の種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Advertising type (0 = none, 1 = standard). Saved for each road. */
   advert_type: number;
-  /** 外観。0=標準、1以上はバリアントの外観の番号。パスごとの保存値で、見た目だけに使う。 */
+  /** Appearance (0 = standard, 1 or greater = appearance number within the variant). Saved for each path and used only for rendering. */
   appearance: number;
-  /** 路上駐車台数（専用駐車枠内も含む。昼夜の大きい方） */
+  /** Number of vehicles parked on the street, including vehicles in dedicated parking spaces. Uses the larger of the daytime and nighttime counts. */
   parked_cars: number;
-  /** 路駐率と台数配分の基準容量（台）。交通を妨げない専用駐車枠とは別。稼働中の地上街路以外は0 */
+  /** Reference capacity, measured in vehicles, for calculating the on-street parking ratio and allocating parked vehicles. This differs from dedicated parking spaces, which do not obstruct traffic. Returns 0 except on active surface streets. */
   street_parking_capacity: number;
-  /** 制限速度(km/h) (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Speed limit (km/h). (Computed on the server. The type may vary.) */
   max_speed?: any;
-  /** 所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道 */
+  /** ID of the named road this path belongs to. A value of -1 (VALUE_NONE) identifies an unnamed path with no road assignment. */
   road_id?: number;
-  /** 形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配から算出し、交差点での減速・停止は含まない */
+  /** Travel speed (km/h) based on the speed limit, curve radius, and longitudinal grade. Excludes slowing and stopping at intersections. */
   base_speed: number;
-  /** 色(#RRGGBB)。パス自身の色、無ければバリアントの既定色。色を使わないバリアントは null。描画はモデルの塗装部分(PATH_PAINT)をこの色で塗る */
+  /** Color (#RRGGBB). Uses the path's own color if set, otherwise the variant default. Null for variants that do not use a color. This color is applied to the model's painted parts (PATH_PAINT). */
   color?: string;
 };
 
 export type PathData = {
-  /** パスの一意なID */
+  /** Unique path ID. */
   path_id: number;
-  /** パス名 */
+  /** Path name. */
   name: string;
-  /** 見た目の更新版数。フロントの差分描画トリガーとして使う */
+  /** Visual revision number. Clients use it to detect when an object needs to be redrawn. */
   version: number;
-  /** パスの大分類（道路・街路・線路・公共交通・インフラなど。PATH_*） */
+  /** Broad path category, such as road, street, track, public transport, or infrastructure. See PATH_*. */
   path_type: number;
-  /** パスの小分類（幅や規格を決めるバリアントID） */
+  /** Path subcategory, given by the variant ID that determines its width and specifications. */
   path_variant: number;
-  /** ステータス（計画中・建設中・稼働中など。STATUS_*） */
+  /** Status, such as planned, under construction, or active. See STATUS_*. */
   status: number;
-  /** 警告フラグのビット和（int16。共有定数の ALERT_PATH_* を参照） */
+  /** Bitmask of alert flags (int16). See the shared ALERT_PATH_* constants. */
   alert: number;
-  /** この区間パスが属する公共交通路線エージェントのID */
+  /** ID of the public transport line agent that this section of path belongs to. */
   line_agent_id: number;
-  /** パスの占有ポリゴンの座標列 */
+  /** Coordinates of the polygon occupied by the path. */
   polygon: any[];
-  /** ベジエ曲線かどうか（1=曲線/0=直線・折れ線） */
+  /** Whether the path is a Bézier curve (1 = curve, 0 = straight line or polyline). */
   curved: boolean;
-  /** 通行方向（双方向/start→end/end→start） */
+  /** Travel direction (both ways, start to end, or end to start). */
   travel_direction: number;
-  /** 修繕中かどうか（0/1） */
+  /** Whether repairs are in progress (0 or 1). */
   under_maintenance: number;
-  /** 駅ホームの設置側（外側/内側/両側） */
+  /** Side on which the station platform is placed (outer, inner, or both sides). */
   platform_side: number;
-  /** 地形追従の個別設定。-1=未設定（バリアント既定に従う）、0=非追従、1=追従 */
+  /** Terrain-following setting for this path (-1 = use the variant default, 0 = disabled, 1 = enabled). */
   follow_terrain: number;
-  /** 両面が同じ地区ならその地区ID。2地区の境界の道路と未所属は0 */
+  /** District ID when both sides belong to the same district. Returns 0 for roads on a district boundary or with no district. */
   zone_id: number;
-  /** 所属地区の名称（zone_idの参照解決。境界の道路と未所属はnull） */
+  /** Name of the district identified by zone_id. Null for roads on a district boundary or with no district. */
   zone_name?: string;
-  /** 左の面（始点→終点の向き）の所属地区ID。0以下は未所属 */
+  /** District ID on the left side, looking from start to end. A value of 0 or less means no district. */
   left_zone_id: number;
-  /** 右の面の所属地区ID。0以下は未所属 */
+  /** District ID on the right side. A value of 0 or less means no district. */
   right_zone_id: number;
-  /** インフラ財の当エポック流量（符号付き。正=start→end方向） */
+  /** Signed flow of infrastructure goods in the current epoch. Positive values indicate flow from start to end. */
   infra_flow: number;
-  /** 騒音レベル */
+  /** Noise level. */
   noise: number;
-  /** 大気汚染レベル */
+  /** Air pollution level. */
   air_pollution: number;
-  /** 制限速度(km/h) (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Speed limit (km/h). (Computed on the server. The type may vary.) */
   max_speed?: any;
-  /** 制限速度をプレイヤー指定で上書きしているか（0/1） */
+  /** Whether the player has overridden the speed limit (0 or 1). */
   override_max_speed: boolean;
-  /** 形状から決まる通過速度(km/h)。制限速度・曲線半径・縦断勾配から算出し、交差点での減速・停止は含まない(geo_path_alignment) */
+  /** Travel speed (km/h) based on the speed limit, curve radius, and longitudinal grade. Excludes slowing and stopping at intersections. */
   base_speed: number;
-  /** パス内の最小曲線半径(m)。直線は上限値(1e6) */
+  /** Minimum curve radius along the path (m). Straight paths use the upper limit (1e6). */
   min_curve_radius: number;
-  /** パス内の最大縦断勾配(%) */
+  /** Maximum longitudinal grade along the path (%). */
   max_grade: number;
-  /** 移動種別ごとの実通過時間（混雑込み） */
+  /** Actual traversal time by travel mode, including congestion. */
   travel_time: Record<string, number>;
-  /** 交通種別ごとの交通量（道路交通・鉄道交通など） */
+  /** Traffic volume by traffic type, such as road or rail traffic. */
   path_traffic: Record<string, number>;
-  /** 利用率（交通量/キャパシティ） (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Utilization rate (traffic volume divided by capacity). (Computed on the server. The type may vary.) */
   utilization?: any;
-  /** 耐久度。デフォルトは 1.0 とする。 */
+  /** Durability. Defaults to 1.0. */
   durability: number;
-  /** 建設進捗率（0〜100%） (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Construction progress (0% to 100%). (Computed on the server. The type may vary.) */
   construction_progress?: any;
-  /** ノードを共有する隣接街路が属する地区の一覧 (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** List of districts to which adjacent streets sharing a node belong. (Computed on the server. The type may vary.) */
   nearby_zones?: any;
-  /** 始点ノードのID */
+  /** Start node ID. */
   start_node_id: number;
-  /** 終点ノードのID */
+  /** End node ID. */
   end_node_id: number;
-  /** 始点アンカー座標 [x, y, z] */
+  /** Start anchor coordinates [x, y, z]. */
   start_point: any[];
-  /** 終点アンカー座標 [x, y, z] */
+  /** End anchor coordinates [x, y, z]. */
   end_point: any[];
-  /** 始点の出口制御点（3次ベジエのP1）[x, y, z]。未指定は自動補完値 */
+  /** Outgoing control point at the start (P1 of a cubic Bézier curve), given as [x, y, z]. Filled in automatically if unspecified. */
   start_control: any[];
-  /** 終点の入口制御点（3次ベジエのP2）[x, y, z]。未指定は自動補完値 */
+  /** Incoming control point at the end (P2 of a cubic Bézier curve), given as [x, y, z]. Filled in automatically if unspecified. */
   end_control: any[];
-  /** 中間アンカー点と制御点のリスト */
+  /** List of intermediate anchors and control points. */
   waypoints: any[];
-  /** 各アンカーの盛土オフセット（m -5〜+5）。着工時の地形変形に使う */
+  /** Embankment offset at each anchor (-5 to +5 m). Used to reshape the terrain when construction starts. */
   embankment_heights: any[];
-  /** 中心点座標 [x, z] */
+  /** Center point coordinates [x, z]. */
   center_point: any[];
-  /** 幅（m） */
+  /** Width (m). */
   width: number;
-  /** パスの物理長（m） */
+  /** Physical path length (m). */
   length: number;
-  /** 街灯の種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Streetlight type (0 = none, 1 = standard). Saved for each road. */
   streetlight_type: number;
-  /** 歩車道境界の柵。0=なし、1=標準。道路ごとの保存値。 */
+  /** Fence between the sidewalk and the roadway (0 = none, 1 = standard). Saved for each road. */
   fence_type: number;
-  /** 街路樹の種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Street tree type (0 = none, 1 = standard). Saved for each road. */
   street_tree_type: number;
-  /** 配線方式。0=なし、1=架空、2=地中。道路ごとの保存値。 */
+  /** Utility wiring mode (0 = none, 1 = overhead, 2 = underground). Saved for each road. */
   utility_mode: number;
-  /** 駅の共通基準線 [x,絶対標高,z]。空なら通常の地形追従 */
+  /** Shared station grade reference line in the form [x, absolute elevation, z]. If empty, normal terrain following applies. */
   station_grade_profile: any[];
-  /** 駅舎の建屋配置端（both/start/end） */
+  /** Path ends with station buildings (both, start, or end). */
   house_ends: string;
-  /** 駅舎の通路方式（elevated/ground/underground） */
+  /** Station building passage mode (elevated, ground, or underground). */
   passage_mode: string;
-  /** ベンチの種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Bench type (0 = none, 1 = standard). Saved for each road. */
   bench_type: number;
-  /** ゴミ箱の種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Trash bin type (0 = none, 1 = standard). Saved for each road. */
   bin_type: number;
-  /** 植え込みの種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Planter type (0 = none, 1 = standard). Saved for each road. */
   planter_type: number;
-  /** 広告の種類。0=なし、1=標準。道路ごとの保存値。 */
+  /** Advertising type (0 = none, 1 = standard). Saved for each road. */
   advert_type: number;
-  /** 外観。0=標準、1以上はバリアントの外観の番号。パスごとの保存値で、見た目だけに使う。 */
+  /** Appearance (0 = standard, 1 or greater = appearance number within the variant). Saved for each path and used only for rendering. */
   appearance: number;
-  /** 路上駐車台数（専用駐車枠内も含む。昼夜の大きい方） */
+  /** Number of vehicles parked on the street, including vehicles in dedicated parking spaces. Uses the larger of the daytime and nighttime counts. */
   parked_cars: number;
-  /** 路駐率と台数配分の基準容量（台）。交通を妨げない専用駐車枠とは別。稼働中の地上街路以外は0 */
+  /** Reference capacity, measured in vehicles, for calculating the on-street parking ratio and allocating parked vehicles. This differs from dedicated parking spaces, which do not obstruct traffic. Returns 0 except on active surface streets. */
   street_parking_capacity: number;
-  /** 路駐率（全路上駐車台数 / street_parking_capacity）。交通への妨げは専用駐車容量の比を差し引いて評価する。基準容量0のときは0 */
+  /** On-street parking ratio (total vehicles parked on the street divided by street_parking_capacity). To assess traffic obstruction, subtract the proportion represented by dedicated parking capacity. Returns 0 if the reference capacity is 0. */
   parking_ratio: number;
-  /** 所属する道路(名前付き道路)のID。-1(VALUE_NONE)は道路に属さない名もなき道 */
+  /** ID of the named road this path belongs to. A value of -1 (VALUE_NONE) identifies an unnamed path with no road assignment. */
   road_id?: number;
-  /** 色(#RRGGBB)。パス自身の色、無ければバリアントの既定色。色を使わないバリアントは null。描画はモデルの塗装部分(PATH_PAINT)をこの色で塗る */
+  /** Color (#RRGGBB). Uses the path's own color if set, otherwise the variant default. Null for variants that do not use a color. This color is applied to the model's painted parts (PATH_PAINT). */
   color?: string;
-  /** このパスの構造に付帯する子(吊り橋の下段)のパスID。-1(VALUE_NONE)は付帯なし */
+  /** ID of the child path attached to this structure, such as the lower deck of a suspension bridge. A value of -1 (VALUE_NONE) means there is no attached path. */
   attached_path_id?: number;
 };
 
 export type ParcelSummary = {
-  /** 土地区画の一意なID */
+  /** Unique parcel ID. */
   parcel_id: number;
-  /** 見た目の更新版数。フロントの差分描画トリガーとして使う */
+  /** Visual revision number. Clients use it to detect when an object needs to be redrawn. */
   version: number;
-  /** 区画タイプ（陸地/海岸など。PARCEL_*） */
+  /** Parcel type, such as land or shoreline. See PARCEL_*. */
   parcel_type: number;
-  /** ステータス（計画中/稼働中など。STATUS_*） */
+  /** Status, such as planned or active. See STATUS_*. */
   status: number;
-  /** 基準標高（m） */
+  /** Reference elevation (m). */
   altitude: number;
-  /** 区画ポリゴンの座標列 [[x, z], ...] */
+  /** Parcel polygon coordinates in the form [[x, z], ...]. */
   polygon: any[];
-  /** 中心点座標 [x, z] */
+  /** Center point coordinates [x, z]. */
   center_point: any[];
-  /** 接道している街路のID */
+  /** ID of the street the parcel fronts. */
   front_path_id: number;
-  /** 区画が接道のどちらの面にあるか（PATH_SIDE_LEFT/RIGHT。-1=接道なし）。所属地区はこの面の地区 */
+  /** Side of the frontage street where the parcel lies (PATH_SIDE_LEFT or PATH_SIDE_RIGHT, or -1 for no frontage). The parcel belongs to the district on that side. */
   front_path_side: number;
-  /** 土地価格 */
+  /** Land price. */
   land_price: number;
-  /** 地区の法規制を区画側で上書きしているか（0/1） */
+  /** Whether the parcel overrides district regulations (0 or 1). */
   restriction_override: boolean;
-  /** 建築可能な建物カテゴリのビットフラグ（bd_type値のOR） */
+  /** Bitmask of building categories allowed for construction, formed by combining bd_type values with bitwise OR. */
   allowed_bd_mask: number;
-  /** 建蔽率の上限 */
+  /** Maximum building coverage ratio. */
   limit_coverage_ratio: number;
-  /** 容積率の上限 */
+  /** Maximum volume ratio. */
   limit_volume_ratio: number;
-  /** 高さの上限（m） */
+  /** Maximum height (m). */
   limit_height: number;
-  /** この区画を使用している建物エージェントのID（0=空き地） */
+  /** ID of the building agent using the parcel (0 if vacant). */
   usage_id: number;
-  /** 岸壁のすぐ外の水深(m)。港の必要水深(agent_master の berth_depth)以上の区画にだけ港が建つ。沿岸区画以外は0 */
+  /** Water depth just beyond the quay (m). A port can be built only if the parcel meets or exceeds the port's required depth (berth_depth in agent_master). Returns 0 for non-coastal parcels. */
   water_depth: number;
 };
 
 export type ParcelData = {
-  /** 土地区画の一意なID */
+  /** Unique parcel ID. */
   parcel_id: number;
-  /** 見た目の更新版数。フロントの差分描画トリガーとして使う */
+  /** Visual revision number. Clients use it to detect when an object needs to be redrawn. */
   version: number;
-  /** 区画タイプ（陸地/海岸など。PARCEL_*） */
+  /** Parcel type, such as land or shoreline. See PARCEL_*. */
   parcel_type: number;
-  /** ステータス（計画中/稼働中など。STATUS_*） */
+  /** Status, such as planned or active. See STATUS_*. */
   status: number;
-  /** 区画ポリゴンの座標列 [[x, z], ...] */
+  /** Parcel polygon coordinates in the form [[x, z], ...]. */
   polygon: any[];
-  /** 中心点座標 [x, z] */
+  /** Center point coordinates [x, z]. */
   center_point: any[];
-  /** この区画を使用している建物エージェントのID（0=空き地） */
+  /** ID of the building agent using the parcel (0 if vacant). */
   usage_id: number;
-  /** 所属地区ID */
+  /** ID of the district this object belongs to. */
   zone_id: number;
-  /** 所属地区の名称（zone_idの参照解決） */
+  /** Name of the district identified by zone_id. */
   zone_name?: string;
-  /** 区画に重なる天然資源のID（資源種別→資源ID） */
+  /** Maps resource types to the IDs of natural resources overlapping the parcel. */
   resource_id: Record<string, number>;
-  /** 地形の平均勾配（無次元）。建設難易度の元データ */
+  /** Average terrain slope (dimensionless). Used to determine construction difficulty. */
   terrain_slope: number;
-  /** 岸壁のすぐ外の水深(m)。港の必要水深(agent_master の berth_depth)以上の区画にだけ港が建つ。沿岸区画以外は0 */
+  /** Water depth just beyond the quay (m). A port can be built only if the parcel meets or exceeds the port's required depth (berth_depth in agent_master). Returns 0 for non-coastal parcels. */
   water_depth: number;
-  /** 区画に重なる天然資源の名称（資源種別→名称） (サーバーサイドで計算されるフィールド。型は動的。) */
+  /** Maps resource types to the names of natural resources overlapping the parcel. (Computed on the server. The type may vary.) */
   name_resource?: any;
-  /** 接道している街路のID */
+  /** ID of the street the parcel fronts. */
   front_path_id: number;
-  /** 接道街路の名称（front_path_idの参照解決） */
+  /** Name of the frontage street identified by front_path_id. */
   front_path_name?: string;
-  /** 区画が接道のどちらの面にあるか（PATH_SIDE_LEFT/RIGHT。-1=接道なし）。所属地区はこの面の地区 */
+  /** Side of the frontage street where the parcel lies (PATH_SIDE_LEFT or PATH_SIDE_RIGHT, or -1 for no frontage). The parcel belongs to the district on that side. */
   front_path_side: number;
-  /** 道路に面する辺のインデックスの一覧 */
+  /** List of indices of the parcel edges that face a road. */
   facade_edge_index: any[];
-  /** 所有者エージェントのID（民間または市政府） */
+  /** ID of the owner agent, either a private agent or the city government. */
   owner_agent_id: number;
-  /** 所有者の名称（owner_agent_idの参照解決） */
+  /** Name of the owner identified by owner_agent_id. */
   owner_agent_name?: string;
-  /** 土地価格 */
+  /** Land price. */
   land_price: number;
-  /** バリアント別の立地倍率（agentバリアントID→倍率） */
+  /** Maps agent variant IDs to location multipliers. */
   agent_multiplier: Record<string, number>;
-  /** 地区の法規制を区画側で上書きしているか（0/1） */
+  /** Whether the parcel overrides district regulations (0 or 1). */
   restriction_override: boolean;
-  /** その土地区画を買収中かどうか */
+  /** Whether land acquisition for this parcel is in progress. */
   under_acquisition: boolean;
-  /** 民間がこの区画に建物を建てられるか。公共施設の敷地になるとfalseになり、プレイヤーが変更できる */
+  /** Whether private agents may build on the parcel. Set to false when the parcel becomes the site of a public facility. The player can change this setting. */
   allow_private_construction: boolean;
-  /** 建築可能な建物カテゴリのビットフラグ（bd_type値のOR） */
+  /** Bitmask of building categories allowed for construction, formed by combining bd_type values with bitwise OR. */
   allowed_bd_mask: number;
-  /** 建蔽率の上限 */
+  /** Maximum building coverage ratio. */
   limit_coverage_ratio: number;
-  /** 容積率の上限 */
+  /** Maximum volume ratio. */
   limit_volume_ratio: number;
-  /** 高さの上限（m） */
+  /** Maximum height (m). */
   limit_height: number;
-  /** 区画面積（m2） */
+  /** Parcel area (m²). */
   area: number;
-  /** 基準標高（m） */
+  /** Reference elevation (m). */
   altitude: number;
-  /** プレイヤーが予約した操作のリスト（買収など） */
+  /** List of actions scheduled by the player, such as land acquisition. */
   user_operations: any[];
 };
 
 export type ZoneData = {
-  /** 地区の一意なID */
+  /** Unique district ID. */
   zone_id: number;
-  /** 見た目の更新版数。フロントの差分描画トリガーとして使う */
+  /** Visual revision number. Clients use it to detect when an object needs to be redrawn. */
   version: number;
-  /** 地区ポリゴン（所属区画の形状を合算して導出） */
+  /** District polygon derived by combining the shapes of its parcels. */
   polygon: any[];
-  /** 地区名 */
+  /** District name. */
   name: string;
-  /** 地区の識別色（#RRGGBB） */
+  /** District identifier color (#RRGGBB). */
   color: string;
-  /** ユーザーが形状確定前の地区か */
+  /** Whether the district's shape has yet to be finalized by the player. */
   auto_managed: boolean;
-  /** 地区面積（m2） */
+  /** District area (m²). */
   area: number;
-  /** 中心点座標 [x, z] */
+  /** Center point coordinates [x, z]. */
   center_point: any[];
-  /** 建築可能な建物カテゴリのビットフラグ（bd_type値のOR） */
+  /** Bitmask of building categories allowed for construction, formed by combining bd_type values with bitwise OR. */
   allowed_bd_mask: number;
-  /** 建蔽率の上限 */
+  /** Maximum building coverage ratio. */
   limit_coverage_ratio: number;
-  /** 容積率の上限 */
+  /** Maximum volume ratio. */
   limit_volume_ratio: number;
-  /** 高さの上限（m） */
+  /** Maximum height (m). */
   limit_height: number;
-  /** 製品別の地区平均価格（税込み。製品ID→価格） */
+  /** Maps product IDs to average prices in the district, including tax. */
   zone_average_prices: Record<string, number>;
-  /** 地区の平均賃金単価の履歴 */
+  /** History of the district's average wage rate. */
   average_wage: number[];
-  /** 平均賃料の履歴 */
+  /** Average rent history. */
   average_rent: number[];
-  /** 地価の㎡単価（円/㎡）の履歴。民間が建てられる区画の地価の合計 ÷ 面積の合計 */
+  /** History of land prices per square meter (yen/m²). Calculated as the total land price of parcels open to private construction divided by their total area. */
   average_land_price: number[];
-  /** 地区人口の履歴 */
+  /** District population history. */
   zone_population: number[];
-  /** 昼間人口の履歴 */
+  /** Daytime population history. */
   daytime_population: number[];
-  /** 失業率の履歴 */
+  /** Unemployment rate history. */
   zone_unemployment_rate: number[];
-  /** 床用途カテゴリ別の需要量（カテゴリ→量） */
+  /** Maps floor use categories to quantities demanded. */
   space_demands: Record<string, number>;
-  /** 床用途カテゴリ別の供給量（カテゴリ→量） */
+  /** Maps floor use categories to quantities supplied. */
   space_supplies: Record<string, number>;
-  /** 製品別の地区供給量（製品ID→量） */
+  /** Maps product IDs to quantities supplied in the district. */
   zone_supply: Record<string, number>;
-  /** 製品別の地区需要量（製品ID→量） */
+  /** Maps product IDs to quantities demanded in the district. */
   zone_demand: Record<string, number>;
 };
 
 export type ResourceData = {
-  /** 天然資源の一意なID */
+  /** Unique natural resource ID. */
   resource_id: number;
-  /** 資源名 */
+  /** Resource name. */
   name: string;
-  /** 採取される製品のID */
+  /** ID of the product extracted from the resource. */
   product_id: number;
-  /** 資源エリアのポリゴンの座標列 */
+  /** Coordinates of the resource area polygon. */
   polygon: any[];
-  /** 中心点座標 [x, z] */
+  /** Center point coordinates [x, z]. */
   center_point: any[];
-  /** 資源種別（master.yaml の resource_master キー） */
+  /** Resource type (key in resource_master in master.yaml). */
   resource_type: number;
-  /** 採取量の履歴（新しい順） */
+  /** Extraction quantity history, newest first. */
   consumption_amount: number[];
-  /** 埋蔵上限量 */
+  /** Maximum resource reserves. */
   max_amount: number;
-  /** 埋蔵量の履歴（新しい順） */
+  /** Resource reserve history, newest first. */
   current_amount: number[];
-  /** 1エポックあたりの埋蔵量回復率 */
+  /** Rate at which resource reserves recover per epoch. */
   recovery_rate: number;
 };
 
