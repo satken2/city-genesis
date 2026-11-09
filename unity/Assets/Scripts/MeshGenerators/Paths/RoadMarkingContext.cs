@@ -20,11 +20,20 @@ public sealed class RoadMarkingContext : MonoBehaviour
     public int BandCount { get; private set; }
     private readonly List<Vector3> points = new();
     private readonly List<float> distances = new();
-    private readonly Dictionary<Vector2Int, List<int>> cells = new();
+    private readonly Dictionary<Vector2Int, CellSegments> cells = new();
     private readonly List<Vector4> bandList = new();
     private readonly List<Vector4> spanList = new();
     private const float CellSize = 16f;
     private const float Unbounded = 1e9f;
+    private const float BoundMargin = 0.05f; // m. Exceeds float rounding in the sphere bound, so the nearest segment is never skipped.
+    private const int Packed = 4; // Floats per segment in CellSegments.Bounds.
+
+    /// <summary>Segments indexed in one cell, ascending. Bounds packs each segment's midpoint xyz and half length (bounding sphere).</summary>
+    private sealed class CellSegments
+    {
+        public readonly List<int> Indices = new();
+        public float[] Bounds;
+    }
 
     public static RoadMarkingContext Create(GameObject parent, SplineComputer spline, PathSummary path,
         bool startApproach, bool endApproach)
@@ -177,26 +186,55 @@ public sealed class RoadMarkingContext : MonoBehaviour
         for (int z = min.y; z <= max.y; z++) for (int x = min.x; x <= max.x; x++)
         {
             var key = new Vector2Int(x, z);
-            if (!cells.TryGetValue(key, out var indices)) cells[key] = indices = new List<int>();
-            indices.Add(i);
+            if (!cells.TryGetValue(key, out var cell)) cells[key] = cell = new CellSegments();
+            cell.Indices.Add(i);
+            cell.Bounds = null;
         }
     }
 
-    public Vector4 Coordinate(Vector3 world, Vector3 normal)
+    private float[] PackBounds(CellSegments cell)
     {
-        if (!cells.TryGetValue(Cell(world), out var indices)) return Vector4.zero;
-        float best = float.PositiveInfinity, s = 0f, t = 0f, height = 0f;
-        foreach (int i in indices)
+        var bounds = new float[cell.Indices.Count * Packed];
+        for (int slot = 0; slot < cell.Indices.Count; slot++)
         {
+            int i = cell.Indices[slot], o = slot * Packed;
+            Vector3 a = points[i], delta = points[i + 1] - a, mid = a + delta * .5f;
+            bounds[o] = mid.x; bounds[o + 1] = mid.y; bounds[o + 2] = mid.z; bounds[o + 3] = delta.magnitude * .5f;
+        }
+        return cell.Bounds = bounds;
+    }
+
+    /// <summary>
+    /// Spline distance, lateral offset, and top-surface flag of the nearest indexed segment in the cell of world.
+    /// Starts from the previous vertex's segment (hint) and skips segments whose bounding sphere lies beyond the current best plus BoundMargin;
+    /// ties go to the lower segment index, so the result equals a full scan of the cell in index order.
+    /// </summary>
+    private Vector4 Coordinate(Vector3 world, Vector3 normal, ref CellSegments hintCell, ref int hintSlot)
+    {
+        if (!cells.TryGetValue(Cell(world), out var cell)) return Vector4.zero;
+        float[] bounds = cell.Bounds ?? PackBounds(cell);
+        float best = float.PositiveInfinity, reach = float.PositiveInfinity, s = 0f, t = 0f, height = 0f;
+        int bestIndex = -1, bestSlot = -1, count = cell.Indices.Count;
+        int first = ReferenceEquals(hintCell, cell) && hintSlot >= 0 && hintSlot < count ? hintSlot : 0;
+        for (int n = 0; n < count; n++)
+        {
+            int slot = first + n < count ? first + n : first + n - count;
+            int o = slot * Packed;
+            float ex = world.x - bounds[o], ey = world.y - bounds[o + 1], ez = world.z - bounds[o + 2], bound = reach + bounds[o + 3];
+            if (ex * ex + ey * ey + ez * ez > bound * bound) continue;
+            int i = cell.Indices[slot];
             Vector3 a = points[i], delta = points[i + 1] - a;
             Vector2 dxz = IntersectionPolygonUtil.XZ(delta), q = IntersectionPolygonUtil.XZ(world - a);
             float fraction = Mathf.Clamp01(Vector2.Dot(q, dxz) / Mathf.Max(.000001f, dxz.sqrMagnitude));
             float d = (world - Vector3.Lerp(a, a + delta, fraction)).sqrMagnitude;
-            if (d >= best) continue;
-            best = d; s = Mathf.Lerp(distances[i], distances[i + 1], fraction);
+            if (!(d < best) && !(d == best && i < bestIndex)) continue;
+            best = d; bestIndex = i; bestSlot = slot; reach = Mathf.Sqrt(best) + BoundMargin;
+            s = Mathf.Lerp(distances[i], distances[i + 1], fraction);
             t = Vector2.Dot(q - dxz * fraction, new Vector2(dxz.y, -dxz.x).normalized);
             height = a.y + delta.y * fraction + RoadPartHeights.BODY_ABOVE_SPLINE;
         }
+        hintCell = cell;
+        hintSlot = bestSlot;
         float top = normal.y > .35f && world.y >= height - .08f ? 1f : 0f;
         return new Vector4(s, t, top, 0f);
     }
@@ -216,8 +254,10 @@ public sealed class RoadMarkingContext : MonoBehaviour
         if (filter == null || filter.sharedMesh == null || renderer == null) return;
         var mesh = filter.sharedMesh;
         var vertices = mesh.vertices; var normals = mesh.normals; var uv = new List<Vector4>(vertices.Length);
+        CellSegments hintCell = null;
+        int hintSlot = -1;
         for (int i = 0; i < vertices.Length; i++) uv.Add(Coordinate(body.transform.TransformPoint(vertices[i]),
-            normals.Length == vertices.Length ? body.transform.TransformDirection(normals[i]) : Vector3.up));
+            normals.Length == vertices.Length ? body.transform.TransformDirection(normals[i]) : Vector3.up, ref hintCell, ref hintSlot));
         mesh.SetUVs(3, uv);
         var surface = body.GetComponent<RoadMarkingSurface>();
         if (surface == null) surface = body.AddComponent<RoadMarkingSurface>();
