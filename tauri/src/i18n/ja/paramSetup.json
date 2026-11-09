@@ -29,6 +29,10 @@
       "financial": "金融"
     },
     "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "都市濃縮度",
+        "desc": "小さなマップに大都市の経済活動を載せるため、住まいや施設が使う床面積をこの値で割る。道路や建物を1つでも作った後に変えると都市が壊れるので、何も作る前に決めること。"
+      },
       "TFR_TARGET": {
         "label": "合計特殊出生率 (TFR) 目標",
         "desc": "世帯が目標とする出生率。高いほど子供が生まれやすい。"
@@ -95,10 +99,6 @@
         "label": "住まい選びの移動時間の重み",
         "desc": "住まいを選ぶとき、通勤・通学・買い物の往復にかかる時間1分を、都市の平均賃金の何倍の負担と見るか。1で賃金そのまま。大きいほど職場や店に近い住まいが選ばれやすい。"
       },
-      "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
-        "label": "可処分所得下限比率",
-        "desc": "世帯が最低限確保しようとする裁量所得の比率。低すぎると生活が破綻しやすい。"
-      },
       "AVERAGE_WAGE": {
         "label": "平均賃金（基準値）",
         "desc": "シミュレーション開始時の基準平均賃金。"
@@ -107,37 +107,9 @@
         "label": "平均家賃（基準値）",
         "desc": "シミュレーション開始時の基準平均家賃（1日あたり1m²あたり）。"
       },
-      "MIN_PROFIT_RATE": {
-        "label": "最低利益率",
-        "desc": "企業が操業継続するための最低利益率。"
-      },
-      "SPAWN_PROFIT_RATE_THRESHOLD": {
-        "label": "新規参入許可最低利益率",
-        "desc": "この利益率を上回る市場にのみ新規企業がスポーンする。過剰出店の抑制用。"
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "配当の資産比例割合",
         "desc": "配当のうち世帯の現預金に比例して配る割合。残りは全世帯に均等に配る。0で全額均等、1で全額を現預金に比例。"
-      },
-      "MIN_PRODUCTION_LIMIT": {
-        "label": "最低生産量比率",
-        "desc": "総需要に対する最低生産量の比率。"
-      },
-      "MAX_LONGRUN_BONUS_DAYS": {
-        "label": "長期稼働ボーナス最大日数",
-        "desc": "企業が長期稼働することで得るボーナスの上限日数。"
-      },
-      "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
-        "label": "輸出が止まる価格差",
-        "desc": "輸出の受取上限（域外価格 ÷ (1 + 輸送費率)）よりこの割合だけ高い供給価格で、輸出入拠点の買い取りが0になる。上限を超えた分に応じて直線的に減る。"
-      },
-      "SPAWN_LABOR_CAP_RATIO": {
-        "label": "スポーン時労働力消費上限",
-        "desc": "新規企業スポーン時に都市の余剰労働力から一度に消費できる最大比率。"
-      },
-      "DEVELOPER_PROFIT_RATIO": {
-        "label": "不動産デベロッパー利益率",
-        "desc": "不動産開発による利益の比率。"
       },
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "設備減価償却率",
@@ -146,14 +118,6 @@
       "WORK_HOURS": {
         "label": "1日の労働時間 (h)",
         "desc": "市民が1日に働く標準時間数。"
-      },
-      "HIGH_SKILL_BOUNDARY": {
-        "label": "高スキル境界値",
-        "desc": "この値を超えると高スキル労働者として扱われる。"
-      },
-      "MAX_BASE_SKILL": {
-        "label": "基礎スキル最大値",
-        "desc": "初等教育で到達できる最大スキル値。"
       },
       "ELEMENTARY_START_AGE": {
         "label": "初等教育開始年齢",
@@ -171,10 +135,6 @@
         "label": "就労可能最低年齢",
         "desc": "この年齢未満の市民は求職対象・失業率集計の対象外。"
       },
-      "SCHOOL_SEARCH_MAX_DISTANCE": {
-        "label": "通学可能最大距離（分）",
-        "desc": "通学先の学校を探す際の最大距離（分換算）。"
-      },
       "BUILDING_FLOOR_LIMIT": {
         "label": "建てられる最高階数（階）",
         "desc": "民間の自動建設で建てる建物の階数の上限。"
@@ -185,29 +145,9 @@
         "graphX": "階数",
         "graphY": "建設費倍率"
       },
-      "BUILDING_ASPECT_RATIO_MAX": {
-        "label": "塔状比の上限",
-        "desc": "建物の高さ÷√建築面積の上限。小さな土地に細長い建物が自動で建つのを防ぐ。0で制限なし。"
-      },
       "DEMOLITION_RATE": {
         "label": "取り壊し効率比",
         "desc": "取り壊しは新規建設と比べてどの程度効率的か（倍率）。"
-      },
-      "REPLACEMENT_GRACE_PERIOD_DAYS": {
-        "label": "建て替えの猶予日数",
-        "desc": "建物の建設が決まってからこの日数が経つまでは、民間による建て替えを行わない（工期を含む）。倒壊・焼失した廃墟は対象外で、すぐに建て替えられる。"
-      },
-      "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
-        "label": "不動産供給余剰率",
-        "desc": "不動産市場で常に確保する余剰供給の比率。"
-      },
-      "CONSTRUCTION_DEMAND_SITE_AREA_MIN": {
-        "label": "開発誘発の標準敷地面積下限",
-        "desc": "開発誘発パルスの標準開発敷地面積の下限(m²)。地区の需要密度に乗じて1エポックの建設需要規模を決める。"
-      },
-      "CONSTRUCTION_DEMAND_SITE_AREA_MAX": {
-        "label": "開発誘発の標準敷地面積上限",
-        "desc": "開発誘発パルスの標準開発敷地面積の上限(m²)。大きいほど1回の開発規模が大きくなる。"
       },
       "COLLAPSE_BASE_RATE": {
         "label": "倒壊基準年間確率",
@@ -216,10 +156,6 @@
       "COLLAPSE_SHAPE": {
         "label": "倒壊確率ワイブル形状パラメータ",
         "desc": "大きいほど耐用年数付近で倒壊確率が急増する。"
-      },
-      "MAINTENANCE_DURABILITY_THRESHOLD": {
-        "label": "修繕判定の耐用度閾値",
-        "desc": "この耐用度未満の建物が修繕の対象になる。"
       },
       "MAINTENANCE_COST_RATIO": {
         "label": "修繕コスト比率",
@@ -232,14 +168,6 @@
       "MAINTENANCE_BASE_PROB_ANNUAL": {
         "label": "修繕移行基準年間確率",
         "desc": "修繕対象建物が実際に修繕に入る基準年間確率。"
-      },
-      "DEMOLITION_DURABILITY_THRESHOLD": {
-        "label": "民間建物の解体閾値",
-        "desc": "民間の建物がこの耐久度を下回ると解体される。"
-      },
-      "SHUTDOWN_GRACE_PERIOD_DAYS": {
-        "label": "シャットダウン猶予期間（日）",
-        "desc": "建物竣工後にシャットダウン判定が免除される日数。テナント集積の猶予期間。"
       },
       "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
         "label": "初期建設負債（m²あたり）",
@@ -261,10 +189,6 @@
         "label": "騒音の減衰距離 (m)",
         "desc": "騒音は距離の2乗で薄まり、さらにこの距離ごとに1/eへ弱まる（建物の遮蔽や空気・地面の吸収）。小さいほど発生源の近くに留まる。"
       },
-      "NOISE_SATURATION_LEVEL": {
-        "label": "騒音飽和レベル",
-        "desc": "騒音ヒートマップの最大値。これを超えた騒音は頭打ちになる。"
-      },
       "POLLUTION_ROAD_TRAFFIC_COEFF": {
         "label": "道路交通大気汚染係数",
         "desc": "道路交通量が大気汚染ヒートマップに与える係数。"
@@ -273,10 +197,6 @@
         "label": "大気汚染の減衰距離 (m)",
         "desc": "大気汚染・悪臭は距離の2乗で薄まり、さらにこの距離ごとに1/eへ弱まる（拡散や沈着）。小さいほど発生源の近くに留まる。"
       },
-      "POLLUTION_SATURATION_LEVEL": {
-        "label": "大気汚染飽和レベル",
-        "desc": "大気汚染ヒートマップの最大値。"
-      },
       "UNEMPLOYMENT_CRIME_WEIGHT": {
         "label": "失業の犯罪ウェイト",
         "desc": "失業率が治安ヒートマップに与える重み。大きいほど失業が治安悪化に直結する。"
@@ -284,18 +204,6 @@
       "CRIME_BLUR_SIGMA_M": {
         "label": "犯罪拡散範囲 (m)",
         "desc": "治安ヒートマップのガウスぼかし半径。"
-      },
-      "CRIME_SATURATION_LEVEL": {
-        "label": "犯罪飽和レベル",
-        "desc": "治安ヒートマップの最大値。"
-      },
-      "LIVING_MULTIPLIER_MIN": {
-        "label": "住環境マルチプライヤー下限",
-        "desc": "住環境が最悪のときの家賃乗数下限。"
-      },
-      "LIVING_MULTIPLIER_MAX": {
-        "label": "住環境マルチプライヤー上限",
-        "desc": "住環境が理想的なときの家賃乗数上限。"
       },
       "PEDESTRIAN_SPEED": {
         "label": "歩行者速度 (km/h)",
@@ -316,10 +224,6 @@
       "PED_MANY_TRAFFIC_THRESHOLD": {
         "label": "歩行者交通量ボーナス飽和閾値",
         "desc": "歩行者交通量がこの値以上で小売店への歩行者ボーナスが最大になる。"
-      },
-      "RESOURCE_EFFICIENCY_THRESHOLD": {
-        "label": "天然資源効率閾値",
-        "desc": "天然資源残量率がこの値以上で採掘効率をほぼ1.0に保つ。未満は急落する。"
       }
     }
   },

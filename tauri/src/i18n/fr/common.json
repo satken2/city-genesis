@@ -132,7 +132,6 @@
     "SAVE_DELETE_FAILED": "Impossible de supprimer la sauvegarde.",
     "QUEST_NOT_FORCE_COMPLETABLE": "Cet objectif ne peut pas être terminé manuellement.",
     "PARAMETERS_LOCKED": "Modifiez les paramètres avant de fonder la ville ou en mode de création de scénario.",
-    "CONDENSATION_FIXED": "La condensation de la ville ne peut plus être modifiée après le début de la partie.",
     "VERIFICATION_FAILED": "La vérification Steam a échoué.",
     "VERIFICATION_UNAVAILABLE": "Le serveur de vérification est indisponible. Vérifiez la connexion puis réessayez.",
     "TRANSIT_TRAIN_TOO_LONG": "Le train dépasse la longueur d’un tronçon d’arrêt. Réduisez le nombre de voitures, allongez le quai ou déplacez l’arrêt.",

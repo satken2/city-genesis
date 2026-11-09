@@ -25,7 +25,7 @@ public static partial class VehicleQA
     {
         var values = New("MasterDataStore+GeneralParamsItem");
         Set(values, "RAIL_MAX_TURN_ANGLE_DEG", 45f); Set(values, "PEDESTRIAN_SPEED", 4f);
-        Set(values, "PATH_CURVATURE_WINDOW_M", 10f); Set(values, "PATH_ACTIVE_HOURS", 15f);
+        Set(values, "PATH_ACTIVE_HOURS", 15f);
         game.GetType("MasterDataStore").GetField("<GeneralParams>k__BackingField", Flags).SetValue(master, values);
         var transit = (IDictionary)Get(master, "transitMasterById");
         foreach (var (id, path, vehicle) in new[] { (1, 1001, 12), (2, 1003, 14), (3, 1002, 20), (4, 1005, 21), (5, 1004, 24), (6, 1006, 22), (7, 1007, 22), (8, 1008, 22), (9, 1009, 30) })

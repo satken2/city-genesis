@@ -132,7 +132,6 @@
     "SAVE_DELETE_FAILED": "無法刪除存檔。",
     "QUEST_NOT_FORCE_COMPLETABLE": "此目標無法手動完成。",
     "PARAMETERS_LOCKED": "請在建立城市之前或場景編輯模式下修改參數。",
-    "CONDENSATION_FIXED": "開始遊戲後無法修改城市濃縮度。",
     "VERIFICATION_FAILED": "Steam驗證失敗。",
     "VERIFICATION_UNAVAILABLE": "無法連線至驗證伺服器。請檢查連線後再試。",
     "TRANSIT_TRAIN_TOO_LONG": "列車編組長於停靠區段。請減少車廂、延長月台或將站點移到更長的區段。",

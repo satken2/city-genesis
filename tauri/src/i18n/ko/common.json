@@ -132,7 +132,6 @@
     "SAVE_DELETE_FAILED": "저장 데이터를 삭제하지 못했습니다.",
     "QUEST_NOT_FORCE_COMPLETABLE": "이 목표는 수동으로 완료할 수 없습니다.",
     "PARAMETERS_LOCKED": "매개변수는 도시 설립 전이나 시나리오 제작 모드에서 변경해 주세요.",
-    "CONDENSATION_FIXED": "도시 응축도는 게임 시작 후 변경할 수 없습니다.",
     "VERIFICATION_FAILED": "Steam 인증을 확인하지 못했습니다.",
     "VERIFICATION_UNAVAILABLE": "인증 서버에 연결할 수 없습니다. 연결 상태를 확인한 후 다시 시도해 주세요.",
     "TRANSIT_TRAIN_TOO_LONG": "편성이 정류장 구간보다 깁니다. 차량 수를 줄이거나 승강장을 연장하거나 정류장을 더 긴 구간으로 옮겨 주세요.",

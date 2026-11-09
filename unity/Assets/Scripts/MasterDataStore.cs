@@ -119,7 +119,6 @@ public class MasterDataStore : MonoBehaviour
 	{
 		public float RAIL_MAX_TURN_ANGLE_DEG;   // Maximum deflection a train can take at a node (degrees).
 		public float PEDESTRIAN_SPEED;          // km/h.
-		public float PATH_CURVATURE_WINDOW_M;   // Distance before/after each point used to measure curve radius (m).
 		public float PATH_ACTIVE_HOURS;         // Daily hours over which daily traffic flows (h).
 	}
 

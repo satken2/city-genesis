@@ -132,7 +132,6 @@
     "SAVE_DELETE_FAILED": "保存データを削除できませんでした。",
     "QUEST_NOT_FORCE_COMPLETABLE": "この目標は手動で達成にできません。",
     "PARAMETERS_LOCKED": "パラメータは都市創設前かシナリオ制作モードで変更してください。",
-    "CONDENSATION_FIXED": "都市濃縮度はゲーム開始後に変更できません。",
     "VERIFICATION_FAILED": "Steamの認証を確認できませんでした。",
     "VERIFICATION_UNAVAILABLE": "認証サーバーに接続できません。接続状況を確認してから再試行してください。",
     "TRANSIT_TRAIN_TOO_LONG": "編成が停留所のある区間より長いため変更できません。両数を減らすか、ホームを延伸するか、停留所を長い区間へ移してください。",

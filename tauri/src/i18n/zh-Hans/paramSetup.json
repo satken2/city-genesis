@@ -29,6 +29,10 @@
       "financial": "金融"
     },
     "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "城市浓缩度",
+        "desc": "为了在小地图上容纳大城市的经济活动，将住宅和设施使用的建筑面积除以此值。哪怕只建了一条道路或一栋建筑后再修改，城市也会损坏，请在建造任何东西之前确定。"
+      },
       "TFR_TARGET": {
         "label": "总和生育率（TFR）目标",
         "desc": "家庭所追求的生育率。数值越高越容易生育。"
@@ -95,10 +99,6 @@
         "label": "选择住所时的出行时间权重",
         "desc": "选择住所时，将通勤、上学和购物往返的每1分钟视为城市平均工资的几倍负担。1表示按工资计算。数值越大，越倾向于选择靠近工作地点和商店的住所。"
       },
-      "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
-        "label": "可支配收入下限比率",
-        "desc": "家庭力求保留的最低裁量收入比例。过低会导致生活容易崩溃。"
-      },
       "AVERAGE_WAGE": {
         "label": "平均工资（基准值）",
         "desc": "模拟开始时的基准平均工资。"
@@ -107,37 +107,9 @@
         "label": "平均房租（基准值）",
         "desc": "模拟开始时的基准平均房租（每日每平方米）。"
       },
-      "MIN_PROFIT_RATE": {
-        "label": "最低利润率",
-        "desc": "企业维持经营所需的最低利润率。"
-      },
-      "SPAWN_PROFIT_RATE_THRESHOLD": {
-        "label": "允许新进入的最低利润率",
-        "desc": "只有利润率高于该值的市场才会生成新企业。用于抑制过度开店。"
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "分红按资产比例分配比率",
         "desc": "分红中按各家庭现金存款比例分配的比例。其余部分平均分给所有家庭。0为全部平均，1为全部按现金存款比例。"
-      },
-      "MIN_PRODUCTION_LIMIT": {
-        "label": "最低产量比率",
-        "desc": "相对于总需求的最低产量比例。"
-      },
-      "MAX_LONGRUN_BONUS_DAYS": {
-        "label": "长期运营加成最大天数",
-        "desc": "企业因长期运营而获得加成的天数上限。"
-      },
-      "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
-        "label": "出口停止的价格差",
-        "desc": "供应价格高于出口收取上限（域外价格 ÷ (1 + 运输费率)）达到该比例时，进出口据点的收购降为0。超出上限的部分越多，收购按直线减少。"
-      },
-      "SPAWN_LABOR_CAP_RATIO": {
-        "label": "生成时劳动力消耗上限",
-        "desc": "新企业生成时可一次性消耗城市剩余劳动力的最大比例。"
-      },
-      "DEVELOPER_PROFIT_RATIO": {
-        "label": "房地产开发商利润率",
-        "desc": "房地产开发所得利润的比例。"
       },
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "设备折旧率",
@@ -146,14 +118,6 @@
       "WORK_HOURS": {
         "label": "每日劳动时间（h）",
         "desc": "市民每日工作的标准小时数。"
-      },
-      "HIGH_SKILL_BOUNDARY": {
-        "label": "高技能分界值",
-        "desc": "超过该值即视为高技能劳动者。"
-      },
-      "MAX_BASE_SKILL": {
-        "label": "基础技能最大值",
-        "desc": "通过初等教育可达到的最大技能值。"
       },
       "ELEMENTARY_START_AGE": {
         "label": "初等教育开始年龄",
@@ -171,10 +135,6 @@
         "label": "可就业最低年龄",
         "desc": "低于该年龄的市民不纳入求职对象与失业率统计。"
       },
-      "SCHOOL_SEARCH_MAX_DISTANCE": {
-        "label": "可通学最大距离（分钟）",
-        "desc": "寻找就读学校时的最大距离（换算为分钟）。"
-      },
       "BUILDING_FLOOR_LIMIT": {
         "label": "最高层数（层）",
         "desc": "民间自动建设所建建筑的层数上限。"
@@ -185,29 +145,9 @@
         "graphX": "层数",
         "graphY": "建设费倍率"
       },
-      "BUILDING_ASPECT_RATIO_MAX": {
-        "label": "塔状比上限",
-        "desc": "建筑高度÷√占地面积的上限。防止在小地块上自动建起细长的高楼。0为不限制。"
-      },
       "DEMOLITION_RATE": {
         "label": "拆除效率比",
         "desc": "拆除相较于新建的效率倍率。"
-      },
-      "REPLACEMENT_GRACE_PERIOD_DAYS": {
-        "label": "重建宽限期（日）",
-        "desc": "自决定建造建筑起，在经过此天数之前，民间不会对其进行重建（含工期）。倒塌或烧毁的废墟不受此限制，可立即重建。"
-      },
-      "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
-        "label": "不动产供给余量率",
-        "desc": "不动产市场中始终保留的余量供给比例。"
-      },
-      "CONSTRUCTION_DEMAND_SITE_AREA_MIN": {
-        "label": "开发诱发的标准用地面积下限",
-        "desc": "开发诱发脉冲的标准开发用地面积下限（m²）。与地区的需求密度相乘，决定单个纪元的建设需求规模。"
-      },
-      "CONSTRUCTION_DEMAND_SITE_AREA_MAX": {
-        "label": "开发诱发的标准用地面积上限",
-        "desc": "开发诱发脉冲的标准开发用地面积上限（m²）。数值越大，单次开发规模越大。"
       },
       "COLLAPSE_BASE_RATE": {
         "label": "倒塌基准年概率",
@@ -216,10 +156,6 @@
       "COLLAPSE_SHAPE": {
         "label": "倒塌概率韦伯形状参数",
         "desc": "数值越大，在使用年限附近倒塌概率上升越急剧。"
-      },
-      "MAINTENANCE_DURABILITY_THRESHOLD": {
-        "label": "修缮判定的耐久度阈值",
-        "desc": "耐久度低于该值的建筑成为修缮对象。"
       },
       "MAINTENANCE_COST_RATIO": {
         "label": "修缮成本比率",
@@ -232,14 +168,6 @@
       "MAINTENANCE_BASE_PROB_ANNUAL": {
         "label": "进入修缮的基准年概率",
         "desc": "修缮对象建筑实际进入修缮的基准年概率。"
-      },
-      "DEMOLITION_DURABILITY_THRESHOLD": {
-        "label": "民间建筑的拆除阈值",
-        "desc": "民间建筑的耐久度低于该值时将被拆除。"
-      },
-      "SHUTDOWN_GRACE_PERIOD_DAYS": {
-        "label": "停业判定宽限期（日）",
-        "desc": "建筑竣工后免于停业判定的天数。用于给租户聚集留出缓冲期。"
       },
       "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
         "label": "初始建设负债（每m²）",
@@ -261,10 +189,6 @@
         "label": "噪音衰减距离（m）",
         "desc": "噪音随距离的平方减弱，并且每经过这一距离再衰减到1/e（建筑遮挡、空气和地面吸收）。数值越小越集中在声源附近。"
       },
-      "NOISE_SATURATION_LEVEL": {
-        "label": "噪音饱和水平",
-        "desc": "噪音热力图的最大值。超过该值的噪音将封顶。"
-      },
       "POLLUTION_ROAD_TRAFFIC_COEFF": {
         "label": "道路交通大气污染系数",
         "desc": "道路交通量对大气污染热力图的影响系数。"
@@ -273,10 +197,6 @@
         "label": "大气污染衰减距离（m）",
         "desc": "大气污染和恶臭随距离的平方减弱，并且每经过这一距离再衰减到1/e（扩散和沉降）。数值越小越集中在污染源附近。"
       },
-      "POLLUTION_SATURATION_LEVEL": {
-        "label": "大气污染饱和水平",
-        "desc": "大气污染热力图的最大值。"
-      },
       "UNEMPLOYMENT_CRIME_WEIGHT": {
         "label": "失业的犯罪权重",
         "desc": "失业率对治安热力图的权重。数值越大失业越直接导致治安恶化。"
@@ -284,18 +204,6 @@
       "CRIME_BLUR_SIGMA_M": {
         "label": "犯罪扩散范围（m）",
         "desc": "治安热力图的高斯模糊半径。"
-      },
-      "CRIME_SATURATION_LEVEL": {
-        "label": "犯罪饱和水平",
-        "desc": "治安热力图的最大值。"
-      },
-      "LIVING_MULTIPLIER_MIN": {
-        "label": "居住环境乘数下限",
-        "desc": "居住环境最差时的房租乘数下限。"
-      },
-      "LIVING_MULTIPLIER_MAX": {
-        "label": "居住环境乘数上限",
-        "desc": "居住环境理想时的房租乘数上限。"
       },
       "PEDESTRIAN_SPEED": {
         "label": "行人速度（km/h）",
@@ -316,10 +224,6 @@
       "PED_MANY_TRAFFIC_THRESHOLD": {
         "label": "行人交通量加成饱和阈值",
         "desc": "行人交通量达到该值以上时，对零售店的行人加成达到最大。"
-      },
-      "RESOURCE_EFFICIENCY_THRESHOLD": {
-        "label": "天然资源效率阈值",
-        "desc": "天然资源剩余率在该值以上时开采效率保持接近1.0，低于该值则急剧下降。"
       }
     }
   },

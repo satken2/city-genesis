@@ -132,7 +132,6 @@
     "SAVE_DELETE_FAILED": "The save could not be deleted.",
     "QUEST_NOT_FORCE_COMPLETABLE": "This objective cannot be completed manually.",
     "PARAMETERS_LOCKED": "Change parameters before founding the city or in scenario editing mode.",
-    "CONDENSATION_FIXED": "City condensation cannot be changed after starting a game.",
     "VERIFICATION_FAILED": "Steam verification failed.",
     "VERIFICATION_UNAVAILABLE": "The verification server is unavailable. Check your connection and try again.",
     "TRANSIT_TRAIN_TOO_LONG": "The train is longer than a stop section. Reduce the number of cars, extend the platform, or move the stop to a longer section.",

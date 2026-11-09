@@ -8,16 +8,15 @@
  * - Durability: 0–1, colored over five 20% steps. Display the value as a percentage.
  * - Noise/air pollution: unbounded values determined by traffic. The bar is the fraction of the saturation level
  *   above which living environment evaluation considers the condition worst (NOISE_SATURATION_LEVEL /
- *   POLLUTION_SATURATION_LEVEL in GENERAL_PARAMS), colored over four levels. Display raw values.
- *   If saturation levels are unavailable, leave the bar empty.
+ *   POLLUTION_SATURATION_LEVEL), colored over four levels. Display raw values.
  *
  * Show a construction badge above meters during maintenance. Render nothing if no items are available.
  */
 
-import { useEffect, useState, type CSSProperties } from "react";
+import { type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { PathData } from "../../types";
-import { buildApiUrl, fetchApi } from "../../utils/api";
+import { NOISE_SATURATION_LEVEL, POLLUTION_SATURATION_LEVEL } from "../../constants";
 import { resolveIntlLocale } from "../../utils/locale";
 import { PATH_TYPES_WITH_UTILIZATION } from "../../local-constants";
 import { congestionColor } from "./PathTrafficPanel";
@@ -25,18 +24,10 @@ import { congestionColor } from "./PathTrafficPanel";
 import "./PathTrafficPanel.css";
 import "./PathConditionPanel.css";
 
-/** Fields used here from GET /api/v1/parameters. */
-type ParametersResponse = {
-  parameters?: { GENERAL_PARAMS?: Record<string, unknown> };
-};
-
-type SaturationLevels = { noise: number | null; pollution: number | null };
-
 /** Durability thresholds for levels 0, 1, 2, 3. Below all thresholds is the worst level. */
 const DURABILITY_THRESHOLDS = [0.8, 0.6, 0.4, 0.2];
 const DURABILITY_COLORS = ["#22c55e", "#84cc16", "#eab308", "#f97316", "#ef4444"];
 const EMISSION_COLORS = ["#22c55e", "#84cc16", "#f59e0b", "#ef4444"];
-const UNKNOWN_COLOR = "#93a9c0";
 
 function durabilityColor(durability: number): string {
   const index = DURABILITY_THRESHOLDS.findIndex((threshold) => durability >= threshold);
@@ -49,10 +40,6 @@ function emissionLevel(ratio: number): number {
   if (ratio < 1 / 3) return 1;
   if (ratio < 2 / 3) return 2;
   return 3;
-}
-
-function positiveNumberOrNull(value: unknown): number | null {
-  return typeof value === "number" && value > 0 ? value : null;
 }
 
 function hasUtilization(path: PathData): boolean {
@@ -94,47 +81,26 @@ function MeterRow({ label, ratio, color, value, tooltip }: MeterRowProps) {
 
 type PathConditionPanelProps = {
   path: PathData;
-  apiBaseUrl: string;
 };
 
-export function PathConditionPanel({ path, apiBaseUrl }: PathConditionPanelProps) {
+export function PathConditionPanel({ path }: PathConditionPanelProps) {
   const { t, i18n } = useTranslation();
   const locale = resolveIntlLocale(i18n.language);
-  const [saturation, setSaturation] = useState<SaturationLevels>({ noise: null, pollution: null });
-
-  const hasEmission = path.noise != null || path.air_pollution != null;
-
-  useEffect(() => {
-    if (!hasEmission) return;
-    const controller = new AbortController();
-    fetchApi<ParametersResponse>(buildApiUrl(apiBaseUrl, "/api/v1/parameters"), { signal: controller.signal })
-      .then((res) => {
-        const general = res.parameters?.GENERAL_PARAMS ?? {};
-        setSaturation({
-          noise: positiveNumberOrNull(general.NOISE_SATURATION_LEVEL),
-          pollution: positiveNumberOrNull(general.POLLUTION_SATURATION_LEVEL),
-        });
-      })
-      .catch((err: unknown) => {
-        if (!controller.signal.aborted) console.error("[PathConditionPanel] parameters fetch failed:", err);
-      });
-    return () => controller.abort();
-  }, [apiBaseUrl, hasEmission]);
 
   if (!hasPathCondition(path)) return null;
 
   const formatPercent = (ratio: number) => `${Math.round(ratio * 100)}%`;
 
   /** Noise/air pollution row. The fraction determines the bar, so expose it in a tooltip. */
-  const renderEmissionRow = (label: string, value: number, saturationLevel: number | null) => {
-    const ratio = saturationLevel != null ? value / saturationLevel : null;
+  const renderEmissionRow = (label: string, value: number, saturationLevel: number) => {
+    const ratio = value / saturationLevel;
     return (
       <MeterRow
         label={label}
-        ratio={ratio ?? 0}
-        color={ratio != null ? EMISSION_COLORS[emissionLevel(ratio)] : UNKNOWN_COLOR}
+        ratio={ratio}
+        color={EMISSION_COLORS[emissionLevel(ratio)]}
         value={value.toLocaleString(locale, { maximumFractionDigits: 1 })}
-        tooltip={ratio != null ? t("path.saturationRatio", { label, percent: Math.round(ratio * 100) }) : undefined}
+        tooltip={t("path.saturationRatio", { label, percent: Math.round(ratio * 100) })}
       />
     );
   };
@@ -163,9 +129,9 @@ export function PathConditionPanel({ path, apiBaseUrl }: PathConditionPanelProps
             value={formatPercent(path.durability)}
           />
         )}
-        {path.noise != null && renderEmissionRow(t("path.noise"), path.noise, saturation.noise)}
+        {path.noise != null && renderEmissionRow(t("path.noise"), path.noise, NOISE_SATURATION_LEVEL)}
         {path.air_pollution != null &&
-          renderEmissionRow(t("path.airPollution"), path.air_pollution, saturation.pollution)}
+          renderEmissionRow(t("path.airPollution"), path.air_pollution, POLLUTION_SATURATION_LEVEL)}
       </ul>
     </div>
   );

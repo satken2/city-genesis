@@ -132,7 +132,6 @@
     "SAVE_DELETE_FAILED": "No se pudo eliminar la partida.",
     "QUEST_NOT_FORCE_COMPLETABLE": "Este objetivo no se puede completar manualmente.",
     "PARAMETERS_LOCKED": "Cambia los parámetros antes de fundar la ciudad o en el editor de escenarios.",
-    "CONDENSATION_FIXED": "La condensación de la ciudad no se puede cambiar después de iniciar la partida.",
     "VERIFICATION_FAILED": "No se pudo verificar Steam.",
     "VERIFICATION_UNAVAILABLE": "El servidor de verificación no está disponible. Revisa la conexión e inténtalo de nuevo.",
     "TRANSIT_TRAIN_TOO_LONG": "El tren es más largo que el tramo de una parada. Reduce los vagones, amplía el andén o mueve la parada a un tramo más largo.",

@@ -29,6 +29,10 @@
       "financial": "Finance"
     },
     "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "City Condensation",
+        "desc": "Divides the floor area used by homes and facilities by this value so that a small map can hold the economic activity of a large city. Changing it after building even one road or building breaks the city, so decide it before building anything."
+      },
       "TFR_TARGET": {
         "label": "Total Fertility Rate (TFR) Target",
         "desc": "The birth rate households aim for. Higher values make births more likely."
@@ -95,10 +99,6 @@
         "label": "Travel Time Weight in Housing Choice",
         "desc": "When choosing a home, how heavily each minute of round trips for work, school, and shopping counts, as a multiple of the city's average wage. 1 = valued at the wage. Higher values favor homes near workplaces and shops."
       },
-      "HOUSEHOLD_TIGHT_BUDGET_RATIO": {
-        "label": "Minimum Disposable Income Ratio",
-        "desc": "Minimum discretionary income ratio a household tries to maintain. If it is too low, household finances break down easily."
-      },
       "AVERAGE_WAGE": {
         "label": "Average Wage (baseline)",
         "desc": "Reference average wage at simulation start."
@@ -107,37 +107,9 @@
         "label": "Average Rent (baseline)",
         "desc": "Reference average rent at simulation start (per day per m²)."
       },
-      "MIN_PROFIT_RATE": {
-        "label": "Minimum Profit Rate",
-        "desc": "Minimum profit rate required for a business to stay operational."
-      },
-      "SPAWN_PROFIT_RATE_THRESHOLD": {
-        "label": "New Entry Minimum Profit Rate",
-        "desc": "New businesses only spawn in markets above this profit rate. Prevents oversaturation."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Dividend Wealth-Proportional Share",
         "desc": "Share of dividends distributed in proportion to each household's cash savings. The rest is split equally among all households. 0 = all equal, 1 = all in proportion to savings."
-      },
-      "MIN_PRODUCTION_LIMIT": {
-        "label": "Minimum Production Ratio",
-        "desc": "Minimum production as a ratio of total demand."
-      },
-      "MAX_LONGRUN_BONUS_DAYS": {
-        "label": "Long-run Operation Bonus Cap (days)",
-        "desc": "Maximum days of long-term operation bonus a business can accrue."
-      },
-      "EXPORT_COMPETITIVENESS_ZERO_RATIO": {
-        "label": "Export Cutoff Price Margin",
-        "desc": "How far the supply price may exceed the export price ceiling (external price ÷ (1 + transport ratio)) before trade hubs stop buying. Purchases fall linearly from the ceiling to zero at this margin."
-      },
-      "SPAWN_LABOR_CAP_RATIO": {
-        "label": "Spawn Labor Consumption Cap",
-        "desc": "Maximum fraction of surplus labor a new business can absorb at once."
-      },
-      "DEVELOPER_PROFIT_RATIO": {
-        "label": "Real Estate Developer Profit Ratio",
-        "desc": "Profit ratio for real estate development activities."
       },
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Equipment Depreciation Rate",
@@ -146,14 +118,6 @@
       "WORK_HOURS": {
         "label": "Daily Work Hours (h)",
         "desc": "Standard number of hours a citizen works per day."
-      },
-      "HIGH_SKILL_BOUNDARY": {
-        "label": "High-Skill Boundary",
-        "desc": "Skill level above which a citizen is classified as a high-skill worker."
-      },
-      "MAX_BASE_SKILL": {
-        "label": "Maximum Base Skill",
-        "desc": "Maximum skill level attainable through elementary education."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Elementary Education Start Age",
@@ -171,10 +135,6 @@
         "label": "Minimum Working Age",
         "desc": "Citizens below this age are excluded from job seeking and unemployment statistics."
       },
-      "SCHOOL_SEARCH_MAX_DISTANCE": {
-        "label": "Max School Search Distance (min)",
-        "desc": "Maximum commuting distance (in minutes) when searching for a school."
-      },
       "BUILDING_FLOOR_LIMIT": {
         "label": "Maximum Floors (floors)",
         "desc": "Upper limit on the number of floors of buildings built automatically by the private sector."
@@ -185,29 +145,9 @@
         "graphX": "Floors",
         "graphY": "Construction cost multiplier"
       },
-      "BUILDING_ASPECT_RATIO_MAX": {
-        "label": "Max Slenderness Ratio",
-        "desc": "Upper limit of building height ÷ √footprint area. Prevents needle-like towers from being built automatically on tiny lots. 0 = no limit."
-      },
       "DEMOLITION_RATE": {
         "label": "Demolition Efficiency Ratio",
         "desc": "How much more efficient demolition is compared to new construction (multiplier)."
-      },
-      "REPLACEMENT_GRACE_PERIOD_DAYS": {
-        "label": "Rebuild Grace Period (days)",
-        "desc": "Private developers do not replace a building until this many days have passed since its construction was decided (construction time included). Collapsed or burned-out ruins are exempt and can be replaced right away."
-      },
-      "REAL_ESTATE_SUPPLY_SURPLUS_RATE": {
-        "label": "Real Estate Supply Surplus Rate",
-        "desc": "Fraction of surplus supply always maintained in the real estate market."
-      },
-      "CONSTRUCTION_DEMAND_SITE_AREA_MIN": {
-        "label": "Development Pulse Standard Site Area Min",
-        "desc": "Minimum standard development site area (m²) for the construction demand pulse. Multiplied by the zone's demand density to size each epoch's construction demand."
-      },
-      "CONSTRUCTION_DEMAND_SITE_AREA_MAX": {
-        "label": "Development Pulse Standard Site Area Max",
-        "desc": "Maximum standard development site area (m²) for the construction demand pulse. Larger values allow bigger single developments."
       },
       "COLLAPSE_BASE_RATE": {
         "label": "Collapse Base Annual Rate",
@@ -216,10 +156,6 @@
       "COLLAPSE_SHAPE": {
         "label": "Collapse Weibull Shape Parameter",
         "desc": "Higher values cause collapse probability to spike sharply near design lifespan."
-      },
-      "MAINTENANCE_DURABILITY_THRESHOLD": {
-        "label": "Maintenance Durability Threshold",
-        "desc": "Buildings below this durability become eligible for maintenance."
       },
       "MAINTENANCE_COST_RATIO": {
         "label": "Maintenance Cost Ratio",
@@ -232,14 +168,6 @@
       "MAINTENANCE_BASE_PROB_ANNUAL": {
         "label": "Maintenance Transition Base Annual Probability",
         "desc": "Base annual probability that an eligible building enters maintenance."
-      },
-      "DEMOLITION_DURABILITY_THRESHOLD": {
-        "label": "Private Building Demolition Threshold",
-        "desc": "Private buildings are demolished when their durability falls below this value."
-      },
-      "SHUTDOWN_GRACE_PERIOD_DAYS": {
-        "label": "Shutdown Grace Period (days)",
-        "desc": "Days after completion during which shutdown checks are waived. Allows tenants to move in."
       },
       "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
         "label": "Initial Construction Debt (per m²)",
@@ -261,10 +189,6 @@
         "label": "Noise Attenuation Distance (m)",
         "desc": "Noise weakens with the square of distance and also drops to 1/e over every this many meters (building shielding, air and ground absorption). Lower = stays closer to the source."
       },
-      "NOISE_SATURATION_LEVEL": {
-        "label": "Noise Saturation Level",
-        "desc": "Maximum value for the noise heatmap. Values above this are capped."
-      },
       "POLLUTION_ROAD_TRAFFIC_COEFF": {
         "label": "Road Traffic Air Pollution Coefficient",
         "desc": "How much road traffic contributes to the air pollution heatmap."
@@ -273,10 +197,6 @@
         "label": "Air Pollution Attenuation Distance (m)",
         "desc": "Air pollution and odor weaken with the square of distance and also drop to 1/e over every this many meters (dispersion and deposition). Lower = stays closer to the source."
       },
-      "POLLUTION_SATURATION_LEVEL": {
-        "label": "Air Pollution Saturation Level",
-        "desc": "Maximum value for the air pollution heatmap."
-      },
       "UNEMPLOYMENT_CRIME_WEIGHT": {
         "label": "Unemployment Crime Weight",
         "desc": "How strongly unemployment rate affects the crime heatmap. Higher = unemployment leads more directly to worse public safety."
@@ -284,18 +204,6 @@
       "CRIME_BLUR_SIGMA_M": {
         "label": "Crime Spread Radius (m)",
         "desc": "Gaussian blur radius for the crime heatmap."
-      },
-      "CRIME_SATURATION_LEVEL": {
-        "label": "Crime Saturation Level",
-        "desc": "Maximum value for the crime heatmap."
-      },
-      "LIVING_MULTIPLIER_MIN": {
-        "label": "Living Environment Multiplier (min)",
-        "desc": "Rent multiplier when living environment is at its worst."
-      },
-      "LIVING_MULTIPLIER_MAX": {
-        "label": "Living Environment Multiplier (max)",
-        "desc": "Rent multiplier when living environment is ideal."
       },
       "PEDESTRIAN_SPEED": {
         "label": "Pedestrian Speed (km/h)",
@@ -316,10 +224,6 @@
       "PED_MANY_TRAFFIC_THRESHOLD": {
         "label": "Pedestrian Traffic Bonus Saturation Threshold",
         "desc": "Pedestrian traffic at or above this value gives retail stores the maximum pedestrian bonus."
-      },
-      "RESOURCE_EFFICIENCY_THRESHOLD": {
-        "label": "Natural Resource Efficiency Threshold",
-        "desc": "Extraction efficiency stays near 1.0 above this natural resource remaining ratio. Drops sharply below."
       }
     }
   },

@@ -30,7 +30,7 @@ public static class PreviewQA
             masterType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, master);
             // The renderer reads these from the city's master; use the standard GENERAL_PARAMS.
             var cityValues = Activator.CreateInstance(asm.GetType("MasterDataStore+GeneralParamsItem"));
-            foreach (var (field, value) in new[] { ("RAIL_MAX_TURN_ANGLE_DEG", 45f), ("PEDESTRIAN_SPEED", 4f), ("PATH_CURVATURE_WINDOW_M", 10f), ("PATH_ACTIVE_HOURS", 15f) })
+            foreach (var (field, value) in new[] { ("RAIL_MAX_TURN_ANGLE_DEG", 45f), ("PEDESTRIAN_SPEED", 4f), ("PATH_ACTIVE_HOURS", 15f) })
                 cityValues.GetType().GetField(field).SetValue(cityValues, value);
             masterType.GetField("<GeneralParams>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(master, cityValues);
             var dict = (IDictionary)masterType.GetField("pathMasterById", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(master);

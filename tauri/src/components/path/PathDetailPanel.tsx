@@ -620,7 +620,7 @@ export function PathDetailPanel({
                   {zoneError && (
                     <div className="zone-change-error">{zoneError}</div>
                   )}
-                  <PathConditionPanel path={pathData} apiBaseUrl={apiBaseUrl} />
+                  <PathConditionPanel path={pathData} />
                 </section>
               )}
 

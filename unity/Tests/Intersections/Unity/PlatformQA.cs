@@ -140,7 +140,7 @@ public static class PlatformQA
     static void StandardCityValues(Type storeType, object store)
     {
         var values = Activator.CreateInstance(assembly.GetType("MasterDataStore+GeneralParamsItem"));
-        foreach (var (field, value) in new[] { ("RAIL_MAX_TURN_ANGLE_DEG", 45f), ("PEDESTRIAN_SPEED", 4f), ("PATH_CURVATURE_WINDOW_M", 10f), ("PATH_ACTIVE_HOURS", 15f) })
+        foreach (var (field, value) in new[] { ("RAIL_MAX_TURN_ANGLE_DEG", 45f), ("PEDESTRIAN_SPEED", 4f), ("PATH_ACTIVE_HOURS", 15f) })
             values.GetType().GetField(field).SetValue(values, value);
         storeType.GetField("<GeneralParams>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(store, values);
     }

@@ -30,7 +30,7 @@ public static class LrtQA
         var type = asm.GetType("MasterDataStore");
         object store = type.GetProperty("Instance").GetValue(null);
         var values = Activator.CreateInstance(asm.GetType("MasterDataStore+GeneralParamsItem"));
-        foreach (var (field, value) in new[] { ("RAIL_MAX_TURN_ANGLE_DEG", 45f), ("PEDESTRIAN_SPEED", 4f), ("PATH_CURVATURE_WINDOW_M", 10f), ("PATH_ACTIVE_HOURS", 15f) })
+        foreach (var (field, value) in new[] { ("RAIL_MAX_TURN_ANGLE_DEG", 45f), ("PEDESTRIAN_SPEED", 4f), ("PATH_ACTIVE_HOURS", 15f) })
             Set(values, field, value);
         type.GetField("<GeneralParams>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(store, values);
         var lrt = Activator.CreateInstance(asm.GetType("MasterDataStore+TransitMasterItem"));
