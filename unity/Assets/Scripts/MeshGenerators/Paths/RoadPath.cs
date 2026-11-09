@@ -12,6 +12,18 @@ public class RoadPath : IPathMeshGenerator
     private static readonly StageMarker splineMeshMarker = new StageMarker("Path.SplineMesh");
     private static readonly StageMarker splineMeshRebuildMarker = new StageMarker("Path.SplineMesh.Rebuild");
     private static readonly StageMarker splineMeshCapsMarker = new StageMarker("Path.SplineMesh.Caps");
+
+    // [Spline mesh measurement] Temporary per-stage markers of CreateSplineMesh, totalled by BuildingStageProbe. Remove after investigation.
+    private static class SplineProbe
+    {
+        public static readonly StageMarker Resolve = new StageMarker("Path.SplineMesh.Resolve");
+        public static readonly StageMarker Setup = new StageMarker("Path.SplineMesh.Setup");
+        public static readonly StageMarker Channel = new StageMarker("Path.SplineMesh.Channel");
+        public static readonly StageMarker Materials = new StageMarker("Path.SplineMesh.Materials");
+        public static readonly StageMarker Seal = new StageMarker("Path.SplineMesh.Seal");
+        public static readonly StageMarker Markings = new StageMarker("Path.SplineMesh.Markings");
+        public static readonly StageMarker PartCreated = new StageMarker("Path.SplineMesh.PartCreated");
+    }
     private static readonly StageMarker pillarCandidatesMarker = new StageMarker("Path.Pillars.Candidates");
     private static readonly StageMarker pillarPortalMarker = new StageMarker("Path.Pillars.Portal");
     private static readonly StageMarker pillarInstantiateMarker = new StageMarker("Path.Pillars.Instantiate");
@@ -331,7 +343,8 @@ public class RoadPath : IPathMeshGenerator
         }
         else
         {
-            prefab = PathDrawContext.ResolvePrefab(prefabName, fallbackPrefabName, out resolvedPrefabName);
+            using (SplineProbe.Resolve.Auto()) // [Spline mesh measurement] Remove after investigation.
+                prefab = PathDrawContext.ResolvePrefab(prefabName, fallbackPrefabName, out resolvedPrefabName);
             if (prefab != null && resolvedPrefabName != prefabName)
             {
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] '{prefabName}' → '{resolvedPrefabName}' を使用");
@@ -375,11 +388,13 @@ public class RoadPath : IPathMeshGenerator
         }
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] プレハブ取得成功: '{prefabName}', mirrorX={mirrorX}");
 
+        var probe = SplineProbe.Setup.Auto(); // [Spline mesh measurement] probe lines are temporary. Remove after investigation.
         GameObject go = new GameObject(prefabName);
         go.transform.SetParent(parent.transform, false);
 
         SplineMesh splineMesh = go.AddComponent<SplineMesh>();
         splineMesh.spline = spline;
+        probe.Dispose();
 
         MeshFilter mf = prefab.GetComponent<MeshFilter>();
         MeshRenderer mr = prefab.GetComponent<MeshRenderer>();
@@ -396,6 +411,7 @@ public class RoadPath : IPathMeshGenerator
 
         if(mf != null && mf.sharedMesh != null)
         {
+             probe = SplineProbe.Channel.Auto();
              bool isBody = roadSurface && prefabName.EndsWith("/body", StringComparison.Ordinal);
              Mesh meshToUse = mf.sharedMesh;
              if (warp?.SourceMesh != null) meshToUse = warp.SourceMesh(meshToUse);
@@ -410,6 +426,7 @@ public class RoadPath : IPathMeshGenerator
 
              // Add a channel with mesh.
              channel = splineMesh.AddChannel(meshToUse, prefabName);
+             probe.Dispose();
 
              // Compute scale from source width (actual-size parts remain unscaled).
              float meshWidth = fittingBounds.size.x;
@@ -426,6 +443,7 @@ public class RoadPath : IPathMeshGenerator
              if (compensatePivot) warpPivotX = meshCenterX * scaleX;
              UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath]   scaleX計算: meshWidth={meshWidth:F3} → scaleX={scaleX:F3} (targetWidth={width}), pivotCompensationX={pivotCompensationX:F3}");
 
+             probe = SplineProbe.Materials.Auto();
              MeshRenderer targetMr = go.GetComponent<MeshRenderer>();
              if (targetMr == null) targetMr = go.AddComponent<MeshRenderer>();
 
@@ -448,6 +466,7 @@ public class RoadPath : IPathMeshGenerator
             }
 
              if (go.GetComponent<MeshFilter>() == null) go.AddComponent<MeshFilter>();
+             probe.Dispose();
         }
         else
         {
@@ -634,7 +653,7 @@ public class RoadPath : IPathMeshGenerator
         {
             Debug.LogError($"[RoadPath] SplineMesh Rebuild失敗 '{prefabName}': {ex}");
         }
-        SealSplineMesh(splineMesh);
+        using (SplineProbe.Seal.Auto()) SealSplineMesh(splineMesh);
 
         if (!singleSpan && !isDashed && (prefabName.EndsWith("/body", StringComparison.Ordinal)
             || prefabName.EndsWith("/sidewalk", StringComparison.Ordinal) || prefabName.EndsWith("/lrt_track", StringComparison.Ordinal)))
@@ -642,10 +661,12 @@ public class RoadPath : IPathMeshGenerator
                 RemoveInternalTileCaps(go.GetComponent<MeshFilter>()?.sharedMesh, channel);
 
         if (roadSurface && prefabName.EndsWith("/body", StringComparison.Ordinal))
-            parent.GetComponentInParent<RoadMarkingContext>()?.Apply(go);
+            using (SplineProbe.Markings.Auto())
+                parent.GetComponentInParent<RoadMarkingContext>()?.Apply(go);
 
         if (mf != null && mf.sharedMesh != null)
-            partCreated?.Invoke(go, spline, mf.sharedMesh, clipFrom, clipTo);
+            using (SplineProbe.PartCreated.Auto())
+                partCreated?.Invoke(go, spline, mf.sharedMesh, clipFrom, clipTo);
         return go;
     }
 

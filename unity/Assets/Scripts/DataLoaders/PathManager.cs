@@ -5533,8 +5533,40 @@ public partial class PathManager : BaseApiDataManager
         }
     }
 
+    // [Intersection measurement] Temporary stage markers (totalled by BuildingStageProbe) and a log of intersections taking 30ms or more. Remove after investigation.
+    private static class IntersectionProbe
+    {
+        public static readonly StageMarker Signature = new StageMarker("Path.Intersection.Signature");
+        public static readonly StageMarker Generate = new StageMarker("Path.Intersection.Generate");
+        public static readonly StageMarker Slab = new StageMarker("Path.Intersection.Slab");
+    }
+
+    private readonly struct IntersectionTimer : IDisposable
+    {
+        private readonly PathManager owner;
+        private readonly int nodeId;
+        private readonly long start;
+
+        public IntersectionTimer(PathManager owner, int nodeId)
+        {
+            this.owner = owner;
+            this.nodeId = nodeId;
+            start = System.Diagnostics.Stopwatch.GetTimestamp();
+        }
+
+        public void Dispose()
+        {
+            double ms = (System.Diagnostics.Stopwatch.GetTimestamp() - start) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+            if (ms < 30) return;
+            var paths = owner.GetPathsConnectedToNode(nodeId);
+            string connected = string.Join(" ", paths.ConvertAll(p => $"path{p.path_id}(v{p.path_variant})"));
+            UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", $"[交差点計測] node{nodeId} {ms:F0}ms 接続={connected}");
+        }
+    }
+
     private void UpdateNodeIntersectionMesh(int nodeId)
     {
+        using var intersectionTimer = new IntersectionTimer(this, nodeId); // [Intersection measurement] Remove after investigation.
         if (!nodeDataCache.TryGetValue(nodeId, out var nodeData))
         {
             Debug.LogWarning($"[PathManager] nodeData not found for nodeId={nodeId}, fetching node...");
@@ -5576,7 +5608,9 @@ public partial class PathManager : BaseApiDataManager
         }
         overloadedIntersectionNodeIds.Remove(nodeId);
 
-        long signature = ComputeNodeIntersectionSignature(nodeId, nodeData, connectedPaths, out bool signatureKnown);
+        long signature;
+        bool signatureKnown;
+        using (IntersectionProbe.Signature.Auto()) signature = ComputeNodeIntersectionSignature(nodeId, nodeData, connectedPaths, out signatureKnown);
         if (signatureKnown && nodeIntersectionSignatures.TryGetValue(nodeId, out long builtSignature) && builtSignature == signature
             && ((nodeIntersectionMeshes.TryGetValue(nodeId, out GameObject unchangedMesh) && unchangedMesh != null) || slablessMergeNodes.Contains(nodeId)))
         {
@@ -5612,7 +5646,9 @@ public partial class PathManager : BaseApiDataManager
             ApplyStationGrade(gradedPath, nodePoints);
             absolutePos.y = nodePoints[0].y;
         }
-        NodeMeshResult meshResult = NodeMeshFactory.GenerateNodeMesh(nodeId, absolutePos, connectedPaths, nodeData.GetRelativeHeight(), p => originalPoints[p.path_id], p => GetIntersectionCutLimit(p, nodeId, originalPoints[p.path_id]));
+        NodeMeshResult meshResult;
+        using (IntersectionProbe.Generate.Auto())
+            meshResult = NodeMeshFactory.GenerateNodeMesh(nodeId, absolutePos, connectedPaths, nodeData.GetRelativeHeight(), p => originalPoints[p.path_id], p => GetIntersectionCutLimit(p, nodeId, originalPoints[p.path_id]));
         // Straight connections of same-type/width roads, highway merges absorbing ramps, and aligned track connections have no plates.
         bool slabless = meshResult != null && meshResult.Mesh == null
             && (meshResult.RoadJoin != null || meshResult.MotorwayMerge != null || meshResult.TrackJoin != null);
@@ -5647,7 +5683,7 @@ public partial class PathManager : BaseApiDataManager
         else
         {
             slablessMergeNodes.Remove(nodeId);
-            UpdateNodeSlab(nodeId, absolutePos, meshResult, markingSignature);
+            using (IntersectionProbe.Slab.Auto()) UpdateNodeSlab(nodeId, absolutePos, meshResult, markingSignature);
         }
         if (meshResult.MotorwayMerge != null) motorwayMerges[nodeId] = meshResult.MotorwayMerge;
         else motorwayMerges.Remove(nodeId);

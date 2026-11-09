@@ -343,12 +343,12 @@ public sealed class RenderWorkPump : MonoBehaviour
 }
 
 /// <summary>
-/// [Building stage measurement] Temporary totals of every "Building." / "Path." profiler marker, logged every five seconds while buildings or roads are generated.
+/// [Building stage measurement] Temporary totals of every "Building." / "Path." / "RoadOverlay." profiler marker, logged every five seconds while buildings or roads are generated or the road editor overlay is drawn.
 /// Totals include nested markers. Remove the entire class after investigation.
 /// </summary>
 internal static class BuildingStageProbe
 {
-    private static readonly string[] Prefixes = { "Building.", "Path." };
+    private static readonly string[] Prefixes = { "Building.", "Path.", "RoadOverlay." };
     private const double ReportSeconds = 5;
     private const float LongFrameSeconds = 0.05f;
 
@@ -448,7 +448,56 @@ internal static class FreezeProbe
     private static bool subscribed;
     public static int WarningCount;
 
+    // [Frame breakdown measurement] Averages over every frame of a window, not only long frames. Remove after investigation.
+    // Script callbacks ("[Invoke]") and whole-frame timings; the probe's own cost is logged so its overhead stays visible.
+    private const double BreakdownSeconds = 5;
+    private const int BreakdownScriptLines = 15;
+    private static readonly string[] FrameMarkers = { "PlayerLoop", "EditorLoop", "CPU Main Thread Frame Time", "CPU Render Thread Frame Time", "GPU Frame Time", "Gfx.WaitForPresentOnGfxThread", "GC.Collect" };
+    private sealed class Tally { public string name; public Unity.Profiling.ProfilerRecorder recorder; public double totalMs; }
+    private static readonly List<Tally> tallies = new();
+    private static readonly System.Diagnostics.Stopwatch probeWatch = new();
+    private static double breakdownStart = -1;
+    private static int breakdownFrames;
+
     internal static void Check()
+    {
+        probeWatch.Start();
+        CheckHitch();
+        AccumulateBreakdown();
+        probeWatch.Stop();
+    }
+
+    private static void AccumulateBreakdown()
+    {
+        foreach (var tally in tallies)
+            if (tally.recorder.Valid) tally.totalMs += tally.recorder.LastValue * 1e-6;
+        breakdownFrames++;
+        double now = Time.realtimeSinceStartupAsDouble;
+        if (breakdownStart < 0) breakdownStart = now;
+        double seconds = now - breakdownStart;
+        if (seconds < BreakdownSeconds) return;
+
+        int frames = Math.Max(1, breakdownFrames);
+        var message = new System.Text.StringBuilder();
+        message.Append($"[フレーム内訳] 区間={seconds:F1}s フレーム={breakdownFrames} 平均fps={breakdownFrames / seconds:F1} Profiler記録={UnityEngine.Profiling.Profiler.enabled} 計測自体={probeWatch.Elapsed.TotalMilliseconds / frames:F2}ms/フレーム");
+        foreach (string name in FrameMarkers)
+        {
+            var tally = tallies.Find(t => t.name == name);
+            if (tally != null) message.Append($"\n  {name}: 平均{tally.totalMs / frames:F2}ms");
+        }
+        var scripts = tallies.FindAll(t => t.name.Contains("[Invoke]"));
+        scripts.Sort((a, b) => b.totalMs.CompareTo(a.totalMs));
+        for (int i = 0; i < Math.Min(BreakdownScriptLines, scripts.Count); i++)
+            message.Append($"\n  {scripts[i].name}: 平均{scripts[i].totalMs / frames:F2}ms");
+        UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message.ToString());
+
+        foreach (var tally in tallies) tally.totalMs = 0;
+        breakdownStart = now;
+        breakdownFrames = 0;
+        probeWatch.Reset();
+    }
+
+    private static void CheckHitch()
     {
         if (!subscribed)
         {
@@ -489,8 +538,11 @@ internal static class FreezeProbe
             if (description.UnitType != Unity.Profiling.ProfilerMarkerDataUnit.TimeNanoseconds) continue;
             string name = description.Name;
             if (string.IsNullOrEmpty(name) || !recordedNames.Add(name)) continue;
-            recorders.Add((name, new Unity.Profiling.ProfilerRecorder(handle, 1,
-                Unity.Profiling.ProfilerRecorderOptions.Default | Unity.Profiling.ProfilerRecorderOptions.StartImmediately)));
+            var recorder = new Unity.Profiling.ProfilerRecorder(handle, 1,
+                Unity.Profiling.ProfilerRecorderOptions.Default | Unity.Profiling.ProfilerRecorderOptions.StartImmediately);
+            recorders.Add((name, recorder));
+            if (name.Contains("[Invoke]") || Array.IndexOf(FrameMarkers, name) >= 0)
+                tallies.Add(new Tally { name = name, recorder = recorder });
         }
     }
 }

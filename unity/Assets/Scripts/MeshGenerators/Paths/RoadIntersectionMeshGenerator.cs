@@ -14,6 +14,22 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
     public NodeMeshResult Generate(int nodeId, Vector3 nodePosition, List<PathSummary> paths, float nodeRelativeY = 0f)
         => GenerateWithSections(nodeId, nodePosition, paths, nodeRelativeY);
 
+    // [Intersection measurement] Temporary per-stage markers totalled by BuildingStageProbe. Remove after investigation.
+    private static class GenProbe
+    {
+        public static readonly StageMarker RoadJoin = new StageMarker("Path.Intersection.Gen.RoadJoin");
+        public static readonly StageMarker MotorwayMerge = new StageMarker("Path.Intersection.Gen.MotorwayMerge");
+        public static readonly StageMarker TrackJoin = new StageMarker("Path.Intersection.Gen.TrackJoin");
+        public static readonly StageMarker Polygon = new StageMarker("Path.Intersection.Gen.Polygon");
+        public static readonly StageMarker Surface = new StageMarker("Path.Intersection.Gen.Surface");
+        public static readonly StageMarker Sidewalks = new StageMarker("Path.Intersection.Gen.Sidewalks");
+        public static readonly StageMarker Boundary = new StageMarker("Path.Intersection.Gen.Boundary");
+        public static readonly StageMarker Rails = new StageMarker("Path.Intersection.Gen.Rails");
+        public static readonly StageMarker ShellAndMarkings = new StageMarker("Path.Intersection.Gen.ShellAndMarkings");
+        public static readonly StageMarker ConnectorHeights = new StageMarker("Path.Intersection.Gen.ConnectorHeights");
+        public static readonly StageMarker Signals = new StageMarker("Path.Intersection.Gen.Signals");
+    }
+
     public NodeMeshResult GenerateWithSections(int nodeId, Vector3 nodePosition, List<PathSummary> paths, float nodeRelativeY = 0f, Func<PathSummary, List<Vector3>> pointResolver = null, Func<PathSummary, float> cutLimitResolver = null)
     {
         // Exclude logical public-transport paths from underlying road/track junction geometry. Aerial cables/pipelines also
@@ -30,7 +46,9 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 
         try
         {
+            var probe = GenProbe.RoadJoin.Auto(); // [Intersection measurement] probe lines are temporary. Remove after investigation.
             var roadJoin = TryContinuousRoadJoin(nodeId, paths, pointResolver, out var roadJoinPoints);
+            probe.Dispose();
             if (roadJoin != null)
             {
                 return new NodeMeshResult(null, null, roadJoinPoints) { RoadJoin = roadJoin };
@@ -46,16 +64,20 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             bool horizontalPlane = nodeRelativeY != 0f;
 
             // Prioritize motorway main lines. With only absorbable ramps, omit plates and join main lines at the node.
+            probe = GenProbe.MotorwayMerge.Auto();
             MotorwayMergeLayout merge = MotorwayMergeLayout.Create(nodeId, paths, pointResolver, cutLimitResolver);
+            probe.Dispose();
             if (merge != null && !merge.NeedsSlab)
             {
                 return new NodeMeshResult(null, null, merge.ConnectionPoints) { MotorwayMerge = merge };
             }
 
             // Straight-track S join for differing track positions (TrackEndTransition). Both paths match lateral position/width at the node.
+            probe = GenProbe.TrackJoin.Auto();
             var trackShifts = TrackEndTransition.ResolveNode(nodeId, paths);
             // Straight connections of matching track positions/widths omit plates, drawing both to the node (continuous wires/girders/platforms).
             TrackContinuousJoin trackJoin = TrackIntersectionMeshGenerator.TryContinuousJoin(nodeId, paths, pointResolver, trackShifts, out var joinPoints);
+            probe.Dispose();
             if (trackJoin != null)
             {
                 return new NodeMeshResult(null, null, joinPoints) { TrackJoin = trackJoin };
@@ -63,6 +85,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
 
             // S-curve widths vary with node distance. Determine cut distance from maximum transition width (larger of original/node widths),
             // but cross-section width from the cut position (narrow cuts can make wide section outlines intersect, preventing plate generation).
+            probe = GenProbe.Polygon.Auto();
             var roadResult = IntersectionPolygonUtil.ComputeIntersectionPolygon(
                 nodeId,
                 nodePos2D,
@@ -71,6 +94,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 p => ResolveRoadWidth(p) + Mathf.Max(0f, TrackWidthShift(p, 0f, trackShifts)), pointResolver, cutLimitResolver,
                 (p, distance) => ResolveRoadWidth(p) + TrackWidthShift(p, distance, trackShifts)
             );
+            probe.Dispose();
 
             if (roadResult.RequiresMoreSpace)
             {
@@ -78,10 +102,12 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 return null;
             }
             MainLineSurface mainLine = merge?.CreateSurface(roadResult.Sections);
+            probe = GenProbe.Surface.Auto();
             Dictionary<int, Vector3> connectionPoints = BuildSectionPoints(roadResult.Sections, nodePosition, horizontalPlane, pointResolver != null);
             // Nodes containing only bedless tracks (monorail, etc.) omit plates, retaining rail connectors/attached parts.
             bool railsOnly = paths.TrueForAll(p => TrackIntersectionMeshGenerator.IsTrackType(p.path_type) && !HasSurfaceSource(p));
             Mesh roadMesh = railsOnly ? null : BuildSurfaceMesh(roadResult.Geometry, nodePosition, roadResult.Sections, mainLine, "RoadIntersection");
+            probe.Dispose();
             if (!railsOnly && roadMesh == null)
             {
                 return null;
@@ -97,6 +123,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 section.BodyDepth = source != null ? source.bounds.size.y : 0f;
             }
 
+            probe = GenProbe.Sidewalks.Auto();
             List<SidewalkConnectorSpec> sidewalkConnectors = null;
             Dictionary<int, SidewalkSetback> sidewalkSetbacks = null;
             if (GetSidewalkPaths(paths).Count >= 1)
@@ -108,15 +135,22 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 sidewalkConnectors = BuildSidewalkConnectorSpecs(nodeId, nodePosition, horizontalPlane, paths, roadResult.ConnectionPoints, out sidewalkSetbacks, roadResult.Sections, roadResult.Corners);
             }
 
+            probe.Dispose();
+
             sidewalkConnectors ??= new List<SidewalkConnectorSpec>();
+            probe = GenProbe.Boundary.Auto();
             BuildBoundaryParts(nodeId, nodePosition, horizontalPlane, paths, roadResult.Sections, sidewalkConnectors, roadResult.Corners);
+            probe.Dispose();
             // For nodes connecting at least two track paths (PATH_TRACK/PATH_MONORAIL),
             // represent switches/at-grade crossings by joining direction-selected track ends with rail connectors
             // for every movement satisfying turn constraints and traffic direction (see TrackIntersectionMeshGenerator).
+            probe = GenProbe.Rails.Auto();
             List<RailConnectorSpec> railConnectors = TrackIntersectionMeshGenerator.BuildRailConnectorSpecs(nodeId, nodePosition, horizontalPlane, paths, roadResult.ConnectionPoints, roadResult.Sections);
+            probe.Dispose();
 
             sidewalkConnectors.RemoveAll(spec => spec.Part == "wall" && WallBlocksRail(spec, railConnectors));
             int surfaceVertexCount = roadMesh != null ? roadMesh.vertexCount : 0;
+            probe = GenProbe.ShellAndMarkings.Auto();
             if (roadMesh != null) AddBodyShell(roadMesh, nodePosition, roadResult.Sections);
             RoadMarkingPlan markings = null;
             if (roadMesh != null && paths.Exists(RoadMarkingRules.HasPaint))
@@ -134,6 +168,8 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 }
                 sidewalkConnectors.RemoveAll(spec => spec.Part == "line");
             }
+            probe.Dispose();
+            probe = GenProbe.ConnectorHeights.Auto();
             if (sidewalkConnectors != null) foreach (var connector in sidewalkConnectors)
             {
                 connector.StartNormal = ClosestSectionNormal(connector.Points[0] + nodePosition, roadResult.Sections);
@@ -150,8 +186,11 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                         connector.Points[i] += Vector3.up * (Mathf.Lerp(connector.StartRailBase, connector.EndRailBase, t * t * (3 - 2 * t)) - RoadPartHeights.TRACK_ABOVE_SPLINE);
                     }
             }
+            probe.Dispose();
+            probe = GenProbe.Signals.Auto();
             var trafficSignals = TrafficSignalLayout.Build(nodeId, horizontalPlane, paths, roadResult.Sections, roadResult.Corners,
                 sidewalkSetbacks, mainLine, TrafficSignalStyle.Current.MinReach);
+            probe.Dispose();
             return new NodeMeshResult(roadMesh, roadMaterial, connectionPoints, sidewalkConnectors, railConnectors, sidewalkSetbacks) { MotorwayMerge = merge, Markings = markings, TrafficSignals = trafficSignals, RailsOnly = railsOnly };
         }
         catch (Exception ex)

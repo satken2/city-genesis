@@ -22,6 +22,29 @@ public partial class RoadPlanManager
     private const float DISTANCE_START_FADE = 280f;
     private const float DISTANCE_INVISIBLE = 480f;
 
+    // [Road overlay measurement] Temporary per-stage markers totalled every five seconds by BuildingStageProbe. Remove after investigation.
+    private static class OverlayProbe
+    {
+        public static readonly StageMarker Background = new StageMarker("RoadOverlay.Background");
+        public static readonly StageMarker BackgroundEdges = new StageMarker("RoadOverlay.Background.Edges");
+        public static readonly StageMarker BackgroundNodes = new StageMarker("RoadOverlay.Background.Nodes");
+        public static readonly StageMarker BackgroundEndFrame = new StageMarker("RoadOverlay.Background.EndFrame");
+        public static readonly StageMarker Grid = new StageMarker("RoadOverlay.Grid");
+        public static readonly StageMarker PlacedEdges = new StageMarker("RoadOverlay.PlacedEdges");
+        public static readonly StageMarker InfraTerminals = new StageMarker("RoadOverlay.InfraTerminals");
+        public static readonly StageMarker Placing = new StageMarker("RoadOverlay.Placing");
+        public static readonly StageMarker Points = new StageMarker("RoadOverlay.Points");
+        public static readonly StageMarker ControlHandles = new StageMarker("RoadOverlay.ControlHandles");
+        public static readonly StageMarker ParallelSnap = new StageMarker("RoadOverlay.ParallelSnap");
+        public static readonly StageMarker Guides = new StageMarker("RoadOverlay.HoverAndSnapGuides");
+        public static readonly StageMarker Tunnel = new StageMarker("RoadOverlay.Tunnel");
+        public static readonly StageMarker MaxSpan = new StageMarker("RoadOverlay.MaxSpan");
+        public static readonly StageMarker Alignment = new StageMarker("RoadOverlay.Alignment");
+        public static readonly StageMarker Elevation = new StageMarker("RoadOverlay.ElevationIntersections");
+        public static readonly StageMarker Buildings = new StageMarker("RoadOverlay.BuildingInterference");
+        public static readonly StageMarker EndFrame = new StageMarker("RoadOverlay.EndFrame");
+    }
+
     private void UpdateOverlay()
     {
         if (overlayRenderer == null) return;
@@ -29,59 +52,65 @@ public partial class RoadPlanManager
         Camera cam = gameCamera != null ? gameCamera : Camera.main;
         if (cam == null) return;
 
-        UpdateBackgroundOverlay(cam);
+        using (OverlayProbe.Background.Auto()) UpdateBackgroundOverlay(cam);
 
         overlayRenderer.BeginFrame();
 
         // Grid points specify an area; do not draw polyline edges, controls, or local interference estimates.
         if (IsGridBuild)
         {
-            DrawGridOverlay(cam);
-            overlayRenderer.EndFrame(cam);
+            using (OverlayProbe.Grid.Auto()) DrawGridOverlay(cam);
+            using (OverlayProbe.EndFrame.Auto()) overlayRenderer.EndFrame(cam);
             return;
         }
 
-        DrawPlacedEdges(cam);
+        using (OverlayProbe.PlacedEdges.Auto()) DrawPlacedEdges(cam);
 
         // Infrastructure terminal markers (draw here every frame instead of in the background mesh
         // to animate rotation and bobbing).
-        DrawInfraTerminalMarkers(cam);
+        using (OverlayProbe.InfraTerminals.Auto()) DrawInfraTerminalMarkers(cam);
 
         if (phase == RoadEditorPhase.Placing)
         {
-            if (points.Count > 0)
+            using (OverlayProbe.Placing.Auto())
             {
-                DrawPreviewLine(cam);
+                if (points.Count > 0)
+                {
+                    DrawPreviewLine(cam);
+                }
+                DrawPlacingMarker(cam);
             }
-            DrawPlacingMarker(cam);
         }
 
-        DrawPoints(cam);
-        DrawControlHandles(cam);
-        DrawParallelSnapGuide();
+        using (OverlayProbe.Points.Auto()) DrawPoints(cam);
+        using (OverlayProbe.ControlHandles.Auto()) DrawControlHandles(cam);
+        using (OverlayProbe.ParallelSnap.Auto()) DrawParallelSnapGuide();
 
-        if (hoveredEdgeIndex >= 0)
+        using (OverlayProbe.Guides.Auto())
         {
-            DrawHoverHighlight(cam);
+            if (hoveredEdgeIndex >= 0)
+            {
+                DrawHoverHighlight(cam);
+            }
+
+            if (isRightAngleSnapActive)
+            {
+                DrawRightAngleSnapGuide(cam);
+            }
+
+            if (isStraightLineSnapActive)
+            {
+                DrawStraightLineSnapGuide(cam);
+            }
         }
 
-        if (isRightAngleSnapActive)
-        {
-            DrawRightAngleSnapGuide(cam);
-        }
+        using (OverlayProbe.Tunnel.Auto()) DrawTunnelSections(cam);
+        using (OverlayProbe.MaxSpan.Auto()) DrawMaxSpanWarnings(cam);
+        using (OverlayProbe.Alignment.Auto()) DrawAlignmentWarnings(cam);
+        using (OverlayProbe.Elevation.Auto()) DrawElevationIntersections(cam);
+        using (OverlayProbe.Buildings.Auto()) DrawBuildingInterference(cam);
 
-        if (isStraightLineSnapActive)
-        {
-            DrawStraightLineSnapGuide(cam);
-        }
-
-        DrawTunnelSections(cam);
-        DrawMaxSpanWarnings(cam);
-        DrawAlignmentWarnings(cam);
-        DrawElevationIntersections(cam);
-        DrawBuildingInterference(cam);
-
-        overlayRenderer.EndFrame(cam);
+        using (OverlayProbe.EndFrame.Auto()) overlayRenderer.EndFrame(cam);
     }
 
     /// <summary>
@@ -156,9 +185,9 @@ public partial class RoadPlanManager
         lastBgUndergroundView = UndergroundView.IsActive;
 
         backgroundRenderer.BeginFrame();
-        DrawExistingEdges(cam);
-        DrawExistingNodes(cam);
-        backgroundRenderer.EndFrame(cam);
+        using (OverlayProbe.BackgroundEdges.Auto()) DrawExistingEdges(cam);
+        using (OverlayProbe.BackgroundNodes.Auto()) DrawExistingNodes(cam);
+        using (OverlayProbe.BackgroundEndFrame.Auto()) backgroundRenderer.EndFrame(cam);
     }
 
 
