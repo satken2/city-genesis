@@ -10,9 +10,9 @@ using GeneratedModels;
 ///   rotating and bobbing above its terminal nodes. Read-only (cannot be dragged).
 /// - <see cref="EnterEditMode"/>: Called in STATE_EDIT_CONNECTOR. In addition to markers, attaches
 ///   <see cref="NodeInputHandler"/> and terminal roles to the target nodes to support dragging and PATCH in MODE_EDIT.
-///   Terminals are equipment within the facility site, so dragging is clamped
-///   to the facility's parcel, which is highlighted during editing (clamping is disabled if
-///   the parcel is not loaded; backend PATCH validation rejects moves outside the parcel).
+///   Terminals are equipment within the facility site, so the facility's parcel is highlighted as the movable area.
+///   The marker follows the cursor even outside it; the backend rejects a drop outside the parcel
+///   and NodeInputHandler returns the node to its original position.
 /// - <see cref="Hide"/> / <see cref="ExitEditMode"/>: Removes markers and restores node visibility.
 ///
 /// Displays only one marker when infrastructure and vehicle network connections share a node
@@ -53,12 +53,7 @@ public class ConnectorEditManager : MonoBehaviour
     private int depotNodeId;
     private bool editMode;
 
-    // Edited facility agent_id and the parcel ID containing it (-1=unresolved).
-    // Terminals are equipment within the facility site, so clamp drag movement
-    // to this parcel (the backend also authoritatively rejects PATCH requests
-    // outside the parcel). If the parcel cannot be resolved, e.g. because it is unloaded,
-    // skip clamping and rely on backend rejection and the existing rollback.
-    private int ownerAgentId;
+    // Parcel of the edited facility, highlighted as the movable area (-1=unresolved, e.g. unloaded).
     private int ownerParcelId = -1;
 
     private ParcelManager parcelManager;
@@ -148,8 +143,7 @@ public class ConnectorEditManager : MonoBehaviour
 
     /// <summary>
     /// Enters connector edit mode, enabling node dragging as well as highlighting.
-    /// agentId identifies the edited facility. Resolves and highlights its parcel
-    /// and restricts terminal dragging to its boundaries.
+    /// agentId identifies the edited facility. Resolves and highlights its parcel as the movable area.
     /// </summary>
     public void EnterEditMode(int infraNodeId, int depotNodeId, int agentId)
     {
@@ -194,11 +188,10 @@ public class ConnectorEditManager : MonoBehaviour
     /// If agentId is unspecified (0 or below), fall back to reverse lookup from the terminal node ID
     /// (BuildingManager.TryGetInfraTerminalOwner).
     /// Leave ownerParcelId = -1 if the facility/parcel cannot be resolved, e.g. because it is unloaded
-    /// (clamping is disabled and backend authoritative validation decides whether movement is allowed).
+    /// (only the highlight is missing; the backend still decides whether a drop is allowed).
     /// </summary>
     private void ResolveOwnerParcel(int agentId, int infraNodeId)
     {
-        ownerAgentId = agentId;
         ownerParcelId = -1;
 
         var bm = BuildingManager.Instance;
@@ -226,7 +219,6 @@ public class ConnectorEditManager : MonoBehaviour
         }
 
         ownerParcelId = summary.parcel_id;
-        ownerAgentId = summary.agent_id;
 
         // Highlight the target parcel to show the player the movable area.
         var pm = ParcelMgr;
@@ -247,25 +239,7 @@ public class ConnectorEditManager : MonoBehaviour
                 pm.ClearHighlightedParcel();
             }
         }
-        ownerAgentId = 0;
         ownerParcelId = -1;
-    }
-
-    /// <summary>
-    /// Clamps drag coordinates to the facility's parcel.
-    /// Returns input coordinates unchanged if the parcel is unresolved/unloaded (backend rejects out-of-parcel
-    /// PATCH requests, and NodeInputHandler.SaveNodePosition rolls the node back).
-    /// </summary>
-    private Vector3 ClampToOwnerParcel(Vector3 worldPos)
-    {
-        if (ownerParcelId <= 0) return worldPos;
-        var pm = ParcelMgr;
-        if (pm == null) return worldPos;
-        if (pm.TryClampPointToParcel(ownerParcelId, worldPos, out Vector3 clamped))
-        {
-            return clamped;
-        }
-        return worldPos;
     }
 
     private ParcelManager ParcelMgr => parcelManager != null
@@ -330,9 +304,6 @@ public class ConnectorEditManager : MonoBehaviour
         }
         if (!entries.TryGetValue(draggingNodeId, out var e) || e.node == null) return;
 
-        // Terminals are equipment within the facility site, so clamp the drag position to its parcel.
-        worldPos = ClampToOwnerParcel(worldPos);
-
         var handler = e.node.GetComponent<NodeInputHandler>();
         handler?.onDragUpdate(worldPos);
 
@@ -342,16 +313,16 @@ public class ConnectorEditManager : MonoBehaviour
         ApplyTerrainFollowY(e.node, draggingNodeId);
     }
 
-    /// <summary>Ends dragging. NodeInputHandler sends PATCH if the move is committed.</summary>
+    /// <summary>
+    /// Ends dragging. NodeInputHandler sends PATCH and returns the node to its original position
+    /// if the backend rejects it (e.g. outside the facility parcel).
+    /// </summary>
     public void ProcessMouseDragEnd(Vector3 worldPos)
     {
         grabAttemptedThisGesture = false;
         if (draggingNodeId <= 0) return;
         if (entries.TryGetValue(draggingNodeId, out var e) && e.node != null)
         {
-            // Clamp the final position to the facility parcel as well (same restriction as during dragging).
-            worldPos = ClampToOwnerParcel(worldPos);
-
             // onDragEnd uses transform.position.y as the final Y, so
             // first set the transform to terrain height at the final XZ + relative height.
             Vector3 p = e.node.transform.position;

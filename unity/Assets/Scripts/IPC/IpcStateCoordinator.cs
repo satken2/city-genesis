@@ -1063,7 +1063,7 @@ public class IpcStateCoordinator : MonoBehaviour
     /// <summary>
     /// STATE_EDIT_CONNECTOR: connector editing.
     /// ipcParams contains UI-selected agent_id / infra_node_id / depot_node_id.
-    /// Enable dragging target terminal nodes and disable other object clicks.
+    /// Enable dragging target terminal nodes while other objects stay selectable.
     /// Keep VisualMode unchanged (ConnectorEditManager forces nodes visible and draws markers).
     /// </summary>
     private void ApplyStateEditConnector(Dictionary<string, object> ipcParams)
@@ -1082,7 +1082,7 @@ public class IpcStateCoordinator : MonoBehaviour
                 agentId = Convert.ToInt32(agObj);
         }
 
-        // InputMode: connector editing preset (NODE=MODE_EDIT, others=MODE_NONE).
+        // InputMode: connector editing preset (TERRAIN=MODE_EDIT_CONNECTOR, NODE=MODE_NONE, others=MODE_NORMAL).
         if (InputSystemManager.Instance != null)
         {
             InputSystemManager.Instance.SetModePreset(InputModePreset.CONNECTOR_EDIT);

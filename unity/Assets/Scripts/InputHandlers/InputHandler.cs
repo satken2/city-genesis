@@ -397,13 +397,24 @@ public class InputHandler : MonoBehaviour
             HandleObjectHit(validHitObject, validHitPoint, validHitObjectType);
 
             // Left-button down: record a pending click without firing immediately.
+            // Connector markers are drawn on top of every object, so a press on one becomes a terrain press
+            // that grabs the marker instead of the building or parcel behind it.
             if (InputUtil.LeftMouseWasPressedThisFrame)
             {
-                hasPendingClick = true;
-                pendingClickObject = validHitObject;
-                pendingClickPoint = validHitPoint;
-                pendingClickObjectType = validHitObjectType;
-                pendingClickScreenPos = InputUtil.MousePosition;
+                if (ConnectorEditManager.Instance != null
+                    && ConnectorEditManager.Instance.IsMouseOverConnector(InputUtil.MousePosition, Camera.main))
+                {
+                    hasPendingTerrainClick = true;
+                    pendingTerrainClickScreenPos = InputUtil.MousePosition;
+                }
+                else
+                {
+                    hasPendingClick = true;
+                    pendingClickObject = validHitObject;
+                    pendingClickPoint = validHitPoint;
+                    pendingClickObjectType = validHitObjectType;
+                    pendingClickScreenPos = InputUtil.MousePosition;
+                }
             }
 
             // Record a pending right click without firing immediately.
@@ -1244,14 +1255,14 @@ public class InputHandler : MonoBehaviour
                 // Markers float above node objects as overlays, displaced from their colliders,
                 // so receive terrain drags rather than collider raycasts;
                 // ConnectorEditManager chooses targets by screen-space marker hit tests
-                // (same as stop placement MODE_EDIT_TRANSIT). Pass raycasts through nodes
-                // (MODE_NONE) and disable other object clicks to prevent accidental operations.
+                // (same as stop placement MODE_EDIT_TRANSIT). Pass raycasts through nodes (MODE_NONE).
+                // AgentDetailPanel enters this mode just by showing a facility, so other objects stay selectable as in normal mode.
                 SetMode(InputObjectType.TERRAIN, InputMode.MODE_EDIT_CONNECTOR);
                 SetMode(InputObjectType.NODE, InputMode.MODE_NONE);
-                SetMode(InputObjectType.BUILDING, InputMode.MODE_NONE);
-                SetMode(InputObjectType.PARCEL, InputMode.MODE_NONE);
-                SetMode(InputObjectType.PATH, InputMode.MODE_NONE);
-                SetMode(InputObjectType.ZONE, InputMode.MODE_NONE);
+                SetMode(InputObjectType.BUILDING, InputMode.MODE_NORMAL);
+                SetMode(InputObjectType.PARCEL, InputMode.MODE_NORMAL);
+                SetMode(InputObjectType.PATH, InputMode.MODE_NORMAL);
+                SetMode(InputObjectType.ZONE, InputMode.MODE_NORMAL);
                 Debug.Log("InputHandler: 接続点編集モードプリセットを設定しました");
                 break;
 

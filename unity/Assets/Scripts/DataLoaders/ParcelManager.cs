@@ -1071,68 +1071,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         staleMarkSerial++;
     }
 
-    // Distance (m) to move a point inward after clamping to the parcel boundary.
-    // Coordinates exactly on the boundary may shift slightly outside during backend coordinate normalization (rounding)
-    // and fail containment checks, so send a clearly interior point.
-    private const float ParcelClampInnerMargin = 0.05f;
-
-    /// <summary>
-    /// Clamp world XZ coordinates inside the specified parcel polygon.
-    /// Return the original point if inside, or the nearest polygon boundary point (moved slightly inward)
-    /// if outside. Preserve the input Y coordinate.
-    /// Used to constrain dragged coordinates to a parcel, such as terminal nodes permitted to move only
-    /// within the facility's parcel (ConnectorEditManager).
-    /// If the parcel is unloaded (absent from the spatial cache), return false and set clamped to the input.
-    /// </summary>
-    public bool TryClampPointToParcel(int parcelId, Vector3 worldPos, out Vector3 clamped)
-    {
-        clamped = worldPos;
-        if (!parcelSpatialCache.TryGetValue(parcelId, out ParcelSpatialEntry entry)
-            || entry.polygon == null || entry.polygon.Length < 3)
-        {
-            return false;
-        }
-
-        Vector2 point = new Vector2(worldPos.x, worldPos.z);
-        if (PolygonUtils.Contains(entry.polygon, point.x, point.y))
-        {
-            return true;
-        }
-
-        // Outside the parcel: project to the nearest among closest points on every edge.
-        float[][] polygon = entry.polygon;
-        float bestSqDist = float.PositiveInfinity;
-        Vector2 bestPoint = point;
-        for (int i = 0; i < polygon.Length; i++)
-        {
-            int next = (i + 1) % polygon.Length;
-            Vector2 a = new Vector2(polygon[i][0], polygon[i][1]);
-            Vector2 b = new Vector2(polygon[next][0], polygon[next][1]);
-            Vector2 candidate = PolylineUtils.ClosestPointOnSegment(point, a, b);
-            float sqDist = (candidate - point).sqrMagnitude;
-            if (sqDist < bestSqDist)
-            {
-                bestSqDist = sqDist;
-                bestPoint = candidate;
-            }
-        }
-
-        // Move slightly from the boundary along the inward direction (external point to projected point) to ensure containment.
-        // If this still lies outside, such as at sharp corners, use the boundary point unchanged.
-        Vector2 inward = bestPoint - point;
-        if (inward.sqrMagnitude > 1e-8f)
-        {
-            Vector2 nudged = bestPoint + inward.normalized * ParcelClampInnerMargin;
-            if (PolygonUtils.Contains(polygon, nudged.x, nudged.y))
-            {
-                bestPoint = nudged;
-            }
-        }
-
-        clamped = new Vector3(bestPoint.x, worldPos.y, bestPoint.y);
-        return true;
-    }
-
     private void RegisterWithVisualModeHandler()
     {
         if (VisualModeHandler.Instance != null)
