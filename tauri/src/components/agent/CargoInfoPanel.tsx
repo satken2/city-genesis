@@ -35,7 +35,7 @@ type CargoInfoResponse = {
   capacity_per_epoch: number;
   /** Capacity determined solely by floor area (t/epoch). */
   area_capacity_per_epoch: number;
-  /** Throughput supported by received raw materials (t/epoch). For international freight stations, this is capacity delivered by international freight lines. Null for ports and others without raw materials. */
+  /** Throughput supported by received raw materials (t/epoch). For international freight stations, this is capacity delivered by international freight lines. Null for hubs whose raw materials do not limit throughput (hubs without raw materials, and ports connected to the ocean shipping lane). */
   material_capacity_per_epoch: number | null;
   /** Total actual throughput by direction (t). Item units differ, so receive the total in tonnes for comparison with capacity. */
   import_handled_tons: number;
