@@ -194,6 +194,21 @@ public static class IntersectionPolygonUtil
         return new PathEndSection { Position = points[0], Direction = Vector2.up };
     }
 
+    /// <summary>Polyline from its start up to distance along it (XZ), ending at the point <see cref="AtDistance"/> returns.</summary>
+    public static List<Vector3> Head(List<Vector3> points, float distance)
+    {
+        var result = new List<Vector3> { points[0] };
+        float travelled = 0f;
+        for (int i = 1; i < points.Count; i++)
+        {
+            travelled += Vector2.Distance(XZ(points[i - 1]), XZ(points[i]));
+            if (travelled >= distance) break;
+            result.Add(points[i]);
+        }
+        result.Add(AtDistance(points, distance).Position);
+        return result;
+    }
+
     /// <summary>Find the route position nearest the cut point and retain only the interior portion of the original polyline.</summary>
     public static List<Vector3> Trim(List<Vector3> points, Vector3? start, Vector3? end)
     {

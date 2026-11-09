@@ -408,7 +408,8 @@ internal static class Program
             var paths = new List<PathSummary> { Arm(1, 101, 10, 1), Arm(2, 101, 1, 11), Arm(3, 102, 1, 12) };
             List<Vector3> Resolve(PathSummary p) { var list = new List<Vector3>(points[p.path_id]); if (p.end_node_id == 1) list.Reverse(); return list; }
             var steep = MotorwayMergeLayout.Create(1, paths, Resolve, p => 100f, v => masters[v]);
-            Check(steep != null && steep.NeedsSlab && steep.Surface != null, "角度の大きいランプを本線へ取り込みました。");
+            var steepSections = new Dictionary<int, PathEndSection> { [1] = IntersectionPolygonUtil.AtDistance(Resolve(paths[0]), 12f), [2] = IntersectionPolygonUtil.AtDistance(Resolve(paths[1]), 12f) };
+            Check(steep != null && steep.NeedsSlab && steep.CreateSurface(steepSections) != null, "角度の大きいランプを本線へ取り込みました。");
             paths[2] = Arm(3, 102, 1, 12, status: Constants.STATUS_CONSTRUCTING);
             points[3] = Ray(20, 150, 0f);
             Check(MotorwayMergeLayout.Create(1, paths, Resolve, p => 100f, v => masters[v]).NeedsSlab, "工事中のランプを本線へ取り込みました。");

@@ -31,9 +31,6 @@ public sealed class MotorwayMergeLayout
     /// <summary>Cut positions without a plate. Main line at node ends; absorbed ramps where fully inside the main-line surface.</summary>
     public Dictionary<int, Vector3> ConnectionPoints { get; } = new Dictionary<int, Vector3>();
 
-    /// <summary>Main-line centerline used to fit plate height to the longitudinal profile.</summary>
-    public MainLineSurface Surface { get; }
-
     private readonly Vector2 node;
     private readonly Dictionary<int, Arm> mains = new Dictionary<int, Arm>();
     private readonly Dictionary<int, Vector2> absorbedReference = new Dictionary<int, Vector2>();
@@ -46,7 +43,18 @@ public sealed class MotorwayMergeLayout
         NeedsSlab = needsSlab;
         mains[MainA] = a;
         mains[MainB] = b;
-        Surface = new MainLineSurface(MainA, a.Points, MainB, b.Points, Mathf.Max(a.Width, b.Width));
+    }
+
+    /// <summary>
+    /// Main-line centerline used to fit plate height to the longitudinal profile, spanning each main arm from the node to its entrance section.
+    /// The plate ends at those sections, so the rest of the main paths never affects its height. Null if either main arm has no section.
+    /// </summary>
+    public MainLineSurface CreateSurface(IReadOnlyDictionary<int, PathEndSection> sections)
+    {
+        if (!sections.TryGetValue(MainA, out var sectionA) || !sections.TryGetValue(MainB, out var sectionB)) return null;
+        Arm a = mains[MainA], b = mains[MainB];
+        return new MainLineSurface(MainA, IntersectionPolygonUtil.Head(a.Points, sectionA.Distance),
+            MainB, IntersectionPolygonUtil.Head(b.Points, sectionB.Distance), Mathf.Max(a.Width, b.Width));
     }
 
     public bool IsAbsorbed(int pathId) => absorbedReference.ContainsKey(pathId);

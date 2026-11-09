@@ -51,7 +51,6 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             {
                 return new NodeMeshResult(null, null, merge.ConnectionPoints) { MotorwayMerge = merge };
             }
-            MainLineSurface mainLine = merge?.Surface;
 
             // Straight-track S join for differing track positions (TrackEndTransition). Both paths match lateral position/width at the node.
             var trackShifts = TrackEndTransition.ResolveNode(nodeId, paths);
@@ -78,6 +77,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[Intersection] node={nodeId}: 接合区間が不足するため道路の切断を行いません。");
                 return null;
             }
+            MainLineSurface mainLine = merge?.CreateSurface(roadResult.Sections);
             Dictionary<int, Vector3> connectionPoints = BuildSectionPoints(roadResult.Sections, nodePosition, horizontalPlane, pointResolver != null);
             // Nodes containing only bedless tracks (monorail, etc.) omit plates, retaining rail connectors/attached parts.
             bool railsOnly = paths.TrueForAll(p => TrackIntersectionMeshGenerator.IsTrackType(p.path_type) && !HasSurfaceSource(p));
