@@ -864,8 +864,8 @@ public partial class CameraController : MonoBehaviour
     }
 
     /// <summary>
-    /// Update camera-only presentation for fly mode, capture mode, or an active drive.
-    /// Hide Tauri's UI to show only the 3D view, notifying the UI only on changes, and display controls in the caption.
+    /// Update camera-only presentation for fly mode, capture mode, an active drive, or citizen following.
+    /// Except while following a citizen, hide Tauri's UI to show only the 3D view, notifying the UI only on changes. Display controls in the caption.
     /// Fly/capture modes lock and hide the cursor for continuous mouse look without screen-edge limits
     /// (third-person driving uses right-drag at the cursor position, so it does not lock the cursor).
     /// Do not switch captions in scenes without ModeTextDisplay, such as mesh tests.
@@ -902,6 +902,10 @@ public partial class CameraController : MonoBehaviour
         else if (DriveMode.IsRiding)
         {
             modeTextDisplayRef.ShowDriveMode(DriveMode.RideCaption);
+        }
+        else if (CitizenFollow.IsFollowing)
+        {
+            modeTextDisplayRef.ShowCitizenFollow();
         }
         else
         {

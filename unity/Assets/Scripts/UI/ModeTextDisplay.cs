@@ -41,7 +41,7 @@ public class ModeTextDisplay : MonoBehaviour
     {
         // Record the latest state even in camera-only modes to restore the correct caption afterward.
         lastState = state;
-        if (DriveMode.IsRiding || (CameraController.Instance != null &&
+        if (DriveMode.IsRiding || CitizenFollow.IsFollowing || (CameraController.Instance != null &&
             (CameraController.Instance.IsFlyMode || CameraController.Instance.IsCinematicMode))) return;
         ApplyStateText(state);
     }
@@ -73,6 +73,13 @@ public class ModeTextDisplay : MonoBehaviour
     {
         RestoreCaptionLayout();
         ApplyStateText("STATE_FLY_MODE");
+    }
+
+    /// <summary>Called while the camera follows a citizen. The citizen panel may already be closed, so show the exit keys here.</summary>
+    public void ShowCitizenFollow()
+    {
+        RestoreCaptionLayout();
+        if (modeText != null) modeText.text = "Following Citizen (Esc / WASD to exit)";
     }
 
     /// <summary>

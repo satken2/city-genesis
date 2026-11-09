@@ -148,6 +148,7 @@ public sealed class CitizenFollow : MonoBehaviour
         people = FindAnyObjectByType<PedestrianManager>();
         paths = FindAnyObjectByType<PathManager>();
         citizenId = id; hasFocus = false; chase.Reset();
+        if (controller != null) controller.RefreshCameraModePresentation();
         IpcClient.Instance?.EmitCitizenFollowState(id, true);
         StartCoroutine(Load(id, ++request, true));
     }
@@ -170,6 +171,7 @@ public sealed class CitizenFollow : MonoBehaviour
         itinerary = null; segments.Clear(); segment = null; visitAgent = destinationAgent = -1; hasFocus = false;
         cars?.StopFollow(); people?.StopFollow();
         if (cam != null) CameraController.Instance?.SetView(cam.transform.position, cam.transform.rotation);
+        CameraController.Instance?.RefreshCameraModePresentation();
         CameraCellChecker.Instance?.ResetViewState();
         if (notify) IpcClient.Instance?.EmitCitizenFollowState(id, false);
     }
