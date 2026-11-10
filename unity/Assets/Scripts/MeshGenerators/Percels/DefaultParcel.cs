@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -6,8 +7,8 @@ using UnityEngine;
 public class DefaultParcel : IParcelMeshGenerator
 {
     /// <summary>
-    /// Top fan (n vertices) and sides for thickness&gt;0 (four vertices per edge) determine final vertex/index counts;
-    /// write directly to arrays, avoiding intermediate Lists on parcel generation/terrain reconformity.
+    /// Top face (n vertices) and sides for thickness&gt;0 (four vertices per edge) determine final vertex/index counts;
+    /// write directly to arrays, avoiding intermediate vertex Lists on parcel generation/terrain reconformity.
     /// </summary>
     public Mesh Generate(Vector2[] points, Vector2 centroid, float thickness, float[] topVertexLocalY)
     {
@@ -15,8 +16,11 @@ public class DefaultParcel : IParcelMeshGenerator
         int n = points.Length;
         bool hasSides = thickness > 0f;
 
+        // The top face is the click surface, so a concave parcel must not cover the road or the neighbor it wraps around.
+        List<int> top = BuildingMeshBuilder.TriangulateOrFan(points);
+
         int vertexCount = n + (hasSides ? 4 * n : 0);
-        int indexCount = 3 * Mathf.Max(0, n - 2) + (hasSides ? 6 * n : 0);
+        int indexCount = top.Count + (hasSides ? 6 * n : 0);
         Vector3[] vertices = new Vector3[vertexCount];
         Vector3[] normals = new Vector3[vertexCount];
         int[] triangles = new int[indexCount];
@@ -34,14 +38,14 @@ public class DefaultParcel : IParcelMeshGenerator
 
         // Backend parcel polygons are normalized counterclockwise (CCW).
         // To make top meshes face upward (visible from +Y),
-        // use counterclockwise triangle fan indices (0 -> i + 1 -> i).
+        // emit each counterclockwise triangle in reverse order.
         // Otherwise Unity MeshCollider's one-sided collisions let downward raycasts pass through.
         int t = 0;
-        for (int i = 1; i < n - 1; i++)
+        for (int i = 0; i < top.Count; i += 3)
         {
-            triangles[t++] = 0;
-            triangles[t++] = i + 1;
-            triangles[t++] = i;
+            triangles[t++] = top[i];
+            triangles[t++] = top[i + 2];
+            triangles[t++] = top[i + 1];
         }
 
         // ----- Sides -----

@@ -2294,9 +2294,11 @@ public partial class TerrainManager : BaseApiDataManager
     /// Fetch coastline (land boundary polygons) into <see cref="CoastlineStore"/>, followed by lakes, rivers, and reclaimed land.
     /// GeoJSON-like response (Polygon / MultiPolygon), using world coordinates.
     /// Completed reclamation expands coastlines; refetch every session:reload as well as initial/forced loads.
+    /// A response identical to the one already applied leaves its store and everything built from it untouched.
     /// </summary>
     public IEnumerator FetchCoastline()
     {
+        ReloadLaps laps = ReloadLaps.Start(); // [Reload measurement] Remove after investigation
         // Callers (session start/full reload) calculate LOD resident cell sets immediately afterward.
         // This depends on map dimensions/cell size; defaults could request cells outside the map,
         // so finalize terrain settings here.
@@ -2309,14 +2311,17 @@ public partial class TerrainManager : BaseApiDataManager
 
         // Finalize ground cover before tile/UltraFar material generation (subsequent loading renders using this value).
         yield return FetchCityGroundCover();
+        laps?.Lap("settings+groundCover"); // [Reload measurement] Remove after investigation
 
         string error = null;
+        int coastlineVersion = CoastlineStore.Version;
 
-        yield return ApiClient.Get<CoastlineResponse>(
+        yield return ApiClient.GetIfChanged<CoastlineResponse>(
             "/terrain/coastline",
-            response =>
+            () => CoastlineStore.SourceJson,
+            (response, json) =>
             {
-                CoastlineStore.SetFromGeoJson(response?.coordinates);
+                CoastlineStore.SetFromGeoJson(response?.coordinates, json);
             },
             err => { error = err; }
         );
@@ -2331,7 +2336,10 @@ public partial class TerrainManager : BaseApiDataManager
             Debug.Log($"TerrainManager: Coastline loaded (hasCoastline={CoastlineStore.HasCoastline}).");
         }
         // Build the lowland rock coast mask in the background while the remaining shore data is fetched.
-        Coroutine coastMask = StartCoroutine(BuildCliffCoastMask());
+        // The mask depends only on the coastline, so an unchanged coastline keeps the current one.
+        bool coastlineChanged = CoastlineStore.Version != coastlineVersion;
+        Coroutine coastMask = coastlineChanged ? StartCoroutine(BuildCliffCoastMask()) : null;
+        laps?.Lap(coastlineChanged ? "coastline(changed)" : "coastline(same)"); // [Reload measurement] Remove after investigation
 
         // Fetch and generate non-sea water surfaces such as lakes alongside coastlines.
         // WaterSurfaceManager creates itself in AfterSceneLoad, so Instance normally exists.
@@ -2339,19 +2347,24 @@ public partial class TerrainManager : BaseApiDataManager
         {
             yield return WaterSurfaceManager.Instance.LoadAndBuild();
         }
+        laps?.Lap("water"); // [Reload measurement] Remove after investigation
         // Fetch rivers (area polygons and water elevation profiles) too, building RiverStore and water meshes.
         // RoadPlanManager river-crossing checks read RiverStore, so this must precede road editing.
         if (RiverSurfaceManager.Instance != null)
         {
             yield return RiverSurfaceManager.Instance.LoadAndBuild();
         }
+        laps?.Lap("rivers"); // [Reload measurement] Remove after investigation
         // Reclaimed land (quay crests/faces). Grounding (Utils.GetGroundHeight) returns crests inside bands, and ports query quay sections,
         // so prepare ReclaimedLandStore before parcel/building loads. Skip rebuilding unchanged contents.
         if (ReclaimedLandManager.Instance != null)
         {
             yield return ReclaimedLandManager.Instance.LoadAndBuild();
         }
-        yield return coastMask;
+        laps?.Lap("reclaimedLands"); // [Reload measurement] Remove after investigation
+        if (coastMask != null) yield return coastMask;
+        laps?.Lap("coastMask"); // [Reload measurement] Remove after investigation
+        laps?.Report("FetchCoastline 経過時間(通信待ちを含む)"); // [Reload measurement] Remove after investigation
         ShoreDataVersion++;
     }
 

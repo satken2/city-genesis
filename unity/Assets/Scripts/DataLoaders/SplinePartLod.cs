@@ -32,6 +32,7 @@ public sealed class SplinePartLod : MonoBehaviour
     private bool farElevated;
     private Vector3? queriedPosition;
     private Segment queriedSegment;
+    private bool queriedOnCurve;
     private PathPresentation presentation;
     private VisualModeObject visual;
 
@@ -65,25 +66,32 @@ public sealed class SplinePartLod : MonoBehaviour
         if (sharedView.UpdatePosition(Camera.main, DrawLodConfig.REEVALUATE_CAMERA_MOVE_DISTANCE)) cameraEpoch++;
     }
 
-    /// <summary>LOD of the section displayed at the specified position. Hidden while awaiting generation or parked.</summary>
-    public DrawLod GetDrawLodAtPosition(Vector3 worldPosition)
+    /// <summary>
+    /// LOD of the section displayed at the specified position; Hidden while awaiting generation or parked.
+    /// False when the position is off this part's curve: a bent road holds one part per long span, each on its own curve.
+    /// </summary>
+    public bool TryGetDrawLodAtPosition(Vector3 worldPosition, out DrawLod lod)
     {
-        if (!isActiveAndEnabled || spline == null) return DrawLod.Hidden;
+        lod = DrawLod.Hidden;
+        if (!isActiveAndEnabled || spline == null) return true;
         // For queries at fixed positions such as signs, avoid projecting onto the curve every frame.
         if (!queriedPosition.HasValue || queriedPosition.Value != worldPosition)
         {
             queriedPosition = worldPosition;
             queriedSegment = null;
-            double percent = spline.Project(worldPosition).percent;
+            SplineSample sample = spline.Project(worldPosition);
+            float reach = width * .5f + Mathf.Abs(lateral);
+            queriedOnCurve = Utils.XZDistanceSquared(sample.position, worldPosition) <= reach * reach;
             foreach (var segment in segments)
             {
-                if (percent < segment.from || percent > segment.to) continue;
+                if (sample.percent < segment.from || sample.percent > segment.to) continue;
                 queriedSegment = segment;
                 break;
             }
         }
-        return queriedSegment?.shown != null && queriedSegment.shown.activeInHierarchy
-            ? queriedSegment.lod : DrawLod.Hidden;
+        if (!queriedOnCurve) return false;
+        if (queriedSegment?.shown != null && queriedSegment.shown.activeInHierarchy) lod = queriedSegment.lod;
+        return true;
     }
 
     /// <param name="pathVariant">Far model variant repeated in distant sections (PathFarModel). 0 means do not draw Far sections.</param>

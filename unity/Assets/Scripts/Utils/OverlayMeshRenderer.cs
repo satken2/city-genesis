@@ -575,21 +575,41 @@ public class OverlayMeshRenderer : MonoBehaviour
     }
 
     /// <summary>
-    /// Add a polygon as a triangle fan.
+    /// Add a ground polygon, triangulated in the XZ plane so that a concave outline
+    /// (such as a parcel wrapping around a road bend) is filled only inside.
     /// Use vertices in world coordinates unchanged.
     /// </summary>
     private void AddPolygonMesh(List<Vector3> points, Color color)
     {
         if (points == null || points.Count < 3) return;
 
-        int startIdx = verts.Count;
-        for (int i = 0; i < points.Count; i++)
+        int count = points.Count;
+        var plan = new Vector2[count];
+        for (int i = 0; i < count; i++)
         {
-            verts.Add(points[i]);
+            plan[i] = new Vector2(points[i].x, points[i].z);
+        }
+
+        // Ear clipping expects CCW input. Overlay shaders draw both faces, so the winding of the result does not matter.
+        bool clockwise = PolygonUtils.SignedArea(plan) < 0f;
+        if (clockwise) System.Array.Reverse(plan);
+
+        int startIdx = verts.Count;
+        for (int i = 0; i < count; i++)
+        {
+            verts.Add(points[clockwise ? count - 1 - i : i]);
             colors.Add(color);
         }
 
-        for (int i = 1; i < points.Count - 1; i++)
+        // Overlays are redrawn repeatedly, so an outline the ear clipper cannot resolve falls back to a fan here
+        // rather than through TriangulateOrFan, which logs every failure.
+        List<int> fill = BuildingMeshBuilder.TriangulateEarClip(plan);
+        foreach (int index in fill)
+        {
+            indices.Add(startIdx + index);
+        }
+        if (fill.Count > 0) return;
+        for (int i = 1; i < count - 1; i++)
         {
             indices.Add(startIdx);
             indices.Add(startIdx + i);

@@ -31,10 +31,10 @@ public sealed class PathSpeedLimitOverlay : MonoBehaviour
             if (lod == null || (lod.drawLod != DrawLod.Normal && lod.drawLod != DrawLod.Close)
                 || (presentation != null && !presentation.IsReady)) return false;
             // Long-road parents remain Normal, so check the actual body section at the sign position.
+            // Spans without a sectioned body are drawn whole at the parent's LOD.
             foreach (var part in parts)
             {
-                if (part == null || !part.IsBody) continue;
-                var segmentLod = part.GetDrawLodAtPosition(position);
+                if (part == null || !part.IsBody || !part.TryGetDrawLodAtPosition(position, out var segmentLod)) continue;
                 if (segmentLod != DrawLod.Normal && segmentLod != DrawLod.Close) return false;
             }
             return true;

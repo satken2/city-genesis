@@ -76,9 +76,13 @@ public static class IntersectionPolygonUtil
                 if (other.path.path_id == e.path.path_id) continue;
                 float dot = Mathf.Clamp(Vector2.Dot(e.direction, other.direction), -1f, 1f);
                 float sin = Mathf.Sqrt(Mathf.Max(0f, 1f - dot * dot));
-                // Opposing roads need only a width-transition section. Limit sharp same-direction branches by maximum length.
-                if (dot > -0.98f)
-                    cut = Mathf.Max(cut, (other.width + e.width * Mathf.Max(0f, dot)) * 0.5f / Mathf.Max(0.1f, sin));
+                // Cut back to where the facing edges of the two roads cross. Once that crossing falls behind either road,
+                // the angle is so open that the base cut (maxWidth / 2) already clears it, and opposing roads need only
+                // a width-transition section. Limit sharp same-direction branches by maximum length.
+                float along = other.width + e.width * dot;
+                float otherAlong = e.width + other.width * dot;
+                if (along > 0f && otherAlong > 0f)
+                    cut = Mathf.Max(cut, along * 0.5f / Mathf.Max(0.1f, sin));
             }
             float limit = cutLimitResolver != null ? cutLimitResolver(e.path) : length * 0.95f;
             cut = Mathf.Min(cut + maxWidth * 0.25f, Mathf.Max(0f, limit));

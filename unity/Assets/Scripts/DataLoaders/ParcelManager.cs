@@ -27,7 +27,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         public Vector3 center;
         public Vector3[] worldPoints;
         /// <summary>
-        /// Fan-triangulated data visualization triangles (lazily generated from worldPoints).
+        /// Data visualization triangles covering the parcel interior (lazily generated from worldPoints).
         /// OverlayMeshRenderer.AddPreTriangulated retains references until EndFrame, so do not modify after generation.
         /// Geometry/height changes replace the entire outline instance, requiring no invalidation.
         /// </summary>
@@ -1543,7 +1543,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// FILTER modes do not draw unbuildable parcels (transparent).
     /// Render to dataVisRenderer (Custom/OverlayFillTerrainConform). Shader tessellation handles
     /// terrain following inside triangles, so the CPU only submits
-    /// simple fan triangulation of parcel polygons (vertex Y uses the same corner terrain heights
+    /// the triangulated parcel polygon (vertex Y uses the same corner terrain heights
     /// as outlines as a fallback before heightmap upload).
     /// </summary>
     private void DrawDataVisPolygon(ParcelOutlineData outline, float alpha)
@@ -1567,12 +1567,16 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
         if (outline.fillTriangles == null)
         {
-            List<Vector3> triVerts = new List<Vector3>((pts.Length - 2) * 3);
-            for (int i = 1; i < pts.Length - 1; i++)
+            Vector2[] plan = new Vector2[pts.Length];
+            for (int i = 0; i < pts.Length; i++)
             {
-                triVerts.Add(pts[0]);
-                triVerts.Add(pts[i]);
-                triVerts.Add(pts[i + 1]);
+                plan[i] = new Vector2(pts[i].x, pts[i].z);
+            }
+            List<int> fill = BuildingMeshBuilder.TriangulateOrFan(plan);
+            List<Vector3> triVerts = new List<Vector3>(fill.Count);
+            foreach (int index in fill)
+            {
+                triVerts.Add(pts[index]);
             }
             outline.fillTriangles = triVerts;
         }

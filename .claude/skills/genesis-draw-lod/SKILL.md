@@ -36,7 +36,7 @@ description: City Genesisの描画LOD(建物・パス1つごとの詳細度 Clos
 ## 知らないと事故る仕様
 - 生成器はセルのティア表を参照してはいけない。描画LODは `BuildingMeshBuilder.Generate(data, isDynamic, drawLod)` の引数と、パスは `PathDrawContext.Begin/End`(PathManager が生成の前後で呼ぶ)で渡す。
 - `_close` パーツは無印と bbox・原点・マテリアルが一致していることが前提。Unityは配置計算を変えずに差し替える。制作側の規約と検査は genesis-building-parts / genesis-path-parts を参照。
-- パスの詳細区間(長いパスの近い部分だけ詳細)は単一スプラインの生成にだけ効く。折れ角付き道路(セグメントごとに別スプライン)・トンネル分割・工事中は全長を同じ詳細度で描く。区間外は `FarRemainder_*` の遠景モデルで埋める。
+- パスの詳細区間(長いパスの近い部分だけ詳細)は単一スプラインの生成にだけ効く。折れ角付き道路(セグメントごとに別スプライン)・トンネル分割・工事中は全長を同じ詳細度で描く。区間外は `FarRemainder_*` の遠景モデルで埋める。これとは別に、地上の道路の路面は256m以上のスプライン(折れ角付き道路ではセグメントごと)を固定区間に分けて区間ごとに描画LODを切り替え(`DataLoaders/SplinePartLod.cs`)、その道路の親は Normal のままにする。
 - 接写の同時保持数は `DrawLodConfig.MAX_CLOSE_BUILDINGS` / `MAX_CLOSE_PATHS` で上限がある。上限に達すると昇格せず Normal で生成する(降格は投影比が決める)。
 - 再判定はカメラが `REEVALUATE_CAMERA_MOVE_DISTANCE` 以上動いたときだけ走る。詳細化は遅延キュー(建物)/再生成キュー(パス)経由なので、切り替わるまで旧オブジェクトが表示され続ける(消えてから出るのではない)。
 - 遠景から詳細(Normal/Close)へ上げるのは、接地・通過する常駐セルの地形タイルが公開されてから(建物は遅延キューの選出 `SelectTopDeferredBuildings`、パスは `DeterminePathDrawLod` が `TerrainManager.IsDetailTerrainReady` を見る)。タイルの公開で各マネージャーの `OnTerrainTileReady` が詳細化を再開させる。

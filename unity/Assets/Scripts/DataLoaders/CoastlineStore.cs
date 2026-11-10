@@ -13,7 +13,8 @@ using Newtonsoft.Json.Linq;
 /// Used by port (MODEL_PORT) quay mesh generation (<see cref="PortBuildingMeshBuilder"/>)
 /// to determine which edges of the base polygon touch the coastline.
 /// Coastlines are extracted from terrain when creating a city, then expanded with reclaimed land as reclamation completes.
-/// FetchCoastline therefore refetches on every session:reload (<see cref="Version"/> advances each time).
+/// FetchCoastline therefore refetches on every session:reload, replacing the rings only when the response differs
+/// (<see cref="Version"/> advances only then).
 /// </summary>
 public static class CoastlineStore
 {
@@ -36,6 +37,12 @@ public static class CoastlineStore
     /// </summary>
     public static int Version { get; private set; }
 
+    /// <summary>
+    /// Raw response text the stored rings were built from; null when none is applied.
+    /// FetchCoastline skips a response identical to this, keeping the rings, the land index, and <see cref="Version"/>.
+    /// </summary>
+    public static string SourceJson { get; private set; }
+
     /// <summary>Read-only view of stored rings. Vector2 x=world X, y=world Z.</summary>
     public static IReadOnlyList<Vector2[]> Rings => rings;
 
@@ -45,6 +52,7 @@ public static class CoastlineStore
         rings.Clear();
         landIndex = null;
         IsLoaded = false;
+        SourceJson = null;
         Version++;
     }
 
@@ -54,8 +62,9 @@ public static class CoastlineStore
     /// but both are handled by recursively collecting arrays of points (<c>[x, z]</c>)
     /// as rings, independent of nesting depth.
     /// Empty coordinates (no coastline) count as successfully loaded with zero rings.
+    /// sourceJson is the response text the coordinates came from, kept as <see cref="SourceJson"/>.
     /// </summary>
-    public static void SetFromGeoJson(JToken coordinates)
+    public static void SetFromGeoJson(JToken coordinates, string sourceJson = null)
     {
         rings.Clear();
         if (coordinates != null)
@@ -64,6 +73,7 @@ public static class CoastlineStore
         }
         landIndex = new LandIndex(rings);
         IsLoaded = true;
+        SourceJson = sourceJson;
         Version++;
     }
 

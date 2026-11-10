@@ -525,6 +525,24 @@
           }
         },
         {
+          "id": "cityDevelopment",
+          "textKey": "tutorial.controls.step4.cityDevelopment",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.city_development"
+            ]
+          },
+          "world": {
+            "mode": "observe"
+          },
+          "until": {
+            "type": "page",
+            "id": "icons.cityDevelopment"
+          }
+        },
+        {
           "id": "constructionProjects",
           "textKey": "tutorial.controls.step4.constructionProjects",
           "ui": {

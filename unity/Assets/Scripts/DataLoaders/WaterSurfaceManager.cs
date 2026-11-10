@@ -18,7 +18,8 @@ using Newtonsoft.Json.Linq;
 /// naturally renders in front because of world Y differences.
 ///
 /// Water is map-specific static data fixed during init_game, but <see cref="TerrainManager.FetchCoastline"/>
-/// calls after coastlines every time, so refetch/regenerate on initial load, forced reload, and session:reload.
+/// calls after coastlines every time, so refetch on initial load, forced reload, and session:reload,
+/// regenerating only when the response differs from the one already built.
 ///
 /// No scene placement required; create automatically in AfterSceneLoad.
 /// </summary>
@@ -42,6 +43,8 @@ public class WaterSurfaceManager : MonoBehaviour
     private readonly List<Mesh> waterMeshes = new List<Mesh>();
     // Generated fallback material (null when borrowing sea material).
     private Material fallbackMaterial;
+    // Response text the current water objects and store were built from; null when none is applied.
+    private string appliedJson;
 
     /// <summary>Create after scene load to work without preplacement.</summary>
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -70,27 +73,32 @@ public class WaterSurfaceManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Fetch water polygons and regenerate water meshes.
+    /// Fetch water polygons and regenerate water meshes when the response differs from the one already built.
     /// Called by TerrainManager.FetchCoastline during initial load, forced reload, and session:reload.
-    /// Destroy existing water before rebuilding on every call (idempotent).
+    /// Existing water stays until a different response arrives, so an identical response changes nothing.
     /// </summary>
     public IEnumerator LoadAndBuild()
     {
-        ClearWaterObjects();
-
         WaterResponse response = null;
+        string json = null;
         string error = null;
-        yield return ApiClient.Get<WaterResponse>(
+        yield return ApiClient.GetIfChanged<WaterResponse>(
             "/terrain/water",
-            res => response = res,
+            () => appliedJson,
+            (res, text) => { response = res; json = text; },
             err => error = err
         );
 
         if (!string.IsNullOrEmpty(error))
         {
             Debug.LogWarning($"WaterSurfaceManager: 水面の取得に失敗: {error}");
+            ClearWaterObjects();
             yield break;
         }
+        if (json == null) yield break;
+
+        ClearWaterObjects();
+        appliedJson = json;
         if (response?.water_surfaces == null || response.water_surfaces.Count == 0)
         {
             yield break;
@@ -119,6 +127,7 @@ public class WaterSurfaceManager : MonoBehaviour
     /// <summary>Destroy all generated water GameObjects/Meshes and the query store.</summary>
     private void ClearWaterObjects()
     {
+        appliedJson = null;
         WaterSurfaceStore.Clear();
         foreach (var go in waterObjects)
         {

@@ -49,6 +49,16 @@ public static class ApiClient
     /// </summary>
     public static IEnumerator Get<T>(string path, Action<T> onSuccess, Action<string> onError = null)
     {
+        return GetIfChanged<T>(path, null, (response, _) => onSuccess?.Invoke(response), onError);
+    }
+
+    /// <summary>
+    /// Send a GET request, parsing the response only when its text differs from the text the caller already applied.
+    /// An identical response invokes neither callback. onChanged receives the parsed response and its raw text to remember.
+    /// appliedText is read when the response arrives, so a caller that discarded its state during the request applies the response again.
+    /// </summary>
+    public static IEnumerator GetIfChanged<T>(string path, Func<string> appliedText, Action<T, string> onChanged, Action<string> onError = null)
+    {
         using (ApiRequest call = Request("GET", path, timeoutSeconds: 10))
         {
             yield return call.Send();
@@ -59,8 +69,9 @@ public static class ApiClient
                 try
                 {
                     string json = request.downloadHandler.text;
+                    if (appliedText != null && json == appliedText()) yield break;
                     T response = JsonConvert.DeserializeObject<T>(json);
-                    onSuccess?.Invoke(response);
+                    onChanged?.Invoke(response, json);
                 }
                 catch (Exception e)
                 {

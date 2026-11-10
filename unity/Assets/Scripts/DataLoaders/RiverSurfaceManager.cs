@@ -22,7 +22,8 @@ using Newtonsoft.Json.Linq;
 /// Store downstream XZ unit vectors in UV2; Custom/WaterLit moves ripples and foam in that direction.
 ///
 /// Rivers are map-specific static data fixed during init_game, but like coastlines/lakes,
-/// fetch and regenerate on initial load, forced reload, and every session:reload through <see cref="TerrainManager.FetchCoastline"/>.
+/// fetch on initial load, forced reload, and every session:reload through <see cref="TerrainManager.FetchCoastline"/>,
+/// regenerating only when the response differs from the one already built.
 /// </summary>
 public class RiverSurfaceManager : MonoBehaviour
 {
@@ -63,6 +64,8 @@ public class RiverSurfaceManager : MonoBehaviour
     private readonly List<GameObject> riverObjects = new List<GameObject>();
     private readonly List<Mesh> riverMeshes = new List<Mesh>();
     private Material riverMaterial;
+    // Response text the current RiverStore, water objects, and mask were built from; null when none is applied.
+    private string appliedJson;
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
@@ -93,27 +96,31 @@ public class RiverSurfaceManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Fetch rivers and regenerate RiverStore/water meshes idempotently.
-    /// Called by FetchCoastline at session start/full reload.
+    /// Fetch rivers and regenerate RiverStore, water meshes, and the mask when the response differs from the one already built.
+    /// Called by FetchCoastline at session start, full reload, and session:reload.
+    /// Existing rivers stay until a different response arrives, so an identical response changes nothing.
     /// </summary>
     public IEnumerator LoadAndBuild()
     {
-        ClearRiverObjects();
-        ClearRiverMask();
-        RiverStore.Clear();
-
         RiversResponse response = null;
+        string json = null;
         string error = null;
-        yield return ApiClient.Get<RiversResponse>(
+        yield return ApiClient.GetIfChanged<RiversResponse>(
             "/terrain/rivers",
-            res => response = res,
+            () => appliedJson,
+            (res, text) => { response = res; json = text; },
             err => error = err
         );
         if (!string.IsNullOrEmpty(error))
         {
             Debug.LogWarning($"RiverSurfaceManager: 川の取得に失敗: {error}");
+            Clear();
             yield break;
         }
+        if (json == null) yield break;
+
+        Clear();
+        appliedJson = json;
         if (response?.rivers == null) yield break;
 
         RiverStore.SetFromJson(response.rivers);
@@ -131,6 +138,7 @@ public class RiverSurfaceManager : MonoBehaviour
     /// <summary>Destroy all water objects during session shutdown or similar cleanup.</summary>
     public void Clear()
     {
+        appliedJson = null;
         ClearRiverObjects();
         ClearRiverMask();
         RiverStore.Clear();
