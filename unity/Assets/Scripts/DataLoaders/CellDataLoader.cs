@@ -550,35 +550,27 @@ public class CellDataLoader : MonoBehaviour
 
     private IEnumerator ReloadAfterSync(int ticket)
     {
-        ReloadLaps laps = ReloadLaps.Start(); // [Reload measurement] Remove after investigation
         while (!CityDataCache.Instance.IsSyncedThrough(ticket)) yield return null;
-        laps?.Lap("citySync(wait)"); // [Reload measurement] Remove after investigation
         reloadAfterSync = null;
-        ApplyReload(laps);
-        laps?.Report("ReloadAfterSync 同期待ち+ApplyReload(同期処理)"); // [Reload measurement] Remove after investigation
+        ApplyReload();
     }
 
-    private void ApplyReload(ReloadLaps laps)
+    private void ApplyReload()
     {
         PropManager.Instance?.InvalidateForestOverview();
         // Record refetch signals before issuing the batch, ensuring the next batch refetches even if subsequent batches are canceled.
         terrainManager?.InvalidateCellVersions();
         buildingManager?.MarkLoadedCellsStale();
         parcelManager?.MarkLoadedCellsStale();
-        laps?.Lap("markStale"); // [Reload measurement] Remove after investigation
         cityOverviewManager?.RequestRefresh();
         RopewayNetworkStore.Instance?.RequestRefresh();
         TransitDataStore.Instance?.Refresh();
         StartCoroutine(CityInsignia.Refresh());
-        laps?.Lap("overview+ropeway+transit+insignia"); // [Reload measurement] Remove after investigation
         BuildingMotion.RefreshAll();
-        laps?.Lap("buildingMotion"); // [Reload measurement] Remove after investigation
         if (currentCenterCell.x != int.MinValue && currentCenterCell.y != int.MinValue)
         {
             LodCellSets cellSets = CalculateLodCellSets();
-            laps?.Lap("lodCellSets"); // [Reload measurement] Remove after investigation
             UpdateManagers(cellSets, isForce: false, forceManagerUpdate: true);
-            laps?.Lap("updateManagers"); // [Reload measurement] Remove after investigation
         }
         else
         {
@@ -600,7 +592,6 @@ public class CellDataLoader : MonoBehaviour
         // Update alert icons alongside data refetches after epoch completion or committed edits.
         // Cooldown throttles repeated calls in a short period.
         AlertManager.Instance?.Refresh();
-        laps?.Lap("zones+interchanges+roadNames+alerts"); // [Reload measurement] Remove after investigation
     }
 
     /// <summary>

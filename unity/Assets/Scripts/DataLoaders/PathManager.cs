@@ -846,13 +846,9 @@ public partial class PathManager : BaseApiDataManager
     /// Only entry point for the terrain-following regeneration queue. changeSerial is pathBuildSerialCounter after applying the cause.
     /// Set terrain-only/pillar-only markers only on new entries; clear if another reason overlaps (skipping always stays conservative).
     /// </summary>
-    private void EnqueueTerrainFollowPath(int id, long changeSerial, TerrainFollowQueueReason reason,
-        [System.Runtime.CompilerServices.CallerLineNumber] int callerLine = 0) // [Reload measurement] Remove callerLine after investigation
+    private void EnqueueTerrainFollowPath(int id, long changeSerial, TerrainFollowQueueReason reason)
     {
         bool added = queuedTerrainFollowPathIds.Add(id);
-        // [Reload measurement] Remove after investigation
-        if (LocalConstants.UNITY_LOG_TIMING && added)
-            Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "[リロード計測] 地形追従キュー登録 path{0} reason={1} 登録元=PathManager.cs:{2} frame={3}", id, reason, callerLine, Time.frameCount);
         if (added || !queuedTerrainFollowSerials.TryGetValue(id, out long queuedSerial) || queuedSerial < changeSerial)
             queuedTerrainFollowSerials[id] = changeSerial;
         if (added && reason == TerrainFollowQueueReason.Terrain) terrainOnlyQueuedPathIds.Add(id);
@@ -1387,8 +1383,7 @@ public partial class PathManager : BaseApiDataManager
                 {
                     if (cellPathLod.TryGetValue(cell, out LodTier t) && t > tier) tier = t;
                 }
-                // [Reload measurement] Remove the suffix after investigation
-                TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: "地形追従" + (terrainOnly ? "(地形)" : pillarOnly ? "(橋脚)" : "(その他)"), batchMember: false);
+                TryRebuildPathOnce(path, tier, updateIntersections: false, forceRebuild: true, reason: "地形追従", batchMember: false);
             }
 
             // If all remaining work waits for the active batch, wait for batch completion (or the sorting interval) instead of repeatedly sorting.
@@ -2366,15 +2361,10 @@ public partial class PathManager : BaseApiDataManager
         Vector3 drawCamPos = drawCam != null ? drawCam.transform.position : Vector3.zero;
         DrawLod drawLod = DeterminePathDrawLod(path, tier, drawCamPos, out double detailFrom, out double detailTo, out _);
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"PathManager: 再描画 path{path.path_id} tier={tier} draw={drawLod} range=({detailFrom:F2}〜{detailTo:F2}) reason={reason}");
-        long measureStart = System.Diagnostics.Stopwatch.GetTimestamp(); // [Reload measurement] Remove after investigation
         if (drawLod == DrawLod.Far)
             CreateOrUpdateFarPath(path, forceRebuild);
         else
             CreateOrUpdatePath(path, updateIntersections, forceRebuild, drawLod, detailFrom, detailTo);
-        // [Reload measurement] Remove after investigation
-        double measureMs = (System.Diagnostics.Stopwatch.GetTimestamp() - measureStart) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
-        if (LocalConstants.UNITY_LOG_TIMING && measureMs >= 5)
-            Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "[リロード計測] パス再生成 {0:F0}ms path{1} variant={2} draw={3} range=({4:F2}〜{5:F2}) reason={6} frame={7}", measureMs, path.path_id, path.path_variant, drawLod, detailFrom, detailTo, reason, Time.frameCount);
 
         // Do not treat API reception or enqueueing as completed rendering. Regenerate after interruption even at the same version.
         if (HasPathRepresentation(path)) pathVersionCache[path.path_id] = path.version;
@@ -3826,9 +3816,7 @@ public partial class PathManager : BaseApiDataManager
 
         pathGO.tag = PATH_TAG;
 
-        var laps = ReloadLaps.Start(); // [Reload measurement] Remove every laps line in this method after investigation
         List<Vector3> points = CalculatePathPoints(path);
-        laps?.Lap("points");
 
         if (points.Count < 2)
         {
@@ -3885,7 +3873,6 @@ public partial class PathManager : BaseApiDataManager
             PathDrawContext.End();
         }
         DrawLodStats.AddGenerationMs(DrawLodStats.Category.Path, genWatch.Elapsed.TotalMilliseconds);
-        laps?.Lap("generate");
 
         var identity = pathGO.AddComponent<RenderCacheIdentity>();
         identity.key = renderKey;
@@ -3917,15 +3904,12 @@ public partial class PathManager : BaseApiDataManager
         inputHandler.pathId = path.path_id;
 
         UpdatePlannedIcon(pathGO, path, path.status == Constants.STATUS_PENDING);
-        laps?.Lap("farRemainders+collider");
 
         SetupVisuals(pathGO, path, status, modulesCreated);
-        laps?.Lap("visuals");
 
         SetupWaypoints(pathGO, path.path_id, points);
 
         RegisterPathSegments(path, points);
-        laps?.Lap("waypoints+segments");
 
         if (updateIntersections)
         {
@@ -3944,16 +3928,12 @@ public partial class PathManager : BaseApiDataManager
         DrawLodStats.OnDrawLodChanged(DrawLodStats.Category.Path,
             oldPath != null ? DrawLodInfo.GetDrawLod(oldPath, DrawLod.Normal) : (DrawLod?)null, drawLod);
 
-        laps?.Lap("register");
         // Fixed-section parts finish asynchronously; replace the previous display only after initial generation completes.
         if (oldPath != null)
         {
             PathPresentation.Replace(pathGO, oldPath, lodCache);
         }
-        laps?.Lap("replace");
         ReevaluateAwaitingIntersectionsForPath(path);
-        laps?.Lap("awaitingIntersections");
-        laps?.ReportIfSlow($"CreateOrUpdatePath path{path.path_id}", 10);
     }
 
     /// <summary>Far point spacing (m), reducing points while retaining curve shape.</summary>
@@ -5186,9 +5166,6 @@ public partial class PathManager : BaseApiDataManager
             bool added = pendingPillarRebuildIds.Add(id);
             pendingPillarRebuildSerials[id] = pathBuildSerialCounter;
             if (!added) continue;
-            // [Reload measurement] Remove after investigation
-            if (LocalConstants.UNITY_LOG_TIMING)
-                Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "[リロード計測] 橋脚・設備の隣接作り直し path{0} variant={1} 橋脚={2} 設備={3} 原因=path{4} variant={5} frame={6}", id, neighbor.path_variant, supported, equipped, path.path_id, path.path_variant, Time.frameCount);
             pendingFarRebuildIds.Remove(id);
             InvalidateTerrainFollowPath(neighbor);
             geometryRevisions.TryGetValue(id, out int revision);

@@ -1457,10 +1457,8 @@ public class IpcStateCoordinator : MonoBehaviour
 
     private System.Collections.IEnumerator PrepareCityThenReload(TerrainManager terrainManager)
     {
-        ReloadLaps laps = ReloadLaps.Start(); // [Reload measurement] Remove after investigation
         string sessionId = null;
         yield return ApiClient.Get<SessionIdentity>("/sessions", session => sessionId = session?.session_id);
-        laps?.Lap("sessions"); // [Reload measurement] Remove after investigation
         if (sessionId != null && sessionId != preparedSessionId)
         {
             // Do not retain render objects/caches resolved using the previous city's master data/asset packs/traffic side.
@@ -1473,19 +1471,15 @@ public class IpcStateCoordinator : MonoBehaviour
                 yield return MasterDataStore.Instance.Initialize(forceReload: true);
             }
             preparedSessionId = sessionId;
-            laps?.Lap("cityChanged"); // [Reload measurement] Remove after investigation
         }
         if (terrainManager != null)
         {
             yield return terrainManager.FetchCoastline();
         }
-        laps?.Lap("fetchCoastline"); // [Reload measurement] Remove after investigation
         if (CellDataLoader.Instance != null)
         {
             CellDataLoader.Instance.ReloadAllData();
         }
-        laps?.Lap("reloadAllData"); // [Reload measurement] Remove after investigation
-        laps?.Report("PrepareCityThenReload 経過時間(通信待ちを含む)"); // [Reload measurement] Remove after investigation
     }
 
     /// <summary>

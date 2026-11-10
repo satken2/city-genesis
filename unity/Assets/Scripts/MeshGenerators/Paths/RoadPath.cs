@@ -12,12 +12,6 @@ public class RoadPath : IPathMeshGenerator
     private static readonly StageMarker splineMeshMarker = new StageMarker("Path.SplineMesh");
     private static readonly StageMarker splineMeshRebuildMarker = new StageMarker("Path.SplineMesh.Rebuild");
     private static readonly StageMarker splineMeshCapsMarker = new StageMarker("Path.SplineMesh.Caps");
-    // [Reload measurement] Remove after investigation
-    private static readonly StageMarker splineMeshResolveStage = new StageMarker("Path.SplineMesh.Resolve");
-    private static readonly StageMarker splineMeshSetupStage = new StageMarker("Path.SplineMesh.Setup");
-    private static readonly StageMarker splineMeshSealStage = new StageMarker("Path.SplineMesh.Seal");
-    private static readonly StageMarker splineMeshMarkingStage = new StageMarker("Path.SplineMesh.Marking");
-    private static readonly StageMarker splineMeshPartCreatedStage = new StageMarker("Path.SplineMesh.PartCreated");
     private static readonly StageMarker pillarCandidatesMarker = new StageMarker("Path.Pillars.Candidates");
     private static readonly StageMarker pillarPortalMarker = new StageMarker("Path.Pillars.Portal");
     private static readonly StageMarker pillarInstantiateMarker = new StageMarker("Path.Pillars.Instantiate");
@@ -234,24 +228,18 @@ public class RoadPath : IPathMeshGenerator
         GameObject container = new GameObject($"Road_{pathData.path_id}");
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] コンテナ作成: {container.name}");
 
-        var laps = ReloadLaps.Start(); // [Reload measurement] Remove every laps line in this method after investigation
         SplineComputer spline = BuildSpline(container, points, isCurved);
 
         float splineLength = spline.CalculateLength();
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] スプライン長: {splineLength:F2}m");
         PathDrawContext.SetAdaptiveTileLength(PathDrawContext.ComputeAdaptiveTileLength(spline, MAX_EXTRUDE_TILE_LENGTH));
-        laps?.Lap("spline");
 
         // Generate road parts.
         CreateRoadParts(container, spline, width, sidewalkWidth, sideWidth, lanes, treeSpacing, wallWidth, centerWidth, pillarSpacing, heightEditable, baseHeight, singleSpan, pathData, points, startSidewalkSetback, endSidewalkSetback);
-        laps?.Lap("parts");
         SuspensionBridgeGenerator.Generate(container, points, pathData, width);
-        laps?.Lap("suspension");
 
         // Generate collider mesh.
         Mesh colliderMesh = BuildColliderMeshFromSpline(spline, width);
-        laps?.Lap("collider");
-        laps?.ReportIfSlow($"RoadPath.Generate path{pathData.path_id}", 10);
         if (colliderMesh != null)
         {
             colliderMesh.name = $"RoadCollider_{pathData.path_id}";
@@ -343,8 +331,7 @@ public class RoadPath : IPathMeshGenerator
         }
         else
         {
-            using (splineMeshResolveStage.Auto()) // [Reload measurement] Remove after investigation
-                prefab = PathDrawContext.ResolvePrefab(prefabName, fallbackPrefabName, out resolvedPrefabName);
+            prefab = PathDrawContext.ResolvePrefab(prefabName, fallbackPrefabName, out resolvedPrefabName);
             if (prefab != null && resolvedPrefabName != prefabName)
             {
                 UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] '{prefabName}' → '{resolvedPrefabName}' を使用");
@@ -389,7 +376,6 @@ public class RoadPath : IPathMeshGenerator
         }
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] プレハブ取得成功: '{prefabName}', mirrorX={mirrorX}");
 
-        var stage = splineMeshSetupStage.Auto(); // [Reload measurement] Remove after investigation
         GameObject go = new GameObject(prefabName);
         go.transform.SetParent(parent.transform, false);
 
@@ -513,7 +499,6 @@ public class RoadPath : IPathMeshGenerator
                     if (!PathDrawContext.IntersectDetailRange(dashFrom, dashTo, out dashFrom, out dashTo))
                     {
                         UnityEngine.Object.Destroy(go);
-                        stage.Dispose(); // [Reload measurement] Remove after investigation
                         return null;
                     }
                     channel.clipFrom = dashFrom;
@@ -546,7 +531,6 @@ public class RoadPath : IPathMeshGenerator
                     if (!PathDrawContext.IntersectDetailRange(clipFrom, clipTo, out double detailClipFrom, out double detailClipTo))
                     {
                         UnityEngine.Object.Destroy(go);
-                        stage.Dispose(); // [Reload measurement] Remove after investigation
                         return null;
                     }
                     clipFrom = detailClipFrom;
@@ -613,7 +597,6 @@ public class RoadPath : IPathMeshGenerator
                 {
                     Debug.LogError($"[RoadPath] パーツ '{prefabName}' の頂点数({partVerts})が単体でSplineMeshの上限({SPLINE_MESH_VERTEX_BUDGET})を超えています。生成を中止します。軽量なモデルで再エクスポートしてください。");
                     UnityEngine.Object.Destroy(go);
-                    stage.Dispose(); // [Reload measurement] Remove after investigation
                     return null;
                 }
                 if (partVerts > 0 && (long)partVerts * channel.count > SPLINE_MESH_VERTEX_BUDGET)
@@ -623,7 +606,6 @@ public class RoadPath : IPathMeshGenerator
                     {
                         // For parts with design periods, preserve tile count and split into separate meshes at integer tile boundaries.
                         int totalCount = channel.count;
-                        stage.Dispose(); // [Reload measurement] Remove after investigation
                         UnityEngine.Object.DestroyImmediate(go);
                         var group = new GameObject(prefabName + "_Sections");
                         group.transform.SetParent(parent.transform, false);
@@ -644,7 +626,6 @@ public class RoadPath : IPathMeshGenerator
             }
         }
 
-        stage.Dispose(); // [Reload measurement] Remove after investigation
         try
         {
             using (splineMeshRebuildMarker.Auto())
@@ -654,8 +635,7 @@ public class RoadPath : IPathMeshGenerator
         {
             Debug.LogError($"[RoadPath] SplineMesh Rebuild失敗 '{prefabName}': {ex}");
         }
-        using (splineMeshSealStage.Auto()) // [Reload measurement] Remove after investigation
-            SealSplineMesh(splineMesh);
+        SealSplineMesh(splineMesh);
 
         if (!singleSpan && !isDashed && (prefabName.EndsWith("/body", StringComparison.Ordinal)
             || prefabName.EndsWith("/sidewalk", StringComparison.Ordinal) || prefabName.EndsWith("/lrt_track", StringComparison.Ordinal)))
@@ -663,12 +643,10 @@ public class RoadPath : IPathMeshGenerator
                 RemoveInternalTileCaps(go.GetComponent<MeshFilter>()?.sharedMesh, channel);
 
         if (roadSurface && prefabName.EndsWith("/body", StringComparison.Ordinal))
-            using (splineMeshMarkingStage.Auto()) // [Reload measurement] Remove after investigation
-                parent.GetComponentInParent<RoadMarkingContext>()?.Apply(go);
+            parent.GetComponentInParent<RoadMarkingContext>()?.Apply(go);
 
         if (mf != null && mf.sharedMesh != null)
-            using (splineMeshPartCreatedStage.Auto()) // [Reload measurement] Remove after investigation
-                partCreated?.Invoke(go, spline, mf.sharedMesh, clipFrom, clipTo);
+            partCreated?.Invoke(go, spline, mf.sharedMesh, clipFrom, clipTo);
         return go;
     }
 
@@ -924,19 +902,15 @@ public class RoadPath : IPathMeshGenerator
 
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] --- 道路パーツ生成開始 ---");
 
-        var laps = ReloadLaps.Start(); // [Reload measurement] Remove every laps line in this method after investigation
         var markingContext = RoadMarkingContext.Create(container, spline, pathData, startApproach, endApproach);
-        laps?.Lap("markingContext");
         var access = RoadAccessPlan.Create(pathData, spline, controlPoints, width);
         markingContext?.OverrideSideLine(true, access.Left, false);
         markingContext?.OverrideSideLine(false, access.Right, false);
-        laps?.Lap("access");
 
         // Draw nearby motorway main-line/ramp sections as one surface (RoadAdjacency).
         // Decide edge-line styles before body generation passes them to shaders.
         bool ramp = RoadAdjacency.IsRamp(pathData);
         RoadCorridorInfo corridor = ResolveRoadCorridor(pathData, controlPoints, width, wallWidth, ramp);
-        laps?.Lap("corridor");
         if (corridor != null && markingContext != null)
         {
             // Main-line joined edges become dashed merge-lane dividers; ramps omit main-line-side edges.
@@ -967,13 +941,11 @@ public class RoadPath : IPathMeshGenerator
         }
         if (corridor != null && !ramp) CreateMergeFillers(container, corridor, width * 0.5f, bodyMaterial);
         access.GenerateSurface(container, bodyMaterial ?? roadBody.GetComponent<MeshRenderer>()?.sharedMaterial);
-        laps?.Lap("endJoin+body+accessSurface");
 
         // Shared-street LRT tracks and platforms. 303 excludes roadside equipment in platform intervals (RoadEquipmentGenerator below).
         List<LrtPlatformParts.Span> lrtPlatforms = segmentPlatformZones == null
             ? LrtPlatformParts.Resolve(pathData, controlPoints, spline.CalculateLength()) : null;
         LrtRoadParts.Generate(container, spline, pathData, lrtPlatforms);
-        laps?.Lap("lrt");
 
         // Offset calculation (all CreateSplineMesh inputs are part-center positions;
         // CreateSplineMesh corrects prefab pivot differences relative to bounds center).
@@ -1053,7 +1025,6 @@ public class RoadPath : IPathMeshGenerator
             }
         }
 
-        laps?.Lap("lines+center");
         // Sidewalks
         if (hasSidewalk)
         {
@@ -1085,7 +1056,6 @@ public class RoadPath : IPathMeshGenerator
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] sidewalkWidth <= 0: 歩道なし");
         }
 
-        laps?.Lap("sidewalk");
         // Wall (sound barriers/guardrails).
         var tunnels = PathTunnelParts.Ranges(spline, pathData);
         if (wallWidth > 0f)
@@ -1112,16 +1082,13 @@ public class RoadPath : IPathMeshGenerator
         PathTunnelParts.GenerateWall(container, spline, pathData, width * .5f, wallWidth, true, tunnels, WallRanges(corridor, true));
         PathTunnelParts.GenerateWall(container, spline, pathData, width * .5f, wallWidth, false, tunnels, WallRanges(corridor, false));
         PathTunnelParts.GenerateCeiling(container, spline, pathData, width * .5f, width * .5f, tunnels);
-        laps?.Lap("wall+tunnel");
 
         // Joined sections form one surface; keep roadside equipment out of it.
         RoadEquipmentGenerator.Generate(container, spline, pathData, width, sidewalkWidth, treeSpacing,
             pathData.path_variant == 303
                 ? segmentPlatformZones ?? LrtPlatformParts.ZoneRanges(lrtPlatforms, LrtRoadParts.PlatformRampLength(303), LrtRoadParts.PLATFORM_EQUIPMENT_ZONE_MARGIN)
                 : corridor != null ? SplineDistances(corridor.GetMergedPercentRanges(null), spline.CalculateLength()) : null, access);
-        laps?.Lap("equipment");
         SuspensionBridgeGenerator.GenerateTruss(container, spline, pathData, width);
-        laps?.Lap("truss");
 
         // Posts.
         // Underground paths (negative relative Y) lie below ground and need no surface-support posts
@@ -1140,7 +1107,6 @@ public class RoadPath : IPathMeshGenerator
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] 柱: height_editable=false/地下パス/spacing未指定のためスキップ");
         }
 
-        laps?.Lap("pillars+span");
         // Output overall generation summary.
         int totalChildren = container.transform.childCount;
         int rendererCount = 0;
@@ -1166,8 +1132,6 @@ public class RoadPath : IPathMeshGenerator
             }
         }
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] --- 道路パーツ生成完了 --- 子オブジェクト数={totalChildren}, MeshFilter={meshFilterCount}, Renderer={rendererCount}, 総頂点数={totalVerts}");
-        laps?.Lap("summary");
-        laps?.ReportIfSlow($"CreateRoadParts path{pathData.path_id}", 10);
     }
 
     /// <summary>

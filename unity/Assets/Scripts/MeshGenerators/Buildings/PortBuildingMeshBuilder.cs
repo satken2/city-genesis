@@ -54,21 +54,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         public Vector2 Normal;
     }
 
-    // [Reload measurement] Remove after investigation
-    private static readonly StageMarker quayStage = new StageMarker("Building.Port.Quay");
-    private static readonly StageMarker partsStage = new StageMarker("Building.Port.Parts");
-    private static readonly StageMarker layoutStage = new StageMarker("Building.Port.Layout");
-    private static readonly StageMarker modelsStage = new StageMarker("Building.Port.Models");
-    private static readonly StageMarker cargoStage = new StageMarker("Building.Port.Cargo");
-    private static readonly StageMarker siteStage = new StageMarker("Building.Port.Site");
-    private static readonly StageMarker combineStage = new StageMarker("Building.Port.Combine");
-    private static readonly StageMarker quayFacingStage = new StageMarker("Building.Port.Quay.Facing");
-    private static readonly StageMarker quayLandPartStage = new StageMarker("Building.Port.Quay.LandPart");
-    private static readonly StageMarker quayLandGeometryStage = new StageMarker("Building.Port.Quay.LandGeometryBuild");
-    private static readonly StageMarker quayFootprintStage = new StageMarker("Building.Port.Quay.Footprint");
-    private static readonly StageMarker quaySlabStage = new StageMarker("Building.Port.Quay.Slab");
-    private static readonly StageMarker quayWaterlinesStage = new StageMarker("Building.Port.Quay.Waterlines");
-
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
         if (buildingData == null || buildingData.polygonArray == null || buildingData.polygonArray.Length < 3)
@@ -105,18 +90,12 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         List<PortLayout.Waterline> waterlines;
         float yardFloorLocalY;
         float colliderHeight;
-        var stage = quayStage.Auto(); // [Reload measurement] Remove after investigation
-        List<ReclaimedQuay> facingQuays;
-        using (quayFacingStage.Auto()) // [Reload measurement] Remove after investigation
-            facingQuays = CollectFacingReclaimedQuays(buildingData, centerPointWorld);
+        List<ReclaimedQuay> facingQuays = CollectFacingReclaimedQuays(buildingData, centerPointWorld);
         if (facingQuays.Count > 0)
         {
             // 1'. Ports facing reclaimed quays: no slab; water edge = facing sections, yard = parcel land portion.
-            float maxTopLocalY;
-            using (quayWaterlinesStage.Auto()) // [Reload measurement] Remove after investigation
-                waterlines = FacingWaterlines(facingQuays, centerPointWorld, out maxTopLocalY);
-            using (quayLandPartStage.Auto()) // [Reload measurement] Remove after investigation
-                yard = ExtractLandPart(footprint, centerPointWorld) ?? footprint;
+            waterlines = FacingWaterlines(facingQuays, centerPointWorld, out float maxTopLocalY);
+            yard = ExtractLandPart(footprint, centerPointWorld) ?? footprint;
             yardFloorLocalY = float.NegativeInfinity;
             colliderHeight = Mathf.Max(0.1f, maxTopLocalY);
             UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
@@ -125,22 +104,16 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         else
         {
             // Natural coast: clip the footprint along the backend's quay line (berth_line).
-            Vector2[] quayFootprint;
-            QuaySeawardEdge seaward;
-            using (quayFootprintStage.Auto()) // [Reload measurement] Remove after investigation
-                quayFootprint = BuildQuayFootprint(footprint, buildingData.berthLineArray, centerPointWorld, out seaward);
+            Vector2[] quayFootprint = BuildQuayFootprint(footprint, buildingData.berthLineArray, centerPointWorld, out QuaySeawardEdge seaward);
 
             // Slab-top world Y = sea level (0m) + 2m, fixed. GameObject sits at center_point terrain height,
             // so subtract centerPointWorld.y for local Y.
             float topLocalY = QUAY_TOP_HEIGHT - centerPointWorld.y;
 
             // Slab mesh (top=topLocalY, bottom=terrain/seabed height at each vertex). subMesh0=top, subMesh1=sides+bottom.
-            Mesh slabMesh;
-            using (quaySlabStage.Auto()) // [Reload measurement] Remove after investigation
-                slabMesh = BuildSlabMesh(quayFootprint, topLocalY, centerPointWorld);
+            Mesh slabMesh = BuildSlabMesh(quayFootprint, topLocalY, centerPointWorld);
             if (slabMesh == null)
             {
-                stage.Dispose(); // [Reload measurement] Remove after investigation
                 return BuildingMeshBuilder.GenerateSimpleBuilding(footprint, 1, LocalConstants.FLOOR_HEIGHT);
             }
 
@@ -151,8 +124,7 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             AppendMesh(slabMesh, new[] { topMaterial, sideMaterial }, combineInstances, materials);
             temporaryMeshes.Add(slabMesh);
 
-            using (quayWaterlinesStage.Auto()) // [Reload measurement] Remove after investigation
-                waterlines = EnumerateSeawardWaterlines(quayFootprint, seaward, topLocalY);
+            waterlines = EnumerateSeawardWaterlines(quayFootprint, seaward, topLocalY);
             yard = quayFootprint;
             yardFloorLocalY = topLocalY;
             // Crane booms project seaward but are excluded from picking (same simplification as construction cranes).
@@ -166,8 +138,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             return Mathf.Max(terrain, yardFloorLocalY);
         }
 
-        stage.Dispose(); // [Reload measurement] Remove after investigation
-        stage = partsStage.Auto(); // [Reload measurement] Remove after investigation
         // 2. Placement plan. Measure standard models regardless of rendering LOD; close-up positions are identical.
         GameObject moduleModel = LayoutPart(prefix, "port_building", variantNumber);
         GameObject craneModel = LayoutPart(prefix, "port_crane", variantNumber);
@@ -187,14 +157,10 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         Bounds? roofpropBounds = PortLayout.GetModelBounds(roofpropModel);
         Vector2[] roofpropRect = roofpropBounds.HasValue ? PortLayout.RotatedRect(roofpropAt, roofpropRotation, roofpropBounds.Value) : null;
 
-        stage.Dispose(); // [Reload measurement] Remove after investigation
-        stage = layoutStage.Auto(); // [Reload measurement] Remove after investigation
         PortLayout.Plan plan = PortLayout.Create(footprint, yard, waterlines,
             PortLayout.GetModelBounds(moduleModel), PortLayout.GetModelBounds(craneModel), roofpropRect,
             cargoSpec, buildingData.visual_variant2);
 
-        stage.Dispose(); // [Reload measurement] Remove after investigation
-        stage = modelsStage.Auto(); // [Reload measurement] Remove after investigation
         // 3. Facility modules (gates/buildings). Rest at parcel edge-0 midpoint ground (at least sea level+2m).
         if (plan.Module != null)
         {
@@ -228,8 +194,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
                 combineInstances, materials, temporaryMeshes);
         }
 
-        stage.Dispose(); // [Reload measurement] Remove after investigation
-        stage = cargoStage.Auto(); // [Reload measurement] Remove after investigation
         // 6. Yard cargo. Stack container parts; place one ground cargo part per slot using rendering LOD (prefer `_close` for close-up).
         if (plan.Stacks.Count > 0)
         {
@@ -247,8 +211,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             $"[PortBMB] agent={buildingData.agent_id} prefix={prefix} lod={BuildingMeshUtils.CurrentDrawLod} 水際{waterlines.Count} " +
             $"施設{(plan.Module != null ? "あり" : "なし")} クレーン{plan.Cranes.Count}基 {(stacked ? "コンテナ" : "荷")}{plan.Stacks.Count}山");
 
-        stage.Dispose(); // [Reload measurement] Remove after investigation
-        stage = siteStage.Auto(); // [Reload measurement] Remove after investigation
         // 7. Site decorations (fences/tiles/ground panels). Shared with modular/prebuilt;
         //    draw yard ground panels for draw_floor=yes, continuous with quay top via the same floor material.
         //    Omit the parcel's sea area (beyond quay). Yard height changes across coastline (reclaimed top and original land,
@@ -261,7 +223,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             centerPointWorld, deformToTerrain: true,
             combineInstances, materials, temporaryMeshes, frontFootprint: footprint);
 
-        stage.Dispose(); // [Reload measurement] Remove after investigation
         // Ports facing reclaimed quays have no slab; without any resolved part, their mesh is empty.
         if (combineInstances.Count == 0 && !BuildingExteriorRenderer.HasCapturedWork)
         {
@@ -273,7 +234,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         // 8. Combine meshes.
-        stage = combineStage.Auto(); // [Reload measurement] Remove after investigation
         Mesh finalMesh = new Mesh();
         finalMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         if (combineInstances.Count > 0) finalMesh.CombineMeshes(combineInstances.ToArray(), false, true);
@@ -285,7 +245,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
             Object.Destroy(temp);
         }
 
-        stage.Dispose(); // [Reload measurement] Remove after investigation
         // 9. Collider (yard extruded to top height).
         Mesh colliderMesh = BuildingMeshBuilder.GenerateColliderMesh(yard, colliderHeight);
 
@@ -863,7 +822,6 @@ public class PortBuildingMeshBuilder : IBuildingMeshGenerator
         cachedCoastlineVersion = CoastlineStore.Version;
         cachedLandGeometry = null;
 
-        using var stage = quayLandGeometryStage.Auto(); // [Reload measurement] Remove after investigation
         var gf = new GeometryFactory();
         Geometry land = null;
         foreach (Vector2[] ring in CoastlineStore.Rings)

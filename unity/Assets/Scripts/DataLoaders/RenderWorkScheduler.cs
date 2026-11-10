@@ -305,12 +305,6 @@ public static class RenderWorkScheduler
                 sample.maxMs = Math.Max(sample.maxMs, elapsed);
                 sample.steps++;
             }
-            // [Reload measurement] Remove after investigation
-            if (LocalConstants.UNITY_LOG_TIMING && elapsed > 20)
-            {
-                ReloadHitchProbe.LongStepFrame = Time.frameCount;
-                UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "[リロード計測] 長い1ステップ {0:F0}ms {1} ({2}) frame={3}", elapsed, current.GetType().FullName, operation.category, Time.frameCount);
-            }
         }
         if (operation.done) { Finish(operation); return; }
         if (!more)
@@ -342,94 +336,6 @@ public sealed class RenderWorkPump : MonoBehaviour
     {
         RenderWorkScheduler.Pump();
         RenderWorkScheduler.ReportTimings();
-        if (LocalConstants.UNITY_LOG_TIMING) ReloadHitchProbe.Check(); // [Reload measurement] Remove after investigation
-    }
-}
-
-/// <summary>
-/// [Reload measurement] Temporary lap timer for the session:reload path. Remove the entire class after investigation.
-/// Start returns null while UNITY_LOG_TIMING is off, so call sites use the null-conditional operator.
-/// </summary>
-internal sealed class ReloadLaps
-{
-    private readonly System.Text.StringBuilder text = new();
-    private readonly long start = Stopwatch.GetTimestamp();
-    private long last = Stopwatch.GetTimestamp();
-
-    internal static ReloadLaps Start() => LocalConstants.UNITY_LOG_TIMING ? new ReloadLaps() : null;
-
-    internal void Lap(string name)
-    {
-        long now = Stopwatch.GetTimestamp();
-        text.Append($" {name}={(now - last) * 1000.0 / Stopwatch.Frequency:F1}ms");
-        last = now;
-    }
-
-    internal void Report(string title) =>
-        UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "[リロード計測] {0} frame={1}:{2}", title, Time.frameCount, text);
-
-    internal void ReportIfSlow(string title, double minimumMs)
-    {
-        if ((last - start) * 1000.0 / Stopwatch.Frequency >= minimumMs) Report(title);
-    }
-}
-
-/// <summary>
-/// [Reload measurement] Temporary profiler-marker breakdown of long frames, covering work outside the shared budget. Remove the entire class after investigation.
-/// LastValue, unscaledDeltaTime, and LastFrameMs read in LateUpdate all describe the preceding frame.
-/// The output is a flat list without nesting; parents and their children both appear.
-/// </summary>
-internal static class ReloadHitchProbe
-{
-    private const float HitchSeconds = 0.05f;
-    /// <summary>Frame holding a scheduler step over 20ms; its breakdown is listed even when the frame stays under HitchSeconds.</summary>
-    internal static int LongStepFrame = -1;
-    private static readonly List<(string name, Unity.Profiling.ProfilerRecorder recorder)> recorders = new();
-    private static readonly HashSet<string> recordedNames = new();
-    private static readonly List<Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle> handles = new();
-    private static int refreshedFrame = -100000, lastGcCount;
-
-    internal static void Check()
-    {
-        // Some markers register only after executing, so periodically refresh the target list.
-        if (Time.frameCount - refreshedFrame >= 300) Refresh();
-        int gc = GC.CollectionCount(0);
-        float dt = Time.unscaledDeltaTime;
-        if (dt >= HitchSeconds || LongStepFrame == Time.frameCount - 1)
-        {
-            var top = new List<(string name, double ms, long calls)>();
-            foreach (var (name, recorder) in recorders)
-            {
-                if (!recorder.Valid || recorder.Count == 0) continue;
-                var sample = recorder.GetSample(recorder.Count - 1);
-                double ms = sample.Value * 1e-6;
-                // The generators' own stage markers are listed from 1ms to expose the breakdown inside one long step.
-                bool ownStage = name.StartsWith("Path.", StringComparison.Ordinal) || name.StartsWith("Building.", StringComparison.Ordinal);
-                if (ms >= (ownStage ? 1 : 5)) top.Add((name, ms, sample.Count));
-            }
-            top.Sort((a, b) => b.ms.CompareTo(a.ms));
-            var message = new System.Text.StringBuilder();
-            message.Append($"[リロード計測] 長いフレーム {dt * 1000:F0}ms 共通予算の使用={RenderWorkScheduler.LastFrameMs:F0}ms GC={gc - lastGcCount}回 frame={Time.frameCount - 1}");
-            foreach (var (name, ms, calls) in top) message.Append($"\n  {name}={ms:F1}ms ×{calls}");
-            UnityEngine.Debug.LogFormat(LogType.Log, LogOption.NoStacktrace, null, "{0}", message.ToString());
-        }
-        lastGcCount = gc;
-    }
-
-    private static void Refresh()
-    {
-        refreshedFrame = Time.frameCount;
-        handles.Clear();
-        Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle.GetAvailable(handles);
-        foreach (var handle in handles)
-        {
-            var description = Unity.Profiling.LowLevel.Unsafe.ProfilerRecorderHandle.GetDescription(handle);
-            if (description.UnitType != Unity.Profiling.ProfilerMarkerDataUnit.TimeNanoseconds) continue;
-            string name = description.Name;
-            if (string.IsNullOrEmpty(name) || !recordedNames.Add(name)) continue;
-            recorders.Add((name, new Unity.Profiling.ProfilerRecorder(handle, 1,
-                Unity.Profiling.ProfilerRecorderOptions.Default | Unity.Profiling.ProfilerRecorderOptions.StartImmediately)));
-        }
     }
 }
 
