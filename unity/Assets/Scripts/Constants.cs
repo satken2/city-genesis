@@ -10,7 +10,7 @@ public static class Constants
     public const string STEAM_TICKET_IDENTITY = "city-genesis";
     public const int GAME_VERIFIED = 0;
     public const int GAME_UNVERIFIED = 1;
-    public const int MAX_UNVERIFIED_POPULATION = 500;
+    public const int MAX_UNVERIFIED_POPULATION = 5000;
     public const int PLAY_MODE_NORMAL = 0;
     public const int PLAY_MODE_SCENARIO = 1;
     public const int PLAY_MODE_TUTORIAL = 2;

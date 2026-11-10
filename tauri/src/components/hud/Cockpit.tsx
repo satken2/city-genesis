@@ -32,7 +32,7 @@
  * object selections, preventing duplicate playback/opening.
  * It also handles the 3D view's `drive:request` so the selection screen receives text in the current language.
  */
-import { PLAY_MODE_SCENARIO } from "../../constants";
+import { MAX_UNVERIFIED_POPULATION, PLAY_MODE_SCENARIO } from "../../constants";
 import policyIcon from "../../assets/images/menu/policy.svg";
 
 
@@ -331,6 +331,19 @@ export function Cockpit() {
     [toggleBulldozer],
   );
 
+  // Keep the button enabled at the unverified population limit and explain the reason on click, because a
+  // disabled button alone does not tell players why they cannot proceed.
+  const handleExecuteClick = useCallback(() => {
+    if (populationLimitReached) {
+      void showNotification({
+        message: t("errors.UNVERIFIED_POPULATION_LIMIT", { limit: MAX_UNVERIFIED_POPULATION }),
+        durationMs: 8000,
+      }).catch(console.error);
+      return;
+    }
+    void openRegisteredWindow("epoch_confirm");
+  }, [populationLimitReached, t]);
+
   if (!visible) return null;
 
   const locale = resolveIntlLocale(i18n.language);
@@ -441,8 +454,8 @@ export function Cockpit() {
         className="cockpit-execute"
         type="button"
         title={t("taskbar.menuExecute")}
-        disabled={isLocked || populationLimitReached}
-        onClick={() => void openRegisteredWindow("epoch_confirm")}
+        disabled={isLocked}
+        onClick={handleExecuteClick}
       >
         {t("taskbar.menuExecute")}
         <img src={iconUrl("menu_execute.png")} alt="" className="cockpit-execute-img" draggable={false} />

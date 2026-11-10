@@ -5,7 +5,7 @@
 export const STEAM_TICKET_IDENTITY: string = "city-genesis";
 export const GAME_VERIFIED: number = 0;
 export const GAME_UNVERIFIED: number = 1;
-export const MAX_UNVERIFIED_POPULATION: number = 500;
+export const MAX_UNVERIFIED_POPULATION: number = 5000;
 export const PLAY_MODE_NORMAL: number = 0;
 export const PLAY_MODE_SCENARIO: number = 1;
 export const PLAY_MODE_TUTORIAL: number = 2;
