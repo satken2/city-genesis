@@ -35,6 +35,8 @@ public struct CursorHudIcon
 /// - Text uses UiFontProvider's multilingual font, including Japanese support.
 /// - Pool icon Images and only replace sprites/colors each frame to reduce GC and Rebuild work.
 /// - Hide automatically while the radial menu shows the same information at a larger size.
+/// - Every provider belongs to a Ctrl radial-menu driver, so the HUD shows the hint for opening
+///   that menu directly under the icon row while the driver reports that the menu can open.
 /// </summary>
 public class CursorStatusHud : MonoBehaviour
 {
@@ -47,6 +49,10 @@ public class CursorStatusHud : MonoBehaviour
     private const int MAX_ICONS = 9;  // Road editing: 1 movement-axis arrow + 1 curve icon + 7 snapping icons.
     private const float OFFSET_X = 18f;   // Cursor offset, avoiding tooltip overlap.
     private const float OFFSET_Y = -40f;
+    private const float LINE_SPACING = 3f;
+    private const int TEXT_FONT_SIZE = 14;
+    private const int HINT_FONT_SIZE = 11;
+    private const string MENU_HINT = "Press Ctrl to open menu";  // English in every UI language.
     // Dim OFF icons to dark gray with lower alpha so they blend into the dark panel
     // and remain clearly distinguishable from white ON icons.
     private static readonly Color ICON_COLOR_ACTIVE = Color.white;
@@ -56,9 +62,11 @@ public class CursorStatusHud : MonoBehaviour
     private RectTransform panel;
     private Image panelBg;
     private readonly Image[] iconPool = new Image[MAX_ICONS];
+    private Text hintComponent;
     private Text textComponent;
 
     private Func<(List<CursorHudIcon> icons, string text)> provider;
+    private Func<bool> menuAvailable;
 
     /// <summary>
     /// Get the singleton, creating it if needed; no scene placement is required.
@@ -117,24 +125,31 @@ public class CursorStatusHud : MonoBehaviour
             iconPool[i] = img;
         }
 
-        // Text below the icon row.
-        GameObject textGO = new GameObject("HudText");
-        textGO.transform.SetParent(panel, false);
-        textComponent = textGO.AddComponent<Text>();
-        // Use a multilingual font for strings such as district names that may contain Japanese.
-        textComponent.font = UiFontProvider.GetFont(14);
-        textComponent.fontSize = 14;
-        textComponent.color = Color.white;
-        textComponent.alignment = TextAnchor.UpperLeft;
-        textComponent.horizontalOverflow = HorizontalWrapMode.Overflow;
-        textComponent.verticalOverflow = VerticalWrapMode.Overflow;
-        RectTransform textRT = textComponent.rectTransform;
-        textRT.anchorMin = new Vector2(0f, 1f);
-        textRT.anchorMax = new Vector2(0f, 1f);
-        textRT.pivot = new Vector2(0f, 1f);
-        textRT.anchoredPosition = new Vector2(PADDING, -(PADDING + ICON_SIZE + 3f));
+        // Lines below the icon row, stacked in this order.
+        hintComponent = CreateText("HudHint", HINT_FONT_SIZE);
+        hintComponent.text = MENU_HINT;
+        textComponent = CreateText("HudText", TEXT_FONT_SIZE);
 
         panelGO.SetActive(false);
+    }
+
+    private Text CreateText(string name, int fontSize)
+    {
+        GameObject go = new GameObject(name);
+        go.transform.SetParent(panel, false);
+        Text text = go.AddComponent<Text>();
+        // Use a multilingual font for strings such as district names that may contain Japanese.
+        text.font = UiFontProvider.GetFont(fontSize);
+        text.fontSize = fontSize;
+        text.color = Color.white;
+        text.alignment = TextAnchor.UpperLeft;
+        text.horizontalOverflow = HorizontalWrapMode.Overflow;
+        text.verticalOverflow = VerticalWrapMode.Overflow;
+        RectTransform rt = text.rectTransform;
+        rt.anchorMin = new Vector2(0f, 1f);
+        rt.anchorMax = new Vector2(0f, 1f);
+        rt.pivot = new Vector2(0f, 1f);
+        return text;
     }
 
     private void OnDestroy()
@@ -143,17 +158,20 @@ public class CursorStatusHud : MonoBehaviour
     }
 
     /// <summary>
-    /// Register a display-content provider and show the HUD. Polled every frame.
+    /// Register a display-content provider and show the HUD. Both functions are polled every frame;
+    /// newMenuAvailable must return whether pressing Ctrl would open the driver's menu now.
     /// </summary>
-    public void SetProvider(Func<(List<CursorHudIcon> icons, string text)> newProvider)
+    public void SetProvider(Func<(List<CursorHudIcon> icons, string text)> newProvider, Func<bool> newMenuAvailable)
     {
         provider = newProvider;
+        menuAvailable = newMenuAvailable;
     }
 
     /// <summary>Remove the provider and hide the HUD.</summary>
     public void ClearProvider()
     {
         provider = null;
+        menuAvailable = null;
         if (panel != null) panel.gameObject.SetActive(false);
     }
 
@@ -195,16 +213,28 @@ public class CursorStatusHud : MonoBehaviour
 
         textComponent.text = hasText ? text : "";
 
-        // Size the panel to its content.
-        float width = PADDING * 2f + Mathf.Max(
-            iconCount * (ICON_SIZE + ICON_SPACING) - (iconCount > 0 ? ICON_SPACING : 0f),
-            hasText ? textComponent.preferredWidth : 0f);
-        float height = PADDING * 2f
-            + (iconCount > 0 ? ICON_SIZE : 0f)
-            + (hasText ? textComponent.preferredHeight + (iconCount > 0 ? 3f : 0f) : 0f);
-        panel.sizeDelta = new Vector2(width, height);
+        // Stack the lines under the icon row and size the panel to its content.
+        float width = iconCount > 0 ? iconCount * (ICON_SIZE + ICON_SPACING) - ICON_SPACING : 0f;
+        float bottom = iconCount > 0 ? ICON_SIZE : 0f;
+        bottom = PlaceLine(hintComponent, menuAvailable != null && menuAvailable(), bottom, ref width);
+        bottom = PlaceLine(textComponent, hasText, bottom, ref width);
+        panel.sizeDelta = new Vector2(PADDING * 2f + width, PADDING * 2f + bottom);
 
         UpdatePosition();
+    }
+
+    /// <summary>
+    /// Place a text line below the content ending at bottom (measured from the top padding)
+    /// and return the new bottom. Hidden lines take no space.
+    /// </summary>
+    private static float PlaceLine(Text line, bool visible, float bottom, ref float width)
+    {
+        line.enabled = visible;
+        if (!visible) return bottom;
+        if (bottom > 0f) bottom += LINE_SPACING;
+        line.rectTransform.anchoredPosition = new Vector2(PADDING, -(PADDING + bottom));
+        width = Mathf.Max(width, line.preferredWidth);
+        return bottom + line.preferredHeight;
     }
 
     /// <summary>

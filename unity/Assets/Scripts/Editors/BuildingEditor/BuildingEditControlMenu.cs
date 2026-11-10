@@ -26,12 +26,14 @@ public class BuildingEditControlMenu : MonoBehaviour
     private string Label(int i) => manager.PlacementText(new[] { "parcel", "free", "roadside" }[i],
         new[] { "区画に配置", "自由配置", "道路沿い配置" }[i]);
 
+    private bool MenuAvailable => !manager.TutorialGuided && !(CameraController.Instance?.IsFlyMode ?? false);
+
     private void Update()
     {
         bool active = manager != null && manager.PlacementActive;
         if (active && !hudActive)
         {
-            CursorStatusHud.EnsureInstance().SetProvider(BuildHud);
+            CursorStatusHud.EnsureInstance().SetProvider(BuildHud, () => MenuAvailable);
             hudActive = true;
         }
         if (!active) { ReleaseUi(); return; }
@@ -48,9 +50,8 @@ public class BuildingEditControlMenu : MonoBehaviour
             menuOwned = false;
             manager.RefreshPlacementPreview();
         }
-        else if (pressed && Application.isFocused && !RadialMenuController.IsOpen && !manager.TutorialGuided &&
-            !(CameraController.Instance?.IsFlyMode ?? false) && !InputUtil.LeftMouseIsPressed &&
-            !InputUtil.RightMouseIsPressed && !InputUtil.MiddleMouseIsPressed)
+        else if (pressed && Application.isFocused && !RadialMenuController.IsOpen && MenuAvailable &&
+            !InputUtil.LeftMouseIsPressed && !InputUtil.RightMouseIsPressed && !InputUtil.MiddleMouseIsPressed)
         {
             items.Clear();
             for (int i = 0; i < 3; i++)

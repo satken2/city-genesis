@@ -40,6 +40,8 @@ public abstract class EditControlMenuBase : MonoBehaviour
     /// <summary>Hook immediately after releasing Ctrl to commit an item (e.g. recalculate a snapped preview).</summary>
     protected virtual void OnMenuCommitted() { }
 
+    private static bool MenuAvailable => !TutorialRuntime.PathRestricted && !TutorialRuntime.BlocksWorldInput;
+
     protected virtual void Update()
     {
         bool active = IsSessionActive;
@@ -47,7 +49,7 @@ public abstract class EditControlMenuBase : MonoBehaviour
         // Register/unregister the HUD (detect session start/end).
         if (active && !hudActive)
         {
-            CursorStatusHud.EnsureInstance().SetProvider(BuildHudContent);
+            CursorStatusHud.EnsureInstance().SetProvider(BuildHudContent, () => MenuAvailable);
             hudActive = true;
         }
         else if (!active && hudActive)
@@ -56,7 +58,7 @@ public abstract class EditControlMenuBase : MonoBehaviour
         }
 
         if (!active) return;
-        if (TutorialRuntime.PathRestricted || TutorialRuntime.BlocksWorldInput)
+        if (!MenuAvailable)
         {
             if (menuOpenedByThis) { RadialMenuController.Instance?.CloseAndCancel(); menuOpenedByThis = false; }
             return;
