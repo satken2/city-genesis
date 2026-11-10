@@ -34,7 +34,6 @@
       "frontage": "전면 폭",
       "depth": "깊이",
       "parcelHint": "필지 클릭 · Ctrl 배치 방식",
-      "committed": "위치 고정 · 패널에서 확정 · Esc 다시 선택",
       "placeHint": "좌클릭 위치 고정 · Ctrl 배치 방식",
       "snapped": "도로에 스냅됨",
       "searching": "도로 찾는 중",

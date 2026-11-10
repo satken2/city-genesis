@@ -78,11 +78,9 @@ public class BuildingEditControlMenu : MonoBehaviour
         int mode = (int)manager.PlacementMode;
         icons.Add(new CursorHudIcon(modeIcons[mode], true));
         string text = Label(mode);
-        if (mode == 0) return (icons, text + "\n" + manager.PlacementText("parcelHint", "区画をクリック · Ctrl 配置方法"));
+        if (mode == 0) return (icons, text);
         text += $" | {manager.PlacementText("frontage", "間口")} {manager.PlacementWidth:0.#}m × " +
             $"{manager.PlacementText("depth", "奥行き")} {manager.PlacementDepth:0.#}m";
-        text += "\n" + (manager.PlacementCommitted ? manager.PlacementText("committed", "位置固定 · パネルで確定 · Esc 選び直し") :
-            manager.PlacementText("placeHint", "左クリック 位置固定 · Ctrl 配置方法"));
         if (mode == 2) text += "\n" + (manager.HasRoadAnchor ? manager.PlacementText("snapped", "道路に吸着中") :
             manager.PlacementText("searching", "道路を探しています"));
         else if (manager.HasRoadAnchor) text += "\n" + manager.PlacementText("snapped", "道路に吸着中");

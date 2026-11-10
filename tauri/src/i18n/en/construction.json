@@ -34,7 +34,6 @@
       "frontage": "Frontage",
       "depth": "Depth",
       "parcelHint": "Click a parcel · Ctrl Placement mode",
-      "committed": "Position fixed · Confirm in panel · Esc Reposition",
       "placeHint": "Left click Fix position · Ctrl Placement mode",
       "snapped": "Snapped to road",
       "searching": "Searching for a road",

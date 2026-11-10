@@ -1024,7 +1024,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     if (selectedVariant === null || editAgentId != null) return;
     let disposed = false;
     let unlisten: (() => void) | undefined;
-    const labelKeys = ["parcel", "free", "roadside", "frontage", "depth", "parcelHint", "committed", "placeHint", "snapped", "searching", "sizeHint", "fixed", "rotateHint"];
+    const labelKeys = ["parcel", "free", "roadside", "frontage", "depth", "snapped", "searching", "sizeHint", "fixed", "rotateHint"];
     void appWindow.listen<BuildingPlacementState>(IPC_EVENT_BUILDING_PLACEMENT_STATE, ({ payload }) => {
       if (disposed || payload.variant !== selectedVariant || payload.revision < latestPlacementRevision.current) return;
       latestPlacementRevision.current = payload.revision;

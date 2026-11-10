@@ -34,7 +34,6 @@
       "frontage": "Façade",
       "depth": "Profondeur",
       "parcelHint": "Cliquer sur une parcelle · Ctrl Mode",
-      "committed": "Position fixée · Confirmer dans le panneau · Esc Replacer",
       "placeHint": "Clic gauche Fixer la position · Ctrl Mode",
       "snapped": "Aligné sur la route",
       "searching": "Recherche de route",

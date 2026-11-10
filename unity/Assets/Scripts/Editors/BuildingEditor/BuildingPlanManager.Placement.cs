@@ -12,7 +12,6 @@ public partial class BuildingPlanManager
         InputHandler.Instance != null && InputHandler.Instance.GetMode(InputObjectType.TERRAIN) == InputMode.MODE_BUILDING_CONSTRUCTION;
     public bool DirectAllowed { get; set; } = true;
     public bool IsDirectPlacement => PlacementActive && DirectAllowed && PlacementMode != BuildingPlacementMode.Parcel;
-    public bool PlacementCommitted => directCommitted;
     public bool HasRoadAnchor => roadAnchorActive;
     public bool SizeEditable => MasterDataStore.Instance?.GetAgentMaster(agentVariant)?.resizable ?? true;
     public float PlacementWidth => directWidth;

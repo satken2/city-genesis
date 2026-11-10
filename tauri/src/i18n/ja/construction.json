@@ -34,7 +34,6 @@
       "frontage": "間口",
       "depth": "奥行き",
       "parcelHint": "区画をクリック · Ctrl 配置方法",
-      "committed": "位置固定 · パネルで確定 · Esc 選び直し",
       "placeHint": "左クリック 位置固定 · Ctrl 配置方法",
       "snapped": "道路に吸着中",
       "searching": "道路を探しています",

@@ -34,7 +34,6 @@
       "frontage": "临街宽度",
       "depth": "进深",
       "parcelHint": "点击地块 · Ctrl 放置方式",
-      "committed": "位置已固定 · 面板确认 · Esc 重新选址",
       "placeHint": "左键 固定位置 · Ctrl 放置方式",
       "snapped": "已吸附道路",
       "searching": "正在寻找道路",
