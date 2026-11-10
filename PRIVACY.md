@@ -2,9 +2,9 @@ English | [日本語 (original)](PRIVACY.ja.md)
 
 # City Genesis Privacy Policy
 
-Last updated: October 25, 2026
+Last updated: November 11, 2026
 
-This policy explains what information <Operator name> ("the developer") receives in connection with the game "City Genesis" ("the game") and how that information is handled.
+This policy explains what information Sato Kenta ("the developer") receives in connection with the game "City Genesis" ("the game") and how that information is handled.
 
 ## Information the developer receives
 
@@ -62,7 +62,7 @@ When this policy changes, this page will be updated and the "Last updated" date 
 
 ## Operator and contact
 
-- Operator: <Operator name>
-- Contact: <Contact email address>
+- Operator: Sato Kenta
+- Contact: g.g.satken@gmail.com
 
 The operator's address will be provided without delay upon request.

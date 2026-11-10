@@ -1,0 +1,55 @@
+City Genesis
+Copyright (c) 2026 Sato Kenta
+
+This repository contains source code and content, which are licensed
+differently.
+
+"Content" means the images (including icons and textures), 3D models
+(including .fbx and .blend files, and the Unity prefabs and materials made
+from them), audio, logos, terrain data, scenarios and save data that were
+created for City Genesis.
+
+Files made by third parties are not covered by this license. They remain
+under their own licenses, which are found in their directories or listed in
+tauri/src/data/credits.ts.
+
+
+1. Source code: MIT License
+---------------------------
+
+All files in this repository other than the Content and third-party files are
+licensed under the MIT License:
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+2. Content: All rights reserved
+-------------------------------
+
+The Content is not licensed under the MIT License. Sato Kenta reserves all
+rights to the Content, except that you may use, copy and modify the Content
+for the following purposes only:
+
+  (a) developing City Genesis, including contributing to this repository; and
+  (b) creating Mods for City Genesis and distributing them free of charge.
+
+You may not sell the Content or any Mod that contains it, and you may not use
+the Content in any other product or project.
+
+THE CONTENT IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND.
