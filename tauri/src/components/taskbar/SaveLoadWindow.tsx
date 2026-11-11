@@ -146,12 +146,13 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
 
   /** Open-file heading: title for scenarios, name for save data. */
   const currentName = !currentSave ? "" : currentSave.is_scenario
-    ? scenarioDisplayTitle(currentSave, i18n.language) : saveDisplayName(currentSave);
+    ? scenarioDisplayTitle(currentSave, i18n.language) : saveDisplayName(currentSave, t);
 
   const openSaveAs = useCallback(() => {
-    setSaveName(currentName || cityName);
+    // The exit autosave label belongs to the heading, not to the name Save As starts from.
+    setSaveName((currentSave?.is_scenario === false ? currentSave.save_name : currentName) || cityName);
     openDialog({ kind: "saveAs" });
-  }, [cityName, currentName, openDialog]);
+  }, [cityName, currentName, currentSave, openDialog]);
 
   const openScenarioCreate = useCallback((titleKey: string) => {
     void openWindow("scenario_metadata", { extra: { create: true, titleKey } });
@@ -196,7 +197,8 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
     setFailure("");
     try {
       if (action === "quitGame") {
-        // Rust's exit_app owns shutdown: notify Unity → coordinated core shutdown/emergency autosave → exit UI.
+        // Rust's exit_app owns shutdown: notify Unity → core shutdown without the emergency autosave, as the
+        // confirmation says → exit UI.
         await invoke("exit_app");
         return;
       }

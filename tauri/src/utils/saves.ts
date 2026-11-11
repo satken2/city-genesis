@@ -87,9 +87,10 @@ export function scenarioDisplayTitle(entry: Pick<ScenarioEntry, "id" | "scenario
   return resolveLocalizedText(entry.scenario_title, language) || resolveLocalizedText(entry.scenario_city_name, language) || entry.id.slice(0, 8);
 }
 
-/** Normal save heading: name, then city name, then ID prefix. */
-export function saveDisplayName(entry: SaveEntry): string {
-  return entry.save_name || entry.city_name || entry.id.slice(0, 8);
+/** Normal save heading: name, then city name, then ID prefix. The core's exit autosave is labeled as such. */
+export function saveDisplayName(entry: SaveEntry, t: TFunction): string {
+  const name = entry.save_name || entry.city_name || entry.id.slice(0, 8);
+  return entry.autosave ? t("saveList.autosaveName", { name }) : name;
 }
 
 /** Maximum wait for Unity capture. Missing responses must not block saving. */

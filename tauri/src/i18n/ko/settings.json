@@ -134,6 +134,7 @@
     "loadFailed": "불러오기에 실패했습니다",
     "deleteFailed": "삭제에 실패했습니다",
     "openFolderButton": "폴더 위치 표시",
-    "scenario": "시나리오"
+    "scenario": "시나리오",
+    "autosaveName": "{{name}} (종료 시 자동 저장)"
   }
 }

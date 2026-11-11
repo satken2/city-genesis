@@ -134,6 +134,7 @@
     "loadFailed": "載入失敗",
     "deleteFailed": "刪除失敗",
     "openFolderButton": "顯示資料夾位置",
-    "scenario": "場景"
+    "scenario": "場景",
+    "autosaveName": "{{name}}（結束時自動儲存）"
   }
 }

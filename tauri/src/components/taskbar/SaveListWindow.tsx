@@ -164,7 +164,7 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
   }, []);
 
   function renderPending(current: Pending) {
-    const name = saveDisplayName(current.entry);
+    const name = saveDisplayName(current.entry, t);
     const failureLine = failure && <p className="save-dialog-error" role="alert">{failure}</p>;
     const cancel = <SaveDialogButton disabled={busy} onClick={dismiss}>{t("common.cancel")}</SaveDialogButton>;
     if (current.kind === "load") {
@@ -209,13 +209,14 @@ export function SaveListWindow({ apiBaseUrl, onClose }: SaveListWindowProps) {
             {sortedEntries.map((entry, index) => {
               const isCurrent = entry.id === currentSaveId;
               const scenarioTitle = resolveLocalizedText(entry.scenario_title, i18n.language);
+              const name = saveDisplayName(entry, t);
               return (
                 <li key={entry.id} className={`save-card${isCurrent ? " save-card--current" : ""}`}
                   style={{ "--save-card-index": index } as CSSProperties}>
                   <SaveThumbnail apiBaseUrl={apiBaseUrl} entry={entry} />
                   <div className="save-card-body">
                     <div className="save-card-heading">
-                      <span className="save-card-name" title={saveDisplayName(entry)}>{saveDisplayName(entry)}</span>
+                      <span className="save-card-name" title={name}>{name}</span>
                       {isCurrent && <span className="save-card-current">{t("saveList.currentSave")}</span>}
                     </div>
                     {scenarioTitle && (

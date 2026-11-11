@@ -134,6 +134,7 @@
     "loadFailed": "Load failed",
     "deleteFailed": "Delete failed",
     "openFolderButton": "Open Save Folder",
-    "scenario": "Scenario"
+    "scenario": "Scenario",
+    "autosaveName": "{{name}} (autosave on exit)"
   }
 }

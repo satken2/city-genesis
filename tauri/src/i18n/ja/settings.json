@@ -134,6 +134,7 @@
     "loadFailed": "読み込みに失敗しました",
     "deleteFailed": "削除に失敗しました",
     "openFolderButton": "フォルダの場所を表示",
-    "scenario": "シナリオ"
+    "scenario": "シナリオ",
+    "autosaveName": "{{name}}（終了時の自動保存）"
   }
 }

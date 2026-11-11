@@ -134,6 +134,7 @@
     "loadFailed": "Échec du chargement",
     "deleteFailed": "Échec de la suppression",
     "openFolderButton": "Afficher le dossier",
-    "scenario": "Scénario"
+    "scenario": "Scénario",
+    "autosaveName": "{{name}} (sauvegarde automatique à la fermeture)"
   }
 }

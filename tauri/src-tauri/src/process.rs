@@ -7,6 +7,7 @@
 
 use crate::state::SharedState;
 use std::collections::VecDeque;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::process::{Child, Command, ExitStatus, Stdio};
 use std::time::{Duration, Instant};
@@ -22,6 +23,9 @@ const EXTERNAL_CORE_URL: &str = "http://127.0.0.1:5000";
 const CORE_READY_TIMEOUT: Duration = Duration::from_secs(120);
 /// Maximum wait for the core to finish emergency autosaving and exit. Force termination after this timeout.
 const CORE_EXIT_TIMEOUT: Duration = Duration::from_secs(60);
+/// Written to the core's stdin just before closing it when the player confirmed the quit. Same value as
+/// `PLAYER_QUIT` in the core's `app/services/lifecycle.py`; the core then skips the emergency autosave.
+const PLAYER_QUIT: &[u8] = b"player_quit\n";
 /// Maximum wait for graphics to exit after receiving the shutdown notification.
 const GRAPHIC_EXIT_TIMEOUT: Duration = Duration::from_secs(8);
 /// If graphics crashes twice within this interval, stop restarting and exit the app.
@@ -127,6 +131,7 @@ impl Processes {
 /// Launch the core. Tauri keeps its stdin pipe open and closes it to signal shutdown (even if
 /// Tauri crashes, the OS closes the pipe, allowing the core to write an emergency autosave and
 /// exit). Therefore, do not put the core in a Job Object that would terminate it immediately with Tauri.
+/// Only a quit the player confirmed writes `PLAYER_QUIT` before closing, so the core exits without saving.
 fn spawn_core(exe: &Path, port: u16, env: &[(&'static str, PathBuf)]) -> std::io::Result<Child> {
     log::info!("[process] コアを起動します: {} (port {port})", exe.display());
     let mut command = Command::new(exe);
@@ -271,6 +276,15 @@ fn is_crash_loop(crashes: &mut VecDeque<Instant>, now: Instant) -> bool {
         crashes.pop_front();
     }
     crashes.len() == 2 && now.duration_since(crashes[0]) < GRAPHIC_CRASH_WINDOW
+}
+
+/// Quit the player confirmed with the Exit button. The confirmation says progress is not autosaved, so tell
+/// the core to skip the emergency autosave, then join the common shutdown.
+pub fn request_player_quit(app: &AppHandle, state: &SharedState) {
+    if let Some(stdin) = state.lock().processes.core.as_mut().and_then(|core| core.stdin.as_mut()) {
+        let _ = stdin.write_all(PLAYER_QUIT);
+    }
+    request_app_exit(app, state);
 }
 
 /// Application-wide shutdown. Route every source here (Exit button, window

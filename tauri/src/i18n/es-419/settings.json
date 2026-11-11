@@ -134,6 +134,7 @@
     "loadFailed": "No se pudo cargar",
     "deleteFailed": "No se pudo eliminar",
     "openFolderButton": "Mostrar la carpeta",
-    "scenario": "Escenario"
+    "scenario": "Escenario",
+    "autosaveName": "{{name}} (guardado automático al salir)"
   }
 }

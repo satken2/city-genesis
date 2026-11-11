@@ -134,6 +134,7 @@
     "loadFailed": "加载失败",
     "deleteFailed": "删除失败",
     "openFolderButton": "显示文件夹位置",
-    "scenario": "场景"
+    "scenario": "场景",
+    "autosaveName": "{{name}}（退出时自动保存）"
   }
 }

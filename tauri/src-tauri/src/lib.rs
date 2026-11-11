@@ -1128,13 +1128,14 @@ mod terrain_editor_tests {
     }
 }
 
-/// Exit the entire application (for the top menu's Exit button).
+/// Exit the entire application after the player confirmed it with an Exit button. The core does not write the
+/// emergency autosave.
 #[tauri::command]
 fn exit_app(app: tauri::AppHandle, state: tauri::State<'_, SharedState>) -> Result<(), String> {
     let state = state.inner().clone();
     // Run on a separate thread to avoid blocking the UI thread while waiting for child processes to exit.
     std::thread::spawn(move || {
-        process::request_app_exit(&app, &state);
+        process::request_player_quit(&app, &state);
     });
     Ok(())
 }
