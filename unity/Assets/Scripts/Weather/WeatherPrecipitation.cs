@@ -97,7 +97,7 @@ public sealed class WeatherPrecipitation : MonoBehaviour
         main.playOnAwake = false;
         main.loop = true;
         main.maxParticles = maxParticles;
-        main.simulationSpace = ParticleSystemSimulationSpace.World;
+        main.simulationSpace = ParticleSystemSimulationSpace.Local; // Airborne particles move with the camera-following holder; world space would leave them behind at pan speeds far above their refill time.
         var renderer = system.GetComponent<ParticleSystemRenderer>();
         renderer.sharedMaterial = material;
         renderer.shadowCastingMode = ShadowCastingMode.Off;
@@ -176,12 +176,7 @@ public sealed class WeatherPrecipitation : MonoBehaviour
     private void Place(ParticleSystem system, ref bool emitting, bool active, Vector3 position)
     {
         if (system == null) return;
-        if (active)
-        {
-            // Clear abandoned particles after large camera movements.
-            if ((system.transform.position - position).sqrMagnitude > 3600f) system.Clear();
-            system.transform.SetPositionAndRotation(position, Quaternion.Euler(90f, 0f, 0f));
-        }
+        system.transform.SetPositionAndRotation(position, Quaternion.Euler(90f, 0f, 0f));
         if (active == emitting) return;
         emitting = active;
         // When precipitation stops, stop only emission and let airborne particles finish their lifetimes.
