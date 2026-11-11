@@ -3,7 +3,12 @@ guid: 3eab3d166ea84257aa49186d34595b2c
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BD_DIRT
+    second: {fileID: 2100000, guid: d3f4e520cb3d432e8107e1dfc4291666, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

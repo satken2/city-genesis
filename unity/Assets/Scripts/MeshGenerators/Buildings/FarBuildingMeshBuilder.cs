@@ -6,7 +6,8 @@ using UnityEngine;
 /// Distant (Far) buildings. Stretch one distant model along XYZ to its placement unit's bounding box (no stacking).
 /// Placement units are wings (BuildingSummary.sub_buildings); buildings without wings use the entire building as one unit.
 /// - Whole building: fit `far` to the footprint bounding rectangle aligned to the front edge (vertex 0→1, same as prebuilt) × floors×floor height.
-/// - Wing: fit `mashup-{model_prefix}-far` to occupied cells (sub-building master width×height cells) × wing floors×floor height.
+/// - Wing: fit `mashup-{model_prefix}-far` to occupied cells (sub-building master width×height cells) × wing floors×floor height,
+///   drawn where the normal assembly draws the wing (MashupBuildingMeshBuilder.ResolveDrawnPlacement).
 ///   Wings without distant models stretch a unit cube to the same box.
 /// Resolve models by scanning exterior model-number folders. Fit model XZ bounds to the outline;
 /// fit height above the model origin (contact plane), so underground/underwater geometry below origin scales identically.
@@ -42,11 +43,11 @@ public static class FarBuildingMeshBuilder
                 float halfWidth = (master?.width ?? 1f) * Constants.MASHUP_CELL_SIZE * 0.5f;
                 float halfDepth = (master?.height ?? 1f) * Constants.MASHUP_CELL_SIZE * 0.5f;
                 float storyHeight = placement.height_per_floor is float h && h > 0f ? h : floorHeight;
-                var offset = new Vector2(placement.position[0], placement.position[1]);
+                MashupBuildingMeshBuilder.ResolveDrawnPlacement(placement, buildingData.agent_id, out Vector2 offset, out float rotation);
                 float baseY = Utils.GetGroundHeight(new Vector3(center.x + offset.x, 1000f, center.y + offset.y)) - centerY;
                 GameObject model = BuildingMeshUtils.GetPartBySuffixScan(prefix, $"mashup-{placement.model_prefix}-far", variantNumber);
                 AddStretched(model, new Rect(-halfWidth, -halfDepth, halfWidth * 2f, halfDepth * 2f),
-                    Mathf.Max(1, placement.floors) * storyHeight, Quaternion.Euler(0f, -placement.rotation + 180f, 0f),
+                    Mathf.Max(1, placement.floors) * storyHeight, Quaternion.Euler(0f, -rotation + 180f, 0f),
                     new Vector3(offset.x, baseY, offset.y), parts);
             }
         }

@@ -10,6 +10,9 @@ using System.Collections.Generic;
 public static class ModularBodyBuilder
 {
     public const float GROUND_OFFSET = 0.005f;
+    public const float GROUND_PANEL_EXACT = 0.0003f;     // Gap (m) allowed between a close-up ground panel and the terrain: none beyond float error.
+    public const float GROUND_PANEL_TOLERANCE = 0.01f;   // Gap (m) allowed at other LODs, small enough for the terrain's depth offset to hide.
+    public const float GROUND_UV_SCALE = 0.1f;           // Ground-panel UV per meter: one texture tile per 10m, like concrete foundations and reclaimed land.
 
     private static readonly StageMarker bodyMarker = new StageMarker("Building.Body");
     private static readonly StageMarker loadPartMarker = new StageMarker("Building.LoadPart");
@@ -284,7 +287,7 @@ public static class ModularBodyBuilder
         // Tiles/ground panels cover the full parcel polygon (fenceFootprint). Footprint-only panels
         // would be hidden beneath the body. Fall back to footprint when the parcel is unavailable.
         // Slope-supporting buildings (IsApplicableModelType=FLAT/HOUSE/GABLE) rest on a horizontal plane
-        // plus concrete foundation, but site decorations follow terrain (ground panels only at close-up; see AppendGroundPanel).
+        // plus concrete foundation, but site decorations follow terrain.
         // Conformity uses centerPointWorld.y (terrain elevation at building center), matching
         // BuildingManager.ResolveBuildingBaseHeight placement on land.
         bool deformToTerrain = isDynamic;
@@ -340,7 +343,7 @@ public static class ModularBodyBuilder
     ///   Null floorMaterial (draw_floor disabled or no floor parts anywhere) omits
     ///   ground panels (no default material fallback). Null floorPolygon
     ///   also omits them.
-    /// - deformToTerrain=true makes fence/tile vertices follow terrain, and ground panels too at close-up
+    /// - deformToTerrain=true makes fence/tile vertices and ground panels follow terrain
     ///   (for ultra-near GROUND / PREBUILT).
     /// While a shown building is generated, the ground panel always becomes deferred work and the other decorations follow
     /// BuildingExteriorRenderer.DeferSiteDecorations.
@@ -371,32 +374,35 @@ public static class ModularBodyBuilder
     }
 
     /// <summary>
-    /// Cover polygon with material (site ground panels, construction-site dirt). Only close-up buildings (DrawLod.Close) with deformToTerrain
-    /// clip the panel against the terrain grid; other levels draw one flat panel at GROUND_OFFSET, because clipping a whole parcel
-    /// costs tens of milliseconds on large parcels. While a shown building is generated, the panel becomes deferred low-priority work.
-    /// Terrain following is decided here because deferred jobs run with the Normal LOD set.
+    /// Cover polygon with material (site ground panels, construction-site dirt). With deformToTerrain the panel follows the terrain
+    /// (<see cref="GenerateTerrainConformingFloorMesh"/>): coincident with it at close-up (DrawLod.Close), within GROUND_PANEL_TOLERANCE
+    /// at other levels, where even ground takes few triangles. Without it, one flat panel at GROUND_OFFSET.
+    /// While a shown building is generated, the panel becomes deferred low-priority work.
+    /// The tolerance is decided here because deferred jobs run with the Normal LOD set.
     /// </summary>
     public static void AppendGroundPanel(Vector2[] polygon, Material material, Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
         if (material == null || polygon == null || polygon.Length < 3) return;
-        bool followTerrain = deformToTerrain && BuildingMeshUtils.CurrentDrawLod == DrawLod.Close;
+        float tolerance = !deformToTerrain ? -1f
+            : BuildingMeshUtils.CurrentDrawLod == DrawLod.Close ? GROUND_PANEL_EXACT : GROUND_PANEL_TOLERANCE;
         if (BuildingExteriorRenderer.Capture != null)
         {
             BuildingExteriorRenderer.Capture.Add((meshes, materials, temporary) =>
-                AddGroundPanelMesh(polygon, material, centerPointWorld, followTerrain, meshes, materials, temporary));
+                AddGroundPanelMesh(polygon, material, centerPointWorld, tolerance, meshes, materials, temporary));
             return;
         }
-        AddGroundPanelMesh(polygon, material, centerPointWorld, followTerrain, combineInstances, allMaterials, temporaryMeshes);
+        AddGroundPanelMesh(polygon, material, centerPointWorld, tolerance, combineInstances, allMaterials, temporaryMeshes);
     }
 
-    private static void AddGroundPanelMesh(Vector2[] polygon, Material material, Vector3 centerPointWorld, bool followTerrain,
+    /// <param name="tolerance">Gap allowed between panel and terrain (m); negative draws the flat panel.</param>
+    private static void AddGroundPanelMesh(Vector2[] polygon, Material material, Vector3 centerPointWorld, float tolerance,
         List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
     {
         Mesh mesh;
         using (groundPanelMarker.Auto())
-            mesh = followTerrain
-                ? GenerateTerrainConformingFloorMesh(polygon, centerPointWorld)
+            mesh = tolerance >= 0f
+                ? GenerateTerrainConformingFloorMesh(polygon, centerPointWorld, tolerance)
                 : GenerateFloorMesh(polygon, GROUND_OFFSET);
         if (mesh == null) return;
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING, $"[MBB] 地面パネル: material={FormatMaterial(material)}");
@@ -610,16 +616,28 @@ public static class ModularBodyBuilder
     }
 
     /// <summary>
-    /// Generate a horizontal ground-panel polygon mesh.
+    /// Generate a horizontal ground-panel polygon mesh, with the same UVs as the terrain-following panel.
     /// </summary>
     public static Mesh GenerateFloorMesh(Vector2[] footprint, float height)
     {
-        return BuildingMeshBuilder.GenerateHorizontalPolygonMesh(footprint, height);
+        Mesh mesh = BuildingMeshBuilder.GenerateHorizontalPolygonMesh(footprint, height);
+        if (mesh != null) mesh.uv = GroundUvs(mesh.vertices);
+        return mesh;
+    }
+
+    private static Vector2[] GroundUvs(Vector3[] vertices)
+    {
+        var uv = new Vector2[vertices.Length];
+        for (int i = 0; i < vertices.Length; i++)
+        {
+            uv[i] = new Vector2(vertices[i].x * GROUND_UV_SCALE, vertices[i].z * GROUND_UV_SCALE);
+        }
+        return uv;
     }
 
     /// <summary>
-    /// Generate a ground-panel mesh sloped to follow terrain.
-    /// Clip terrain-grid triangles to the site outline, keeping interiors coplanar with terrain.
+    /// Generate a ground-panel mesh that follows terrain within tolerance (m): terrain-grid blocks stay single quads where the terrain
+    /// is that even and fall back to the terrain's own triangles elsewhere (<see cref="BuildingMeshBuilder.GenerateAdaptiveTerrainSurfaceMesh"/>).
     /// Use provisional SITE_FLOOR_MAX_EDGE subdivision only while tiles are unloaded; regenerate after terrain arrives.
     ///
     /// Convert each vertex height to local coordinates relative to center_point terrain height (centerPointWorld.y).
@@ -629,11 +647,12 @@ public static class ModularBodyBuilder
     /// Also shared by non-building ground panels (station-house path exclusive area, StationHousePath).
     /// Pass footprint in unrotated local XZ with origin at the center.
     /// </summary>
-    public static Mesh GenerateTerrainConformingFloorMesh(Vector2[] footprint, Vector3 centerPointWorld)
+    public static Mesh GenerateTerrainConformingFloorMesh(Vector2[] footprint, Vector3 centerPointWorld, float tolerance = GROUND_PANEL_EXACT)
     {
         if (footprint == null || footprint.Length < 3) return null;
 
-        Mesh aligned = BuildingMeshBuilder.GenerateTerrainSurfaceMesh(footprint, centerPointWorld, GROUND_OFFSET);
+        Mesh aligned = BuildingMeshBuilder.GenerateAdaptiveTerrainSurfaceMesh(
+            footprint, centerPointWorld, GROUND_OFFSET, tolerance, GROUND_UV_SCALE);
         if (aligned != null) return aligned;
 
         float baseGround = centerPointWorld.y;
@@ -667,6 +686,7 @@ public static class ModularBodyBuilder
         Mesh mesh = new Mesh();
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         mesh.vertices = vertices;
+        mesh.uv = GroundUvs(vertices);
         mesh.triangles = triangles.ToArray();
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();

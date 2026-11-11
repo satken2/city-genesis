@@ -31,14 +31,14 @@ using GeneratedModels;
 ///
 /// Excluded from slope handling (IsApplicableModelType): buildings rest on center terrain elevation
 /// (BuildingManager placement rules), with no concrete foundation.
-/// Thus ultra-near (isDynamic) fences/tiles follow terrain, and ground panels too at close-up
+/// Thus ultra-near (isDynamic) fences/tiles/ground panels follow terrain
 /// (same treatment as MODEL_MODULAR_GROUND).
 /// </summary>
 public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
 {
     /// <summary>
     /// Generate a prebuilt building mesh from BuildingSummary.
-    /// With isDynamic=true, fences/tiles follow terrain (ground panels only at close-up).
+    /// With isDynamic=true, fences/tiles/ground panels follow terrain.
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
@@ -119,7 +119,7 @@ public class PreBuiltBuildingMeshBuilder : IBuildingMeshGenerator
         // Draw ground panels only for master draw_floor=yes; resolve floor-part materials
         // via a{variant}→b{bd_type}→common (draw only for non-null floorMaterial).
         // Prebuilt buildings rest at center terrain elevation (excluded from slope handling),
-        // so ultra-near (isDynamic) fences/tiles follow terrain (ground panels only at close-up).
+        // so ultra-near (isDynamic) fences/tiles/ground panels follow terrain.
         Vector2[] fenceFootprint = BuildingMeshUtils.ResolveParcelContext(
             buildingData, out _, out Vector3 centerPointWorld);
         Vector2[] sitePolygon = (fenceFootprint != null && fenceFootprint.Length >= 3) ? fenceFootprint : footprint;

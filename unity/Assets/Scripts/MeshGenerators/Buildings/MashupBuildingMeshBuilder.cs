@@ -13,6 +13,7 @@ using GeneratedModels;
 /// - mashup-{model_prefix}-base-prebuilt … first floor.
 /// - mashup-{model_prefix}-mid-prebuilt  … one repeated floor (count varies with floors).
 /// - mashup-{model_prefix}-top-prebuilt  … top; may represent the complete building.
+/// Wings marked loose in the sub-building master are drawn off the placement grid (<see cref="ResolveDrawnPlacement"/>).
 /// Render all parts at authored size without XYZ scaling; stacking Y follows cumulative authored heights
 /// (unlike prebuilt, no mid floor-height Y scaling or floor-height grid).
 /// height_per_floor determines only fallback white-box height for wings with no parts.
@@ -36,6 +37,9 @@ using GeneratedModels;
 /// </summary>
 public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
 {
+    private const float LOOSE_TURN_DEG = 20f;  // Largest free turn of a loose wing either way, on top of the turns that keep its cells.
+    private const float LOOSE_SHIFT = 1f;      // Largest shift (m) of a loose wing along each axis.
+
     private readonly bool openPit;
 
     /// <param name="openPit">Generate as an open pit (MODEL_OPEN_PIT).</param>
@@ -46,7 +50,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
 
     /// <summary>
     /// Generate a mashup building mesh from BuildingSummary.
-    /// When isDynamic is true, fences follow terrain (ground panels only at close-up).
+    /// When isDynamic is true, fences and ground panels follow terrain.
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
@@ -85,7 +89,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
                 }
                 int firstMesh = temporaryMeshes.Count;
                 float topY = GenerateSubBuilding(
-                    placement, glbPrefix, variantNumber, floorHeight, centerPointWorld,
+                    placement, buildingData.agent_id, glbPrefix, variantNumber, floorHeight, centerPointWorld,
                     combineInstances, materials, temporaryMeshes);
                 maxTopY = Mathf.Max(maxTopY, topY);
                 if (openPit && TryEncapsulate(temporaryMeshes, firstMesh, out Bounds bounds))
@@ -158,11 +162,36 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
+    /// Where a wing is drawn (position relative to center_point, rotation in the placement's convention).
+    /// Wings marked loose in the sub-building master (heaps, parked machines) do not line up on the placement grid: each takes one
+    /// of the turns that map its cells onto themselves (quarter turns for square wings, half turns otherwise), a free turn up to
+    /// LOOSE_TURN_DEG, and a shift up to LOOSE_SHIFT. The amounts are fixed by the building and the wing's planned position, so
+    /// regeneration, LOD changes, and edits to other wings redraw it the same. Other wings keep the planned placement.
+    /// </summary>
+    public static void ResolveDrawnPlacement(SubBuildingPlacement placement, int agentId, out Vector2 position, out float rotation)
+    {
+        position = new Vector2(placement.position[0], placement.position[1]);
+        rotation = placement.rotation;
+        MasterDataStore.SubBuildingMasterItem master = MasterDataStore.Instance != null
+            ? MasterDataStore.Instance.GetSubBuildingMaster(placement.subbuilding_id)
+            : null;
+        if (master == null || !master.loose) return;
+
+        int x = Mathf.RoundToInt(position.x * 2f), z = Mathf.RoundToInt(position.y * 2f);
+        float step = Mathf.Approximately(master.width ?? 1f, master.height ?? 1f) ? 90f : 180f;
+        rotation += Mathf.Floor(CollapsedBuildingMeshBuilder.Hash01(agentId, x, z, 30) * (360f / step)) * step
+            + (CollapsedBuildingMeshBuilder.Hash01(agentId, x, z, 31) * 2f - 1f) * LOOSE_TURN_DEG;
+        position += new Vector2(
+            CollapsedBuildingMeshBuilder.Hash01(agentId, x, z, 32) * 2f - 1f,
+            CollapsedBuildingMeshBuilder.Hash01(agentId, x, z, 33) * 2f - 1f) * LOOSE_SHIFT;
+    }
+
+    /// <summary>
     /// Stack one sub-building and add it to the CombineInstance list.
     /// </summary>
     /// <returns>Local Y of this wing's top (for collider height).</returns>
     private static float GenerateSubBuilding(
-        SubBuildingPlacement placement, string glbPrefix, int variantNumber, float floorHeight,
+        SubBuildingPlacement placement, int agentId, string glbPrefix, int variantNumber, float floorHeight,
         Vector3 centerPointWorld,
         List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
     {
@@ -171,7 +200,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
         GameObject middleModule = BuildingMeshUtils.GetPartBySuffixScan(glbPrefix, $"mashup-{placement.model_prefix}-mid-prebuilt", variantNumber);
         GameObject topModule = BuildingMeshUtils.GetPartBySuffixScan(glbPrefix, $"mashup-{placement.model_prefix}-top-prebuilt", variantNumber);
 
-        Vector2 xzOffset = new Vector2(placement.position[0], placement.position[1]);
+        ResolveDrawnPlacement(placement, agentId, out Vector2 xzOffset, out float rotationDeg);
         int floors = Mathf.Max(1, placement.floors);
         // Used for white-box height when a wing has no parts.
         float subFloorHeight = (placement.height_per_floor.HasValue && placement.height_per_floor.Value > 0f)
@@ -181,7 +210,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
         // Apply rotation using the wall/entrance convention (model X axis along the edge).
         // This aligns model X (width in Blender) with the master width cell-allocation direction
         // (road-facing edge), placing the front corresponding to the wall exterior toward the road.
-        Quaternion rotation = Quaternion.Euler(0, -placement.rotation + 180f, 0);
+        Quaternion rotation = Quaternion.Euler(0, -rotationDeg + 180f, 0);
 
         // Use each wing's placement terrain elevation as its Y reference so it neither floats nor sinks
         // across sloped parcels (subtract center elevation because the building GameObject sits there).

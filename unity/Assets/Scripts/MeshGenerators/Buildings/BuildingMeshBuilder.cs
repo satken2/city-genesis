@@ -43,7 +43,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>
     /// Generate a building mesh from BuildingSummary.
     /// Choose the generation method based on model_type.
-    /// When isDynamic is true, modular/prebuilt fences and tiles follow the terrain (ground panels only at close-up).
+    /// When isDynamic is true, modular/prebuilt fences, tiles, and ground panels follow the terrain.
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic = false)
     {
@@ -1168,17 +1168,9 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>
-    /// Clip a site against terrain-grid triangles. Interpolate interior heights on the same triangles
-    /// to avoid intersecting the ground due to differing triangulation or bilinear interpolation.
-    /// Return null when terrain is unloaded so callers can fall back to a temporary mesh.
-    /// </summary>
-    public static Mesh GenerateTerrainSurfaceMesh(Vector2[] footprint, Vector3 center, float offset)
-    {
-        return GenerateTerrainSurfaceMesh(footprint, TriangulateOrFan(footprint), center, offset, false);
-    }
-
-    /// <summary>
     /// Clip a triangulated surface (including surfaces with holes) against the terrain grid. Pass XZ-counterclockwise triangles.
+    /// Interpolate interior heights on the terrain's own triangles to avoid intersecting the ground due to differing triangulation
+    /// or bilinear interpolation. Return null when terrain is unloaded so callers can fall back to a temporary mesh.
     /// With withUv, use local XZ coordinates (1m=1) as UVs so paving and other textures have consistent density regardless of site orientation.
     /// </summary>
     public static Mesh GenerateTerrainSurfaceMesh(IReadOnlyList<Vector2> footprint, IReadOnlyList<int> source,
@@ -1274,6 +1266,310 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
         return mesh;
+    }
+
+    /// <summary>Largest block of terrain-grid cells, per side, that one quad of an adaptive terrain surface may cover (a power of two).</summary>
+    private const int TERRAIN_SURFACE_MAX_BLOCK = 16;
+
+    /// <summary>Twice the area (m²) of an inward dent that still counts as straight when a clipped cell of an adaptive terrain surface is fanned.</summary>
+    private const float CLIP_DENT_AREA = 1e-4f;
+
+    /// <summary>
+    /// Cover a simple polygon (local XZ relative to center, CCW) with a surface that follows the terrain within a tolerance, using as few
+    /// triangles as the terrain allows. The terrain grid is cut into square blocks (a quadtree of up to TERRAIN_SURFACE_MAX_BLOCK cells
+    /// per side). A block inside the polygon stays one quad when every terrain grid point in it lies within tolerance of the quad's two
+    /// triangles, which split along the terrain's own diagonal; otherwise it splits into four, down to single cells that coincide with the
+    /// terrain triangles. Blocks crossing the outline split down to cells, which are clipped to the polygon. Even ground therefore takes
+    /// a few quads, while cut slopes and pit benches keep the terrain's own resolution.
+    /// A quad beside smaller blocks becomes a fan through their corners, so the surface has no T-junctions. Fan vertices carry terrain
+    /// heights, which keeps a fan within twice the tolerance.
+    /// Normals come from the terrain's slope at each vertex rather than from the triangles, so large quads shade as smoothly as the
+    /// terrain under them. UVs are local XZ × uvScale. Return null when terrain is unloaded so callers can fall back to a temporary mesh.
+    /// </summary>
+    public static Mesh GenerateAdaptiveTerrainSurfaceMesh(Vector2[] footprint, Vector3 center, float offset, float tolerance, float uvScale)
+    {
+        if (footprint == null || footprint.Length < 3) return null;
+        if (!Utils.TryGetTerrainGrid(center, out Vector2 origin, out Vector2 spacing)) return null;
+
+        int n = footprint.Length;
+        Vector2 min = footprint[0], max = footprint[0];
+        foreach (Vector2 p in footprint)
+        {
+            min = Vector2.Min(min, p);
+            max = Vector2.Max(max, p);
+        }
+
+        // Grid window aligned to whole top-level blocks, so the same terrain always yields the same blocks.
+        // Geometry is computed in local coordinates: world coordinates lose millimeters far from the map center.
+        const int block = TERRAIN_SURFACE_MAX_BLOCK;
+        int gx0 = Mathf.FloorToInt((min.x + center.x - origin.x) / spacing.x / block) * block;
+        int gz0 = Mathf.FloorToInt((min.y + center.z - origin.y) / spacing.y / block) * block;
+        int gx1 = Mathf.CeilToInt((max.x + center.x - origin.x) / spacing.x / block) * block;
+        int gz1 = Mathf.CeilToInt((max.y + center.z - origin.y) / spacing.y / block) * block;
+        int pointsX = gx1 - gx0 + 1, pointsZ = gz1 - gz0 + 1;
+        if (pointsX < 2 || pointsZ < 2) return null;
+        Vector2 gridOrigin = new Vector2(
+            (float)((double)origin.x + (double)gx0 * spacing.x - center.x),
+            (float)((double)origin.y + (double)gz0 * spacing.y - center.z));
+
+        var heights = new float[pointsX * pointsZ];
+        var vertexIndex = new int[pointsX * pointsZ];
+        var active = new bool[pointsX * pointsZ];
+        for (int i = 0; i < heights.Length; i++)
+        {
+            heights[i] = float.NaN;
+            vertexIndex[i] = -1;
+        }
+        Utils.ReadGroundHeightGrid(center, gx0, gz0, pointsX, pointsZ, heights);
+        var blocks = new List<Vector3Int>();   // (i, j, cells per side) of quads lying inside the polygon.
+        var clipped = new List<Vector2Int>();  // Cells crossing the outline.
+
+        Vector2 Point(int i, int j) => gridOrigin + new Vector2(i * spacing.x, j * spacing.y);
+
+        float Height(int i, int j)
+        {
+            int k = j * pointsX + i;
+            if (float.IsNaN(heights[k]))
+            {
+                Vector2 p = Point(i, j);
+                heights[k] = Utils.GetGroundHeight(new Vector3(p.x + center.x, 0f, p.y + center.z));
+            }
+            return heights[k];
+        }
+
+        // The terrain between grid points is linear on triangles that subdivide the quad's two triangles, so the gap peaks at grid points.
+        bool Flat(int i, int j, int s)
+        {
+            float h00 = Height(i, j), h10 = Height(i + s, j), h11 = Height(i + s, j + s), h01 = Height(i, j + s);
+            float inverse = 1f / s;
+            for (int b = 0; b <= s; b++)
+            {
+                float v = b * inverse;
+                for (int a = 0; a <= s; a++)
+                {
+                    float u = a * inverse;
+                    float plane = a >= b
+                        ? h00 + u * (h10 - h00) + v * (h11 - h10)
+                        : h00 + u * (h11 - h01) + v * (h01 - h00);
+                    float height = heights[(j + b) * pointsX + i + a];
+                    if (float.IsNaN(height)) height = Height(i + a, j + b);
+                    if (Mathf.Abs(height - plane) > tolerance) return false;
+                }
+            }
+            return true;
+        }
+
+        void Take(int i, int j, int s)
+        {
+            active[j * pointsX + i] = true;
+            active[j * pointsX + i + s] = true;
+            active[(j + s) * pointsX + i] = true;
+            active[(j + s) * pointsX + i + s] = true;
+        }
+
+        void Visit(int i, int j, int s, bool inside)
+        {
+            if (!inside)
+            {
+                Vector2 lo = Point(i, j), hi = Point(i + s, j + s);
+                bool crossing = false;
+                for (int e = 0, p = n - 1; e < n && !crossing; p = e++)
+                {
+                    crossing = SegmentTouchesRect(footprint[p], footprint[e], lo, hi);
+                }
+                if (!crossing && !PolygonUtils.Contains(footprint, (lo + hi) * 0.5f)) return;
+                if (crossing && s == 1)
+                {
+                    clipped.Add(new Vector2Int(i, j));
+                    Take(i, j, 1);
+                    return;
+                }
+                inside = !crossing;
+            }
+            if (inside && (s == 1 || Flat(i, j, s)))
+            {
+                blocks.Add(new Vector3Int(i, j, s));
+                Take(i, j, s);
+                return;
+            }
+            int half = s / 2;
+            Visit(i, j, half, inside);
+            Visit(i + half, j, half, inside);
+            Visit(i, j + half, half, inside);
+            Visit(i + half, j + half, half, inside);
+        }
+
+        for (int j = 0; j < pointsZ - 1; j += block)
+        {
+            for (int i = 0; i < pointsX - 1; i += block)
+            {
+                Visit(i, j, block, false);
+            }
+        }
+
+        var vertices = new List<Vector3>();
+        var normals = new List<Vector3>();
+        var indices = new List<int>();
+        var cutVertices = new Dictionary<Vector2Int, int>();
+
+        Vector3 Normal(int i, int j)
+        {
+            int i0 = Mathf.Max(i - 1, 0), i1 = Mathf.Min(i + 1, pointsX - 1);
+            int j0 = Mathf.Max(j - 1, 0), j1 = Mathf.Min(j + 1, pointsZ - 1);
+            float slopeX = (Height(i1, j) - Height(i0, j)) / ((i1 - i0) * spacing.x);
+            float slopeZ = (Height(i, j1) - Height(i, j0)) / ((j1 - j0) * spacing.y);
+            return new Vector3(-slopeX, 1f, -slopeZ).normalized;
+        }
+
+        int GridVertex(int i, int j)
+        {
+            int k = j * pointsX + i;
+            if (vertexIndex[k] < 0)
+            {
+                Vector2 p = Point(i, j);
+                vertexIndex[k] = vertices.Count;
+                vertices.Add(new Vector3(p.x, Height(i, j) - center.y + offset, p.y));
+                normals.Add(Normal(i, j));
+            }
+            return vertexIndex[k];
+        }
+
+        // Counterclockwise in plan; the reversed winding faces up.
+        var ring = new List<int>();
+        foreach (Vector3Int quad in blocks)
+        {
+            int i = quad.x, j = quad.y, s = quad.z;
+            ring.Clear();
+            for (int a = 0; a < s; a++) if (a == 0 || active[j * pointsX + i + a]) ring.Add(GridVertex(i + a, j));
+            for (int b = 0; b < s; b++) if (b == 0 || active[(j + b) * pointsX + i + s]) ring.Add(GridVertex(i + s, j + b));
+            for (int a = s; a > 0; a--) if (a == s || active[(j + s) * pointsX + i + a]) ring.Add(GridVertex(i + a, j + s));
+            for (int b = s; b > 0; b--) if (b == s || active[(j + b) * pointsX + i]) ring.Add(GridVertex(i, j + b));
+            if (ring.Count == 4)
+            {
+                indices.Add(ring[0]); indices.Add(ring[2]); indices.Add(ring[1]);
+                indices.Add(ring[0]); indices.Add(ring[3]); indices.Add(ring[2]);
+                continue;
+            }
+            int hub = GridVertex(i + s / 2, j + s / 2);
+            for (int k = 0; k < ring.Count; k++)
+            {
+                indices.Add(hub); indices.Add(ring[(k + 1) % ring.Count]); indices.Add(ring[k]);
+            }
+        }
+
+        var polygon = new List<Vector2>(8);
+        var scratch = new List<Vector2>(8);
+
+        var piece = new List<int>(8);
+        var piecePoints = new List<Vector2>(8);
+
+        // The part of the polygon inside one terrain triangle (a, b, c). The whole outline is clipped rather than its triangulation,
+        // whose inner edges would put vertices on cell borders that the quads beside them lack. Points at grid corners take the grid
+        // vertices, so clipped cells join those quads without seams.
+        void EmitClipped(Vector2 a, Vector2 b, Vector2 c, float ha, float hb, float hc, Vector3 na, Vector3 nb, Vector3 nc)
+        {
+            polygon.Clear();
+            polygon.AddRange(footprint);
+            ClipTerrainPolygon(ref polygon, ref scratch, a, b);
+            ClipTerrainPolygon(ref polygon, ref scratch, b, c);
+            ClipTerrainPolygon(ref polygon, ref scratch, c, a);
+            if (polygon.Count < 3) return;
+            float area = Cross(a, b, c);
+            piece.Clear();
+            piecePoints.Clear();
+            foreach (Vector2 p in polygon)
+            {
+                float fx = (p.x - gridOrigin.x) / spacing.x, fz = (p.y - gridOrigin.y) / spacing.y;
+                int gi = Mathf.RoundToInt(fx), gj = Mathf.RoundToInt(fz);
+                int index;
+                if (Mathf.Abs(fx - gi) < 1e-4f && Mathf.Abs(fz - gj) < 1e-4f && gi >= 0 && gj >= 0 && gi < pointsX && gj < pointsZ)
+                {
+                    index = GridVertex(gi, gj);
+                }
+                else
+                {
+                    var key = new Vector2Int(Mathf.RoundToInt(p.x * 10000f), Mathf.RoundToInt(p.y * 10000f));
+                    if (!cutVertices.TryGetValue(key, out index))
+                    {
+                        float wa = Cross(p, b, c) / area, wb = Cross(a, p, c) / area, wc = Cross(a, b, p) / area;
+                        index = vertices.Count;
+                        vertices.Add(new Vector3(p.x, wa * ha + wb * hb + wc * hc - center.y + offset, p.y));
+                        normals.Add((wa * na + wb * nb + wc * nc).normalized);
+                        cutVertices.Add(key, index);
+                    }
+                }
+                if (piece.Count > 0 && (piece[piece.Count - 1] == index || piece[0] == index)) continue;
+                piece.Add(index);
+                piecePoints.Add(p);
+            }
+            if (piece.Count < 3) return;
+
+            // A reflex corner of the outline inside this triangle leaves a concave piece, which a fan would triangulate wrongly.
+            // Outlines carry vertices millimeters apart and nearly collinear runs; a dent below CLIP_DENT_AREA is float noise, not a corner.
+            bool convex = true;
+            for (int k = 0; k < piece.Count && convex; k++)
+            {
+                convex = Cross(piecePoints[k], piecePoints[(k + 1) % piece.Count], piecePoints[(k + 2) % piece.Count]) >= -CLIP_DENT_AREA;
+            }
+            // A piece that ear clipping cannot resolve is fanned as well: it lies within one terrain triangle, so the error stays there.
+            List<int> ears = convex ? null : TriangulateEarClip(piecePoints.ToArray());
+            if (ears == null || ears.Count == 0)
+            {
+                for (int k = 1; k < piece.Count - 1; k++)
+                {
+                    indices.Add(piece[0]); indices.Add(piece[k + 1]); indices.Add(piece[k]);
+                }
+                return;
+            }
+            for (int k = 0; k + 2 < ears.Count; k += 3)
+            {
+                indices.Add(piece[ears[k]]); indices.Add(piece[ears[k + 2]]); indices.Add(piece[ears[k + 1]]);
+            }
+        }
+
+        foreach (Vector2Int cell in clipped)
+        {
+            int i = cell.x, j = cell.y;
+            Vector2 lo = Point(i, j), hi = Point(i + 1, j + 1);
+            Vector2 right = new Vector2(hi.x, lo.y), top = new Vector2(lo.x, hi.y);
+            float hLo = Height(i, j), hRight = Height(i + 1, j), hHi = Height(i + 1, j + 1), hTop = Height(i, j + 1);
+            Vector3 nLo = Normal(i, j), nHi = Normal(i + 1, j + 1);
+            EmitClipped(lo, right, hi, hLo, hRight, hHi, nLo, Normal(i + 1, j), nHi);
+            EmitClipped(lo, hi, top, hLo, hHi, hTop, nLo, nHi, Normal(i, j + 1));
+        }
+
+        if (indices.Count == 0) return null;
+        var uv = new List<Vector2>(vertices.Count);
+        foreach (Vector3 v in vertices) uv.Add(new Vector2(v.x * uvScale, v.z * uvScale));
+        var mesh = new Mesh { indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+        mesh.SetVertices(vertices);
+        mesh.SetNormals(normals);
+        mesh.SetUVs(0, uv);
+        mesh.SetTriangles(indices, 0);
+        mesh.RecalculateBounds();
+        return mesh;
+    }
+
+    /// <summary>Whether segment a–b reaches the axis-aligned rectangle lo–hi, counting contact with its border.</summary>
+    private static bool SegmentTouchesRect(Vector2 a, Vector2 b, Vector2 lo, Vector2 hi)
+    {
+        const float margin = 1e-3f;
+        float enter = 0f, exit = 1f;
+        Vector2 d = b - a;
+        for (int axis = 0; axis < 2; axis++)
+        {
+            float low = lo[axis] - margin, high = hi[axis] + margin;
+            if (Mathf.Abs(d[axis]) < 1e-9f)
+            {
+                if (a[axis] < low || a[axis] > high) return false;
+                continue;
+            }
+            float t0 = (low - a[axis]) / d[axis], t1 = (high - a[axis]) / d[axis];
+            enter = Mathf.Max(enter, Mathf.Min(t0, t1));
+            exit = Mathf.Min(exit, Mathf.Max(t0, t1));
+            if (enter > exit) return false;
+        }
+        return true;
     }
 
     private static void ClipTerrainPolygon(ref List<Vector2> input, ref List<Vector2> output, Vector2 a, Vector2 b)

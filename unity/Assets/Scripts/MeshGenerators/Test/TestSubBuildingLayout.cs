@@ -188,8 +188,9 @@ public static class TestSubBuildingLayout
             var tied = SameWing(best, pool).FindAll(kvp =>
             {
                 (_, int? max) = CountBounds(kvp.Value);
+                // The cast rounds to the precision bestQuotient was stored in; without it Mono compares a wider intermediate and no row ties.
                 return (!max.HasValue || state.Counts[kvp.Key] < max.Value)
-                    && Weight(kvp.Value) / (state.Counts[kvp.Key] + 1) == bestQuotient;
+                    && (float)(Weight(kvp.Value) / (state.Counts[kvp.Key] + 1)) == bestQuotient;
             });
             best = PickLook(tied);
             if (!TryPlace(best, preferFront: false, state))

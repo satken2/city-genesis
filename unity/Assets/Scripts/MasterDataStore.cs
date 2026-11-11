@@ -166,6 +166,7 @@ public class MasterDataStore : MonoBehaviour
 		public float? weight;    // Building-count ratio for generated placements (default 1.0; 0 excludes it from proportional filling).
 		public int? min_count;   // Minimum placement count (default 0).
 		public int? max_count;   // Maximum placement count (unlimited if unset). The first building, with the lowest ID, forms the facility's front.
+		public bool loose;       // Drawn turned and shifted off the placement grid (heaps, parked machines); see MashupBuildingMeshBuilder.ResolveDrawnPlacement.
 	}
 
 	[Serializable]

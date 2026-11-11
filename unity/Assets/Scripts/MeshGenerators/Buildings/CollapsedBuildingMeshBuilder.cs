@@ -517,7 +517,7 @@ public class CollapsedBuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     /// <summary>Deterministic value in [0, 1) for a seed, grid coordinates, and a stream number.</summary>
-    private static float Hash01(int seed, int x, int z, int stream)
+    internal static float Hash01(int seed, int x, int z, int stream)
     {
         unchecked
         {

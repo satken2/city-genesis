@@ -178,6 +178,41 @@ public static class Utils
         return spacing.x > 0f && spacing.y > 0f;
     }
 
+    /// <summary>
+    /// Ground heights at points of the rendered tile grid (<see cref="TryGetTerrainGrid"/> at reference): for grid indices x0…x0+countX-1 and
+    /// z0…z0+countZ-1 counted from that grid's origin, write what <see cref="GetGroundHeight"/> returns there into
+    /// heights[(z - z0) * countX + (x - x0)]. Each loaded tile's heightmap is read as one block, which is far cheaper per point.
+    /// Points on tiles that are not loaded are left untouched.
+    /// </summary>
+    public static void ReadGroundHeightGrid(Vector3 reference, int x0, int z0, int countX, int countZ, float[] heights)
+    {
+        if (!TryGetTerrainGrid(reference, out Vector2 origin, out Vector2 spacing)) return;
+        int cells = GetTerrainAtPosition(reference).terrainData.heightmapResolution - 1;
+        for (int tz = Mathf.FloorToInt((float)z0 / cells); tz * cells < z0 + countZ; tz++)
+        {
+            for (int tx = Mathf.FloorToInt((float)x0 / cells); tx * cells < x0 + countX; tx++)
+            {
+                Terrain terrain = GetTerrainAtPosition(new Vector3(
+                    origin.x + (tx + 0.5f) * cells * spacing.x, 0f, origin.y + (tz + 0.5f) * cells * spacing.y));
+                if (terrain == null || terrain.terrainData == null || terrain.terrainData.heightmapResolution != cells + 1) continue;
+                int minX = Mathf.Max(x0, tx * cells), maxX = Mathf.Min(x0 + countX - 1, (tx + 1) * cells);
+                int minZ = Mathf.Max(z0, tz * cells), maxZ = Mathf.Min(z0 + countZ - 1, (tz + 1) * cells);
+                float[,] block = terrain.terrainData.GetHeights(minX - tx * cells, minZ - tz * cells, maxX - minX + 1, maxZ - minZ + 1);
+                float scale = terrain.terrainData.size.y, baseY = terrain.transform.position.y;
+                for (int z = minZ; z <= maxZ; z++)
+                {
+                    float worldZ = origin.y + z * spacing.y;
+                    for (int x = minX; x <= maxX; x++)
+                    {
+                        float height = block[z - minZ, x - minX] * scale + baseY;
+                        if (ReclaimedLandStore.TryGetBandTop(origin.x + x * spacing.x, worldZ, out float top) && top > height) height = top;
+                        heights[(z - z0) * countX + (x - x0)] = height;
+                    }
+                }
+            }
+        }
+    }
+
     private static Terrain GetTerrainAtPosition(Vector3 position)
     {
         // Prefer the cached TerrainManager reference.

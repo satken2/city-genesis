@@ -3,7 +3,12 @@ guid: ca5b2f7cc7a0ef348a99ebe98eab302d
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: BD_IRON_DUST
+    second: {fileID: 2100000, guid: f96d3d0ef9e54c6c931786d2b3b870ca, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

@@ -13,7 +13,7 @@ using GeneratedModels;
 ///
 /// Output:
 /// - Site dirt: a ground panel covering the entire site (parcel polygon, or footprint if unavailable), drawn by the same rule as
-///   site ground panels (ModularBodyBuilder.AppendGroundPanel: terrain-following only at close-up, deferred low-priority work).
+///   site ground panels (ModularBodyBuilder.AppendGroundPanel: terrain-following, deferred low-priority work).
 ///   Material: Resources/ConstructionDirt (falls back to ConstructionMaterial → BuildingMaterial if missing).
 /// - Foundation: the same Y-extruded footprint base as completed buildings (BuildingMeshBuilder.GenerateFoundationMesh),
 ///   using dirt material. Only for model_type values supporting slopes (IsApplicableModelType).

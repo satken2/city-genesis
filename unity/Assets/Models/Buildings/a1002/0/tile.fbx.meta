@@ -3,7 +3,12 @@ guid: 71fa324b7c5149a5bb40234003ce692c
 ModelImporter:
   serializedVersion: 24600
   internalIDToNameTable: []
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: MAT_SOIL_TILLED
+    second: {fileID: 2100000, guid: 3a14a3b3c6dc4e2ba948b08872aefa7a, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

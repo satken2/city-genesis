@@ -13,6 +13,10 @@ public static class TerrainSurfaceQA
     static object Call(string type, string method, params object[] args)
         => source.GetType(type).GetMethod(method, BindingFlags.Static | BindingFlags.Public).Invoke(null, args);
     static float Height(float x, float z) => (float)Call("Utils", "GetGroundHeight", new Vector3(x, 0, z));
+    static float Constant(string name) => (float)source.GetType("ModularBodyBuilder").GetField(name).GetRawConstantValue();
+    static float Exact => Constant("GROUND_PANEL_EXACT");
+    static Mesh Floor(Vector2[] polygon, Vector3 center, float tolerance)
+        => (Mesh)Call("ModularBodyBuilder", "GenerateTerrainConformingFloorMesh", polygon, center, tolerance);
 
     public static void Run()
     {
@@ -54,7 +58,7 @@ public static class TerrainSurfaceQA
 
             var polygon = new[] { new Vector2(-12.3f, -10.2f), new Vector2(11.7f, -8.3f), new Vector2(10.2f, 11.4f), new Vector2(-4.6f, 6.3f), new Vector2(-11.3f, 10.8f) };
             var center = new Vector3(0, Height(0, 0), 0);
-            var floor = (Mesh)Call("ModularBodyBuilder", "GenerateTerrainConformingFloorMesh", polygon, center);
+            var floor = Floor(polygon, center, Exact);
             CheckFloorArea(floor, polygon);
             var floorObject = new GameObject("Floor");
             floorObject.transform.position = center;
@@ -78,6 +82,7 @@ public static class TerrainSurfaceQA
             if (maxPenetration > .001f) throw new Exception("Terrain penetrates floor");
             CheckFloorRendering(terrain, floorObject, floor, root);
             CheckCellBoundary(polygon);
+            CheckAdaptive(root);
             CheckRoad(data, terrainObject);
             File.WriteAllText(output, "PASS\n" + string.Join("\n", results));
             EditorApplication.Exit(0);
@@ -121,7 +126,7 @@ public static class TerrainSurfaceQA
         adjacent.transform.position = new Vector3(32, -20, -32);
         Call("Utils", "InvalidateHeightCache");
         var center = new Vector3(31.3f, Height(31.3f, 0), 0);
-        var mesh = (Mesh)Call("ModularBodyBuilder", "GenerateTerrainConformingFloorMesh", polygon, center);
+        var mesh = Floor(polygon, center, Exact);
         CheckFloorArea(mesh, polygon);
         var go = new GameObject("Boundary floor");
         go.transform.position = center;
@@ -149,6 +154,189 @@ public static class TerrainSurfaceQA
         UnityEngine.Object.DestroyImmediate(adjacent);
         UnityEngine.Object.DestroyImmediate(data);
         Call("Utils", "InvalidateHeightCache");
+    }
+
+    // Ground panels away from close-up: even ground takes few triangles, benches and cut slopes keep the terrain's own triangles,
+    // and the gap to the terrain stays within twice the tolerance without terrain showing through from Normal-LOD distances.
+    static void CheckAdaptive(string root)
+    {
+        const int res = 513;
+        float cell = 500f / (res - 1);
+        var data = new TerrainData { heightmapResolution = res, size = new Vector3(500, 200, 500) };
+        var heights = new float[res, res];
+        var pit = new Vector2(330, 250);
+        for (int z = 0; z < res; z++)
+            for (int x = 0; x < res; x++)
+            {
+                float wx = x * cell, wz = z * cell;
+                // Rolling ground, a leveled yard, and an open pit with 10m benches (6m berm, 3.5m face).
+                float h = 120 + .05f * wx + 3f * Mathf.Sin(wx / 40f) * Mathf.Cos(wz / 55f);
+                if (wx > 150 && wx < 230 && wz > 190 && wz < 240) h = 128;
+                float inward = 70 - Vector2.Distance(new Vector2(wx, wz), pit);
+                if (inward > 0)
+                {
+                    float step = Mathf.Floor(inward / 9.5f), along = inward - step * 9.5f;
+                    h -= 10f * (step + Mathf.Clamp01(along / 3.5f));
+                }
+                heights[z, x] = h / 200f;
+            }
+        data.SetHeights(0, 0, heights);
+        var terrainObject = Terrain.CreateTerrainGameObject(data);
+        terrainObject.transform.position = new Vector3(1000, -20, -250);
+        var terrain = terrainObject.GetComponent<Terrain>();
+        terrain.heightmapPixelError = (float)source.GetType("LocalConstants").GetField("TERRAIN_HEIGHTMAP_PIXEL_ERROR").GetRawConstantValue();
+        terrain.drawInstanced = false;
+        Physics.SyncTransforms();
+        Call("Utils", "InvalidateHeightCache");
+
+        float tolerance = Constant("GROUND_PANEL_TOLERANCE"), offset = Constant("GROUND_OFFSET");
+        var sites = new (string name, Vector3 center, Vector2[] polygon)[]
+        {
+            ("mine 3.4ha with pit", new Vector3(1290, 0, 0), new[] { new Vector2(-150, -58), new Vector2(118, -66), new Vector2(124, 71), new Vector2(-141, 55) }),
+            ("rolling field 1.0ha", new Vector3(1090, 0, -120), new[] { new Vector2(-52, -47), new Vector2(49, -51), new Vector2(55, 46), new Vector2(-10, 30), new Vector2(-50, 52) }),
+            ("leveled yard 0.3ha", new Vector3(1190, 0, -35), new[] { new Vector2(-36, -22), new Vector2(37, -21), new Vector2(36, 22), new Vector2(-37, 21) }),
+            ("house lot 300m2", new Vector3(1100, 0, 60), new[] { new Vector2(-10, -8), new Vector2(10, -7), new Vector2(9, 8), new Vector2(-10, 7) }),
+            ("large farm 19ha", new Vector3(1250, 0, 0), new[] { new Vector2(-240, -200), new Vector2(230, -215), new Vector2(240, 190), new Vector2(-235, 205) }),
+            // An L-shaped lot whose outline has a reflex corner, vertices millimeters apart, and a nearly collinear run, as parcels cut by roads do.
+            ("notched lot 0.2ha", new Vector3(1120, 0, 150), new[] { new Vector2(-30, -22), new Vector2(-4.2f, -22.004f), new Vector2(-4.198f, -22.003f), new Vector2(-4.196f, -22.004f),
+                new Vector2(30, -21.6f), new Vector2(30.3f, 2.1f), new Vector2(6.4f, 2.4f), new Vector2(6.1f, 21), new Vector2(-12.3f, 21.2f), new Vector2(-30.2f, 21.5f) }),
+        };
+        // Clipping must settle every cell without falling back to warnings, which cost more than the geometry.
+        int warnings = 0;
+        Application.LogCallback onLog = (message, stack, type) => { if (type != LogType.Log) warnings++; };
+        Application.logMessageReceived += onLog;
+        // The first call pays for JIT compilation.
+        UnityEngine.Object.DestroyImmediate(Floor(sites[3].polygon, new Vector3(sites[3].center.x, Height(sites[3].center.x, sites[3].center.z), sites[3].center.z), tolerance));
+        var ground = terrainObject.GetComponent<TerrainCollider>();
+        foreach (var site in sites)
+        {
+            var center = new Vector3(site.center.x, Height(site.center.x, site.center.z), site.center.z);
+            Mesh[] meshes = new Mesh[2];
+            double[] ms = new double[2];
+            for (int mode = 0; mode < 2; mode++)
+            {
+                // Median of five runs: single runs vary with garbage collection.
+                var samples = new List<double>();
+                for (int run = 0; run < 5; run++)
+                {
+                    if (meshes[mode] != null) UnityEngine.Object.DestroyImmediate(meshes[mode]);
+                    Call("Utils", "InvalidateHeightCache");
+                    var watch = System.Diagnostics.Stopwatch.StartNew();
+                    meshes[mode] = Floor(site.polygon, center, mode == 0 ? Exact : tolerance);
+                    samples.Add(watch.Elapsed.TotalMilliseconds);
+                }
+                samples.Sort();
+                ms[mode] = samples[2];
+                CheckFloorArea(meshes[mode], site.polygon);
+            }
+            double area = 0;
+            for (int i = 0; i < site.polygon.Length; i++)
+            {
+                Vector2 a = site.polygon[i], b = site.polygon[(i + 1) % site.polygon.Length];
+                area += ((double)a.x * b.y - (double)a.y * b.x) * .5;
+            }
+            int cells = (int)(Math.Abs(area) / (cell * cell));
+            results.Add($"Adaptive {site.name}: {cells} terrain cells; close-up {meshes[0].vertexCount} vertices {ms[0]:F1}ms; other LODs {meshes[1].vertexCount} vertices {meshes[1].triangles.Length / 3} triangles {ms[1]:F1}ms");
+
+            float minX = float.MaxValue, maxX = float.MinValue, minZ = float.MaxValue, maxZ = float.MinValue;
+            foreach (var p in site.polygon) { minX = Mathf.Min(minX, p.x); maxX = Mathf.Max(maxX, p.x); minZ = Mathf.Min(minZ, p.y); maxZ = Mathf.Max(maxZ, p.y); }
+            float stride = Mathf.Max(.31f, (maxX - minX) / 300f);
+            for (int mode = 0; mode < 2; mode++)
+            {
+                var go = new GameObject("Adaptive floor");
+                go.transform.position = center;
+                var collider = go.AddComponent<MeshCollider>();
+                collider.sharedMesh = meshes[mode];
+                Physics.SyncTransforms();
+                float below = 0, above = 0;
+                int count = 0;
+                for (float z = minZ; z <= maxZ; z += stride)
+                    for (float x = minX; x <= maxX; x += stride)
+                    {
+                        var ray = new Ray(new Vector3(center.x + x, 500, center.z + z), Vector3.down);
+                        if (!collider.Raycast(ray, out var surface, 1000) || !ground.Raycast(ray, out var earth, 1000)) continue;
+                        count++;
+                        below = Mathf.Max(below, earth.point.y - surface.point.y);
+                        above = Mathf.Max(above, surface.point.y - earth.point.y);
+                    }
+                float allowed = mode == 0 ? .001f : 2 * tolerance + .001f;
+                results.Add($"  {(mode == 0 ? "close-up" : "other LODs")}: {count} samples, terrain above panel {below:F4}m, panel above terrain {above:F4}m");
+                if (count < 200) throw new Exception("Adaptive floor coverage missing: " + site.name);
+                if (below > allowed || above - offset > allowed) throw new Exception("Adaptive floor leaves the terrain: " + site.name);
+                if (mode == 1) CheckAdaptiveRendering(terrain, go, meshes[0], meshes[1], center, Mathf.Max(maxX - minX, maxZ - minZ) * .5f, site.name, root);
+                UnityEngine.Object.DestroyImmediate(go);
+            }
+            if (site.name.StartsWith("leveled") && meshes[1].vertexCount * 3 > cells)
+                throw new Exception("Leveled ground is not simplified");
+            if (meshes[1].vertexCount > meshes[0].vertexCount) throw new Exception("Tolerance adds vertices: " + site.name);
+            UnityEngine.Object.DestroyImmediate(meshes[0]);
+            UnityEngine.Object.DestroyImmediate(meshes[1]);
+        }
+        Application.logMessageReceived -= onLog;
+        results.Add($"Adaptive: {warnings} warnings or errors logged");
+        if (warnings > 0) throw new Exception("Ground panels logged warnings");
+        UnityEngine.Object.DestroyImmediate(terrainObject);
+        UnityEngine.Object.DestroyImmediate(data);
+        Call("Utils", "InvalidateHeightCache");
+    }
+
+    // Perspective views from Normal-LOD distances and angles. Ground panels are drawn as deferred exteriors with the part's own material,
+    // so only the terrain's depth offset (1,1) separates them from the terrain.
+    // Terrain in front of the panel hides both panels alike, so count the pixels where terrain shows through the tolerant panel only.
+    static void CheckAdaptiveRendering(Terrain terrain, GameObject floorObject, Mesh exact, Mesh floor, Vector3 center, float radius, string name, string root)
+    {
+        var earthMaterial = new Material(Shader.Find("Tests/SurfaceDepthQA")) { color = Color.green };
+        earthMaterial.SetFloat("_Factor", 1);
+        earthMaterial.SetFloat("_Units", 1);
+        terrain.materialTemplate = earthMaterial;
+        var filter = floorObject.AddComponent<MeshFilter>();
+        var floorMaterial = new Material(Shader.Find("Tests/SurfaceDepthQA")) { color = Color.white };
+        floorObject.AddComponent<MeshRenderer>().sharedMaterial = floorMaterial;
+        var camera = new GameObject("Camera").AddComponent<Camera>();
+        camera.fieldOfView = 40;
+        camera.nearClipPlane = .3f;
+        camera.farClipPlane = 20000;
+        camera.clearFlags = CameraClearFlags.SolidColor;
+        camera.backgroundColor = Color.black;
+        var target = new RenderTexture(1600, 900, 24);
+        camera.targetTexture = target;
+        Color32[] Capture(string file)
+        {
+            camera.Render();
+            RenderTexture.active = target;
+            var texture = new Texture2D(1600, 900, TextureFormat.RGB24, false);
+            texture.ReadPixels(new Rect(0, 0, 1600, 900), 0, 0);
+            texture.Apply();
+            if (file != null) File.WriteAllBytes(root + "/Temp/TerrainSurfaceQA/" + file + ".png", texture.EncodeToPNG());
+            var pixels = texture.GetPixels32();
+            UnityEngine.Object.DestroyImmediate(texture);
+            return pixels;
+        }
+        string slug = name.Split(' ')[0];
+        foreach (float distance in new[] { 25f, 60f, 150f, 400f, 1200f })
+            foreach (float elevation in new[] { 12f, 40f })
+            {
+                var look = center + new Vector3(Mathf.Min(radius * .5f, distance * .3f), 0, 0);
+                camera.transform.position = look + Quaternion.Euler(elevation, 200, 0) * Vector3.back * distance;
+                camera.transform.LookAt(look);
+                filter.sharedMesh = exact;
+                var reference = Capture(null);
+                filter.sharedMesh = floor;
+                var actual = Capture(distance == 150f ? $"adaptive-{slug}-{elevation}" : null);
+                int covered = 0, holes = 0;
+                for (int i = 0; i < actual.Length; i++)
+                    if (reference[i].r > 250)
+                    {
+                        covered++;
+                        if (actual[i].r < 100 && actual[i].g > 150) holes++;
+                    }
+                results.Add($"  rendering at {distance}m, {elevation} deg: {holes}/{covered} terrain pixels inside panel");
+                if (distance >= 60f && holes > covered / 2000 + 5) throw new Exception($"Rendered terrain shows through the panel: {name} at {distance}m");
+            }
+        RenderTexture.active = null;
+        camera.targetTexture = null;
+        UnityEngine.Object.DestroyImmediate(camera.gameObject);
+        UnityEngine.Object.DestroyImmediate(target);
     }
 
     static void CheckFloorRendering(Terrain terrain, GameObject floorObject, Mesh floor, string root)
