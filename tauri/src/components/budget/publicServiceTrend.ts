@@ -104,11 +104,14 @@ export function buildPublicServiceTrend(
   return result;
 }
 
-/** Leave headroom above displayed quantities and limiting capacity so larger facility capacity does not flatten actual values. */
+/**
+ * Scale the axis to actual demand and production only, leaving 25% headroom.
+ * Forecasts and capacities above it are clipped so a distant forecast or a large facility does not flatten the actuals.
+ */
 export function publicServiceChartUpperBound(trend: PublicServiceTrend): number {
-  let maximum = trend.capacityLimit;
+  let maximum = 0;
   for (const point of trend.points) {
-    maximum = Math.max(maximum, point.demand ?? 0, point.production ?? 0, point.forecast ?? 0);
+    maximum = Math.max(maximum, point.demand ?? 0, point.production ?? 0);
   }
   return maximum > 0 ? maximum / 0.75 : 1;
 }

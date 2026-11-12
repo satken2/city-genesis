@@ -58,10 +58,9 @@ assert.ok(flatTrend.points.slice(3).every(p => p.forecast === 100));
 const upstreamLimit = buildPublicServiceTrend([1, 2], { ...flat, total_order: [10, 20] }, 3, supply(30, 200), 30, 50);
 assert.equal(upstreamLimit.capacityLimit, 50);
 assert.equal(upstreamLimit.capacityReachedIn, 2, "高圧財側の容量が小さければ、そちらの到達時期を案内する");
-const upstreamLarge = buildPublicServiceTrend([1, 2], flat, 3, supply(100, 200), 30, 1000000);
-assert.equal(publicServiceChartUpperBound(upstreamLarge), 200 / 0.75, "大きい方の容量は縦軸を押し広げず、基準量に25%の高さの余白を残す");
-assert.equal(publicServiceChartUpperBound(buildPublicServiceTrend([1, 2], flat, 3, supply(100, 1000000), 30, 200)), 200 / 0.75,
-  "通常財側の容量が大きくても、小さい高圧財側の容量を縦軸の基準にする");
+assert.equal(publicServiceChartUpperBound(buildPublicServiceTrend([1, 2], flat, 3, supply(100, 200), 30, 1000000)), 100 / 0.75,
+  "容量は縦軸を押し広げず、需要・生産の実績に25%の高さの余白を残す");
+assert.equal(publicServiceChartUpperBound(upstreamLimit), 95 / 0.75, "需要の見込みが伸びても縦軸は実績で決める");
 assert.equal(publicServiceChartUpperBound(monthly), 10000 / 0.75, "過去の実績も縦軸の範囲に収める");
 assert.equal(publicServiceChartUpperBound(buildPublicServiceTrend([], undefined, 0, supply(0, 0), 30)), 1);
 const declining = { ...flat, total_order: [100, 50] };

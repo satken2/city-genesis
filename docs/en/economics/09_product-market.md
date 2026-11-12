@@ -49,3 +49,5 @@ Some products have no local production facilities and are supplied entirely thro
 
 Trade uses external prices and is affected by overseas freight costs and tariffs. Heavy, inexpensive goods are costly to transport and tend to favor local production; light, expensive goods can trade over greater distances. See [finance](12_finance.md) for trade-related money flows.
 
+Natural resources that can be extracted in only a limited number of places outside the city also carry a value there. The external price of a product extracted from such a resource includes the value of the resource and the freight from where it is extracted. A resource located in the city is obtained simply by extracting it, so a city with such resources has an advantage in exporting the extracted products and in industries that use them as raw materials.
+
