@@ -23,6 +23,7 @@
   },
   "publicServiceGauge": {
     "tooltip": "공공 서비스의 충족도(수요 / 공급 용량)",
+    "trade": "수출입",
     "services": {
       "302": "상수도",
       "303": "전력",

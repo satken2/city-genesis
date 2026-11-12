@@ -23,6 +23,7 @@
   },
   "publicServiceGauge": {
     "tooltip": "公共サービスの充足度(需要 / 供給キャパシティ)",
+    "trade": "輸出入",
     "services": {
       "302": "水道",
       "303": "電力",

@@ -58,6 +58,18 @@
   transition: height 0.2s;
 }
 
+/* Cross replacing the bar when no facility can supply it. */
+.psg-missing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: var(--flat-danger);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
 .psg-icon {
   width: 14px;
   height: 14px;

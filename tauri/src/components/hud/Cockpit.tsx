@@ -16,7 +16,8 @@
  *   In scenario authoring mode (scenarioMode), clicking buildings/roads deletes them immediately without
  *   confirmation or undo. Normally, only vacant land, planned buildings/roads, and terrain props are eligible.
  * - Public service adequacy: vertical bars show electricity/water demand against the smaller of service and
- *   high-voltage goods capacity. Click to open public facilities.
+ *   high-voltage goods capacity, and import/export handling against trade hub capacity. A bar shows a cross
+ *   instead when its capacity is zero, i.e. the facility is not built yet. Click to open public facilities.
  * - Realized climate: temperature, precipitation, sunlight, and wind speed of the most recently started epoch in
  *   a 2×2 layout. Click to open climate settings in scenario authoring mode, or the climate window otherwise.
  * - Alerts: L1 notifications use two severity levels. One or more warnings (city functions are deteriorating and

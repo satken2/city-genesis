@@ -17,7 +17,7 @@ import { CityMapCanvas, type CityMapLayerVisibility } from "../map/CityMapCanvas
 import { InfraMapLegend } from "../map/InfraMapLegend";
 import type { InfraSelection } from "../map/infraOverlay";
 
-type LogisticsHub = {
+export type LogisticsHub = {
   agent_id: number;
   name: string;
   variant: number;
@@ -40,7 +40,7 @@ type LogisticsStation = {
   load: number;
 };
 
-type LogisticsData = {
+export type LogisticsData = {
   epoch: number;
   simulation_days: number;
   freight_product_ids: number[];

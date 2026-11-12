@@ -23,6 +23,7 @@
   },
   "publicServiceGauge": {
     "tooltip": "Cobertura del servicio público (demanda / capacidad de suministro)",
+    "trade": "Comercio exterior",
     "services": {
       "302": "Agua potable",
       "303": "Electricidad",

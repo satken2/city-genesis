@@ -23,6 +23,7 @@
   },
   "publicServiceGauge": {
     "tooltip": "Public service adequacy (demand / supply capacity)",
+    "trade": "Trade",
     "services": {
       "302": "Water",
       "303": "Electricity",

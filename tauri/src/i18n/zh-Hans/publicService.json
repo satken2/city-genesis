@@ -23,6 +23,7 @@
   },
   "publicServiceGauge": {
     "tooltip": "公共服务的充足度（需求 / 供给容量）",
+    "trade": "进出口",
     "services": {
       "302": "自来水",
       "303": "电力",

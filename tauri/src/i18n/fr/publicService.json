@@ -23,6 +23,7 @@
   },
   "publicServiceGauge": {
     "tooltip": "Couverture du service public (demande / capacité de fourniture)",
+    "trade": "Import-export",
     "services": {
       "302": "Eau potable",
       "303": "Électricité",
