@@ -180,6 +180,10 @@
       "facility_infra_disconnected": {
         "title": "{{facility}} is not connected to the {{product_name}} network"
       },
+      "slum_sanitation": {
+        "title": "There are households living in slums",
+        "evidence": "Households living in slums: {{count}}"
+      },
       "service_shortage": {
         "title": "{{product_name}} is in short supply",
         "evidence": "Households received {{percent}}% of the reference amount"

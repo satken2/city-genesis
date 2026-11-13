@@ -180,6 +180,10 @@
       "facility_infra_disconnected": {
         "title": "{{facility}}이(가) {{product_name}} 망에 연결되어 있지 않음"
       },
+      "slum_sanitation": {
+        "title": "슬럼에 거주하는 가구가 있음",
+        "evidence": "슬럼에 거주하는 가구: {{count}}가구"
+      },
       "service_shortage": {
         "title": "{{product_name}} 공급이 부족함",
         "evidence": "가구가 받은 양은 기준량의 {{percent}}%"

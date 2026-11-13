@@ -180,6 +180,10 @@
       "facility_infra_disconnected": {
         "title": "{{facility}}未接入{{product_name}}网络"
       },
+      "slum_sanitation": {
+        "title": "有家庭居住在贫民窟",
+        "evidence": "居住在贫民窟的家庭：{{count}}户"
+      },
       "service_shortage": {
         "title": "{{product_name}}供应不足",
         "evidence": "家庭获得量为基准量的 {{percent}}%"

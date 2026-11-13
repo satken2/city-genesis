@@ -180,6 +180,10 @@
       "facility_infra_disconnected": {
         "title": "{{facility}}が{{product_name}}の網に接続されていない"
       },
+      "slum_sanitation": {
+        "title": "スラムに居住している世帯がいる",
+        "evidence": "スラムに居住している世帯：{{count}}世帯"
+      },
       "service_shortage": {
         "title": "{{product_name}}の供給が不足している",
         "evidence": "世帯の受取は基準量の {{percent}}%"

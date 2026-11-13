@@ -180,6 +180,10 @@
       "facility_infra_disconnected": {
         "title": "{{facility}} no tiene conexión con la red de {{product_name}}"
       },
+      "slum_sanitation": {
+        "title": "Hay hogares que viven en asentamientos precarios",
+        "evidence": "Hogares en asentamientos precarios: {{count}}"
+      },
       "service_shortage": {
         "title": "Falta suministro de {{product_name}}",
         "evidence": "Los hogares recibieron el {{percent}}% de la cantidad de referencia"

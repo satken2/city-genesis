@@ -180,6 +180,10 @@
       "facility_infra_disconnected": {
         "title": "{{facility}} n’a pas de raccordement au réseau de {{product_name}}"
       },
+      "slum_sanitation": {
+        "title": "Des ménages vivent dans des bidonvilles",
+        "evidence": "Ménages vivant dans des bidonvilles : {{count}}"
+      },
       "service_shortage": {
         "title": "L’offre de {{product_name}} est insuffisante",
         "evidence": "Les ménages ont reçu {{percent}} % de la quantité de référence"
