@@ -1,31 +1,20 @@
 /**
  * Tourism statistics tab component.
  *
- * Fetches and visualizes tourist stays, capacity, accommodation supply/demand, satisfaction,
- * and spending from GET /api/v1/stats/tourism.
- *
- * Layout:
- * - Top row: summary tiles (staying tourists / capacity and fulfillment / arrivals and returns /
- *   applications / tourism revenue / average satisfaction).
- * - Left/right split.
- *   - Left column: three history charts (staying tourists vs capacity, arrivals/returns/applications,
- *     tourism revenue).
- *   - Right column: bottleneck table (attractions vs gateways), accommodation supply/demand card,
- *     satisfaction card (average + distribution), and tourist spending list.
- *
- * No visitor-flow breakdown (destinations) or District aggregation is provided, as the backend
- * does not aggregate these.
+ * Shows GET /api/v1/stats/tourism.
+ * - Left column: history charts of staying tourists vs visitor capacity, tourism revenue, and the average
+ *   satisfaction of staying tourists.
+ * - Right column: lists of gateways and tourist attractions. Each facility shows how many tourists it adds to
+ *   the city's visitor capacity, the same value as its detail panel.
  */
 
+import { invoke } from "@tauri-apps/api/core";
 import { resolveIntlLocale } from "../../../utils/locale";
 import { formatExactAmount } from "../../../utils/money";
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   LineChart,
   Line,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -33,6 +22,8 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import type { YAxisProps } from "recharts";
+import { AgentLink } from "../../common/AgentLink";
 import { useEpochCachedStats } from "../useEpochCache";
 import "./TourismTab.css";
 import { useRemPx } from "../../../hooks/useRemPx";
@@ -43,103 +34,27 @@ type HistoryPoint = {
   epoch: number;
   tourist_count: number;
   tourist_capacity: number;
-  arrivals: number;
-  departures: number;
-  applicants: number;
   tourism_revenue: number;
+  satisfaction: number | null;
 };
 
-type FacilityCount = {
-  variant: number;
+type Facility = {
+  agent_id: number;
   name: string;
-  total: number;
-  active: number;
-};
-
-type BottleneckRow = {
-  kind: "attraction" | "gateway";
-  product_id: number;
-  product_name: string;
-  facilities: FacilityCount[];
-  capacity_per_day: number;
-  actual_per_day: number;
-  utilization: number;
-  capacity_persons: number | null;
-  is_constraint: boolean;
-};
-
-type HotelCount = {
-  variant: number;
-  name: string;
-  active: number;
-  paused: number;
-  constructing: number;
-};
-
-type DistributionPoint = {
-  bin: string;
-  leisure: number;
-  tourism: number;
-  qol: number;
+  tourist_capacity: number | null;
 };
 
 type TourismStats = {
   epoch: number;
-  party_size: number;
-  summary: {
-    tourist_count: number;
-    tourist_household_count: number;
-    tourist_capacity: number;
-    occupancy_ratio: number;
-    arrivals: number;
-    departures: number;
-    applicants: number;
-    tourism_revenue: number;
-  };
   history: HistoryPoint[];
-  bottleneck: BottleneckRow[];
-  lodging: {
-    capacity: number;
-    occupied: number;
-    vacancy: number;
-    vacancy_rate: number;
-    waiting_parties: number;
-    waiting_days_mean: number;
-    waiting_days_max: number;
-    avg_rent_per_m2: number;
-    lodging_cost_per_party_day: number;
-    tourist_wtp_per_party_day: number;
-    hotels: HotelCount[];
-  };
-  satisfaction: {
-    staying_parties: number;
-    avg_leisure: number;
-    avg_tourism: number;
-    avg_env: number;
-    avg_qol: number;
-    departure_candidate_ratio: number;
-    departure_threshold: number;
-    distribution: DistributionPoint[];
-  };
-  consumption: {
-    product_id: number;
-    product_name: string;
-    unit: string;
-    amount: number;
-    value: number;
-  }[];
+  gateways: Facility[];
+  attractions: Facility[];
 };
 
-// Series colors: tourists = pink (matching accommodation floors), capacity = cyan, arrivals = green, returns = red, applications = amber, revenue = purple.
 const COLOR_COUNT = "#ec4899";
 const COLOR_CAPACITY = "#06b6d4";
-const COLOR_ARRIVALS = "#10b981";
-const COLOR_DEPARTURES = "#ef4444";
-const COLOR_APPLICANTS = "#f59e0b";
 const COLOR_REVENUE = "#a78bfa";
-const COLOR_LEISURE = "#f59e0b";
-const COLOR_TOURISM = "#ec4899";
-const COLOR_QOL = "#60a5fa";
+const COLOR_SATISFACTION = "#60a5fa";
 
 const CHART_MARGIN = { top: 12, right: 16, left: -10, bottom: 0 };
 const Y_AXIS_WIDTH_REM = 4.44; // Y-axis width (rem). Convert to px with useRemPx when rendering.
@@ -156,7 +71,11 @@ function fmt(value: number, digits = 0): string {
 }
 
 function pct(ratio: number): string {
-  return `${(ratio * 100).toFixed(1)}%`;
+  return `${Math.round(ratio * 100)}%`;
+}
+
+function openAgent(entityId: string) {
+  void invoke("open_registered_window", { windowType: "agent_detail", entityId }).catch(console.error);
 }
 
 export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
@@ -166,13 +85,6 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { data, loading, error } = useEpochCachedStats<TourismStats>(
     apiBaseUrl,
     "/api/v1/stats/tourism"
-  );
-
-  const history = data?.history ?? [];
-  const consumption = data?.consumption ?? [];
-  const maxConsumptionValue = useMemo(
-    () => consumption.reduce((max, c) => Math.max(max, c.value), 0),
-    [consumption]
   );
 
   if (loading) {
@@ -186,51 +98,14 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     );
   }
 
-  const { summary, lodging, satisfaction } = data;
+  const history = data.history;
   const hasHistory = history.length > 0;
-  const netFlow = summary.arrivals - summary.departures;
-  const hasStaying = satisfaction.staying_parties > 0;
 
-  const tiles: { key: string; label: string; value: string; sub?: string }[] = [
-    {
-      key: "tourists",
-      label: t("statistics.tourism.tileTourists"),
-      value: `${fmt(summary.tourist_count)} ${t("statistics.people")}`,
-      sub: `${fmt(summary.tourist_household_count)} ${t("statistics.tourism.parties")}`,
-    },
-    {
-      key: "capacity",
-      label: t("statistics.tourism.tileCapacity"),
-      value: `${fmt(summary.tourist_capacity)} ${t("statistics.people")}`,
-      sub: `${t("statistics.tourism.tileOccupancy")} ${pct(summary.occupancy_ratio)}`,
-    },
-    {
-      key: "flow",
-      label: t("statistics.tourism.tileFlow"),
-      value: `${netFlow >= 0 ? "+" : ""}${fmt(netFlow)}`,
-      sub: `${t("statistics.tourism.seriesArrivals")} ${fmt(summary.arrivals)} / ${t("statistics.tourism.seriesDepartures")} ${fmt(summary.departures)}`,
-    },
-    {
-      key: "applicants",
-      label: t("statistics.tourism.tileApplicants"),
-      value: `${fmt(summary.applicants)} ${t("statistics.tourism.parties")}`,
-    },
-    {
-      key: "revenue",
-      label: t("statistics.tourism.tileRevenue"),
-      value: formatExactAmount(summary.tourism_revenue, locale, false, { maximumFractionDigits: 0 }),
-    },
-    {
-      key: "qol",
-      label: t("statistics.tourism.tileAvgQol"),
-      value: hasStaying ? pct(satisfaction.avg_qol) : "-",
-      sub: hasStaying
-        ? `${t("statistics.tourism.departureCandidates")} ${pct(satisfaction.departure_candidate_ratio)}`
-        : undefined,
-    },
-  ];
-
-  const renderHistoryChart = (children: React.ReactNode, valueFormatter?: (value: number) => string) => (
+  const renderHistoryChart = (
+    children: React.ReactNode,
+    valueFormatter?: (value: number) => string,
+    yAxis?: YAxisProps,
+  ) => (
     <div className="tourism-card__chart-container">
       {hasHistory ? (
         <ResponsiveContainer width="100%" height="100%">
@@ -244,6 +119,7 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               axisLine={{ stroke: "#253246" }}
               allowDecimals={false}
               tickFormatter={valueFormatter}
+              {...yAxis}
             />
             <Tooltip
               contentStyle={TOOLTIP_STYLE}
@@ -260,23 +136,27 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     </div>
   );
 
+  const renderFacilityList = (title: string, facilities: Facility[]) => (
+    <div className="tourism-card">
+      <h3 className="tourism-card__title">{title}</h3>
+      <ul className="tourism-facility-list">
+        {facilities.map((f) => (
+          <li key={f.agent_id} className="tourism-facility-list__item">
+            <AgentLink agentId={f.agent_id} agentName={f.name || `#${f.agent_id}`} onNavigate={openAgent} />
+            <span className="tourism-facility-list__value">
+              {f.tourist_capacity == null ? "-" : `${fmt(f.tourist_capacity)} ${t("statistics.people")}`}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+
   return (
     <div className="tourism-tab">
       <h2 className="tourism-tab__title">{t("statistics.tourism.title")}</h2>
 
-      {/* Summary tiles */}
-      <div className="tourism-tiles">
-        {tiles.map((tile) => (
-          <div key={tile.key} className="tourism-tile">
-            <span className="tourism-tile__label">{tile.label}</span>
-            <span className="tourism-tile__value">{tile.value}</span>
-            {tile.sub && <span className="tourism-tile__sub">{tile.sub}</span>}
-          </div>
-        ))}
-      </div>
-
       <div className="tourism-tab__grid">
-        {/* Left column: history charts */}
         <div className="tourism-tab__col">
           <div className="tourism-card">
             <h3 className="tourism-card__title">{t("statistics.tourism.chartCountHistory")}</h3>
@@ -289,208 +169,26 @@ export function TourismTab({ apiBaseUrl }: { apiBaseUrl: string }) {
           </div>
 
           <div className="tourism-card">
-            <h3 className="tourism-card__title">{t("statistics.tourism.chartFlowHistory")}</h3>
-            {renderHistoryChart(
-              <>
-                <Line type="monotone" dataKey="arrivals" name={t("statistics.tourism.seriesArrivals")} stroke={COLOR_ARRIVALS} strokeWidth={2} dot={{ r: 2 }} />
-                <Line type="monotone" dataKey="departures" name={t("statistics.tourism.seriesDepartures")} stroke={COLOR_DEPARTURES} strokeWidth={2} dot={{ r: 2 }} />
-                <Line type="monotone" dataKey="applicants" name={t("statistics.tourism.seriesApplicants")} stroke={COLOR_APPLICANTS} strokeWidth={1.5} strokeDasharray="4 2" dot={false} />
-              </>
-            )}
-          </div>
-
-          <div className="tourism-card">
             <h3 className="tourism-card__title">{t("statistics.tourism.chartRevenueHistory")}</h3>
             {renderHistoryChart(
               <Line type="monotone" dataKey="tourism_revenue" name={t("statistics.tourism.seriesRevenue")} stroke={COLOR_REVENUE} strokeWidth={2} dot={{ r: 2 }} />,
               (value) => formatExactAmount(value, locale),
             )}
           </div>
-        </div>
 
-        {/* Right column: bottlenecks, accommodation, satisfaction, and spending */}
-        <div className="tourism-tab__col">
-          {/* Bottleneck table */}
           <div className="tourism-card">
-            <h3 className="tourism-card__title">{t("statistics.tourism.bottleneckTitle")}</h3>
-            <table className="tourism-table">
-              <thead>
-                <tr>
-                  <th>{t("statistics.tourism.colKind")}</th>
-                  <th>{t("statistics.tourism.colFacilities")}</th>
-                  <th className="text-right">{t("statistics.tourism.colCapacityPerDay")}</th>
-                  <th className="text-right">{t("statistics.tourism.colActualPerDay")}</th>
-                  <th className="text-right">{t("statistics.tourism.colUtilization")}</th>
-                  <th className="text-right">{t("statistics.tourism.colCapacityPersons")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.bottleneck.map((row) => (
-                  <tr key={row.kind}>
-                    <td className="font-semibold">
-                      {t(row.kind === "attraction" ? "statistics.tourism.kindAttraction" : "statistics.tourism.kindGateway")}
-                      <span className="tourism-table__product">{row.product_name}</span>
-                      {row.is_constraint && (
-                        <span className="tourism-badge tourism-badge--constraint">
-                          {t("statistics.tourism.constraintBadge")}
-                        </span>
-                      )}
-                    </td>
-                    <td>
-                      {row.facilities.length === 0 ? (
-                        <span className="tourism-table__muted">-</span>
-                      ) : (
-                        row.facilities.map((f) => (
-                          <div key={f.variant} className="tourism-table__facility">
-                            {f.name}: {fmt(f.active)}/{fmt(f.total)}
-                          </div>
-                        ))
-                      )}
-                    </td>
-                    <td className="text-right">{fmt(row.capacity_per_day, 1)}</td>
-                    <td className="text-right">{fmt(row.actual_per_day, 1)}</td>
-                    <td className="text-right">{pct(row.utilization)}</td>
-                    <td className="text-right">
-                      {row.capacity_persons == null ? "-" : `${fmt(row.capacity_persons)} ${t("statistics.people")}`}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Accommodation supply/demand */}
-          <div className="tourism-card">
-            <h3 className="tourism-card__title">{t("statistics.tourism.lodgingTitle")}</h3>
-            <div className="tourism-kv-grid">
-              <span className="tourism-kv__label">{t("statistics.tourism.lodgingCapacity")}</span>
-              <span className="tourism-kv__value">
-                {fmt(lodging.occupied, 1)} / {fmt(lodging.capacity, 1)} ㎡
-                <span className="tourism-kv__note">
-                  {t("statistics.tourism.lodgingVacancyRate")} {pct(lodging.vacancy_rate)}
-                </span>
-              </span>
-              <span className="tourism-kv__label">{t("statistics.tourism.waitingParties")}</span>
-              <span className="tourism-kv__value">
-                {fmt(lodging.waiting_parties)} {t("statistics.tourism.parties")}
-                {lodging.waiting_parties > 0 && (
-                  <span className="tourism-kv__note">
-                    {t("statistics.tourism.waitingDays", {
-                      mean: fmt(lodging.waiting_days_mean),
-                      max: fmt(lodging.waiting_days_max),
-                    })}
-                  </span>
-                )}
-              </span>
-              <span className="tourism-kv__label">{t("statistics.tourism.lodgingCost")}</span>
-              <span className="tourism-kv__value">
-                {formatExactAmount(lodging.lodging_cost_per_party_day, locale)}
-                <span className="tourism-kv__note">
-                  {t("statistics.tourism.touristWtp")}{" "}
-                  {formatExactAmount(lodging.tourist_wtp_per_party_day, locale)}
-                </span>
-              </span>
-            </div>
-            <div className="tourism-occupancy-bar" title={pct(1 - lodging.vacancy_rate)}>
-              <div
-                className="tourism-occupancy-bar__fill"
-                style={{ width: `${Math.min(100, lodging.capacity > 0 ? (lodging.occupied / lodging.capacity) * 100 : 0)}%` }}
-              />
-            </div>
-            <table className="tourism-table tourism-table--compact">
-              <thead>
-                <tr>
-                  <th>{t("statistics.tourism.hotelsTitle")}</th>
-                  <th className="text-right">{t("statistics.tourism.hotelActive")}</th>
-                  <th className="text-right">{t("statistics.tourism.hotelPaused")}</th>
-                  <th className="text-right">{t("statistics.tourism.hotelConstructing")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lodging.hotels.map((h) => (
-                  <tr key={h.variant}>
-                    <td className="font-semibold">{h.name}</td>
-                    <td className="text-right">{fmt(h.active)}</td>
-                    <td className="text-right">{fmt(h.paused)}</td>
-                    <td className="text-right">{fmt(h.constructing)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Satisfaction */}
-          <div className="tourism-card">
-            <h3 className="tourism-card__title">{t("statistics.tourism.satisfactionTitle")}</h3>
-            {hasStaying ? (
-              <>
-                <div className="tourism-meters">
-                  {[
-                    { key: "leisure", label: t("statistics.tourism.avgLeisure"), value: satisfaction.avg_leisure, color: COLOR_LEISURE },
-                    { key: "tour", label: t("statistics.tourism.avgTourism"), value: satisfaction.avg_tourism, color: COLOR_TOURISM },
-                    { key: "env", label: t("statistics.tourism.avgEnv"), value: Math.min(satisfaction.avg_env, 1), color: COLOR_CAPACITY, raw: satisfaction.avg_env },
-                    { key: "qol", label: t("statistics.tourism.avgQol"), value: satisfaction.avg_qol, color: COLOR_QOL },
-                  ].map((m) => (
-                    <div key={m.key} className="tourism-meter">
-                      <span className="tourism-meter__label">{m.label}</span>
-                      <div className="tourism-meter__track">
-                        <div className="tourism-meter__fill" style={{ width: `${m.value * 100}%`, background: m.color }} />
-                      </div>
-                      <span className="tourism-meter__value">{(m.raw ?? m.value).toFixed(2)}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="tourism-card__chart-container tourism-card__chart-container--short">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={satisfaction.distribution} margin={{ top: 4, right: 8, left: -20, bottom: 0 }} barCategoryGap={2}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#253246" vertical={false} />
-                      <XAxis dataKey="bin" tick={{ fontSize: "0.74rem", fill: "#8ba3bb" }} tickLine={false} interval={0} />
-                      <YAxis width={remPx(5.56)} tick={AXIS_TICK} tickLine={false} allowDecimals={false} />
-                      <Tooltip contentStyle={TOOLTIP_STYLE} />
-                      <Legend wrapperStyle={{ fontSize: "0.93rem" }} iconSize={8} />
-                      <Bar dataKey="leisure" name={t("statistics.tourism.avgLeisure")} fill={COLOR_LEISURE} />
-                      <Bar dataKey="tourism" name={t("statistics.tourism.avgTourism")} fill={COLOR_TOURISM} />
-                      <Bar dataKey="qol" name={t("statistics.tourism.avgQol")} fill={COLOR_QOL} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </>
-            ) : (
-              <div className="tourism-card__empty">{t("statistics.tourism.noTourists")}</div>
+            <h3 className="tourism-card__title">{t("statistics.tourism.chartSatisfactionHistory")}</h3>
+            {renderHistoryChart(
+              <Line type="monotone" dataKey="satisfaction" name={t("statistics.tourism.seriesSatisfaction")} stroke={COLOR_SATISFACTION} strokeWidth={2} dot={{ r: 2 }} />,
+              pct,
+              { domain: [0, 1], allowDecimals: true },
             )}
           </div>
+        </div>
 
-          {/* Tourist spending */}
-          <div className="tourism-card">
-            <h3 className="tourism-card__title">{t("statistics.tourism.consumptionTitle")}</h3>
-            <div className="tourism-card__list-container">
-              {consumption.length > 0 ? (
-                consumption.map((item) => {
-                  const width = maxConsumptionValue > 0 ? (item.value / maxConsumptionValue) * 100 : 0;
-                  return (
-                    <div key={item.product_id} className="tourism-bar-item">
-                      <div className="tourism-bar-item__header">
-                        <span className="tourism-bar-item__name">{item.product_name}</span>
-                        <span className="tourism-bar-item__values">
-                          <span className="tourism-bar-item__value">
-                            {formatExactAmount(item.value, locale)}
-                          </span>
-                          <span className="tourism-bar-item__amount">
-                            {fmt(item.amount, 1)} {item.unit}
-                          </span>
-                        </span>
-                      </div>
-                      <div className="tourism-bar-track">
-                        <div className="tourism-bar-fill" style={{ width: `${width}%` }} />
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="tourism-card__empty">{t("statistics.tourism.noTourists")}</div>
-              )}
-            </div>
-          </div>
+        <div className="tourism-tab__col">
+          {renderFacilityList(t("statistics.tourism.gatewaysTitle"), data.gateways)}
+          {renderFacilityList(t("statistics.tourism.attractionsTitle"), data.attractions)}
         </div>
       </div>
     </div>
