@@ -65,7 +65,6 @@ const CityRegulationWindow = lazy(() => import("./components/regulation/CityRegu
 const CityStatisticsWindow = lazy(() => import("./components/statistics/CityStatisticsWindow").then(m => ({ default: m.CityStatisticsWindow })));
 const DisplayOptionsPanel = lazy(() => import("./components/display/DisplayOptionsPanel").then(m => ({ default: m.DisplayOptionsPanel })));
 const EpochConfirmWindow = lazy(() => import("./components/taskbar/EpochConfirmWindow").then(m => ({ default: m.EpochConfirmWindow })));
-const CityNotificationsWindow = lazy(() => import("./components/notification/CityNotificationsWindow").then(m => ({ default: m.CityNotificationsWindow })));
 const ConstructionProjectsWindow = lazy(() => import("./components/construction/ConstructionProjectsWindow").then(m => ({ default: m.ConstructionProjectsWindow })));
 const EpochResultWindow = lazy(() => import("./components/taskbar/EpochResultWindow").then(m => ({ default: m.EpochResultWindow })));
 const QuestCompleteWindow = lazy(() => import("./components/taskbar/QuestCompleteWindow").then(m => ({ default: m.QuestCompleteWindow })));
@@ -106,7 +105,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * Window types with dedicated panels. Render these with dedicated components instead of the generic JSON
  * display.
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_list", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "city_insignia", "climate_settings", "climate_effects", "policy_planning", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "achievement_unlocked", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "city_development", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_list", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "city_insignia", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "achievement_unlocked", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "city_development", "agent_creation"]);
 
 
 function App() {
@@ -560,8 +559,6 @@ function App() {
               <ClimateSettingsWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "climate_effects" ? (
               <ClimateEffectsWindow apiBaseUrl={context.api_base_url} />
-            ) : context.window_type === "policy_planning" ? (
-              <PolicyPlanningWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "citizen_list" ? (
               <CitizenListWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "system_stats" ? (
@@ -590,7 +587,7 @@ function App() {
             ) : context.window_type === "epoch_confirm" ? (
               <EpochConfirmWindow apiBaseUrl={context.api_base_url} onClose={closeWindow} />
             ) : context.window_type === "city_notifications" ? (
-              <CityNotificationsWindow apiBaseUrl={context.api_base_url} />
+              <PolicyPlanningWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "construction_projects" ? (
               <ConstructionProjectsWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "epoch_result" ? (

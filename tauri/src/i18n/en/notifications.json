@@ -3,10 +3,6 @@
     "trayTooltip": "City Notifications",
     "empty": "No problems require attention right now",
     "loadFailed": "Failed to load notifications",
-    "sections": {
-      "warning": "Warnings — immediate action required",
-      "caution": "Cautions — issues holding back growth"
-    },
     "types": {
       "resource_runway": "Resource \"{{name}}\" is expected to be depleted in about {{remaining_epochs}} epochs",
       "resource_depleted": "Resource \"{{name}}\" has been depleted",

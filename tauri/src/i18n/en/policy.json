@@ -1,22 +1,74 @@
 {
   "policy": {
-    "title": "Policy planning",
     "pending": "Simulation running",
     "noData": "No data",
-    "noFindings": "No matching problems.",
     "actionError": "Could not open the action screen.",
     "indicators": {
       "unemployment": {
-        "title": "Unemployment",
-        "tab": "Unemployment"
+        "tab": "Unemployment",
+        "issue": "Unemployment is high",
+        "clear": "No unemployment problems found",
+        "evidence": "Unemployment rate {{value}}"
       },
       "income": {
-        "title": "Average household income",
-        "tab": "Income"
+        "tab": "Income",
+        "issue": "Household income is low",
+        "clear": "No income problems found",
+        "evidence": "Average household income {{value}}"
+      },
+      "tourism": {
+        "tab": "Tourism",
+        "issue": "Few tourists are visiting",
+        "clear": "No tourism problems found",
+        "evidence": "{{value}} tourists staying · capacity {{capacity}}"
       },
       "crime": {
-        "title": "Crime damage",
-        "tab": "Crime"
+        "tab": "Crime",
+        "issue": "Crime and disputes are occurring",
+        "clear": "No crime problems found",
+        "evidence": "Crime damage {{value}} · {{incidents}} incidents of trouble"
+      },
+      "sanitation": {
+        "tab": "Sanitation",
+        "issue": "Sanitation problems are occurring",
+        "clear": "No sanitation problems found",
+        "evidence": "Sanitation is deteriorating for {{value}} households"
+      },
+      "water": {
+        "tab": "Water",
+        "issue": "Water is in short supply",
+        "clear": "No water supply problems found",
+        "evidence": "Households received {{value}} of the reference amount"
+      },
+      "electricity": {
+        "tab": "Electricity",
+        "issue": "Electricity is in short supply",
+        "clear": "No electricity supply problems found",
+        "evidence": "Households received {{value}} of the reference amount"
+      },
+      "internet": {
+        "tab": "Telecom",
+        "issue": "Telecommunications is in short supply",
+        "clear": "No telecommunications supply problems found",
+        "evidence": "Households received {{value}} of the reference amount"
+      },
+      "high_water": {
+        "tab": "Bulk water",
+        "issue": "Bulk water is in short supply",
+        "clear": "No bulk water supply problems found",
+        "evidence": "Facilities received {{value}} of their orders"
+      },
+      "high_electricity": {
+        "tab": "High-voltage power",
+        "issue": "High-voltage power is in short supply",
+        "clear": "No high-voltage power supply problems found",
+        "evidence": "Facilities received {{value}} of their orders"
+      },
+      "upkeep": {
+        "tab": "Upkeep",
+        "issue": "Upkeep of public buildings, roads and rail is short",
+        "clear": "No upkeep problems found",
+        "evidence": "{{value}} of the needed upkeep was received"
       }
     },
     "nodes": {
@@ -52,14 +104,6 @@
         "title": "Some households include unemployed adults",
         "evidence": "Households with unemployed adults: {{count}}"
       },
-      "no_income": {
-        "title": "Some households have no income",
-        "evidence": "Households with average daily income of zero or less: {{count}}"
-      },
-      "basic_consumption": {
-        "title": "Some households remain in the basic consumption tier",
-        "evidence": "Households in the basic consumption tier: {{count}}"
-      },
       "security_response": {
         "title": "Police cannot prevent all harm",
         "evidence": "Crime damage in the past month: {{count}} cases",
@@ -80,11 +124,6 @@
         "title": "Police stations lack supplies",
         "evidence": "Police stations short of supplies: {{count}}"
       },
-      "crime_incidents": {
-        "title": "Trouble is breaking out",
-        "evidence": "Trouble in the past month: {{count}} incidents",
-        "evidence_week": "Trouble in the past week: {{count}} incidents"
-      },
       "unemployment_pressure": {
         "title": "Unemployment contributes to security problems",
         "evidence": "Unemployed adults: {{count}}"
@@ -101,6 +140,78 @@
         "title": "Children are growing up in districts with crime",
         "evidence": "Children in districts with crime in the past month: {{count}}",
         "evidence_week": "Children in districts with crime in the past week: {{count}}"
+      },
+      "service_no_facility": {
+        "title": "No facility supplies this service"
+      },
+      "service_facility_limited": {
+        "title": "Some {{kinds}} cannot operate",
+        "evidence": "Facilities effectively not operating: {{count}}"
+      },
+      "service_low_orders": {
+        "title": "Households order less than the reference amount",
+        "evidence": "Orders are {{percent}}% of the reference amount"
+      },
+      "repair_budget_exhausted": {
+        "title": "The Maintenance budget ran out and upkeep orders were cut",
+        "evidence": "Maintenance spending {{expense}} / budget {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "Households or facilities are outside the service range",
+        "evidence": "Outside every facility’s range: {{count}} households, {{facilities}} facilities"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}} cannot procure {{product_name}}",
+        "evidence": "Received {{received}} of the required {{demand}}"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}} is short of workers",
+        "evidence": "Secured {{total_labor}} of the {{quota}} effective labor units required"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}} cannot secure specialists"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}} has scaled back its plan for lack of budget"
+      },
+      "facility_inactive": {
+        "title": "{{facility}} is not operating"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}} is not connected to the {{product_name}} network"
+      },
+      "service_shortage": {
+        "title": "{{product_name}} is in short supply",
+        "evidence": "Households received {{percent}}% of the reference amount"
+      },
+      "tourism_no_attraction": {
+        "title": "There are no attractions"
+      },
+      "tourism_no_gateway": {
+        "title": "There is no gateway for tourists to arrive"
+      },
+      "tourism_no_trade_hub": {
+        "title": "There is no trade hub to pay travel funds"
+      },
+      "tourists_without_lodging": {
+        "title": "Some tourists cannot find lodging",
+        "evidence": "Tourists waiting for lodging: {{count}}"
+      },
+      "tourism_lodging_costly": {
+        "title": "Lodging is expensive relative to travel budgets",
+        "evidence": "New tourist applications are at {{percent}}% of normal"
+      },
+      "tourists_dissatisfied": {
+        "title": "Tourist satisfaction is low",
+        "evidence": "New applications at {{percent}}% of normal · {{count}} went home dissatisfied"
+      },
+      "tourism_experience_short": {
+        "title": "Tourists are not getting enough tourism experiences",
+        "evidence": "Tourism experiences received: {{percent}}%"
+      },
+      "tourism_leisure_short": {
+        "title": "Tourists are not getting enough leisure",
+        "evidence": "Leisure received: {{percent}}%"
       }
     },
     "actions": {
@@ -139,6 +250,18 @@
       },
       "criminality": {
         "title": "Check citizens’ tendency toward crime"
+      },
+      "service_facility": {
+        "title": "Build a facility that supplies it"
+      },
+      "parcel": {
+        "title": "Prepare a larger parcel"
+      },
+      "transit": {
+        "title": "Review transit frequency and tracks"
+      },
+      "entity_detail": {
+        "title": "Open details"
       }
     },
     "selectorTitle": "What would you like to investigate?",
@@ -153,7 +276,41 @@
     "investigate": {
       "crime": "Investigate causes of crime",
       "unemployment": "Investigate causes of unemployment",
-      "income": "Investigate causes of low income"
+      "income": "Investigate causes of low income",
+      "water": "Investigate causes of the water shortage",
+      "electricity": "Investigate causes of the electricity shortage",
+      "internet": "Investigate causes of the telecommunications shortage",
+      "upkeep": "Investigate causes of the upkeep shortage",
+      "high_water": "Investigate causes of the bulk water shortage",
+      "high_electricity": "Investigate causes of the high-voltage power shortage",
+      "facility": "Investigate this facility"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "Indicators",
+    "problems": {
+      "resource_runway": "Resource \"{{name}}\" is expected to be depleted in about {{remaining_epochs}} epochs",
+      "resource_depleted": "Resource \"{{name}}\" has been depleted",
+      "facility_inoperative": "Public facility \"{{name}}\" is not operating",
+      "facility_inoperative_labor": "Public facility \"{{name}}\" is not operating due to a labor shortage",
+      "facility_inoperative_material": "Public facility \"{{name}}\" is not operating due to a material shortage",
+      "facility_inoperative_high_skill": "Public facility \"{{name}}\" is running at reduced capacity due to a shortage of skilled staff",
+      "facility_inoperative_budget": "Public facility \"{{name}}\" is running at reduced capacity due to a budget shortfall",
+      "education_low_enrollment": "Educational institution \"{{name}}\" is underused — few students are enrolled ({{enrolled}} of {{max_students}} seats)",
+      "infra_facility_down": "Infrastructure facility \"{{name}}\" is out of service",
+      "infra_disconnected": "{{count}} facilities are disconnected from the infrastructure network",
+      "rail_capacity_exceeded": "Train frequency exceeds track capacity on {{count}} track segment(s)",
+      "collapse": "{{count}} buildings/roads have collapsed",
+      "collapse_with_deaths": "{{count}} buildings/roads have collapsed, killing {{deaths}} people",
+      "deaths_traffic": "{{count}} people died in traffic accidents",
+      "tenant_blocked_by_parcel_size": "No building for \"{{tenant_name}}\" can be constructed in district \"{{zone_name}}\" (needs {{required}} m2, largest buildable {{max_capacity}} m2)",
+      "unknown": "A critical event has occurred",
+      "sanitation": "Sanitation is deteriorating for {{count}} households"
+    },
+    "facilitiesTitle": "Facilities not operating",
+    "otherProblemsTitle": "Other problems",
+    "facility": {
+      "title": "{{facility}} cannot operate",
+      "evidence": "Production is {{percent}}% of plan"
     }
   }
 }

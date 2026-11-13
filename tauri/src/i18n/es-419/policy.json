@@ -1,22 +1,74 @@
 {
   "policy": {
-    "title": "Planificación de políticas",
     "pending": "Simulación en curso",
     "noData": "Sin datos",
-    "noFindings": "No hay problemas que coincidan.",
     "actionError": "No se pudo abrir la pantalla de la acción.",
     "indicators": {
       "unemployment": {
-        "title": "Desempleo",
-        "tab": "Desempleo"
+        "tab": "Desempleo",
+        "issue": "El desempleo es alto",
+        "clear": "No se encontraron problemas de desempleo",
+        "evidence": "Tasa de desempleo {{value}}"
       },
       "income": {
-        "title": "Ingreso promedio del hogar",
-        "tab": "Ingresos"
+        "tab": "Ingresos",
+        "issue": "Los ingresos de los hogares son bajos",
+        "clear": "No se encontraron problemas de ingresos",
+        "evidence": "Ingreso promedio del hogar {{value}}"
+      },
+      "tourism": {
+        "tab": "Turismo",
+        "issue": "Llegan pocos turistas",
+        "clear": "No se encontraron problemas de turismo",
+        "evidence": "{{value}} turistas alojados · capacidad {{capacity}}"
       },
       "crime": {
-        "title": "Daños por delitos",
-        "tab": "Delincuencia"
+        "tab": "Delincuencia",
+        "issue": "Hay delitos y altercados",
+        "clear": "No se encontraron problemas de delincuencia",
+        "evidence": "Daños por delitos {{value}} · {{incidents}} conflictos"
+      },
+      "sanitation": {
+        "tab": "Saneamiento",
+        "issue": "Hay problemas de saneamiento",
+        "clear": "No se encontraron problemas de saneamiento",
+        "evidence": "El saneamiento empeora para {{value}} hogares"
+      },
+      "water": {
+        "tab": "Agua",
+        "issue": "Falta suministro de agua",
+        "clear": "No se encontraron problemas de suministro de agua",
+        "evidence": "Los hogares recibieron {{value}} de la cantidad de referencia"
+      },
+      "electricity": {
+        "tab": "Electricidad",
+        "issue": "Falta suministro de electricidad",
+        "clear": "No se encontraron problemas de suministro de electricidad",
+        "evidence": "Los hogares recibieron {{value}} de la cantidad de referencia"
+      },
+      "internet": {
+        "tab": "Telecomunicaciones",
+        "issue": "Falta suministro de telecomunicaciones",
+        "clear": "No se encontraron problemas de suministro de telecomunicaciones",
+        "evidence": "Los hogares recibieron {{value}} de la cantidad de referencia"
+      },
+      "high_water": {
+        "tab": "Agua en bloque",
+        "issue": "Falta suministro de agua en bloque",
+        "clear": "No se encontraron problemas de suministro de agua en bloque",
+        "evidence": "Las instalaciones recibieron {{value}} de sus pedidos"
+      },
+      "high_electricity": {
+        "tab": "Alta tensión",
+        "issue": "Falta suministro de electricidad de alta tensión",
+        "clear": "No se encontraron problemas de suministro de alta tensión",
+        "evidence": "Las instalaciones recibieron {{value}} de sus pedidos"
+      },
+      "upkeep": {
+        "tab": "Mantenimiento diario",
+        "issue": "Falta mantenimiento en edificios públicos, calles y vías férreas",
+        "clear": "No se encontraron problemas de mantenimiento",
+        "evidence": "Se recibió {{value}} del mantenimiento necesario"
       }
     },
     "nodes": {
@@ -52,14 +104,6 @@
         "title": "Algunos hogares tienen adultos desempleados",
         "evidence": "Hogares con adultos desempleados: {{count}}"
       },
-      "no_income": {
-        "title": "Algunos hogares no tienen ingresos",
-        "evidence": "Hogares con ingreso diario promedio de cero o menos: {{count}}"
-      },
-      "basic_consumption": {
-        "title": "Algunos hogares permanecen en el consumo básico",
-        "evidence": "Hogares en el nivel de consumo básico: {{count}}"
-      },
       "security_response": {
         "title": "La policía no logra evitar todos los daños",
         "evidence": "Daños por delitos en el último mes: {{count}} casos",
@@ -80,11 +124,6 @@
         "title": "Faltan suministros en las comisarías",
         "evidence": "Comisarías sin suficientes suministros: {{count}}"
       },
-      "crime_incidents": {
-        "title": "Se están produciendo conflictos",
-        "evidence": "Conflictos en el último mes: {{count}}",
-        "evidence_week": "Conflictos en la última semana: {{count}}"
-      },
       "unemployment_pressure": {
         "title": "El desempleo contribuye a los problemas de seguridad",
         "evidence": "Adultos desempleados: {{count}}"
@@ -101,6 +140,78 @@
         "title": "Hay niños que crecen en distritos con delitos",
         "evidence": "Niños en distritos con delitos en el último mes: {{count}}",
         "evidence_week": "Niños en distritos con delitos en la última semana: {{count}}"
+      },
+      "service_no_facility": {
+        "title": "Ninguna instalación presta este servicio"
+      },
+      "service_facility_limited": {
+        "title": "Hay instalaciones sin funcionar ({{kinds}})",
+        "evidence": "Instalaciones que en la práctica no funcionan: {{count}}"
+      },
+      "service_low_orders": {
+        "title": "Los hogares piden menos que la cantidad de referencia",
+        "evidence": "Los pedidos son el {{percent}}% de la cantidad de referencia"
+      },
+      "repair_budget_exhausted": {
+        "title": "El presupuesto de Mantenimiento se agotó y se recortó el mantenimiento diario",
+        "evidence": "Gasto de Mantenimiento {{expense}} / presupuesto {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "Hay hogares o instalaciones fuera del alcance del servicio",
+        "evidence": "Fuera del alcance de todas las instalaciones: {{count}} hogares, {{facilities}} instalaciones"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}} no logra conseguir {{product_name}}",
+        "evidence": "Recibió {{received}} de los {{demand}} necesarios"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}} carece de personal",
+        "evidence": "Consiguió {{total_labor}} de las {{quota}} unidades de trabajo efectivo necesarias"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}} no consigue especialistas"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}} redujo su plan por falta de presupuesto"
+      },
+      "facility_inactive": {
+        "title": "{{facility}} no está en funcionamiento"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}} no tiene conexión con la red de {{product_name}}"
+      },
+      "service_shortage": {
+        "title": "Falta suministro de {{product_name}}",
+        "evidence": "Los hogares recibieron el {{percent}}% de la cantidad de referencia"
+      },
+      "tourism_no_attraction": {
+        "title": "No hay atracciones"
+      },
+      "tourism_no_gateway": {
+        "title": "No hay puerta de entrada para los turistas"
+      },
+      "tourism_no_trade_hub": {
+        "title": "No hay un centro de comercio exterior que pague los viáticos"
+      },
+      "tourists_without_lodging": {
+        "title": "Hay turistas que no encuentran alojamiento",
+        "evidence": "Turistas esperando alojamiento: {{count}}"
+      },
+      "tourism_lodging_costly": {
+        "title": "El alojamiento es caro frente al presupuesto de viaje",
+        "evidence": "Las nuevas solicitudes de turistas están al {{percent}}% de lo normal"
+      },
+      "tourists_dissatisfied": {
+        "title": "La satisfacción de los turistas es baja",
+        "evidence": "Nuevas solicitudes al {{percent}}% de lo normal · {{count}} regresaron insatisfechos"
+      },
+      "tourism_experience_short": {
+        "title": "Los turistas no reciben suficientes experiencias turísticas",
+        "evidence": "Experiencias turísticas recibidas: {{percent}}%"
+      },
+      "tourism_leisure_short": {
+        "title": "Los turistas no reciben suficiente ocio",
+        "evidence": "Ocio recibido: {{percent}}%"
       }
     },
     "actions": {
@@ -139,6 +250,18 @@
       },
       "criminality": {
         "title": "Consultar la tendencia a delinquir de los ciudadanos"
+      },
+      "service_facility": {
+        "title": "Construir una instalación que lo preste"
+      },
+      "parcel": {
+        "title": "Preparar una parcela más grande"
+      },
+      "transit": {
+        "title": "Revisar la frecuencia y las vías del transporte"
+      },
+      "entity_detail": {
+        "title": "Abrir detalles"
       }
     },
     "selectorTitle": "¿Qué quieres investigar?",
@@ -153,7 +276,41 @@
     "investigate": {
       "crime": "Investigar las causas de la delincuencia",
       "unemployment": "Investigar las causas del desempleo",
-      "income": "Investigar las causas de los bajos ingresos"
+      "income": "Investigar las causas de los bajos ingresos",
+      "water": "Investigar las causas de la falta de agua",
+      "electricity": "Investigar las causas de la falta de electricidad",
+      "internet": "Investigar las causas de la falta de telecomunicaciones",
+      "upkeep": "Investigar las causas de la falta de mantenimiento diario",
+      "high_water": "Investigar las causas de la falta de agua en bloque",
+      "high_electricity": "Investigar las causas de la falta de alta tensión",
+      "facility": "Investigar esta instalación"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "Indicadores",
+    "problems": {
+      "resource_runway": "Se prevé que el recurso «{{name}}» se agote en unas {{remaining_epochs}} épocas",
+      "resource_depleted": "El recurso «{{name}}» se ha agotado",
+      "facility_inoperative": "El servicio público «{{name}}» no está operando",
+      "facility_inoperative_labor": "El servicio público «{{name}}» no opera por falta de mano de obra",
+      "facility_inoperative_material": "El servicio público «{{name}}» no opera por falta de insumos",
+      "facility_inoperative_high_skill": "El servicio público «{{name}}» redujo su operación por falta de personal especializado",
+      "facility_inoperative_budget": "El servicio público «{{name}}» redujo su operación por falta de presupuesto",
+      "education_low_enrollment": "La institución educativa «{{name}}» está subutilizada: hay pocos estudiantes inscritos ({{enrolled}} de {{max_students}} cupos)",
+      "infra_facility_down": "La instalación de infraestructura «{{name}}» está fuera de servicio",
+      "infra_disconnected": "{{count}} instalaciones no están conectadas a la red de infraestructura",
+      "rail_capacity_exceeded": "La frecuencia de trenes supera la capacidad de la vía en {{count}} tramo(s)",
+      "collapse": "{{count}} edificios o calles se derrumbaron",
+      "collapse_with_deaths": "{{count}} edificios o calles se derrumbaron y murieron {{deaths}} personas",
+      "deaths_traffic": "{{count}} personas murieron en accidentes de tránsito",
+      "tenant_blocked_by_parcel_size": "En el distrito «{{zone_name}}» no se puede construir un edificio donde quepa «{{tenant_name}}» (se requieren {{required}} m2, el máximo de la parcela es {{max_capacity}} m2)",
+      "unknown": "Ocurrió un evento crítico",
+      "sanitation": "El saneamiento empeora para {{count}} hogares"
+    },
+    "facilitiesTitle": "Instalaciones sin funcionar",
+    "otherProblemsTitle": "Otros problemas",
+    "facility": {
+      "title": "{{facility}} no puede funcionar",
+      "evidence": "La producción es el {{percent}}% del plan"
     }
   }
 }

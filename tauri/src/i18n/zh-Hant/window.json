@@ -1,8 +1,7 @@
 {
   "windowType": {
-    "policy_planning": "政策規劃",
     "diagnosis": "診斷",
-    "city_notifications": "重大通知",
+    "city_notifications": "政策規劃",
     "city_map": "城市地圖",
     "zone_edit": "編輯地區",
     "city_development": "城市自動開發",

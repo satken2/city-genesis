@@ -523,11 +523,12 @@
     "actions": []
   },
   "city_notifications": {
-    "title": "重大通知",
-    "width": 480,
-    "height": 520,
+    "title": "政策立案",
+    "width": 1100,
+    "height": 780,
     "resizable": true,
     "policy": "single",
+    "empty_shell": true,
     "actions": []
   },
   "epoch_result": {
@@ -634,15 +635,6 @@
     "title": "気候",
     "width": 800,
     "height": 540,
-    "resizable": true,
-    "policy": "single",
-    "empty_shell": true,
-    "actions": []
-  },
-  "policy_planning": {
-    "title": "政策立案",
-    "width": 1100,
-    "height": 780,
     "resizable": true,
     "policy": "single",
     "empty_shell": true,

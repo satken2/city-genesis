@@ -3,10 +3,6 @@
     "trayTooltip": "도시 알림",
     "empty": "현재 대응이 필요한 문제가 없습니다",
     "loadFailed": "알림을 가져오지 못했습니다",
-    "sections": {
-      "warning": "경고 — 즉시 대처 필요",
-      "caution": "주의 — 성장을 저해하는 문제"
-    },
     "types": {
       "resource_runway": "자원 「{{name}}」이(가) 약 {{remaining_epochs}}에포크 후 고갈될 전망입니다",
       "resource_depleted": "자원 「{{name}}」이(가) 고갈되었습니다",

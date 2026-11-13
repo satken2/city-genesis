@@ -3,10 +3,6 @@
     "trayTooltip": "Notificaciones de la ciudad",
     "empty": "Por ahora no hay problemas que atender",
     "loadFailed": "No se pudieron obtener las alertas",
-    "sections": {
-      "warning": "Alertas — requieren acción inmediata",
-      "caution": "Avisos — problemas que frenan el crecimiento"
-    },
     "types": {
       "resource_runway": "Se prevé que el recurso «{{name}}» se agote en unas {{remaining_epochs}} épocas",
       "resource_depleted": "El recurso «{{name}}» se ha agotado",

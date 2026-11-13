@@ -12,25 +12,51 @@
 
 .policy-planning p { margin: 0; }
 .policy-selector-title { margin: 0; font-size: 1rem; font-weight: 500; }
-.policy-toolbar { display: flex; align-items: flex-start; gap: 1rem; justify-content: space-between; padding-bottom: 0.5rem; }
+/* 左に調査先の一覧、右に選んだものの木。問題が多いときは問題の欄だけをスクロールし、指標はいつも見えるようにする。 */
+.policy-body { display: flex; gap: 1.2rem; flex: 1; min-height: 0; }
 .policy-planning button { font: inherit; font-size: 1rem; border-radius: 0; }
 .policy-planning button:focus-visible { outline: 2px solid var(--flat-accent); outline-offset: 2px; }
-.policy-indicators { display: flex; flex-wrap: wrap; gap: 0.7rem; }
+.policy-selector { display: flex; flex-direction: column; gap: 0.9rem; flex: 0 0 24rem; min-height: 0; }
+.policy-problems { display: flex; flex-direction: column; gap: 0.9rem; flex: 1; min-height: 6rem; overflow-y: auto; padding-right: 0.4rem; }
+.policy-section { display: flex; flex-direction: column; gap: 0.4rem; }
+.policy-section-title { margin: 0; font-size: 1rem; font-weight: 700; color: var(--flat-text-label); }
+.policy-problem-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+/* 警告は赤、注意は黄で、ひと目で区別できるようにする。 */
+.policy-problem {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.08);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.policy-problem:hover { background: rgba(239, 68, 68, 0.18); }
+.policy-problem--caution { border-color: rgba(245, 158, 11, 0.35); background: rgba(245, 158, 11, 0.08); }
+.policy-problem--caution:hover { background: rgba(245, 158, 11, 0.18); }
+.policy-planning .policy-problem--selected { outline: 2px solid var(--flat-accent); outline-offset: -2px; }
+.policy-problem-icon { width: 1.5rem; height: 1.5rem; object-fit: contain; flex-shrink: 0; }
+.policy-problem-message { flex: 1; min-width: 0; line-height: 1.4; }
+.policy-problem-date { flex-shrink: 0; font-size: 0.9rem; color: var(--flat-text-label); white-space: nowrap; }
+.policy-indicators { display: flex; flex-direction: column; gap: 0.4rem; }
 .policy-indicator {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   gap: 0.45rem;
-  min-width: 8rem;
   padding: 0.45rem 1rem;
   border: 0;
   background: var(--flat-raised);
 }
 .policy-indicator:hover { background: var(--flat-raised-hover); }
-.policy-indicator--selected { background: var(--flat-selected); box-shadow: inset 0 -2px 0 var(--flat-accent); }
+.policy-indicator--selected { background: var(--flat-selected); box-shadow: inset 3px 0 0 var(--flat-accent); }
 .policy-indicator--selected:hover { background: var(--flat-selected-hover); }
-.policy-investigation { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-.policy-tree-scroll { overflow: auto; min-height: 0; flex: 1; border-top: 1px solid var(--flat-raised-hover); }
+.policy-investigation { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; }
+.policy-tree-scroll { overflow: auto; min-height: 0; flex: 1; border-left: 1px solid var(--flat-raised-hover); }
+.policy-clear { align-items: center; justify-content: center; border-left: 1px solid var(--flat-raised-hover); color: var(--flat-text-label); }
 .policy-column-headings,
 .policy-row { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); column-gap: 2rem; }
 .policy-column-headings {
@@ -70,6 +96,9 @@
 
 @media (max-width: 700px) {
   .policy-planning { padding: 0.8rem; }
+  .policy-body { flex-direction: column; }
+  .policy-selector { flex: 0 1 40%; }
+  .policy-tree-scroll { border-left: 0; border-top: 1px solid var(--flat-raised-hover); }
   .policy-diagram { --policy-indent: 1.5rem; }
   .policy-column-headings,
   .policy-row { column-gap: 1.25rem; }

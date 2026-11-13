@@ -1,6 +1,6 @@
 /**
  * Shared L1 (critical) notification logic. Fetch and format events requiring immediate mayor attention from GET
- * /api/v1/notifications. Used by cockpit flashing alerts/new-event toasts and CityNotificationsWindow. The
+ * /api/v1/notifications. Used by cockpit flashing alerts/new-event toasts and the policy planning window. The
  * backend returns only type and params, not messages; the frontend interpolates i18n notifications.types.<type>.
  * See city-genesis/docs/ja/programs/通知レベル管理.md for L1/L2/L3 concepts.
  */
@@ -60,7 +60,12 @@ type TranslateFn = (key: string, options?: Record<string, unknown>) => string;
  * Format one notification for display. Unknown types fall back to a generic message, so display remains
  * functional if frontend i18n additions lag behind backend types.
  */
-export function formatL1NotificationMessage(t: TranslateFn, notification: L1Notification): string {
+export function formatL1NotificationMessage(
+  t: TranslateFn,
+  notification: L1Notification,
+  /** i18n group holding one string per type: the toast wording, or the plain statements of the policy window. */
+  group = "notifications.types",
+): string {
   // Collapse wording depends on casualties; public facility operating failures depend on cause (params.reason).
   let typeKey = notification.type;
   if (notification.type === "collapse" && Number(notification.params.deaths ?? 0) > 0) {
@@ -74,12 +79,12 @@ export function formatL1NotificationMessage(t: TranslateFn, notification: L1Noti
   ) {
     typeKey = `facility_inoperative_${reason}`;
   }
-  return t(`notifications.types.${typeKey}`, {
+  return t(`${group}.${typeKey}`, {
     ...notification.params,
     // Fall back from unknown reason to generic wording without a cause, then from unknown type to unknown.
-    defaultValue: t(`notifications.types.${notification.type}`, {
+    defaultValue: t(`${group}.${notification.type}`, {
       ...notification.params,
-      defaultValue: t("notifications.types.unknown"),
+      defaultValue: t(`${group}.unknown`),
     }),
   });
 }

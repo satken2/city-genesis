@@ -1,22 +1,74 @@
 {
   "policy": {
-    "title": "政策規劃",
     "pending": "模擬進行中",
     "noData": "暫無實績",
-    "noFindings": "沒有符合條件的問題。",
     "actionError": "無法開啟操作畫面。",
     "indicators": {
       "unemployment": {
-        "title": "失業率",
-        "tab": "失業率"
+        "tab": "失業率",
+        "issue": "失業率偏高",
+        "clear": "未發現失業問題",
+        "evidence": "失業率 {{value}}"
       },
       "income": {
-        "title": "平均家庭所得",
-        "tab": "所得"
+        "tab": "所得",
+        "issue": "家庭所得偏低",
+        "clear": "未發現所得問題",
+        "evidence": "平均家庭所得 {{value}}"
+      },
+      "tourism": {
+        "tab": "觀光",
+        "issue": "遊客偏少",
+        "clear": "未發現觀光問題",
+        "evidence": "在住遊客 {{value}}人·可接待 {{capacity}}人"
       },
       "crime": {
-        "title": "犯罪損害",
-        "tab": "犯罪損害"
+        "tab": "犯罪損害",
+        "issue": "發生了犯罪與糾紛",
+        "clear": "未發現犯罪問題",
+        "evidence": "犯罪損害 {{value}}·糾紛 {{incidents}}起"
+      },
+      "sanitation": {
+        "tab": "衛生",
+        "issue": "出現了衛生問題",
+        "clear": "未發現衛生問題",
+        "evidence": "{{value}}個家庭的衛生狀況正在惡化"
+      },
+      "water": {
+        "tab": "供水",
+        "issue": "供水供應不足",
+        "clear": "未發現供水供應問題",
+        "evidence": "家庭獲得量為基準量的 {{value}}"
+      },
+      "electricity": {
+        "tab": "電力",
+        "issue": "電力供應不足",
+        "clear": "未發現電力供應問題",
+        "evidence": "家庭獲得量為基準量的 {{value}}"
+      },
+      "internet": {
+        "tab": "通訊",
+        "issue": "通訊供應不足",
+        "clear": "未發現通訊供應問題",
+        "evidence": "家庭獲得量為基準量的 {{value}}"
+      },
+      "high_water": {
+        "tab": "高壓供水",
+        "issue": "高壓供水供應不足",
+        "clear": "未發現高壓供水供應問題",
+        "evidence": "設施獲得量為訂購量的 {{value}}"
+      },
+      "high_electricity": {
+        "tab": "高壓電力",
+        "issue": "高壓電力供應不足",
+        "clear": "未發現高壓電力供應問題",
+        "evidence": "設施獲得量為訂購量的 {{value}}"
+      },
+      "upkeep": {
+        "tab": "設施養護",
+        "issue": "公共建築、道路與軌道的養護不足",
+        "clear": "未發現養護問題",
+        "evidence": "獲得的養護為所需量的 {{value}}"
       }
     },
     "nodes": {
@@ -52,14 +104,6 @@
         "title": "部分家庭有失業成年人",
         "evidence": "有無職成年人的家庭：{{count}}戶"
       },
-      "no_income": {
-        "title": "部分家庭沒有收入",
-        "evidence": "平均日所得不高於零的家庭：{{count}}戶"
-      },
-      "basic_consumption": {
-        "title": "部分家庭停留在基本消費階段",
-        "evidence": "處於基本消費階段的家庭：{{count}}戶"
-      },
       "security_response": {
         "title": "警察未能阻止所有損害",
         "evidence": "最近1個月的犯罪受害：{{count}}起",
@@ -80,11 +124,6 @@
         "title": "警察局物資不足",
         "evidence": "物資不足的警察局：{{count}}處"
       },
-      "crime_incidents": {
-        "title": "發生了糾紛",
-        "evidence": "最近1個月的糾紛：{{count}}起",
-        "evidence_week": "最近1週的糾紛：{{count}}起"
-      },
       "unemployment_pressure": {
         "title": "失業導致治安惡化",
         "evidence": "無職成年人：{{count}}人"
@@ -101,6 +140,78 @@
         "title": "有孩子在發生犯罪的地區成長",
         "evidence": "最近1個月發生犯罪的地區中的孩子：{{count}}人",
         "evidence_week": "最近1週發生犯罪的地區中的孩子：{{count}}人"
+      },
+      "service_no_facility": {
+        "title": "沒有提供此服務的設施"
+      },
+      "service_facility_limited": {
+        "title": "有無法運轉的{{kinds}}",
+        "evidence": "實際上無法營運的設施：{{count}}處"
+      },
+      "service_low_orders": {
+        "title": "家庭的訂購量低於基準量",
+        "evidence": "訂購量為基準量的 {{percent}}%"
+      },
+      "repair_budget_exhausted": {
+        "title": "修繕預算已用完，養護訂單被削減",
+        "evidence": "修繕支出 {{expense}} ／ 預算 {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "有家庭或設施位於供應範圍之外",
+        "evidence": "不在任何設施範圍內：{{count}}戶、{{facilities}}處設施"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}}無法採購到{{product_name}}",
+        "evidence": "需要 {{demand}}，實際獲得 {{received}}"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}}缺乏人員",
+        "evidence": "所需勞動力 {{quota}}，已確保 {{total_labor}}（有效勞動力）"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}}無法確保專業人才"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}}因預算不足而縮減計畫"
+      },
+      "facility_inactive": {
+        "title": "{{facility}}未在運轉"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}}未接入{{product_name}}網路"
+      },
+      "service_shortage": {
+        "title": "{{product_name}}供應不足",
+        "evidence": "家庭獲得量為基準量的 {{percent}}%"
+      },
+      "tourism_no_attraction": {
+        "title": "沒有景點"
+      },
+      "tourism_no_gateway": {
+        "title": "沒有供遊客到達的門戶"
+      },
+      "tourism_no_trade_hub": {
+        "title": "沒有支付旅費的進出口樞紐"
+      },
+      "tourists_without_lodging": {
+        "title": "有遊客找不到住宿",
+        "evidence": "等待住宿的遊客：{{count}}人"
+      },
+      "tourism_lodging_costly": {
+        "title": "住宿費相對旅費偏高",
+        "evidence": "新遊客的申請為原本的 {{percent}}%"
+      },
+      "tourists_dissatisfied": {
+        "title": "遊客滿意度偏低",
+        "evidence": "新遊客的申請為原本的 {{percent}}%·因不滿而回國 {{count}}人"
+      },
+      "tourism_experience_short": {
+        "title": "遊客未能獲得足夠的觀光體驗",
+        "evidence": "觀光體驗滿足 {{percent}}%"
+      },
+      "tourism_leisure_short": {
+        "title": "遊客未能獲得足夠的娛樂休閒",
+        "evidence": "娛樂休閒滿足 {{percent}}%"
       }
     },
     "actions": {
@@ -139,6 +250,18 @@
       },
       "criminality": {
         "title": "查看市民的犯罪傾向"
+      },
+      "service_facility": {
+        "title": "建造提供此服務的設施"
+      },
+      "parcel": {
+        "title": "準備更大的地塊"
+      },
+      "transit": {
+        "title": "調整公共交通班次與線路"
+      },
+      "entity_detail": {
+        "title": "開啟詳情"
       }
     },
     "selectorTitle": "要調查什麼？",
@@ -153,7 +276,41 @@
     "investigate": {
       "crime": "調查犯罪損害的原因",
       "unemployment": "調查失業的原因",
-      "income": "調查低所得的原因"
+      "income": "調查低所得的原因",
+      "water": "調查供水不足的原因",
+      "electricity": "調查電力不足的原因",
+      "internet": "調查通訊不足的原因",
+      "upkeep": "調查設施養護不足的原因",
+      "high_water": "調查高壓供水不足的原因",
+      "high_electricity": "調查高壓電力不足的原因",
+      "facility": "調查此設施的原因"
+    },
+    "facilityFinding": "{{facility}}：{{title}}",
+    "indicatorsTitle": "指標",
+    "problems": {
+      "resource_runway": "資源「{{name}}」預計再約{{remaining_epochs}}個紀元將枯竭",
+      "resource_depleted": "資源「{{name}}」已枯竭",
+      "facility_inoperative": "公共設施「{{name}}」無法營運",
+      "facility_inoperative_labor": "公共設施「{{name}}」因勞動力不足而無法營運",
+      "facility_inoperative_material": "公共設施「{{name}}」因原物料不足而無法營運",
+      "facility_inoperative_high_skill": "公共設施「{{name}}」因專業人才不足而縮減營運",
+      "facility_inoperative_budget": "公共設施「{{name}}」因預算不足而縮減營運",
+      "education_low_enrollment": "教育機構「{{name}}」招不到學生，處於低負載營運（在學{{enrolled}}人/名額{{max_students}}人）",
+      "infra_facility_down": "基礎設施「{{name}}」已停止運轉",
+      "infra_disconnected": "有{{count}}處設施未接入基礎設施網路",
+      "rail_capacity_exceeded": "有{{count}}段軌道的列車班次超過了軌道容量",
+      "collapse": "有{{count}}處建築・道路倒塌",
+      "collapse_with_deaths": "有{{count}}處建築・道路倒塌，{{deaths}}人死亡",
+      "deaths_traffic": "交通事故導致{{count}}人死亡",
+      "tenant_blocked_by_parcel_size": "在地區「{{zone_name}}」無法建造可容納「{{tenant_name}}」的建築（需要{{required}}m2，地塊最大為{{max_capacity}}m2）",
+      "unknown": "發生了重大事件",
+      "sanitation": "{{count}}個家庭的衛生狀況正在惡化"
+    },
+    "facilitiesTitle": "無法運轉的設施",
+    "otherProblemsTitle": "其他問題",
+    "facility": {
+      "title": "{{facility}}無法運轉",
+      "evidence": "產量為計畫的 {{percent}}%"
     }
   }
 }

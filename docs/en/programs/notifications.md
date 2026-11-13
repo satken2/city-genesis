@@ -6,7 +6,7 @@ City problems are communicated according to urgency and the importance of locati
 
 | Level | Communicates | Presentation |
 | --- | --- | --- |
-| L1 | Problems and major events that must remain visible | Persistent icons, counts, and notification list |
+| L1 | Problems and major events that must remain visible | Persistent icons, counts, and the policy planning window for investigating causes and actions |
 | L2 | Trends that worsen if ignored | Epoch-result statistics |
 | L3 | Events whose location matters | Alerts in 3D space |
 
@@ -19,6 +19,8 @@ An L1 `warning` means a city function is deteriorating and the player can act so
 The front end displays current notifications returned by the core without recalculating triggers. Distinguish ongoing problems from one-epoch events, and discard old notifications when switching cities.
 
 The core supplies notification types and interpolation values; the UI resolves localized text. Unknown types use generic wording so core updates cannot disable the notification display. Temporary interaction feedback uses the UI's shared notification mechanism.
+
+L1 notifications form the list of problems in the policy planning window. For each current notification, the core returns the causes it observed and pointers to actions. The front end displays the causes of the selected notification as a tree and does not determine causes or actions itself. Indicators such as the unemployment rate can be investigated in the same window, but they are not notifications and are not counted on the persistent icon.
 
 ## Alerts in 3D space
 

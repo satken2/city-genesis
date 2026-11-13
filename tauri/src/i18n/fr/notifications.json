@@ -3,10 +3,6 @@
     "trayTooltip": "Notifications de la ville",
     "empty": "Aucun problème ne nécessite d'action pour le moment",
     "loadFailed": "Échec de la récupération des alertes",
-    "sections": {
-      "warning": "Alertes — action immédiate requise",
-      "caution": "Vigilance — freins à la croissance"
-    },
     "types": {
       "resource_runway": "La ressource « {{name}} » devrait être épuisée dans environ {{remaining_epochs}} époques",
       "resource_depleted": "La ressource « {{name}} » est épuisée",

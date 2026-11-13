@@ -3,10 +3,6 @@
     "trayTooltip": "城市通知",
     "empty": "目前没有需要处理的问题",
     "loadFailed": "通知获取失败",
-    "sections": {
-      "warning": "警告 — 需要立即处理",
-      "caution": "注意 — 阻碍发展的问题"
-    },
     "types": {
       "resource_runway": "资源「{{name}}」预计还有约{{remaining_epochs}}个纪元将枯竭",
       "resource_depleted": "资源「{{name}}」已枯竭",

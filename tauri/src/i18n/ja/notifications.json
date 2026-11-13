@@ -3,10 +3,6 @@
     "trayTooltip": "都市の通知",
     "empty": "現在、対処が必要な問題はありません",
     "loadFailed": "通知の取得に失敗しました",
-    "sections": {
-      "warning": "警告 — 今すぐ対処が必要",
-      "caution": "注意 — 成長を妨げる問題"
-    },
     "types": {
       "resource_runway": "資源「{{name}}」があと約{{remaining_epochs}}エポックで枯渇する見込みです",
       "resource_depleted": "資源「{{name}}」が枯渇しました",

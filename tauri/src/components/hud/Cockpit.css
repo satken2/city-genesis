@@ -154,8 +154,7 @@
 
 /* ─── Alerts (L1 notifications) ─── */
 
-.cockpit-alert,
-.cockpit-policy {
+.cockpit-alert {
   width: 28px;
   height: 28px;
   border-radius: 4px;

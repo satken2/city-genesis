@@ -1,22 +1,74 @@
 {
   "policy": {
-    "title": "政策立案",
     "pending": "シミュレーション中",
     "noData": "実績なし",
-    "noFindings": "該当する問題はありません。",
     "actionError": "操作画面を開けませんでした。",
     "indicators": {
       "unemployment": {
-        "title": "失業率",
-        "tab": "失業率"
+        "tab": "失業率",
+        "issue": "失業率が高い",
+        "clear": "失業の問題は見つかっていません",
+        "evidence": "失業率 {{value}}"
       },
       "income": {
-        "title": "平均世帯所得",
-        "tab": "所得"
+        "tab": "所得",
+        "issue": "世帯の所得が低い",
+        "clear": "所得の問題は見つかっていません",
+        "evidence": "平均世帯所得 {{value}}"
+      },
+      "tourism": {
+        "tab": "観光",
+        "issue": "観光客が少ない",
+        "clear": "観光の問題は見つかっていません",
+        "evidence": "滞在観光客 {{value}}人・受入可能 {{capacity}}人"
       },
       "crime": {
-        "title": "犯罪被害",
-        "tab": "犯罪被害"
+        "tab": "犯罪被害",
+        "issue": "犯罪やいざこざが起きている",
+        "clear": "犯罪の問題は見つかっていません",
+        "evidence": "犯罪被害 {{value}}・いざこざ {{incidents}}件"
+      },
+      "sanitation": {
+        "tab": "衛生",
+        "issue": "衛生の問題が発生している",
+        "clear": "衛生の問題は見つかっていません",
+        "evidence": "{{value}}世帯で衛生が悪化している"
+      },
+      "water": {
+        "tab": "水道",
+        "issue": "水道の供給が不足している",
+        "clear": "水道の供給の問題は見つかっていません",
+        "evidence": "世帯の受取は基準量の {{value}}"
+      },
+      "electricity": {
+        "tab": "電力",
+        "issue": "電力の供給が不足している",
+        "clear": "電力の供給の問題は見つかっていません",
+        "evidence": "世帯の受取は基準量の {{value}}"
+      },
+      "internet": {
+        "tab": "通信",
+        "issue": "通信の供給が不足している",
+        "clear": "通信の供給の問題は見つかっていません",
+        "evidence": "世帯の受取は基準量の {{value}}"
+      },
+      "high_water": {
+        "tab": "高圧水道",
+        "issue": "高圧水道の供給が不足している",
+        "clear": "高圧水道の供給の問題は見つかっていません",
+        "evidence": "施設の受取は注文の {{value}}"
+      },
+      "high_electricity": {
+        "tab": "高圧電力",
+        "issue": "高圧電力の供給が不足している",
+        "clear": "高圧電力の供給の問題は見つかっていません",
+        "evidence": "施設の受取は注文の {{value}}"
+      },
+      "upkeep": {
+        "tab": "施設の維持",
+        "issue": "公共の建物と道路・線路の維持が不足している",
+        "clear": "維持の問題は見つかっていません",
+        "evidence": "受けられた維持は必要量の {{value}}"
       }
     },
     "nodes": {
@@ -52,14 +104,6 @@
         "title": "無職の成人がいる世帯がある",
         "evidence": "無職の成人を含む世帯：{{count}}世帯"
       },
-      "no_income": {
-        "title": "収入のない世帯がある",
-        "evidence": "平均日収がゼロ以下：{{count}}世帯"
-      },
-      "basic_consumption": {
-        "title": "最低限の消費段階に留まる世帯がある",
-        "evidence": "最低限の消費段階にある世帯：{{count}}世帯"
-      },
       "security_response": {
         "title": "警察が被害を防ぎきれていない",
         "evidence": "直近1か月の犯罪被害：{{count}}件",
@@ -80,11 +124,6 @@
         "title": "警察署の物資が足りない",
         "evidence": "物資不足の警察署：{{count}}か所"
       },
-      "crime_incidents": {
-        "title": "いざこざが起きている",
-        "evidence": "直近1か月のいざこざ：{{count}}件",
-        "evidence_week": "直近1週間のいざこざ：{{count}}件"
-      },
       "unemployment_pressure": {
         "title": "失業が治安悪化の要因になっている",
         "evidence": "無職の成人：{{count}}人"
@@ -101,6 +140,78 @@
         "title": "犯罪の起きた地区で子どもが育っている",
         "evidence": "直近1か月に犯罪が起きた地区の子ども：{{count}}人",
         "evidence_week": "直近1週間に犯罪が起きた地区の子ども：{{count}}人"
+      },
+      "service_no_facility": {
+        "title": "供給する施設がない"
+      },
+      "service_facility_limited": {
+        "title": "稼働できていない{{kinds}}がある",
+        "evidence": "実質的に運営できていない施設：{{count}}か所"
+      },
+      "service_low_orders": {
+        "title": "世帯の注文が基準量より少ない",
+        "evidence": "注文は基準量の {{percent}}%"
+      },
+      "repair_budget_exhausted": {
+        "title": "修繕予算を使い切り、維持の注文が削られた",
+        "evidence": "修繕の支出 {{expense}} ／ 予算 {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "供給範囲の外に世帯・施設がある",
+        "evidence": "どの施設の範囲にも入らない：{{count}}世帯・{{facilities}}施設"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}}が{{product_name}}を調達できていない",
+        "evidence": "必要量 {{demand}} に対して受取 {{received}}"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}}が人手不足になっている",
+        "evidence": "必要な労働力 {{quota}} に対して確保 {{total_labor}}（実質労働力）"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}}が専門人材を確保できていない"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}}が予算不足で計画を縮小している"
+      },
+      "facility_inactive": {
+        "title": "{{facility}}は稼働していない"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}}が{{product_name}}の網に接続されていない"
+      },
+      "service_shortage": {
+        "title": "{{product_name}}の供給が不足している",
+        "evidence": "世帯の受取は基準量の {{percent}}%"
+      },
+      "tourism_no_attraction": {
+        "title": "観光地がない"
+      },
+      "tourism_no_gateway": {
+        "title": "観光客が来る玄関口がない"
+      },
+      "tourism_no_trade_hub": {
+        "title": "旅費を払う輸出入拠点がない"
+      },
+      "tourists_without_lodging": {
+        "title": "宿泊先が見つからない観光客がいる",
+        "evidence": "宿泊先を待つ観光客：{{count}}人"
+      },
+      "tourism_lodging_costly": {
+        "title": "宿泊費が旅費に比べて高い",
+        "evidence": "新しい観光客の応募は本来の {{percent}}%"
+      },
+      "tourists_dissatisfied": {
+        "title": "観光客の満足度が低い",
+        "evidence": "新しい観光客の応募は本来の {{percent}}%・満足できずに帰国 {{count}}人"
+      },
+      "tourism_experience_short": {
+        "title": "観光体験を十分に受け取れていない",
+        "evidence": "観光体験の充足 {{percent}}%"
+      },
+      "tourism_leisure_short": {
+        "title": "娯楽・余暇を十分に受け取れていない",
+        "evidence": "娯楽・余暇の充足 {{percent}}%"
       }
     },
     "actions": {
@@ -139,6 +250,18 @@
       },
       "criminality": {
         "title": "市民の犯罪傾向を確認する"
+      },
+      "service_facility": {
+        "title": "供給する施設を建てる"
+      },
+      "parcel": {
+        "title": "より大きい土地区画を用意する"
+      },
+      "transit": {
+        "title": "公共交通の便数と線路を見直す"
+      },
+      "entity_detail": {
+        "title": "詳細を開く"
       }
     },
     "selectorTitle": "何を調査しますか？",
@@ -153,7 +276,41 @@
     "investigate": {
       "crime": "犯罪被害の原因を調査",
       "unemployment": "失業率の原因を調査",
-      "income": "所得の原因を調査"
+      "income": "所得の原因を調査",
+      "water": "水道の不足の原因を調査",
+      "electricity": "電力の不足の原因を調査",
+      "internet": "通信の不足の原因を調査",
+      "upkeep": "施設の維持の不足の原因を調査",
+      "high_water": "高圧水道の不足の原因を調査",
+      "high_electricity": "高圧電力の不足の原因を調査",
+      "facility": "この施設の原因を調査"
+    },
+    "facilityFinding": "{{facility}}：{{title}}",
+    "indicatorsTitle": "指標",
+    "problems": {
+      "resource_runway": "資源「{{name}}」があと約{{remaining_epochs}}エポックで枯渇する",
+      "resource_depleted": "資源「{{name}}」が枯渇した",
+      "facility_inoperative": "公共施設「{{name}}」が運営できていない",
+      "facility_inoperative_labor": "公共施設「{{name}}」が労働力不足で運営できていない",
+      "facility_inoperative_material": "公共施設「{{name}}」が原材料不足で運営できていない",
+      "facility_inoperative_high_skill": "公共施設「{{name}}」が専門人材の不足で運営を縮小している",
+      "facility_inoperative_budget": "公共施設「{{name}}」が予算不足で運営を縮小している",
+      "education_low_enrollment": "教育機関「{{name}}」は学生が集まらず低稼働になっている（在籍{{enrolled}}人／定員{{max_students}}人）",
+      "infra_facility_down": "インフラ施設「{{name}}」が停止している",
+      "infra_disconnected": "{{count}}件の施設がインフラ網に接続されていない",
+      "rail_capacity_exceeded": "{{count}}本の線路で列車の便数が軌道の容量を超えている",
+      "collapse": "{{count}}件の建物・道路が倒壊した",
+      "collapse_with_deaths": "{{count}}件の建物・道路が倒壊し、{{deaths}}人が死亡した",
+      "deaths_traffic": "交通事故により{{count}}人が死亡した",
+      "tenant_blocked_by_parcel_size": "地区「{{zone_name}}」で「{{tenant_name}}」が入居できる建物を建てられない（必要{{required}}m2、区画の最大{{max_capacity}}m2）",
+      "unknown": "重大な事象が発生した",
+      "sanitation": "{{count}}世帯の衛生状態が悪化している"
+    },
+    "facilitiesTitle": "稼働できていない施設",
+    "otherProblemsTitle": "その他の問題",
+    "facility": {
+      "title": "{{facility}}が稼働できていない",
+      "evidence": "生産は計画の {{percent}}%"
     }
   }
 }

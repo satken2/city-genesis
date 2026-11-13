@@ -1,22 +1,74 @@
 {
   "policy": {
-    "title": "정책 수립",
     "pending": "시뮬레이션 진행 중",
     "noData": "실적 없음",
-    "noFindings": "해당하는 문제가 없습니다.",
     "actionError": "작업 화면을 열지 못했습니다.",
     "indicators": {
       "unemployment": {
-        "title": "실업률",
-        "tab": "실업률"
+        "tab": "실업률",
+        "issue": "실업률이 높음",
+        "clear": "실업 문제가 발견되지 않았습니다",
+        "evidence": "실업률 {{value}}"
       },
       "income": {
-        "title": "평균 가구 소득",
-        "tab": "소득"
+        "tab": "소득",
+        "issue": "가구 소득이 낮음",
+        "clear": "소득 문제가 발견되지 않았습니다",
+        "evidence": "평균 가구 소득 {{value}}"
+      },
+      "tourism": {
+        "tab": "관광",
+        "issue": "관광객이 적음",
+        "clear": "관광 문제가 발견되지 않았습니다",
+        "evidence": "체류 관광객 {{value}}명 · 수용 가능 {{capacity}}명"
       },
       "crime": {
-        "title": "범죄 피해",
-        "tab": "범죄 피해"
+        "tab": "범죄 피해",
+        "issue": "범죄와 다툼이 발생하고 있음",
+        "clear": "범죄 문제가 발견되지 않았습니다",
+        "evidence": "범죄 피해 {{value}} · 소란 {{incidents}}건"
+      },
+      "sanitation": {
+        "tab": "위생",
+        "issue": "위생 문제가 발생하고 있음",
+        "clear": "위생 문제가 발견되지 않았습니다",
+        "evidence": "{{value}}가구의 위생 상태가 악화되고 있음"
+      },
+      "water": {
+        "tab": "수도",
+        "issue": "수도 공급이 부족함",
+        "clear": "수도 공급 문제가 발견되지 않았습니다",
+        "evidence": "가구가 받은 양은 기준량의 {{value}}"
+      },
+      "electricity": {
+        "tab": "전력",
+        "issue": "전력 공급이 부족함",
+        "clear": "전력 공급 문제가 발견되지 않았습니다",
+        "evidence": "가구가 받은 양은 기준량의 {{value}}"
+      },
+      "internet": {
+        "tab": "통신",
+        "issue": "통신 공급이 부족함",
+        "clear": "통신 공급 문제가 발견되지 않았습니다",
+        "evidence": "가구가 받은 양은 기준량의 {{value}}"
+      },
+      "high_water": {
+        "tab": "고압 수도",
+        "issue": "고압 수도 공급이 부족함",
+        "clear": "고압 수도 공급 문제가 발견되지 않았습니다",
+        "evidence": "시설이 받은 양은 주문의 {{value}}"
+      },
+      "high_electricity": {
+        "tab": "고압 전력",
+        "issue": "고압 전력 공급이 부족함",
+        "clear": "고압 전력 공급 문제가 발견되지 않았습니다",
+        "evidence": "시설이 받은 양은 주문의 {{value}}"
+      },
+      "upkeep": {
+        "tab": "시설 유지관리",
+        "issue": "공공 건물·도로·선로의 유지관리가 부족함",
+        "clear": "유지관리 문제가 발견되지 않았습니다",
+        "evidence": "받은 유지관리는 필요량의 {{value}}"
       }
     },
     "nodes": {
@@ -52,14 +104,6 @@
         "title": "무직 성인이 있는 가구가 있음",
         "evidence": "무직 성인이 있는 가구: {{count}}가구"
       },
-      "no_income": {
-        "title": "소득이 없는 가구가 있음",
-        "evidence": "평균 일 소득이 0 이하인 가구: {{count}}가구"
-      },
-      "basic_consumption": {
-        "title": "최저 소비 단계에 머무는 가구가 있음",
-        "evidence": "최저 소비 단계의 가구: {{count}}가구"
-      },
       "security_response": {
         "title": "경찰이 피해를 모두 막지 못하고 있음",
         "evidence": "최근 1개월 범죄 피해: {{count}}건",
@@ -80,11 +124,6 @@
         "title": "경찰서에 물자가 부족함",
         "evidence": "물자가 부족한 경찰서: {{count}}곳"
       },
-      "crime_incidents": {
-        "title": "소란이 일어나고 있음",
-        "evidence": "최근 1개월의 소란: {{count}}건",
-        "evidence_week": "최근 1주일의 소란: {{count}}건"
-      },
       "unemployment_pressure": {
         "title": "실업이 치안 악화에 영향을 줌",
         "evidence": "무직 성인: {{count}}명"
@@ -101,6 +140,78 @@
         "title": "범죄가 발생한 지구에서 자라는 아이가 있음",
         "evidence": "최근 1개월 범죄가 발생한 지구의 아이: {{count}}명",
         "evidence_week": "최근 1주일 범죄가 발생한 지구의 아이: {{count}}명"
+      },
+      "service_no_facility": {
+        "title": "공급하는 시설이 없음"
+      },
+      "service_facility_limited": {
+        "title": "가동하지 못하는 {{kinds}}이(가) 있음",
+        "evidence": "사실상 운영되지 못하는 시설: {{count}}곳"
+      },
+      "service_low_orders": {
+        "title": "가구의 주문이 기준량보다 적음",
+        "evidence": "주문은 기준량의 {{percent}}%"
+      },
+      "repair_budget_exhausted": {
+        "title": "수선 예산을 다 써서 유지관리 주문이 깎임",
+        "evidence": "수선 지출 {{expense}} / 예산 {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "공급 범위 밖에 가구·시설이 있음",
+        "evidence": "어느 시설의 범위에도 들지 않음: {{count}}가구 · {{facilities}}시설"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}}이(가) {{product_name}}을(를) 조달하지 못함",
+        "evidence": "필요량 {{demand}} 중 {{received}} 수령"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}}의 인력이 부족함",
+        "evidence": "필요 노동력 {{quota}} 중 {{total_labor}} 확보(실질 노동력)"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}}이(가) 전문 인력을 확보하지 못함"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}}이(가) 예산 부족으로 계획을 축소함"
+      },
+      "facility_inactive": {
+        "title": "{{facility}}이(가) 가동되지 않음"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}}이(가) {{product_name}} 망에 연결되어 있지 않음"
+      },
+      "service_shortage": {
+        "title": "{{product_name}} 공급이 부족함",
+        "evidence": "가구가 받은 양은 기준량의 {{percent}}%"
+      },
+      "tourism_no_attraction": {
+        "title": "관광지가 없음"
+      },
+      "tourism_no_gateway": {
+        "title": "관광객이 들어올 관문이 없음"
+      },
+      "tourism_no_trade_hub": {
+        "title": "여비를 지급할 수출입 거점이 없음"
+      },
+      "tourists_without_lodging": {
+        "title": "숙박처를 찾지 못한 관광객이 있음",
+        "evidence": "숙박처를 기다리는 관광객: {{count}}명"
+      },
+      "tourism_lodging_costly": {
+        "title": "숙박비가 여비에 비해 비쌈",
+        "evidence": "새 관광객의 응모는 본래의 {{percent}}%"
+      },
+      "tourists_dissatisfied": {
+        "title": "관광객의 만족도가 낮음",
+        "evidence": "새 관광객의 응모는 본래의 {{percent}}% · 불만족으로 귀국 {{count}}명"
+      },
+      "tourism_experience_short": {
+        "title": "관광 체험을 충분히 받지 못함",
+        "evidence": "관광 체험 충족 {{percent}}%"
+      },
+      "tourism_leisure_short": {
+        "title": "오락·여가를 충분히 받지 못함",
+        "evidence": "오락·여가 충족 {{percent}}%"
       }
     },
     "actions": {
@@ -139,6 +250,18 @@
       },
       "criminality": {
         "title": "시민의 범죄 성향 확인"
+      },
+      "service_facility": {
+        "title": "공급 시설 짓기"
+      },
+      "parcel": {
+        "title": "더 큰 토지 구획 마련하기"
+      },
+      "transit": {
+        "title": "대중교통 운행 횟수와 선로 검토"
+      },
+      "entity_detail": {
+        "title": "상세 열기"
       }
     },
     "selectorTitle": "무엇을 조사할까요?",
@@ -153,7 +276,41 @@
     "investigate": {
       "crime": "범죄 피해 원인 조사",
       "unemployment": "실업 원인 조사",
-      "income": "저소득 원인 조사"
+      "income": "저소득 원인 조사",
+      "water": "수도 부족 원인 조사",
+      "electricity": "전력 부족 원인 조사",
+      "internet": "통신 부족 원인 조사",
+      "upkeep": "시설 유지관리 부족 원인 조사",
+      "high_water": "고압 수도 부족 원인 조사",
+      "high_electricity": "고압 전력 부족 원인 조사",
+      "facility": "이 시설의 원인 조사"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "지표",
+    "problems": {
+      "resource_runway": "자원 「{{name}}」이(가) 약 {{remaining_epochs}}에포크 후 고갈될 전망임",
+      "resource_depleted": "자원 「{{name}}」이(가) 고갈됨",
+      "facility_inoperative": "공공시설 「{{name}}」이(가) 운영되지 않고 있음",
+      "facility_inoperative_labor": "공공시설 「{{name}}」이(가) 노동력 부족으로 운영되지 않고 있음",
+      "facility_inoperative_material": "공공시설 「{{name}}」이(가) 원자재 부족으로 운영되지 않고 있음",
+      "facility_inoperative_high_skill": "공공시설 「{{name}}」이(가) 전문 인력 부족으로 운영을 축소하고 있음",
+      "facility_inoperative_budget": "공공시설 「{{name}}」이(가) 예산 부족으로 운영을 축소하고 있음",
+      "education_low_enrollment": "교육 기관 「{{name}}」에 학생이 모이지 않아 가동률이 낮음(재적 {{enrolled}}명/정원 {{max_students}}명)",
+      "infra_facility_down": "인프라 시설 「{{name}}」이(가) 정지되어 있음",
+      "infra_disconnected": "{{count}}개 시설이 인프라망에 연결되어 있지 않음",
+      "rail_capacity_exceeded": "{{count}}개 선로에서 열차 운행 횟수가 궤도 용량을 초과함",
+      "collapse": "{{count}}개의 건물・도로가 붕괴함",
+      "collapse_with_deaths": "{{count}}개의 건물・도로가 붕괴하여 {{deaths}}명이 사망함",
+      "deaths_traffic": "교통사고로 {{count}}명이 사망함",
+      "tenant_blocked_by_parcel_size": "지구 「{{zone_name}}」에서 「{{tenant_name}}」이(가) 입주할 수 있는 건물을 지을 수 없음(필요 {{required}}m2, 구획 최대 {{max_capacity}}m2)",
+      "unknown": "중대한 사건이 발생함",
+      "sanitation": "{{count}}가구의 위생 상태가 악화되고 있음"
+    },
+    "facilitiesTitle": "가동하지 못하는 시설",
+    "otherProblemsTitle": "기타 문제",
+    "facility": {
+      "title": "{{facility}}이(가) 가동하지 못함",
+      "evidence": "생산은 계획의 {{percent}}%"
     }
   }
 }
