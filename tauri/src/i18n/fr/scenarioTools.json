@@ -12,15 +12,10 @@
     "privatizeFailed": "Échec du passage des installations en gestion privée",
     "spacing": "Espacement des rues",
     "variant": "Types de rue",
-    "angle": "Orientation",
-    "angleAuto": "Aligner sur la route la plus proche",
-    "angleManual": "Angle manuel",
     "preview": "Aperçu",
     "previewing": "Calcul...",
-    "gridPreviewed": "{{count}} tronçons peuvent être planifiés ({{rejected}} rejetés)",
     "create": "Créer",
     "creating": "Création...",
-    "gridCreated": "{{count}} tronçons planifiés ({{rejected}} rejetés)",
     "gridFailed": "Échec de la création des ruelles",
     "reject": {
       "too_short": "trop court",
@@ -62,10 +57,6 @@
       "created": "{{name}} créé ({{area}} m², {{floors}} étages)",
       "createFailed": "Échec de la création de l’agent économique"
     },
-    "pattern": "Motif",
-    "parcelSize": "Dimension cible des parcelles",
-    "blockHint": "Incluez des îlots entiers entourés de routes principales. Des rues à une voie sont planifiées pour desservir les parcelles.",
-    "noBlocks": "Aucun îlot fermé avec de la place pour de nouvelles rues. Incluez des îlots entiers dans la zone sélectionnée.",
     "editor": {
       "cityTab": "Édition de la ville",
       "skillsTab": "Compétences des citoyens",

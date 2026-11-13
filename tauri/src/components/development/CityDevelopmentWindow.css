@@ -65,14 +65,16 @@
   color: var(--flat-text-label);
 }
 
-.city-development__variant {
+.city-development__variant,
+.city-development__check {
   display: flex;
   align-items: flex-start;
   gap: 0.4rem;
   overflow-wrap: anywhere;
 }
 
-.city-development__variant input {
+.city-development__variant input,
+.city-development__check input {
   flex-shrink: 0;
   accent-color: var(--flat-accent);
 }

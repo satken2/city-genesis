@@ -12,15 +12,10 @@
     "privatizeFailed": "No se pudieron convertir las instalaciones a gestión privada",
     "spacing": "Separación de calles",
     "variant": "Tipos de calle",
-    "angle": "Orientación",
-    "angleAuto": "Alinear con la calle más cercana",
-    "angleManual": "Indicar ángulo",
     "preview": "Vista previa",
     "previewing": "Calculando...",
-    "gridPreviewed": "Se pueden planificar {{count}} tramos ({{rejected}} rechazados)",
     "create": "Crear",
     "creating": "Creando...",
-    "gridCreated": "Se planificaron {{count}} tramos ({{rejected}} rechazados)",
     "gridFailed": "No se pudieron crear las calles",
     "reject": {
       "too_short": "demasiado corto",
@@ -62,10 +57,6 @@
       "created": "Se creó {{name}} ({{area}} m², {{floors}} pisos)",
       "createFailed": "No se pudo crear el agente económico"
     },
-    "pattern": "Patrón",
-    "parcelSize": "Tamaño objetivo del lote",
-    "blockHint": "Incluye manzanas completas rodeadas de vías principales. Se planifican calles de un carril para dar frente vial a los lotes.",
-    "noBlocks": "No hay manzanas cerradas con espacio para más calles. Incluye manzanas completas en el área seleccionada.",
     "editor": {
       "cityTab": "Edición de la ciudad",
       "skillsTab": "Habilidades de ciudadanos",

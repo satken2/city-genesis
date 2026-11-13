@@ -12,15 +12,10 @@
     "privatizeFailed": "轉為民間設施失敗",
     "spacing": "街道間距",
     "variant": "巷道類型",
-    "angle": "方向",
-    "angleAuto": "對齊最近道路",
-    "angleManual": "指定角度",
     "preview": "預覽",
     "previewing": "計算中...",
-    "gridPreviewed": "可規劃 {{count}} 段巷道（拒絕 {{rejected}} 段）",
     "create": "建立",
     "creating": "建立中...",
-    "gridCreated": "已規劃 {{count}} 段巷道（拒絕 {{rejected}} 段）",
     "gridFailed": "建立巷道失敗",
     "reject": {
       "too_short": "過短",
@@ -62,10 +57,6 @@
       "created": "已建立 {{name}}（{{area}} m² · {{floors}}層）",
       "createFailed": "建立經濟主體失敗"
     },
-    "pattern": "生成模式",
-    "parcelSize": "目標地塊尺寸",
-    "blockHint": "請將主幹道圍合的整個街區納入範圍。規劃單車道街道，為地塊提供臨街面。",
-    "noBlocks": "範圍內沒有可增設街道的封閉街區。請將整個街區納入所選範圍。",
     "editor": {
       "cityTab": "城市編輯",
       "skillsTab": "市民技能",

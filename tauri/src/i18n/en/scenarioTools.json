@@ -12,15 +12,10 @@
     "privatizeFailed": "Failed to convert facilities to private operation",
     "spacing": "Street spacing",
     "variant": "Street types",
-    "angle": "Orientation",
-    "angleAuto": "Align to nearest road",
-    "angleManual": "Set angle",
     "preview": "Preview",
     "previewing": "Calculating...",
-    "gridPreviewed": "{{count}} street segments can be planned ({{rejected}} rejected)",
     "create": "Create",
     "creating": "Creating...",
-    "gridCreated": "Planned {{count}} street segments ({{rejected}} rejected)",
     "gridFailed": "Failed to create side streets",
     "reject": {
       "too_short": "too short",
@@ -62,10 +57,6 @@
       "created": "Created {{name}} ({{area}} m², {{floors}} floors)",
       "createFailed": "Failed to create the economic agent"
     },
-    "pattern": "Pattern",
-    "parcelSize": "Target lot size",
-    "blockHint": "Include entire blocks enclosed by trunk roads. Single-lane streets are planned to provide road frontage for lots.",
-    "noBlocks": "No enclosed blocks with room for more streets were found. Include entire blocks in the selected area.",
     "editor": {
       "cityTab": "City editing",
       "skillsTab": "Citizen skills",

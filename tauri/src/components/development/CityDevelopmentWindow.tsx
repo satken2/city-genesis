@@ -11,14 +11,8 @@ import { buildablePathMaster, buildCategoryVariants, type PathVariantOption } fr
 import { clearHintbarTextIf, setHintbarText } from "../../utils/hintbar";
 import { IPC_EVENT_CAMERA_STATE, sendCameraQueryState, sendSessionReload } from "../../utils/ipc";
 import { CityMapCanvas, type CityMapCanvasHandle } from "../map/CityMapCanvas";
-import {
-  BLOCK_PATTERNS, DEVELOPMENT_PATTERNS, STREET_PATTERNS, useDevelopmentBrush,
-  type BlockPattern, type DevelopmentPattern, type StreetPattern,
-} from "./useDevelopmentBrush";
+import { DEVELOPMENT_PATTERNS, useDevelopmentBrush, type DevelopmentPattern } from "./useDevelopmentBrush";
 import "./CityDevelopmentWindow.css";
-
-type Algorithm = DevelopmentPattern | StreetPattern | "block";
-const ALGORITHMS = [...DEVELOPMENT_PATTERNS, ...STREET_PATTERNS, "block"] as const;
 
 const CAMERA_HALF_EXTENT_M = 600;
 const NO_VARIANTS: number[] = [];
@@ -40,18 +34,14 @@ export function CityDevelopmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const masterData = useMasterData();
   const scenarioMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCENARIO;
   const mapRef = useRef<CityMapCanvasHandle>(null);
-  const [algorithm, setAlgorithm] = useState<Algorithm>("arterial");
-  const [blockPattern, setBlockPattern] = useState<BlockPattern>("block_grid");
+  const [pattern, setPattern] = useState<DevelopmentPattern>("planned_city_1");
   const [overlayVersion, setOverlayVersion] = useState(0);
-  const blockMode = algorithm === "block";
-  const variantGroup = blockMode ? "block" : "standard";
-  const [variantSelections, setVariantSelections] = useState<Partial<Record<typeof variantGroup, number[]>>>({});
+  const [selection, setSelection] = useState<number[]>();
 
   const choices = useMemo(() => buildCategoryVariants(buildablePathMaster(masterData, scenarioMode), PATH_STREET)
-    .filter(({ data }) => !data.height_editable && data.frontage_allowed && (!blockMode || data.lanes === 1)),
-  [masterData, scenarioMode, blockMode]);
+    .filter(({ data }) => !data.height_editable && data.frontage_allowed),
+  [masterData, scenarioMode]);
 
-  const selection = variantSelections[variantGroup];
   const variants = useMemo(() => {
     const available = selection?.filter(id => choices.some(choice => choice.id === id));
     if (available && (available.length > 0 || selection?.length === 0)) return available;
@@ -62,10 +52,7 @@ export function CityDevelopmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   }, [selection, choices]);
 
   const toggleVariant = (id: number, checked: boolean) => {
-    setVariantSelections(prev => ({
-      ...prev,
-      [variantGroup]: checked ? [...variants, id] : variants.filter(value => value !== id),
-    }));
+    setSelection(checked ? [...variants, id] : variants.filter(value => value !== id));
   };
 
   const reload = async () => {
@@ -73,7 +60,7 @@ export function CityDevelopmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     mapRef.current?.reload();
   };
 
-  const workflow = useDevelopmentBrush(blockMode ? blockPattern : algorithm, { apiBaseUrl, variants, reload });
+  const workflow = useDevelopmentBrush(pattern, { apiBaseUrl, variants, reload });
   const { hint, mapProps, running } = workflow;
   const busy = running !== null;
 
@@ -115,31 +102,16 @@ export function CityDevelopmentWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         <label className="city-development__field">
           <span>{t("cityDevelopment.pattern")}</span>
           <select
-            value={algorithm}
+            value={pattern}
             disabled={busy}
             data-guide="city_development.pattern"
-            onChange={event => setAlgorithm(event.currentTarget.value as Algorithm)}
+            onChange={event => setPattern(event.currentTarget.value as DevelopmentPattern)}
           >
-            {ALGORITHMS.map(key => (
+            {DEVELOPMENT_PATTERNS.map(key => (
               <option key={key} value={key}>{t(`cityDevelopment.patterns.${key}`)}</option>
             ))}
           </select>
         </label>
-        {blockMode && (
-          <label className="city-development__field">
-            <span>{t("scenarioTools.pattern")}</span>
-            <select
-              value={blockPattern}
-              disabled={busy}
-              data-guide="city_development.block_pattern"
-              onChange={event => setBlockPattern(event.currentTarget.value as BlockPattern)}
-            >
-              {BLOCK_PATTERNS.map(key => (
-                <option key={key} value={key}>{t(`cityDevelopment.patterns.${key}`)}</option>
-              ))}
-            </select>
-          </label>
-        )}
         <fieldset className="city-development__variants" disabled={busy}>
           <legend>{t("cityDevelopment.roadVariants")}</legend>
           {choices.map(({ id, data }) => (
