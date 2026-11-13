@@ -3,8 +3,10 @@ import { describeError } from "../../utils/errors";
  * 政策立案は、都市で起きている問題(L1通知)と指標から調査先を選び、その原因の木と対策を表示する。
  * コックピットのアラートのアイコンから開く。原因はコアの観測結果で、対策は既存の操作画面へ案内する。
  * 左に調査先の一覧(指標・稼働できていない施設・その他の問題)、右に選んだものの木を並べる。
+ * 右は事象・原因・別の調査への参照を色とラベルで区別し、対策は対象のカード内にまとめる。
  * 施設の不調は、どの木の中でも「その施設が稼働できていない」という節で止め、原因はその施設を選んで調べる。
  * 別の指標で調べる要因は参照ノードで止め、そのボタンで調査先を切り替える。
+ * 詳細画面のあるカードは全体をクリックして開ける。カード内の対策・調査ボタンはそれぞれの操作を優先する。
  * 施設の不調をたどる節(domain が diagnosis)はコアの施設診断の節で、文言も施設診断のものを使う。
  * どの施設の不調かは subject が持ち、節の文の主語として出す。
  * 再表示は App の open_seq で初期化され、エポック完了時にも値を取り直す。
@@ -14,7 +16,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useTranslation } from "react-i18next";
-import { PLAY_MODE_READ_ONLY } from "../../constants";
+import { PLAY_MODE_READ_ONLY, PRODUCT_ELECTRICITY, PRODUCT_HIGH_ELECTRICITY, PRODUCT_HIGH_WATER,
+  PRODUCT_INTERNET, PRODUCT_WATER_SUPPLY } from "../../constants";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { usePlayMode } from "../../hooks/usePlayMode";
 import { useEpochPeriodUnit } from "../../hooks/useEpochPeriodUnit";
@@ -29,6 +32,13 @@ import { formatEpochDate } from "../../utils/date";
 import { resolveIntlLocale } from "../../utils/locale";
 import crisisIcon from "../../assets/images/ui/crisis.png";
 import infoIcon from "../../assets/images/ui/info.png";
+import adviceIcon from "../../assets/images/menu/policy.svg";
+import crimeIcon from "../../assets/images/alerts/shooting.png";
+import sanitationIcon from "../../assets/images/alerts/sanitation.png";
+import infrastructureIcon from "../../assets/images/alerts/electricity.png";
+import facilityIcon from "../../assets/images/alerts/facility-inoperative.svg";
+import collapseIcon from "../../assets/images/alerts/rubble.png";
+import resourceIcon from "../../assets/images/alerts/resource-warning.png";
 import "./PolicyPlanningWindow.css";
 
 type Finding = {
@@ -68,7 +78,7 @@ const ACTIONS: Record<string, { window: string; edits?: boolean; params?: Record
   welfare: { window: "city_regulation", edits: true, params: { extra: { initialTab: "labor" } } },
   immigration_skills: { window: "city_regulation", edits: true, params: { extra: { initialTab: "immigration" } } },
   immigration_limit: { window: "city_regulation", edits: true, params: { extra: { initialTab: "immigration" } } },
-  employment: { window: "city_statistics" },
+  employment: { window: "city_statistics", params: { extra: { initialTab: "employment" } } },
   police: { window: "building_construction", edits: true },
   service_facility: { window: "building_construction", edits: true },
   facilities: { window: "public_facilities" },
@@ -82,6 +92,25 @@ const INDICATOR_ORDER: Indicator["id"][] = [
   "upkeep",
 ];
 const INDICATOR_ACTIONS: Partial<Record<Indicator["id"], string[]>> = { income: ["welfare"] };
+const INDICATOR_DETAILS: Partial<Record<Indicator["id"], { initialTab: string; initialSubTab?: string }>> = {
+  unemployment: { initialTab: "employment" },
+  income: { initialTab: "income" },
+  tourism: { initialTab: "tourism" },
+  crime: { initialTab: "accidents", initialSubTab: "crime" },
+  sanitation: { initialTab: "health" },
+};
+const INDICATOR_PRODUCTS: Partial<Record<Indicator["id"], number>> = {
+  water: PRODUCT_WATER_SUPPLY, electricity: PRODUCT_ELECTRICITY, internet: PRODUCT_INTERNET,
+  high_water: PRODUCT_HIGH_WATER, high_electricity: PRODUCT_HIGH_ELECTRICITY,
+};
+const SERVICE_FINDINGS = new Set(["service_shortage", "service_no_facility", "service_facility_limited"]);
+// Unity の AlertIconFactory と表示設定のアラートに対応する素材。専用の表示がない事象には付けない。
+const EVENT_ICONS: Partial<Record<string, string>> = {
+  crime: crimeIcon, sanitation: sanitationIcon,
+  electricity: infrastructureIcon, high_electricity: infrastructureIcon, high_water: infrastructureIcon,
+  facility_inoperative: facilityIcon, infra_facility_down: infrastructureIcon,
+  collapse: collapseIcon, resource_runway: resourceIcon, resource_depleted: resourceIcon,
+};
 const FINDING_INDICATORS: Record<string, Indicator["id"]> = {
   household_unemployment: "unemployment",
   unemployment_pressure: "unemployment",
@@ -92,13 +121,13 @@ const FINDING_INDICATORS: Record<string, Indicator["id"]> = {
 const DIAGNOSIS_FRACTIONS = new Set(["ratio", "unemployment_rate"]);
 
 /** 木の一番上に置く、選んだ問題または指標。 */
-type DiagramRoot = { key: string; indicatorId?: Indicator["id"]; title: string; detail: string; roots: Finding[]; buttons: RowButton[] };
-type RowButton = { key: string; label: string; guide: string; disabled?: boolean; onClick: () => void };
-type DiagramRow = { id: string; parentId: string | null; depth: number; emphasized: boolean; title: string; detail: string; buttons: RowButton[] };
+type DiagramRoot = { key: string; indicatorId?: Indicator["id"]; title: string; detail: string; icon?: string; roots: Finding[]; buttons: RowButton[]; openDetail?: () => void };
+type RowButton = { key: string; label: string; guide: string; icon?: string; disabled?: boolean; onClick: () => void };
+type DiagramRow = { id: string; parentId: string | null; depth: number; kind: "event" | "cause" | "reference"; title: string; detail: string; buttons: RowButton[]; openDetail?: () => void };
 type Connection = { id: string; path: string; x: number; y: number };
 
 function PolicyDiagram({ root, rows }: { root: DiagramRoot; rows: DiagramRow[] }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const diagramRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef(new Map<string, HTMLElement>());
   const arrowId = `policy-arrow-${useId().replace(/:/g, "")}`;
@@ -155,17 +184,28 @@ function PolicyDiagram({ root, rows }: { root: DiagramRoot; rows: DiagramRow[] }
     <ol className="policy-rows">
       {rows.map(row => <li key={row.id} className="policy-row" data-parent-id={row.parentId ?? undefined} data-depth={row.depth}
         style={{ "--policy-depth": row.depth } as CSSProperties}>
-        <div className="policy-event-cell">
-          <article className={`policy-finding${row.emphasized ? " policy-finding--indicator" : ""}`}
-            ref={element => { if (element) nodeRefs.current.set(row.id, element); else nodeRefs.current.delete(row.id); }}>
+        <article className={`policy-finding policy-finding--${row.kind}${row.openDetail ? " policy-finding--interactive" : ""}`}
+          ref={element => { if (element) nodeRefs.current.set(row.id, element); else nodeRefs.current.delete(row.id); }}>
+          {row.openDetail && <button type="button" className="policy-finding-open" data-guide="policy.action.entity_detail"
+            aria-label={`${t("policy.actions.entity_detail.title")}: ${row.title}`}
+            title={t("policy.actions.entity_detail.title")} onClick={row.openDetail} />}
+          <div className={`policy-finding-content${row.kind === "event" && !root.icon ? " policy-finding-content--plain" : ""}`}>
+            {row.kind === "event"
+              ? root.icon && <img src={root.icon} alt="" className="policy-event-icon" draggable={false} />
+              : <span className="policy-finding-badge">{t("policy.causeTitle")}</span>}
             <h3>{row.title}</h3>
             {row.detail && <p className="policy-evidence">{row.detail}</p>}
-          </article>
-        </div>
-        <div className="policy-actions">
-          {row.buttons.map(button => <button type="button" key={button.key} disabled={button.disabled}
-            data-guide={button.guide} onClick={button.onClick}>{button.label}</button>)}
-        </div>
+            {row.buttons.length > 0 && <footer className="policy-finding-footer">
+              <div className="policy-actions">
+                {row.buttons.map(button => <button type="button" key={button.key} disabled={button.disabled}
+                  data-guide={button.guide} onClick={button.onClick}>
+                  {button.icon && <img src={button.icon} alt="" className="policy-advice-icon" draggable={false} />}
+                  <span className="policy-action-label">{button.label}</span><span className="policy-action-arrow" aria-hidden="true" />
+                </button>)}
+              </div>
+            </footer>}
+          </div>
+        </article>
       </li>)}
     </ol>
   </div>;
@@ -243,11 +283,37 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     }
   }
 
-  const actionButtons = (ids: string[]): RowButton[] => ids.filter(id => id in ACTIONS).map(id => ({
-    key: id, label: t(`policy.actions.${id}.title`), guide: `policy.action.${id}`,
-    disabled: ACTIONS[id].edits && !canEdit,
-    onClick: () => void open(ACTIONS[id].window, { params: ACTIONS[id].params }),
-  }));
+  // 市内の既存施設だけでなくマスターから引くので、まだ建っていない場合も建設対象を示せる。
+  const supplierNames = (productId?: number) => productId == null ? "" :
+    [...new Set(Object.values(master?.agents ?? {}).filter(agent => agent.supply === productId)
+      .map(agent => agent.display_name).filter(Boolean))].join("・");
+  const actionButtons = (ids: string[], productId?: number, findingType?: string): RowButton[] => {
+    const suppliers = supplierNames(productId);
+    return ids.filter(id => id in ACTIONS).map(id => ({
+      key: id, label: t(`policy.actions.${id}.title`, {
+        context: suppliers ? "named" : findingType, suppliers,
+      }), guide: `policy.action.${id}`,
+      icon: adviceIcon,
+      disabled: ACTIONS[id].edits && !canEdit,
+      onClick: () => void open(ACTIONS[id].window, { params: ACTIONS[id].params }),
+    }));
+  };
+  const serviceDetail = (productId: number) => () => void open("public_facilities", { params: { extra: { initialProductId: productId } } });
+  const mapDetail = (productId: number) => () => void open("city_map", { params: { extra: { initialInfraProductId: productId } } });
+  const indicatorDetail = (id: Indicator["id"]) => {
+    const productId = INDICATOR_PRODUCTS[id];
+    if (productId != null) return serviceDetail(productId);
+    const extra = INDICATOR_DETAILS[id];
+    return extra ? () => void open("city_statistics", { params: { extra } }) : undefined;
+  };
+  const facilityDetail = (id: number) => () => void open("agent_detail", { entityId: String(id) });
+  const findingDetail = (finding: Finding, productId?: number) => {
+    if (productId != null && (finding.type === "service_out_of_range" || finding.type.startsWith("infra_"))) {
+      return mapDetail(productId);
+    }
+    if (finding.subject) return facilityDetail(finding.subject.id);
+    return productId != null && SERVICE_FINDINGS.has(finding.type) ? serviceDetail(productId) : undefined;
+  };
 
   const formatIndicator = (item: Indicator) => item.unit === "percent" ? percent.format(item.value!)
     : item.unit === "households" || item.unit === "persons" ? number.format(item.value!)
@@ -266,7 +332,7 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     detail: item.params.percent == null ? "" : t("policy.facility.evidence", { percent: number.format(item.params.percent) }),
   });
 
-  const describe = (finding: Finding) => {
+  const describe = (finding: Finding, productId?: number) => {
     const diagnosis = finding.domain === "diagnosis";
     const values: Record<string, string> = Object.fromEntries(Object.entries(finding.params).map(([key, value]) =>
       [key, number.format(diagnosis && DIAGNOSIS_FRACTIONS.has(key) ? value * 100 : value)]));
@@ -274,10 +340,11 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     // 下に施設が並ぶ節は、その施設の種類の名前(変電所など)を差し込めるようにする。
     const kinds = [...new Set(finding.children.filter(child => child.type === "facility_ref")
       .map(child => master?.agents[facilityOf.get(child.subject!.id)?.variant ?? -1]?.display_name).filter(Boolean))].join("・");
-    const names = { ...values, facility, kinds, product_name: master?.products[finding.params.product_id]?.display_name ?? "" };
+    const suppliers = supplierNames(productId);
+    const names = { ...values, facility, kinds, suppliers, product_name: master?.products[finding.params.product_id]?.display_name ?? "" };
     if (!diagnosis) {
       return {
-        title: t(`policy.nodes.${finding.type}.title`, names),
+        title: t(`policy.nodes.${finding.type}.title`, { ...names, context: suppliers ? "named" : undefined }),
         detail: t(`policy.nodes.${finding.type}.evidence`, { ...names, context: periodUnit, defaultValue: "" }),
       };
     }
@@ -293,24 +360,23 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   let clearMessage = "";
   const indicatorRoot = (item: Indicator, key: string): DiagramRoot => ({
     key, indicatorId: item.id, ...stateIndicator(item), roots: item.roots, buttons: actionButtons(INDICATOR_ACTIONS[item.id] ?? []),
+    icon: EVENT_ICONS[item.id],
+    openDetail: indicatorDetail(item.id),
   });
   if (current.problem) {
     const item = current.problem;
     const detailWindow = item.entity ? NOTIFICATION_ENTITY_WINDOW_TYPES[item.entity.type] : undefined;
     root = {
       key: `problem:${item.id}`, title: stateProblem(item), detail: "", roots: item.roots,
-      buttons: [...actionButtons(item.actions), ...(detailWindow ? [{
-        key: "entity_detail", label: t("policy.actions.entity_detail.title"), guide: "policy.action.entity_detail",
-        onClick: () => void open(detailWindow, { entityId: String(item.entity!.id) }),
-      }] : [])],
+      icon: EVENT_ICONS[item.type],
+      buttons: actionButtons(item.actions),
+      openDetail: detailWindow ? () => void open(detailWindow, { entityId: String(item.entity!.id) }) : undefined,
     };
   } else if (current.facility) {
     const item = current.facility;
     root = {
-      key: `facility:${item.id}`, ...stateFacility(item), roots: item.roots, buttons: [{
-        key: "entity_detail", label: t("policy.actions.entity_detail.title"), guide: "policy.action.entity_detail",
-        onClick: () => void open("agent_detail", { entityId: String(item.id) }),
-      }],
+      key: `facility:${item.id}`, ...stateFacility(item), roots: item.roots, buttons: [], openDetail: facilityDetail(item.id),
+      icon: facilityIcon,
     };
   } else if (current.indicator?.issue) {
     root = indicatorRoot(current.indicator, `indicator:${current.indicator.id}`);
@@ -321,8 +387,11 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const rows: DiagramRow[] = [];
   if (root) {
     const indicatorId = root.indicatorId;
-    rows.push({ id: "root", parentId: null, depth: 0, emphasized: true, title: root.title, detail: root.detail, buttons: root.buttons });
-    const append = (finding: Finding, parentId: string, depth: number, id: string) => {
+    rows.push({ id: "root", parentId: null, depth: 0, kind: "event", title: root.title, detail: root.detail,
+      buttons: root.buttons, openDetail: root.openDetail });
+    const append = (finding: Finding, parentId: string, depth: number, id: string, parentProductId?: number) => {
+      // 供給範囲など品目を省略した原因は親の財を引き継ぎ、別の原材料をたどったらその財へ切り替える。
+      const productId = finding.params.product_id ?? parentProductId;
       // 別の指標で調べる原因は、その指標に問題があるときだけ案内する。案内だけの節は、案内先に問題が無ければ出さない。
       const target = finding.indicator ?? FINDING_INDICATORS[finding.type];
       const reference = target !== indicatorId && indicators.find(item => item.id === target && item.issue);
@@ -330,23 +399,25 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       // 別の施設の不調はここで止め、その施設を選んで原因を調べる。
       const referenced = finding.type === "facility_ref" ? facilityOf.get(finding.subject!.id) : undefined;
       if (referenced) {
-        rows.push({ id, parentId, depth, emphasized: true, ...stateFacility(referenced), buttons: [{
+        rows.push({ id, parentId, depth, kind: "reference", ...stateFacility(referenced), openDetail: facilityDetail(referenced.id), buttons: [{
           key: "investigate", label: t("policy.investigate.facility"), guide: "policy.investigate.facility",
           onClick: () => setSelected({ kind: "facility", id: referenced.id }),
         }] });
         return;
       }
       if (reference) {
-        rows.push({ id, parentId, depth, emphasized: true, ...stateIndicator(reference), buttons: [{
+        rows.push({ id, parentId, depth, kind: "reference", ...stateIndicator(reference), openDetail: indicatorDetail(reference.id), buttons: [{
           key: "investigate", label: t(`policy.investigate.${reference.id}`), guide: `policy.investigate.${reference.id}`,
           onClick: () => setSelected({ kind: "indicator", id: reference.id }),
         }] });
         return;
       }
-      rows.push({ id, parentId, depth, emphasized: false, ...describe(finding), buttons: actionButtons(finding.actions) });
-      finding.children.forEach((child, index) => append(child, id, depth + 1, `${id}.${index}`));
+      rows.push({ id, parentId, depth, kind: "cause", ...describe(finding, productId), buttons: actionButtons(finding.actions, productId, finding.type),
+        openDetail: findingDetail(finding, productId) });
+      finding.children.forEach((child, index) => append(child, id, depth + 1, `${id}.${index}`, productId));
     };
-    root.roots.forEach((finding, index) => append(finding, "root", 1, String(index)));
+    root.roots.forEach((finding, index) => append(finding, "root", 1, String(index),
+      indicatorId ? INDICATOR_PRODUCTS[indicatorId] : undefined));
   }
 
   // 施設とその他の問題は同じ形の行で並べ、警告は赤、注意は黄にする。
@@ -402,10 +473,6 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         </nav>
         {root && <section className="policy-investigation" aria-label={root.title}>
           <div className="policy-tree-scroll" key={root.key}>
-            <div className="policy-column-headings">
-              <h2>{t("policy.eventsTitle")}</h2>
-              <h2>{t("policy.adviceTitle")}</h2>
-            </div>
             <PolicyDiagram root={root} rows={rows} />
           </div>
         </section>}

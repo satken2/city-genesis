@@ -38,19 +38,19 @@
         "tab": "Eau",
         "issue": "L’offre d’eau est insuffisante",
         "clear": "Aucun problème d’offre d’eau constaté",
-        "evidence": "Les ménages ont reçu {{value}} de la quantité de référence"
+        "evidence": "Les ménages et les installations ont reçu {{value}} de leurs commandes"
       },
       "electricity": {
         "tab": "Électricité",
         "issue": "L’offre d’électricité est insuffisante",
         "clear": "Aucun problème d’offre d’électricité constaté",
-        "evidence": "Les ménages ont reçu {{value}} de la quantité de référence"
+        "evidence": "Les ménages et les installations ont reçu {{value}} de leurs commandes"
       },
       "internet": {
         "tab": "Télécoms",
         "issue": "L’offre de télécommunications est insuffisante",
         "clear": "Aucun problème d’offre de télécommunications constaté",
-        "evidence": "Les ménages ont reçu {{value}} de la quantité de référence"
+        "evidence": "Les ménages et les installations ont reçu {{value}} de leurs commandes"
       },
       "high_water": {
         "tab": "Eau brute",
@@ -142,15 +142,12 @@
         "evidence_week": "Enfants dans des quartiers touchés par des crimes cette dernière semaine : {{count}}"
       },
       "service_no_facility": {
-        "title": "Aucune installation ne fournit ce service"
+        "title": "Aucune installation ne fournit ce service",
+        "title_named": "{{suppliers}} : aucune installation disponible"
       },
       "service_facility_limited": {
         "title": "Des installations ne peuvent pas fonctionner ({{kinds}})",
         "evidence": "Installations pratiquement à l’arrêt : {{count}}"
-      },
-      "service_low_orders": {
-        "title": "Les ménages commandent moins que la quantité de référence",
-        "evidence": "Les commandes représentent {{percent}} % de la quantité de référence"
       },
       "repair_budget_exhausted": {
         "title": "Le budget Entretien est épuisé et l’entretien courant a été réduit",
@@ -158,7 +155,8 @@
       },
       "service_out_of_range": {
         "title": "Des ménages ou des installations sont hors de la zone de service",
-        "evidence": "Hors de la zone de toutes les installations : {{count}} ménages, {{facilities}} installations"
+        "evidence": "Hors de la zone de toutes les installations : {{count}} ménages, {{facilities}} installations",
+        "title_named": "Des ménages ou des installations sont hors de la zone de desserte de {{suppliers}}"
       },
       "facility_material_unmet": {
         "title": "{{facility}} ne parvient pas à se procurer {{product_name}}",
@@ -185,7 +183,7 @@
         "evidence": "Ménages vivant dans des bidonvilles : {{count}}"
       },
       "service_shortage": {
-        "title": "L’offre de {{product_name}} est insuffisante",
+        "title": "Les ménages ne reçoivent pas assez de {{product_name}}",
         "evidence": "Les ménages ont reçu {{percent}} % de la quantité de référence"
       },
       "tourism_no_attraction": {
@@ -256,7 +254,10 @@
         "title": "Examiner la tendance des citoyens à commettre des délits"
       },
       "service_facility": {
-        "title": "Construire une installation qui le fournit"
+        "title": "Construire une installation qui le fournit",
+        "title_named": "Construire : {{suppliers}}",
+        "title_tourism_no_attraction": "Construire une attraction touristique",
+        "title_tourism_no_gateway": "Construire un port ou un aéroport"
       },
       "parcel": {
         "title": "Préparer une parcelle plus grande"
@@ -270,6 +271,7 @@
     },
     "selectorTitle": "Que souhaitez-vous examiner ?",
     "eventsTitle": "Ce qui se passe",
+    "causeTitle": "La cause",
     "adviceTitle": "Actions conseillées",
     "needsAttention": "Amélioration possible",
     "values": {

@@ -56,7 +56,7 @@ const CAMERA_MARKER_TIP_PX = 17;
 const CAMERA_MARKER_HALF_WIDTH_PX = 8;
 const CAMERA_MARKER_RADIUS_PX = 4;
 
-export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
+export function CityMapWindow({ apiBaseUrl, initialInfraProductId }: { apiBaseUrl: string; initialInfraProductId?: number }) {
   const { t } = useTranslation();
   const mapRef = useRef<CityMapCanvasHandle>(null);
   const coordRef = useRef<HTMLSpanElement | null>(null);
@@ -114,7 +114,7 @@ export function CityMapWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     navigation.reload();
     void sendCameraQueryState().catch(console.error);
   }, [navigation.reload]);
-  const controls = useCityMapControls(apiBaseUrl, mapRef, handleReload);
+  const controls = useCityMapControls(apiBaseUrl, mapRef, handleReload, initialInfraProductId);
 
   /**
  * Camera position marker overlay. ctx already has the world-coordinate view transform, allowing direct world-coordinate

@@ -153,7 +153,7 @@ export function UsageMeter({ usage_ratio, goodHigh = false }: { usage_ratio: num
   );
 }
 
-export function AccidentsTab({ apiBaseUrl }: { apiBaseUrl: string }) {
+export function AccidentsTab({ apiBaseUrl, initialSubTab }: { apiBaseUrl: string; initialSubTab?: string }) {
   const { t } = useTranslation();
   const remPx = useRemPx();
   const masterData = useMasterData();
@@ -162,7 +162,8 @@ export function AccidentsTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     "/api/v1/stats/accidents"
   );
 
-  const [activeSubTab, setActiveSubTab] = useState<"fire" | "traffic" | "crime" | "collapse">("fire");
+  const [activeSubTab, setActiveSubTab] = useState<"fire" | "traffic" | "crime" | "collapse">(() =>
+    initialSubTab === "traffic" || initialSubTab === "crime" || initialSubTab === "collapse" ? initialSubTab : "fire");
 
   // Open the building (Agent) details window.
   const openAgentDetail = (agentId: number) => {

@@ -97,3 +97,18 @@ assert.deepEqual(JSON.parse(JSON.stringify(options)), [
   { productId: 306, selection: { network: null, coverage: 306 } },
 ]);
 console.log("PASS: service goods paired with the infrastructure network their suppliers receive");
+
+modules["../../contexts/MasterDataContext"].useMasterData = () => ({
+  products: { 200: { type: 4 }, 401: { type: 4 } },
+  agents: { 1062: { materials: { 401: 1 } } },
+});
+let availableCoverage = [];
+modules.react.useState = (initial) => [Array.isArray(initial) ? availableCoverage : initial, () => {}];
+assert.equal(exports.useInfraSelection("test", 401).option.productId, 401);
+availableCoverage = [{ product_id: 303, supplier_variants: [1062] }, { product_id: 306, supplier_variants: [] }];
+assert.equal(exports.useInfraSelection("test", 401).option.productId, 303,
+  "供給範囲の取得後は、指定した高圧財を含むサービス側の選択肢を開く");
+assert.equal(exports.useInfraSelection("test", 306).option.productId, 306);
+assert.equal(exports.useInfraSelection("test").option.productId, 200, "指定なしでは従来どおり最初の財");
+assert.equal(exports.useInfraSelection("test", 999).option.productId, 200, "存在しない財は最初の財に戻す");
+console.log("PASS: initial infrastructure good selects its service/network pair after options load");

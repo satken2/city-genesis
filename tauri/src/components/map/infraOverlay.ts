@@ -497,13 +497,15 @@ export type InfraSelectionState = {
 };
 
 /** Infrastructure choices and selection state, used by the city map infrastructure overlay. */
-export function useInfraSelection(apiBaseUrl: string): InfraSelectionState {
+export function useInfraSelection(apiBaseUrl: string, initialProductId?: number): InfraSelectionState {
   const products = useInfraProducts(apiBaseUrl);
   const options = useMemo(
     () => pairWithFeedNetwork(products).sort((a, b) => a.productId - b.productId),
     [products]
   );
-  const [productId, setProductId] = useState<number | null>(null);
-  const option = options.find((p) => p.productId === productId) ?? options[0] ?? null;
+  const [productId, setProductId] = useState<number | null>(initialProductId ?? null);
+  // 高圧財がサービス側の選択肢に統合されていても、同じ網を表示する。
+  const option = options.find((p) => p.productId === productId
+    || (productId != null && p.selection.network === productId)) ?? options[0] ?? null;
   return { options, option, select: setProductId };
 }

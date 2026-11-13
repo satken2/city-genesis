@@ -282,9 +282,12 @@ function TabIcon({ icon, className }: { icon: string; className?: string }) {
   return null;
 }
 
-export function CityStatisticsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
+export function CityStatisticsWindow({ apiBaseUrl, initialTab, initialSubTab }: {
+  apiBaseUrl: string; initialTab?: string; initialSubTab?: string;
+}) {
   const { t } = useTranslation();
-  const [activeTab, setActiveTab] = useState(TABS[0].id);
+  // 再表示時は App の open_seq で再マウントされ、渡された通常タブから開き直す。
+  const [activeTab, setActiveTab] = useState(() => TABS.find(tab => tab.id === initialTab)?.id ?? TABS[0].id);
 
   // Whether developer-only debug tabs are visible.
   // Check the backend's debug_execution (true only in development runs) once on mount.
@@ -339,7 +342,7 @@ export function CityStatisticsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         {activeTab === "education" && <EducationTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "employment" && <EmploymentTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "trade" && <TradeTab apiBaseUrl={apiBaseUrl} />}
-        {activeTab === "accidents" && <AccidentsTab apiBaseUrl={apiBaseUrl} />}
+        {activeTab === "accidents" && <AccidentsTab apiBaseUrl={apiBaseUrl} initialSubTab={initialSubTab} />}
         {activeTab === "business" && <BusinessTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "commute" && <CommuteTab apiBaseUrl={apiBaseUrl} />}
         {activeTab === "realestate" && <RealEstateTab apiBaseUrl={apiBaseUrl} />}

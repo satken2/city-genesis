@@ -15,7 +15,7 @@ globalThis.fetch = async url => {
 const output = resolve("node_modules/.cache/policy-tests.mjs");
 const mock = resolve("tools/policy/mock-runtime.ts");
 await build({ entryPoints: ["tools/policy/tests.tsx"], outfile: output, bundle: true,
-  platform: "node", format: "esm", packages: "external", loader: { ".css": "empty", ".png": "dataurl" },
+  platform: "node", format: "esm", packages: "external", loader: { ".css": "empty", ".png": "dataurl", ".svg": "dataurl" },
   define: { "import.meta.env.DEV": "false" },
   alias: { "@tauri-apps/api/core": mock, "@tauri-apps/api/event": mock, "@tauri-apps/api/window": mock } });
 await import(pathToFileURL(output).href);

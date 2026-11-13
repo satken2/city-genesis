@@ -38,19 +38,19 @@
         "tab": "수도",
         "issue": "수도 공급이 부족함",
         "clear": "수도 공급 문제가 발견되지 않았습니다",
-        "evidence": "가구가 받은 양은 기준량의 {{value}}"
+        "evidence": "가구·시설의 주문량 대비 수령률 {{value}}"
       },
       "electricity": {
         "tab": "전력",
         "issue": "전력 공급이 부족함",
         "clear": "전력 공급 문제가 발견되지 않았습니다",
-        "evidence": "가구가 받은 양은 기준량의 {{value}}"
+        "evidence": "가구·시설의 주문량 대비 수령률 {{value}}"
       },
       "internet": {
         "tab": "통신",
         "issue": "통신 공급이 부족함",
         "clear": "통신 공급 문제가 발견되지 않았습니다",
-        "evidence": "가구가 받은 양은 기준량의 {{value}}"
+        "evidence": "가구·시설의 주문량 대비 수령률 {{value}}"
       },
       "high_water": {
         "tab": "고압 수도",
@@ -142,15 +142,12 @@
         "evidence_week": "최근 1주일 범죄가 발생한 지구의 아이: {{count}}명"
       },
       "service_no_facility": {
-        "title": "공급하는 시설이 없음"
+        "title": "공급하는 시설이 없음",
+        "title_named": "{{suppliers}} 없음"
       },
       "service_facility_limited": {
         "title": "가동하지 못하는 {{kinds}}이(가) 있음",
         "evidence": "사실상 운영되지 못하는 시설: {{count}}곳"
-      },
-      "service_low_orders": {
-        "title": "가구의 주문이 기준량보다 적음",
-        "evidence": "주문은 기준량의 {{percent}}%"
       },
       "repair_budget_exhausted": {
         "title": "수선 예산을 다 써서 유지관리 주문이 깎임",
@@ -158,7 +155,8 @@
       },
       "service_out_of_range": {
         "title": "공급 범위 밖에 가구·시설이 있음",
-        "evidence": "어느 시설의 범위에도 들지 않음: {{count}}가구 · {{facilities}}시설"
+        "evidence": "어느 시설의 범위에도 들지 않음: {{count}}가구 · {{facilities}}시설",
+        "title_named": "{{suppliers}}의 공급 범위 밖에 가구·시설이 있다"
       },
       "facility_material_unmet": {
         "title": "{{facility}}이(가) {{product_name}}을(를) 조달하지 못함",
@@ -185,7 +183,7 @@
         "evidence": "슬럼에 거주하는 가구: {{count}}가구"
       },
       "service_shortage": {
-        "title": "{{product_name}} 공급이 부족함",
+        "title": "가구가 {{product_name}}을(를) 충분히 공급받지 못하고 있다",
         "evidence": "가구가 받은 양은 기준량의 {{percent}}%"
       },
       "tourism_no_attraction": {
@@ -256,7 +254,10 @@
         "title": "시민의 범죄 성향 확인"
       },
       "service_facility": {
-        "title": "공급 시설 짓기"
+        "title": "공급 시설 짓기",
+        "title_named": "{{suppliers}} 건설",
+        "title_tourism_no_attraction": "관광지 건설",
+        "title_tourism_no_gateway": "항구나 공항 건설"
       },
       "parcel": {
         "title": "더 큰 토지 구획 마련하기"
@@ -270,6 +271,7 @@
     },
     "selectorTitle": "무엇을 조사할까요?",
     "eventsTitle": "일어나고 있는 일",
+    "causeTitle": "그 원인",
     "adviceTitle": "대응 방안",
     "needsAttention": "개선 여지 있음",
     "values": {

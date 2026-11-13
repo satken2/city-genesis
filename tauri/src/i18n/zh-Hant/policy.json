@@ -38,19 +38,19 @@
         "tab": "供水",
         "issue": "供水供應不足",
         "clear": "未發現供水供應問題",
-        "evidence": "家庭獲得量為基準量的 {{value}}"
+        "evidence": "住戶與設施的訂單滿足率為 {{value}}"
       },
       "electricity": {
         "tab": "電力",
         "issue": "電力供應不足",
         "clear": "未發現電力供應問題",
-        "evidence": "家庭獲得量為基準量的 {{value}}"
+        "evidence": "住戶與設施的訂單滿足率為 {{value}}"
       },
       "internet": {
         "tab": "通訊",
         "issue": "通訊供應不足",
         "clear": "未發現通訊供應問題",
-        "evidence": "家庭獲得量為基準量的 {{value}}"
+        "evidence": "住戶與設施的訂單滿足率為 {{value}}"
       },
       "high_water": {
         "tab": "高壓供水",
@@ -142,15 +142,12 @@
         "evidence_week": "最近1週發生犯罪的地區中的孩子：{{count}}人"
       },
       "service_no_facility": {
-        "title": "沒有提供此服務的設施"
+        "title": "沒有提供此服務的設施",
+        "title_named": "沒有{{suppliers}}"
       },
       "service_facility_limited": {
         "title": "有無法運轉的{{kinds}}",
         "evidence": "實際上無法營運的設施：{{count}}處"
-      },
-      "service_low_orders": {
-        "title": "家庭的訂購量低於基準量",
-        "evidence": "訂購量為基準量的 {{percent}}%"
       },
       "repair_budget_exhausted": {
         "title": "修繕預算已用完，養護訂單被削減",
@@ -158,7 +155,8 @@
       },
       "service_out_of_range": {
         "title": "有家庭或設施位於供應範圍之外",
-        "evidence": "不在任何設施範圍內：{{count}}戶、{{facilities}}處設施"
+        "evidence": "不在任何設施範圍內：{{count}}戶、{{facilities}}處設施",
+        "title_named": "有住戶或設施位於{{suppliers}}的供應範圍之外"
       },
       "facility_material_unmet": {
         "title": "{{facility}}無法採購到{{product_name}}",
@@ -185,7 +183,7 @@
         "evidence": "居住在貧民窟的家庭：{{count}}戶"
       },
       "service_shortage": {
-        "title": "{{product_name}}供應不足",
+        "title": "住戶未獲得足夠的{{product_name}}",
         "evidence": "家庭獲得量為基準量的 {{percent}}%"
       },
       "tourism_no_attraction": {
@@ -256,7 +254,10 @@
         "title": "查看市民的犯罪傾向"
       },
       "service_facility": {
-        "title": "建造提供此服務的設施"
+        "title": "建造提供此服務的設施",
+        "title_named": "興建{{suppliers}}",
+        "title_tourism_no_attraction": "興建觀光景點",
+        "title_tourism_no_gateway": "興建港口或機場"
       },
       "parcel": {
         "title": "準備更大的地塊"
@@ -270,6 +271,7 @@
     },
     "selectorTitle": "要調查什麼？",
     "eventsTitle": "正在發生的情況",
+    "causeTitle": "其原因",
     "adviceTitle": "對策建議",
     "needsAttention": "有改善空間",
     "values": {

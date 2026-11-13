@@ -38,19 +38,19 @@
         "tab": "Water",
         "issue": "Water is in short supply",
         "clear": "No water supply problems found",
-        "evidence": "Households received {{value}} of the reference amount"
+        "evidence": "Households and facilities received {{value}} of their orders"
       },
       "electricity": {
         "tab": "Electricity",
         "issue": "Electricity is in short supply",
         "clear": "No electricity supply problems found",
-        "evidence": "Households received {{value}} of the reference amount"
+        "evidence": "Households and facilities received {{value}} of their orders"
       },
       "internet": {
         "tab": "Telecom",
         "issue": "Telecommunications is in short supply",
         "clear": "No telecommunications supply problems found",
-        "evidence": "Households received {{value}} of the reference amount"
+        "evidence": "Households and facilities received {{value}} of their orders"
       },
       "high_water": {
         "tab": "Bulk water",
@@ -142,15 +142,12 @@
         "evidence_week": "Children in districts with crime in the past week: {{count}}"
       },
       "service_no_facility": {
-        "title": "No facility supplies this service"
+        "title": "No facility supplies this service",
+        "title_named": "No {{suppliers}} available"
       },
       "service_facility_limited": {
         "title": "Some {{kinds}} cannot operate",
         "evidence": "Facilities effectively not operating: {{count}}"
-      },
-      "service_low_orders": {
-        "title": "Households order less than the reference amount",
-        "evidence": "Orders are {{percent}}% of the reference amount"
       },
       "repair_budget_exhausted": {
         "title": "The Maintenance budget ran out and upkeep orders were cut",
@@ -158,7 +155,8 @@
       },
       "service_out_of_range": {
         "title": "Households or facilities are outside the service range",
-        "evidence": "Outside every facility’s range: {{count}} households, {{facilities}} facilities"
+        "evidence": "Outside every facility’s range: {{count}} households, {{facilities}} facilities",
+        "title_named": "Households or facilities are outside the service range of {{suppliers}}"
       },
       "facility_material_unmet": {
         "title": "{{facility}} cannot procure {{product_name}}",
@@ -185,7 +183,7 @@
         "evidence": "Households living in slums: {{count}}"
       },
       "service_shortage": {
-        "title": "{{product_name}} is in short supply",
+        "title": "Households are not receiving enough {{product_name}}",
         "evidence": "Households received {{percent}}% of the reference amount"
       },
       "tourism_no_attraction": {
@@ -256,7 +254,10 @@
         "title": "Check citizens’ tendency toward crime"
       },
       "service_facility": {
-        "title": "Build a facility that supplies it"
+        "title": "Build a facility that supplies it",
+        "title_named": "Build {{suppliers}}",
+        "title_tourism_no_attraction": "Build a tourist attraction",
+        "title_tourism_no_gateway": "Build a port or airport"
       },
       "parcel": {
         "title": "Prepare a larger parcel"
@@ -270,6 +271,7 @@
     },
     "selectorTitle": "What would you like to investigate?",
     "eventsTitle": "What is happening",
+    "causeTitle": "Underlying cause",
     "adviceTitle": "Suggested actions",
     "needsAttention": "Room for improvement",
     "values": {

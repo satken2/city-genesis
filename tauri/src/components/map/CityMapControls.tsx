@@ -106,13 +106,14 @@ export type CityMapControls = {
 export function useCityMapControls(
   apiBaseUrl: string,
   mapRef: RefObject<CityMapCanvasHandle | null>,
-  onReload: () => void
+  onReload: () => void,
+  initialInfraProductId?: number,
 ): CityMapControls {
   const { t } = useTranslation();
   const masterData = useMasterData();
-  const infra = useInfraSelection(apiBaseUrl);
+  const infra = useInfraSelection(apiBaseUrl, initialInfraProductId);
   const [layers, setLayers] = useState<CityMapLayerVisibility>({ ...DEFAULT_CITY_MAP_LAYERS });
-  const [overlay, setOverlay] = useState<CityMapOverlay>("none");
+  const [overlay, setOverlay] = useState<CityMapOverlay>(initialInfraProductId == null ? "none" : "infra");
   // Retain public transport type, heatmap type, and infrastructure goods separately to restore previous choices when switching overlays back.
   const [transitVariant, setTransitVariant] = useState<number | null>(null);
   const [heatmapKind, setHeatmapKind] = useState<CityMapHeatmapActiveKind>(HEATMAP_KINDS[0]);

@@ -38,19 +38,19 @@
         "tab": "水道",
         "issue": "水道の供給が不足している",
         "clear": "水道の供給の問題は見つかっていません",
-        "evidence": "世帯の受取は基準量の {{value}}"
+        "evidence": "世帯・施設の注文に対する受取率 {{value}}"
       },
       "electricity": {
         "tab": "電力",
         "issue": "電力の供給が不足している",
         "clear": "電力の供給の問題は見つかっていません",
-        "evidence": "世帯の受取は基準量の {{value}}"
+        "evidence": "世帯・施設の注文に対する受取率 {{value}}"
       },
       "internet": {
         "tab": "通信",
         "issue": "通信の供給が不足している",
         "clear": "通信の供給の問題は見つかっていません",
-        "evidence": "世帯の受取は基準量の {{value}}"
+        "evidence": "世帯・施設の注文に対する受取率 {{value}}"
       },
       "high_water": {
         "tab": "高圧水道",
@@ -142,15 +142,12 @@
         "evidence_week": "直近1週間に犯罪が起きた地区の子ども：{{count}}人"
       },
       "service_no_facility": {
-        "title": "供給する施設がない"
+        "title": "供給する施設がない",
+        "title_named": "{{suppliers}}がない"
       },
       "service_facility_limited": {
         "title": "稼働できていない{{kinds}}がある",
         "evidence": "実質的に運営できていない施設：{{count}}か所"
-      },
-      "service_low_orders": {
-        "title": "世帯の注文が基準量より少ない",
-        "evidence": "注文は基準量の {{percent}}%"
       },
       "repair_budget_exhausted": {
         "title": "修繕予算を使い切り、維持の注文が削られた",
@@ -158,7 +155,8 @@
       },
       "service_out_of_range": {
         "title": "供給範囲の外に世帯・施設がある",
-        "evidence": "どの施設の範囲にも入らない：{{count}}世帯・{{facilities}}施設"
+        "evidence": "どの施設の範囲にも入らない：{{count}}世帯・{{facilities}}施設",
+        "title_named": "{{suppliers}}の供給範囲の外に世帯・施設がある"
       },
       "facility_material_unmet": {
         "title": "{{facility}}が{{product_name}}を調達できていない",
@@ -185,7 +183,7 @@
         "evidence": "スラムに居住している世帯：{{count}}世帯"
       },
       "service_shortage": {
-        "title": "{{product_name}}の供給が不足している",
+        "title": "世帯が十分な{{product_name}}を受けられていない",
         "evidence": "世帯の受取は基準量の {{percent}}%"
       },
       "tourism_no_attraction": {
@@ -256,7 +254,10 @@
         "title": "市民の犯罪傾向を確認する"
       },
       "service_facility": {
-        "title": "供給する施設を建てる"
+        "title": "供給する施設を建てる",
+        "title_named": "{{suppliers}}を建てる",
+        "title_tourism_no_attraction": "観光地を建てる",
+        "title_tourism_no_gateway": "港や空港を建てる"
       },
       "parcel": {
         "title": "より大きい土地区画を用意する"
@@ -270,6 +271,7 @@
     },
     "selectorTitle": "何を調査しますか？",
     "eventsTitle": "起きていること",
+    "causeTitle": "その原因",
     "adviceTitle": "対策のアドバイス",
     "needsAttention": "改善の余地あり",
     "values": {

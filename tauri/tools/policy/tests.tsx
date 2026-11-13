@@ -6,7 +6,8 @@ import i18next from "i18next";
 import { I18nextProvider } from "react-i18next";
 import { dispatch, opened, invocations } from "./mock-runtime";
 import { PolicyPlanningWindow } from "../../src/components/policy/PolicyPlanningWindow";
-import { PLAY_MODE_NORMAL, PLAY_MODE_READ_ONLY } from "../../src/constants";
+import { PLAY_MODE_NORMAL, PLAY_MODE_READ_ONLY, PRODUCT_WATER_SUPPLY, PRODUCT_GARBAGE_SERVICE,
+  PRODUCT_ELECTRICITY, PRODUCT_HIGH_WATER } from "../../src/constants";
 
 const globals = globalThis as typeof globalThis & { policyPayload: unknown; policyRequests: number };
 const i18n = i18next.createInstance();
@@ -93,6 +94,10 @@ assert.equal(container.querySelectorAll(".policy-finding").length, 0, "問題が
 assert.equal(container.querySelector(".policy-clear")?.textContent, "所得の問題は見つかっていません");
 assert.equal(container.querySelector('[data-guide="policy.action.welfare"]'), null, "問題のない所得には増額案を出さない");
 await click('[data-guide="policy.indicator.crime"]');
+await click('.policy-row[data-depth="0"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), {
+  windowType: "city_statistics", params: { extra: { initialTab: "accidents", initialSubTab: "crime" } },
+}, "見学中でも事件・事故の犯罪タブを直接開く");
 assert.ok(!container.querySelector<HTMLButtonElement>('[data-guide="policy.action.criminality"]')!.disabled,
   "見学中も市民の犯罪性向を確認できる");
 await click('[data-guide="policy.action.criminality"]');
@@ -137,7 +142,7 @@ globals.policyPayload = { epoch: 2, pending: false, indicators: [
 ] };
 await refreshAfterEpoch();
 await click('[data-guide="policy.indicator.unemployment"]');
-assert.equal(container.querySelector('.policy-row[data-depth="2"] .policy-actions')?.children.length, 0,
+assert.equal(container.querySelector('.policy-row[data-depth="2"] .policy-actions'), null,
   "教育未修了の求職者の行には対策を表示しない");
 assert.ok(container.textContent!.includes("通学中 100人・未就学 12人／定員 100人"));
 const educationButton = container.querySelector<HTMLButtonElement>('.policy-row[data-depth="3"] [data-guide="policy.action.education"]');
@@ -211,12 +216,23 @@ assert.deepEqual([...container.querySelectorAll(".policy-problem-message")].map(
 assert.equal(container.querySelector('[data-guide="policy.indicator.unemployment"]')?.getAttribute("aria-pressed"), "true",
   "左の並びのとおり、問題のある最初の指標を開く");
 await click('[data-guide="policy.indicator.water"]');
+assert.ok(container.textContent!.includes("世帯・施設の注文に対する受取率 2.3%"));
+await click('.policy-row[data-depth="0"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "public_facilities", params: { extra: { initialProductId: PRODUCT_WATER_SUPPLY } } },
+  "水道の事象カードから公共サービスの水道タブを開く");
+await click('.policy-row[data-depth="1"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "public_facilities", params: { extra: { initialProductId: PRODUCT_WATER_SUPPLY } } },
+  "施設の稼働不足の集計カードは親の品目を引き継ぐ");
 const master = JSON.parse(readFileSync("src/i18n/ja/policy.json", "utf8"));
 assert.ok(master.policy.nodes.service_facility_limited.title.includes("{{kinds}}"));
 assert.deepEqual(rowTitles().slice(2), ["泉町ポンプ場が稼働できていない", "松葉町ポンプ場が稼働できていない"],
   "稼働できていない施設は列挙だけして、その先はたどらない");
 assert.equal(container.querySelectorAll('.policy-row[data-depth="3"]').length, 0);
+await click('.policy-row[data-depth="2"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "agent_detail", entityId: "31" }, "参照カードから施設詳細を開く");
+const beforeInvestigation = opened.length;
 await click('.policy-row[data-depth="2"] [data-guide="policy.investigate.facility"]');
+assert.equal(opened.length, beforeInvestigation, "カード内の調査ボタンは詳細画面を重ねて開かない");
 assert.equal(container.querySelector('[data-guide="policy.facility"][aria-pressed="true"]')?.textContent, "泉町ポンプ場が稼働できていない",
   "施設の行から、その施設を選ぶ");
 assert.deepEqual(rowTitles(), [
@@ -233,7 +249,15 @@ assert.deepEqual(rowTitles(), ["松葉町ポンプ場が稼働できていない
   "松葉町ポンプ場が予算不足で計画を縮小している"]);
 assert.ok(container.textContent!.includes("失業率 20%"), "指標の数値は他の節と同じく根拠の行に出す");
 assert.ok(container.querySelector('.policy-row[data-depth="1"] [data-guide="policy.action.budget"]'), "施設の不調にも対策を並べる");
+await click('.policy-row[data-depth="1"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "agent_detail", entityId: "30" }, "原因カードの主語の施設を開く");
+const beforeBudget = opened.length;
+await click('.policy-row[data-depth="1"] [data-guide="policy.action.budget"]');
+assert.equal(opened.length, beforeBudget + 1);
+assert.equal(opened.at(-1), "city_budget", "対策ボタンはカードの詳細へ遷移しない");
 await click('[data-guide="policy.investigate.unemployment"]');
+await click('.policy-row[data-depth="0"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "city_statistics", params: { extra: { initialTab: "employment" } } });
 assert.equal(container.querySelector('[data-guide="policy.indicator.unemployment"]')?.getAttribute("aria-pressed"), "true");
 assert.ok(![...container.querySelectorAll(".policy-problem")].some(row => row.getAttribute("aria-pressed") === "true"),
   "指標へ移ったら一覧の選択を外す");
@@ -242,9 +266,16 @@ assert.deepEqual(rowTitles(), ["地区「港町」で「製鉄所」が入居で
 await click('[data-guide="policy.action.parcel"]');
 assert.equal(opened.at(-1), "parcel_creation", "原因まで言っている問題は、打つ手だけを示す");
 await click('[data-guide="policy.indicator.sanitation"]');
-assert.deepEqual(rowTitles(), ["衛生の問題が発生している", "の供給が不足している", "供給する施設がない"],
+assert.deepEqual(rowTitles(), ["衛生の問題が発生している", "世帯が十分なを受けられていない", "供給する施設がない"],
   "衛生は届いていないサービスを原因として下げる");
 assert.ok(container.textContent!.includes("5世帯で衛生が悪化している") && container.textContent!.includes("世帯の受取は基準量の 2.3%"));
+await click('.policy-row[data-depth="0"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "city_statistics", params: { extra: { initialTab: "health" } } });
+await click('.policy-row[data-depth="1"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "public_facilities", params: { extra: { initialProductId: PRODUCT_GARBAGE_SERVICE } } });
+await click('.policy-row[data-depth="2"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "public_facilities", params: { extra: { initialProductId: PRODUCT_GARBAGE_SERVICE } } },
+  "供給する施設がない原因にも祖先の品目を引き継ぐ");
 const clearPayload = structuredClone(globals.policyPayload) as { indicators: { id: string; issue: boolean; roots: unknown[] }[] };
 Object.assign(clearPayload.indicators.find(item => item.id === "water")!, { issue: false, roots: [] });
 globals.policyPayload = clearPayload;
@@ -252,6 +283,33 @@ await refreshAfterEpoch();
 await click('[data-guide="policy.indicator.water"]');
 assert.deepEqual(rowTitles(), []);
 assert.equal(container.querySelector(".policy-clear")?.textContent, "水道の供給の問題は見つかっていません");
+globals.policyPayload = { epoch: 3, pending: false, indicators: [
+  { id: "electricity", value: 0.5, unit: "percent", sample: 10, issue: true, roots: [
+    { type: "service_out_of_range", domain: "policy", params: { count: 3, facilities: 2 }, actions: ["service_facility"], children: [] },
+  ] },
+  { id: "sanitation", value: 3, unit: "households", sample: 10, issue: true, roots: [
+    { type: "service_shortage", domain: "policy", params: { product_id: PRODUCT_GARBAGE_SERVICE, percent: 20 }, actions: [], children: [
+      { type: "service_out_of_range", domain: "policy", params: { count: 3, facilities: 0 }, actions: [], children: [] },
+    ] },
+  ] },
+  { id: "high_water", value: 0.5, unit: "percent", sample: 2, issue: true, roots: [
+    { type: "infra_network_split", domain: "diagnosis", params: { product_id: PRODUCT_HIGH_WATER }, actions: [], children: [] },
+  ] },
+] };
+await refreshAfterEpoch();
+await click('[data-guide="policy.indicator.electricity"]');
+await click('.policy-row[data-depth="1"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "city_map", params: { extra: { initialInfraProductId: PRODUCT_ELECTRICITY } } },
+  "供給範囲外は、その財のインフラ表示付きマップを開く");
+await click('[data-guide="policy.indicator.sanitation"]');
+await click('.policy-row[data-depth="2"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "city_map", params: { extra: { initialInfraProductId: PRODUCT_GARBAGE_SERVICE } } },
+  "衛生の原因をたどった場合も、具体的なサービスの範囲を開く");
+await click('[data-guide="policy.indicator.high_water"]');
+await click('.policy-row[data-depth="0"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "public_facilities", params: { extra: { initialProductId: PRODUCT_HIGH_WATER } } });
+await click('.policy-row[data-depth="1"] .policy-finding-open');
+assert.deepEqual(invocations.at(-1), { windowType: "city_map", params: { extra: { initialInfraProductId: PRODUCT_HIGH_WATER } } });
 await act(async () => root.unmount());
 const afterUnmount = globals.policyRequests;
 await act(async () => dispatch("epoch:executing", { executing: false }));

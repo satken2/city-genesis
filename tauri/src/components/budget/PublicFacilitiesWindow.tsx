@@ -264,8 +264,10 @@ const MAP_LAYERS: Partial<CityMapLayerVisibility> = {
 
 export function PublicFacilitiesWindow({
   apiBaseUrl,
+  initialProductId,
 }: {
   apiBaseUrl: string;
+  initialProductId?: number;
 }) {
   const { t, i18n } = useTranslation();
   const locale = resolveIntlLocale(i18n.language);
@@ -423,12 +425,14 @@ export function PublicFacilitiesWindow({
       .sort((a, b) => a.id - b.id);
   }, [masterData?.products]);
 
-  // After data loads, automatically select the first tab if none is selected.
+  // マスターの取得後に指定品目を選ぶ。高圧財は、その供給元も一覧に含む公共サービスのタブへ案内する。
   useEffect(() => {
     if (activeTab === null && publicServiceProducts.length > 0) {
-      setActiveTab(String(publicServiceProducts[0].id));
+      const initialProduct = publicServiceProducts.find(p => p.id === initialProductId
+        || (initialProductId != null && getPublicServiceInfrastructure(p.id)?.productId === initialProductId));
+      setActiveTab(String((initialProduct ?? publicServiceProducts[0]).id));
     }
-  }, [activeTab, publicServiceProducts]);
+  }, [activeTab, publicServiceProducts, initialProductId]);
 
   const activeProduct = useMemo(
     () => publicServiceProducts.find((p) => String(p.id) === activeTab) ?? null,

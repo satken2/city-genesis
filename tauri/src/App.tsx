@@ -504,7 +504,8 @@ function App() {
             ) : context.window_type === "city_budget" ? (
               <CityBudgetWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "public_facilities" ? (
-              <PublicFacilitiesWindow apiBaseUrl={context.api_base_url} />
+              <PublicFacilitiesWindow apiBaseUrl={context.api_base_url}
+                initialProductId={windowExtra(context)?.initialProductId as number | undefined} />
             ) : context.window_type === "transit_management" ? (
               <TransitManagementWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "transit_creation" ? (
@@ -581,7 +582,9 @@ function App() {
               <CityRegulationWindow apiBaseUrl={context.api_base_url} onClose={closeWindow}
                 initialTab={windowExtra(context)?.initialTab as string | undefined} />
             ) : context.window_type === "city_statistics" ? (
-              <CityStatisticsWindow apiBaseUrl={context.api_base_url} />
+              <CityStatisticsWindow apiBaseUrl={context.api_base_url}
+                initialTab={windowExtra(context)?.initialTab as string | undefined}
+                initialSubTab={windowExtra(context)?.initialSubTab as string | undefined} />
             ) : context.window_type === "display_options" ? (
               <DisplayOptionsPanel apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "epoch_confirm" ? (
@@ -645,7 +648,8 @@ function App() {
             ) : context.window_type === "info_dialog" ? (
               <InfoDialogWindow apiBaseUrl={context.api_base_url} content={windowExtra(context) as InfoDialogContent} onClose={closeWindow} />
             ) : context.window_type === "city_map" ? (
-              <CityMapWindow apiBaseUrl={context.api_base_url} />
+              <CityMapWindow apiBaseUrl={context.api_base_url}
+                initialInfraProductId={windowExtra(context)?.initialInfraProductId as number | undefined} />
             ) : context.window_type === "zone_edit" ? (
               <ZoneEditWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "scenario_tools" ? (
