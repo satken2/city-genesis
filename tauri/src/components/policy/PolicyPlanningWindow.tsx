@@ -3,9 +3,8 @@ import { describeError } from "../../utils/errors";
  * 政策立案は、都市で起きている問題(L1通知)と指標から調査先を選び、その原因の木と対策を表示する。
  * コックピットのアラートのアイコンから開く。原因はコアの観測結果で、対策は既存の操作画面へ案内する。
  * 左に調査先の一覧(指標・稼働できていない施設・その他の問題)、右に選んだものの木を並べる。
- * 右は事象・原因・別の調査への参照を色とラベルで区別し、対策は対象のカード内にまとめる。
- * 施設の不調は、どの木の中でも「その施設が稼働できていない」という節で止め、原因はその施設を選んで調べる。
- * 別の指標で調べる要因は参照ノードで止め、そのボタンで調査先を切り替える。
+ * 右は事象と原因を色で区別し、対策と参照先の調査ボタンは対象のカード内にまとめる。
+ * 別の指標や施設の参照は、調査ボタンを押すとその直下に原因を展開する。同じ枝の祖先へ戻る参照は展開しない。
  * 詳細画面のあるカードは全体をクリックして開ける。カード内の対策・調査ボタンはそれぞれの操作を優先する。
  * 施設の不調をたどる節(domain が diagnosis)はコアの施設診断の節で、文言も施設診断のものを使う。
  * どの施設の不調かは subject が持ち、節の文の主語として出す。
@@ -33,6 +32,7 @@ import { resolveIntlLocale } from "../../utils/locale";
 import crisisIcon from "../../assets/images/ui/crisis.png";
 import infoIcon from "../../assets/images/ui/info.png";
 import adviceIcon from "../../assets/images/menu/policy.svg";
+import investigateIcon from "../../assets/images/ui/investigate.svg";
 import crimeIcon from "../../assets/images/alerts/shooting.png";
 import sanitationIcon from "../../assets/images/alerts/sanitation.png";
 import infrastructureIcon from "../../assets/images/alerts/electricity.png";
@@ -122,11 +122,11 @@ const DIAGNOSIS_FRACTIONS = new Set(["ratio", "unemployment_rate"]);
 
 /** 木の一番上に置く、選んだ問題または指標。 */
 type DiagramRoot = { key: string; indicatorId?: Indicator["id"]; title: string; detail: string; icon?: string; roots: Finding[]; buttons: RowButton[]; openDetail?: () => void };
-type RowButton = { key: string; label: string; guide: string; icon?: string; disabled?: boolean; onClick: () => void };
-type DiagramRow = { id: string; parentId: string | null; depth: number; kind: "event" | "cause" | "reference"; title: string; detail: string; buttons: RowButton[]; openDetail?: () => void };
-type Connection = { id: string; path: string; x: number; y: number };
+type RowButton = { key: string; label: string; guide: string; icon?: string; disabled?: boolean; expanded?: boolean; onClick: () => void };
+type DiagramRow = { id: string; parentId: string | null; depth: number; kind: "event" | "cause" | "reference"; title: string; detail: string; buttons: RowButton[]; openDetail?: () => void; revealed?: boolean; collapsing?: string };
+type Connection = { id: string; path: string; x: number; y: number; revealed?: boolean; collapsing?: string };
 
-function PolicyDiagram({ root, rows }: { root: DiagramRoot; rows: DiagramRow[] }) {
+function PolicyDiagram({ root, rows, onCollapseEnd }: { root: DiagramRoot; rows: DiagramRow[]; onCollapseEnd: (id: string) => void }) {
   const { t, i18n } = useTranslation();
   const diagramRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef(new Map<string, HTMLElement>());
@@ -134,8 +134,8 @@ function PolicyDiagram({ root, rows }: { root: DiagramRoot; rows: DiagramRow[] }
   const [geometry, setGeometry] = useState({ width: 0, height: 0, connections: [] as Connection[] });
 
   // 接続点はカードの実寸から求める。折り返し・文字サイズによる変化は ResizeObserver で追従する。
-  // rows は親の描画ごとに作り直されるので、並びが変わったときだけ測り直すよう、行の識別子の並びを見る。
-  const layout = rows.map(row => row.id).join(" ");
+  // rows は親の描画ごとに作り直されるので、行の並びと開閉状態の変化だけを購読し直す。
+  const layout = rows.map(row => `${row.id}:${row.collapsing ?? ""}`).join(" ");
   useLayoutEffect(() => {
     const diagram = diagramRef.current;
     if (!diagram) return;
@@ -152,7 +152,7 @@ function PolicyDiagram({ root, rows }: { root: DiagramRoot; rows: DiagramRow[] }
         const targetX = (parent.left + node.left) / 2 - bounds.left;
         const targetY = parent.bottom - bounds.top;
         const radius = Math.min(10, (x - targetX) / 2, (y - targetY) / 2);
-        connections.push({ id: row.id, x, y,
+        connections.push({ id: row.id, x, y, revealed: row.revealed, collapsing: row.collapsing,
           path: `M ${x} ${y} H ${targetX + radius} Q ${targetX} ${y} ${targetX} ${y - radius} V ${targetY}` });
       }
       setGeometry(previous => {
@@ -175,37 +175,49 @@ function PolicyDiagram({ root, rows }: { root: DiagramRoot; rows: DiagramRow[] }
           <path d="M 0 0 L 8 4 L 0 8 Z" fill="currentColor" />
         </marker>
       </defs>
-      {geometry.connections.map(connection => <g key={connection.id}>
+      {geometry.connections.map(connection => <g key={connection.id}
+        className={connection.collapsing ? "policy-connection--collapsing" : connection.revealed ? "policy-connection--revealed" : undefined}>
         <path d={connection.path} fill="none" stroke="currentColor" strokeWidth="1.5"
           strokeLinecap="round" strokeLinejoin="round" markerEnd={`url(#${arrowId})`} />
         <circle cx={connection.x} cy={connection.y} r="3.5" fill="currentColor" />
       </g>)}
     </svg>
     <ol className="policy-rows">
-      {rows.map(row => <li key={row.id} className="policy-row" data-parent-id={row.parentId ?? undefined} data-depth={row.depth}
-        style={{ "--policy-depth": row.depth } as CSSProperties}>
-        <article className={`policy-finding policy-finding--${row.kind}${row.openDetail ? " policy-finding--interactive" : ""}`}
-          ref={element => { if (element) nodeRefs.current.set(row.id, element); else nodeRefs.current.delete(row.id); }}>
-          {row.openDetail && <button type="button" className="policy-finding-open" data-guide="policy.action.entity_detail"
-            aria-label={`${t("policy.actions.entity_detail.title")}: ${row.title}`}
-            title={t("policy.actions.entity_detail.title")} onClick={row.openDetail} />}
-          <div className={`policy-finding-content${row.kind === "event" && !root.icon ? " policy-finding-content--plain" : ""}`}>
-            {row.kind === "event"
-              ? root.icon && <img src={root.icon} alt="" className="policy-event-icon" draggable={false} />
-              : <span className="policy-finding-badge">{t("policy.causeTitle")}</span>}
-            <h3>{row.title}</h3>
-            {row.detail && <p className="policy-evidence">{row.detail}</p>}
-            {row.buttons.length > 0 && <footer className="policy-finding-footer">
-              <div className="policy-actions">
-                {row.buttons.map(button => <button type="button" key={button.key} disabled={button.disabled}
-                  data-guide={button.guide} onClick={button.onClick}>
-                  {button.icon && <img src={button.icon} alt="" className="policy-advice-icon" draggable={false} />}
-                  <span className="policy-action-label">{button.label}</span><span className="policy-action-arrow" aria-hidden="true" />
-                </button>)}
-              </div>
-            </footer>}
-          </div>
-        </article>
+      {rows.map(row => <li key={row.id} className={`policy-row${row.collapsing ? " policy-row--collapsing" : row.revealed ? " policy-row--revealed" : ""}`}
+        data-parent-id={row.parentId ?? undefined} data-depth={row.depth} aria-hidden={row.collapsing ? true : undefined}
+        style={{ "--policy-depth": row.depth } as CSSProperties}
+        onAnimationEnd={event => {
+          if (row.collapsing && event.target === event.currentTarget && event.animationName === "policy-row-collapse") onCollapseEnd(row.collapsing);
+        }}>
+        <div className="policy-row-content"
+          ref={element => {
+            if (element) {
+              element.inert = !!row.collapsing;
+              nodeRefs.current.set(row.id, element);
+            } else nodeRefs.current.delete(row.id);
+          }}>
+          <article className={`policy-finding policy-finding--${row.kind}${row.openDetail ? " policy-finding--interactive" : ""}`}>
+            {row.openDetail && <button type="button" className="policy-finding-open" data-guide="policy.action.entity_detail"
+              aria-label={`${t("policy.actions.entity_detail.title")}: ${row.title}`}
+              title={t("policy.actions.entity_detail.title")} onClick={row.openDetail} />}
+            <div className={`policy-finding-content${row.kind === "event" && !root.icon ? " policy-finding-content--plain" : ""}`}>
+              {row.kind === "event"
+                ? root.icon && <img src={root.icon} alt="" className="policy-event-icon" draggable={false} />
+                : <span className="policy-finding-badge">{t("policy.causeTitle")}</span>}
+              <h3>{row.title}</h3>
+              {row.detail && <p className="policy-evidence">{row.detail}</p>}
+              {row.buttons.length > 0 && <footer className="policy-finding-footer">
+                <div className="policy-actions">
+                  {row.buttons.map(button => <button type="button" key={button.key} disabled={button.disabled}
+                    data-guide={button.guide} aria-expanded={button.expanded} onClick={button.onClick}>
+                    {button.icon && <img src={button.icon} alt="" className="policy-advice-icon" draggable={false} />}
+                    <span className="policy-action-label">{button.label}</span><span className="policy-action-arrow" aria-hidden="true" />
+                  </button>)}
+                </div>
+              </footer>}
+            </div>
+          </article>
+        </div>
       </li>)}
     </ol>
   </div>;
@@ -218,6 +230,7 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const periodUnit = useEpochPeriodUnit(apiBaseUrl);
   const [report, setReport] = useState<Report | null>(null);
   const [selected, setSelected] = useState<Selection | null>(null);
+  const [branches, setBranches] = useState<Map<string, "open" | "closing">>(new Map());
   const [revision, setRevision] = useState(0);
   const [loading, setLoading] = useState(true);
   const [executing, setExecuting] = useState(false);
@@ -246,6 +259,7 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     setLoading(true);
     setError("");
     setReport(null);
+    setBranches(new Map());
     void fetchApi<Report>(buildApiUrl(apiBaseUrl, "/api/v1/city/policy-planning"), { signal: controller.signal })
       .then(result => { if (!controller.signal.aborted) setReport(result); })
       .catch(e => { if (!controller.signal.aborted) setError(describeError(e)); })
@@ -272,6 +286,25 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     : problems[0] ? { problem: problems[0] }
     : { indicator: indicators[0] };
   const facilityOf = new Map(facilities.map(item => [item.id, item]));
+  const select = (selection: Selection) => {
+    setSelected(selection);
+    setBranches(new Map());
+  };
+  const toggleExpansion = (id: string) => setBranches(previous => {
+    const next = new Map(previous);
+    if (next.get(id) === "open") {
+      if (rows.some(row => row.parentId === id)) next.set(id, "closing");
+      else next.delete(id);
+    } else next.set(id, "open");
+    return next;
+  });
+  // 閉じる枝の子孫はアニメーション完了まで残す。途中で開き直した枝は完了通知で消さない。
+  const finishCollapse = (id: string) => setBranches(previous => {
+    if (previous.get(id) !== "closing") return previous;
+    const next = new Map(previous);
+    for (const path of next.keys()) if (path === id || path.startsWith(`${id}.`)) next.delete(path);
+    return next;
+  });
 
   async function open(windowType: string, args: Record<string, unknown>) {
     setActionError(false);
@@ -389,35 +422,43 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     const indicatorId = root.indicatorId;
     rows.push({ id: "root", parentId: null, depth: 0, kind: "event", title: root.title, detail: root.detail,
       buttons: root.buttons, openDetail: root.openDetail });
-    const append = (finding: Finding, parentId: string, depth: number, id: string, parentProductId?: number) => {
+    const append = (finding: Finding, parentId: string, depth: number, id: string, ancestors: string[],
+      parentProductId?: number, contextIndicatorId?: Indicator["id"], revealed = false, collapsing?: string) => {
       // 供給範囲など品目を省略した原因は親の財を引き継ぎ、別の原材料をたどったらその財へ切り替える。
       const productId = finding.params.product_id ?? parentProductId;
       // 別の指標で調べる原因は、その指標に問題があるときだけ案内する。案内だけの節は、案内先に問題が無ければ出さない。
       const target = finding.indicator ?? FINDING_INDICATORS[finding.type];
-      const reference = target !== indicatorId && indicators.find(item => item.id === target && item.issue);
+      const reference = target !== contextIndicatorId && indicators.find(item => item.id === target && item.issue);
       if (!reference && finding.type === "indicator_reference") return;
-      // 別の施設の不調はここで止め、その施設を選んで原因を調べる。
       const referenced = finding.type === "facility_ref" ? facilityOf.get(finding.subject!.id) : undefined;
-      if (referenced) {
-        rows.push({ id, parentId, depth, kind: "reference", ...stateFacility(referenced), openDetail: facilityDetail(referenced.id), buttons: [{
-          key: "investigate", label: t("policy.investigate.facility"), guide: "policy.investigate.facility",
-          onClick: () => setSelected({ kind: "facility", id: referenced.id }),
-        }] });
-        return;
-      }
-      if (reference) {
-        rows.push({ id, parentId, depth, kind: "reference", ...stateIndicator(reference), openDetail: indicatorDetail(reference.id), buttons: [{
-          key: "investigate", label: t(`policy.investigate.${reference.id}`), guide: `policy.investigate.${reference.id}`,
-          onClick: () => setSelected({ kind: "indicator", id: reference.id }),
-        }] });
+      const referenceRoot: DiagramRoot | null = referenced ? {
+        key: `facility:${referenced.id}`, ...stateFacility(referenced), roots: referenced.roots,
+        buttons: [], openDetail: facilityDetail(referenced.id),
+      } : reference ? indicatorRoot(reference, `indicator:${reference.id}`) : null;
+      if (referenceRoot) {
+        // 展開状態は表示位置ごとに持つ。祖先だけを循環判定に使い、別の枝にある同じ原因は独立して調べられる。
+        const canExpand = !ancestors.includes(referenceRoot.key) && (referenceRoot.roots.length > 0 || referenceRoot.buttons.length > 0);
+        const isExpanded = canExpand && branches.get(id) === "open";
+        const isVisible = canExpand && branches.has(id);
+        const guide = `policy.investigate.${referenced ? "facility" : referenceRoot.indicatorId}`;
+        const expansion: RowButton | undefined = canExpand ? {
+          key: "investigate", label: t(isExpanded ? "policy.collapse" : guide), guide, icon: investigateIcon,
+          expanded: isExpanded, onClick: () => toggleExpansion(id),
+        } : undefined;
+        rows.push({ id, parentId, depth, kind: "reference", title: referenceRoot.title, detail: referenceRoot.detail,
+          openDetail: referenceRoot.openDetail, revealed, collapsing,
+          buttons: [...(expansion ? [expansion] : []), ...(isVisible ? referenceRoot.buttons : [])] });
+        if (isVisible) referenceRoot.roots.forEach((child, index) => append(child, id, depth + 1, `${id}.ref.${index}`,
+          [...ancestors, referenceRoot.key], referenceRoot.indicatorId ? INDICATOR_PRODUCTS[referenceRoot.indicatorId] : undefined,
+          referenceRoot.indicatorId, true, collapsing ?? (branches.get(id) === "closing" ? id : undefined)));
         return;
       }
       rows.push({ id, parentId, depth, kind: "cause", ...describe(finding, productId), buttons: actionButtons(finding.actions, productId, finding.type),
-        openDetail: findingDetail(finding, productId) });
-      finding.children.forEach((child, index) => append(child, id, depth + 1, `${id}.${index}`, productId));
+        openDetail: findingDetail(finding, productId), revealed, collapsing });
+      finding.children.forEach((child, index) => append(child, id, depth + 1, `${id}.${index}`, ancestors, productId, contextIndicatorId, revealed, collapsing));
     };
-    root.roots.forEach((finding, index) => append(finding, "root", 1, String(index),
-      indicatorId ? INDICATOR_PRODUCTS[indicatorId] : undefined));
+    root.roots.forEach((finding, index) => append(finding, "root", 1, String(index), [root.key],
+      indicatorId ? INDICATOR_PRODUCTS[indicatorId] : undefined, indicatorId));
   }
 
   // 施設とその他の問題は同じ形の行で並べ、警告は赤、注意は黄にする。
@@ -445,7 +486,7 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               {indicators.map(item =>
                 <button type="button" key={item.id} className={`policy-indicator${item.id === current.indicator?.id ? " policy-indicator--selected" : ""}`}
                   aria-pressed={item.id === current.indicator?.id} data-guide={`policy.indicator.${item.id}`}
-                  onClick={() => setSelected({ kind: "indicator", id: item.id })}>
+                  onClick={() => select({ kind: "indicator", id: item.id })}>
                   {t(`policy.indicators.${item.id}.tab`)}
                   {item.issue && <span role="img" aria-label={t("policy.needsAttention")}>⚠️</span>}
                 </button>)}
@@ -458,7 +499,7 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               <ul className="policy-problem-list">
                 {facilities.map(item => listRow(`facility:${item.id}`, "policy.facility", item.severity === "caution",
                   current.facility?.id === item.id, stateFacility(item).title, "",
-                  () => setSelected({ kind: "facility", id: item.id })))}
+                  () => select({ kind: "facility", id: item.id })))}
               </ul>
             </section>}
             {problems.length > 0 && <section className="policy-section">
@@ -466,14 +507,14 @@ export function PolicyPlanningWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
               <ul className="policy-problem-list">
                 {problems.map(item => listRow(item.id, `policy.problem.${item.type}`, isCautionNotification(item),
                   current.problem?.id === item.id, stateProblem(item), formatEpochDate(item.created_date, locale),
-                  () => setSelected({ kind: "problem", id: item.id })))}
+                  () => select({ kind: "problem", id: item.id })))}
               </ul>
             </section>}
           </div>
         </nav>
         {root && <section className="policy-investigation" aria-label={root.title}>
           <div className="policy-tree-scroll" key={root.key}>
-            <PolicyDiagram root={root} rows={rows} />
+            <PolicyDiagram root={root} rows={rows} onCollapseEnd={finishCollapse} />
           </div>
         </section>}
         {clearMessage && <section className="policy-investigation policy-clear"><p role="status">{clearMessage}</p></section>}

@@ -65,8 +65,8 @@ assert.ok(container.textContent!.includes("直近1週間の犯罪被害：7件")
 assert.ok(container.querySelector('.policy-row[data-depth="0"]')?.textContent?.includes("直近1週間"),
   "人口あたりの犯罪被害も同じ期間を表示する");
 assert.ok(container.textContent!.includes("予算不足の警察署：1か所"), "施設数が何を指すかを説明する");
-assert.ok(!container.textContent!.includes("現在の雇用枠に空きがない"), "他の指標で調査できる原因を展開しない");
-assert.equal(container.querySelectorAll('.policy-row[data-parent-id="1"]').length, 0, "失業は失業率の調査で止める");
+assert.ok(!container.textContent!.includes("現在の雇用枠に空きがない"), "他の指標の原因はクリックするまで展開しない");
+assert.equal(container.querySelectorAll('.policy-row[data-parent-id="1"]').length, 0, "参照先の原因は初期状態で閉じる");
 assert.ok(container.querySelector('.policy-row[data-parent-id="root"][data-depth="1"] [data-guide="policy.action.criminality"]'),
   "犯罪性向は失業や警察と並べて表示する");
 assert.ok(container.textContent!.includes("犯罪傾向のある市民：30人"));
@@ -76,12 +76,37 @@ const click = async (selector: string) => {
   await act(async () => element.click());
   await flush();
 };
+const finishCollapsing = async () => {
+  const row = container.querySelector(".policy-row--collapsing");
+  assert.ok(row);
+  await act(async () => row.dispatchEvent(Object.assign(new window.Event("animationend", { bubbles: true }), {
+    animationName: "policy-row-collapse",
+  })));
+  await flush();
+};
 const beforeSwitch = globals.policyRequests;
 await click('[data-guide="policy.investigate.unemployment"]');
-assert.equal(container.querySelector('[data-guide="policy.indicator.unemployment"]')?.getAttribute("aria-pressed"), "true");
-assert.equal(globals.policyRequests, beforeSwitch, "同じ調査結果の失業率タブへ切り替える");
-assert.equal(opened.length, 0, "別ウィンドウを開かずに指標を切り替える");
-assert.equal(container.querySelectorAll(".policy-finding").length, 3);
+assert.equal(container.querySelector('[data-guide="policy.indicator.crime"]')?.getAttribute("aria-pressed"), "true");
+assert.equal(globals.policyRequests, beforeSwitch, "取得済みの参照先の原因をその場で展開する");
+assert.equal(opened.length, 0, "調査ボタンは別ウィンドウを開かずに展開する");
+assert.equal(container.querySelectorAll(".policy-finding").length, 7);
+assert.ok(container.querySelector('.policy-row[data-parent-id="1"][data-depth="2"]')?.textContent?.includes("現在の雇用枠に空きがない"),
+  "参照したカードを親として、その直下に原因を接続する");
+assert.equal(container.querySelector('[data-guide="policy.investigate.unemployment"]')?.getAttribute("aria-expanded"), "true");
+assert.equal(container.querySelector('[data-guide="policy.investigate.unemployment"]')?.textContent, "折りたたむ");
+await click('.policy-actions [data-guide="policy.investigate.unemployment"]');
+assert.equal(container.querySelectorAll(".policy-finding").length, 7, "閉じるアニメーション中は原因を残す");
+assert.ok(container.querySelector<HTMLElement>(".policy-row--collapsing .policy-row-content")?.inert,
+  "閉じる途中のカードは操作対象から外す");
+assert.equal(container.querySelector('[data-guide="policy.investigate.unemployment"]')?.textContent, "失業率の原因を調査");
+await finishCollapsing();
+assert.equal(container.querySelectorAll(".policy-finding").length, 5, "再クリックでその枝だけを閉じる");
+await click('.policy-actions [data-guide="policy.investigate.unemployment"]');
+assert.equal(container.querySelectorAll(".policy-finding").length, 7, "再展開してもカードを重複させない");
+await click('.policy-actions [data-guide="policy.investigate.unemployment"]');
+await click('.policy-actions [data-guide="policy.investigate.unemployment"]');
+assert.equal(container.querySelectorAll(".policy-row--collapsing").length, 0, "閉じる途中でも再展開できる");
+assert.equal(container.querySelectorAll(".policy-finding").length, 7);
 assert.ok(container.textContent!.includes("20%"));
 await click('[data-guide="policy.action.population"]');
 assert.deepEqual(opened, ["citizen_list"], "追放は既存の市民選択画面へ案内する");
@@ -94,6 +119,7 @@ assert.equal(container.querySelectorAll(".policy-finding").length, 0, "問題が
 assert.equal(container.querySelector(".policy-clear")?.textContent, "所得の問題は見つかっていません");
 assert.equal(container.querySelector('[data-guide="policy.action.welfare"]'), null, "問題のない所得には増額案を出さない");
 await click('[data-guide="policy.indicator.crime"]');
+assert.equal(container.querySelectorAll(".policy-finding").length, 5, "左の調査先を切り替えたら展開状態を初期化する");
 await click('.policy-row[data-depth="0"] .policy-finding-open');
 assert.deepEqual(invocations.at(-1), {
   windowType: "city_statistics", params: { extra: { initialTab: "accidents", initialSubTab: "crime" } },
@@ -178,7 +204,7 @@ await refreshAfterEpoch();
 await click('[data-guide="policy.indicator.crime"]');
 assert.ok(container.textContent!.includes("実績なし"));
 
-// 左は指標・稼働できていない施設・その他の問題の順に並べる。施設の不調は木の中では参照で止め、施設を選ぶとその原因を表示する。
+// 参照先を展開しても左の選択を保ち、同じ枝の祖先へ戻る参照では展開を止める。
 globals.policyPayload = { epoch: 2, pending: false, problems: [
   { id: "tenant", type: "tenant_blocked_by_parcel_size", severity: "caution", created_date: 10, entity: { type: "zone", id: 2 },
     params: { zone_name: "港町", tenant_name: "製鉄所", required: 100, max_capacity: 50 }, actions: ["parcel"], roots: [] },
@@ -226,13 +252,30 @@ assert.deepEqual(invocations.at(-1), { windowType: "public_facilities", params: 
 const master = JSON.parse(readFileSync("src/i18n/ja/policy.json", "utf8"));
 assert.ok(master.policy.nodes.service_facility_limited.title.includes("{{kinds}}"));
 assert.deepEqual(rowTitles().slice(2), ["泉町ポンプ場が稼働できていない", "松葉町ポンプ場が稼働できていない"],
-  "稼働できていない施設は列挙だけして、その先はたどらない");
+  "施設の参照先はクリックするまで閉じる");
 assert.equal(container.querySelectorAll('.policy-row[data-depth="3"]').length, 0);
 await click('.policy-row[data-depth="2"] .policy-finding-open');
-assert.deepEqual(invocations.at(-1), { windowType: "agent_detail", entityId: "31" }, "参照カードから施設詳細を開く");
-const beforeInvestigation = opened.length;
+assert.deepEqual(invocations.at(-1), { windowType: "agent_detail", entityId: "31" }, "参照カード本体から施設詳細を開く");
+assert.equal(container.querySelector('.policy-actions [data-guide="policy.action.entity_detail"]'), null, "カード内に詳細ボタンを重複させない");
 await click('.policy-row[data-depth="2"] [data-guide="policy.investigate.facility"]');
+assert.equal(container.querySelector('[data-guide="policy.indicator.water"]')?.getAttribute("aria-pressed"), "true",
+  "施設の参照を展開しても水道の調査を保つ");
+assert.ok(container.querySelector('.policy-row[data-depth="3"]')?.textContent?.includes("水道の供給が不足している"));
+assert.equal(container.querySelector('.policy-row[data-depth="3"] [data-guide="policy.investigate.water"]'), null,
+  "祖先の水道へ戻る参照は再展開しない");
+const beforeInvestigation = opened.length;
+await click('.policy-row[data-depth="5"] [data-guide="policy.investigate.facility"]');
 assert.equal(opened.length, beforeInvestigation, "カード内の調査ボタンは詳細画面を重ねて開かない");
+assert.ok(container.querySelector('.policy-row[data-depth="6"] [data-guide="policy.action.budget"]'),
+  "展開した原因からさらに別の施設の原因をたどれる");
+assert.equal(container.querySelectorAll('.policy-row[data-depth="2"] [aria-expanded="false"]').length, 1,
+  "別の枝にある同じ施設の参照は閉じたまま保つ");
+await click('.policy-row[data-depth="2"] .policy-actions [data-guide="policy.investigate.facility"]');
+await finishCollapsing();
+assert.equal(container.querySelectorAll('.policy-row[data-depth="3"]').length, 0, "親を閉じると子孫も閉じる");
+await click('.policy-row[data-depth="2"] .policy-actions [data-guide="policy.investigate.facility"]');
+assert.equal(container.querySelectorAll('.policy-row[data-depth="6"]').length, 0, "再展開時は子孫の展開状態も初期化する");
+await click('[data-guide="policy.facility"]');
 assert.equal(container.querySelector('[data-guide="policy.facility"][aria-pressed="true"]')?.textContent, "泉町ポンプ場が稼働できていない",
   "施設の行から、その施設を選ぶ");
 assert.deepEqual(rowTitles(), [
@@ -245,19 +288,20 @@ assert.ok(!/です|ます|ません/.test([...container.querySelectorAll(".polic
 await click('.policy-row[data-depth="0"] [data-guide="policy.action.entity_detail"]');
 assert.deepEqual(invocations.at(-1), { windowType: "agent_detail", entityId: "31" }, "施設の詳細を開く");
 await click('.policy-row[data-depth="3"] [data-guide="policy.investigate.facility"]');
-assert.deepEqual(rowTitles(), ["松葉町ポンプ場が稼働できていない", "松葉町ポンプ場が人手不足になっている", "失業率が高い",
+assert.deepEqual(rowTitles().slice(4), ["松葉町ポンプ場が稼働できていない", "松葉町ポンプ場が人手不足になっている", "失業率が高い",
   "松葉町ポンプ場が予算不足で計画を縮小している"]);
 assert.ok(container.textContent!.includes("失業率 20%"), "指標の数値は他の節と同じく根拠の行に出す");
-assert.ok(container.querySelector('.policy-row[data-depth="1"] [data-guide="policy.action.budget"]'), "施設の不調にも対策を並べる");
-await click('.policy-row[data-depth="1"] .policy-finding-open');
+assert.ok(container.querySelector('.policy-row[data-depth="4"] [data-guide="policy.action.budget"]'), "施設の不調にも対策を並べる");
+await click('.policy-row[data-depth="4"] .policy-finding-open');
 assert.deepEqual(invocations.at(-1), { windowType: "agent_detail", entityId: "30" }, "原因カードの主語の施設を開く");
 const beforeBudget = opened.length;
-await click('.policy-row[data-depth="1"] [data-guide="policy.action.budget"]');
+await click('.policy-row[data-depth="4"] [data-guide="policy.action.budget"]');
 assert.equal(opened.length, beforeBudget + 1);
 assert.equal(opened.at(-1), "city_budget", "対策ボタンはカードの詳細へ遷移しない");
-await click('[data-guide="policy.investigate.unemployment"]');
-await click('.policy-row[data-depth="0"] .policy-finding-open');
+assert.equal(container.querySelector('[data-guide="policy.investigate.unemployment"]'), null, "参照先に原因が無ければ展開操作を出さない");
+await click('.policy-row[data-depth="5"] .policy-finding-open');
 assert.deepEqual(invocations.at(-1), { windowType: "city_statistics", params: { extra: { initialTab: "employment" } } });
+await click('[data-guide="policy.indicator.unemployment"]');
 assert.equal(container.querySelector('[data-guide="policy.indicator.unemployment"]')?.getAttribute("aria-pressed"), "true");
 assert.ok(![...container.querySelectorAll(".policy-problem")].some(row => row.getAttribute("aria-pressed") === "true"),
   "指標へ移ったら一覧の選択を外す");
@@ -315,4 +359,4 @@ const afterUnmount = globals.policyRequests;
 await act(async () => dispatch("epoch:executing", { executing: false }));
 await flush();
 assert.equal(globals.policyRequests, afterUnmount);
-console.log("PASS: compact selectors, aligned actions, terminal indicator references, in-window switching, read-only mode, epoch refresh and problems");
+console.log("PASS: compact selectors, aligned actions, inline reference expansion, cycle prevention, read-only mode, epoch refresh and problems");

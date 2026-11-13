@@ -279,6 +279,7 @@
       "per_thousand": "인구 1,000명당 {{value}}건 (최근 1개월)",
       "per_thousand_week": "인구 1,000명당 {{value}}건 (최근 1주일)"
     },
+    "collapse": "접기",
     "investigate": {
       "crime": "범죄 피해 원인 조사",
       "unemployment": "실업 원인 조사",

@@ -279,6 +279,7 @@
       "per_thousand": "1,000人あたり {{value}}件（直近1か月）",
       "per_thousand_week": "1,000人あたり {{value}}件（直近1週間）"
     },
+    "collapse": "折りたたむ",
     "investigate": {
       "crime": "犯罪被害の原因を調査",
       "unemployment": "失業率の原因を調査",

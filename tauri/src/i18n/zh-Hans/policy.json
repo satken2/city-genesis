@@ -279,6 +279,7 @@
       "per_thousand": "每1,000人 {{value}}起（最近1个月）",
       "per_thousand_week": "每1,000人 {{value}}起（最近1周）"
     },
+    "collapse": "收起",
     "investigate": {
       "crime": "调查犯罪损害的原因",
       "unemployment": "调查失业的原因",

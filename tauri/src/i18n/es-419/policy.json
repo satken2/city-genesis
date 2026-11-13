@@ -279,6 +279,7 @@
       "per_thousand": "{{value}} casos por cada 1,000 habitantes (último mes)",
       "per_thousand_week": "{{value}} casos por cada 1,000 habitantes (última semana)"
     },
+    "collapse": "Contraer",
     "investigate": {
       "crime": "Investigar las causas de la delincuencia",
       "unemployment": "Investigar las causas del desempleo",
