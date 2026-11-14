@@ -546,7 +546,7 @@ public static partial class PropsQA
             renderFrame=0;renderStage++;
             if(renderStage<11)return;
             EditorApplication.update-=RenderTick;
-            var buffers=Chunks.Values.Cast<object>().SelectMany(c=>((IList)Field(c,"forests")).Cast<object>()).Select(p=>(GraphicsBuffer)Field(p,"points")).ToArray();
+            var buffers=Chunks.Values.Cast<object>().SelectMany(c=>((IList)Field(c,"forests")).Cast<object>()).Select(p=>(GraphicsBuffer)Field(Field(p,"group"),"points")).Distinct().ToArray();
             managerType.GetMethod("ClearAllCells").Invoke(manager,null);
             Check(buffers.All(b=>!b.IsValid()),"session clear leaked GPU forest buffers");
             results.Add("PASS checks="+checks+"; actual FBX with URP Lit (fallback) / Forest.shader (GPU); CPU timings exclude GPU completion");

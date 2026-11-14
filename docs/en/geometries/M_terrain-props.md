@@ -16,7 +16,7 @@ Reflect added, changed, and removed placements using reloaded prop data. Disting
 
 ## Rendering
 
-`PropManager` subdivides resident terrain cells and creates candidates, exclusions, and rendering batches per subarea. `ForestRenderer` scatters forest trees on the GPU using the same grid and `seed`. Neither creates GameObjects or Colliders per prop. Shared models use GPU instancing and screen-size-based Close, Normal, or Far without reducing counts. Scatter previews and bulldozer selection reproduce the same candidates, preserving positions across confirmation. See [LOD](E_lod.md).
+`PropManager` subdivides resident terrain cells and creates candidates, exclusions, and rendering batches per subarea. Except for near-only types (grass), `ForestRenderer` scatters area placements on the GPU using the same grid and `seed`. GPU-placed points are gathered into one buffer per terrain cell and scatter, and draw calls are issued per that unit. Neither creates GameObjects or Colliders per prop. Shared models use GPU instancing and screen-size-based Close, Normal, or Far without reducing counts. Scatter previews and bulldozer selection reproduce the same candidates, preserving positions across confirmation. See [LOD](E_lod.md).
 
 ## Model names
 

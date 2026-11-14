@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-/// <summary>Generate area-placed trees on the GPU. Retain only areas and patches on the CPU.</summary>
+/// <summary>Generate area-placed props on the GPU. Retain only areas and patches on the CPU.</summary>
 public sealed class ForestRenderer : IDisposable
 {
     public static float DetailDistance => 100f * GraphicsConfig.FarDistanceScale; // Distance where trees switch from normal to far models.
@@ -12,8 +12,17 @@ public sealed class ForestRenderer : IDisposable
     readonly ComputeShader compute;
     readonly Shader shader, foliageShader;
     readonly Dictionary<Material, Material> materials = new Dictionary<Material, Material>();
+    readonly Dictionary<(Vector2Int cell, int source, int type), Group> groups = new Dictionary<(Vector2Int, int, int), Group>();
     readonly int kernel;
     public bool Supported => compute != null && shader != null && shader.isSupported;
+
+    struct GpuPoint { public Vector4 positionScale, rotationVisible; } // Same layout as ForestPoint in ForestPlacement.compute.
+    static GpuPoint[] zeros = new GpuPoint[0];
+    static GpuPoint[] Zeros(int count)
+    {
+        if (zeros.Length < count) zeros = new GpuPoint[Mathf.NextPowerOfTwo(count)];
+        return zeros;
+    }
 
     public ForestRenderer()
     {
@@ -24,6 +33,10 @@ public sealed class ForestRenderer : IDisposable
         if (Supported) kernel = compute.FindKernel("Generate");
     }
 
+    /// <summary>
+    /// One patch's generation inputs and its range in the group's points buffer. Placement, exclusion and picking stay per patch;
+    /// only the points are stored and drawn per group.
+    /// </summary>
     public sealed class Patch : IDisposable
     {
         public int sourceId, type, seed, count, gridWidth, gridCount, startX, startZ;
@@ -32,20 +45,93 @@ public sealed class ForestRenderer : IDisposable
         public Rect rect;
         public Bounds bounds;
         public PropRenderModel model;
-        public GraphicsBuffer points, vertices, rings;
+        public GraphicsBuffer vertices, rings;
         public int regionRings, ringCount;
         public bool dirty = true, ready, hidden;
+        public Vector2Int key;
+        public Group group;
+        public int offset;
+        public void Hide() { hidden = true; group?.Clear(this); }
+        public void Dispose() { vertices?.Dispose(); rings?.Dispose(); vertices = rings = null; group?.Detach(this); group = null; }
+    }
+
+    /// <summary>
+    /// Points of every patch of one scatter in one terrain cell, drawn with one call per model part. Drawing per patch would make
+    /// draw-call submission dominate the frame for scatters covering many patches.
+    /// A patch key keeps its range while its count fits, so regenerating one patch rewrites only that range.
+    /// Any other membership change lays the buffer out again and regenerates every member.
+    /// </summary>
+    public sealed class Group : IDisposable
+    {
+        public readonly Vector2Int cell;
+        public readonly PropRenderModel model;
+        public GraphicsBuffer points;
+        public int instanceCount;
+        public Bounds bounds;
+        public bool hasBounds;
         public readonly MaterialPropertyBlock properties = new MaterialPropertyBlock();
-        public void Dispose() { points?.Dispose(); vertices?.Dispose(); rings?.Dispose(); points = vertices = rings = null; }
+        readonly Dictionary<Vector2Int, Patch> members = new Dictionary<Vector2Int, Patch>();
+        readonly Dictionary<Vector2Int, (int offset, int count)> ranges = new Dictionary<Vector2Int, (int, int)>();
+        readonly Action<Group> released;
+        bool layoutDirty;
+
+        public Group(Vector2Int cell, PropRenderModel model, Action<Group> released)
+        {
+            this.cell = cell; this.model = model; this.released = released;
+        }
+
+        public void Attach(Patch p)
+        {
+            members[p.key] = p; p.group = this;
+            if (!layoutDirty && ranges.TryGetValue(p.key, out var range) && p.count <= range.count) p.offset = range.offset;
+            else layoutDirty = true;
+        }
+
+        public void Detach(Patch p)
+        {
+            if (!members.TryGetValue(p.key, out var current) || current != p) return;
+            members.Remove(p.key);
+            Clear(p);
+            if (members.Count == 0) released(this);
+        }
+
+        /// <summary>Zero the patch's range: zero points are invisible in the forest shader.</summary>
+        public void Clear(Patch p)
+        {
+            if (points == null || !ranges.TryGetValue(p.key, out var range)) return;
+            points.SetData(Zeros(range.count), 0, range.offset, range.count);
+        }
+
+        /// <summary>Called before a member generates. A new buffer starts zeroed, so members are hidden until regenerated.</summary>
+        public void EnsureLayout()
+        {
+            if (!layoutDirty) return;
+            layoutDirty = false;
+            ranges.Clear();
+            int total = 0;
+            foreach (var pair in members)
+            {
+                var p = pair.Value;
+                ranges[pair.Key] = (total, p.count);
+                p.offset = total; p.dirty = true; p.ready = false;
+                total += p.count;
+            }
+            points?.Dispose();
+            points = new GraphicsBuffer(GraphicsBuffer.Target.Structured, total, 32);
+            points.SetData(Zeros(total), 0, 0, total);
+            instanceCount = total;
+        }
+
+        public void Dispose() { points?.Dispose(); points = null; }
     }
 
     // リングには頂点開始・頂点数・ポリゴン番号・穴/水域のビットを保持する。
     public Patch Create(PropScatterItem data, List<PropGeometry.Region> regions,
-        List<PropGeometry.Region> obstacles, Rect rect, PropRenderModel model, int budget)
+        List<PropGeometry.Region> obstacles, Rect rect, PropRenderModel model, int budget, Vector2Int cell, Vector2Int key)
     {
         if (!Supported || !Valid(data.density, budget)) return null;
         var p = new Patch { sourceId = data.prop_scatter_id, type = data.prop_type, seed = data.seed,
-            edgeFadeWidth = data.edge_fade_width, rect = rect, model = model,
+            edgeFadeWidth = data.edge_fade_width, rect = rect, model = model, key = key,
             clearance = Mathf.Max(model.bounds.extents.x, model.bounds.extents.z) * .15f };
         Grid(rect, data.density, out p.spacing, out p.startX, out p.startZ, out p.gridWidth, out p.gridCount);
         p.count = Count(p.gridCount, budget);
@@ -58,13 +144,16 @@ public sealed class ForestRenderer : IDisposable
         if (p.regionRings == 0) return null;
         try
         {
-            p.points = new GraphicsBuffer(GraphicsBuffer.Target.Structured, p.count, 32);
             p.vertices = new GraphicsBuffer(GraphicsBuffer.Target.Structured, verts.Count, 8);
             p.rings = new GraphicsBuffer(GraphicsBuffer.Target.Structured, descriptors.Count, 16);
             p.vertices.SetData(verts); p.rings.SetData(descriptors);
-            return p;
         }
         catch { p.Dispose(); throw; }
+        var groupKey = (cell, p.sourceId, p.type);
+        if (!groups.TryGetValue(groupKey, out var group))
+            groups.Add(groupKey, group = new Group(cell, model, g => { groups.Remove(groupKey); g.Dispose(); }));
+        group.Attach(p);
+        return p;
     }
 
     /// <summary>
@@ -108,9 +197,14 @@ public sealed class ForestRenderer : IDisposable
 
     public bool Generate(Patch p, Terrain terrain, Vector3 offset)
     {
+        // A hidden patch keeps its range zeroed until the reloaded snapshot replaces it.
+        if (p.hidden) { p.dirty = false; return false; }
         if (terrain == null || terrain.terrainData == null) return false;
         var data = terrain.terrainData;
-        compute.SetBuffer(kernel, "_Points", p.points);
+        var group = p.group;
+        group.EnsureLayout();
+        compute.SetBuffer(kernel, "_Points", group.points);
+        compute.SetInt("_PointOffset", p.offset);
         compute.SetBuffer(kernel, "_Vertices", p.vertices);
         compute.SetBuffer(kernel, "_Rings", p.rings);
         compute.SetInts("_Grid", p.startX, p.startZ, p.gridWidth, p.gridCount);
@@ -131,6 +225,11 @@ public sealed class ForestRenderer : IDisposable
         p.bounds = new Bounds(new Vector3(p.rect.center.x + offset.x,
             terrain.transform.position.y + data.size.y * .5f, p.rect.center.y + offset.z),
             new Vector3(p.rect.width + extent*2, data.size.y + extent*2, p.rect.height + extent*2));
+        float cellSize = TerrainManager.CellSize;
+        group.bounds = new Bounds(new Vector3((group.cell.x + .5f) * cellSize + offset.x,
+            terrain.transform.position.y + data.size.y * .5f, (group.cell.y + .5f) * cellSize + offset.z),
+            new Vector3(cellSize + extent*2, data.size.y + extent*2, cellSize + extent*2));
+        group.hasBounds = true;
         p.dirty = false; p.ready = true;
         return true;
     }
@@ -166,17 +265,24 @@ public sealed class ForestRenderer : IDisposable
         return material;
     }
 
-    /// <summary>Submit one patch. castShadows enables shadows within the shadow distance; shadowInstances accumulates instances submitted with shadows.</summary>
-    public int Draw(Patch p, Camera camera, Plane[] planes, bool castShadows, ref int shadowInstances)
+    /// <summary>Submit every group. castShadows enables shadows within the shadow distance; shadowInstances accumulates instances submitted with shadows.</summary>
+    public int Draw(Camera camera, Plane[] planes, bool castShadows, ref int shadowInstances)
     {
-        if (!p.ready || p.hidden) return 0;
-        // Off-view patches that cast shadows are submitted too; Unity culls them from the view by worldBounds.
-        bool shadows = castShadows && PropRenderPolicy.WithinShadowDistance(p.bounds, camera.transform.position);
-        if (!shadows && !GeometryUtility.TestPlanesAABB(planes, p.bounds)) return 0;
-        float nearest = Mathf.Sqrt(p.bounds.SqrDistance(camera.transform.position));
-        if (nearest > DrawLodConfig.PropHiddenEnterDistance + p.model.Radius) return 0;
-        var properties = p.properties;
-        properties.SetBuffer("_ForestPoints", p.points);
+        int draws = 0;
+        foreach (var group in groups.Values) draws += Draw(group, camera, planes, castShadows, ref shadowInstances);
+        return draws;
+    }
+
+    int Draw(Group g, Camera camera, Plane[] planes, bool castShadows, ref int shadowInstances)
+    {
+        if (!g.hasBounds || g.points == null) return 0;
+        // Off-view groups that cast shadows are submitted too; Unity culls them from the view by worldBounds.
+        bool shadows = castShadows && PropRenderPolicy.WithinShadowDistance(g.bounds, camera.transform.position);
+        if (!shadows && !GeometryUtility.TestPlanesAABB(planes, g.bounds)) return 0;
+        float nearest = Mathf.Sqrt(g.bounds.SqrDistance(camera.transform.position));
+        if (nearest > DrawLodConfig.PropHiddenEnterDistance + g.model.Radius) return 0;
+        var properties = g.properties;
+        properties.SetBuffer("_ForestPoints", g.points);
         properties.SetVector("_ForestCamera", camera.transform.position);
         properties.SetFloat("_DetailDistance", DetailDistance);
         properties.SetFloat("_TransitionWidth", TransitionWidth);
@@ -184,24 +290,24 @@ public sealed class ForestRenderer : IDisposable
         int draws = 0;
         // Near and Far use the same fixed random values when switching, avoiding duplicate rendering or boundary bands.
         if (nearest < DetailDistance + TransitionWidth * .5f)
-            draws += DrawParts(p, p.model.normal, camera, 0, shadows, ref shadowInstances);
-        draws += DrawParts(p, p.model.far, camera, 1, shadows, ref shadowInstances);
+            draws += DrawParts(g, g.model.normal, camera, 0, shadows, ref shadowInstances);
+        draws += DrawParts(g, g.model.far, camera, 1, shadows, ref shadowInstances);
         return draws;
     }
 
-    int DrawParts(Patch p, List<PropRenderModel.Part> parts, Camera camera, int lod, bool shadows, ref int shadowInstances)
+    int DrawParts(Group g, List<PropRenderModel.Part> parts, Camera camera, int lod, bool shadows, ref int shadowInstances)
     {
         int draws = 0;
         foreach (var part in parts)
         {
-            if (shadows) shadowInstances += p.count;
-            p.properties.SetInt("_ForestLod", lod);
-            p.properties.SetMatrix("_PartLocal", part.local);
-            p.properties.SetMatrix("_PartNormal", part.local.inverse.transpose);
-            var rp = new RenderParams(MaterialFor(part.material)) { camera = camera, worldBounds = p.bounds,
-                matProps = p.properties, receiveShadows = true,
+            if (shadows) shadowInstances += g.instanceCount;
+            g.properties.SetInt("_ForestLod", lod);
+            g.properties.SetMatrix("_PartLocal", part.local);
+            g.properties.SetMatrix("_PartNormal", part.local.inverse.transpose);
+            var rp = new RenderParams(MaterialFor(part.material)) { camera = camera, worldBounds = g.bounds,
+                matProps = g.properties, receiveShadows = true,
                 shadowCastingMode = shadows ? ShadowCastingMode.On : ShadowCastingMode.Off };
-            Graphics.RenderMeshPrimitives(rp, part.mesh, part.submesh, p.count);
+            Graphics.RenderMeshPrimitives(rp, part.mesh, part.submesh, g.instanceCount);
             draws++;
         }
         return draws;
@@ -212,5 +318,7 @@ public sealed class ForestRenderer : IDisposable
         foreach (var mat in materials.Values)
             if (Application.isPlaying) UnityEngine.Object.Destroy(mat); else UnityEngine.Object.DestroyImmediate(mat);
         materials.Clear();
+        foreach (var group in groups.Values) group.Dispose();
+        groups.Clear();
     }
 }

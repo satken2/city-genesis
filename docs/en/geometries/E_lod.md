@@ -49,7 +49,7 @@ Rendering centerlines, after intersection trimming, are reused while road data a
 
 ## Props and forests
 
-Area forests are scattered on the GPU. Other props thin resident candidates using a fixed ranking derived from saved coordinates, retaining the same points when budgets change. See [terrain props](M_terrain-props.md).
+Area placements, except near-only types, are scattered on the GPU. Other props thin resident candidates using a fixed ranking derived from saved coordinates, retaining the same points when budgets change. See [terrain props](M_terrain-props.md).
 
 ## Generation budget and lifetime
 

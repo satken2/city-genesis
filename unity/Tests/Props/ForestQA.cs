@@ -16,6 +16,14 @@ public static partial class PropsQA
         foreach (var chunk in Chunks.Values) foreach (var patch in (IList)Field(chunk,"forests"))
             Check((bool)renderer.GetType().GetMethod("Generate").Invoke(renderer,new object[]{patch,forestTerrain,Vector3.zero}),"GPU generation unavailable");
     }
+    // Points of one patch: its range in the buffer shared by one scatter within one terrain cell.
+    static GpuPoint[] PatchPoints(object patch)
+    {
+        int n=(int)Field(patch,"count");
+        var points=new GpuPoint[n];
+        ((GraphicsBuffer)Field(Field(patch,"group"),"points")).GetData(points,0,(int)Field(patch,"offset"),n);
+        return points;
+    }
 
     static void CheckGpuForest()
     {
@@ -48,8 +56,7 @@ public static partial class PropsQA
             foreach(var chunk in Chunks.Values) foreach(var patch in (IList)Field(chunk,"forests"))
             {
                 int n=(int)Field(patch,"count"), width=(int)Field(patch,"gridWidth");
-                var buffer=(GraphicsBuffer)Field(patch,"points");
-                var points=new GpuPoint[n]; buffer.GetData(points);
+                var points=PatchPoints(patch);
                 for(int i=0;i<n;i++)
                 {
                     var sample=sampleMethod.Invoke(null,new object[]{(int)Field(patch,"startX")+i%width,(int)Field(patch,"startZ")+i/width,(float)Field(patch,"spacing"),(int)Field(patch,"seed")});
@@ -69,8 +76,11 @@ public static partial class PropsQA
             var old=((IList)Field(first,"forests"))[0];
             Apply(Snapshot(count,true,count));
             Check(Chunks.Values.Cast<object>().Any(c=>((IList)Field(c,"forests")).Contains(old)),"unchanged forest recreated buffers");
+            var patches=Chunks.Values.Cast<object>().SelectMany(c=>((IList)Field(c,"forests")).Cast<object>()).ToArray();
+            Check(patches.Length>1 && patches.Select(p=>Field(p,"group")).Distinct().Count()==1,"patches of one cell and scatter were not drawn together");
             managerType.GetMethod("HideSource").Invoke(manager,new object[]{true,1});
             Check(Chunks.Values.Cast<object>().All(c=>((IList)Field(c,"forests")).Cast<object>().All(p=>(bool)Field(p,"hidden"))),"scatter deletion did not hide GPU forest");
+            Check(patches.All(p=>PatchPoints(p).All(q=>q.rotationVisible.y<.5f)),"hidden GPU forest left visible points");
         }
         CheckScatterOptions();
         CheckGpuHolesAndEdits();
@@ -101,7 +111,7 @@ public static partial class PropsQA
                 foreach (var chunk in Chunks.Values) foreach (var patch in (IList)Field(chunk, "forests"))
                 {
                     int n = (int)Field(patch, "count"), width = (int)Field(patch, "gridWidth");
-                    var gpu = new GpuPoint[n]; ((GraphicsBuffer)Field(patch, "points")).GetData(gpu);
+                    var gpu = PatchPoints(patch);
                     for (int i = 0; i < n; i++)
                     {
                         var sample = sampleMethod.Invoke(null, new object[] { (int)Field(patch, "startX") + i % width, (int)Field(patch, "startZ") + i / width, (float)Field(patch, "spacing"), (int)Field(patch, "seed") });
@@ -220,7 +230,7 @@ public static partial class PropsQA
         foreach(var chunk in Chunks.Values)foreach(var patch in (IList)Field(chunk,"forests"))
         {
             int n=(int)Field(patch,"count"), width=(int)Field(patch,"gridWidth");
-            var gpu=new GpuPoint[n];((GraphicsBuffer)Field(patch,"points")).GetData(gpu);
+            var gpu=PatchPoints(patch);
             for(int i=0;i<n;i++)
             {
                 var sample=sampleMethod.Invoke(null,new object[]{(int)Field(patch,"startX")+i%width,(int)Field(patch,"startZ")+i/width,(float)Field(patch,"spacing"),(int)Field(patch,"seed")});
@@ -240,12 +250,12 @@ public static partial class PropsQA
         Check((bool)Field(pickArgs[2],"scatter") && (int)Field(pickArgs[2],"id")==8,"GPU pick wrong source");
         var first=Chunks.Values.Cast<object>().Where(c=>((IList)Field(Field(c,"spec"),"obstacles")).Count>0)
             .SelectMany(c=>((IList)Field(c,"forests")).Cast<object>()).First();
-        var oldBuffer=(GraphicsBuffer)Field(first,"points");
+        var oldBuffer=(GraphicsBuffer)Field(first,"vertices");
         for(int z=0;z<33;z++)for(int x=0;x<33;x++)heights[z,x]=.4f;
         forestTerrain.terrainData.SetHeights(0,0,heights);
         Drain((IEnumerator)managerType.GetMethod("AdjustPropHeightsForCellsCoroutine").Invoke(manager,new object[]{cells}));
         Check((bool)Field(first,"dirty"),"terrain edit did not invalidate GPU patch");GenerateForests();
-        var updated=new GpuPoint[(int)Field(first,"count")];oldBuffer.GetData(updated);
+        var updated=PatchPoints(first);
         Check(updated.All(p=>Mathf.Abs(p.positionScale.y-40)<.015f),"GPU forest did not follow terrain edit");
         Apply(snapshot.Replace("\"signature\":\"water\"","\"signature\":\"changed\""));
         Check(!oldBuffer.IsValid(),"replaced GPU buffer leaked");

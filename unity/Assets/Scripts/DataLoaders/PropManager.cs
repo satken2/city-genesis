@@ -71,7 +71,8 @@ public class PropManager : BaseApiDataManager
     private readonly List<Rect> forestReadyRects = new List<Rect>();
     private TerrainManager terrainManager;
     private bool GpuForests => useGpuForests && (forestRenderer ?? (forestRenderer = new ForestRenderer())).Supported;
-    private bool IsGpuTree(int type) => (type == 1 || type == 2) && GpuForests;
+    // GPU patches exist for every resident patch and share one candidate budget, so near-only types keep CPU candidates around the camera instead.
+    private bool IsGpuScatter(int type) => !PropRenderPolicy.NearOnly(type) && GpuForests;
     private const int BatchSize = 511;
     // 水際のぼかしが小区画・常駐セルの境界で途切れないよう、周囲の水域も参照する。
     private const float ObstacleMargin = PropGeometry.WaterFadeWidth;
@@ -381,7 +382,7 @@ public class PropManager : BaseApiDataManager
             if (spec.scatters.Exists(s => !PropRenderPolicy.NearOnly(s.data.prop_type)) || spec.instances.Count > 0) activeSpecs++;
         int quota = maxResidentCandidates / Mathf.Max(1, activeSpecs);
         int forestSpecs = 0;
-        foreach (var spec in ordered) foreach (var scatter in spec.scatters) if (IsGpuTree(scatter.data.prop_type)) forestSpecs++;
+        foreach (var spec in ordered) foreach (var scatter in spec.scatters) if (IsGpuScatter(scatter.data.prop_type)) forestSpecs++;
         int forestQuota = ForestRenderer.CandidateBudget / Mathf.Max(1, forestSpecs);
         foreach (var spec in ordered)
         {
@@ -391,7 +392,7 @@ public class PropManager : BaseApiDataManager
             spec.instances.Sort((a,b) => a.prop_instance_id.CompareTo(b.prop_instance_id));
             spec.obstacles.Sort((a,b) => string.CompareOrdinal(a.data.key,b.data.key));
             // Candidate budgets depend on resident patch count; exclude them from signatures. For GPU forests include only effective counts determined by budget.
-            spec.sourceSignature = GpuForests + ":" + string.Join(";", spec.scatters.ConvertAll(s => IsGpuTree(s.data.prop_type)
+            spec.sourceSignature = GpuForests + ":" + string.Join(";", spec.scatters.ConvertAll(s => IsGpuScatter(s.data.prop_type)
                     ? $"s{s.data.prop_scatter_id}:{s.data.version}:f{ForestRenderer.PatchCount(spec.rect, s.data.density, forestQuota)}"
                     : $"s{s.data.prop_scatter_id}:{s.data.version}")) + "|" +
                 string.Join(";", spec.instances.ConvertAll(i => $"i{i.prop_instance_id}:{i.version}"));
@@ -484,10 +485,10 @@ public class PropManager : BaseApiDataManager
                 {
                     foreach (var scatter in spec.scatters)
                     {
-                        if (!IsGpuTree(scatter.data.prop_type)) continue;
+                        if (!IsGpuScatter(scatter.data.prop_type)) continue;
                         var model = Model(scatter.data.prop_type);
                         if (model.normal.Count == 0) continue;
-                        var patch = forestRenderer.Create(scatter.data, scatter.regions, scatter.data.allow_water ? landObstacles : obstacles, spec.rect, model, forestQuota);
+                        var patch = forestRenderer.Create(scatter.data, scatter.regions, scatter.data.allow_water ? landObstacles : obstacles, spec.rect, model, forestQuota, spec.cell, spec.key);
                         if (patch != null) chunk.forests.Add(patch);
                     }
                 }
@@ -675,7 +676,7 @@ public class PropManager : BaseApiDataManager
             if (scatter) chunk.hiddenScatters.Add(id);
             if (scatter)
                 foreach (var patch in chunk.forests)
-                    if (patch.sourceId == id && !patch.hidden) { patch.hidden = true; forestStateVersion++; }
+                    if (patch.sourceId == id && !patch.hidden) { patch.Hide(); forestStateVersion++; }
             bool changed = false;
             for (int i = 0; i < chunk.points.Length; i++)
             {
@@ -705,7 +706,7 @@ public class PropManager : BaseApiDataManager
     {
         foreach (var scatter in spec.scatters)
         {
-            if (PropRenderPolicy.NearOnly(scatter.data.prop_type) != detailOnly || IsGpuTree(scatter.data.prop_type)
+            if (PropRenderPolicy.NearOnly(scatter.data.prop_type) != detailOnly || IsGpuScatter(scatter.data.prop_type)
                 || (hidden != null && hidden.Contains(scatter.data.prop_scatter_id))) continue;
             if (Model(scatter.data.prop_type).normal.Count == 0) continue;
             foreach (var point in PropGeometry.Scatter(spec.rect, scatter.regions, scatter.data.density, scatter.data.seed, scatter.data.edge_fade_width))
@@ -801,7 +802,7 @@ public class PropManager : BaseApiDataManager
                             yield return null;
                             timer.Restart();
                             dispatchFrame = Time.frameCount; dispatched = 0;
-                            if (!chunks.TryGetValue(key, out live) || live != chunk || patch.points == null) break;
+                            if (!chunks.TryGetValue(key, out live) || live != chunk || patch.group == null) break;
                             if (terrainManager == null || !terrainManager.LoadedTerrainTiles.TryGetValue(chunk.spec.cell, out terrain)) continue;
                         }
                         if (forestRenderer.Generate(patch, terrain, Offset)) { dispatched += patch.count; forestStateVersion++; }
@@ -1051,8 +1052,7 @@ public class PropManager : BaseApiDataManager
             Graphics.RenderMeshInstanced(parameters, batch.part.mesh, batch.part.submesh, batch.matrices);
             SubmittedBatchCount++; SubmittedInstanceCount += batch.matrices.Length;
         }
-        foreach (var chunk in chunks.Values) foreach (var patch in chunk.forests)
-            SubmittedForestBatches += forestRenderer.Draw(patch, cam, planes, GraphicsConfig.PropShadows, ref shadowInstances);
+        if (forestRenderer != null) SubmittedForestBatches = forestRenderer.Draw(cam, planes, GraphicsConfig.PropShadows, ref shadowInstances);
         SubmittedShadowInstances = shadowInstances;
     }
     public IEnumerator AdjustPropHeightsForCellsCoroutine(List<Vector2Int> cells)

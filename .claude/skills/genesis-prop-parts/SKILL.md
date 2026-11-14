@@ -53,7 +53,7 @@ description: City Genesisの地形プロップ3Dモデル(森の木・岩・茂�
 - 木2種は `pipeline/jobs/build_prop_trees.py` で原点に著作する。通常72/96三角形、専用Far14/20三角形（幹なしの八角錐/丸い葉塊）。
   広葉樹は4個の葉塊、針葉樹は細身の4段樹冠。両種の再生成は同ジョブを一度実行する。
   葉はスムーズ法線と粗さ0.9、共有256×256色画像（Props/Textures）を使う。画像は外部参照でFarも共有し、FBX拡散色は白にする。
-- ヤシの木5・熱帯の低木6は `pipeline/jobs/build_prop_tropical.py` で著作する。森のGPU描画(1・2)の対象外で、通常の散布で描く。
+- ヤシの木5・熱帯の低木6は `pipeline/jobs/build_prop_tropical.py` で著作する。
   葉の帯は自動簡略化で崩れるので、ヤシだけ幹付きの専用Farを持つ。寸法・再生成は同じ場所の `tropical.md`。
 - **樹木・植え込みの葉**(森の木・街路樹・公園の木・戸建ての植え込みと庭木)は、葉の材質の面へ樹冠全体に寄せた法線と陰り(頂点色R)を焼き、
   UnityではFBXの葉材質を取り込み設定で `Assets/Models/Materials/` の共有材質(`CityGenesis/Foliage`)へ割り当てる。

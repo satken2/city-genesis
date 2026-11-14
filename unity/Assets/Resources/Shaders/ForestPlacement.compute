@@ -8,6 +8,8 @@ Texture2D<float4> _Heightmap;
 SamplerState linearClampSampler;
 int4 _Grid;
 int _Count, _Seed, _RegionRings, _RingCount, _HeightResolution;
+// 地形セル1つ・散布1件で共有する点のバッファのうち、このパッチの範囲の先頭。
+int _PointOffset;
 float _Spacing, _Clearance;
 float _EdgeFadeWidth, _WaterFadeWidth;
 float4 _Rect;
@@ -95,5 +97,5 @@ void Generate(uint3 id : SV_DispatchThreadID)
     ForestPoint result;
     result.positionScale = float4(world.x,height,world.y,scale);
     result.rotationVisible = float4(Unit(h+2)*6.28318530718,visible ? 1 : 0,Unit(h+4),Unit(h+5));
-    _Points[id.x] = result;
+    _Points[_PointOffset + id.x] = result;
 }
