@@ -173,28 +173,45 @@ public static class LandmarkPathsQA
         var cables=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="SuspensionCables")
             .SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).ToArray();
         float cableEdge=cables.Where(v=>Mathf.Abs(v.z-length*.5f)<.4f).Max(v=>Mathf.Abs(v.x));
-        float widthScale=Mathf.Max(1,width/12),lateral=width*.5f+.8f*widthScale;
+        float widthScale=Mathf.Max(1,width/12),lateral=width*.5f+1.2f*widthScale;
         Require(Mathf.Abs(cableEdge-(lateral+.25f))<.005f,"main cable diameter 0.5m");
-        // The anchorage spans a quarter of the side span (deck end to tower) and the cable enters its bridge-side top.
+        // Each leg stands on its own concrete footing beside the deck: buried 15cm, rising 1.5m (per width scale) above the ground.
+        var footings=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="SuspensionFootings")
+            .SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).ToArray();
+        Require(footings.Length==4*24,"one footing per leg");
+        Require(Mathf.Abs(footings.Min(v=>v.y)+.15f)<.01f&&Mathf.Abs(footings.Max(v=>v.y)-1.5f*widthScale)<.01f,"footing height");
+        Require(Mathf.Abs(footings.Min(v=>Mathf.Abs(v.x))-width*.5f)<.01f
+            &&Mathf.Abs(footings.Max(v=>Mathf.Abs(v.x))-(width*.5f+2.4f*widthScale))<.01f,"footing beside the deck");
+        var legs=cables.Where(v=>Mathf.Abs(Mathf.Abs(v.x)-lateral)>.9f*widthScale).ToArray();
+        Require(legs.Length==4*24&&Mathf.Abs(legs.Min(v=>v.y)-1.5f*widthScale)<.01f&&Mathf.Abs(legs.Max(v=>v.y)-12.1f)<.01f,"legs from the footings to the deck");
+        Require(legs.All(v=>Mathf.Abs(Mathf.Abs(Mathf.Abs(v.x)-lateral)-widthScale)<.01f),"leg width follows road width");
+        // The cable rests on the deck (axis one radius above the road surface) at mid-span and never dips below it.
+        // The batch also holds the tower legs below the deck, so look away from the towers.
+        var strands=cables.Where(v=>Mathf.Abs(Mathf.Abs(v.x)-lateral)<.3f&&Mathf.Abs(v.z-length*.2f)>3f&&Mathf.Abs(v.z-length*.8f)>3f).ToArray();
+        Require(strands.Min(v=>v.y)>12.1f-.01f,"cable never dips below the deck");
+        foreach(int side in new[]{-1,1})
+            Require(strands.Where(v=>v.x*side>0&&Mathf.Abs(v.z-length*.5f)<2f).Min(v=>v.y)<12.1f+.05f,"cable rests on the deck at mid-span");
+        // The anchorage spans a quarter of the side span (deck end to tower) and the cable enters its bridge-side face at deck level.
         var anchorages=go.GetComponentsInChildren<MeshFilter>().Where(f=>f.name=="SuspensionAnchorage")
             .Select(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint).ToArray()).ToArray();
         Require(anchorages.Length==2,"two anchorages");
-        float inset=length*.2f*.25f,entry=12.1f+.4f*inset;
+        float inset=length*.2f*.25f,entry=12.1f+.4f*inset*.25f;
         Require(anchorages.Any(a=>Mathf.Abs(a.Min(v=>v.z))<.01f&&Mathf.Abs(a.Max(v=>v.z)-inset)<.01f)
             &&anchorages.Any(a=>Mathf.Abs(a.Min(v=>v.z)-(length-inset))<.01f&&Mathf.Abs(a.Max(v=>v.z)-length)<.01f),"anchorage length");
         foreach(var a in anchorages)
         {
             Require(Mathf.Abs(a.Min(v=>v.y)+.15f)<.01f,"anchorage reaches ground");
             Require(Mathf.Abs(a.Max(v=>v.y)-entry)<.01f,"anchorage height follows its length");
-            Require(a.Max(v=>Mathf.Abs(v.x))<=width*.5f+1.7f*widthScale+.01f&&a.Min(v=>Mathf.Abs(v.x))>width*.5f,"anchorage beside the deck");
+            Require(Mathf.Abs(a.Max(v=>Mathf.Abs(v.x))-(width*.5f+2.4f*widthScale))<.01f&&Mathf.Abs(a.Min(v=>Mathf.Abs(v.x))-width*.5f)<.01f,"anchorage beside the deck");
         }
         foreach(float z in new[]{inset,length-inset}) foreach(int side in new[]{-1,1})
-            Require(cables.Any(v=>(v-new Vector3(side*lateral,entry,z)).magnitude<.3f),"cable enters anchorage");
+            Require(cables.Any(v=>(v-new Vector3(side*lateral,12.1f,z)).magnitude<.3f),"cable enters anchorage at deck level");
         foreach(var tower in towers)
         {
             var points=tower.GetComponentsInChildren<MeshFilter>().SelectMany(f=>f.sharedMesh.vertices.Select(f.transform.TransformPoint)).ToArray();
             Require(Mathf.Abs(points.Max(v=>v.y)-12.1f-Mathf.Max(length*.6f*.08f,3.2f)*widthScale)<.02f,"tower height follows road width");
-            Require(Mathf.Abs(points.Max(v=>v.z)-points.Min(v=>v.z)-2.4f*widthScale)<.02f,"tower thickness follows road width");
+            Require(Mathf.Abs(points.Max(v=>v.z)-points.Min(v=>v.z)-3f*widthScale)<.02f,"tower thickness follows road width");
+            Require(Mathf.Abs(points.Max(v=>Mathf.Abs(v.x))-(lateral+widthScale))<.02f,"tower columns over the legs");
         }
         // Far LOD keeps the towers with their legs below the deck, and drops the cables and anchorages.
         var far=new GameObject("Far");
@@ -229,7 +246,7 @@ public static class LandmarkPathsQA
         bool Painted(Material m)=>m.name=="PATH_PAINT"+color && ((Vector4)(m.color-expected)).magnitude<.002f;
         var tower=go.GetComponentsInChildren<Transform>().First(t=>t.name=="SuspensionTower")
             .GetComponentsInChildren<MeshRenderer>().SelectMany(r=>r.sharedMaterials).ToArray();
-        Require(tower.Any(Painted)&&tower.Any(m=>m.name.StartsWith("PATH_CONCRETE"))&&!tower.Any(m=>m.name=="PATH_PAINT"),"tower painted, foundation concrete");
+        Require(tower.Length>0&&tower.All(Painted),"tower painted");
         Require(Of(n=>n=="SuspensionCables").All(Painted),"cables painted");
         Require(Of(n=>n=="SuspensionAnchorage").All(m=>!m.name.StartsWith("PATH_PAINT")),"anchorage unpainted");
         var truss=Of(n=>n.EndsWith("/truss"));

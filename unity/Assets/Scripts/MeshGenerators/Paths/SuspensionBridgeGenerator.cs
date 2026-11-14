@@ -5,11 +5,15 @@ using GeneratedModels;
 using UnityEngine;
 
 /// <summary>
-/// Towers use actual width; main cables follow span-dependent parabolas.
+/// Towers use actual width; main cables follow span-dependent parabolas that rest on the deck at the low point
+/// of each main span and at the free ends, as the cables of a real suspension bridge come down to the roadway.
 /// Towers stand at every anchor between two suspension spans (waypoints, and nodes joined to another suspension bridge),
 /// and at the free ends of a chain at SIDE_SPAN_RATIO of the end span. A free end has an anchorage that receives the cable.
 /// A joint tower is shared: only the bridge with the smallest path ID at the node draws it, and every bridge there sizes it
 /// from the longest adjacent main span so their cables meet the same tower top.
+/// Below the deck each tower column continues as a leg of the same section down to its own concrete footing, which
+/// stands on the ground (the seabed over water) and rises above the ground or the water surface. The footings are
+/// per leg, beside the deck, so that the truss and a lower deck pass between them at any deck height.
 /// Towers, cables and anchorages are drawn once per path along the whole deck polyline (Generate), and Far LOD keeps
 /// the towers (GenerateFar); the truss is a continuous part drawn per road spline (GenerateTruss).
 /// </summary>
@@ -18,8 +22,16 @@ public static class SuspensionBridgeGenerator
     private const float SIDE_SPAN_RATIO = 0.2f;        // End-to-tower distance as a share of the end span.
     private const float TOWER_HEIGHT_PER_SPAN = 0.08f; // Tower height above the deck per metre of the adjacent main span (12m two-lane reference).
     private const float MIN_TOWER_HEIGHT = 3.2f;
+    private const float LEG_OFFSET = 1.2f;             // Column centre beyond the deck edge. This and the sizes below are per width scale and match the tower model.
+    private const float LEG_WIDTH = 2.0f;              // Column section across the bridge.
+    private const float LEG_DEPTH = 3.0f;              // Column section along the bridge.
+    private const float FOOTING_WIDTH = 2.4f;          // Footing across the bridge; its inner face lies on the deck edge.
+    private const float FOOTING_DEPTH = 5.0f;          // Footing along the bridge.
+    private const float FOOTING_RISE = 1.5f;           // Footing top above the ground or the water surface.
     private const float ANCHORAGE_SHARE = 0.25f;       // Anchorage length as a share of the side span (deck end to tower).
-    private const float DECK_CABLE_RISE = 0.8f;        // Cable height above the deck where it lands at an end without an anchorage model.
+    private const float ANCHORAGE_RISE = 0.25f;        // Height above the deck relative to the model's proportions: the cable enters at deck level, so the block stays low.
+    private const float CABLE_RADIUS = 0.25f;
+    private const float DECK_CABLE_RISE = CABLE_RADIUS; // Cable axis height above the deck where the cable rests on it.
 
     /// <summary>Other suspension bridges joined at the path's start (true) or end node. Provided by PathManager.</summary>
     public static Func<PathSummary, bool, List<PathSummary>> JointProvider;
@@ -80,11 +92,12 @@ public static class SuspensionBridgeGenerator
                 : k == last && endJoints.Count > 0 ? deck.Length
                 : deck.Project(PlanPoint(anchors, stations[k]));
 
-        float lateral = width*.5f + .8f * widthScale;
+        float lateral = width*.5f + LEG_OFFSET * widthScale;
         Color? paint = RoadPath.PaintColorOf(path);
         // Cables and the tower legs below the deck share the tower's painted steel.
         var steel = System.Array.Find(renderer.sharedMaterials, m => m != null && m.name.StartsWith(RoadPath.PAINT_MATERIAL));
         var batch = new PathStructureMesh(parent, "SuspensionCables", new[] { RoadPath.GetOrCreatePartMaterial(steel ?? renderer.sharedMaterial, paint) });
+        var footings = new PathStructureMesh(parent, "SuspensionFootings", new[] { RoadPath.GetOrCreateRoadMaterialByName("PATH_CONCRETE") });
         Vector3 DeckPoint(float d, Vector3 right, float x) => deck.Point(d) + right*x + Vector3.up*RoadPartHeights.BODY_ABOVE_SPLINE;
         for (int k = 0; k <= last; k++)
         {
@@ -94,7 +107,9 @@ public static class SuspensionBridgeGenerator
             var tower = UnityEngine.Object.Instantiate(prefab,parent.transform);
             tower.name = "SuspensionTower";
             tower.transform.position = DeckPoint(distances[k], right, 0);
-            tower.transform.rotation = Quaternion.LookRotation(Vector3.Cross(right, Vector3.up));
+            Quaternion facing = Quaternion.LookRotation(Vector3.Cross(right, Vector3.up));
+            Vector3 along = facing * Vector3.forward;
+            tower.transform.rotation = facing;
             tower.transform.localScale = new Vector3(1,heights[k]/12f,1);
             foreach (var r in tower.GetComponentsInChildren<MeshRenderer>())
             {
@@ -105,10 +120,24 @@ public static class SuspensionBridgeGenerator
             for (int side=-1;side<=1;side+=2)
             {
                 Vector3 top=DeckPoint(distances[k], right, side*lateral);
-                Vector3 ground=new Vector3(top.x,Utils.GetGroundHeight(top),top.z);
-                if (top.y > ground.y) batch.Bar(ground,top,.85f * widthScale);
+                // The footing spans the terrain under its whole footprint: buried below the lowest corner
+                // (15cm, as the anchorage is) and rising from the highest ground or water surface.
+                float low=float.MaxValue, high=float.MinValue;
+                for (int corner=0;corner<5;corner++)
+                {
+                    Vector3 p = corner==4 ? top : top + right*((corner%2*2-1)*FOOTING_WIDTH*.5f*widthScale) + along*((corner/2*2-1)*FOOTING_DEPTH*.5f*widthScale);
+                    low=Mathf.Min(low,Utils.GetGroundHeight(p));
+                    high=Mathf.Max(high,Utils.GetPathSurfaceHeight(p));
+                }
+                float footingBottom=low-.15f, footingTop=high+FOOTING_RISE*widthScale;
+                footings.Box(new Vector3(top.x,(footingBottom+footingTop)*.5f,top.z),
+                    new Vector3(FOOTING_WIDTH*widthScale,footingTop-footingBottom,FOOTING_DEPTH*widthScale), facing);
+                if (top.y > footingTop)
+                    batch.Box(new Vector3(top.x,(footingTop+top.y)*.5f,top.z),
+                        new Vector3(LEG_WIDTH*widthScale,top.y-footingTop,LEG_DEPTH*widthScale), facing);
             }
         }
+        footings.Finish();
         if (towersOnly)
         {
             batch.Finish();
@@ -119,20 +148,22 @@ public static class SuspensionBridgeGenerator
         var spans = new List<(float from, float to, Func<float, float> rise)>();
         if (startJoints.Count == 0)
         {
-            var (inset, entry) = Anchorage(parent, deck, path, true, distances[0]);
+            float inset = Anchorage(parent, deck, path, true, distances[0]);
             float h = heights[0];
-            spans.Add((inset, distances[0], u => Mathf.Lerp(entry, h, u) - h*.12f*4*u*(1-u)));
+            spans.Add((inset, distances[0], u => Mathf.Lerp(DECK_CABLE_RISE, h, u) - h*.12f*4*u*(1-u)));
         }
         for (int k = 0; k < last; k++)
         {
-            float a = heights[k], b = heights[k + 1], sag = .75f * Mathf.Min(a, b);
+            // The sag whose parabola has its low point on the deck, also between towers of different heights.
+            float a = heights[k], b = heights[k + 1];
+            float root = (Mathf.Sqrt(a - DECK_CABLE_RISE) + Mathf.Sqrt(b - DECK_CABLE_RISE)) * .5f, sag = root * root;
             spans.Add((distances[k], distances[k + 1], u => Mathf.Lerp(a, b, u) - sag*4*u*(1-u)));
         }
         if (endJoints.Count == 0)
         {
-            var (inset, entry) = Anchorage(parent, deck, path, false, deck.Length - distances[last]);
+            float inset = Anchorage(parent, deck, path, false, deck.Length - distances[last]);
             float h = heights[last];
-            spans.Add((distances[last], deck.Length - inset, u => Mathf.Lerp(h, entry, u) - h*.12f*4*u*(1-u)));
+            spans.Add((distances[last], deck.Length - inset, u => Mathf.Lerp(h, DECK_CABLE_RISE, u) - h*.12f*4*u*(1-u)));
         }
         for (int side=-1;side<=1;side+=2)
         {
@@ -148,7 +179,7 @@ public static class SuspensionBridgeGenerator
                     float rise=span.rise(u);
                     Vector3 deckPoint=DeckPoint(Mathf.Lerp(span.from,span.to,u), Vector3.Lerp(rightFrom,rightTo,u), side*lateral);
                     Vector3 cable=deckPoint+Vector3.up*rise;
-                    if(i>0) batch.Bar(previous,cable,.25f, sides: 12);
+                    if(i>0) batch.Bar(previous,cable,CABLE_RADIUS, sides: 12);
                     if(i>0 && i<count && rise>1f) batch.Bar(deckPoint,cable,.035f);
                     previous=cable;
                 }
@@ -160,19 +191,19 @@ public static class SuspensionBridgeGenerator
     /// <summary>
     /// Anchorage at a free end (model `p{variant}/anchorage`), scaled so its length is ANCHORAGE_SHARE of the side span.
     /// Model: origin on the deck centerline at the road surface of the end, +Z toward the bridge, X at actual size.
-    /// Y and Z above the origin take the same scale; vertices below the origin stretch to the ground like piers.
-    /// The cable enters at the bridge-side top (max Z, max Y) at the tower's cable offset.
-    /// Returns that entry as (distance inward from the end, height above the deck).
+    /// Above the origin, Y takes ANCHORAGE_RISE of the Z scale; vertices below the origin stretch to the ground like piers.
+    /// The cable enters the bridge-side face (max Z) at deck level, at the tower's cable offset.
+    /// Returns the distance of that face inward from the end (0 without an anchorage model).
     /// </summary>
-    private static (float inset, float rise) Anchorage(GameObject parent, Deck deck, PathSummary path, bool start, float sideSpan)
+    private static float Anchorage(GameObject parent, Deck deck, PathSummary path, bool start, float sideSpan)
     {
         var prefab = PathDrawContext.ResolvePrefab($"{PathParts.Folder(path)}/anchorage", null, out _);
         var filter = prefab != null ? prefab.GetComponentInChildren<MeshFilter>() : null;
         var renderer = prefab != null ? prefab.GetComponentInChildren<MeshRenderer>() : null;
         Mesh source = filter != null ? filter.sharedMesh : null;
-        if (source == null || renderer == null || sideSpan < .01f) return (0f, DECK_CABLE_RISE);
+        if (source == null || renderer == null || sideSpan < .01f) return 0f;
         var bounds = source.bounds;
-        if (bounds.max.z < .01f || bounds.min.y >= 0f) return (0f, DECK_CABLE_RISE);
+        if (bounds.max.z < .01f || bounds.min.y >= 0f) return 0f;
         float scale = ANCHORAGE_SHARE * sideSpan / bounds.max.z;
         var vertices = source.vertices;
         var world = new Vector3[vertices.Length];
@@ -183,7 +214,7 @@ public static class SuspensionBridgeGenerator
             Vector3 top = deck.Point(d) + deck.Right(d) * (start ? v.x : -v.x) + Vector3.up * RoadPartHeights.BODY_ABOVE_SPLINE;
             if (v.y >= 0f)
             {
-                world[i] = top + Vector3.up * (v.y * scale);
+                world[i] = top + Vector3.up * (v.y * scale * ANCHORAGE_RISE);
                 continue;
             }
             // Bury 15cm so the bottom does not float on terrain error (as platform foundations do).
@@ -194,7 +225,7 @@ public static class SuspensionBridgeGenerator
             System.Array.ConvertAll(renderer.sharedMaterials, m => RoadPath.GetOrCreatePartMaterial(m, RoadPath.PaintColorOf(path))));
         batch.Append(source, world);
         batch.Finish();
-        return (bounds.max.z * scale, bounds.max.y * scale);
+        return bounds.max.z * scale;
     }
 
     /// <summary>Drawn deck centerline: straight spans between its points, measured by 3D length.</summary>
