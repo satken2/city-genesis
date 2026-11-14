@@ -59,6 +59,7 @@
     "welfare": {
       "unemployment": "Prestaciones por desempleo",
       "pension": "Pensiones",
+      "cash": "Pagos en efectivo",
       "livelihood": "Asistencia de subsistencia"
     }
   },

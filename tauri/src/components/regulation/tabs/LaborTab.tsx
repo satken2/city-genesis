@@ -3,7 +3,7 @@
  *
  * Working hours: statutory working hours per day.
  * Social security: policy values for city government cash benefits to households (unemployment benefits, pensions,
- * income support). Retirement age and benefit rates are City policy properties used both for required social
+ * unconditional cash payments, income support). Retirement age and benefit rates are City policy properties used both for required social
  * security budget calculations (category 12) and benefit payments in the backend.
  *
  * The API exchanges benefit rates as 0–1 ratios, while the UI uses 0–100 percentages.
@@ -19,6 +19,7 @@ export const WELFARE_KEYS = [
   "retirement_age",
   "unemployment_benefit_ratio",
   "pension_benefit_ratio",
+  "cash_payment_ratio",
   "livelihood_assistance_ratio",
 ] as const;
 
@@ -28,6 +29,7 @@ export type WelfareKey = (typeof WELFARE_KEYS)[number];
 const RATIO_KEYS: ReadonlySet<WelfareKey> = new Set([
   "unemployment_benefit_ratio",
   "pension_benefit_ratio",
+  "cash_payment_ratio",
   "livelihood_assistance_ratio",
 ]);
 
@@ -44,6 +46,7 @@ const WELFARE_ROWS: { key: WelfareKey; labelKey: string; unitKey: string; min: n
   { key: "retirement_age", labelKey: "regulation.retirementAge", unitKey: "regulation.retirementAgeUnit", min: 0, max: 120, step: 1 },
   { key: "unemployment_benefit_ratio", labelKey: "regulation.unemploymentBenefitRatio", unitKey: "regulation.welfareWageRatioUnit", min: 0, max: 150, step: 5 },
   { key: "pension_benefit_ratio", labelKey: "regulation.pensionBenefitRatio", unitKey: "regulation.welfareWageRatioUnit", min: 0, max: 150, step: 5 },
+  { key: "cash_payment_ratio", labelKey: "regulation.cashPaymentRatio", unitKey: "regulation.welfareWageRatioUnit", min: 0, max: 150, step: 5 },
   { key: "livelihood_assistance_ratio", labelKey: "regulation.livelihoodAssistanceRatio", unitKey: "regulation.welfareShortfallRatioUnit", min: 0, max: 100, step: 5 },
 ];
 

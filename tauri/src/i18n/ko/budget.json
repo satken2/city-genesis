@@ -59,6 +59,7 @@
     "welfare": {
       "unemployment": "실업급여",
       "pension": "연금",
+      "cash": "현금 지급",
       "livelihood": "생활보조"
     }
   },

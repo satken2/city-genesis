@@ -42,18 +42,20 @@ export type RegulationsData = {
   retirement_age: number;
   unemployment_benefit_ratio: number;
   pension_benefit_ratio: number;
+  cash_payment_ratio: number;
   livelihood_assistance_ratio: number;
 };
 
 /**
  * Draft social security policy values.
- * Retirement age in years, unemployment benefits/pensions as ratios of district standard wages, and income
- * support as a ratio of the shortfall.
+ * Retirement age in years, unemployment benefits/pensions/cash payments as ratios of district standard wages,
+ * and income support as a ratio of the shortfall.
  */
 export type WelfareRegulations = {
   retirement_age: number;
   unemployment_benefit_ratio: number;
   pension_benefit_ratio: number;
+  cash_payment_ratio: number;
   livelihood_assistance_ratio: number;
 };
 

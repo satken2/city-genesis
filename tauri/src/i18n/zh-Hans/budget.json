@@ -59,6 +59,7 @@
     "welfare": {
       "unemployment": "失业救济",
       "pension": "养老金",
+      "cash": "现金发放",
       "livelihood": "生活救助"
     }
   },

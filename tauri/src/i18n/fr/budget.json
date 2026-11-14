@@ -59,6 +59,7 @@
     "welfare": {
       "unemployment": "Allocations chômage",
       "pension": "Pensions",
+      "cash": "Versements en espèces",
       "livelihood": "Aide à la subsistance"
     }
   },

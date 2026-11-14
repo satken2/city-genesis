@@ -177,6 +177,7 @@ export function CityRegulationWindow({
           retirement_age: regulationsRes.retirement_age,
           unemployment_benefit_ratio: regulationsRes.unemployment_benefit_ratio,
           pension_benefit_ratio: regulationsRes.pension_benefit_ratio,
+          cash_payment_ratio: regulationsRes.cash_payment_ratio,
           livelihood_assistance_ratio: regulationsRes.livelihood_assistance_ratio,
         });
         setPendingWelfare({});

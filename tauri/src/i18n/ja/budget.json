@@ -59,6 +59,7 @@
     "welfare": {
       "unemployment": "失業給付",
       "pension": "年金",
+      "cash": "現金の支給",
       "livelihood": "生活扶助"
     }
   },

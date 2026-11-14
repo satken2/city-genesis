@@ -59,6 +59,7 @@
     "welfare": {
       "unemployment": "Unemployment Benefits",
       "pension": "Pensions",
+      "cash": "Cash Payments",
       "livelihood": "Livelihood Assistance"
     }
   },

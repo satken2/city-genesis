@@ -36,7 +36,7 @@ When funds are insufficient, budgets shrink according to the maintenance priorit
 
 ## 15.4. Social security
 
-Social security provides cash benefits to established resident households: unemployment benefits, pensions for older citizens, and assistance for minimum living standards. Benefit levels and retirement age are city policies. Unemployment, aging, and hardship increase required spending.
+Social security provides cash benefits to established resident households: unemployment benefits, pensions for older citizens, unconditional cash payments to every resident, and assistance for minimum living standards. Benefit levels and retirement age are city policies. Unemployment, aging, and hardship increase required spending.
 
 ## 15.5. Public works
 
