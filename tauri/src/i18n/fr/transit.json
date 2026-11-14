@@ -51,6 +51,7 @@
     "waypointCountLabel": "Points de passage placés",
     "stopsUnit": "",
     "needTwoStops": "Il faut au moins deux arrêts pour créer une ligne.",
+    "needLoopClosed": "Cliquez sur le premier arrêt pour fermer la boucle avant de créer la ligne.",
     "tabBasicInfo": "Aperçu",
     "tabSettings": "Réglages",
     "tabLineMap": "Carte du tracé",

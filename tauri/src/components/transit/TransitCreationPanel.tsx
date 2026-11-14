@@ -24,6 +24,8 @@ import { describeError } from "../../utils/errors";
  *    Unity), so the return to the first stop is always an explicit choice. It calls POST /api/v1/transit/lines
  *    with path_variant = transit_path_id of the selected type (section path variant), and points = visitation
  *    points received from Unity.
+ * [Cancel] keeps the panel open, like road construction: it discards the points placed so far and restarts placement
+ *    (new lines from no points, route edits from the line's current route), keeping type and settings.
  * Route editing retains type/fare/etc. (the details settings tab owns those), gives Unity the
  * current points to edit, then sends new points via PUT /api/v1/transit/lines/{id}/route.
  *
@@ -120,6 +122,7 @@ export function TransitCreationPanel({
   const [loopClosed, setLoopClosed] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [placementRun, setPlacementRun] = useState(0);
 
   const stopCount = points.filter((p) => p.kind === "stop").length;
   const waypointCount = points.length - stopCount;
@@ -177,15 +180,18 @@ export function TransitCreationPanel({
   // Pass stop constraints (stop_path_variants) and running network (route_path_variants) so Unity can
   // filter snapping targets. New-line type changes reset visitation points and vehicle appearance. Route edits
   // pass current points for editing and hide the edited line's existing color band (line_agent_id).
+  // placementRun increments on [Cancel], restarting placement from the initial points while keeping type and settings.
+  useEffect(() => {
+    if (!selectedEntry || isEdit) return;
+    setVehicleModel(defaultTransitVehicleModel(selectedEntry.transit_path_id));
+    setCarsPerTrain((cars) => Math.min(selectedEntry.max_cars_per_train, Math.max(selectedEntry.freight ? 2 : 1, cars)));
+  }, [selectedEntry, isEdit]);
+
   useEffect(() => {
     if (!selectedEntry) return;
     const initialPoints = isEdit && editedLine ? editedLine.route_points : [];
     setPoints(initialPoints);
     setLoopClosed(false);
-    if (!isEdit) {
-      setVehicleModel(defaultTransitVehicleModel(selectedEntry.transit_path_id));
-      setCarsPerTrain((cars) => Math.min(selectedEntry.max_cars_per_train, Math.max(selectedEntry.freight ? 2 : 1, cars)));
-    }
     void sendChangeState(
       "STATE_EDIT_TRANSIT",
       {
@@ -197,7 +203,7 @@ export function TransitCreationPanel({
       },
       "transit_creation",
     );
-  }, [selectedEntry, isEdit, editedLine, editLineId]);
+  }, [selectedEntry, isEdit, editedLine, editLineId, placementRun]);
 
   // Return to normal mode and clear line placement gizmos on close (unmount).
   useEffect(() => {
@@ -288,9 +294,17 @@ export function TransitCreationPanel({
     }
   }, [apiBaseUrl, isEdit, editLineId, selectedEntry, fare, headway, carsPerTrain, vehicleModel, points, stopCount, onClose, t]);
 
+  const handleCancel = useCallback(() => {
+    setError(null);
+    setPlacementRun((run) => run + 1);
+  }, []);
+
   if (!masterData) {
     return <p className="bc-muted">{t("common.loading")}</p>;
   }
+
+  const confirmBlockedReason =
+    stopCount < 2 ? t("transit.needTwoStops") : !loopClosed ? t("transit.needLoopClosed") : null;
 
   // Use fallback text if master description is unset ("nan" or empty).
   const description =
@@ -441,15 +455,16 @@ export function TransitCreationPanel({
       {/* Action buttons (fixed at panel bottom). */}
       {selectedEntry && (
         <div className="bc-section bc-action-bar">
+          {confirmBlockedReason && <div className="bc-description-text" style={{ marginBottom: 8 }}>{confirmBlockedReason}</div>}
           <div className="bc-actions">
-            <button className="bc-btn" type="button" data-guide="transit.cancel" onClick={onClose}>
+            <button className="bc-btn" type="button" data-guide="transit.cancel" onClick={handleCancel}>
               {t("transit.cancel")}
             </button>
             <button
               className="bc-btn bc-btn-confirm"
               type="button"
               data-guide="transit.confirm"
-              disabled={isSaving || stopCount < 2 || !loopClosed}
+              disabled={isSaving || confirmBlockedReason !== null}
               onClick={() => void handleConfirm()}
             >
               {isSaving ? t("common.processing") : t(isEdit ? "transit.confirmRouteUpdate" : "transit.confirmCreate")}

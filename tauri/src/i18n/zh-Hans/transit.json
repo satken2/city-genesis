@@ -51,6 +51,7 @@
     "waypointCountLabel": "已放置的途经点",
     "stopsUnit": "处",
     "needTwoStops": "创建线路至少需要2个停靠站。",
+    "needLoopClosed": "点击第一个停靠站闭合环线后即可新建线路。",
     "tabBasicInfo": "基本信息",
     "tabSettings": "设置",
     "tabLineMap": "线路地图",

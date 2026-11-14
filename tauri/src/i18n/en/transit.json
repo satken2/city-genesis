@@ -51,6 +51,7 @@
     "waypointCountLabel": "Placed waypoints",
     "stopsUnit": "",
     "needTwoStops": "A line needs at least two stops.",
+    "needLoopClosed": "Click the first stop to close the loop before creating the line.",
     "tabBasicInfo": "Overview",
     "tabSettings": "Settings",
     "tabLineMap": "Route map",

@@ -73,7 +73,7 @@ public class TransitPlanManager : MonoBehaviour
     // Overlay drawing parameters (pixels).
     private const float STOP_MARKER_HALF_SIZE = 10f;
     private const float WAYPOINT_MARKER_RADIUS = 5f;
-    private const float POINT_HIT_RADIUS = 12f;
+    private const float POINT_HIT_RADIUS = 20f; // Covers the whole stop square (corners at 14px) with margin; a miss places a new stop instead.
     private const float EDGE_HIT_PIXELS = 8f;
     private const float LINE_THICKNESS = 2.5f;
 

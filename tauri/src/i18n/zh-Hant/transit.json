@@ -51,6 +51,7 @@
     "waypointCountLabel": "已放置的途經點",
     "stopsUnit": "處",
     "needTwoStops": "建立路線至少需要2個停靠站。",
+    "needLoopClosed": "點擊第一個停靠站閉合環線後即可新建路線。",
     "tabBasicInfo": "基本資訊",
     "tabSettings": "設定",
     "tabLineMap": "路線地圖",

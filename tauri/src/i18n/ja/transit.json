@@ -51,6 +51,7 @@
     "waypointCountLabel": "配置済みの経由点",
     "stopsUnit": "箇所",
     "needTwoStops": "路線を作るには停留所が2つ以上必要です。",
+    "needLoopClosed": "最初に置いた停留所をクリックして一周を閉じると新設できます。",
     "tabBasicInfo": "基本情報",
     "tabSettings": "設定",
     "tabLineMap": "路線地図",

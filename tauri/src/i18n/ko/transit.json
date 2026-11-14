@@ -51,6 +51,7 @@
     "waypointCountLabel": "배치된 경유점",
     "stopsUnit": "개소",
     "needTwoStops": "노선을 만들려면 정류장이 2개 이상 필요합니다.",
+    "needLoopClosed": "처음 놓은 정류장을 클릭해 한 바퀴를 닫으면 노선을 만들 수 있습니다.",
     "tabBasicInfo": "기본 정보",
     "tabSettings": "설정",
     "tabLineMap": "노선 지도",

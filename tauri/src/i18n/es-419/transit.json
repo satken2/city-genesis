@@ -51,6 +51,7 @@
     "waypointCountLabel": "Puntos de paso colocados",
     "stopsUnit": "",
     "needTwoStops": "Se necesitan al menos dos paradas para crear una línea.",
+    "needLoopClosed": "Haz clic en la primera parada para cerrar el circuito antes de crear la línea.",
     "tabBasicInfo": "Resumen",
     "tabSettings": "Ajustes",
     "tabLineMap": "Mapa de ruta",
