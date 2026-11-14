@@ -108,9 +108,11 @@ public partial class RoadPlanManager
         {
             distance += Utils.XZDistance(points[i - step].position, points[i].position);
             var point = points[i];
-            float height = plane.HeightAt(point.position);
-            if (Mathf.Abs(point.position.y - height) <= 1e-4f) continue;
-            point.position.y = height;
+            Vector3 position = point.position;
+            float height = plane.HeightAt(position);
+            if (Mathf.Abs(position.y - height) <= 1e-4f) continue;
+            position.y = height;
+            point.position = position;
             points[i] = point;
             // As with anchor movement, release fixed heights through both neighbors whose automatic grades change.
             ReleaseControlHeights(i - 1, i + 1);
