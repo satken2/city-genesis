@@ -27,10 +27,10 @@ export type DevelopmentPattern = (typeof DEVELOPMENT_PATTERNS)[number];
 /** 道路の間隔(m)と区画の面積(m²)の既定値と範囲。範囲はコアの検証と同じ */
 const DEFAULT_SPACING_M = 70;
 const SPACING_MIN_M = 20;
-const SPACING_MAX_M = 500;
+const SPACING_MAX_M = 2000;
 const DEFAULT_PARCEL_AREA_M2 = 600;
 const PARCEL_AREA_MIN_M2 = 50;
-const PARCEL_AREA_MAX_M2 = 20000;
+const PARCEL_AREA_MAX_M2 = 1_000_000;
 
 type WorldPoint = { x: number; z: number };
 type Stroke = { radius: number; points: WorldPoint[] };
