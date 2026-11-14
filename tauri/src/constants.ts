@@ -317,6 +317,7 @@ export const LIVING_HEATMAP_MARGIN_M: number = 200.0;
 export const LIVING_HEATMAP_MAX_DIM: number = 2000;
 export const NOISE_SATURATION_LEVEL: number = 400.0;
 export const POLLUTION_SATURATION_LEVEL: number = 380.0;
+export const ENV_SCORE_DECADES: number = 2.0;
 export const CRIME_SATURATION_LEVEL: number = 1.0;
 export const SANITATION_GRID_METERS: number = 100.0;
 export const FIRE_SPREAD_RADIUS: number = 30.0;

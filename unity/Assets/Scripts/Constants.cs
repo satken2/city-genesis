@@ -322,6 +322,7 @@ public static class Constants
     public const int LIVING_HEATMAP_MAX_DIM = 2000;
     public const float NOISE_SATURATION_LEVEL = 400.0f;
     public const float POLLUTION_SATURATION_LEVEL = 380.0f;
+    public const float ENV_SCORE_DECADES = 2.0f;
     public const float CRIME_SATURATION_LEVEL = 1.0f;
     public const float SANITATION_GRID_METERS = 100.0f;
     public const float FIRE_SPREAD_RADIUS = 30.0f;
