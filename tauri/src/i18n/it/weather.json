@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Tempo metereologico",
+    "choose": "Scegli il tempo",
+    "loading": "Controllo del tempo...",
+    "unknown": "Sconosciuto",
+    "automatic": "{{weather}} (auto)",
+    "failed": "Impossibile cambiare il tempo",
+    "names": {
+      "clear": "Chiaro",
+      "high_clouds": "Nubi alte",
+      "fair": "Fiera",
+      "broken_clouds": "intervalli di sole",
+      "overcast": "Nuvoloso",
+      "rain_clouds": "Nuvole di pioggia",
+      "fog": "Nebbia",
+      "drizzle": "Pioggerella",
+      "rain": "Pioggia",
+      "heavy_rain": "Pioggia a dirotto",
+      "light_snow": "Neve leggera",
+      "snow": "Neve",
+      "blizzard": "Tormenta"
+    },
+    "epochClimate": "Clima epocale",
+    "temperature": "Temperatura",
+    "precipitation": "Precipitazione",
+    "sunlight": "Intensità del sole",
+    "windSpeed": "velocità del vento"
+  }
+}

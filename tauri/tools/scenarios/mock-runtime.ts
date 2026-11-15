@@ -1,6 +1,7 @@
 export const state = {
   calls: [] as { command: string; args: any }[],
   confirmed: true,
+  language: "ja",
   /** コマンドごとの戻り値。未登録のコマンドは `{ error: null }` を返す */
   results: {} as Record<string, unknown>,
   /** コマンドごとの失敗。構造化エラーもそのまま reject する。results より優先する */
@@ -33,4 +34,4 @@ export async function invoke(command: string, args?: any) {
 const translate = (key: string) => key;
 /** 言語ごとの翻訳は「言語:キー」を返し、どの言語で引いたかを確かめられるようにする */
 const fixedT = (language: string) => (key: string) => `${language}:${key}`;
-export function useTranslation() { return { t: translate, i18n: { language: "ja", getFixedT: fixedT } }; }
+export function useTranslation() { return { t: translate, i18n: { language: state.language, getFixedT: fixedT } }; }

@@ -1,0 +1,61 @@
+{
+  "mapNavigation": {
+    "title": "Esplora la città",
+    "back": "Indietro",
+    "search": "Cerca un posto",
+    "origin": "Cerca un punto di partenza",
+    "destination": "Cerca una destinazione",
+    "clear": "Chiaro",
+    "searching": "Cercando...",
+    "error": "Impossibile connettersi. Ricarica e riprova.",
+    "noResults": "Nessun posto trovato",
+    "mode": "Modalità di viaggio",
+    "pedestrian": "Passeggiata e transito",
+    "automobile": "Guidare",
+    "pickOrigin": "Scegli Inizia sulla mappa",
+    "pickDestination": "Scegli la destinazione sulla mappa",
+    "swap": "Scambiare",
+    "cancel": "Annulla",
+    "directions": "Indicazioni stradali",
+    "intro": "Cerca strutture, stazioni, distretti o strade o seleziona un luogo sulla mappa.",
+    "chooseOrigin": "Cerca un punto di partenza o scegline uno sulla mappa.",
+    "routing": "Trovare un percorso…",
+    "showRoute": "Mostra percorso completo",
+    "mapPoint": "Punto sulla mappa",
+    "minutes": "Informazioni su {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Stima basata sulla rete stradale dal calcolo del percorso #{{epoch}}. Le linee tratteggiate indicano la camminata e i collegamenti con le strade.",
+    "busy": "La simulazione è in esecuzione. I risultati si aggiorneranno al termine.",
+    "not_ready": "Nessun dato di percorso ancora. Esegui una simulazione in questa città per visualizzare i percorsi.",
+    "unreachable": "Nessun percorso collega questi due luoghi.",
+    "no_access": "Nessuna strada accessibile è stata trovata vicino al luogo selezionato.",
+    "geometry_unavailable": "La geometria di transito per questo percorso non è disponibile.",
+    "place_missing": "Il luogo selezionato è stato rimosso. Si prega di selezionarlo di nuovo.",
+    "kind": {
+      "agent": "Servizio, struttura",
+      "zone": "Quartiere",
+      "stop": "Fermata",
+      "station": "Stazione",
+      "point": "Punto",
+      "road": "Strada"
+    },
+    "leg": {
+      "walk": "Camminare",
+      "drive": "Guidare",
+      "transit": "Transito",
+      "conveyor": "trasportatore passeggeri",
+      "access": "Collegamento alla strada",
+      "turn": "Giro di giunzione"
+    },
+    "picking": {
+      "origin": "Fai clic sul punto di partenza sulla mappa.",
+      "destination": "Fai clic sulla tua destinazione sulla mappa."
+    },
+    "pins": {
+      "tab": "spille",
+      "hint": "Fare clic sulla mappa per posizionare uno spillo nel colore scelto. Fare clic con il pulsante destro del mouse per rimuoverlo.",
+      "list": "Elenco dei pin",
+      "remove": "rimuovere il perno"
+    }
+  }
+}

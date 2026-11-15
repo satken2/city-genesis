@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Skład podłogi",
+    "parking": "Parking",
+    "type": "Typ budynku",
+    "durability": "Trwałość",
+    "floors": "Podłogi",
+    "floorsValue": "{{floors}}F (obszar podłogi {{area, number}}㎡)",
+    "heightLabel": "wysokość: {{value}}m",
+    "baseAreaLabel": "Obszar podstawowy: {{area, number}}㎡",
+    "underMaintenance": "Trwają prace konserwacyjne",
+    "parkingCapacity": "Pojemność parkingowa",
+    "parkingCapacityValue": "{{capacity}} samochody",
+    "parkingDay": "Dzień",
+    "parkingNight": "Nocna pora",
+    "parkingUsage": "{{used}} / {{capacity}} samochody"
+  },
+  "building_appearance": {
+    "variantLabel": "wygląd {{index}}",
+    "layoutHint": "Przeciągnij kartę na miejsce, aby umieścić / przeciągnij, aby przesunąć / przesunąć + przeciągnąć, aby obrócić / usunąć klawisz, aby usunąć",
+    "sizeLabel": "{{width}}×{{height}}m",
+    "deleteSelected": "Usunąć wybrane",
+    "apply": "Zastosować",
+    "saveFailed": "Nie udało się zapisać wyglądu",
+    "noSubbuildings": "Dla tego typu budynku nie zdefiniowano żadnych budynków podrzędnych"
+  }
+}

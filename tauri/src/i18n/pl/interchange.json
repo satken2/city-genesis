@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Wymieniać",
+      "jct": "Węzeł"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "Z",
+      "to": "W celu",
+      "road": "{{type}} #{{id}}",
+      "none": "Brak połączonych par drogowych.",
+      "direction": {
+        "n": "Północ",
+        "ne": "Północny wschód",
+        "e": "Wschód",
+        "se": "południowo-wschodni",
+        "s": "Południe",
+        "sw": "Południowy zachód",
+        "w": "Zachód",
+        "nw": "Północny zachód"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

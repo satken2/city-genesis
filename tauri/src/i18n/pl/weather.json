@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Pogoda",
+    "choose": "Wybierz pogodę",
+    "loading": "Sprawdzanie pogody…",
+    "unknown": "Nieznany",
+    "automatic": "{{weather}} (auto)",
+    "failed": "Nie można zmienić pogody",
+    "names": {
+      "clear": "Oczyścić",
+      "high_clouds": "Wysokie chmury",
+      "fair": "Targi",
+      "broken_clouds": "Słoneczne interwały",
+      "overcast": "Pochmurny",
+      "rain_clouds": "Chmury deszczowe",
+      "fog": "Mgła",
+      "drizzle": "Mżawka",
+      "rain": "Deszcz",
+      "heavy_rain": "Ulewa",
+      "light_snow": "Lekki śnieg",
+      "snow": "Śnieg",
+      "blizzard": "Buran"
+    },
+    "epochClimate": "Klimat epoki",
+    "temperature": "Temperatura",
+    "precipitation": "Osad",
+    "sunlight": "Intensywność światła słonecznego",
+    "windSpeed": "Prędkość wiatru"
+  }
+}

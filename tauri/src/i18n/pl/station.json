@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Stacja",
+    "name": "Nazwa stacji",
+    "ridership": "Jeździectwo",
+    "platforms": "Lista platformy",
+    "noPlatforms": "Do tej stacji nie należą żadne platformy (platformy przekroczone przez linię należą tutaj)",
+    "lines": "Linie do serwowania",
+    "noLines": "Żadne linie nie obsługują tej stacji",
+    "stops": "Jeździectwo przez przystanek",
+    "noStops": "Brak przystanków na tej stacji",
+    "lineRunning": "Bieganie",
+    "lineSuspended": "Zawieszona",
+    "houseEnds": "Umieszczenie budynku stacji",
+    "houseEnds_both": "Oba końce",
+    "houseEnds_start": "Zaczynać",
+    "houseEnds_end": "Koniec",
+    "passageMode": "Umieszczenie przejścia",
+    "passageMode_elevated": "Podniesiony",
+    "passageMode_ground": "Poziom ziemi",
+    "passageMode_underground": "Podziemny"
+  }
+}

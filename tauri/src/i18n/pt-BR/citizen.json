@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} anos",
+    "male": "Masculino",
+    "female": "Fêmea",
+    "single": "Solteira",
+    "married": "Casado",
+    "household": "Domicílio",
+    "employer": "Empregador",
+    "unemployed": "Desempregado",
+    "school": "Escola",
+    "notEnrolled": "não inscrito",
+    "major": "Principal",
+    "higherEducation": "Ensino superior",
+    "graduated": "Concluído",
+    "notGraduated": "não concluído",
+    "skills": "Habilidades",
+    "criminality": "Tendência ao crime",
+    "commuteTime": "Tempo de deslocamento",
+    "automobile": "Carro",
+    "automobileOwned": "Possuído",
+    "automobileNone": "Nenhum",
+    "householdStatus": "Estado domiciliar"
+  },
+  "household": {
+    "title": "Domicílio",
+    "familyType": "Tipo de família",
+    "familySingle": "Solteira",
+    "familyCouple": "Casal",
+    "familyFamily": "Família",
+    "familySenior": "Senior",
+    "hasAutomobile": "tem automóvel",
+    "noAutomobile": "nenhum automóvel",
+    "discretionaryIncome": "Renda disponível",
+    "livingStandard": "Padrão de vida",
+    "livingStandardLevel": {
+      "0": "Desprovido",
+      "1": "Pobre",
+      "2": "Classe média",
+      "3": "Afluente"
+    },
+    "satisNutrition": "Nutrição",
+    "satisHealthcare": "Saúde",
+    "satisLeisure": "Lazer",
+    "satisTourism": "Turismo",
+    "tourist": "turistas",
+    "partySize": "Tamanho da festa",
+    "members": "Membros"
+  },
+  "education": {
+    "people": "pessoas"
+  }
+}

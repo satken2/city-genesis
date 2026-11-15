@@ -1,0 +1,16 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Site",
+      "paths": "yol",
+      "vehicles": "araçlar",
+      "props": "Destekler"
+    },
+    "additional": "Ek modeller",
+    "loading": "3D görünümden modeller yükleniyor…",
+    "noModel": "model yok",
+    "noImage": "görüntü yok",
+    "weight": "Ağırlık",
+    "applyNote": "Bir oyuna bir sonraki başladığınızda veya yüklediğinizde ağırlık değişiklikleri etkili olur."
+  }
+}

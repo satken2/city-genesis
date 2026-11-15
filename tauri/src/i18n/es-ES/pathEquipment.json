@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Equipamiento vial",
+    "streetlight_type": "Alumbrado",
+    "fence_type": "Vallas",
+    "street_tree_type": "Árboles",
+    "utility_mode": "Cableado",
+    "none": "Ninguno",
+    "standard": "Estándar",
+    "overhead": "Aéreo",
+    "underground": "Subterráneo",
+    "apply": "Aplicar",
+    "bench_type": "Bancas",
+    "bin_type": "Basureros",
+    "planter_type": "Jardineras",
+    "advert_type": "Publicidad"
+  }
+}

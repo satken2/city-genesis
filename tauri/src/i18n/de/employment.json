@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Erforderliche Fähigkeit",
+    "wage": "Lohnsatz",
+    "quota": "erforderliche Arbeit",
+    "totalLabor": "Leiharbeit",
+    "employees": "Mitarbeiterliste",
+    "hired": "Gemietet",
+    "vacant": "Vakant",
+    "noQuota": "Keine Arbeit erforderlich",
+    "noEmployees": "Keine Mitarbeiter",
+    "statusTitle": "Beschäftigungsstatus"
+  }
+}

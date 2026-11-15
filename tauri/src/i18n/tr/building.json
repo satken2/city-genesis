@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Zemin kompozisyonu",
+    "parking": "Otopark",
+    "type": "yapı tipi",
+    "durability": "Dayanıklılık",
+    "floors": "yer",
+    "floorsValue": "{{floors}}F (Zemin Alanı {{area, number}}㎡)",
+    "heightLabel": "Yükseklik: {{value}}m",
+    "baseAreaLabel": "Temel alan: {{area, number}}",
+    "underMaintenance": "Bakımda",
+    "parkingCapacity": "park kapasitesi",
+    "parkingCapacityValue": "{{capacity}} arabalar",
+    "parkingDay": "Gündüz",
+    "parkingNight": "Gece vakti",
+    "parkingUsage": "{{used}} / {{capacity}}"
+  },
+  "building_appearance": {
+    "variantLabel": "Görünüm {{index}}",
+    "layoutHint": "Bir kartı siteye sürükleyin / taşımak için sürükleyin / Shift + sürükleyin",
+    "sizeLabel": "{{width}}×{{height}}m",
+    "deleteSelected": "Seçili kaldır",
+    "apply": "Uygulamak",
+    "saveFailed": "Görünüm kaydedilemedi",
+    "noSubbuildings": "Bu bina tipi için herhangi bir alt bina tanımlanmamıştır."
+  }
+}

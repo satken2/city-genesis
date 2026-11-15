@@ -1,0 +1,147 @@
+{
+  "settings": {
+    "title": "Einstellungen",
+    "groups": {
+      "general": "General",
+      "display": "Anzeigen",
+      "sound": "Klingen",
+      "system": "System",
+      "about": "Über",
+      "developer": "Entwicklereinstellungen"
+    },
+    "swagger": {
+      "label": "Swagger (API-Dokumentation)",
+      "description": "Zeigen Sie die verbundene Backend-API in Ihrem Standardbrowser an",
+      "action": "Im Browser öffnen"
+    },
+    "currencyUnit": {
+      "label": "Währungseinheit",
+      "description": "die Einheit mit Geldbeträgen angezeigt. Lassen Sie die Anzeigesprache leer."
+    },
+    "fontSize": {
+      "label": "Schriftgröße",
+      "large": "Groß",
+      "medium": "Medium",
+      "small": "Klein",
+      "custom": "Brauch",
+      "preview": "Aktuelle Größe"
+    },
+    "monitor": {
+      "label": "Anzeigen",
+      "prev": "Vorherige Anzeige",
+      "next": "Nächste Anzeige"
+    },
+    "graphicMonitor": {
+      "label": "3D-Ansichtsanzeige"
+    },
+    "multiDisplay": {
+      "label": "Multi-Display-Modus",
+      "description": "Zeigt Fenster auf einer anderen Anzeige als der Spielbildschirm an",
+      "on": "Auf",
+      "off": "Aus"
+    },
+    "popupMonitor": {
+      "label": "Fensteranzeige"
+    },
+    "hintbar": {
+      "label": "Hinweisleiste",
+      "show": "Anzeigen",
+      "hide": "Verstecken",
+      "description": "Leiste oben auf dem Bildschirm, die Bedienungshinweise anzeigt"
+    },
+    "citizenVoice": {
+      "label": "Bürgerstimmen",
+      "show": "Anzeigen",
+      "hide": "Verstecken",
+      "description": "Karte oben rechts auf dem Bildschirm, die die Bemerkungen der Bewohner wiederum zeigt"
+    },
+    "language": {
+      "label": "Sprache",
+      "description": "Die Anzeigesprache der Benutzeroberfläche. Dies ist getrennt von der Sprache Ihrer Speicherdaten.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano"
+    },
+    "volume": {
+      "label": "Volumen",
+      "master": "Master-Volumen",
+      "bgm": "BGM",
+      "sfx": "Soundeffekte"
+    },
+    "compute": {
+      "label": "GPU-Beschleunigung",
+      "comingSoon": "Kommt bald",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU aktiv",
+      "statusInactive": "CPU aktiv",
+      "restartRequired": "Das Hauptprogramm wird nach dem Ändern dieser Einstellung neu gestartet",
+      "restarting": "Neustart...",
+      "restartFailed": "Neustart fehlgeschlagen",
+      "restartUnavailable": "Einstellungen gespeichert. Änderungen werden beim nächsten Spielbeginn wirksam",
+      "confirmRestart": "Rechnermodus auf {{mode}} umschalten? Das Hauptprogramm wird neu gestartet.",
+      "restartAction": "Neu starten"
+    },
+    "windowReset": {
+      "label": "Fensterposition & Größe",
+      "action": "Rücksetzen"
+    },
+    "credits": {
+      "label": "Credits",
+      "description": "Zuordnungen für die in diesem Spiel verwendeten Assets und Software",
+      "action": "Aussicht"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Neues Spiel",
+    "overwriteSave": "Speichern überschreiben",
+    "saveAs": "Speichern als",
+    "load": "Laden",
+    "quitGame": "Spiel beenden",
+    "returnToTop": "Zurück zum Top-Menü",
+    "loading": "Lädt…",
+    "shuttingDown": "Herunterfahren ...",
+    "saveFailed": "Speichern fehlgeschlagen",
+    "loadFailed": "Laden fehlgeschlagen",
+    "confirmNewGame": "Aktuelle Daten gehen verloren. Ein neues Spiel starten?",
+    "confirmQuitGame": "Bist du sicher, dass du aufhören willst? Ihr aktueller Fortschritt wird nicht automatisch gespeichert.",
+    "confirmReturnToTop": "zum oberen Menü zurückkehren? Ihr aktueller Fortschritt wird nicht automatisch gespeichert.",
+    "confirm": "Ja",
+    "cancel": "Nein",
+    "saveAsScenario": "Als Szenario speichern",
+    "saveAsNewScenario": "Als ein anderes Szenario speichern",
+    "overwriteScenario": "Szenario überschreiben",
+    "backToGame": "Zurück zum Spiel",
+    "saveName": "Name speichern",
+    "confirmOverwrite": "Überschreiben Sie das Speichern \"{{name}}\"?",
+    "confirmOverwriteScenario": "Überschreiben Sie das Szenario \"{{name}}\"?"
+  },
+  "saveList": {
+    "noSaves": "Keine Speicherdaten gefunden",
+    "currentSave": "Aktuelle Daten",
+    "population": "Bevölkerung",
+    "inGameDate": "Datum",
+    "savedAt": "Gespeichert bei",
+    "loadButton": "Laden",
+    "deleteButton": "Löschen",
+    "confirmLoad": "Diese Speicherdaten laden?",
+    "confirmDelete": "Diese Speicherdaten löschen? Dies kann nicht rückgängig gemacht werden.",
+    "loading": "Lädt…",
+    "loadFailed": "Laden fehlgeschlagen",
+    "deleteFailed": "Löschen fehlgeschlagen",
+    "openFolderButton": "Öffnen Sie den Speicherordner",
+    "scenario": "Szenario",
+    "autosaveName": "{{name}} (Auto speichern beim Beenden)"
+  }
+}

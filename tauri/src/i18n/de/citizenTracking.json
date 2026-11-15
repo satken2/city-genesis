@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Übersicht",
+    "tabActivity": "Aktivität",
+    "follow": "Folgen Sie mit der Kamera",
+    "unfollow": "Hör auf zu folgen",
+    "track": "Zur Tracking-Liste hinzufügen",
+    "trackRandom": "Verfolgen Sie einen zufälligen Bürger",
+    "noUntrackedCitizens": "Es sind keine nicht verfolgten Bürger verfügbar.",
+    "trackRandomError": "Konnte einen Bürger nicht verfolgen.",
+    "untrack": "Aus der Tracking-Liste entfernen",
+    "home": "Residenz",
+    "mobility": "Rumkommen",
+    "mode": {
+      "automobile": "Auto",
+      "pedestrian": "Gehen und öffentliche Verkehrsmittel"
+    },
+    "visits": "Ziele",
+    "visitKind": {
+      "home": "Zuhause",
+      "work": "Arbeiten",
+      "school": "Schule",
+      "shop": "Das einkaufen"
+    },
+    "legs": {
+      "walk": "Walk",
+      "drive": "Auto",
+      "transit": "Transit",
+      "conveyor": "Personentransportsystem"
+    },
+    "trip": "Einweg {{minutes}} min · {{route}}",
+    "noRoute": "Keine Route",
+    "noVisits": "hat nirgendwo hin zu gehen.",
+    "status": {
+      "not_ready": "nach der Simulation angezeigt.",
+      "busy": "Nicht verfügbar, während die Simulation ausgeführt wird.",
+      "no_home": "Warten auf die Unterbringung, es gibt also keine aufgezeichnete Aktivität.",
+      "missing": "Dieser Bürger lebt nicht mehr in der Stadt.",
+      "error": "Konnte nicht laden."
+    },
+    "empty": "Es werden keine Bürger verfolgt.",
+    "pickFailed": {
+      "not_ready": "Führen Sie die Simulation durch, um auf Autos und Fußgänger zu klicken und zu sehen, wer sie sind.",
+      "busy": "Bürger können nicht gezeigt werden, während die Simulation läuft.",
+      "none": "Konnte nicht finden, wer in diesem Auto oder zu Fuß ist.",
+      "missing": "Dieser Bürger lebt nicht mehr in der Stadt.",
+      "no_home": "Dieser Bürger wartet auf Wohnraum.",
+      "error": "Konnte den Bürger nicht zeigen."
+    }
+  }
+}

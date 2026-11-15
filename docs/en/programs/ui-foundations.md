@@ -37,6 +37,8 @@ Font sizes follow root settings, and dimensions tied to body text generally use 
 ## Languages and author text
 
 UI text belongs in i18n resources. Keep keys and [game terminology](../contributing/glossary.md) aligned across supported languages, using common language and locale definitions.
+Spanish uses distinct codes for Spain (`es-ES`) and Latin America (`es-419`). Brazilian Portuguese uses `pt-BR`.
+Request names and descriptions of master data such as building types and products from the core's master data API using the current display language.
 
 Player-facing explanations should give concrete causes, consequences of actions, and things to check when making decisions. Treat loading-screen Tips as part of the manual, explaining what city-building choices lead to without exposing internal formulas or processing steps. Each item should introduce the context needed to understand it on its own, without familiarity with other Tips or earlier wording. When expanding an explanation, preserve its subject and original humor instead of padding it with obvious cautions.
 

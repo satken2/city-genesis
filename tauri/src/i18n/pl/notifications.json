@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Powiadomienia o mieście",
+    "empty": "Żadne problemy nie wymagają teraz uwagi",
+    "loadFailed": "Nie udało się załadować powiadomień",
+    "types": {
+      "resource_runway": "Oczekuje się, że zasób „{{name}}” zostanie wyczerpany w epokach około {{remaining_epochs}}",
+      "resource_depleted": "Zasób „{{name}}” został wyczerpany",
+      "facility_inoperative": "Obiekt publiczny „{{name}}” nie działa",
+      "facility_inoperative_labor": "Obiekt publiczny „{{name}}” nie działa z powodu niedoboru siły roboczej",
+      "facility_inoperative_material": "Obiekt publiczny „{{name}}” nie działa z powodu niedoboru materiału",
+      "facility_inoperative_high_skill": "Obiekt publiczny „{{name}}” działa ze zmniejszoną wydajnością z powodu braku wykwalifikowanych pracowników",
+      "facility_inoperative_budget": "Obiekt publiczny „{{name}}” działa ze zmniejszoną wydajnością z powodu niedoboru budżetu",
+      "education_low_enrollment": "Instytucja edukacyjna „{{name}}” jest niedostatecznie wykorzystana — niewielu studentów jest zapisanych ({{enrolled}} z {{max_students}} miejsc)",
+      "infra_facility_down": "Obiekt infrastrukturalny „{{name}}” nie działa z eksploatacji",
+      "infra_disconnected": "Obiekty {{count}} są odłączone od sieci infrastruktury",
+      "rail_capacity_exceeded": "Częstotliwość pociągu przekracza przepustowość toru na segmentach {{count}}",
+      "collapse": "{{count}} budynki/drogi zawaliły się",
+      "collapse_with_deaths": "{{count}} zawaliły się budynki/drogi, zabijając {{deaths}} osób",
+      "deaths_traffic": "{{count}} Ludzie zginęli w wypadkach drogowych",
+      "tenant_blocked_by_parcel_size": "W dystrykcie „{{zone_name}}” nie można zbudować żadnego budynku dla „{{tenant_name}}” (wymaga {{required}} m2, największy do zabudowy {{max_capacity}} m2). Większa paczka jest wymagana",
+      "unknown": "Wystąpiło krytyczne zdarzenie",
+      "sanitation": "Warunki sanitarne pogarszają się w przypadku gospodarstw domowych {{count}}. usprawnić oczyszczanie ścieków i odpady."
+    }
+  }
+}

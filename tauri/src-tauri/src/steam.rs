@@ -71,6 +71,13 @@ pub fn game_language() -> Option<&'static str> {
         "tchinese" => Some("zh-Hant"),
         "french" => Some("fr"),
         "koreana" => Some("ko"),
+        "german" => Some("de"),
+        "polish" => Some("pl"),
+        "russian" => Some("ru"),
+        "brazilian" => Some("pt-BR"),
+        "spanish" => Some("es-ES"),
+        "turkish" => Some("tr"),
+        "italian" => Some("it"),
         _ => None,
     }
 }

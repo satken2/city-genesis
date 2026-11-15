@@ -1,0 +1,204 @@
+{
+  "agent": {
+    "back": "Zurück",
+    "editAppearance": "Aussehen ändern",
+    "relocateCityHall": "Rathaus umziehen",
+    "publicFacility": "Öffentliche Einrichtung",
+    "underAcquisition": "Landerwerb aushandeln",
+    "publicFacilityPanel": {
+      "title": "Öffentliche Einrichtung"
+    },
+    "abandon": "Verlassen",
+    "abandonHint": "Geben Sie den Unterhalt auf und lassen Sie ihn ohne Reparaturen zerfallen",
+    "statusSince": {
+      "founded": "Gegründet",
+      "householdFormed": "Haushalt gebildet",
+      "arrived": "Kam an",
+      "opened": "Angebrochen",
+      "schoolOpened": "Angebrochen",
+      "completed": "Fertiggestellt",
+      "operatingSince": "aktiv seit",
+      "resumed": "wieder aufgenommen",
+      "paused": "pausiert",
+      "suspended": "Eingestellt",
+      "schoolClosed": "Eingestellt",
+      "constructionStarted": "Der Bau begann",
+      "demolitionScheduled": "Abriss geplant",
+      "demolitionStarted": "Abriss begann",
+      "demolished": "Zerstört",
+      "collapsed": "Zusammengebrochen",
+      "burnedDown": "Niedergebrannt",
+      "default": "Status seit"
+    },
+    "reserves": "Reserve",
+    "revenues": "Einnahmen",
+    "expenses": "Kosten",
+    "zone": "Stadtbezirk",
+    "building": "Gebäude",
+    "rent": "Mieten",
+    "floorOccupancy": "Bodenbelegung",
+    "tenants": "Mieter",
+    "guests": "Gesellschaft",
+    "tabBasicInfo": "Grundlegende Informationen",
+    "utilizationTarget": "Zielauslastung",
+    "currentUtilization": "Aktuelle Auslastung",
+    "constructionSpeed": "Baugeschwindigkeit",
+    "constructionCostPerEpoch": "Baukosten / Epoche",
+    "remainingConstruction": "Verbleibende Bauzeit",
+    "remainingEpochs": "~ {{n}} Epochen",
+    "tabBuildingInfo": "Gebäudeinfo",
+    "tabCargoInfo": "Ladung",
+    "tabTradeInfo": "Angebot, Nachfrage & Handel",
+    "tabTourismInfo": "Tourismus",
+    "tabEmploymentInfo": "Beschäftigung",
+    "action": {
+      "purchase": "Kauf",
+      "bulldoze": "Abreißen",
+      "cancelBulldoze": "Abbruch abbrechen",
+      "pause": "Pause",
+      "resume": "Weitermachen",
+      "delete": "Löschen",
+      "repair": "Reparieren",
+      "rebuild": "Wieder aufbauen",
+      "edit": "Bearbeiten",
+      "startConstruction": "Baubeginn",
+      "stopConstruction": "Konstruktion aussetzen",
+      "cancelAbandon": "Abbruch abbrechen",
+      "explode": "sprengen",
+      "explodeConfirm": "Dieses Gebäude in die Luft jagen und als Unfall inszenieren? Das Gebäude stürzt sofort ein und jeder, der darin lebt oder arbeitet, wird getötet. Die öffentliche Stimmung wird schlecht leiden, und dies kann nicht rückgängig gemacht werden.",
+      "explodeTitle": "Gebäude sprengen",
+      "explodeConfirmAction": "sprengen"
+    },
+    "pendingWarning": "Dieses Gebäude ist geplant. Bitte befehlen Sie, um mit dem Bau zu beginnen.",
+    "alerts": {
+      "diagnoseHint": "Click to diagnose the cause",
+      "title": "Warnungen",
+      "constructionShortage": {
+        "title": "Mangel an Bauservice",
+        "description": "Das Baubudget ist unzureichend, was zu Verzögerungen beim Bau führt."
+      },
+      "onFire": {
+        "title": "Brandfall!",
+        "description": "Im Gebäude ist ein Feuer ausgebrochen."
+      },
+      "accidentalFire": {
+        "title": "versehentlicher Brand (Minor)",
+        "description": "Ein unbeabsichtigter kleiner Brand wurde jedoch klein gehalten."
+      },
+      "infraDisconnected": {
+        "title": "Nicht mit dem Infrastrukturnetzwerk verbunden",
+        "description": "Es ist kein Infrastrukturpfad an das Terminal dieser Einrichtung angeschlossen. Es kann keine Lieferungen versenden oder empfangen, bis es mit dem Netzwerk verbunden ist."
+      },
+      "capacityTight": {
+        "title": "Nahe Kapazität",
+        "description": "Diese Anlage übernimmt 90% oder mehr ihrer Kapazität. Es kann kaum mehr Nachfrage befriedigen."
+      },
+      "nonconforming": {
+        "title": "entspricht nicht den Vorschriften",
+        "description": "Dieses Gebäude entspricht nicht den Bestimmungen seines Pakets. Es wird nicht repariert und wird abgerissen, sobald es sich verschlechtert."
+      },
+      "crime": {
+        "title": "Verbrechen aufgetreten",
+        "description": "In diesem Gebäude ist ein Verbrechen aufgetreten."
+      },
+      "crimeSign": {
+        "title": "Anzeichen von Kriminalität",
+        "description": "Anzeichen von Kriminalität wurden in diesem Gebäude beobachtet. Achten Sie auf eine Verschlechterung der öffentlichen Sicherheit."
+      },
+      "laborShortage": {
+        "title": "Arbeitskräftemangel",
+        "description": "Es werden nicht genügend Arbeitnehmer beschäftigt, sodass die Produktion und Dienstleistungen nicht an den Plan fallen."
+      },
+      "materialShortage": {
+        "title": "Materialmangel",
+        "description": "Die Rohstoffbeschaffung ist unzureichend, so dass die Produktion und Dienstleistungen nicht an den Plan fallen."
+      },
+      "highSkillShortage": {
+        "title": "Fachkräftemangel",
+        "description": "Es gibt nicht genügend hochqualifiziertes Personal, so dass die Produktion auf das reduziert wird, was das verfügbare Personal kann."
+      },
+      "budgetCapped": {
+        "title": "Budgetmangel",
+        "description": "Das zugewiesene Budget liegt weit unter dem erforderlichen Betrag, sodass die Operationen verkleinert wurden. Überprüfen Sie die Budgetzuweisung."
+      },
+      "facilityWarning": {
+        "title": "Öffentliche Einrichtung nicht funktionsfähig",
+        "description": "Diese Einrichtung bietet weit weniger Service als geplant. Überprüfen Sie die Arbeits- und Materialbeschaffung."
+      },
+      "sanitationWarning": {
+        "title": "Verschlechterung der Hygiene",
+        "description": "Die sanitären Einrichtungen auf dem Paket dieses Gebäudes haben sich stark verschlechtert und betreffen die Haushalte der Wohnsitze. Verbessern Sie die Versorgung mit Abwasser und Abfallbehandlung."
+      },
+      "infraWarning": {
+        "title": "Infrastruktureinrichtung gestoppt oder zusammengebrochen",
+        "description": "Diese Einrichtung hat den Betrieb eingestellt oder ist zusammengebrochen, was sich auf das Infrastrukturangebot auswirkt. Überprüfen Sie den Status und die Versorgungsverbindungen."
+      }
+    },
+    "infra": {
+      "title": "Infrastrukturverbindung",
+      "connected": "Verbunden",
+      "disconnected": "Getrennt",
+      "received": "Erhielt"
+    },
+    "tabConstructionInfo": "Bau",
+    "tabEducationInfo": "Bildung",
+    "education": {
+      "totalStudents": "Eingeschriebene Studenten",
+      "totalCapacity": "Gesamtkapazität",
+      "statusTitle": "Einschreibung",
+      "enrolled": "eingeschrieben",
+      "vacant": "Sitze öffnen",
+      "noCapacity": "Keine Kapazität",
+      "countLabel": "Graf",
+      "enrollmentBySkill": "Einschreibung nach Geschick",
+      "settingsTitle": "Zulassungsquoten",
+      "settingsHint": "Legen Sie das Zuweisungsgewicht für jede Fertigkeit fest. Die Gesamtkapazität wird proportional zu den Gewichten aufgeteilt.",
+      "skillHeader": "Qualifikation",
+      "weightHeader": "Gewicht",
+      "previewHeader": "Kapazität",
+      "save": "Speichern",
+      "saving": "Speichern ...",
+      "saveFailed": "Fehler beim Speichern",
+      "sumMustBePositive": "Die Summe der Quoten muss mindestens 1 betragen",
+      "invalidWeight": "Gewichte müssen ganze Zahlen von 0 oder mehr sein",
+      "studentsList": "Studentenliste",
+      "noStudents": "Keine Schüler",
+      "showMore": "Mehr anzeigen ({{count}})"
+    }
+  },
+  "agentList": {
+    "filterType": "Typ",
+    "filterVariant": "Variante",
+    "filterZone": "Zone",
+    "allVariants": "Alle Varianten",
+    "allZones": "Alle Zonen",
+    "resultCount": "{{count}} Ergebnisse",
+    "capped": "(von {{total}} insgesamt)",
+    "loading": "Lädt…",
+    "noResults": "Keine passenden Agenten",
+    "colStatus": "Status",
+    "colVariant": "Variante",
+    "colName": "Name",
+    "colProduct": "Produkt",
+    "colPrice": "Preis",
+    "colProduction": "Produktion",
+    "colStock": "Stock",
+    "colSold": "Verkauft",
+    "colWage": "Lohnsatz",
+    "colEmployment": "Beschäftigung",
+    "colUtilization": "Verwendung",
+    "colBdType": "Gebäudetyp",
+    "colDurability": "Haltbarkeit",
+    "colRent": "Mieten",
+    "colFloors": "Böden",
+    "colFloorArea": "Grundfläche",
+    "colOccupancy": "Besitz",
+    "colFamilyType": "Familientyp",
+    "colDiscretionaryIncome": "Verfügbares Einkommen",
+    "colSatisNutrition": "Ernährung",
+    "colSatisHealthcare": "Gesundheitswesen",
+    "colSatisLeisure": "Freizeit",
+    "colSatisResidential": "Wohn-",
+    "colAutomobile": "Auto"
+  }
+}

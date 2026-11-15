@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Información de oferta",
+    "product": "Producto ofrecido",
+    "amount": "Cantidad ofrecida",
+    "price": "Precio de venta",
+    "soldAmount": "Cantidad vendida",
+    "profitRate": "Margen de ganancia",
+    "utilization": "Utilización"
+  },
+  "tourismSupply": {
+    "title": "Recepción de turistas",
+    "touristCapacity": "Capacidad de recepción de turistas",
+    "persons": "{{value}} personas",
+    "218": {
+      "price": "Precio de entrada",
+      "amount": "Cupo de visitantes (acumulado)",
+      "soldAmount": "Visitantes (acumulado)"
+    },
+    "219": {
+      "price": "Tarifa",
+      "amount": "Cupo de pasajeros (acumulado)",
+      "soldAmount": "Pasajeros (acumulado)"
+    }
+  },
+  "demand": {
+    "product": "Producto",
+    "demandAmount": "Demanda",
+    "receivedAmount": "Cantidad obtenida",
+    "acquiredAmount": "Inventario"
+  },
+  "cargo": {
+    "title": "Operaciones de carga",
+    "description": "Este centro de comercio exterior importa mercancías desde fuera de la región para abastecer los mercados de la ciudad, y compra la producción excedente de la ciudad para exportarla.",
+    "capacity": "Capacidad de manejo",
+    "perPeriod": "/mes",
+    "perPeriod_week": "/semana",
+    "materialCapacity": "Límite por insumos recibidos",
+    "areaCapacity": "Límite por superficie",
+    "importHandled": "Volumen importado",
+    "exportHandled": "Volumen exportado",
+    "utilization": "Utilización",
+    "importSectionTitle": "Importación",
+    "exportSectionTitle": "Exportación",
+    "handledImport": "Vendido",
+    "handledExport": "Comprado",
+    "allocation": "Asignación",
+    "priceImport": "Precio de venta unitario",
+    "priceExport": "Precio de compra unitario",
+    "lost": "Ventas perdidas",
+    "noProducts": "No hay productos manejados"
+  }
+}

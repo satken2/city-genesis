@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Dalej",
+    "close": "Zamknij",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "Pierwsze kroki miasta",
+        "description": "Ukończ swój pierwszy budynek. Historia twojego miasta zaczyna się tutaj."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Miasto wypływa do morza",
+        "description": "Ukończ swoją pierwszą morską farmę wiatrową lub morską platformę naftową. Branża twojego miasta wyrusza w morze."
+      },
+      "RAIL_LINES_1": {
+        "name": "Wszystko na pokładzie!",
+        "description": "Otwórz linię kolejową"
+      },
+      "RAIL_LINES_20": {
+        "name": "Królestwo Kolejowe",
+        "description": "Obsługuj 20 linii kolejowych w jednym mieście. Ta mapa trasy to nie lada widok."
+      },
+      "BUS_LINES_1": {
+        "name": "Autobus przyjeżdża do miasta",
+        "description": "Otwórz linię autobusową"
+      },
+      "BUS_LINES_20": {
+        "name": "Wszędzie autobusem",
+        "description": "Obsługuj 20 linii autobusowych w jednym mieście"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Dojazdy nad miastem",
+        "description": "Otwórz linię jednoszynową. Zobacz znajome ulice z nieco wyżej."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Miasto na niebie",
+        "description": "Obsługuj 20 linii jednoszynowych w jednym mieście"
+      },
+      "LRT_LINES_1": {
+        "name": "Tramwaje przyjeżdżają do miasta",
+        "description": "Otwórz linię LRT"
+      },
+      "LRT_LINES_20": {
+        "name": "Miasto tramwajów",
+        "description": "Obsługuj 20 linii LRT w jednym mieście"
+      },
+      "POPULATION_10K": {
+        "name": "dom dla 10 000",
+        "description": "osiągnąć populację 10 000"
+      },
+      "POPULATION_100K": {
+        "name": "Kwitnące miasto regionalne",
+        "description": "osiągnąć populację 100 000"
+      },
+      "POPULATION_500K": {
+        "name": "Dołączanie do dużych miast",
+        "description": "osiągnąć populację 500 000"
+      },
+      "POPULATION_1M": {
+        "name": "Miliony Miasta",
+        "description": "osiągnąć populację 1 000 000. Metropolia z milionem istnień ludzkich do wsparcia."
+      },
+      "FLOORS_5": {
+        "name": "Miasto rośnie w górę",
+        "description": "Zorganizuj prywatny budynek o powierzchni 5 lub więcej pięter ukończonych"
+      },
+      "FLOORS_10": {
+        "name": "Początki wysokiego wzrostu",
+        "description": "Miej prywatny budynek o powierzchni 10 lub więcej pięter. Dzięki Bogu za windy."
+      },
+      "FLOORS_20": {
+        "name": "Skyline nabiera kształtu",
+        "description": "Zorganizuj prywatny budynek o powierzchni 20 lub więcej pięter ukończonych"
+      },
+      "FLOORS_40": {
+        "name": "Wieżowiec",
+        "description": "Miej prywatny budynek o powierzchni 40 lub więcej pięter. Nowy symbol Twojego miasta."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Przemysł dla lepszego zdrowia",
+        "description": "Niech fabryka farmaceutyczna zacznie działać w twoim mieście. Pomóż ludziom żyć zdrowiej, zaczynając tutaj."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Miasto krzemowe",
+        "description": "Niech fabryka półprzewodników zacznie działać w twoim mieście. Tiny Chips, główna branża."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Miasto precyzji",
+        "description": "Niech fabryka instrumentów precyzyjnych zacznie działać w Twoim mieście. Wiedza techniczna staje się mocną stroną Twojego miasta."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Nowy dom dla oprogramowania",
+        "description": "Niech firma programistyczna otwarta dla biznesu w Twoim mieście. Daj nowym pomysłom miejsce do rozwoju."
+      },
+      "TOURISTS_1": {
+        "name": "Witamy w naszym mieście",
+        "description": "po raz pierwszy pobyt turysty w swoim mieście"
+      },
+      "TOURISTS_1K": {
+        "name": "Miasto warte podróży",
+        "description": "Miej 1000 turystów przebywających jednocześnie w Twoim mieście"
+      },
+      "TOURISTS_10K": {
+        "name": "Świat przychodzi z wizytą",
+        "description": "Miej 10 000 turystów przebywających jednocześnie w Twoim mieście"
+      },
+      "YEARS_10": {
+        "name": "Dziesięć lat z miastem",
+        "description": "Graj przez 10 lat w jednym mieście. Przed nami jeszcze więcej budowania miasta."
+      },
+      "YEARS_100": {
+        "name": "Miasto stulecia",
+        "description": "Graj przez 100 lat w jednym mieście. Zobacz swoje miasto przez całe stulecie."
+      },
+      "YEARS_500": {
+        "name": "Miasto tworzące historię",
+        "description": "Graj przez 500 lat w jednym mieście. Pokolenia mijają, a miasto trwa."
+      },
+      "YEARS_1000": {
+        "name": "Miasto tysiącletnie",
+        "description": "Graj przez 1000 lat w jednym mieście. Zbuduj miasto o tysiącletniej historii."
+      },
+      "YEARS_10000": {
+        "name": "Wieczne Miasto",
+        "description": "Graj przez 10 000 lat w jednym mieście. To niezła kadencja, burmistrzu."
+      }
+    }
+  }
+}

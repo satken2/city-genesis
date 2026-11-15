@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Weiter",
+    "close": "Schließen",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "Die ersten Schritte einer Stadt",
+        "description": "Vervollständige dein erstes Gebäude. Die Geschichte Ihrer Stadt beginnt hier."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Eine Stadt nimmt das Meer",
+        "description": "Vervollständigen Sie Ihren ersten Offshore-Windpark oder Ihre Offshore-Ölplattform. Die Industrie Ihrer Stadt geht aufs Meer."
+      },
+      "RAIL_LINES_1": {
+        "name": "Alles an Bord!",
+        "description": "Öffnen Sie eine Eisenbahnlinie"
+      },
+      "RAIL_LINES_20": {
+        "name": "Eisenbahnreich",
+        "description": "Betreiben Sie 20 Bahnlinien in einer Stadt. Diese Routenkarte ist ein ziemlicher Anblick."
+      },
+      "BUS_LINES_1": {
+        "name": "Der Bus kommt in die Stadt",
+        "description": "Öffnen Sie eine Buslinie"
+      },
+      "BUS_LINES_20": {
+        "name": "Überall mit dem Bus",
+        "description": "Betreiben Sie 20 Buslinien in einer Stadt"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Pendeln über der Stadt",
+        "description": "Öffnen Sie eine Einschienenbahn. Sehen Sie vertraute Straßen von etwas höher."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Stadt am Himmel",
+        "description": "Betreiben Sie 20 Monorail-Linien in einer Stadt"
+      },
+      "LRT_LINES_1": {
+        "name": "Straßenbahnen kommen in die Stadt",
+        "description": "Öffnen Sie eine LRT-Leitung"
+      },
+      "LRT_LINES_20": {
+        "name": "Stadt der Straßenbahn",
+        "description": "Betreiben Sie 20 LRT-Linien in einer Stadt"
+      },
+      "POPULATION_10K": {
+        "name": "Heimat von 10.000",
+        "description": "Erreichen Sie eine Bevölkerung von 10.000"
+      },
+      "POPULATION_100K": {
+        "name": "Eine blühende Regionalstadt",
+        "description": "Erreichen Sie eine Bevölkerung von 100.000"
+      },
+      "POPULATION_500K": {
+        "name": "Beitritt zu den großen Städten",
+        "description": "eine Bevölkerung von 500.000 erreichen"
+      },
+      "POPULATION_1M": {
+        "name": "Millionen Stadt",
+        "description": "eine Bevölkerung von 1.000.000 erreichen. Eine Metropole mit einer Million Leben zu unterstützen."
+      },
+      "FLOORS_5": {
+        "name": "Eine Stadt wächst nach oben",
+        "description": "Lassen Sie ein privates Gebäude von 5 oder mehr Etagen fertigstellen"
+      },
+      "FLOORS_10": {
+        "name": "Hochhaus-Anfänge",
+        "description": "Lassen Sie ein privates Gebäude von 10 oder mehr Stockwerken fertigstellen. Gott sei Dank für Aufzüge."
+      },
+      "FLOORS_20": {
+        "name": "Eine Skyline nimmt Gestalt an",
+        "description": "Lassen Sie ein privates Gebäude von 20 oder mehr Stockwerken fertigstellen"
+      },
+      "FLOORS_40": {
+        "name": "Wolkenkratzer",
+        "description": "Lassen Sie ein privates Gebäude von 40 oder mehr Stockwerken fertigstellen. Ein neues Symbol für Ihre Stadt."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Industrie für bessere Gesundheit",
+        "description": "Lassen Sie eine pharmazeutische Fabrik in Ihrer Stadt in Betrieb gehen. Helfen Sie den Menschen, gesünder zu leben, und beginnen Sie hier."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Siliziumstadt",
+        "description": "Lassen Sie eine Halbleiterfabrik in Ihrer Stadt in Betrieb gehen. Winzige Chips, eine große Industrie."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Eine Stadt der Präzision",
+        "description": "Lassen Sie in Ihrer Stadt eine Präzisionsinstrumentenfabrik in Betrieb nehmen. Technisches Know-how wird zur Stärke Ihrer Stadt."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Ein neues Zuhause für Software",
+        "description": "Lassen Sie ein Softwareunternehmen in Ihrer Stadt für Geschäfte öffnen. Geben Sie neuen Ideen einen Ort zum Wachsen."
+      },
+      "TOURISTS_1": {
+        "name": "Willkommen in unserer Stadt",
+        "description": "Haben Sie zum ersten Mal einen touristischen Aufenthalt in Ihrer Stadt"
+      },
+      "TOURISTS_1K": {
+        "name": "Eine Stadt, die die Reise wert ist",
+        "description": "Lassen Sie 1.000 Touristen gleichzeitig in Ihrer Stadt bleiben"
+      },
+      "TOURISTS_10K": {
+        "name": "Die Welt kommt zu Besuch",
+        "description": "Lassen Sie 10.000 Touristen gleichzeitig in Ihrer Stadt bleiben"
+      },
+      "YEARS_10": {
+        "name": "Zehn Jahre mit der Stadt",
+        "description": "10 Jahre in einer Stadt spielen. Es gibt noch viel mehr Stadtbau."
+      },
+      "YEARS_100": {
+        "name": "Jahrhundert-Stadt",
+        "description": "100 Jahre in einer Stadt spielen. Sehen Sie Ihre Stadt durch ein ganzes Jahrhundert."
+      },
+      "YEARS_500": {
+        "name": "Eine Stadt, die Geschichte macht",
+        "description": "500 Jahre in einer Stadt spielen. Generationen vergehen und die Stadt geht weiter."
+      },
+      "YEARS_1000": {
+        "name": "Millennial-Stadt",
+        "description": "Spielen Sie 1.000 Jahre in einer Stadt. Baue eine Stadt mit tausend Jahren Geschichte."
+      },
+      "YEARS_10000": {
+        "name": "Ewige Stadt",
+        "description": "Spielen Sie 10.000 Jahre in einer Stadt. Das ist eine ziemliche Amtszeit, Bürgermeister."
+      }
+    }
+  }
+}

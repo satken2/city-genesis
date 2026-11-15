@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Data corrente",
+    "afterDate": "Data dopo l'esecuzione",
+    "epochCount": "Epoche",
+    "message": "finire il lavoro di questo turno e il tempo di anticipo?",
+    "no": "No",
+    "yes": "Sì",
+    "executing": "Simulazione in esecuzione...",
+    "errorSteamLimit": "Non è stato possibile confermare la verifica di Steam, quindi non è possibile eseguire più epoche. (Senza verifica, puoi giocare fino a una popolazione di {{limit}}.)",
+    "errorAlreadyRunning": "Un'altra epoca è già in esecuzione. Riprova al termine.",
+    "errorFailed": "Impossibile eseguire l'epoca: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} epoche)",
+    "sectionConstruction": "In costruzione",
+    "kindPath": "Strada",
+    "kindBuilding": "Servizio, struttura",
+    "kindProject": "Progetto",
+    "noItems": "Nessuna",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Completato",
+    "sectionStatistics": "Statistica",
+    "sectionScore": "Segnare",
+    "scoreGain": "Utile",
+    "scoreLoss": "sanzioni",
+    "questState": {
+      "completed": "raggiunto",
+      "active": "In corso",
+      "locked": "bloccato",
+      "failed": "Fallito"
+    },
+    "trendHint": "Trend nell'ultima {{count}} epoche: {{trend}}",
+    "trend": {
+      "up": "Crescente",
+      "flat": "Costante",
+      "down": "Caduta",
+      "none": "Storia insufficiente"
+    },
+    "statPopulation": "Popolazione",
+    "statTourists": "Turisti",
+    "statGdp": "PIL",
+    "statPrice": "Prezzi",
+    "statIncome": "Reddito",
+    "statUnemployment": "Disoccupazione",
+    "statHealthcare": "assistenza sanitaria",
+    "statNutrition": "Nutrizione",
+    "statLeisure": "Tempo libero",
+    "statFire": "incendi",
+    "statTraffic": "incidenti stradali",
+    "statCrime": "Crimine",
+    "questCompleted": "raggiunto!",
+    "questFailed": "Termine scaduto"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Mappatura delle vie di trasporto",
+      "prepare": "Preparare questo termine",
+      "transit": "Organizzare il trasporto pubblico",
+      "market": "Merce commerciale",
+      "production": "produrre e consumare",
+      "commute": "Andare al lavoro e a scuola",
+      "growth": "Cittadini che crescono",
+      "evaluate": "Valutare la città",
+      "immigration": "accogliere gli immigrati",
+      "labor": "in cerca di lavoro",
+      "spawn": "Apertura di nuove attività",
+      "relocate": "Spostare le famiglie",
+      "construction": "Costruire edifici",
+      "finance": "Regolamento delle finanze",
+      "plan": "Pianificazione del prossimo mandato",
+      "incident": "Rispondere agli incidenti",
+      "finalize": "Compilazione delle statistiche"
+    }
+  }
+}

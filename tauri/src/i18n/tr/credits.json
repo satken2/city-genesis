@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Bu oyun aşağıda listelenen varlıkları kullanır. Yazar adları, kaynaklar, lisans adları ve bir lisansın gerektirdiği herhangi bir ilişkilendirme metni kelimesi kelimesine çoğaltılır.",
+    "empty": "giriş yok.",
+    "requiredText": "Gerekli İlişkilendirme",
+    "categories": {
+      "bgm": "Müzik",
+      "sfx": "Ses efektleri",
+      "image": "Görüntüler ve Simgeler",
+      "font": "yazı tipleri",
+      "model": "3B Modeller",
+      "texture": "dokuma"
+    }
+  }
+}

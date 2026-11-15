@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Osservazione",
+    "tabActivity": "Attività",
+    "follow": "Segui con fotocamera",
+    "unfollow": "Smetti di seguire",
+    "track": "Aggiungi alla lista di tracciamento",
+    "trackRandom": "Tieni traccia di un cittadino a caso",
+    "noUntrackedCitizens": "Non ci sono cittadini non tracciati disponibili.",
+    "trackRandomError": "non poteva rintracciare un cittadino.",
+    "untrack": "Rimuovi dalla lista di monitoraggio",
+    "home": "Residenza",
+    "mobility": "Muoversi",
+    "mode": {
+      "automobile": "Auto",
+      "pedestrian": "passeggiate e mezzi pubblici"
+    },
+    "visits": "Destinazioni",
+    "visitKind": {
+      "home": "Casa",
+      "work": "Lavoro",
+      "school": "Scuola",
+      "shop": "Shopping"
+    },
+    "legs": {
+      "walk": "Camminare",
+      "drive": "Auto",
+      "transit": "Transito",
+      "conveyor": "Sistema di trasporto persone"
+    },
+    "trip": "Solo andata {{minutes}} min · {{route}}",
+    "noRoute": "Nessun percorso",
+    "noVisits": "non ha un posto dove andare.",
+    "status": {
+      "not_ready": "mostrato dopo l'esecuzione della simulazione.",
+      "busy": "non disponibile mentre la simulazione è in esecuzione.",
+      "no_home": "in attesa di alloggio, quindi non c'è attività registrata.",
+      "missing": "Questo cittadino non vive più in città.",
+      "error": "Impossibile caricare."
+    },
+    "empty": "Nessun cittadino viene rintracciato.",
+    "pickFailed": {
+      "not_ready": "Esegui la simulazione per fare clic su auto e pedoni e vedere chi sono.",
+      "busy": "I cittadini non possono essere mostrati mentre la simulazione è in esecuzione.",
+      "none": "Non sono riuscito a trovare chi c'è in questa macchina oa piedi.",
+      "missing": "Questo cittadino non vive più in città.",
+      "no_home": "Questo cittadino sta aspettando un alloggio.",
+      "error": "non poteva mostrare il cittadino."
+    }
+  }
+}

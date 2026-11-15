@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Dirigir",
+    "car": "Carro",
+    "rail": "Rotas ferroviárias",
+    "running": "Veículos em funcionamento",
+    "standard": "carro de passageiros",
+    "commercial": "Veículo comercial",
+    "truck": "Caminhão",
+    "finishEditing": "Termine a edição antes de iniciar uma unidade.",
+    "noLines": "Nenhuma rota de operação de trilho está disponível para pedalar.",
+    "pickRail": "Clique em uma faixa na rota selecionada.",
+    "pickRoad": "Clique em uma estrada ativa.",
+    "pickVehicle": "Clique em um carro em movimento, ônibus ou trem (arraste para a panela).",
+    "clickStart": "Selecione uma posição inicial (arrastar para panorâmica).",
+    "startSelected": "Iniciar selecionado. Parta na direção da seta.",
+    "reverse": "direção reversa",
+    "start": "Partir",
+    "back": "De volta",
+    "close": "Sair (ESC)",
+    "invalidStart": "não pode começar aqui. Selecione uma estrada dirigível ou uma pista em sua rota.",
+    "invalidVehicle": "Nenhum veículo selecionado. Clique em um carro em movimento, ônibus ou trem.",
+    "notReady": "Esta direção não está disponível ou os arredores estão sendo carregados. Mude a direção ou posição, ou aguarde e tente novamente."
+  }
+}

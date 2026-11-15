@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Bezirk #{{id}}",
+    "color": "Distriktfarbe",
+    "colorUpdateFailed": "Fehler beim Aktualisieren der Distriktfarbe",
+    "basicInfo": "Grundlegende Informationen",
+    "area": "Bereich",
+    "zonePopulation": "Wohnbevölkerung",
+    "daytimePopulation": "Tagesbevölkerung",
+    "spaceAmount": "Bodenbelegung",
+    "slotStarvationTitle": "Warteende Mieter können nicht untergebracht werden",
+    "slotStarvationWarning": "\"{{tenant}}\" benötigt mindestens {{required}} m2 Nutzfläche in einem einzigen Gebäude, aber das größte Baugebiet in diesem Bezirk ist {{max}} m2. Stellen Sie ein größeres Paket bereit.",
+    "restrictions": "Bauvorschriften",
+    "restrictionUpdateFailed": "Fehler beim Aktualisieren der Bezirksbestimmungen",
+    "restrictionRequired": "Abdeckungsverhältnis, Volumenverhältnis und Höhe können nicht leer sein",
+    "mergeConfirm": "Füge \"{{source}}\" in \"{{target}}\" zusammen. Der Quellbezirk verschwindet zusammen mit seinen Regulierungseinstellungen.",
+    "mergeAction": "Verschmelzen",
+    "mergeFailed": "Distrikte konnten nicht zusammengeführt werden (Distrikte, die nicht angrenzend sind, können nicht zusammengeführt werden)",
+    "mergeNoRequest": "Kein Distrikt zum Zusammenführen ausgewählt",
+    "edit": {
+      "toolHeading": "Operation",
+      "toolCreate": "Neues Viertel schaffen",
+      "toolExpand": "Bezirk erweitern",
+      "toolExpandZone": "{{name}} erweitern",
+      "modeHeading": "Auswahlmethode",
+      "modeBlock": "Ganzer Block",
+      "modeRoad": "Straßenseite",
+      "hint": {
+        "create": {
+          "block": "Halten Sie Strg gedrückt und ziehen Sie über von Straßen umgebene Blöcke. Die bemalten Blöcke mit ihren Paketen werden zu einem neuen Bezirk. Zum Schwenken ziehen, zu Zoom scrollen.",
+          "road": "Halten Sie die Strg-Taste gedrückt und ziehen Sie über eine Seite einer Straße (die Hälfte der Straße oder die Parzellen dahinter). Diese Seite der Straße mit ihren Paketen wird zu einem neuen Bezirk. Zum Schwenken ziehen, zu Zoom scrollen."
+        },
+        "expand": {
+          "block": "Bewegen Sie den Mauszeiger über einen Bezirk, halten Sie dann die Strg-Taste und ziehen Sie über Blöcke, um sie mit ihren Paketen zu diesem Bezirk hinzuzufügen. Zum Schwenken ziehen, zu Zoom scrollen.",
+          "road": "Bewegen Sie den Mauszeiger über einen Bezirk, halten Sie dann die Strg-Taste gedrückt und ziehen Sie über eine Seite einer Straße (die Hälfte der Straße oder die Parzellen dahinter), um diese Seite mit ihren Parzellen zu diesem Bezirk hinzuzufügen. Zum Schwenken ziehen, zu Zoom scrollen."
+        }
+      },
+      "failed": "konnte den Bezirk nicht ändern."
+    }
+  }
+}

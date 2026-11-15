@@ -1,0 +1,752 @@
+{
+  "tutorial": {
+    "startButton": "Start",
+    "controls": {
+      "title": "Grundlegende Steuerelemente",
+      "description": "Lernen Sie Ihre Ziele als Bürgermeister und wie Sie vor der Zeit planen. Nachdem Sie untersucht haben, was die Informationen der Stadt bedeuten, was jeder Knopf bewirkt und wie Sie die Kamera bewegen, verlängern Sie eine Straße, um ein neues Wohngebiet zu schaffen und sie mit Häusern, Strom und Wasser zu versorgen.",
+      "step1": {
+        "title": "Baue eine Stadt als Bürgermeister",
+        "role": "In City Genesis wächst eine Stadt als Bürgermeister. Sie planen Straßen und Einrichtungen, entscheiden, wie Land genutzt wird, legen Steuern fest und weisen Geld für öffentliche Dienstleistungen auf. Ihre Aufgabe ist es, die Bedingungen zu schaffen, die Anwohner und Unternehmen unterstützen. Drücken Sie „Weiter“, um fortzufahren.",
+        "goal": "Zielen Sie auf eine Stadt, in der die Bewohner bequem und sicher leben können. Bereitstellung von Häusern und Arbeitsplätzen, Strom, Wasser und Gesundheitswesen. Das Wachstum der Stadt kostet auch Geld. Berücksichtigen Sie das Leben der Menschen und die Finanzen der Stadt, wenn Sie entscheiden, was verbessert werden soll.",
+        "epoch": "Die Zeit verläuft jeweils einen Monat. Legen Sie zuerst Budgets und Baupläne fest und drücken Sie dann „Start“, wenn Sie bereit sind. Bau und Aktivitäten der Bewohner und Unternehmen schreiten voran; Überprüfen Sie die Ergebnisse, bevor Sie Ihre nächsten Pläne machen. Das Datum bleibt bis zum Start still. Nehmen Sie sich also Zeit.",
+        "epoch_week": "Die Zeit verläuft jeweils eine Woche. Legen Sie zuerst Budgets und Baupläne fest und drücken Sie dann „Start“, wenn Sie bereit sind. Bau und Aktivitäten der Bewohner und Unternehmen schreiten voran; Überprüfen Sie die Ergebnisse, bevor Sie Ihre nächsten Pläne machen. Das Datum bleibt bis zum Start still. Nehmen Sie sich also Zeit."
+      },
+      "step2": {
+        "title": "Lesen Sie die Stadt aus dem Cockpit",
+        "tools": "Das Cockpit am unteren Bildschirmrand hilft Ihnen, die Stadt zu überprüfen und zu entscheiden, was als nächstes zu tun ist. „Ansicht“ verwendet Farben, um Mangel und Problembereiche zu finden. „Map“ zeigt, wo sich Orte in der ganzen Stadt befinden, und hilft Ihnen, Ihren Weg zu finden, wenn er wächst.",
+        "tracking": "Mit \"Bürgerliste\" können Sie die Bewohner nach Namen finden und die Bewohner, die Sie erneut besuchen möchten. Fügen Sie jemanden zu Tracking aus seinen Bürgerdetails hinzu und verwenden Sie diese Schaltfläche, um zu seinen Informationen zurückzukehren und zu pendeln. Entdecken Sie individuelle Leben hinter den stadtweiten Figuren.",
+        "bulldozer": "„Bulldozer“ entfernt leere Parzellen und storniert geplante Gebäude und Straßen. Drücken Sie die Schaltfläche und klicken Sie in der 3D-Ansicht auf ein Ziel. Drücken Sie es erneut, um den Modus zu verlassen. Um ein fertiggestelltes Gebäude oder eine fertiggestellte Straße zu entfernen, öffnen Sie die Details und wählen Sie Abriss.",
+        "services": "Die Blitz- und Wassertropfenanzeigen zeigen, wie viel Platz Ihre Strom- und Wasserversorgung wachsen muss. Wenn sie sich füllen, nähert sich die Nachfrage der Kapazität. Klicken Sie darauf, um die öffentlichen Einrichtungen zu überprüfen, und prüfen Sie, ob Sie mehr Versorgung benötigen, bevor Sie die Stadt erweitern.",
+        "score": "„Score“ fasst zusammen, wie zufrieden die Einwohner mit dem Leben in Ihrer Stadt sind. höher ist besser. Häuser, Arbeitsplätze, Gesundheitsversorgung und ein angenehmes Wohnumfeld tragen dazu bei, es zu verbessern. Wenn es fällt, achten Sie auf die Schwierigkeiten, mit denen die Bewohner konfrontiert sind.",
+        "budget": "\"Budget\" zeigt die erwarteten Ausgaben des nächsten Monats im Verhältnis zum Einkommen des letzten Monats. Wenn das Messgerät nach rechts schwingt, übersteigen die Ausgaben das Einkommen. Umgekehrt, wenn es nach links schwingt, haben Sie Geld übrig. Überprüfen Sie es, bevor Sie die Zeit verlängern.",
+        "budget_week": "\"Budget\" zeigt die erwarteten Ausgaben der nächsten Woche im Verhältnis zum Einkommen der letzten Woche. Wenn das Messgerät nach rechts schwingt, übersteigen die Ausgaben das Einkommen. Umgekehrt, wenn es nach links schwingt, haben Sie Geld übrig. Überprüfen Sie es, bevor Sie die Zeit verlängern.",
+        "budgetChanges": "Mehr Bau, höherer Anlagenbetrieb und schnellere Bauweise erhöhen das benötigte Geld und erhöhen die Budgetanzeige. Ein geringerer Betrieb oder eine langsamere Konstruktion können die erwarteten Kosten senken. Wenn die Steuereinnahmen steigen, sinkt das Messgerät, auch wenn die Ausgaben gleich bleiben.",
+        "budgetPlanning": "Eine niedrige Spur bedeutet, dass Sie Geld für die Stadt zur Verfügung haben. Erwägen Sie, in fehlende Dienstleistungen oder Einrichtungen zu investieren, die Sie bald benötigen.",
+        "date": "Das Datum zeigt an, wie weit die Zeit der Stadt fortgeschritten ist. Verwenden Sie es, um den Baufortschritt und die saisonalen Änderungen zu verfolgen. Es bleibt während der Planung und Aktualisierung still, wenn Sie die Zeit mit \"Start\" fortfahren.",
+        "climate": "Die Temperatur, der Niederschlag, das Sonnenlicht und das Windpaneel zeigen das durchschnittliche Klima dieses Monats. Diese Bedingungen wirken sich auf die Landwirtschaft, Windkraft und Solarenergie aus. Wenn die Ernte oder die Stromerzeugung gering sind, überprüfen Sie auch das Klima.",
+        "climate_week": "Die Temperatur, der Niederschlag, das Sonnenlicht und das Windpaneel zeigen das Durchschnittsklima dieser Woche. Diese Bedingungen wirken sich auf die Landwirtschaft, Windkraft und Solarenergie aus. Wenn die Ernte oder die Stromerzeugung gering sind, überprüfen Sie auch das Klima.",
+        "climateEffects": "Schwaches Sonnenlicht reduziert die Sonnenleistung und schwacher Wind die Windleistung. Temperatur und Niederschlag wirken sich ebenfalls auf die Landwirtschaft aus. Klicken Sie auf das Klimafeld, um zu sehen, wie sich die Bedingungen dieses Monats auf die Produktionseffizienz der einzelnen Anlagen auswirken. Planen Sie Einrichtungen mit saisonalen Änderungen der Versorgung.",
+        "climateEffects_week": "Schwaches Sonnenlicht reduziert die Sonnenleistung und schwacher Wind die Windleistung. Temperatur und Niederschlag wirken sich ebenfalls auf die Landwirtschaft aus. Klicken Sie auf das Klima-Panel, um zu sehen, wie sich die Bedingungen dieser Woche auf die Produktionseffizienz jeder Anlage auswirken. Planen Sie Einrichtungen mit saisonalen Änderungen der Versorgung.",
+        "notifications": "Die Nummer in „Benachrichtigungen“ zählt Warnungen und Warnungen zu überprüfen. Eine rote Zahl und eine blinkende Taste bedeuten, dass die Stadtfunktionen gestört werden und sofortige Aufmerksamkeit benötigt wird. Gelbe Zahlen weisen auf Vorsichtsmaßnahmen hin, wie z. B. die Vorbereitung auf das Wachstum oder Probleme, deren Verbesserung einige Zeit in Anspruch nimmt. Drücken Sie die Taste, um sie zu lesen.",
+        "notificationActions": "Wenn eine Benachrichtigung eine Einrichtung oder einen Bezirk identifiziert, klicken Sie auf die Zeile, um sie zu überprüfen. Reagieren Sie auf die Ursache: Schließen Sie fehlende Stromleitungen an oder arrangieren Sie die Versorgung für eine Einrichtung ohne Material. Hinweise zu laufenden Problemen verschwinden, wenn ihre Ursache gelöst ist. Überprüfen Sie nach dem Eingreifen die Ergebnisse des nächsten Monats."
+      },
+      "step3": {
+        "title": "Ändern Sie die Ansicht, um Probleme zu finden",
+        "open": "Stromknappheit und Verkehrsstaus können vom Erscheinungsbild der Stadt schwer zu erkennen sein. Verwenden Sie „Ansicht“, um die Informationen auf der Karte anzuzeigen. Drücken Sie im Cockpit „Ansicht“, um das Bedienfeld zu öffnen.",
+        "tabs": "Auf den vertikalen Registerkarten können Sie auswählen, was Sie überprüfen möchten, z. B. Gebäude, Straßen, Parzellen oder Bezirke. Sie können auch unerwünschte Objekte ausblenden, wenn sich die Information überlappt, die Ansicht schwer lesbar ist. Drücken Sie „Weiter“, um die Anzeigeoptionen zu erkunden.",
+        "modes": "Die Schaltflächen in jeder Registerkarte wählen aus, welche Informationen die Objekte färben. Finde belebte Straßen oder unruhige Gebäude und verwende sie als Hinweise für deine nächste Aktion. Klicken Sie in der 3D-Ansicht auf ein Objekt, um es weiter zu überprüfen. Drücken Sie \"Weiter\"."
+      },
+      "step4": {
+        "title": "Entdecken Sie Ihre Werkzeuge zum Stadtbau",
+        "grading": "Lassen Sie uns die Schaltflächen links von oben nach unten erkunden. „Earthworks“ ebnet die Steigungen für den Bau oder die Rückgewinnung von Land aus dem Meer. Es schafft Raum für Wachstum, wenn Sie mehr Häuser oder Arbeitsplätze benötigen, aber zu wenig nutzbares Land haben.",
+        "road": "„Straße, Bahn & Infrastruktur“ schafft Wege für Menschen, Güter, Strom und Wasser. Verbinden Sie Häuser und Arbeitsplätze mit Straßen, verbinden Sie entfernte Orte mit der Schiene und verbinden Sie Einrichtungen mit Stromleitungen und Rohren. Diese Netzwerke unterstützen Reise-, Handels- und Versorgungsbedarf.",
+        "land": "„Land Parzellen“ bereitet Baustellen für Gebäude vor. Leeres Land allein ist keine Baustelle. Mehr Häuser und große Einrichtungen brauchen Standorte mit genügend Platz für sie.",
+        "landDevelopment": "Pakete bieten Raum für den Stadtbau und für die Entwicklung von Privathäusern und Unternehmen. Private Gebäude wachsen nach Bedarf und Bezirksbauordnung. Wenn Sie mehr Häuser oder Jobs wünschen, überprüfen Sie, ob genügend freie Pakete verfügbar sind.",
+        "district": "Mit „Distrikt“ können Sie Teile der Stadt mit unterschiedlichen Prioritäten verwalten, wie zum Beispiel Wohnviertel oder Industriegebiet. Jeder Bezirk kann die zulässigen Gebäudetypen einschränken und der gesamten Nachbarschaft eine geeignete Richtung für die Entwicklung geben.",
+        "districtRules": "Mit den Bezirksdetails können Sie auswählen, welche Gebäudetypen zulässig sind. Verwenden Sie sie entsprechend der Art von Stadt, die Sie anbauen möchten, z. B. Fabriken aus einer Wohngegend herauszuhalten. Sie können auch die Bevölkerungs- und Lebensbedingungen zwischen den Bezirken vergleichen, um zu entscheiden, wo Unterstützung benötigt wird.",
+        "construction": "\"Bau\" plant Gebäude, die die Stadt braucht. Sie können Häuser, Arbeitsplätze, Krankenhäuser, Schulen und Kraftwerke bauen. Verwenden Sie es, um mehr Wohnraum und Arbeitsplätze zu schaffen oder Lücken in den Bereichen Gesundheitswesen, Bildung, Elektrizität und andere Dienstleistungen zu schließen.",
+        "transport": "„Öffentlicher Verkehr“ hilft den Anwohnern, mit dem Bus oder der Bahn zu reisen. Sie können Routen und Stopps festlegen und Tarife und Serviceintervalle anpassen. Die Verknüpfung von Häusern mit Arbeitsplätzen und Schulen trägt dazu bei, die Pendelbelastung zu verringern.",
+        "propPlacement": "\"Prop Placement\" fügt Bäume, Felsen und andere Landschaften hinzu. Verwenden Sie es, um den Straßen Grün zu verleihen oder das Gelände zu dekorieren.",
+        "cityDevelopment": "„Automatic City Development“ plant sofort Straßen und Grundstücke über ein weites Gebiet. Malen Sie den Bereich, den Sie entwickeln möchten, auf der Karte und wählen Sie ein Straßenlayout, um Straßen und Parzellen auf einmal vorzubereiten. Verwenden Sie es, wenn Sie ein neues Wohngebiet oder eine neue Stadt von Grund auf neu eröffnen.",
+        "constructionProjects": "„Bauprojekte“ sammelt geplante und laufende Arbeiten an einem Ort. Überprüfen Sie den Fortschritt und die Kosten, um zu entscheiden, welche Fortschritte zu erzielen sind.",
+        "regulation": "„Regulierungen“ legt Regeln für das Leben und Arbeiten in der Stadt fest, einschließlich Geschwindigkeitsbegrenzungen, Arbeitszeiten, Einwanderung und soziale Sicherheit. Passen Sie sie an Ihre Prioritäten an, um Sicherheit, Zeit für das Leben und das Wachstum der Stadt zu genießen.",
+        "stat": "„Statistiken“ helfen Ihnen bei der Bewertung Ihrer Entscheidungen. Diagramme zeigen Veränderungen in der Bevölkerung, dem Einkommen, dem Pendelverkehr, der Zufriedenheit der Bewohner und der Größe der Wirtschaft und der Preise. Überprüfen Sie nach dem Ändern von Richtlinien oder Einrichtungen, ob sich das Leben verbessert und was noch fehlt. Das vervollständigt die Schaltflächen auf der linken Seite."
+      },
+      "step5": {
+        "title": "Führen Sie Ihre Pläne aus und überprüfen Sie die Ergebnisse",
+        "flow": "Nachdem Sie die Stadt überprüft und die Konstruktion und Budgets geplant haben, verwenden Sie „Start“ im Cockpit, um die Zeit voranzutreiben. Die Arbeit verläuft, die Bewohner arbeiten, die Unternehmen produzieren und die Finanzen und die Ergebnisse ändern sich. Einige Pläne benötigen mehrere Monate, um ihre Auswirkungen zu zeigen.",
+        "execute": "Überprüfen Sie die Ergebnisse und Hinweise, nachdem Sie die Zeit verschoben haben. Beheben Sie Probleme in Ihren nächsten Plänen und fahren Sie dann wieder vor. Wachsen Sie die Stadt, indem Sie „Plan, Fortschritt, Überprüfung“ wiederholen. Hier müssen Sie nicht „Start“ drücken. Drücken Sie „Weiter“, um die Kamerasteuerungen zu erlernen."
+      },
+      "step6": {
+        "title": "Bewegen Sie die Kamera",
+        "description": "Sie können die Kamera wie folgt bewegen: Mit der linken Taste ziehen, um die Ansicht zu verschieben, mit der rechten Taste zum Drehen, mit A/S/D (oder den Pfeiltasten) zu bewegen, Q/E zu drehen, R/F, um die Höhe zu ändern, und das Mausrad zum Zoomen. Probieren Sie es frei aus und drücken Sie dann \"Weiter\"."
+      },
+      "step7": {
+        "title": "Fliegenmodus und Kinomodus",
+        "description": "Die Kamera verfügt über zwei spezielle Modi. \"Fly-Modus\" beginnt mit Umschalt + F: Bewegen Sie sich mit W / A / S / D entlang Ihrer Ansicht, schauen Sie sich mit der Maus um und gehen Sie mit R / F nach oben oder unten. Drücken Sie ESC, um es zu verlassen. \"Cinema-Modus\" startet über die Schaltfläche in der oberen linken Ecke des Bildschirms und lässt Sie um die Stadt kreisen. Schauen Sie sich mit der Maus um; Shift schaltet zwischen Umlauf und Reisen um, Pausen, Rücktasten und ESC-Ausgänge. Die Bildschirmfelder werden ausgeblendet, während der Modus eingeschaltet ist, und kommen beim Drücken von ESC wieder. Wenn Sie sie ausprobiert haben, verlassen Sie beide Modi und drücken Sie \"Weiter\"."
+      },
+      "step8": {
+        "title": "Siehe die Stadtgrenze",
+        "description": "Wir haben die Kamera an den östlichen Rand der Stadt gebracht. Der Bereich, den Sie als Stadt verwenden können, ist dieses Rechteck, in dem detailliertes Gelände vorhanden ist und die Kamera es auch nicht verlassen kann. Das ist alles für den Bildschirm und die Steuerelemente. Als nächstes schaffen wir tatsächlich ein neues Wohngebiet. Drücken Sie \"Weiter\"."
+      },
+      "step9": {
+        "title": "Verlängern Sie die Straße",
+        "description": "Lassen Sie uns nun ein Wohngebiet bauen, um neue Bewohner willkommen zu heißen. Häuser und Arbeitsplätze sind nicht nutzbar, es sei denn, Straßen verbinden sie: Menschen können nicht kommen und gehen, und Waren können nicht ankommen. Verlängern Sie zunächst die Ost-West-Straße der Stadt nach Westen, um einen Weg in die neue Nachbarschaft zu eröffnen. Drücken Sie auf der Symbolleiste auf „Straße, Rail & Infrastructure“, um das Baufeld zu öffnen."
+      },
+      "step10": {
+        "title": "Vervollständige die Straße",
+        "description": "Die Straße ist noch „Bauplan geplant“. Eine geplante Straße kann noch nicht befahren werden - Menschen und Autos können sie erst benutzen, wenn die Arbeit abgeschlossen ist. Drücken Sie im Cockpit 2–3 Mal auf „Start“, um die Zeit zu verschieben und zu warten, bis sie abgeschlossen ist. Der Bau kostet jeden Monat Geld, während es unterwegs ist.",
+        "description_week": "Die Straße ist noch „Bauplan geplant“. Eine geplante Straße kann noch nicht befahren werden - Menschen und Autos können sie erst benutzen, wenn die Arbeit abgeschlossen ist. Drücken Sie im Cockpit 2–3 Mal auf „Start“, um die Zeit zu verschieben und zu warten, bis sie abgeschlossen ist. Der Bau kostet jede Woche Geld, während es unterwegs ist."
+      },
+      "step11": {
+        "title": "Pakete erstellen",
+        "description": "Die Straße ist bereit. Als nächstes bereiten Sie Pakete als Baustellen vor. Gebäude können nur auf Paketen stehen, und ein Paket gegenüber einer Straße lässt Menschen und Waren kommen und gehen. Drücken Sie auf dem Symbolfeld auf „Land Parzellen“.",
+        "create": "Vergewissern Sie sich, dass „Längsstraße erstellen“ ausgewählt ist, und klicken Sie dann in der 3D-Ansicht auf die Straße, die Sie verlängert haben. Wenn rote Konturen entlang der Straße ausgerichtet sind, bestätigen Sie die Pakete."
+      },
+      "step12": {
+        "title": "Erstellen Sie einen Bezirk",
+        "description": "Entscheiden Sie vor dem Bau, was diese Straße werden soll. Ohne einen Plan könnte eine Fabrik direkt neben den Häusern hochfahren. Solche Pläne werden pro \"Bezirk\" gemacht. Bezirke sind Straße für Straße zugewiesen, und ein Grundstück gehört zum Bezirk der Straße, der es gegenübersteht. Drücken Sie auf der Symbolleiste auf „Distrikt“, um das Fenster „Distrikte bearbeiten“ zu öffnen: Im Moment ist die ganze Stadt ein einziger Bezirk.",
+        "create": "Verwenden Sie die Bürste „Straßenseite“. Schalten Sie das Tool auf „Neuen Bezirk erstellen“, halten Sie die Strg-Taste gedrückt und ziehen Sie die Straße entlang, die Sie verlängert haben. Beide Seiten der Straße, die Sie malen, und die ihnen zugewandten Parzellen werden zu einem neuen Bezirk."
+      },
+      "step13": {
+        "title": "Bezirk erstellt",
+        "description": "Sie haben die neue Straße vom Stadtzentrum als eigener Bezirk getrennt. Sie können die Bevölkerung und Preise pro Bezirk überprüfen und entscheiden, welche Gebäude dort gebaut werden können, damit jedes Gebiet so wachsen kann, wie es ihm passt. Sobald Sie es überprüft haben, schließen Sie das Fenster \"Distrikte bearbeiten\"."
+      },
+      "step14": {
+        "title": "Öffnen Sie die Bezirksdetails",
+        "description": "Machen wir den neuen Bezirk zu einem Wohngebiet. Zeigen Sie die Bezirke mit dem Symbol unten links auf dem Bildschirm an und klicken Sie dann auf das Etikett des gerade erstellten Bezirks, um seine Details zu öffnen."
+      },
+      "step15": {
+        "title": "Machen Sie es Wohnen",
+        "description": "Die Bauvorschriften am unteren Rand der Tafel wählen aus, welche Gebäude auf den Paketen dieses Bezirks gebaut werden dürfen. Wir wollen einen ruhigen Ort, an dem wir hier wohnen können. Klicken Sie also auf jedes Gebäude als „Wohnung“ und „Haus“, um sie zu deaktivieren."
+      },
+      "step16": {
+        "title": "Überprüfen Sie ein Paket",
+        "description": "Für jedes darin enthaltene Paket gelten die Bestimmungen eines Bezirks. Klicken Sie auf das Paket mit dem gelben Marker, um seine Details zu öffnen."
+      },
+      "step17": {
+        "title": "Regulierung angewendet",
+        "description": "Am unteren Rand des Paketpaneels können Sie die Bezirksverordnung sehen, die nur „Wohnung“ und „Haus“ zulässt. Jetzt können nur Häuser auf dieser Straße gebaut werden. Anstatt Pakete nacheinander zu setzen, folgt die Entscheidung der Richtung eines Bezirks der ganzen Straße."
+      },
+      "step18": {
+        "title": "Häuser bauen",
+        "description": "Lassen Sie uns jetzt Häuser zur Verfügung stellen. Wohnen wird normalerweise automatisch vom privaten Sektor gebaut, wenn die Menschen hier leben wollen, aber öffentliche Wohnungen, die von der Stadt gebaut werden, machen einen Mangel schnell wett. Lassen Sie uns hier ein öffentliches Apartmentgebäude bauen. Drücken Sie auf dem Symbolfeld auf „Konstruktion“.",
+        "select": "Wählen Sie in der Kategorie „Wohnen“ die Option „Wohnungskomplex“, klicken Sie auf ein Paket im neuen Bezirk als Website und bestätigen Sie."
+      },
+      "step19": {
+        "title": "Vervollständige die Häuser",
+        "description": "Wie Straßen können Gebäude nicht bewohnt werden, nur weil sie geplant sind. Die Fertigstellung eines Wohnhauses dauert mehr als ein halbes Jahr. Drücken Sie „Start“, um die Zeit zu verschieben und zu warten, bis sie abgeschlossen ist."
+      },
+      "step20": {
+        "title": "Auf Strom prüfen",
+        "description": "Häuser allein machen kein Leben: Menschen brauchen auch Strom und Wasser. Diese Stadt hat noch kein Kraftwerk und keine Wasserversorgung. Klicken Sie auf das Apartmenthaus mit der gelben Markierung, in der die Stadtbewohner wohnen, um ihre Details zu öffnen, wählen Sie einen der Mieter auf der Registerkarte „Gebäudeinformationen“ aus und öffnen Sie dann die Registerkarte „Supply, Demand & Trade“: Sie können bestätigen, dass die erworbene Strommenge 0 ist."
+      },
+      "step21": {
+        "title": "Bauen Sie ein Solarkraftwerk",
+        "description": "Um Strom zu liefern, benötigen Sie zunächst ein Kraftwerk, um ihn zu erzeugen. Bauen Sie mit dem gelben Marker ein „Sonnenkraftwerk“ auf dem Paket. Es würde normalerweise einige Zeit dauern, bis dies ein Tutorial ist, wird die Bauzeit übersprungen."
+      },
+      "step22": {
+        "title": "Bauen Sie eine Umspannstation",
+        "description": "Der Hochspannungsstrom aus einem Kraftwerk kann von den Haushalten nicht so genutzt werden. Ein Umspannwerk wandelt es in Energiehäuser um, die es nutzen und an die umliegenden Gebäude verteilen können, die über die Straße verbunden sind. Bauen Sie auf dem Paket eine „elektrische Umspannstation“ mit der gelben Markierung in der Nähe des Wohnhauses."
+      },
+      "step23": {
+        "title": "Verbinden Sie sich mit einer Stromleitung",
+        "description": "Auch wenn Kraftwerk und Umspannwerk getrennt sind, verbindet sie eine Route für den Strom. Öffnen Sie auf dem Symbolfeld „Straße, Schiene & Infrastruktur“, wählen Sie unter „Strom“ die Option „Stromübertragungsleitung“ und ziehen Sie eine Linie vom Anschlussterminal der Solaranlage zum Terminal des Umspannwerks. Eine gerade Linie zwischen den Terminals macht es in einem Zug."
+      },
+      "step24": {
+        "title": "Bestätigen Sie die Stromversorgung",
+        "description": "Stellen Sie nach dem Anschluss sicher, dass der Strom wirklich fließt. Drücken Sie auf „Start“, um die Zeit zu verschieben, klicken Sie auf die Unterstation, um ihre Details zu öffnen, und überprüfen Sie auf der Registerkarte „Angebot, Nachfrage und Handel“, ob die empfangene Menge an Hochspannungsstrom nicht 0 ist."
+      },
+      "step25": {
+        "title": "Macht erreicht Häuser",
+        "description": "Öffnen Sie anhand der Details des Apartmentgebäudes die Registerkarte „Supply, Demand & Trade“ eines Mieters, wie Sie es zuerst getan haben, und überprüfen Sie, ob die erworbene Strommenge nicht mehr 0 ist. Es kann noch ein oder zwei Monate dauern, bis die Haushalte erreicht sind. Erzeugen Sie es in einem Kraftwerk, tragen Sie es über Stromleitungen, verteilen Sie es von einem Umspannwerk - nur wenn alle drei angeschlossen sind, erreicht der Strom die Häuser."
+      },
+      "step26": {
+        "title": "Finden Sie eine Wasserquelle",
+        "description": "Als nächstes kommt Wasser. Leitungswasser wird gepumpt und in die Stadt geschickt. Finden Sie zuerst heraus, wo Wasser gepumpt werden kann. Drücken Sie im Cockpit auf „Ansicht“, um das Ansichtsfenster zu öffnen.",
+        "show": "Wählen Sie auf den vertikalen Registerkarten \"Natürliche Ressourcen\" und wechseln Sie in \"Visible\". Wasserquellen erscheinen in hellblau auf der Karte. Klicken Sie auf die Wasserquelle mit der gelben Markierung, um ihre Details zu öffnen."
+      },
+      "step27": {
+        "title": "Bauen Sie eine Grundwasserpumpe",
+        "description": "Eine Grundwasserpumpe saugt Wasser aus dem Untergrund auf, so dass es dort gebaut werden muss, wo sich eine Wasserquelle befindet. Es braucht auch Strom und Arbeiter, um zu rennen, weshalb wir zuerst die Macht gebracht haben. Bauen Sie auf dem Paket eine „Grundwasserbrunnenpumpe“ mit dem gelben Marker oben auf der Wasserquelle. Da dies ein Tutorial ist, wird die Bauzeit übersprungen."
+      },
+      "step28": {
+        "title": "Bauen Sie eine Wasserpumpstation",
+        "description": "Gepumptes Wasser kann nicht so wie es ist an Haushalte übergeben. So wie ein Umspannwerk Strom verteilt, liefert eine Wasserpumpstation Wasser an die umliegenden Gebäude, die über die Straße verbunden sind. Bauen Sie auf dem Paket eine „Wasserpumpstation“ mit dem gelben Marker in der Nähe des Wohnhauses."
+      },
+      "step29": {
+        "title": "Verbinden Sie sich mit einem Rohr",
+        "description": "Sie benötigen ein Rohr, um das Wasser von der Grundwasserpumpe zur Pumpstation zu transportieren. Öffnen Sie auf der Icon Panel „Straße, Bahn & Infrastruktur“, wählen Sie unter „Wasser“ die Option „Wasserwasserleitung“ und legen Sie diese vom Anschluss der Grundwasserpumpe zum Terminal der Pumpstation. Um es von den Straßen und der Stromleitung fernzuhalten, machen Sie einen breiten Umweg um die Ostseite."
+      },
+      "step30": {
+        "title": "Bestätigen Sie die Wasserversorgung",
+        "description": "Drücken Sie auf „Start“, um die Zeit zu verschieben, klicken Sie auf die Wasserpumpstation, um ihre Details zu öffnen, und überprüfen Sie auf der Registerkarte „Angebot, Nachfrage und Handel“, ob die empfangene Menge an Hochdruckwasser nicht 0 ist. ankommen"
+      },
+      "step31": {
+        "title": "Die Grundlagen sind vorhanden",
+        "description": "Wasser hat die Pumpstation erreicht, so dass Häuser um sie herum Leitungswasser verwenden können. Verlegen Sie Straßen, bereiten Sie Parzellen vor, entscheiden Sie die Richtung jedes Bezirks, bauen Sie Häuser und bringen Sie Strom und Wasser ein - das ist der grundlegende Fluss des Stadtgebäudes. Drücken Sie „Weiter“, um das Tutorial für grundlegende Steuerelemente zu beenden."
+      }
+    },
+    "scenario4": {
+      "title": "Baue eine Eisenbahn",
+      "description": "Wir wollen das Wohngebiet und die Arbeitsplätze mit der Bahn verbinden, aber private Gebäude und ein öffentliches Krankenhaus behindern die Strecke. In diesem Tutorial lernen Sie Landerwerb, Abriss der öffentlichen Einrichtung, erhöhte Strecke über Straßen, Plattformen und Stationen, ein Depot, Kurven- und Gradanpassung, Stromanschluss und das Öffnen eines Dienstes.",
+      "step1": {
+        "title": "erhöhte Plattformen legen",
+        "description": "Offene Straßen, Bahn & Infrastruktur → Eisenbahnen. Bauen Sie die hochklassigen erhöhten Seitenplattformen auf der Westseite der Stadt und die zweigleisigen Seitenplattformen auf der Ostseite. Klicken Sie mit der linken Maustaste auf beide markierten Endpunkte bei 6 m, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann.",
+        "open": "Offene Straßen, Bahn & Infrastruktur → Eisenbahnen. Bauen Sie die hochklassigen erhöhten Seitenplattformen auf der Westseite der Stadt und die zweigleisigen Seitenplattformen auf der Ostseite. Klicken Sie mit der linken Maustaste auf beide markierten Endpunkte bei 6 m, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann.",
+        "variant": "Offene Straßen, Bahn & Infrastruktur → Eisenbahnen. Bauen Sie die hochklassigen erhöhten Seitenplattformen auf der Westseite der Stadt und die zweigleisigen Seitenplattformen auf der Ostseite. Klicken Sie mit der linken Maustaste auf beide markierten Endpunkte bei 6 m, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann.",
+        "start": "Offene Straßen, Bahn & Infrastruktur → Eisenbahnen. Bauen Sie die hochklassigen erhöhten Seitenplattformen auf der Westseite der Stadt und die zweigleisigen Seitenplattformen auf der Ostseite. Klicken Sie mit der linken Maustaste auf beide markierten Endpunkte bei 6 m, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann.",
+        "end": "Offene Straßen, Bahn & Infrastruktur → Eisenbahnen. Bauen Sie die hochklassigen erhöhten Seitenplattformen auf der Westseite der Stadt und die zweigleisigen Seitenplattformen auf der Ostseite. Klicken Sie mit der linken Maustaste auf beide markierten Endpunkte bei 6 m, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann.",
+        "confirm": "Offene Straßen, Bahn & Infrastruktur → Eisenbahnen. Bauen Sie die hochklassigen erhöhten Seitenplattformen auf der Westseite der Stadt und die zweigleisigen Seitenplattformen auf der Ostseite. Klicken Sie mit der linken Maustaste auf beide markierten Endpunkte bei 6 m, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann.",
+        "town": "Bauen Sie die westlichen hochwertig erhöhten Seitenplattformen in 6 m. Klicken Sie mit der linken Maustaste auf beide markierten Endpunkte, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann.",
+        "new": "Bauen Sie die östlichen doppelspurigen Seitenplattformen. Verwenden Sie BACK, um zu den Karten zurückzukehren und wählen Sie diese Plattform unter Eisenbahn. Klicken Sie mit der linken Maustaste auf beide Endpunkte bei 6 m, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann. Wenn das Panel geschlossen ist, öffnen Sie Straßen, Bahn und Infrastruktur.",
+        "east": "Bauen Sie die östlichen doppelspurigen Seitenplattformen. Verwenden Sie BACK, um zu den Karten zurückzukehren und wählen Sie diese Plattform unter Eisenbahn. Klicken Sie mit der linken Maustaste auf beide Endpunkte bei 6 m, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann. Wenn das Panel geschlossen ist, öffnen Sie Straßen, Bahn und Infrastruktur."
+      },
+      "step2": {
+        "title": "Stationseingänge bauen",
+        "description": "Wählen Sie einfaches Bahnhofsgebäude. Verbinden Sie jedes Markierungspaar mit einem kurzen Durchgang über die Plattform. Platzieren Sie die Eingänge direkt außerhalb der Plattform. Klicken Sie mit der linken Maustaste auf die markierten Endpunkte, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann beide Passagen.",
+        "open": "Wählen Sie einfaches Bahnhofsgebäude. Verbinden Sie jedes Markierungspaar mit einem kurzen Durchgang über die Plattform. Platzieren Sie die Eingänge direkt außerhalb der Plattform. Klicken Sie mit der linken Maustaste auf die markierten Endpunkte, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann beide Passagen.",
+        "variant": "Wählen Sie einfaches Bahnhofsgebäude. Verbinden Sie jedes Markierungspaar mit einem kurzen Durchgang über die Plattform. Platzieren Sie die Eingänge direkt außerhalb der Plattform. Klicken Sie mit der linken Maustaste auf die markierten Endpunkte, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann beide Passagen.",
+        "start": "Wählen Sie einfaches Bahnhofsgebäude. Verbinden Sie jedes Markierungspaar mit einem kurzen Durchgang über die Plattform. Platzieren Sie die Eingänge direkt außerhalb der Plattform. Klicken Sie mit der linken Maustaste auf die markierten Endpunkte, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann beide Passagen.",
+        "end": "Wählen Sie einfaches Bahnhofsgebäude. Verbinden Sie jedes Markierungspaar mit einem kurzen Durchgang über die Plattform. Platzieren Sie die Eingänge direkt außerhalb der Plattform. Klicken Sie mit der linken Maustaste auf die markierten Endpunkte, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann beide Passagen.",
+        "confirm": "Wählen Sie einfaches Bahnhofsgebäude. Verbinden Sie jedes Markierungspaar mit einem kurzen Durchgang über die Plattform. Platzieren Sie die Eingänge direkt außerhalb der Plattform. Klicken Sie mit der linken Maustaste auf die markierten Endpunkte, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann beide Passagen.",
+        "town": "Wählen Sie einfaches Bahnhofsgebäude. Verbinden Sie jedes Markierungspaar mit einem kurzen Durchgang über die Plattform. Platzieren Sie die Eingänge direkt außerhalb der Plattform. Klicken Sie mit der linken Maustaste auf die markierten Endpunkte, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann beide Passagen.",
+        "new": "Wählen Sie einfaches Bahnhofsgebäude. Verbinden Sie jedes Markierungspaar mit einem kurzen Durchgang über die Plattform. Platzieren Sie die Eingänge direkt außerhalb der Plattform. Klicken Sie mit der linken Maustaste auf die markierten Endpunkte, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann beide Passagen.",
+        "east": "Wählen Sie einfaches Bahnhofsgebäude. Verbinden Sie jedes Markierungspaar mit einem kurzen Durchgang über die Plattform. Platzieren Sie die Eingänge direkt außerhalb der Plattform. Klicken Sie mit der linken Maustaste auf die markierten Endpunkte, klicken Sie mit der rechten Maustaste, um die Form zu beenden, und bestätigen Sie dann beide Passagen."
+      },
+      "step3": {
+        "title": "Planen Sie den Abschnitt Akquisition",
+        "description": "Wählen Sie doppelte Bahngleise. Ziehen Sie eine gerade Linie von 6 m vom östlichen Ende der Westplattform bis zum westlichen Ende der Hauptstraße. Gebäude behindern diesen Abschnitt, daher erfordert es Landerwerb. Bestätigen Sie den Plan und drücken Sie Weiter. Bauzeit wird hier nicht übersprungen.",
+        "open": "Wählen Sie doppelte Bahngleise. Ziehen Sie eine gerade Linie von 6 m vom östlichen Ende der Westplattform bis zum westlichen Ende der Hauptstraße. Gebäude behindern diesen Abschnitt, daher erfordert es Landerwerb. Bestätigen Sie den Plan und drücken Sie Weiter. Bauzeit wird hier nicht übersprungen.",
+        "variant": "Wählen Sie doppelte Bahngleise. Ziehen Sie eine gerade Linie von 6 m vom östlichen Ende der Westplattform bis zum westlichen Ende der Hauptstraße. Gebäude behindern diesen Abschnitt, daher erfordert es Landerwerb. Bestätigen Sie den Plan und drücken Sie Weiter. Bauzeit wird hier nicht übersprungen.",
+        "start": "Wählen Sie doppelte Bahngleise. Ziehen Sie eine gerade Linie von 6 m vom östlichen Ende der Westplattform bis zum westlichen Ende der Hauptstraße. Gebäude behindern diesen Abschnitt, daher erfordert es Landerwerb. Bestätigen Sie den Plan und drücken Sie Weiter. Bauzeit wird hier nicht übersprungen.",
+        "end": "Wählen Sie doppelte Bahngleise. Ziehen Sie eine gerade Linie von 6 m vom östlichen Ende der Westplattform bis zum westlichen Ende der Hauptstraße. Gebäude behindern diesen Abschnitt, daher erfordert es Landerwerb. Bestätigen Sie den Plan und drücken Sie Weiter. Bauzeit wird hier nicht übersprungen.",
+        "confirm": "Wählen Sie doppelte Bahngleise. Ziehen Sie eine gerade Linie von 6 m vom östlichen Ende der Westplattform bis zum westlichen Ende der Hauptstraße. Gebäude behindern diesen Abschnitt, daher erfordert es Landerwerb. Bestätigen Sie den Plan und drücken Sie Weiter. Bauzeit wird hier nicht übersprungen.",
+        "town": "Wählen Sie doppelte Bahngleise. Ziehen Sie eine gerade Linie von 6 m vom östlichen Ende der Westplattform bis zum westlichen Ende der Hauptstraße. Gebäude behindern diesen Abschnitt, daher erfordert es Landerwerb. Bestätigen Sie den Plan und drücken Sie Weiter. Bauzeit wird hier nicht übersprungen.",
+        "new": "Wählen Sie doppelte Bahngleise. Ziehen Sie eine gerade Linie von 6 m vom östlichen Ende der Westplattform bis zum westlichen Ende der Hauptstraße. Gebäude behindern diesen Abschnitt, daher erfordert es Landerwerb. Bestätigen Sie den Plan und drücken Sie Weiter. Bauzeit wird hier nicht übersprungen.",
+        "east": "Wählen Sie doppelte Bahngleise. Ziehen Sie eine gerade Linie von 6 m vom östlichen Ende der Westplattform bis zum westlichen Ende der Hauptstraße. Gebäude behindern diesen Abschnitt, daher erfordert es Landerwerb. Bestätigen Sie den Plan und drücken Sie Weiter. Bauzeit wird hier nicht übersprungen."
+      },
+      "step4": {
+        "title": "Bestellen Sie das Krankenhaus abgerissen",
+        "description": "Die Verhandlungen über den Kauf privater Grundstücke beginnen automatisch, aber das öffentliche Krankenhaus der Stadt wird nicht automatisch entfernt und verhindert, dass der Gleisbau beginnt. Klicken Sie auf das Krankenhaus und drücken Sie in den Schaltflächen oben auf Bulldoze. Sobald der Abriss geplant ist, drücken Sie Weiter.",
+        "open": "Die Verhandlungen über den Kauf privater Grundstücke beginnen automatisch, aber das öffentliche Krankenhaus der Stadt wird nicht automatisch entfernt und verhindert, dass der Gleisbau beginnt. Klicken Sie auf das Krankenhaus und drücken Sie in den Schaltflächen oben auf Bulldoze. Sobald der Abriss geplant ist, drücken Sie Weiter.",
+        "variant": "Die Verhandlungen über den Kauf privater Grundstücke beginnen automatisch, aber das öffentliche Krankenhaus der Stadt wird nicht automatisch entfernt und verhindert, dass der Gleisbau beginnt. Klicken Sie auf das Krankenhaus und drücken Sie in den Schaltflächen oben auf Bulldoze. Sobald der Abriss geplant ist, drücken Sie Weiter.",
+        "start": "Die Verhandlungen über den Kauf privater Grundstücke beginnen automatisch, aber das öffentliche Krankenhaus der Stadt wird nicht automatisch entfernt und verhindert, dass der Gleisbau beginnt. Klicken Sie auf das Krankenhaus und drücken Sie in den Schaltflächen oben auf Bulldoze. Sobald der Abriss geplant ist, drücken Sie Weiter.",
+        "end": "Die Verhandlungen über den Kauf privater Grundstücke beginnen automatisch, aber das öffentliche Krankenhaus der Stadt wird nicht automatisch entfernt und verhindert, dass der Gleisbau beginnt. Klicken Sie auf das Krankenhaus und drücken Sie in den Schaltflächen oben auf Bulldoze. Sobald der Abriss geplant ist, drücken Sie Weiter.",
+        "confirm": "Die Verhandlungen über den Kauf privater Grundstücke beginnen automatisch, aber das öffentliche Krankenhaus der Stadt wird nicht automatisch entfernt und verhindert, dass der Gleisbau beginnt. Klicken Sie auf das Krankenhaus und drücken Sie in den Schaltflächen oben auf Bulldoze. Sobald der Abriss geplant ist, drücken Sie Weiter.",
+        "town": "Die Verhandlungen über den Kauf privater Grundstücke beginnen automatisch, aber das öffentliche Krankenhaus der Stadt wird nicht automatisch entfernt und verhindert, dass der Gleisbau beginnt. Klicken Sie auf das Krankenhaus und drücken Sie in den Schaltflächen oben auf Bulldoze. Sobald der Abriss geplant ist, drücken Sie Weiter.",
+        "new": "Die Verhandlungen über den Kauf privater Grundstücke beginnen automatisch, aber das öffentliche Krankenhaus der Stadt wird nicht automatisch entfernt und verhindert, dass der Gleisbau beginnt. Klicken Sie auf das Krankenhaus und drücken Sie in den Schaltflächen oben auf Bulldoze. Sobald der Abriss geplant ist, drücken Sie Weiter.",
+        "east": "Die Verhandlungen über den Kauf privater Grundstücke beginnen automatisch, aber das öffentliche Krankenhaus der Stadt wird nicht automatisch entfernt und verhindert, dass der Gleisbau beginnt. Klicken Sie auf das Krankenhaus und drücken Sie in den Schaltflächen oben auf Bulldoze. Sobald der Abriss geplant ist, drücken Sie Weiter."
+      },
+      "step5": {
+        "title": "Warten Sie, bis der Abschnitt zum Erwerb abgeschlossen ist",
+        "description": "Zeit bis zum privaten Landerwerb, Abriss des Krankenhauses und Bauende der Strecke. Dies kann mehrere Monate dauern. Dieser Abschnitt wird durch normale Konstruktion abgeschlossen.",
+        "open": "Zeit bis zum privaten Landerwerb, Abriss des Krankenhauses und Bauende der Strecke. Dies kann mehrere Monate dauern. Dieser Abschnitt wird durch normale Konstruktion abgeschlossen.",
+        "variant": "Zeit bis zum privaten Landerwerb, Abriss des Krankenhauses und Bauende der Strecke. Dies kann mehrere Monate dauern. Dieser Abschnitt wird durch normale Konstruktion abgeschlossen.",
+        "start": "Zeit bis zum privaten Landerwerb, Abriss des Krankenhauses und Bauende der Strecke. Dies kann mehrere Monate dauern. Dieser Abschnitt wird durch normale Konstruktion abgeschlossen.",
+        "end": "Zeit bis zum privaten Landerwerb, Abriss des Krankenhauses und Bauende der Strecke. Dies kann mehrere Monate dauern. Dieser Abschnitt wird durch normale Konstruktion abgeschlossen.",
+        "confirm": "Zeit bis zum privaten Landerwerb, Abriss des Krankenhauses und Bauende der Strecke. Dies kann mehrere Monate dauern. Dieser Abschnitt wird durch normale Konstruktion abgeschlossen.",
+        "town": "Zeit bis zum privaten Landerwerb, Abriss des Krankenhauses und Bauende der Strecke. Dies kann mehrere Monate dauern. Dieser Abschnitt wird durch normale Konstruktion abgeschlossen.",
+        "new": "Zeit bis zum privaten Landerwerb, Abriss des Krankenhauses und Bauende der Strecke. Dies kann mehrere Monate dauern. Dieser Abschnitt wird durch normale Konstruktion abgeschlossen.",
+        "east": "Zeit bis zum privaten Landerwerb, Abriss des Krankenhauses und Bauende der Strecke. Dies kann mehrere Monate dauern. Dieser Abschnitt wird durch normale Konstruktion abgeschlossen."
+      },
+      "step6": {
+        "title": "Strecke direkt über der Hauptstraße",
+        "description": "Verlegen Sie auf 6m direkt über die Mitte der Hauptstraße von West nach Osten. Die Nutzung des Straßenkorridors vermeidet den Erwerb angrenzender privater Grundstücke. Der Weg von der Straße in Gebäude kann immer noch Akquisition oder Abriss der öffentlichen Einrichtung erfordern.",
+        "open": "Verlegen Sie auf 6m direkt über die Mitte der Hauptstraße von West nach Osten. Die Nutzung des Straßenkorridors vermeidet den Erwerb angrenzender privater Grundstücke. Der Weg von der Straße in Gebäude kann immer noch Akquisition oder Abriss der öffentlichen Einrichtung erfordern.",
+        "variant": "Verlegen Sie auf 6m direkt über die Mitte der Hauptstraße von West nach Osten. Die Nutzung des Straßenkorridors vermeidet den Erwerb angrenzender privater Grundstücke. Der Weg von der Straße in Gebäude kann immer noch Akquisition oder Abriss der öffentlichen Einrichtung erfordern.",
+        "start": "Verlegen Sie auf 6m direkt über die Mitte der Hauptstraße von West nach Osten. Die Nutzung des Straßenkorridors vermeidet den Erwerb angrenzender privater Grundstücke. Der Weg von der Straße in Gebäude kann immer noch Akquisition oder Abriss der öffentlichen Einrichtung erfordern.",
+        "end": "Verlegen Sie auf 6m direkt über die Mitte der Hauptstraße von West nach Osten. Die Nutzung des Straßenkorridors vermeidet den Erwerb angrenzender privater Grundstücke. Der Weg von der Straße in Gebäude kann immer noch Akquisition oder Abriss der öffentlichen Einrichtung erfordern.",
+        "confirm": "Verlegen Sie auf 6m direkt über die Mitte der Hauptstraße von West nach Osten. Die Nutzung des Straßenkorridors vermeidet den Erwerb angrenzender privater Grundstücke. Der Weg von der Straße in Gebäude kann immer noch Akquisition oder Abriss der öffentlichen Einrichtung erfordern.",
+        "town": "Verlegen Sie auf 6m direkt über die Mitte der Hauptstraße von West nach Osten. Die Nutzung des Straßenkorridors vermeidet den Erwerb angrenzender privater Grundstücke. Der Weg von der Straße in Gebäude kann immer noch Akquisition oder Abriss der öffentlichen Einrichtung erfordern.",
+        "new": "Verlegen Sie auf 6m direkt über die Mitte der Hauptstraße von West nach Osten. Die Nutzung des Straßenkorridors vermeidet den Erwerb angrenzender privater Grundstücke. Der Weg von der Straße in Gebäude kann immer noch Akquisition oder Abriss der öffentlichen Einrichtung erfordern.",
+        "east": "Zum Schluss legen Sie 6 m vom östlichen Ende der Arterienstraße bis zum Westende der östlichen Plattform. Sobald beide Plattformen verbunden sind, schließt Next den Bau ab."
+      },
+      "step7": {
+        "title": "Bauen Sie das Eisenbahndepot",
+        "description": "Wählen Sie im Baufeld Rail Depot und bauen Sie es auf dem gelben Grundstück nördlich der Stadt. Platzieren Sie das Depot selbst. Weiter überspringt die Bauzeit.",
+        "open": "Wählen Sie im Baufeld Rail Depot und bauen Sie es auf dem gelben Grundstück nördlich der Stadt. Platzieren Sie das Depot selbst. Weiter überspringt die Bauzeit.",
+        "variant": "Wählen Sie im Baufeld Rail Depot und bauen Sie es auf dem gelben Grundstück nördlich der Stadt. Platzieren Sie das Depot selbst. Weiter überspringt die Bauzeit.",
+        "start": "Wählen Sie im Baufeld Rail Depot und bauen Sie es auf dem gelben Grundstück nördlich der Stadt. Platzieren Sie das Depot selbst. Weiter überspringt die Bauzeit.",
+        "end": "Wählen Sie im Baufeld Rail Depot und bauen Sie es auf dem gelben Grundstück nördlich der Stadt. Platzieren Sie das Depot selbst. Weiter überspringt die Bauzeit.",
+        "confirm": "Wählen Sie im Baufeld Rail Depot und bauen Sie es auf dem gelben Grundstück nördlich der Stadt. Platzieren Sie das Depot selbst. Weiter überspringt die Bauzeit.",
+        "town": "Wählen Sie im Baufeld Rail Depot und bauen Sie es auf dem gelben Grundstück nördlich der Stadt. Platzieren Sie das Depot selbst. Weiter überspringt die Bauzeit.",
+        "new": "Wählen Sie im Baufeld Rail Depot und bauen Sie es auf dem gelben Grundstück nördlich der Stadt. Platzieren Sie das Depot selbst. Weiter überspringt die Bauzeit.",
+        "east": "Wählen Sie im Baufeld Rail Depot und bauen Sie es auf dem gelben Grundstück nördlich der Stadt. Platzieren Sie das Depot selbst. Weiter überspringt die Bauzeit."
+      },
+      "step8": {
+        "title": "Gestalten Sie den gebogenen Kletterzweig",
+        "description": "Wählen Sie die Bahnstrecke. Beginnen Sie am östlichen Boden des Depots, machen Sie eine breite Schleife nach Osten durch die Nordostmarkierung und verbinden Sie sich mit dem Verschmelzungspunkt der Hauptlinie bei 6 m. Um innerhalb der Krümmungs- und Steigungsgrenzen zu bleiben, platzieren Sie die Strecke mit den gelben Zwischenpunkten als Orientierungshilfe. Nachdem Sie mit der rechten Maustaste geklickt haben, um die Form zu bestätigen, können Sie sie durch Ziehen von Scheitelpunkten und Steuergriffen anpassen.",
+        "open": "Wählen Sie die Bahnstrecke. Beginnen Sie am östlichen Boden des Depots, machen Sie eine breite Schleife nach Osten durch die Nordostmarkierung und verbinden Sie sich mit dem Verschmelzungspunkt der Hauptlinie bei 6 m. Um innerhalb der Krümmungs- und Steigungsgrenzen zu bleiben, platzieren Sie die Strecke mit den gelben Zwischenpunkten als Orientierungshilfe. Nachdem Sie mit der rechten Maustaste geklickt haben, um die Form zu bestätigen, können Sie sie durch Ziehen von Scheitelpunkten und Steuergriffen anpassen.",
+        "variant": "Wählen Sie die Bahnstrecke. Beginnen Sie am östlichen Boden des Depots, machen Sie eine breite Schleife nach Osten durch die Nordostmarkierung und verbinden Sie sich mit dem Verschmelzungspunkt der Hauptlinie bei 6 m. Um innerhalb der Krümmungs- und Steigungsgrenzen zu bleiben, platzieren Sie die Strecke mit den gelben Zwischenpunkten als Orientierungshilfe. Nachdem Sie mit der rechten Maustaste geklickt haben, um die Form zu bestätigen, können Sie sie durch Ziehen von Scheitelpunkten und Steuergriffen anpassen.",
+        "start": "Wählen Sie die Bahnstrecke. Beginnen Sie am östlichen Boden des Depots, machen Sie eine breite Schleife nach Osten durch die Nordostmarkierung und verbinden Sie sich mit dem Verschmelzungspunkt der Hauptlinie bei 6 m. Um innerhalb der Krümmungs- und Steigungsgrenzen zu bleiben, platzieren Sie die Strecke mit den gelben Zwischenpunkten als Orientierungshilfe. Nachdem Sie mit der rechten Maustaste geklickt haben, um die Form zu bestätigen, können Sie sie durch Ziehen von Scheitelpunkten und Steuergriffen anpassen.",
+        "end": "Wählen Sie die Bahnstrecke. Beginnen Sie am östlichen Boden des Depots, machen Sie eine breite Schleife nach Osten durch die Nordostmarkierung und verbinden Sie sich mit dem Verschmelzungspunkt der Hauptlinie bei 6 m. Um innerhalb der Krümmungs- und Steigungsgrenzen zu bleiben, platzieren Sie die Strecke mit den gelben Zwischenpunkten als Orientierungshilfe. Nachdem Sie mit der rechten Maustaste geklickt haben, um die Form zu bestätigen, können Sie sie durch Ziehen von Scheitelpunkten und Steuergriffen anpassen.",
+        "confirm": "Wählen Sie die Bahnstrecke. Beginnen Sie am östlichen Boden des Depots, machen Sie eine breite Schleife nach Osten durch die Nordostmarkierung und verbinden Sie sich mit dem Verschmelzungspunkt der Hauptlinie bei 6 m. Um innerhalb der Krümmungs- und Steigungsgrenzen zu bleiben, platzieren Sie die Strecke mit den gelben Zwischenpunkten als Orientierungshilfe. Nachdem Sie mit der rechten Maustaste geklickt haben, um die Form zu bestätigen, können Sie sie durch Ziehen von Scheitelpunkten und Steuergriffen anpassen.",
+        "town": "Wählen Sie die Bahnstrecke. Beginnen Sie am östlichen Boden des Depots, machen Sie eine breite Schleife nach Osten durch die Nordostmarkierung und verbinden Sie sich mit dem Verschmelzungspunkt der Hauptlinie bei 6 m. Um innerhalb der Krümmungs- und Steigungsgrenzen zu bleiben, platzieren Sie die Strecke mit den gelben Zwischenpunkten als Orientierungshilfe. Nachdem Sie mit der rechten Maustaste geklickt haben, um die Form zu bestätigen, können Sie sie durch Ziehen von Scheitelpunkten und Steuergriffen anpassen.",
+        "new": "Wählen Sie die Bahnstrecke. Beginnen Sie am östlichen Boden des Depots, machen Sie eine breite Schleife nach Osten durch die Nordostmarkierung und verbinden Sie sich mit dem Verschmelzungspunkt der Hauptlinie bei 6 m. Um innerhalb der Krümmungs- und Steigungsgrenzen zu bleiben, platzieren Sie die Strecke mit den gelben Zwischenpunkten als Orientierungshilfe. Nachdem Sie mit der rechten Maustaste geklickt haben, um die Form zu bestätigen, können Sie sie durch Ziehen von Scheitelpunkten und Steuergriffen anpassen.",
+        "east": "Wählen Sie die Bahnstrecke. Beginnen Sie am östlichen Boden des Depots, machen Sie eine breite Schleife nach Osten durch die Nordostmarkierung und verbinden Sie sich mit dem Verschmelzungspunkt der Hauptlinie bei 6 m. Um innerhalb der Krümmungs- und Steigungsgrenzen zu bleiben, platzieren Sie die Strecke mit den gelben Zwischenpunkten als Orientierungshilfe. Nachdem Sie mit der rechten Maustaste geklickt haben, um die Form zu bestätigen, können Sie sie durch Ziehen von Scheitelpunkten und Steuergriffen anpassen."
+      },
+      "step9": {
+        "title": "Versorgen Sie das Depot aus der bestehenden Anlage",
+        "description": "Um Züge zu fahren, müssen Sie eine Stromleitung aus dem Kraftwerk anschließen. Verwenden Sie die Stromleitung, um das Anlagenterminal an das gemeinsame östliche Terminal des Depots anzuschließen. Bestätigen Sie die Zeile.",
+        "open": "Um Züge zu fahren, müssen Sie eine Stromleitung aus dem Kraftwerk anschließen. Verwenden Sie die Stromleitung, um das Anlagenterminal an das gemeinsame östliche Terminal des Depots anzuschließen. Bestätigen Sie die Zeile.",
+        "variant": "Um Züge zu fahren, müssen Sie eine Stromleitung aus dem Kraftwerk anschließen. Verwenden Sie die Stromleitung, um das Anlagenterminal an das gemeinsame östliche Terminal des Depots anzuschließen. Bestätigen Sie die Zeile.",
+        "start": "Um Züge zu fahren, müssen Sie eine Stromleitung aus dem Kraftwerk anschließen. Verwenden Sie die Stromleitung, um das Anlagenterminal an das gemeinsame östliche Terminal des Depots anzuschließen. Bestätigen Sie die Zeile.",
+        "end": "Um Züge zu fahren, müssen Sie eine Stromleitung aus dem Kraftwerk anschließen. Verwenden Sie die Stromleitung, um das Anlagenterminal an das gemeinsame östliche Terminal des Depots anzuschließen. Bestätigen Sie die Zeile.",
+        "confirm": "Um Züge zu fahren, müssen Sie eine Stromleitung aus dem Kraftwerk anschließen. Verwenden Sie die Stromleitung, um das Anlagenterminal an das gemeinsame östliche Terminal des Depots anzuschließen. Bestätigen Sie die Zeile.",
+        "town": "Um Züge zu fahren, müssen Sie eine Stromleitung aus dem Kraftwerk anschließen. Verwenden Sie die Stromleitung, um das Anlagenterminal an das gemeinsame östliche Terminal des Depots anzuschließen. Bestätigen Sie die Zeile.",
+        "new": "Um Züge zu fahren, müssen Sie eine Stromleitung aus dem Kraftwerk anschließen. Verwenden Sie die Stromleitung, um das Anlagenterminal an das gemeinsame östliche Terminal des Depots anzuschließen. Bestätigen Sie die Zeile.",
+        "east": "Um Züge zu fahren, müssen Sie eine Stromleitung aus dem Kraftwerk anschließen. Verwenden Sie die Stromleitung, um das Anlagenterminal an das gemeinsame östliche Terminal des Depots anzuschließen. Bestätigen Sie die Zeile."
+      },
+      "step10": {
+        "title": "Öffnen Sie den Eisenbahndienst",
+        "description": "Öffentliche Verkehrsmittel eröffnen → Neue Linie und wählen Sie eine Mittelstreckenbahn. Platzieren Sie auf den erhöhten Plattformen nach Westen und Osten und klicken Sie dann auf die erste Haltestelle, um die Schleife zu schließen. Setzen Sie den Tarif auf 0 und zielen Sie auf 5 Minuten und bestätigen Sie dann.",
+        "open": "Öffentliche Verkehrsmittel eröffnen → Neue Linie und wählen Sie eine Mittelstreckenbahn. Platzieren Sie auf den erhöhten Plattformen nach Westen und Osten und klicken Sie dann auf die erste Haltestelle, um die Schleife zu schließen. Setzen Sie den Tarif auf 0 und zielen Sie auf 5 Minuten und bestätigen Sie dann.",
+        "variant": "Öffentliche Verkehrsmittel eröffnen → Neue Linie und wählen Sie eine Mittelstreckenbahn. Platzieren Sie auf den erhöhten Plattformen nach Westen und Osten und klicken Sie dann auf die erste Haltestelle, um die Schleife zu schließen. Setzen Sie den Tarif auf 0 und zielen Sie auf 5 Minuten und bestätigen Sie dann.",
+        "start": "Öffentliche Verkehrsmittel eröffnen → Neue Linie und wählen Sie eine Mittelstreckenbahn. Platzieren Sie auf den erhöhten Plattformen nach Westen und Osten und klicken Sie dann auf die erste Haltestelle, um die Schleife zu schließen. Setzen Sie den Tarif auf 0 und zielen Sie auf 5 Minuten und bestätigen Sie dann.",
+        "end": "Öffentliche Verkehrsmittel eröffnen → Neue Linie und wählen Sie eine Mittelstreckenbahn. Platzieren Sie auf den erhöhten Plattformen nach Westen und Osten und klicken Sie dann auf die erste Haltestelle, um die Schleife zu schließen. Setzen Sie den Tarif auf 0 und zielen Sie auf 5 Minuten und bestätigen Sie dann.",
+        "confirm": "Öffentliche Verkehrsmittel eröffnen → Neue Linie und wählen Sie eine Mittelstreckenbahn. Platzieren Sie auf den erhöhten Plattformen nach Westen und Osten und klicken Sie dann auf die erste Haltestelle, um die Schleife zu schließen. Setzen Sie den Tarif auf 0 und zielen Sie auf 5 Minuten und bestätigen Sie dann.",
+        "town": "Öffentliche Verkehrsmittel eröffnen → Neue Linie und wählen Sie eine Mittelstreckenbahn. Platzieren Sie auf den erhöhten Plattformen nach Westen und Osten und klicken Sie dann auf die erste Haltestelle, um die Schleife zu schließen. Setzen Sie den Tarif auf 0 und zielen Sie auf 5 Minuten und bestätigen Sie dann.",
+        "new": "Öffentliche Verkehrsmittel eröffnen → Neue Linie und wählen Sie eine Mittelstreckenbahn. Platzieren Sie auf den erhöhten Plattformen nach Westen und Osten und klicken Sie dann auf die erste Haltestelle, um die Schleife zu schließen. Setzen Sie den Tarif auf 0 und zielen Sie auf 5 Minuten und bestätigen Sie dann.",
+        "east": "Öffentliche Verkehrsmittel eröffnen → Neue Linie und wählen Sie eine Mittelstreckenbahn. Platzieren Sie auf den erhöhten Plattformen nach Westen und Osten und klicken Sie dann auf die erste Haltestelle, um die Schleife zu schließen. Setzen Sie den Tarif auf 0 und zielen Sie auf 5 Minuten und bestätigen Sie dann."
+      },
+      "step11": {
+        "title": "Fahrzeuge und Service bestätigen",
+        "description": "Vorlaufzeit und Überprüfung der Kapazität und des Betriebsintervalls der Linie im öffentlichen Verkehrsmanagement. Das Depot benötigt mehrere Monate, um Fahrzeuge zu erhalten. Positive Kapazität bestätigt, dass der Dienst ausgeführt wird. Die Bewohner vergleichen auch Wanderwege, so dass diese kurze Linie möglicherweise noch keine Passagiere hat.",
+        "open": "Vorlaufzeit und Überprüfung der Kapazität und des Betriebsintervalls der Linie im öffentlichen Verkehrsmanagement. Das Depot benötigt mehrere Monate, um Fahrzeuge zu erhalten. Positive Kapazität bestätigt, dass der Dienst ausgeführt wird. Die Bewohner vergleichen auch Wanderwege, so dass diese kurze Linie möglicherweise noch keine Passagiere hat.",
+        "variant": "Vorlaufzeit und Überprüfung der Kapazität und des Betriebsintervalls der Linie im öffentlichen Verkehrsmanagement. Das Depot benötigt mehrere Monate, um Fahrzeuge zu erhalten. Positive Kapazität bestätigt, dass der Dienst ausgeführt wird. Die Bewohner vergleichen auch Wanderwege, so dass diese kurze Linie möglicherweise noch keine Passagiere hat.",
+        "start": "Vorlaufzeit und Überprüfung der Kapazität und des Betriebsintervalls der Linie im öffentlichen Verkehrsmanagement. Das Depot benötigt mehrere Monate, um Fahrzeuge zu erhalten. Positive Kapazität bestätigt, dass der Dienst ausgeführt wird. Die Bewohner vergleichen auch Wanderwege, so dass diese kurze Linie möglicherweise noch keine Passagiere hat.",
+        "end": "Vorlaufzeit und Überprüfung der Kapazität und des Betriebsintervalls der Linie im öffentlichen Verkehrsmanagement. Das Depot benötigt mehrere Monate, um Fahrzeuge zu erhalten. Positive Kapazität bestätigt, dass der Dienst ausgeführt wird. Die Bewohner vergleichen auch Wanderwege, so dass diese kurze Linie möglicherweise noch keine Passagiere hat.",
+        "confirm": "Vorlaufzeit und Überprüfung der Kapazität und des Betriebsintervalls der Linie im öffentlichen Verkehrsmanagement. Das Depot benötigt mehrere Monate, um Fahrzeuge zu erhalten. Positive Kapazität bestätigt, dass der Dienst ausgeführt wird. Die Bewohner vergleichen auch Wanderwege, so dass diese kurze Linie möglicherweise noch keine Passagiere hat.",
+        "town": "Vorlaufzeit und Überprüfung der Kapazität und des Betriebsintervalls der Linie im öffentlichen Verkehrsmanagement. Das Depot benötigt mehrere Monate, um Fahrzeuge zu erhalten. Positive Kapazität bestätigt, dass der Dienst ausgeführt wird. Die Bewohner vergleichen auch Wanderwege, so dass diese kurze Linie möglicherweise noch keine Passagiere hat.",
+        "new": "Vorlaufzeit und Überprüfung der Kapazität und des Betriebsintervalls der Linie im öffentlichen Verkehrsmanagement. Das Depot benötigt mehrere Monate, um Fahrzeuge zu erhalten. Positive Kapazität bestätigt, dass der Dienst ausgeführt wird. Die Bewohner vergleichen auch Wanderwege, so dass diese kurze Linie möglicherweise noch keine Passagiere hat.",
+        "east": "Vorlaufzeit und Überprüfung der Kapazität und des Betriebsintervalls der Linie im öffentlichen Verkehrsmanagement. Das Depot benötigt mehrere Monate, um Fahrzeuge zu erhalten. Positive Kapazität bestätigt, dass der Dienst ausgeführt wird. Die Bewohner vergleichen auch Wanderwege, so dass diese kurze Linie möglicherweise noch keine Passagiere hat."
+      },
+      "step12": {
+        "title": "Überprüfen Sie den Eisenbahnbau",
+        "description": "Die Kamera ist zum Westbahnhof gezogen. Schauen Sie sich die Züge am Bahnsteig an. Sie haben Plattformen, Stationen, Gleise, ein Depot, seinen gebogenen Abzweig, einen Stromanschluss und einen Service gebaut. Sie haben den privaten Akquisitions- und Abriss der öffentlichen Einrichtungen erledigt und den Erwerb auf der Straße vermieden. Verwenden Sie Kurvenradius und Grad-Feedback in zukünftigen Bahnprojekten.",
+        "open": "Die Kamera ist zum Westbahnhof gezogen. Schauen Sie sich die Züge am Bahnsteig an. Sie haben Plattformen, Stationen, Gleise, ein Depot, seinen gebogenen Abzweig, einen Stromanschluss und einen Service gebaut. Sie haben den privaten Akquisitions- und Abriss der öffentlichen Einrichtungen erledigt und den Erwerb auf der Straße vermieden. Verwenden Sie Kurvenradius und Grad-Feedback in zukünftigen Bahnprojekten.",
+        "variant": "Die Kamera ist zum Westbahnhof gezogen. Schauen Sie sich die Züge am Bahnsteig an. Sie haben Plattformen, Stationen, Gleise, ein Depot, seinen gebogenen Abzweig, einen Stromanschluss und einen Service gebaut. Sie haben den privaten Akquisitions- und Abriss der öffentlichen Einrichtungen erledigt und den Erwerb auf der Straße vermieden. Verwenden Sie Kurvenradius und Grad-Feedback in zukünftigen Bahnprojekten.",
+        "start": "Die Kamera ist zum Westbahnhof gezogen. Schauen Sie sich die Züge am Bahnsteig an. Sie haben Plattformen, Stationen, Gleise, ein Depot, seinen gebogenen Abzweig, einen Stromanschluss und einen Service gebaut. Sie haben den privaten Akquisitions- und Abriss der öffentlichen Einrichtungen erledigt und den Erwerb auf der Straße vermieden. Verwenden Sie Kurvenradius und Grad-Feedback in zukünftigen Bahnprojekten.",
+        "end": "Die Kamera ist zum Westbahnhof gezogen. Schauen Sie sich die Züge am Bahnsteig an. Sie haben Plattformen, Stationen, Gleise, ein Depot, seinen gebogenen Abzweig, einen Stromanschluss und einen Service gebaut. Sie haben den privaten Akquisitions- und Abriss der öffentlichen Einrichtungen erledigt und den Erwerb auf der Straße vermieden. Verwenden Sie Kurvenradius und Grad-Feedback in zukünftigen Bahnprojekten.",
+        "confirm": "Die Kamera ist zum Westbahnhof gezogen. Schauen Sie sich die Züge am Bahnsteig an. Sie haben Plattformen, Stationen, Gleise, ein Depot, seinen gebogenen Abzweig, einen Stromanschluss und einen Service gebaut. Sie haben den privaten Akquisitions- und Abriss der öffentlichen Einrichtungen erledigt und den Erwerb auf der Straße vermieden. Verwenden Sie Kurvenradius und Grad-Feedback in zukünftigen Bahnprojekten.",
+        "town": "Die Kamera ist zum Westbahnhof gezogen. Schauen Sie sich die Züge am Bahnsteig an. Sie haben Plattformen, Stationen, Gleise, ein Depot, seinen gebogenen Abzweig, einen Stromanschluss und einen Service gebaut. Sie haben den privaten Akquisitions- und Abriss der öffentlichen Einrichtungen erledigt und den Erwerb auf der Straße vermieden. Verwenden Sie Kurvenradius und Grad-Feedback in zukünftigen Bahnprojekten.",
+        "new": "Die Kamera ist zum Westbahnhof gezogen. Schauen Sie sich die Züge am Bahnsteig an. Sie haben Plattformen, Stationen, Gleise, ein Depot, seinen gebogenen Abzweig, einen Stromanschluss und einen Service gebaut. Sie haben den privaten Akquisitions- und Abriss der öffentlichen Einrichtungen erledigt und den Erwerb auf der Straße vermieden. Verwenden Sie Kurvenradius und Grad-Feedback in zukünftigen Bahnprojekten.",
+        "east": "Die Kamera ist zum Westbahnhof gezogen. Schauen Sie sich die Züge am Bahnsteig an. Sie haben Plattformen, Stationen, Gleise, ein Depot, seinen gebogenen Abzweig, einen Stromanschluss und einen Service gebaut. Sie haben den privaten Akquisitions- und Abriss der öffentlichen Einrichtungen erledigt und den Erwerb auf der Straße vermieden. Verwenden Sie Kurvenradius und Grad-Feedback in zukünftigen Bahnprojekten."
+      }
+    },
+    "complete": {
+      "title": "Tutorial abgeschlossen",
+      "description": "Herzlichen Glückwunsch! Sie haben das Tutorial abgeschlossen. Drücken Sie \"Finish\", um den Guide zu schließen und diese Stadt weiterhin frei zu spielen.",
+      "button": "Finish"
+    },
+    "nextButton": "Weiter",
+    "checking": "Verifizieren...",
+    "failed": "Bedingung nicht erfüllt. Bitte versuchen Sie es erneut.",
+    "completed": "Tutorial abgeschlossen! Gut gemacht.",
+    "stepProgress": "Schritt {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Öffnen Sie die Konstruktionsleiste mit dem Straßensymbol.",
+      "selectRoad": "Wählen Sie die ebenerdige zweispurige Straße. Es ist nur die gewünschte Variante verfügbar.",
+      "placeStart": "Klicken Sie mit der linken Maustaste in den Cyan-Kreis, um den Start der Straße zu platzieren.",
+      "placeEnd": "Klicken Sie mit der linken Maustaste in den gelben Kreis, um das Ende der Straße zu platzieren.",
+      "finalizeRoad": "Klicken Sie mit der rechten Maustaste in die 3D-Ansicht, um die Straßenform zu beenden.",
+      "confirmRoad": "Bestätigen Sie im Baufeld, um die Straße zu speichern, und drücken Sie dann \"Weiter\".",
+      "failed": "Einrichtung oder Kommunikation fehlgeschlagen. erneut versuchen; Wenn das Problem weiterhin besteht, beenden Sie das Tutorial und starten Sie es in einer neuen Stadt.",
+      "retry": "Wiederholen",
+      "placementRequired": "Verwenden Sie die von der Anleitung gezeigte Variante und Positionen.",
+      "preparing": "Vorbereitung der Tutorial-Stadt.",
+      "finishFailed": "Das Tutorial konnte nicht beendet werden. Bitte versuchen Sie es erneut."
+    },
+    "trade": {
+      "title": "Starten Sie den internationalen Handel",
+      "description": "Eine örtliche Fabrik will Kunden aus Übersee erreichen. In diesem Tutorial erfahren Sie, wie Sie Lebensmittel durch einen Hafen exportieren und Waren per Güterbahn aus einem Nachbarland importieren.",
+      "step1": {
+        "description": "Ein Exportterminal wird benötigt, um die auf dieser Insel produzierten Lebensmittel nach Übersee zu versenden. Baue ein \"Container-Terminal\" auf dem Küstenpaket mit dem gelben Marker. Da dies ein Tutorial ist, wird die Bauzeit übersprungen.",
+        "title": "Bauen Sie einen Container-Port"
+      },
+      "step2": {
+        "description": "Es dauert ein paar Monate, bis die Produktion und der Transport der Fabrik in Gang kommen. Fahren Sie also mit den Exportergebnissen des Hafens fort. Schließen Sie die Details des Containerterminals einmal und öffnen Sie sie erneut. Sie können die Import- und Exportergebnisse auf der Registerkarte Fracht sehen.",
+        "title": "Lebensmittelexporte bestätigen"
+      },
+      "step3": {
+        "description": "Sie haben jetzt einen Ort zum Importieren und Exportieren per Schiff. Als nächstes bauen wir einen Ort, an dem wir Waren auf der Schiene importieren und exportieren. Bauen Sie auf dem Paket eine \"internationale Güterstation\" mit der gelben Markierung entlang der Straße. An der Ostgrenze führt eine Eisenbahn in das Nachbarland und eine Grenzgüterstation.",
+        "title": "Bauen Sie eine internationale Güterstation"
+      },
+      "step4": {
+        "open": "Öffnen Sie \"Straße, Bahn & Infrastruktur\" auf dem Symbolfeld und wählen Sie unter \"Eisenbahn\" die Option \"Container-Frachtplattform\".",
+        "place": "Legen Sie eine Plattform nördlich des internationalen Güterbahnhofs parallel dazu. Klicken Sie mit der linken Maustaste in den Cyan-Kreis (West), um den Start zu platzieren, und innerhalb des gelben Kreises (Ost), um das Ende zu platzieren, und klicken Sie dann mit der rechten Maustaste in der 3D-Ansicht, um die Form zu beenden. Schalten Sie \"Plattformseite\" auf \"innen\" und überprüfen Sie, ob sich der Bahnsteig auf der Seite des Stationsgebäudes befindet, bevor Sie es bestätigen. Wenn Sie fertig sind, drücken Sie \"Weiter\".",
+        "title": "Baue einen Bahnsteig neben der Station"
+      },
+      "step5": {
+        "description": "Drücken Sie \"Zurück\", um zur Liste zurückzukehren, wählen Sie \"Eisenbahnstrecke\" und legen Sie den Track vom östlichen Ende der Plattform zum Westende des Gleises, der vom Grenzgüterverkehr außerhalb der Stadt kommt.",
+        "title": "Spur zur Grenze legen"
+      },
+      "step6": {
+        "title": "Baue ein Depot",
+        "description": "Baue ein \"Rail Depot\" auf dem Paket mit der gelben Markierung entlang der Strecke. Drücken Sie \"Weiter\" und da dies ein Tutorial ist, wird die Bauzeit übersprungen und das Depot ist abgeschlossen."
+      },
+      "step7": {
+        "title": "Verbinden Sie das Depot mit der Hauptleitung",
+        "description": "Legen Sie ein Abstellgleis vom Anschlussterminal am östlichen Ende des Depots zur Hauptleitung. Verbinden Sie die Hauptlinie in einem flachen Winkel nach Osten und nicht im rechten Winkel. Wenn Sie fertig sind, drücken Sie \"Weiter\"."
+      },
+      "step8": {
+        "description": "Öffnen Sie \"Straße, Schiene & Infrastruktur\" auf dem Symbolfeld und schließen Sie unter \"Strom\" unter \"Strom\" das Anschlussterminal des Solarkraftwerks östlich der Stadt an das Anschlussterminal des Depots an.",
+        "title": "Versorgung des Depots mit Strom"
+      },
+      "step9": {
+        "description": "Drücken Sie in \"Öffentlicher Verkehr\" auf \"+ neue Linie\" und wählen Sie als Linientyp \"Internationale Frachtlinie\". Platzieren Sie auf den Plattformen des internationalen Güterbahnhofs und des Grenzgüterbahnhofs, klicken Sie auf die erste Haltestelle, um die Schleife zu schließen, und öffnen Sie die Linie. Züge können sich nicht auf einer Spur passieren. Stellen Sie daher den Zielfortschritt auf 45 Minuten ein, damit ein Zug die Hin- und Rückfahrt machen kann.",
+        "title": "Öffnen Sie die internationale Frachtlinie"
+      },
+      "step10": {
+        "description": "Vorauszeit und bestätigen, dass Güterzüge auf der internationalen Güterlinie fahren. Es dauert ein paar Monate, bis das Depot Personal einstellt, Materialien kauft und die Fahrzeuge vorbereitet.",
+        "title": "Führen Sie die Güterzüge"
+      }
+    },
+    "highway": {
+      "title": "eine Autobahn bauen",
+      "description": "Die Stadt braucht eine andere Route für Fahrzeuge, wenn sie wächst. In diesem Tutorial lernen Sie, wie Sie eine Hochstraße über eine lokale Straße bauen und diese mit Rampen verbinden, um einen Austausch zu schaffen.",
+      "step1": {
+        "title": "Überqueren Sie die Straße",
+        "open": "Überqueren Sie die zentrale Straße mit einer erhöhten Autobahn. Öffnen Sie auf dem Symbolfeld \"Straße, Bahn & Infrastruktur\" und wählen Sie die zweispurige Autobahn unter \"Autobahnen\".",
+        "start": "Klicken Sie mit der linken Maustaste in den Cyan-Kreis, um den Start der Autobahn zu platzieren. Es schnappt auf einem Viadukt 7 m über dem Boden.",
+        "end": "Klicken Sie mit der linken Maustaste in den gelben Kreis, um das Ende zu platzieren. Es schnappt auf der anderen Straßenseite auf 7 m Höhe.",
+        "confirm": "Bestätigen Sie im Baufeld, um die Autobahn zu speichern, und drücken Sie dann \"Weiter\". Da dies ein Tutorial ist, wird die Bauzeit übersprungen und sofort abgeschlossen."
+      },
+      "step2": {
+        "title": "Nennen Sie die Autobahn",
+        "description": "Sie können Straßen verwalten, indem Sie ihnen Namen geben. Ganz oben auf dem Detailfenster der von Ihnen gebauten Autobahn befindet sich die Straße, zu der sie gehört, derzeit \"keine (nicht Teil einer Straße)\". Geben Sie ihr also einen beliebigen Namen."
+      },
+      "step3": {
+        "title": "Baue eine Rampe",
+        "description": "Bauen Sie eine Rampe, um sich mit der Straße zu verbinden. Wählen Sie als Straßentyp \"Rampe\" und verbinden Sie eine glatt gebogene Rampe von der Position der gelben Markierung auf dem Bildschirm auf die Autobahn."
+      },
+      "step4": {
+        "title": "Überprüfen Sie den Austausch",
+        "description": "Sie können das Interchange-Detail-Panel öffnen, indem Sie auf der Rampe auf \"IC1\" klicken. Vergewissern Sie sich, dass die Straße und die Autobahn angeschlossen sind."
+      }
+    },
+    "mining": {
+      "title": "Minenressourcen",
+      "description": "Unter der Insel liegen wertvolle Ressourcen, aber es gibt keine Möglichkeit, sie herauszuholen. In diesem Tutorial erfahren Sie, wie Sie eine Mine, eine Güterbahn und einen Hafen einrichten, um Erz zu extrahieren, zu transportieren und nach Übersee zu exportieren.",
+      "step1": {
+        "description": "Aktivieren Sie natürliche Ressourcen und öffnen Sie das Detailfeld der südöstlichen Erzlagerstätte.",
+        "title": "Untersuchen Sie die Erzvene"
+      },
+      "step2": {
+        "description": "Bauen Sie eine Mine auf dem gelben Grundstück über der südöstlichen Erzvene. Da dies ein Tutorial ist, wird die Bauzeit übersprungen.",
+        "title": "Baue eine Mine"
+      },
+      "step3": {
+        "description": "Bauen Sie eine Erzladestation auf dem großen bestehenden Grundstück südöstlich der Mine. Mit einer Erzladestation können Sie das an der Mine abgezogene Erz in Züge laden.",
+        "title": "Bauen Sie eine Ladestation neben der Mine"
+      },
+      "step4": {
+        "description": "Bauen Sie eine Erzentladestation auf dem großen, bestehenden Grundstück südlich des Hafens. An einer Entladestation können Sie das mit dem Zug gebrachte Erz durchführen.",
+        "title": "Bauen Sie eine Entladestation in der Nähe des Hafens"
+      },
+      "step5": {
+        "description": "Bauen Sie einen Bulk-Port auf dem gelben Küstengrundstück.",
+        "title": "Bauen Sie einen Bulk-Port"
+      },
+      "step6": {
+        "open": "Wählen Sie die Erzfrachtplattform und verbinden Sie jedes Markierungspaar südwestlich der Ladestation und südlich der Entladestation. sich den Plattformen zu ihren Einrichtungen stellen.",
+        "loading": "Wählen Sie die Erzfrachtplattform und verbinden Sie jedes Markierungspaar südwestlich der Ladestation und südlich der Entladestation. sich den Plattformen zu ihren Einrichtungen stellen.",
+        "unloading": "Wählen Sie die Erzfrachtplattform und verbinden Sie jedes Markierungspaar südwestlich der Ladestation und südlich der Entladestation. sich den Plattformen zu ihren Einrichtungen stellen.",
+        "title": "Bahnsteige neben den Stationen bauen"
+      },
+      "step7": {
+        "town": "Legen Sie die Güterbahn vom Osten der östlichen Hafen-Plattform aus südlich des Mittelpunkts der Straße zum Ende der nordwestlichen Bergbahn. Der Track ist noch nicht verbunden, legen Sie ihn also selbst aus. Verwenden Sie Kurven, um die Fahrtrichtung auszurichten, stellen Sie das Gelände für den Aufstieg auf \"No Follow\" ein und passen Sie die Note und den Radius an, bis die roten Verletzungen verschwinden. Fügen Sie Zwischenpunkte hinzu, so dass jede Spannweite 500 m oder weniger beträgt.",
+        "climb": "Legen Sie die Güterbahn vom Osten der östlichen Hafen-Plattform aus südlich des Mittelpunkts der Straße zum Ende der nordwestlichen Bergbahn. Der Track ist noch nicht verbunden, legen Sie ihn also selbst aus. Verwenden Sie Kurven, um die Fahrtrichtung auszurichten, stellen Sie das Gelände für den Aufstieg auf \"No Follow\" ein und passen Sie die Note und den Radius an, bis die roten Verletzungen verschwinden. Fügen Sie Zwischenpunkte hinzu, so dass jede Spannweite 500 m oder weniger beträgt.",
+        "title": "Verbinden Sie die beiden Stationen mit der Bahn"
+      },
+      "step8": {
+        "title": "Baue ein Depot",
+        "description": "Bauen Sie auf dem bestehenden Grundstück südwestlich des Hafens ein Eisenbahndepot. Orientieren Sie es so, dass eine Strecke vom Anschlussterminal an ihrem östlichen Ende bis zur hafenseitigen Plattform geführt werden kann."
+      },
+      "step9": {
+        "title": "Verbinden Sie das Depot mit der Hauptleitung",
+        "description": "Verbinden Sie das östliche Terminal des Depots mit einer glatten, flachen Abzweigung mit der westlichen Hafen-Plattform."
+      },
+      "step10": {
+        "description": "Verbinden Sie das vorhandene Solaranlagenterminal mit einer Stromleitung mit dem östlichen gemeinsamen Terminal des Depots.",
+        "title": "Versorgung des Depots mit Strom"
+      },
+      "step11": {
+        "description": "Erstellen Sie eine Erztransportlinie, platzieren Sie Stopps auf beiden Erzgüterplattformen und klicken Sie auf die erste Haltestelle, um den Rücklauf zu schließen. Züge können sich nicht auf einem Gleis passieren. Stellen Sie daher den Zielschritt auf 45 Minuten ein, damit ein Zug die Hin- und Rückfahrt machen kann, dann bestätigen Sie.",
+        "title": "Öffnen Sie die Erzfrachtlinie"
+      },
+      "step12": {
+        "description": "Vorauszeit für den Bergbau, das Laden, den Schienentransport, das Entladen und den Export. Die Beschaffung von Fahrzeugen und den Transport dauert einige Monate.",
+        "title": "Vorauszeit"
+      },
+      "step13": {
+        "description": "Vorab die Zeit und überprüfen Sie die Erzbelege und Exporte in den Details des Küstenhafens. Bergbau, Fahrzeugbeschaffung und Transport dauern mehrere Monate.",
+        "title": "Erzexporte bestätigen"
+      }
+    },
+    "tourism": {
+      "title": "Tourismus entwickeln",
+      "description": "Die Insel braucht einen Hafen, eine Unterkunft und eine Buslinie, um die Besucher in ihren Ruinen willkommen zu heißen. Erfahren Sie, wie Sie ein Hotel- und Passagierterminal bauen, eine Buslinie erstellen und die Ankunft der Touristen, den Verkauf von Restaurants und die Busnutzung überprüfen.",
+      "step1": {
+        "description": "Bauen Sie ein Touristenhotel auf dem in Gelb markierten Grundstück westlich der antiken Ruinen. Da dies ein Tutorial ist, wird die Bauzeit übersprungen.",
+        "title": "Baue ein Hotel neben den Ruinen"
+      },
+      "step2": {
+        "description": "Ein Hafen wird benötigt, um Touristen zu empfangen. Baue ein Passagierterminal auf dem markierten Hafengrundstück.",
+        "title": "Bauen Sie ein Passagierterminal"
+      },
+      "step3": {
+        "description": "Touristen haben keine privaten Autos, daher muss öffentliche Verkehrsmittel zur Verfügung gestellt werden. Öffentliche Verkehrsmittel öffnen → Neue Linie und Buslinie wählen. Halten Sie an den gelben Markierungen in dieser Reihenfolge Haltestellen an: Hafen → Wohnen → Ruinen → Wohnen, klicken Sie dann auf die Hafenhaltestelle, um die Schleife zu schließen. Setzen Sie den Tarif auf 0 und den Zielfortschritt auf 1 Minute und bestätigen Sie dann.",
+        "title": "Erstellen Sie eine Buslinie vom Hafen zu den Ruinen"
+      },
+      "step4": {
+        "description": "Zeit für die Begrüßung von Touristen. Die Einrichtung und die Beschaffung von Busfahrzeugen benötigen einige Monate, um loszulegen.",
+        "title": "Vorauszeit"
+      },
+      "step5": {
+        "description": "Überprüfen Sie den Verkauf des Restaurants an den Ruinen und den Passagieren auf der von Ihnen erstellten Buslinie. Schließen Sie diesen Schritt ab, wenn die Touristen angekommen sind, überschreiten die Restaurantverkäufe ihr Startniveau und der Bus hat Passagiere. Zeit weiter, falls erforderlich.",
+        "title": "Überprüfen Sie die Restaurantverkäufe und die Busreisenden"
+      }
+    },
+    "intro": {
+      "controls": "Helfen Sie als neuer Bürgermeister, eine Stadt zu bauen, in der die Bewohner gut leben und sich sicher fühlen können. Diese Stadt hat noch keine Neuankömmlinge und keine Strom- oder Wasserversorgung. In diesem Tutorial lernen Sie als Bürgermeister, wie Sie die Zeit vorantreiben, wie Sie den Zustand der Stadt lesen und wie Sie die Tasten und die Kamerasteuerung lesen können, und führen Sie dann durch die Vorbereitung von Straßen und Paketen, das Festlegen der Richtung eines Bezirks, das Bauen von Häusern und die Versorgung mit Strom und Wasser.",
+      "scenario4": "Wir wollen das Wohngebiet und die Arbeitsplätze mit der Bahn verbinden, aber private Gebäude und ein öffentliches Krankenhaus behindern die Strecke. In diesem Tutorial lernen Sie Landerwerb, Abriss der öffentlichen Einrichtung, erhöhte Strecke über Straßen, Plattformen und Stationen, ein Depot, Kurven- und Gradanpassung, Stromanschluss und das Öffnen eines Dienstes.",
+      "trade": "Eine lokale Lebensmittelfabrik hat um Hilfe gebeten, ihre Produkte in Übersee zu verkaufen. Die Stadt will auch eine Möglichkeit, Waren aus dem Ausland einzubringen. In diesem Tutorial erfahren Sie, wie Sie Lebensmittel durch einen Hafen exportieren und Waren per Güterbahn aus einem Nachbarland importieren.",
+      "highway": "Wenn die Stadt wächst, werden mehr Fahrzeuge Menschen und Güter durch sie transportieren. Die Stadt will eine andere Route, damit der durch den Verkehr nicht alle auf der örtlichen Straße landen. In diesem Tutorial lernen Sie, wie Sie eine Hochstraße über eine lokale Straße bauen und diese mit Rampen verbinden, um einen Austausch zu schaffen.",
+      "mining": "Unter dieser Insel liegen wertvolle Ressourcen, aber es gibt keine Möglichkeit, sie vom Berg zum Hafen zu transportieren. Ohne Transport kann die Insel diesen Reichtum nicht in eine Branche verwandeln. In diesem Tutorial erfahren Sie, wie Sie eine Mine, eine Güterbahn und einen Hafen einrichten, um Erz zu extrahieren, zu transportieren und nach Übersee zu exportieren.",
+      "tourism": "Die Inselbewohner möchten ihre alten Ruinen im Landesinneren mit mehr Besuchern teilen. Es fehlt ihnen jedoch ein Passagierhafen, eine Unterkunft und eine Busverbindung vom Hafen in die Stadt. In diesem Tutorial lernen Sie, ein Hotel- und Passagierterminal zu bauen, eine Buslinie zu erstellen und die Ankunft der Touristen, den Verkauf von Restaurants und die Busnutzung zu überprüfen.",
+      "heading": "eine Anfrage für den Bürgermeister",
+      "windowTitle": "Tutorial",
+      "marine": "Diese Stadt an der Bucht hat noch keinen Hafen und noch keine Öleinrichtungen. In diesem Tutorial werden Sie Land aus dem Meer zurückerobern und einen Tanker-Pier bauen, die Mündung der Bucht mit einer Hängebrücke überspannen, Rohöl aus einem Unterwasserölfeld pumpen und es per Pipeline zum Export schicken und eine Außeninsel mit der Fähre mit der Stadt verbinden."
+    },
+    "marine": {
+      "title": "das Meer entwickeln",
+      "description": "Diese Stadt an der Bucht hat noch keinen Hafen und noch keine Öleinrichtungen. In diesem Tutorial werden Sie Land aus dem Meer zurückerobern und einen Tanker-Pier bauen, die Mündung der Bucht mit einer Hängebrücke überspannen, Rohöl aus einem Unterwasserölfeld pumpen und es per Pipeline zum Export schicken und eine Außeninsel mit der Fähre mit der Stadt verbinden.",
+      "step1": {
+        "title": "Planen Sie ein Reklamationsprojekt",
+        "description": "Ein Hafen braucht einen Kai, in dem große Schiffe anlegen und für seine Einrichtungen landen können. Das Meer an der Spitze der Bucht zurückgewinnen, um Land für einen Hafen zu schaffen. Öffnen Sie das Earthworks-Tool, klicken Sie mit der linken Maustaste auf die vier gelben Markierungen, um den Bereich zu zeichnen, und klicken Sie mit der rechten Maustaste, um ihn zu schließen. Überprüfen Sie, ob die Schätzung für die Rückgewinnung vorgesehen ist, und bestätigen Sie dann das Projekt."
+      },
+      "step2": {
+        "title": "Vervollständige das zurückgewonnene Land",
+        "description": "Verwenden Sie START, um mindestens einen Monat vorzurücken, und drücken Sie dann Weiter. Da diese Lektion keine Baulieferanten hat, überspringt als nächstes die verbleibenden Rekultivierungsarbeiten. Sobald es fertig ist, wird das Meer Land und sein seewärts gerichteter Rand wird zu einem Kai, in dem Schiffe anlegen können."
+      },
+      "step3": {
+        "title": "Bauen Sie eine Straße auf das wiedergewonnene Land",
+        "description": "Ein Hafen oder ein Ölterminal auf zurückgewonnenem Land ist ohne Straße nutzlos: Menschen können nicht zur Arbeit kommen und Waren können sich nicht bewegen. Bauen Sie eine Straße vom Ende der Stadtstraße auf das wiedergewonnene Land. In dieser Lektion ist die Straße fertig, sobald Sie sie bestätigen. Drücken Sie auf der Symbolleiste auf „Straße, Rail & Infrastructure“, um das Baufeld zu öffnen."
+      },
+      "step4": {
+        "title": "Bauen Sie den Tanker Pier",
+        "description": "Tanker, die Rohöl befördern, sind große Schiffe, so dass ein Hafen nur dort gebaut werden kann, wo das Meer vor dem Kai tief genug ist. Der Kai des wiedergewonnenen Landes steht tiefem Wasser, das zu einem Hafen passt. Öffnen Sie das Bauwerkzeug, wählen Sie in der Kategorie „Ports“ „Tanker-Pier“, klicken Sie mit der linken Maustaste in den gelben Kreis am Kai, um seinen Platz festzulegen, und bestätigen Sie ihn im Konstruktionsfeld. Wenn ein Hafen gebaut wird, wird automatisch eine Verbindungsspur auf die Ocean Shipping Lane vor der Küste gezogen, damit die Schiffe kommen und gehen können. Diese Lektion überspringt die Bauzeit."
+      },
+      "step5": {
+        "title": "Überbrücken Sie die Mündung der Bucht",
+        "description": "Die Autobahn hält auf beiden Seiten der Mündung der Bucht. Die Mündung ist 1,6 km breit, zu breit für eine gewöhnliche Brücke auf Pfeilerreihen. Verbinden Sie sie daher mit einer Hängebrücke, die in einer Spannweite eine lange Strecke überqueren kann. Große Schiffe fahren auf der Schifffahrtsspur darunter, so dass die Brücke hoch genug sein muss, um sie zu räumen. Die Enden der Autobahn an beiden Ufern sind bereits in dieser Höhe. Öffnen Sie auf dem Symbolfeld „Straße, Schiene und Infrastruktur“, wählen Sie unter „Autobahnen“ die Option „4-spurige Hängebrücke“ und zeichnen Sie es vom nördlichen Ende (Cyan-Kreis) zum südlichen Ende (gelber Kreis). Klicken Sie mit der rechten Maustaste, um die Form zu beenden, bestätigen Sie im Konstruktionsfeld und drücken Sie dann auf Weiter."
+      },
+      "step6": {
+        "title": "Finden Sie das Unterwasserölfeld",
+        "description": "Als nächstes setzen Sie die Ressourcen des Meeres ein. Prüfen Sie vor dem Bau eines Ölterminals, ob sich ein Ölfeld unter dem nahe gelegenen Meer befindet. Drücken Sie im Cockpit auf „Ansicht“, um das Ansichtsfenster zu öffnen.",
+        "show": "Wählen Sie auf den vertikalen Registerkarten \"Natürliche Ressourcen\" und wechseln Sie in \"Visible\". Sie können ein Ölfeld sehen, das sich unter der Bucht ausbreitet. Klicken Sie auf das Ölfeld neben der gelben Markierung, um die Details zu öffnen."
+      },
+      "step7": {
+        "title": "Bauen Sie das Ölterminal",
+        "description": "Rohöl, das vom Unterwasserfeld gepumpt wird, wird per Pipeline an einen Ölterminal an Land geschickt und von dort aus verkauft. Das Terminal wird gegenüber dem Kai gebaut, wo die Pipeline eintreten kann. Öffnen Sie das Bauwerkzeug, wählen Sie in der Kategorie „Ports“ die Option „Öl-Pipeline-Terminal“, klicken Sie mit der linken Maustaste in den gelben Kreis des Kai, um seinen Platz festzulegen, und bestätigen Sie ihn in der Konstruktionsleiste. Diese Lektion überspringt die Bauzeit."
+      },
+      "step8": {
+        "title": "Bauen Sie die Ölplattform",
+        "description": "Eine Ölplattform, die Rohöl pumpt, muss direkt über dem Ölfeld im Meer stehen. Öffnen Sie das Bauwerkzeug, wählen Sie \"Offshore-Ölplattform\" in der Kategorie \"Farming & Resources\", klicken Sie mit der linken Maustaste in den gelben Kreis auf dem Meer, um seinen Platz festzulegen, und bestätigen Sie ihn im Konstruktionsfeld. Diese Lektion überspringt die Bauzeit."
+      },
+      "step9": {
+        "title": "Verbinden Sie sie mit einer Pipeline",
+        "description": "Senden Sie das von der Plattform gepumpte Rohöl durch eine Unterwasserleitung zum Ölterminal. Öffnen Sie auf dem Symbolfeld „Straße, Schiene & Infrastruktur“, wählen Sie unter „Öl“ die Option „Unterwasser-Öl-Pipeline“ und ziehen Sie es von der Anschlussklemme der Plattform zur Anschlussklemme des Ölterminals. Nachdem Sie es bestätigt haben, drücken Sie Weiter und die Pipeline ist sofort fertig."
+      },
+      "step10": {
+        "title": "Exportieren Sie das Rohöl",
+        "description": "Das Ölterminal verkauft das Rohöl, das es auf dem Markt erhält, und der Tankerpier kauft es und exportiert es per Schiff nach Übersee. Es dauert einige Monate, bis die Arbeiter ankommen und das Öl mit dem Verkauf beginnt. Verwenden Sie Start, um einige Monate voranzukommen, und drücken Sie dann Weiter. Wenn noch nichts exportiert wurde, fahren Sie ein wenig weiter und drücken Sie es erneut."
+      },
+      "step11": {
+        "title": "Baue einen Fähranleger",
+        "description": "Die Insel vor der Küste hat keine Möglichkeit, die Stadt zu erreichen. Öffnen Sie eine Fähre, damit die Bewohner in die Stadt reisen können. Bauen Sie zuerst einen Fähranleger am Ufer der Stadt. Öffnen Sie auf dem Symbolfeld „Straße, Schiene und Infrastruktur“, wählen Sie unter „Wasserstraße“ „Ferry Pier“ und zeichnen Sie es vom Ufer (Cyan-Kreis) über das Meer (gelber Kreis). Klicken Sie mit der rechten Maustaste, um die Form zu beenden, bestätigen Sie im Konstruktionsfeld und drücken Sie dann auf Weiter."
+      },
+      "step12": {
+        "title": "Zeichnen Sie die Fährspur",
+        "description": "Als nächstes ziehen Sie die Spur Die Fähre fährt vom Pier der Insel zum Pier der Stadt. Eine Fahrspur kann nicht über Land gehen. Gehen Sie also um die Nordseite der Insel, gehen Sie unter der Hängebrücke an der Mündung der Bucht vorbei und betreten Sie die Bucht und klicken Sie auf dem Weg zu Punkten mit der linken Maustaste. Wählen Sie unter „Wasserstraße“ die „Ferry Lane“ aus, verbinden Sie die Spitze des Inselpiers mit der Spitze des städtischen Piers, bestätigen Sie und drücken Sie Weiter."
+      },
+      "step13": {
+        "title": "Öffnen Sie die Fährlinie",
+        "description": "Erstellen Sie schließlich die Fährlinie, die auf der Fahrspur verläuft. Erstellen Sie eine Fährlinie, platzieren Sie Haltestellen auf dem Pier der Insel und am Pier der Stadt, klicken Sie auf die erste Haltestelle, um die Schleife zu schließen, und bestätigen Sie. Sobald die Zeile vorhanden ist, ist dieses Tutorial abgeschlossen. Um Schiffe tatsächlich zu betreiben, benötigen Sie auch ein Wartungsdock, das sie leaset."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Spiel starten",
+    "nowLoading": "Jetzt laden...",
+    "startError": "kann nicht gestartet werden. Bitte versuchen Sie es erneut.",
+    "todaysTips": "Die heutigen Tipps",
+    "gotIt": "Schließen",
+    "items": {
+      "tip1": {
+        "title": "Geld bringt die Stadt um",
+        "description": "Die Ausgaben der Stadt für Bau und öffentliche Löhne werden zu Einkommen für Unternehmen und Haushalte und unterstützen das Einkaufen und die Produktion. Allein das Sammeln von Steuern wird die Wirtschaft nicht in Bewegung halten. Die benötigten Dienstleistungen und Reparaturen finanzieren, um Geld in die Stadt zurückzubringen."
+      },
+      "tip2": {
+        "title": "Das lange Spiel spielen",
+        "description": "Bürger, die in einer unsicheren Umgebung aufwachsen, haben eine größere Tendenz, als Erwachsene Kriminalität zu begehen. Verbrechen Sie die Kriminalität und die Umwelt, in denen Kinder aufwachsen. Die Bewältigung der Wurzeln der schlechten öffentlichen Sicherheit dauert mindestens eine Generation."
+      },
+      "tip3": {
+        "title": "Mach den Weg!",
+        "description": "Feuerwehrleute müssen die Szene erreichen, um zu helfen. Auch bei vorhandener Feuerwache lassen lange Strecken oder verstopfte Straßen den Schaden wachsen. Überprüfen Sie die Stationsstandorte und die Zugangsrouten neben ihren Budgets."
+      },
+      "tip5": {
+        "title": "eine bergauf kosten",
+        "description": "Der Bau von Straßen an steilen Hängen erfordert mehr Arbeit als auf flachem Boden. Die kürzeste Route auf der Karte ist nicht immer die billigste. Vergleichen Sie Gelände- und Konstruktionsschätzungen und betrachten Sie einen leichten Umweg."
+      },
+      "tip6": {
+        "title": "Einige Planungen erforderlich",
+        "description": "Mehr Einwohner und Fabriken bedeuten mehr Nachfrage nach Strom und Wasser. Beginnen Sie mit dem Bau, nachdem ein Mangel aufgetreten ist, und Sie warten auf die Fertigstellung. Überprüfen Sie die Ersatzversorgungskapazität, bevor Sie einen neuen Bezirk entwickeln."
+      },
+      "tip7": {
+        "title": "Eile macht Abfall",
+        "description": "Höhere Geschwindigkeitsbegrenzungen beschleunigen die Fahrten, erhöhen aber das Unfallrisiko. Scharfe Kurven brauchen ebenfalls Pflege. Bei häufigen Unfällen überprüfen Sie das Straßenlayout und die Geschwindigkeitsbegrenzung."
+      },
+      "tip8": {
+        "title": "In die Zukunft investieren",
+        "description": "Eine wachsende Bevölkerung allein löst den Personalmangel in Krankenhäusern oder fortgeschrittenen Fabriken nicht. Stellen Sie die Spezialisierungen der Universität und die Zulassungskapazität ein, um die erforderlichen Spezialisten zu schulen und den Studenten Zeit für den Abschluss zu geben."
+      },
+      "tip9": {
+        "title": "Für die Ewigkeit gebaut",
+        "description": "Vernachlässigte Reparaturen ließen Gebäude und Straßen verschlechtern und riskierten schließlich den Zusammenbruch. Brände und Zusammenbrüche verschlimmern auch die Stimmung der Öffentlichkeit, daher ist es riskant, alles für Neubauten auszugeben. Halten Sie Geld für Reparaturen und Brandbekämpfung bereit."
+      },
+      "tip10": {
+        "title": "Ein kleiner Atemraum",
+        "description": "Eng gepackte Gebäude lassen ein Feuer leichter auf ihre Nachbarn ausbreiten. Neben den Feuerwehren hilft der Raum zwischen den Gebäuden, die Stadt zu schützen."
+      },
+      "tip11": {
+        "title": "eingraben",
+        "description": "Überprüfen Sie die Ressourceneinlagen, bevor Sie die Standorte für Minen und Ölgewinnung auswählen. Reserven fallen, wenn Sie sie extrahieren. Eine Bergbaustadt braucht auch einen Plan für Arbeitsplätze und Steuereinnahmen, nachdem ihre Einlagen aufgebraucht sind."
+      },
+      "tip12": {
+        "title": "Die Cash Cow der Stadt",
+        "description": "Der Bürgermeister kann Wohn- und Geschäftsgebäude bauen, um Miete von Mietern zu verdienen. Leerraum bringt keine Miete, also überprüfen Sie, welche Nutzungen nachgefragt sind, in der Nähe freie Stellen und die Lage vor dem Bau."
+      },
+      "tip13": {
+        "title": "Der Steuermann kommt",
+        "description": "Steuersätze wirken sich auf die Geschäftskosten und die Rentabilität sowie die Einnahmen aus der Stadt aus. Niedrigere Steuern auf eine Branche können Ihnen helfen, ihr Wachstum zu unterstützen. Wenn der Umsatz zu kurz kommt, überprüfen Sie die Situation jeder Branche, bevor Sie die Steuern auf der ganzen Linie erhöhen."
+      },
+      "tip14": {
+        "title": "Habe immer einen Plan B",
+        "description": "Wenn Unfälle oder Katastrophen Kraftwerke oder Stromleitungen deaktivieren, breiten sich die Auswirkungen auf Fabriken und Anwohner aus, die von der Elektrizität abhängig sind. Stellen Sie Backup-Einrichtungen und Zustellrouten für wichtige Infrastruktur bereit, damit die ganze Stadt nicht zum Stillstand kommt."
+      },
+      "tip15": {
+        "title": "Finden Sie einen Ort zum Leben",
+        "description": "Wenn Sie das freie Land in der Innenstadt ungenutzt lassen, können sich Menschen, die ihre Häuser verloren haben, dort niederlassen, was es zu einem wahrscheinlichen Ort für einen Slum macht. Stellen Sie Häuser zur Verfügung, die sie sich leisten können, und der Slum wird allmählich schrumpfen, wenn die Bewohner in sie einziehen."
+      },
+      "tip16": {
+        "title": "Industriecluster",
+        "description": "Das Clustering ähnlicher Branchen und deren Rohstoffproduzenten macht einen Standort günstiger für die Produktion. Erwägen Sie die Gruppierung verwandter Branchen, anstatt Fabriken in der ganzen Stadt zu verstreuen. Denken Sie in der Nähe des Gehäuses an den Lärm und die Luftverschmutzung, die sie verursachen können."
+      },
+      "tip17": {
+        "title": "Steigen und mahlen",
+        "description": "Längere Arbeitszeiten im Reglement lassen die gleiche Belegschaft mehr Produktion unterstützen. Aber Gesundheit und Freizeit leiden und reduzieren die Ausgaben für Unterhaltung. Zu viel Zeit, um Geld zu verdienen, lässt keine Zeit, um es auszugeben."
+      },
+      "tip18": {
+        "title": "Essen, pendeln, schlafen, wiederholen",
+        "description": "Lange Pendelverkehre verkürzen die Freizeit und Ausgaben für Unterhaltung. Überprüfen Sie die Entfernung zwischen Häusern und Arbeitsplätzen und Überlastung auf dem Weg. Für Anwohner, die nur rechtzeitig zum Schlafen nach Hause kommen, ist Ihr lebhaftes Einkaufsviertel nur eine Landschaft durch ein Fenster."
+      },
+      "tip19": {
+        "title": "Lassen Sie Raum zum Wachsen",
+        "description": "Längere Züge können nur fahren, wenn sie an den Bahnhöfen der Linie passen. Planen Sie die Plattformlängen beim Bau von Stationen, um die zukünftige Nachfrage zu ermöglichen. Die Verlängerung einer Station hilft nicht, wenn die anderen noch zu kurz sind."
+      },
+      "tip20": {
+        "title": "Fegen Sie es unter der Stadt",
+        "description": "Unterirdische Straßen verursachen keine Lärm- oder Luftverschmutzung, was sie zu einer Option zum Schutz von Wohngebieten macht. Einige Probleme können wirklich unter der Stadt gefegt werden."
+      },
+      "tip21": {
+        "title": "Im Schatten des Fortschritts",
+        "description": "Hohe Gebäude werfen Schatten in ihren Norden und verschlechtern die Lebensbedingungen in der Nähe. Achten Sie auf ihre Größe und ihren Abstand. Terrain wie Berge wirft auch Schatten. Die Zukunft Ihrer Stadt mag hell sein, aber der Boden darunter ist möglicherweise pechschwarz."
+      },
+      "tip22": {
+        "title": "Tauschen Sie die Schlüssel gegen einen Transitpass",
+        "description": "Wenn öffentliche Verkehrsmittel Arbeitsplätze, Schulen und Geschäfte leicht zu erreichen sind, entscheiden sich Haushalte mit größerer Wahrscheinlichkeit für ein Leben ohne Auto. Einsparungen beim Autobesitz können auf andere Ausgaben fließen."
+      },
+      "tip23": {
+        "title": "Nächster Halt: Niemand",
+        "description": "Busse addieren den Straßenverkehr auch ohne Passagiere. Zu viele zu laufen können die Überlastung verschlimmern. Überprüfen Sie die Fahrerschaft und die Fortschritte, um zu entscheiden, wie viel Service benötigt wird."
+      },
+      "tip24": {
+        "title": "Maulwürfe zahlen keine Miete",
+        "description": "Tief genug Tunnel können passieren, ohne das Land darüber zu kaufen. Flache Abschnitte erfordern noch Landerwerb, also überprüfen Sie Tiefen und Schätzungen. Wenn die Verhandlungen schwierig werden, versuchen Sie, etwas tiefer zu graben."
+      },
+      "tip25": {
+        "title": "ein ausgesetzter Pendelverkehr",
+        "description": "Seilbahnen bieten öffentliche Verkehrsmittel, wo Berge und steile Hänge Straßen erschweren. Stellen Sie auch den Zugang zu Bahnhöfen und Verbindungen zu anderen Transportmitteln bereit. Wenn das Reisen auf dem Boden zu viel Mühe macht, lassen Sie Ihre Bürger hängen."
+      },
+      "tip26": {
+        "title": "Aktuelle Verkehrsbedingungen",
+        "description": "Reserve-Erzeugungskapazität hilft nicht, wenn Stromleitungen nicht genug Strom transportieren können. Überprüfen Sie vor dem Hinzufügen von Kraftwerken die Verbindungen und Übertragungskapazitäten auf den Bezirk auf den Mangel. Eine untergroße Linie kann das Angebot der gesamten Stadt einschränken."
+      },
+      "tip27": {
+        "title": "Hier gibt es nichts zu sehen",
+        "description": "Sie können ein Gebäude in der Entwicklung sprengen und als Unfall weitergeben. Die öffentliche Stimmung wird jedoch schlecht leiden. Bevor Sie eine Website löschen, sollten Sie die Kosten für den Kauf abwägen und gegen die Auswirkungen eines kraftvollen Ansatzes abreißen."
+      },
+      "tip28": {
+        "title": "aufs Meer gehen",
+        "description": "Kurz an Land? Neue Standorte vom Meer zurückfordern. Ölplattformen können auch dort gebaut werden, wo sich unter dem Meeresboden Ressourcen befinden."
+      },
+      "tip29": {
+        "title": "Rotes Licht, Rotes Licht",
+        "description": "Mehr signalgesteuerte Kreuzungen bedeuten mehr Zeit, die an Lichtern warten. Vermeiden Sie zu viele auf Hauptstraßen. Mit einem akribisch kreuzenden Gitter unterbricht die Sonne möglicherweise, bevor Ihre Bewohner jemals grün sehen."
+      },
+      "tip30": {
+        "title": "Kannst du mich jetzt hören?",
+        "description": "Höhere Funktürme auf höherer Ebene können breitere Bereiche abdecken. Suchen Sie nach Bergen zwischen dem Turm und Orten ohne Rezeption. Durch die Begeisterung für mehr Kraft kann man kein Signal durch einen Berg bekommen."
+      },
+      "tip31": {
+        "title": "Fügen Sie einfach Leistung hinzu",
+        "description": "Eine Küstenentsalzungsanlage kann eine Stadt ohne nahe gelegene Süßwasserquelle versorgen. Es braucht jedoch Strom, um zu funktionieren. Zuerst jagt ihr Wasser, dann sucht ihr nach Macht."
+      },
+      "tip32": {
+        "title": "Jobs im Takt",
+        "description": "Arbeitslosigkeit ist ein Faktor, der die öffentliche Sicherheit verschlechtert. Anwohner brauchen Arbeitsplätze sowie Polizeischutz. Wenn die Arbeitslosigkeit hoch ist, überprüfen Sie die Stellenangebote, die Fähigkeiten, die Arbeitgeber benötigen und ob die Bewohner diese Jobs erreichen können."
+      },
+      "tip33": {
+        "title": "Das ist das Problem der Zukunft von mir",
+        "description": "Gebäude und Straßen müssen nach dem Bau ständig repariert werden. Erweitern Sie, nur weil Sie es sich leisten können, zu bauen, und zukünftige Budgets können in der Wartung verschwinden. Denken Sie daran, der zukünftige Bürgermeister ist auch Sie."
+      },
+      "tip34": {
+        "title": "Mehr Pumpen, gleiches Wasser",
+        "description": "Die Wasserquellen füllen sich mit der Zeit auf, aber das Extrahieren von mehr als sie erholt sich, verringert die Reserven. andere Quellen sichern, bevor die Nachfrage wächst. Mehr Pumpen kommen nicht mit mehr Wasser."
+      },
+      "tip35": {
+        "title": "Es ist eine Funktion",
+        "description": "Straßen und Gebäude sind nicht leicht zu bewegen, sobald der Bau beginnt. Überprüfen Sie vor der Bestätigung die Ausrichtung, die Verbindungen und das um sie herum verbliebene Land. Trotzdem könnte diese versehentlich krumme Straße auf Ihnen als lokaler Charakter wachsen."
+      },
+      "tip36": {
+        "title": "Großer Bürgermeister schaut zu",
+        "description": "Klicken Sie auf einen Fußgänger oder ein Auto, um einen Bürger zu Ihrer Tracking-Liste hinzuzufügen. Verwenden Sie es, um einem Bewohner zu folgen, dessen Leben Sie interessiert. Neben stadtweiten Statistiken können Sie Ihre Stadt durch das tägliche Leben einer Person sehen."
+      },
+      "tip37": {
+        "title": "Ein Backup für die Prognose",
+        "description": "Sonnen- und Windleistung ändern sich mit dem Wetter. Die Planung rund um die Versorgung mit Schönwetter allein kann Sie kurz lassen, wenn sich die Bedingungen ändern. Kombinieren Sie sie mit Quellen, die weniger wetterabhängig sind, wie Wärme- oder Kernenergie."
+      },
+      "tip38": {
+        "title": "Die Größe ist wichtig",
+        "description": "Einige Gebäude passen nicht auf kleine Pakete. Überprüfen Sie den Platz, der für eine geplante Einrichtung benötigt wird, bevor Sie das Land teilen. Viel Ersatzland hilft einem großen Gebäude nicht, wenn alles in winzigen Parzellen ist."
+      },
+      "tip39": {
+        "title": "Das wird dich kosten",
+        "description": "Abwasserbehandlung, Abfallentsorgung, Kommunikation und Gesundheitsversorgung können standardmäßig kostenlos sein. Durch das Setzen von Gebühren können Benutzer einen Teil der Betriebskosten decken. Freundliche Preise oder ehrgeizige Preisschilder? Das ist der Anruf des Bürgermeisters."
+      },
+      "tip40": {
+        "title": "Kopieren, Einfügen, Profitieren",
+        "description": "Als Bürgermeister können Sie Kopien von bestehenden Gebäuden konstruieren. Halten Sie den Typ und die Bodenanzahl unverändert und verwenden Sie ein Paket, das zum Original passt, um die Baukosten zu senken. Das Straßenbild mag sich wiederholen, aber Ihre Brieftasche wird die Aussicht genießen."
+      },
+      "tip41": {
+        "title": "Mehr als die Miete",
+        "description": "Die Bewohner vergleichen Miete, Arbeit und Schulwege, Einkaufsreisen, Wohnqualität und das Wohnumfeld bei der Auswahl eines neuen Hauses. Lärm, Luftverschmutzung, öffentliche Sicherheit und Sonnenlicht sind wichtig. Günstige, aber unbequeme Häuser sind weniger ansprechend; Bequeme sind immer noch eine erschwingliche Miete und genügend Platz, um einzuziehen."
+      },
+      "tip42": {
+        "title": "Besser tief als leid",
+        "description": "Große Anschlüsse wie Container-, Schüttgut- und Tankanschlüsse benötigen ausreichend tiefes Wasser. Küsten, an denen der Meeresboden steil abfällt, sind gut für Häfen geeignet, da tiefes Wasser in der Nähe der Küste liegt. Selbst an einer flachen Küste mit flachem Wasser, das sich vor der Küste erstreckt, können Sie einen Hafen bauen, indem Sie Land zu tieferem Wasser zurückgewinnen."
+      },
+      "tip43": {
+        "title": "Nur eine Minute…",
+        "description": "Zu viel Parken auf der Straße verlangsamt den Verkehr und erhöht das Unfallrisiko. Bauen Sie Parkplätze, um diese Autos woanders zu bleiben. Die „nur eine Minute“ eines Fahrers kann zum Nachmittag aller anderen werden."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Wählen Sie ein Paket aus, um ein Gebäude zu planen. Es dauert einige Zeit von der Planung bis zur Fertigstellung.",
+    "parcelCreation": "Halten Sie Strg gedrückt, um eine Erstellungsmethode aus dem radialen Menü auszuwählen, und klicken Sie dann in der 3D-Ansicht auf ein Ziel. Passen Sie die Größe im Bedienfeld an und bestätigen Sie.",
+    "transitCreation": "Klicken Sie mit der linken Maustaste, um die Stopps in der richtigen Reihenfolge zu platzieren. Klicken Sie auf den ersten Stopp, um die Schleife zu schließen. Ziehen Sie ein Segment, um einen Wegpunkt hinzuzufügen, ziehen Sie einen Punkt, um ihn zu verschieben, und klicken Sie mit der rechten Maustaste, um ihn zu löschen. Für eine Hin- und Rückfahrt platzieren Sie auch die Rückhaltestellen. Klicken Sie erneut auf einen platzierten Stopp oder lassen Sie einen Stopp auf einen anderen Stopp fallen, um dort wieder anzuhalten.",
+    "transitManagement": "Liste der öffentlichen Verkehrslinien. Passen Sie Tarife und Fortschritte an oder erstellen und löschen Sie Linien. Die Tarife wirken sich auf die Routenwahl der Bewohner aus. Zu hohe Tarife reduzieren das Fahrverhalten und erhöhen den Besitz des Autos.",
+    "pathConstruction": "Bauen Sie Straßen und Eisenbahnen. Klicken Sie in der 3D-Ansicht auf das Terrain: Klicken Sie mit der linken Maustaste, um Eckpunkte hinzuzufügen, klicken Sie mit der rechten Maustaste, um die Form zu bestätigen, und ziehen Sie die Eckpunkte, um sie neu zu positionieren. Halten Sie STRG gedrückt, um das Einstellungsmenü zu öffnen (Kurve/Gerade und Schnappen). Verwenden Sie 3/4 Tasten, um die Damm- / Schnitthöhe zu ändern.",
+    "pathConstructionElevated": "Bauen Sie Straßen und Eisenbahnen. Klicken Sie in der 3D-Ansicht auf das Terrain: Klicken Sie mit der linken Maustaste, um Eckpunkte hinzuzufügen, klicken Sie mit der rechten Maustaste, um die Form zu bestätigen, und ziehen Sie die Eckpunkte, um sie neu zu positionieren. Halten Sie STRG gedrückt, um das Einstellungsmenü zu öffnen (Kurve/Gerade und Schnappen). Verwenden Sie PageUp/PageDown oder 1/2, um die Höhe zu ändern, und 3/4 Tasten, um die Damm-/Schnitthöhe zu ändern.",
+    "districtEdit": "Erstellen, erweitern und verschmelzen Sie \"Distrikte\", die Einheiten für Regulierungen und Statistiken. Halten Sie in der 3D-Ansicht Strg gedrückt, um die Werkzeuge zu wechseln. Werkzeug erstellen: Klicken Sie mit der linken Maustaste auf eine Straße, um einen neuen Bezirk in der angezeigten Farbe zu erstellen (jedes Mal, wenn Sie das Werkzeug auswählen, wird eine neue Farbe gezeichnet). Erweitern Sie das Werkzeug: Klicken Sie mit der rechten Maustaste, um den Bezirk auszuwählen, der wachsen soll, und klicken Sie dann mit der linken Maustaste, um sie hineinzuziehen. Zusammenführen-Tool: Klicken Sie mit der rechten Maustaste, um den zum Zusammenführen zu fassenden Bezirk auszuwählen, und klicken Sie dann mit der linken Maustaste auf einen anderen Bezirk, um das Bestätigungsfeld zu öffnen. Die Farbe und der Name des ausgewählten Distrikts werden neben dem Mauszeiger angezeigt. Drücken Sie die Taste erneut, um zu beenden.",
+    "bulldozer": "Bulldozer-Modus. Klicken Sie mit der linken Maustaste, um leere Pakete, geplante Gebäude, geplante Straßen und Geländerabwehr zu entfernen (verstreute Requisiten werden nach Bestätigung als ganzes Gebiet entfernt). Drücken Sie die Taste erneut, um zu beenden.",
+    "bulldozerInstant": "Bulldozer-Modus. Klicken Sie mit der linken Maustaste, um Gebäude, Straßen, leere Parzellen und Geländerequisiten ohne Bestätigung sofort zu löschen. Gebäude werden zusammen mit ihren Mietern und Anwohnern entfernt und das Gelände nicht wiederhergestellt (das Rathaus, der Grenzkontrollpunkt und die öffentlichen Verkehrssegmente können nicht gelöscht werden; verstreute Requisiten werden nach Bestätigung immer noch als ganzes Gebiet entfernt). Drücken Sie die Taste erneut, um zu beenden.",
+    "cityBudget": "Entscheiden Sie, wie Sie die aus Steuern und Geschäftstätigkeiten für die nächste Periode verdienten Mittel verteilen. Wenn die Regierung Materialien für den Straßenbau oder den Betrieb öffentlicher Einrichtungen kauft, kann sie dies nur innerhalb des hier festgelegten Budgets tun. Wenn das Budget nicht ausreicht, können Mitarbeiter öffentlicher Einrichtungen entlassen werden.",
+    "resourceEdit": "Erstellen Sie einen natürlichen Ressourcenbereich. Wählen Sie einen Ressourcentyp aus und klicken Sie dann auf das Terrain. Klicken Sie mit der linken Maustaste, um einen Scheitelpunkt hinzuzufügen, klicken Sie auf eine Kante, um einen Scheitelpunkt einzufügen, und klicken Sie mit der rechten Maustaste, um einen Scheitelpunkt zu entfernen. Ziehen Sie einen Scheitelpunkt, um ihn neu zu positionieren.",
+    "grading": "Klicken Sie mit der linken Maustaste, um Scheitelpunkte zu platzieren, und klicken Sie dann mit der rechten Maustaste, um den Bereich zu bestätigen."
+  }
+}

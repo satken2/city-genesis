@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Data atual",
+    "afterDate": "Data após a execução",
+    "epochCount": "épocas",
+    "message": "Terminar o trabalho e o tempo de avanço desta vez?",
+    "no": "Não",
+    "yes": "Sim",
+    "executing": "Executando simulação...",
+    "errorSteamLimit": "A verificação do Steam não pôde ser confirmada; portanto, nenhuma época pode ser executada. (Sem verificação, você pode jogar até uma população de {{limit}}.)",
+    "errorAlreadyRunning": "Outra época já está em execução. Tente novamente depois que terminar.",
+    "errorFailed": "Falha ao executar a época: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} épocas)",
+    "sectionConstruction": "Em construção",
+    "kindPath": "Via",
+    "kindBuilding": "Facilidade",
+    "kindProject": "Projeto",
+    "noItems": "Nenhum",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Concluído",
+    "sectionStatistics": "Estatística",
+    "sectionScore": "Contagem",
+    "scoreGain": "Ganhos",
+    "scoreLoss": "Penalidades",
+    "questState": {
+      "completed": "alcançado",
+      "active": "Em progresso",
+      "locked": "Trancado",
+      "failed": "Fracassado"
+    },
+    "trendHint": "Tendência nas últimas épocas {{count}}: {{trend}}",
+    "trend": {
+      "up": "Aumentar",
+      "flat": "Firmar",
+      "down": "Queda",
+      "none": "História insuficiente"
+    },
+    "statPopulation": "População",
+    "statTourists": "turistas",
+    "statGdp": "PIB",
+    "statPrice": "Preços",
+    "statIncome": "Renda",
+    "statUnemployment": "Desemprego",
+    "statHealthcare": "Saúde",
+    "statNutrition": "Nutrição",
+    "statLeisure": "Lazer",
+    "statFire": "Incêndios",
+    "statTraffic": "acidentes de trânsito",
+    "statCrime": "Crime",
+    "questCompleted": "alcançado!",
+    "questFailed": "Prazo passado"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Mapeamento de rotas de transporte",
+      "prepare": "Preparando este termo",
+      "transit": "Organização do transporte público",
+      "market": "Mercadorias de negociação",
+      "production": "Produzindo e consumindo",
+      "commute": "indo para o trabalho e para a escola",
+      "growth": "Cidadãos crescendo",
+      "evaluate": "Avaliação da cidade",
+      "immigration": "Acolhendo imigrantes",
+      "labor": "procurando empregos",
+      "spawn": "Abrindo novos negócios",
+      "relocate": "Movendo as famílias",
+      "construction": "Construindo edifícios",
+      "finance": "Liquidação das finanças",
+      "plan": "Planejando o próximo mandato",
+      "incident": "Respondendo a incidentes",
+      "finalize": "Compilando estatísticas"
+    }
+  }
+}

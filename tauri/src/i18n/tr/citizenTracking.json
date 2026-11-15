@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Genel bakış",
+    "tabActivity": "Faaliyet",
+    "follow": "Kamera ile takip edin",
+    "unfollow": "Takip etmeyi bırak",
+    "track": "İzleme listesine ekle",
+    "trackRandom": "Rastgele bir vatandaşı takip edin",
+    "noUntrackedCitizens": "İzlenmeyen vatandaşlar yok.",
+    "trackRandomError": "bir vatandaşı takip edemedi.",
+    "untrack": "İzleme listesinden kaldır",
+    "home": "Oturma",
+    "mobility": "dolaşma",
+    "mode": {
+      "automobile": "Araba",
+      "pedestrian": "Yürüyüş ve toplu taşıma"
+    },
+    "visits": "hedef",
+    "visitKind": {
+      "home": "Ev",
+      "work": "Çalışma",
+      "school": "Okul",
+      "shop": "Alışveriş"
+    },
+    "legs": {
+      "walk": "Yürüyüş",
+      "drive": "Araba",
+      "transit": "Transit",
+      "conveyor": "Yolcu taşıma sistemi"
+    },
+    "trip": "Tek Yön {{minutes}} Min · {{route}}",
+    "noRoute": "rota yok",
+    "noVisits": "gidecek yeri yok.",
+    "status": {
+      "not_ready": "Simülasyon çalışmasından sonra gösterilir.",
+      "busy": "Simülasyon çalışırken kullanılamaz.",
+      "no_home": "Konut bekleniyor, bu nedenle kayıtlı bir faaliyet yok.",
+      "missing": "Bu vatandaş artık şehirde yaşamıyor.",
+      "error": "yüklenemedi."
+    },
+    "empty": "Hiçbir vatandaş takip edilmiyor.",
+    "pickFailed": {
+      "not_ready": "Arabalara ve yayalara tıklamak ve kim olduklarını görmek için simülasyonu çalıştırın.",
+      "busy": "Simülasyon çalışırken vatandaşlar gösterilemez.",
+      "none": "Bu arabada veya yürüyerek kimin olduğunu bulamadım.",
+      "missing": "Bu vatandaş artık şehirde yaşamıyor.",
+      "no_home": "Bu vatandaş konut bekliyor.",
+      "error": "vatandaşa gösteremedi."
+    }
+  }
+}

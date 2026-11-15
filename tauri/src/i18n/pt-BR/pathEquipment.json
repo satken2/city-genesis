@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Equipamento rodoviário",
+    "streetlight_type": "postes de luz",
+    "fence_type": "cercas",
+    "street_tree_type": "Árvores da rua",
+    "utility_mode": "Fiação do utilitário",
+    "none": "Nenhum",
+    "standard": "Padrão",
+    "overhead": "Aéreo",
+    "underground": "Subterrâneo",
+    "apply": "Aplicar",
+    "bench_type": "Bancos",
+    "bin_type": "caixas",
+    "planter_type": "plantadores",
+    "advert_type": "Publicidade"
+  }
+}

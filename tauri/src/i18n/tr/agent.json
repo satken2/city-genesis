@@ -1,0 +1,204 @@
+{
+  "agent": {
+    "back": "Geri",
+    "editAppearance": "Görünüşü Değiştir",
+    "relocateCityHall": "belediye binasının yerini değiştirmek",
+    "publicFacility": "Kamu tesisi",
+    "underAcquisition": "Arazi edinimi müzakere",
+    "publicFacilityPanel": {
+      "title": "Kamu tesisi"
+    },
+    "abandon": "Vazgeçmek",
+    "abandonHint": "Bakımdan vazgeçin ve onarım olmadan çürümesine izin verin",
+    "statusSince": {
+      "founded": "Kurulmuş",
+      "householdFormed": "hanehalkı",
+      "arrived": "varışta",
+      "opened": "Açıldı",
+      "schoolOpened": "Açıldı",
+      "completed": "Tamamlandı",
+      "operatingSince": "beri aktif",
+      "resumed": "devam ettirilmiş",
+      "paused": "durgun",
+      "suspended": "Askıda",
+      "schoolClosed": "Askıda",
+      "constructionStarted": "İnşaat başladı",
+      "demolitionScheduled": "Yıkım Planlandı",
+      "demolitionStarted": "yıkım başladı",
+      "demolished": "yıkılmış",
+      "collapsed": "Çökmüş",
+      "burnedDown": "Yandı",
+      "default": "o zamandan beri durum"
+    },
+    "reserves": "rezerv",
+    "revenues": "Gelir",
+    "expenses": "Giderler",
+    "zone": "Mahalle",
+    "building": "Bina",
+    "rent": "Kira",
+    "floorOccupancy": "kat doluluk",
+    "tenants": "kiracılar",
+    "guests": "Misafir",
+    "tabBasicInfo": "Temel Bilgi",
+    "utilizationTarget": "Hedef Kullanımı",
+    "currentUtilization": "güncel kullanım",
+    "constructionSpeed": "inşaat hızı",
+    "constructionCostPerEpoch": "İnşaat Maliyeti / Epoch",
+    "remainingConstruction": "Kalan inşaat süresi",
+    "remainingEpochs": "~{{n}} dönemler",
+    "tabBuildingInfo": "Yapı Bilgisi",
+    "tabCargoInfo": "Kargo",
+    "tabTradeInfo": "Arz, Talep ve Ticaret",
+    "tabTourismInfo": "Turizm",
+    "tabEmploymentInfo": "İş",
+    "action": {
+      "purchase": "Satın alma",
+      "bulldoze": "Yık",
+      "cancelBulldoze": "Yıkımı iptal et",
+      "pause": "Durma",
+      "resume": "Özgeçmiş",
+      "delete": "Sil",
+      "repair": "Onarım",
+      "rebuild": "Yeniden inşa etmek",
+      "edit": "Yayına hazırlamak",
+      "startConstruction": "İnşaata başla",
+      "stopConstruction": "askıya alma inşaatı",
+      "cancelAbandon": "Terkini iptal et",
+      "explode": "Patlamak",
+      "explodeConfirm": "Bu binayı havaya uçurup bir kaza olarak mı sahneleyelim? Bina hemen çöker ve içeride yaşayan veya çalışan herkes öldürülür. Halkın duyarlılığı kötü bir şekilde acı çekecek ve bu geri alınamaz.",
+      "explodeTitle": "Patlama binası",
+      "explodeConfirmAction": "Patlamak"
+    },
+    "pendingWarning": "bu bina planlanmıştır. Lütfen inşaatı başlatmak için komut verin.",
+    "alerts": {
+      "diagnoseHint": "Nedeni teşhis etmek için tıklayın",
+      "title": "uyarılar",
+      "constructionShortage": {
+        "title": "İnşaat Hizmeti Eksikliği",
+        "description": "İnşaat bütçesi yetersiz, inşaatta gecikmelere neden oluyor."
+      },
+      "onFire": {
+        "title": "Yangın olayı!",
+        "description": "Binada yangın çıktı."
+      },
+      "accidentalFire": {
+        "title": "Kazayla Yangın (Küçük)",
+        "description": "Kaza sonucu küçük bir yangın meydana geldi, ancak küçük tutuldu."
+      },
+      "infraDisconnected": {
+        "title": "Altyapı ağına bağlı değil",
+        "description": "Bu tesisin terminaline herhangi bir altyapı yolu bağlı değildir. Ağa bağlanana kadar malzeme gönderemez veya alamaz."
+      },
+      "capacityTight": {
+        "title": "yakın kapasite",
+        "description": "Bu tesis, kapasitesinin %90'ını veya daha fazlasını karşılıyor. Daha fazla talebi zar zor karşılayabilir."
+      },
+      "nonconforming": {
+        "title": "Yönetmeliklere uymuyor",
+        "description": "Bu bina, parselin düzenlemelerini karşılamıyor. Tamir edilmeyecek ve bozulduğunda yıkılacaktır."
+      },
+      "crime": {
+        "title": "suç meydana geldi",
+        "description": "Bu binada bir suç işlendi."
+      },
+      "crimeSign": {
+        "title": "Suç İşaretleri",
+        "description": "Bu binada suç belirtileri görüldü. Kamu güvenliğinin kötüleşmesine dikkat edin."
+      },
+      "laborShortage": {
+        "title": "iş kıtlığı",
+        "description": "Yeterince işçi istihdam edilmiyor, bu nedenle üretim ve hizmetler planın gerisinde kalıyor."
+      },
+      "materialShortage": {
+        "title": "Malzeme kıtlığı",
+        "description": "Hammadde alımı yetersiz olduğundan, üretim ve hizmetler planın gerisinde kalıyor."
+      },
+      "highSkillShortage": {
+        "title": "Nitelikli personel sıkıntısı",
+        "description": "Yeterince yüksek vasıflı personel yoktur, bu nedenle çıktı, mevcut personelin kaldırabileceğine indirgenir."
+      },
+      "budgetCapped": {
+        "title": "Bütçe açığı",
+        "description": "Tahsis edilen bütçe, gerekli miktarın çok altında olduğundan, operasyonlar küçültüldü. Bütçe tahsisini gözden geçirin."
+      },
+      "facilityWarning": {
+        "title": "kamu tesisi çalışmıyor",
+        "description": "Bu tesis planlanandan çok daha az hizmet veriyor. İşçiliğini ve malzeme alımını kontrol edin."
+      },
+      "sanitationWarning": {
+        "title": "kötüleşen sanitasyon",
+        "description": "Bu binanın parselindeki sanitasyon ciddi şekilde kötüleşti ve yerleşik haneleri etkiledi. Kanalizasyon ve atık arıtma tedarikini iyileştirin."
+      },
+      "infraWarning": {
+        "title": "Altyapı tesisi durduruldu veya çöktü",
+        "description": "Bu tesis, altyapı tedarikini etkileyerek çalışmayı durdurdu veya çöktü. Durumunu ve besleme bağlantılarını kontrol edin."
+      }
+    },
+    "infra": {
+      "title": "altyapı bağlantısı",
+      "connected": "Bağlı",
+      "disconnected": "Bağlantısız",
+      "received": "Kabul edilmiş"
+    },
+    "tabConstructionInfo": "İnşaat",
+    "tabEducationInfo": "Eğitim",
+    "education": {
+      "totalStudents": "kayıtlı öğrenciler",
+      "totalCapacity": "Toplam kapasite",
+      "statusTitle": "Kayıt",
+      "enrolled": "Kaydedilmiş",
+      "vacant": "açık koltuklar",
+      "noCapacity": "kapasite yok",
+      "countLabel": "Saymak",
+      "enrollmentBySkill": "Beceriye Göre Kayıt",
+      "settingsTitle": "giriş kontenjanları",
+      "settingsHint": "Her beceri için tahsis ağırlığını ayarlayın. Toplam kapasite, ağırlıklarla orantılı olarak bölünür.",
+      "skillHeader": "Beceri",
+      "weightHeader": "Ağırlık",
+      "previewHeader": "Kapasite",
+      "save": "Kaydet",
+      "saving": "tasarruf...",
+      "saveFailed": "Kaydedilemedi",
+      "sumMustBePositive": "Kotaların toplamı en az 1 olmalıdır",
+      "invalidWeight": "Ağırlıklar 0 veya daha fazla tamsayı olmalıdır",
+      "studentsList": "öğrenci listesi",
+      "noStudents": "öğrenci yok",
+      "showMore": "Daha fazlasını göster ({{count}})"
+    }
+  },
+  "agentList": {
+    "filterType": "Tip",
+    "filterVariant": "Varyant",
+    "filterZone": "Bölge",
+    "allVariants": "Tüm varyantlar",
+    "allZones": "Tüm Bölgeler",
+    "resultCount": "{{count}} sonuçları",
+    "capped": "( {{total}} toplam)",
+    "loading": "Yükleniyor…",
+    "noResults": "Eşleşen ajan yok",
+    "colStatus": "Durum",
+    "colVariant": "Varyant",
+    "colName": "İsim",
+    "colProduct": "Ürün",
+    "colPrice": "Fiyat",
+    "colProduction": "Üretim",
+    "colStock": "Stok",
+    "colSold": "satılmış",
+    "colWage": "Ücret oranı",
+    "colEmployment": "İş",
+    "colUtilization": "Kullanım",
+    "colBdType": "yapı tipi",
+    "colDurability": "Dayanıklılık",
+    "colRent": "Kira",
+    "colFloors": "yer",
+    "colFloorArea": "taban alanı",
+    "colOccupancy": "İşgal",
+    "colFamilyType": "aile tipi",
+    "colDiscretionaryIncome": "harcanabilir gelir",
+    "colSatisNutrition": "Beslenme",
+    "colSatisHealthcare": "sağlık",
+    "colSatisLeisure": "Boş",
+    "colSatisResidential": "Yerleşim",
+    "colAutomobile": "Araba"
+  }
+}

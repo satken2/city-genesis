@@ -1,0 +1,39 @@
+{
+  "tag": {
+    "label": "Projekt",
+    "none": "(bez tagu)",
+    "createNew": "+ nowy tag…",
+    "newPlaceholder": "Wpisz nazwę tagu",
+    "add": "Dodać",
+    "cancel": "Anuluj",
+    "saveFailed": "Nie udało się zapisać tagu",
+    "showObject": "Pokaż w widoku 3D",
+    "hideObject": "Ukryj się w widoku 3D"
+  },
+  "constructionProjects": {
+    "empty": "Żadne oznaczone nie działa jeszcze. Wybierz tag podczas umieszczania z panelu konstrukcyjnego lub dodaj go z panelu szczegółów obiektu użyteczności publicznej lub drogi, która jest zaplanowana lub w trakcie budowy.",
+    "loadFailed": "Nie udało się załadować projektów budowlanych",
+    "totalCost": "Szacowany koszt",
+    "duration": "Pozostały czas",
+    "progress": "Postęp",
+    "progressValue": "{{done}} / {{total}} Gotowe",
+    "monthsValue": "{{value}} miesięcy",
+    "stalled": "Zatrzymany",
+    "stalledWarning": "{{count}} Prace nie będą postępować, ponieważ szybkość budowy wynosi 0 (wykluczone z sumy czasu trwania).",
+    "done": "Gotowy",
+    "unnamed": "#{{id}}",
+    "showAll": "Pokaż wszystko jeszcze raz ({{count}})",
+    "showTag": "Pokaż ten projekt w widoku 3D",
+    "hideTag": "Ukryj ten projekt w widoku 3D",
+    "showObject": "Pokaż w widoku 3D",
+    "hideObject": "Ukryj się w widoku 3D",
+    "deleteTag": "Usuń ten tag",
+    "confirmDeleteTag": "Usunąć tag \"{{tag}}\"? Zostanie on usunięty z jego budynków i dróg (samą robotę pozostają).",
+    "columns": {
+      "name": "Cel",
+      "status": "Status",
+      "cost": "Pozostały koszt",
+      "remaining": "Pozostały czas"
+    }
+  }
+}

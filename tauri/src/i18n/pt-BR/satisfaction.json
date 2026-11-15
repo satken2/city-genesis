@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "Esgotado",
+    "unhappy": "Infeliz",
+    "neutral": "Neutro",
+    "happy": "Feliz",
+    "delighted": "Encantado",
+    "zero": "Satisfação zero"
+  }
+}

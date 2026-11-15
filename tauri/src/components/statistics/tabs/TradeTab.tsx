@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useMasterData } from "../../../contexts/MasterDataContext";
 import {
   LineChart,
   Line,
@@ -55,6 +56,7 @@ const TOOLTIP_STYLE = {
 
 export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
+  const master = useMasterData();
   const locale = resolveIntlLocale(i18n.language);
   const money = (value: number) => formatExactAmount(value, locale);
   const remPx = useRemPx();
@@ -235,7 +237,7 @@ export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   return (
                     <div key={item.product_id} className="trade-bar-item">
                       <div className="trade-bar-item__header">
-                        <span className="trade-bar-item__name">{item.product_name}</span>
+                        <span className="trade-bar-item__name">{master?.products[item.product_id]?.display_name ?? item.product_name}</span>
                         <span className="trade-bar-item__values">
                           <span className="trade-bar-item__val-actual" style={{ color: COLOR_EXPORT }}>
                             {item.amount.toLocaleString(undefined, { maximumFractionDigits: 1 })}
@@ -284,7 +286,7 @@ export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                   return (
                     <div key={item.product_id} className="trade-bar-item">
                       <div className="trade-bar-item__header">
-                        <span className="trade-bar-item__name">{item.product_name}</span>
+                        <span className="trade-bar-item__name">{master?.products[item.product_id]?.display_name ?? item.product_name}</span>
                         <span className="trade-bar-item__values">
                           <span className="trade-bar-item__val-actual" style={{ color: COLOR_IMPORT }}>
                             {item.amount.toLocaleString(undefined, { maximumFractionDigits: 1 })}

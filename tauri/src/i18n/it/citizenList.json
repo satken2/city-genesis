@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Cerca cittadini",
+    "tabTracking": "Lista di monitoraggio",
+    "name": "Nome",
+    "age": "Età",
+    "ageSeparator": "a",
+    "search": "Ricerca",
+    "noResults": "nessuna partita di cittadini.",
+    "truncated": "mostrando {{shown, number}} di {{total, number}} Cittadini abbinati."
+  }
+}

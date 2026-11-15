@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "Das durchschnittliche Klima dieses Monats",
+    "currentClimate_week": "Das durchschnittliche Klima dieser Woche",
+    "title": "Effizienz der Anlagenproduktion nach Klima",
+    "facility": "Einrichtung",
+    "factor": "Produktionseffizienz"
+  }
+}

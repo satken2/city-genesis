@@ -1,0 +1,16 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Edificios",
+      "paths": "Vías",
+      "vehicles": "Vehículos",
+      "props": "Props"
+    },
+    "additional": "Modelos adicionales",
+    "loading": "Cargando modelos desde la vista 3D…",
+    "noModel": "Sin modelo",
+    "noImage": "Sin imagen",
+    "weight": "Peso",
+    "applyNote": "Los cambios de peso se aplican la próxima vez que inicies o cargues una partida."
+  }
+}

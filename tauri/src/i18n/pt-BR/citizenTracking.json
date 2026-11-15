@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Visão global",
+    "tabActivity": "Atividade",
+    "follow": "Siga com a câmera",
+    "unfollow": "pare de seguir",
+    "track": "Adicionar à lista de rastreamento",
+    "trackRandom": "rastreamento aleatório de uma pessoa",
+    "noUntrackedCitizens": "Não há cidadãos sem trilha disponíveis.",
+    "trackRandomError": "Não foi possível rastrear um cidadão.",
+    "untrack": "Remover da lista de rastreamento",
+    "home": "Residência",
+    "mobility": "se locomovendo",
+    "mode": {
+      "automobile": "Carro",
+      "pedestrian": "Caminhada e transporte público"
+    },
+    "visits": "destinos",
+    "visitKind": {
+      "home": "Casa",
+      "work": "Trabalho",
+      "school": "Escola",
+      "shop": "Compras"
+    },
+    "legs": {
+      "walk": "Caminhada",
+      "drive": "Carro",
+      "transit": "Transito",
+      "conveyor": "Sistema de transporte de pessoas"
+    },
+    "trip": "One Way {{minutes}} min · {{route}}",
+    "noRoute": "nenhuma rota",
+    "noVisits": "não tem para onde ir.",
+    "status": {
+      "not_ready": "Mostrado após a simulação ser executada.",
+      "busy": "Não disponível enquanto a simulação estiver em execução.",
+      "no_home": "Aguardando a moradia, então não há atividade registrada.",
+      "missing": "Este cidadão não mora mais na cidade.",
+      "error": "Não foi possível carregar."
+    },
+    "empty": "Nenhum cidadão está sendo rastreado.",
+    "pickFailed": {
+      "not_ready": "Execute a simulação para clicar em carros e pedestres e ver quem eles são.",
+      "busy": "Os cidadãos não podem ser mostrados enquanto a simulação estiver em execução.",
+      "none": "Não foi possível encontrar quem está neste carro ou a pé.",
+      "missing": "Este cidadão não mora mais na cidade.",
+      "no_home": "Este cidadão está esperando por moradia.",
+      "error": "Não podia mostrar o cidadão."
+    }
+  }
+}

@@ -11,6 +11,7 @@ import { SaveLoadWindow } from "../../src/components/taskbar/SaveLoadWindow";
 import { SaveListWindow } from "../../src/components/taskbar/SaveListWindow";
 import { errorCode, prepareSaveLoad, saveError } from "../../src/utils/saves";
 import { ApiError } from "../../src/utils/api";
+import { SUPPORTED_LANGUAGES } from "../../src/utils/locale";
 import { importedBackgroundExtent, importedMapExtent, readHeightmapInfo } from "../../src/components/scenario/heightmapImport";
 import { BACKGROUND_RGB, renderImportPreview, type PreviewLayer } from "../../src/components/scenario/heightmapPreview";
 import { encodeFloat16Array, uint8ToBase64 } from "../../src/components/terrain/terrainData";
@@ -514,7 +515,7 @@ let closed = false;
 await act(async () => { root.render(<ScenarioMetadataWindow apiBaseUrl="http://test" scenarioId={entry.id} onClose={() => { closed = true; }} />); });
 await settle();
 const languageTabs = [...container.querySelectorAll<HTMLButtonElement>(".localized-text [role=tab]")];
-assert.equal(languageTabs.length, 7);
+assert.equal(languageTabs.length, SUPPORTED_LANGUAGES.length);
 assert.ok(languageTabs[0].textContent?.startsWith("settings.language.en"), "English comes first");
 assert.ok(languageTabs[0].textContent?.includes("localizedText.required"));
 assert.equal(container.querySelector(".localized-text [aria-selected=true]")?.textContent, "settings.language.ja", "the display language opens first");
@@ -647,10 +648,11 @@ await settle();
 // 都市の言語の既定はアプリ設定の言語。シナリオと違えば名前の付け直しを知らせる。
 const languageSelect = container.querySelector<HTMLSelectElement>(".new-game-confirm-select")!;
 assert.equal(languageSelect.value, "en");
+assert.deepEqual([...languageSelect.options].map(option => option.value), [...SUPPORTED_LANGUAGES]);
 assert.ok(container.querySelector(".new-game-confirm-relocalize"), "starting in another language renames the city");
 await act(async () => { setText(languageSelect, "ja"); });
 assert.ok(!container.querySelector(".new-game-confirm-relocalize"));
-await act(async () => { setText(languageSelect, "fr"); });
+await act(async () => { setText(languageSelect, "es-ES"); });
 // ロード前に決めるのは言語・地表・アセットパックだけ。都市名と日数は都市が表示されたあとの設定ページで決める。
 const optionRow = (option: string) => container.querySelector(`.new-game-confirm-field[data-option=${option}]`);
 assert.equal(container.querySelector(".new-game-confirm-title")?.textContent, "newGame.confirmTitle");
@@ -674,7 +676,7 @@ assert.deepEqual(session.introDialog?.pages?.map((page: { kind: string }) => pag
 assert.equal(session.introDialog?.pages?.[0]?.textKey, "newGame.developmentNotice.text");
 assert.deepEqual(session.introDialog?.pages?.[1]?.scenario?.scenario_description, entry.scenario_description,
   "the introduction matches the scenario details");
-assert.deepEqual([session.language, session.groundCover, session.assetPack], ["fr", 2, "standard"]);
+assert.deepEqual([session.language, session.groundCover, session.assetPack], ["es-ES", 2, "standard"]);
 assert.ok(!("cityName" in session) && !("simulationDays" in session),
   "city name and simulation days keep the scenario values until the start settings page");
 delete state.results.load_app_settings;

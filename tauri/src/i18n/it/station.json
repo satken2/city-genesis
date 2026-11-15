@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Stazione",
+    "name": "Nome della stazione",
+    "ridership": "Pilota",
+    "platforms": "Elenco delle piattaforme",
+    "noPlatforms": "Nessuna piattaforma appartiene a questa stazione (qui appartengono le piattaforme attraversate dalla linea)",
+    "lines": "Linee di servizio",
+    "noLines": "Nessuna linea serve questa stazione",
+    "stops": "Pista da fermare",
+    "noStops": "Nessuna fermata in questa stazione",
+    "lineRunning": "Corsa",
+    "lineSuspended": "Sospesa",
+    "houseEnds": "Posizionamento dell'edificio della stazione",
+    "houseEnds_both": "Entrambe le estremità",
+    "houseEnds_start": "Inizio",
+    "houseEnds_end": "Fine",
+    "passageMode": "Posizionamento del passaggio",
+    "passageMode_elevated": "Elevato",
+    "passageMode_ground": "piano terra",
+    "passageMode_underground": "Sotterraneo"
+  }
+}

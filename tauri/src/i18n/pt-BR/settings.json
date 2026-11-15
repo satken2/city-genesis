@@ -1,0 +1,147 @@
+{
+  "settings": {
+    "title": "Configurações",
+    "groups": {
+      "general": "Geral",
+      "display": "Mostrar",
+      "sound": "Som",
+      "system": "Sistema",
+      "about": "Sobre",
+      "developer": "Configurações do desenvolvedor"
+    },
+    "swagger": {
+      "label": "Swagger (documentação da API)",
+      "description": "Veja a API de back-end conectada no seu navegador padrão",
+      "action": "Abra no navegador"
+    },
+    "currencyUnit": {
+      "label": "unidade de moeda",
+      "description": "A unidade mostrada com valores monetários. Deixe em branco para seguir o idioma de exibição."
+    },
+    "fontSize": {
+      "label": "Tamanho da fonte",
+      "large": "Grande",
+      "medium": "Médio",
+      "small": "Pequeno",
+      "custom": "Costume",
+      "preview": "Tamanho atual"
+    },
+    "monitor": {
+      "label": "Mostrar",
+      "prev": "Exibição anterior",
+      "next": "Próxima exibição"
+    },
+    "graphicMonitor": {
+      "label": "Exibição da visualização 3D"
+    },
+    "multiDisplay": {
+      "label": "Modo multidisplay",
+      "description": "Mostra o Windows em uma tela diferente da tela do jogo",
+      "on": "Sobre",
+      "off": "Fora"
+    },
+    "popupMonitor": {
+      "label": "Visor de janela"
+    },
+    "hintbar": {
+      "label": "Barra de dica",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "description": "Barra na parte superior da tela que mostra as dicas de operação"
+    },
+    "citizenVoice": {
+      "label": "Vozes do cidadão",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "description": "Cartão no canto superior direito da tela que mostra os comentários dos moradores"
+    },
+    "language": {
+      "label": "Idioma",
+      "description": "O idioma de exibição da interface do usuário. Isso é separado do idioma dos seus dados de salvamento.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano"
+    },
+    "volume": {
+      "label": "Volume",
+      "master": "volume mestre",
+      "bgm": "BGM",
+      "sfx": "efeitos sonoros"
+    },
+    "compute": {
+      "label": "Aceleração da GPU",
+      "comingSoon": "em breve",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU ativa",
+      "statusInactive": "CPU ativa",
+      "restartRequired": "O programa principal será reiniciado após alterar essa configuração",
+      "restarting": "Reiniciando...",
+      "restartFailed": "Falha na reinicialização",
+      "restartUnavailable": "Configurações salvas. As alterações entrarão em vigor na próxima vez que o jogo começar",
+      "confirmRestart": "Mude o modo de computação para {{mode}}? O programa principal será reiniciado.",
+      "restartAction": "reinicie"
+    },
+    "windowReset": {
+      "label": "Posição e tamanho da janela",
+      "action": "Restabelecer"
+    },
+    "credits": {
+      "label": "créditos",
+      "description": "Atribuições para os ativos e softwares usados neste jogo",
+      "action": "Visão"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Novo jogo",
+    "overwriteSave": "Substituir Salvar",
+    "saveAs": "Salvar como",
+    "load": "Carregar",
+    "quitGame": "Sair do jogo",
+    "returnToTop": "Voltar ao menu superior",
+    "loading": "Carregando…",
+    "shuttingDown": "fechando...",
+    "saveFailed": "Falha ao salvar",
+    "loadFailed": "Falha na carga",
+    "confirmNewGame": "Os dados atuais serão perdidos. Iniciar um novo jogo?",
+    "confirmQuitGame": "Você têm certeza que quer desistir? Seu progresso atual não é salvo automaticamente.",
+    "confirmReturnToTop": "Voltar ao menu superior? Seu progresso atual não é salvo automaticamente.",
+    "confirm": "Sim",
+    "cancel": "Não",
+    "saveAsScenario": "Salvar como cenário",
+    "saveAsNewScenario": "Salvar como outro cenário",
+    "overwriteScenario": "sobrescrever cenário",
+    "backToGame": "De volta ao jogo",
+    "saveName": "Salvar nome",
+    "confirmOverwrite": "Substitua o salvamento “{{name}}”?",
+    "confirmOverwriteScenario": "Substitua o cenário \"{{name}}\"?"
+  },
+  "saveList": {
+    "noSaves": "Nenhum dado de salvamento encontrado",
+    "currentSave": "Dados atuais",
+    "population": "População",
+    "inGameDate": "Data",
+    "savedAt": "salvo em",
+    "loadButton": "Carregar",
+    "deleteButton": "Excluir",
+    "confirmLoad": "Carregar esses dados de salvamento?",
+    "confirmDelete": "Excluir esses dados de salvamento? Isso não pode ser desfeito.",
+    "loading": "Carregando…",
+    "loadFailed": "Falha na carga",
+    "deleteFailed": "Falha na exclusão",
+    "openFolderButton": "Abra a pasta Salvar",
+    "scenario": "Cenário",
+    "autosaveName": "{{name}} (save automático na saída)"
+  }
+}

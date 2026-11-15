@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Obciążenie symulacyjne",
+      "heading": "Czas obliczeń ostatniej epoki ({{days}} dni)",
+      "noData": "Brak danych pomiarowych",
+      "note": "Kiedy kilka epok biegnie z rzędu, pokazuje to ostatnią. Liczba operacji to przybliżone oszacowanie liczby kombinacji w głównych porównaniach, na podstawie wielkości miasta.",
+      "colGroup": "Proces",
+      "colTime": "Czas",
+      "colWorkload": "Liczba operacji",
+      "workloadHint": "Szorstka liczba głównych porównań (elementy tablicy). Najedź kursorem na wartość, aby zobaczyć podział.",
+      "seconds": "{{value}} S",
+      "ms": "{{value}} MS"
+    },
+    "group": {
+      "market": "Rynek towarów",
+      "realestate": "Rynek nieruchomości",
+      "labor": "Rynek pracy",
+      "building_spawn": "Budowlanie szwu",
+      "agent_spawn": "Odrodzenie agenta",
+      "routing": "Znalezienie ścieżki obywatelskiej",
+      "transit": "Znalezienie ścieżki tranzytu",
+      "environment": "Warunki życia",
+      "other": "Inny"
+    },
+    "workload": {
+      "market": "Kupujący {{demanders}} × Sprzedający {{suppliers}} (pomnożone na produkt i zsumowane)",
+      "realestate": "Gospodarstwa domowe rozważają przeprowadzkę {{movers}} × budynki mieszkalne {{housing}}",
+      "labor": "Osoby poszukujące pracy {{seekers}} × Pracodawcy {{employers}}",
+      "building_spawn": "Paczki kandydujące {{parcels}} × Typy budynków × Liczba pięter × Podłogi",
+      "agent_spawn": "Produkty × Strefy {{zones}} × Strefy {{zones}}",
+      "routing": "2 tryby podróży × strefy {{zones}} × strefy {{zones}} × 3 trasy kandydujące × ścieżki {{paths}}",
+      "transit": "Zatrzymuje {{stops}} × Węzły {{nodes}}",
+      "environment": "Siatka {{width}} × {{height}} × Słońce Pozycje"
+    },
+    "entities": {
+      "colMetric": "Metryczny",
+      "colCount": "Liczyć",
+      "title": "Liczy się encji",
+      "agents": "Agenci",
+      "households": "Gospodarstwa domowe",
+      "businesses": "Biznesy",
+      "publicFacilities": "Obiekty użyteczności publicznej",
+      "buildings": "Budynki",
+      "citizens": "obywatele",
+      "population": "Populacja",
+      "zones": "Strefy",
+      "parcels": "Paczki",
+      "paths": "Ścieżki",
+      "roads": "Drogi",
+      "tracks": "Utwory",
+      "infra": "Sieci komunalne",
+      "nodes": "Węzły"
+    },
+    "approximation": {
+      "title": "Przybliżenie symulacji",
+      "intro": "Planowane są opcje uproszczenia obliczeń dla dużych miast. Te ustawienia nie mogą być jeszcze zmienione.",
+      "warning": "Te zmiany mogą wpłynąć na równowagę gry. Nie można ich cofnąć.",
+      "irreversible": "Zmiany spowodowane przybliżeniem utrzymują się w późniejszych epokach. Po włączeniu przybliżenia nie można wyłączyć ani zmniejszyć.",
+      "undecided": "TBD",
+      "candidates": "Kandydaci maks.",
+      "epochs": "Epoki między recenzjami",
+      "off": "Poza",
+      "on": "Na",
+      "goods": {
+        "label": "kupuj kandydatów",
+        "description": "Ogranicz dostawców w porównaniu według ceny i odległości."
+      },
+      "jobs": {
+        "label": "Kandydaci do pracy",
+        "description": "Ogranicz pracodawców w porównaniu z wynagrodzeniami i warunkami dojazdów."
+      },
+      "housing": {
+        "label": "Kandydaci na mieszkania",
+        "description": "Ogranicz domy w porównaniu z czynszem i lokalizacją."
+      },
+      "interval": {
+        "label": "Rutynowy interwał decyzji",
+        "description": "Rzadziej przeglądaj zakupy, pracę i wybory mieszkaniowe."
+      },
+      "aggregation": {
+        "label": "Grupa podobnych obywateli i gospodarstw domowych",
+        "description": "Podejmuj pewne decyzje łącznie dla obywateli lub gospodarstw domowych o podobnych okolicznościach."
+      }
+    },
+    "status": {
+      "title": "Stan systemu",
+      "gpuDisabled": "Przyspieszenie GPU: wyłączone",
+      "coreSimulator": "Symulator rdzenia",
+      "currentMemory": "Bieżące wykorzystanie pamięci: {{value}}",
+      "peakMemory": "Szczytowe użycie pamięci od uruchomienia: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Bieżące użycie VRAM: {{value}}",
+      "usageTooltip": "Cały komputer {{pc}} / ta gra {{game}} / zainstalowany {{total}}",
+      "legendPc": "Cały komputer",
+      "legendGame": "ta gra"
+    }
+  }
+}

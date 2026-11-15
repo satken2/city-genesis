@@ -1,0 +1,16 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Gebäude",
+      "paths": "Wege",
+      "vehicles": "Fahrzeuge",
+      "props": "Requisiten"
+    },
+    "additional": "Zusätzliche Modelle",
+    "loading": "Laden von Modellen aus der 3D-Ansicht…",
+    "noModel": "Kein Modell",
+    "noImage": "Kein Bild",
+    "weight": "Gewicht",
+    "applyNote": "Gewichtsänderungen werden beim nächsten Start oder Laden eines Spiels wirksam."
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Intercâmbio",
+      "jct": "Junção"
+    },
+    "fallbackName": {
+      "ic": "ic #{{id}}",
+      "jct": "jct #{{id}}"
+    },
+    "connections": {
+      "from": "De",
+      "to": "Para",
+      "road": "{{type}} #{{id}}",
+      "none": "Sem pares de estradas conectados.",
+      "direction": {
+        "n": "Norte",
+        "ne": "Nordeste",
+        "e": "Oriente",
+        "se": "Sudeste",
+        "s": "Sul",
+        "sw": "sudoeste",
+        "w": "Ocidente",
+        "nw": "Noroeste"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

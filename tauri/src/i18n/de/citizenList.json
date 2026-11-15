@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Bürger suchen",
+    "tabTracking": "Tracking-Liste",
+    "name": "Name",
+    "age": "Das alter",
+    "ageSeparator": "zu",
+    "search": "Suche",
+    "noResults": "Keine Bürger passen zusammen.",
+    "truncated": "Anzeigen {{shown, number}} von {{total, number}} Matching Citizens."
+  }
+}

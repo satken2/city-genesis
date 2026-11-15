@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Yol Ekipmanları",
+    "streetlight_type": "sokak lambaları",
+    "fence_type": "çitler",
+    "street_tree_type": "sokak ağaçları",
+    "utility_mode": "elektrik tesisatı",
+    "none": "Hiçbiri",
+    "standard": "Standart",
+    "overhead": "Havai",
+    "underground": "Yeraltı",
+    "apply": "Uygulamak",
+    "bench_type": "Benches",
+    "bin_type": "çöp kovaları",
+    "planter_type": "ekici",
+    "advert_type": "İlan"
+  }
+}

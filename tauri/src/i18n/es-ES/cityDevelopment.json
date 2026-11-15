@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritmo",
+    "roadVariants": "Tipos de vía",
+    "patterns": {
+      "grid_1": "Cuadrícula 1",
+      "grid_2": "Cuadrícula 2",
+      "sprawl_1": "Expansión dispersa 1",
+      "sprawl_2": "Expansión dispersa 2",
+      "sprawl_3": "Expansión dispersa 3",
+      "planned_city_1": "Ciudad planificada 1",
+      "split_1": "División 1"
+    },
+    "spacing": "Separación de calles",
+    "blockLength": "Longitud de manzana",
+    "splitHint": "Incluye manzanas completas rodeadas de calles. Las calles paralelas al lado largo de la manzana siguen la separación de calles, y las perpendiculares la longitud de manzana.",
+    "createParcels": "Crear parcelas",
+    "parcelArea": "Área de parcela",
+    "hint": "Mantén Ctrl y arrastra para pintar el área a desarrollar. Arrastra para mover el mapa y usa la rueda para acercar o alejar.",
+    "clear": "Limpiar",
+    "preview": "Vista previa",
+    "previewing": "Calculando...",
+    "create": "Confirmar",
+    "creating": "Creando...",
+    "previewed": "Suaviza un poco el terreno en {{area}} y se pueden planificar {{roads}} tramos de calle y {{parcels}} parcelas ({{rejected}} rechazados)",
+    "created": "Se suavizó el terreno y se planificaron {{roads}} tramos de calle y {{parcels}} parcelas ({{rejected}} rechazados)"
+  }
+}

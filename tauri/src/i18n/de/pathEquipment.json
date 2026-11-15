@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Straßenausrüstung",
+    "streetlight_type": "Straßenlaternen",
+    "fence_type": "Zäune",
+    "street_tree_type": "Straßenbäume",
+    "utility_mode": "Versorgungskabel",
+    "none": "Keiner",
+    "standard": "Standard",
+    "overhead": "Oben",
+    "underground": "Untergrund",
+    "apply": "Anwenden",
+    "bench_type": "Bänke",
+    "bin_type": "Mülleimer",
+    "planter_type": "Pflanzgefäße",
+    "advert_type": "Werbung"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} lat",
+    "male": "Męski",
+    "female": "Kobieta",
+    "single": "Jednoosobowy",
+    "married": "Żonaty",
+    "household": "Gospodarstwo domowe",
+    "employer": "Pracodawca",
+    "unemployed": "Bezrobotny",
+    "school": "Szkoła",
+    "notEnrolled": "Nie zapisany",
+    "major": "Poważny",
+    "higherEducation": "Wyższa edukacja",
+    "graduated": "Ukończono",
+    "notGraduated": "Nie ukończone",
+    "skills": "Umiejętności",
+    "criminality": "skłonność do przestępczości",
+    "commuteTime": "Czas dojazdu",
+    "automobile": "Samochód",
+    "automobileOwned": "posiadane",
+    "automobileNone": "Żaden",
+    "householdStatus": "Status gospodarstwa domowego"
+  },
+  "household": {
+    "title": "Gospodarstwo domowe",
+    "familyType": "Typ rodziny",
+    "familySingle": "Jednoosobowy",
+    "familyCouple": "Para",
+    "familyFamily": "Rodzina",
+    "familySenior": "Senior",
+    "hasAutomobile": "ma samochód",
+    "noAutomobile": "Brak samochodu",
+    "discretionaryIncome": "Dochód rozporządzalny",
+    "livingStandard": "Standard życia",
+    "livingStandardLevel": {
+      "0": "W nędzy",
+      "1": "Ubogi",
+      "2": "Klasa średnia",
+      "3": "Zamożny"
+    },
+    "satisNutrition": "Odżywianie",
+    "satisHealthcare": "Healthcare",
+    "satisLeisure": "Wolny czas",
+    "satisTourism": "Turystyka",
+    "tourist": "Turyści",
+    "partySize": "Rozmiar imprezy",
+    "members": "Członkowie"
+  },
+  "education": {
+    "people": "ludzie"
+  }
+}

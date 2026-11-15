@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algorithmus",
+    "roadVariants": "Straßentypen",
+    "patterns": {
+      "grid_1": "Gitter 1",
+      "grid_2": "Gitter 2",
+      "sprawl_1": "Zersiedeln 1",
+      "sprawl_2": "Zersiedeln 2",
+      "sprawl_3": "Ausbreitung 3",
+      "planned_city_1": "Geplante Stadt 1",
+      "split_1": "Unterteilen 1"
+    },
+    "spacing": "Straßenabstand",
+    "blockLength": "Blocklänge",
+    "splitHint": "Schließen Sie ganze von Straßen eingeschlossene Blöcke ein. Straßen, die parallel zu der langen Seite jedes Blocks sind, werden durch Straßenabstände beabstandet und Straßen über die Blocklänge kreuzend.",
+    "createParcels": "Pakete erstellen",
+    "parcelArea": "Paketbereich",
+    "hint": "Halten Sie Strg und ziehen Sie, um den Bereich zu malen, um sich zu entwickeln. Zum Schwenken ziehen, zu Zoom scrollen.",
+    "clear": "Klar",
+    "preview": "Vorschau",
+    "previewing": "berechnen...",
+    "create": "Bestätigen",
+    "creating": "Schaffen...",
+    "previewed": "Glättet das Gelände in {{area}} leicht und kann {{roads}} Straßensegmente und {{parcels}} Pakete ({{rejected}} abgelehnt)",
+    "created": "Glättet das Gelände und geplante {{roads}} Straßensegmente und {{parcels}} Pakete ({{rejected}} abgelehnt)"
+  }
+}

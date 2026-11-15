@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Zaproponuj trasę",
+    "mode": "Tryb wysokości",
+    "fixed": "Zachowaj wysokość punktów orientacyjnych",
+    "adjust": "Dostosuj pośrednie wysokości punktów trasy",
+    "help": "Dostępne po zakończeniu kształtu. Punkty końcowe i pozycje XZ w punkcie waypoint XZ pozostają stałe.",
+    "searching": "Wyszukiwanie…",
+    "cancel": "Anuluj",
+    "undo": "Cofnij sugestię",
+    "notFound": "Nie znaleziono trasy.",
+    "failed": "Propozycja trasy nie powiodła się."
+  }
+}

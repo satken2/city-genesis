@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritmo",
+    "roadVariants": "Tipos de estradas",
+    "patterns": {
+      "grid_1": "Grade 1",
+      "grid_2": "Grade 2",
+      "sprawl_1": "expansão 1",
+      "sprawl_2": "expansão 2",
+      "sprawl_3": "expansão 3",
+      "planned_city_1": "Cidade planejada 1",
+      "split_1": "Subdividir 1"
+    },
+    "spacing": "espaçamento entre estradas",
+    "blockLength": "Comprimento do bloco",
+    "splitHint": "Inclua blocos inteiros cercados por estradas. As estradas paralelas ao lado comprido de cada bloco são espaçadas por espaçamento entre as estradas e atravessam as estradas pelo comprimento do bloco.",
+    "createParcels": "Crie pacotes",
+    "parcelArea": "área de encomendas",
+    "hint": "Segure Ctrl e arraste para pintar a área a ser desenvolvida. Arraste para panorâmica, role até o zoom.",
+    "clear": "Claro",
+    "preview": "Visualização",
+    "previewing": "Calculando...",
+    "create": "Confirmar",
+    "creating": "Criando...",
+    "previewed": "Suaviza levemente o terreno em {{area}} e pode planejar {{roads}} segmentos de estradas e {{parcels}} parcelas ({{rejected}} rejeitado)",
+    "created": "Suavizava o terreno e os segmentos de estradas planejados {{roads}} e os pacotes de {{parcels}} ({{rejected}} rejeitado)"
+  }
+}

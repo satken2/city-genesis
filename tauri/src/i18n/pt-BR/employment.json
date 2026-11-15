@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Habilidade exigida",
+    "wage": "Taxa salarial",
+    "quota": "mão de obra necessária",
+    "totalLabor": "Trabalho contratado",
+    "employees": "Lista de funcionários",
+    "hired": "Assalariado",
+    "vacant": "Vago",
+    "noQuota": "Não é necessário mão de obra",
+    "noEmployees": "Nenhum funcionário",
+    "statusTitle": "Situação de emprego"
+  }
+}

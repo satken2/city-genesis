@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "Bu ayın ortalama iklimi",
+    "currentClimate_week": "Bu haftanın ortalama iklimi",
+    "title": "İklime göre tesis üretim verimliliği",
+    "facility": "Tesis",
+    "factor": "üretim verimliliği"
+  }
+}

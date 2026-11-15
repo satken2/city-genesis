@@ -4,8 +4,9 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { readFileSync, readdirSync } from "node:fs";
 import i18n from "i18next";
+import { SUPPORTED_LANGUAGES } from "../../src/utils/locale";
 
-const languages = ["ja", "en", "es-419", "fr", "ko", "zh-Hans", "zh-Hant"];
+const languages = SUPPORTED_LANGUAGES;
 const translations = Object.fromEntries(languages.map(language => {
   const folder = `src/i18n/${language}`;
   const translation = Object.assign({}, ...readdirSync(folder).filter(file => file.endsWith(".json"))
@@ -51,7 +52,7 @@ for (const language of languages) {
   assert.deepEqual(Object.keys(errors).sort(), Object.keys(referenceErrors).sort(), `${language}: error codes match`);
   for (const [key, text] of Object.entries(referenceErrors)) {
     const slots = (text as string).match(/\{\{[^}]+\}\}/g) ?? [];
-    assert.deepEqual((errors[key] as string).match(/\{\{[^}]+\}\}/g) ?? [], slots, `${language}: ${key} interpolation matches`);
+    assert.deepEqual(((errors[key] as string).match(/\{\{[^}]+\}\}/g) ?? []).sort(), slots.sort(), `${language}: ${key} interpolation matches`);
   }
   await i18n.changeLanguage(language);
   assert.ok(!api.describeError(structured).includes("{{"));

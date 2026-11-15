@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Şehir Bildirimleri",
+    "empty": "Şu anda hiçbir sorun dikkat gerektirmez",
+    "loadFailed": "Bildirimler yüklenemedi",
+    "types": {
+      "resource_runway": "\"{{name}}\" kaynağının {{remaining_epochs}} çağında tükenmesi bekleniyor",
+      "resource_depleted": "\"{{name}}\" kaynağı tükendi",
+      "facility_inoperative": "\"{{name}}\" genel tesisi çalışmıyor",
+      "facility_inoperative_labor": "\"{{name}}\" kamu tesisi, işgücü sıkıntısı nedeniyle çalışmıyor",
+      "facility_inoperative_material": "\"{{name}}\" genel tesisi, malzeme sıkıntısı nedeniyle çalışmıyor",
+      "facility_inoperative_high_skill": "\"{{name}}\" kamu tesisi, kalifiye personel eksikliği nedeniyle kapasite azaltılmış durumda çalışıyor",
+      "facility_inoperative_budget": "\"{{name}}\" genel tesisi, bütçe açığı nedeniyle kapasite azaltılmış durumda çalışıyor",
+      "education_low_enrollment": "Eğitim kurumu \"{{name}}\" yetersiz kullanılıyor - çok az öğrenci kayıtlı ({{enrolled}}, {{max_students}} koltuk)",
+      "infra_facility_down": "Altyapı tesisi \"{{name}}\" hizmet dışı",
+      "infra_disconnected": "{{count}} tesislerinin altyapı ağından bağlantısı kesildi",
+      "rail_capacity_exceeded": "Tren sıklığı, {{count}} parça segmentinde iz kapasitesini aşıyor",
+      "collapse": "{{count}} binalar/yollar çöktü",
+      "collapse_with_deaths": "{{count}} binalar/yollar çöktü ve {{deaths}} kişi öldü",
+      "deaths_traffic": "{{count}} kişi trafik kazalarında öldü",
+      "tenant_blocked_by_parcel_size": "\"{{tenant_name}}\" için hiçbir bina \"{{zone_name}}\" bölgesinde inşa edilemez ({{required}} m2, en büyük inşa edilebilir {{max_capacity}} m2). Daha büyük bir parsel gerekli",
+      "unknown": "Kritik bir olay meydana geldi",
+      "sanitation": "{{count}} hane için sanitasyon kötüleşiyor. Kanalizasyon ve atık arıtımı iyileştirin."
+    }
+  }
+}

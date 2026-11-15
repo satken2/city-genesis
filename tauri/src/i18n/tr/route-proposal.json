@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "yol önermek",
+    "mode": "Yükseklik modu",
+    "fixed": "Ara Nokta Yüksekliklerini Tut",
+    "adjust": "Ara yol noktası yüksekliklerini ayarlayın",
+    "help": "Şekli bitirdikten sonra kullanılabilir. Uç noktalar ve yol noktası XZ konumları sabit kalır.",
+    "searching": "Arama…",
+    "cancel": "İptal",
+    "undo": "öneriyi geri almak",
+    "notFound": "güzergah bulunamadı.",
+    "failed": "Rota önerisi başarısız oldu."
+  }
+}

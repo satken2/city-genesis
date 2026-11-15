@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Станция",
+    "name": "Название станции",
+    "ridership": "райдерство",
+    "platforms": "Список платформ",
+    "noPlatforms": "Эта станция не принадлежит этой станции (здесь принадлежат платформы, пересекаемые линией)",
+    "lines": "Сервировочные линии",
+    "noLines": "Эта станция не обслуживает эту станцию",
+    "stops": "Поездка по остановке",
+    "noStops": "На этой станции нет остановок",
+    "lineRunning": "Бег",
+    "lineSuspended": "Приостановлено",
+    "houseEnds": "Размещение в здании станции",
+    "houseEnds_both": "Оба конца",
+    "houseEnds_start": "Начало",
+    "houseEnds_end": "Конец",
+    "passageMode": "Размещение прохода",
+    "passageMode_elevated": "Высокий",
+    "passageMode_ground": "Нижний этаж",
+    "passageMode_underground": "Под землей"
+  }
+}

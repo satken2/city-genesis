@@ -5,8 +5,7 @@
  *
  * Fetch only while shared monitoring confirms backend connectivity. Do not retry independently; refetch when
  * connectivity recovers (connected becomes true). Master data can differ between cities because the core reloads
- * it on each game start. Remember the session_id returned with the master data; discard/refetch when
- * session-state reports a changed session_id. Fetch every kind with one GET /api/v1/master request per window.
+ * it on each game start. Fetch every kind with one GET /api/v1/master request per window and display language.
  */
 
 import {
@@ -15,12 +14,13 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactNode,
 } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { useTranslation } from "react-i18next";
 import { fetchApi } from "../utils/api";
+import { resolveSupportedLanguage, type SupportedLanguage } from "../utils/locale";
 import type { MasterData } from "../types";
 
 /**
@@ -67,6 +67,13 @@ const MASTER_KINDS: { key: keyof MasterData; name: string; numericKeys?: boolean
 /** GET /api/v1/master response: each kind maps IDs to entries; session_id identifies the city owning the data. */
 type MasterResponse = { session_id: string | null; [name: string]: unknown };
 
+type MasterSnapshot = {
+  baseUrl: string;
+  language: SupportedLanguage;
+  sessionId: string | null;
+  data: MasterData;
+};
+
 /**
  * Convert API response string keys to numeric keys. JSON object keys are always strings; convert on fetch for
  * convenient numeric ID access.
@@ -83,7 +90,7 @@ function toNumericKeys<T>(
 
 /**
  * Provider that fetches master data in bulk and exposes it through Context. Fetch when requested, apiBaseUrl is
- * known, and connectivity is confirmed. Discard/refetch data when apiBaseUrl or the city (session_id) changes.
+ * known, and connectivity is confirmed.
  */
 export function MasterDataProvider({
   apiBaseUrl,
@@ -94,66 +101,44 @@ export function MasterDataProvider({
   connected: boolean;
   children: ReactNode;
 }) {
-  const [masterData, setMasterData] = useState<MasterData | null>(null);
+  const { i18n } = useTranslation();
+  const language = resolveSupportedLanguage(i18n.language);
+  const [snapshot, setSnapshot] = useState<MasterSnapshot | null>(null);
   const [requested, setRequested] = useState(false);
-  const prevBaseUrlRef = useRef<string | undefined>(undefined);
-  const masterDataRef = useRef(masterData);
-  masterDataRef.current = masterData;
-  const inFlightRef = useRef(false);
-  const disposedRef = useRef(false);
-  // City owning the fetched master data (session_id returned with it; null if no city).
-  const dataSessionRef = useRef<string | null>(null);
-
-  const fetchAll = useCallback(async (base: string) => {
-    if (masterDataRef.current !== null || inFlightRef.current) return;
-
-    inFlightRef.current = true;
-    try {
-      const response = await fetchApi<MasterResponse>(`${base}/api/v1/master`, { cache: "reload" });
-      const results = MASTER_KINDS.map(({ key, name, numericKeys = true }) => {
-        const entries = response[name] as Record<string, unknown>;
-        return [key, numericKeys ? toNumericKeys(entries) : entries] as const;
-      });
-      if (!disposedRef.current) {
-        dataSessionRef.current = response.session_id ?? null;
-        setMasterData(Object.fromEntries(results) as unknown as MasterData);
-      }
-    } catch (error: unknown) {
-      console.error("マスターデータの取得に失敗しました(通信の回復後に取り直します):", error);
-    } finally {
-      inFlightRef.current = false;
-    }
-  }, []);
-
-  useEffect(() => {
-    disposedRef.current = false;
-    return () => {
-      disposedRef.current = true;
-    };
-  }, []);
+  const [sessionId, setSessionId] = useState<string | null>();
+  const masterData = snapshot && snapshot.baseUrl === apiBaseUrl && snapshot.language === language
+    && (sessionId === undefined || snapshot.sessionId === sessionId) ? snapshot.data : null;
 
   useEffect(() => {
     const unlisten = listen<{ session?: { session_id?: string | null } | null }>("session-state", ({ payload }) => {
-      if (masterDataRef.current !== null && (payload.session?.session_id ?? null) !== dataSessionRef.current) {
-        masterDataRef.current = null;
-        setMasterData(null);
-      }
+      setSessionId(payload.session?.session_id ?? null);
     });
     return () => { void unlisten.then(off => off()); };
   }, []);
 
   useEffect(() => {
-    if (!apiBaseUrl) return;
-    if (prevBaseUrlRef.current !== undefined && prevBaseUrlRef.current !== apiBaseUrl) {
-      setMasterData(null);
-      masterDataRef.current = null;
-    }
-    prevBaseUrlRef.current = apiBaseUrl;
-
-    if (masterData === null && requested && connected) {
-      void fetchAll(apiBaseUrl.replace(/\/+$/, ""));
-    }
-  }, [apiBaseUrl, connected, requested, fetchAll, masterData]);
+    if (!apiBaseUrl || !connected || !requested || masterData) return;
+    const controller = new AbortController();
+    const url = `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/master?language=${language}`;
+    void fetchApi<MasterResponse>(url, { cache: "reload", signal: controller.signal }).then(response => {
+      if (controller.signal.aborted) return;
+      const results = MASTER_KINDS.map(({ key, name, numericKeys = true }) => {
+        const entries = response[name] as Record<string, unknown>;
+        return [key, numericKeys ? toNumericKeys(entries) : entries] as const;
+      });
+      setSnapshot({
+        baseUrl: apiBaseUrl,
+        language,
+        sessionId: response.session_id ?? null,
+        data: Object.fromEntries(results) as unknown as MasterData,
+      });
+    }).catch((error: unknown) => {
+      if (!controller.signal.aborted) {
+        console.error("マスターデータの取得に失敗しました(通信の回復後に取り直します):", error);
+      }
+    });
+    return () => controller.abort();
+  }, [apiBaseUrl, connected, requested, language, sessionId, masterData]);
 
   const request = useCallback(() => setRequested(true), []);
   const contextValue = useMemo(() => ({ data: masterData, request }), [masterData, request]);

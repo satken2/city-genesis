@@ -1,0 +1,147 @@
+{
+  "settings": {
+    "title": "Ayarlar",
+    "groups": {
+      "general": "Genel",
+      "display": "Ekran",
+      "sound": "Ses",
+      "system": "Sistem",
+      "about": "Hakkında",
+      "developer": "Geliştirici Ayarları"
+    },
+    "swagger": {
+      "label": "Swagger (API belgeleri)",
+      "description": "Varsayılan tarayıcınızda bağlı arka uç API'sini görüntüleyin",
+      "action": "Tarayıcıda aç"
+    },
+    "currencyUnit": {
+      "label": "döviz birimi",
+      "description": "parasal tutarlarla gösterilen birim. Ekran dilini takip etmek için boş bırakın."
+    },
+    "fontSize": {
+      "label": "Yazı boyutu",
+      "large": "Büyük",
+      "medium": "Orta",
+      "small": "Küçük",
+      "custom": "Gelenek",
+      "preview": "Mevcut Boyut"
+    },
+    "monitor": {
+      "label": "Ekran",
+      "prev": "Önceki Ekran",
+      "next": "Sonraki ekran"
+    },
+    "graphicMonitor": {
+      "label": "3D görünüm ekranı"
+    },
+    "multiDisplay": {
+      "label": "Çoklu ekran modu",
+      "description": "Windows'u oyun ekranından farklı bir ekranda gösterir",
+      "on": "Üzerinde",
+      "off": "Kapalı"
+    },
+    "popupMonitor": {
+      "label": "vitrin"
+    },
+    "hintbar": {
+      "label": "ipucu çubuğu",
+      "show": "Göstermek",
+      "hide": "Gizlemek",
+      "description": "İşlem ipuçlarını gösteren ekranın üst kısmındaki çubuk"
+    },
+    "citizenVoice": {
+      "label": "Vatandaş Sesleri",
+      "show": "Göstermek",
+      "hide": "Gizlemek",
+      "description": "Ekranın sağ üst köşesinde, sakinlerin sözlerini sırayla gösteren kart"
+    },
+    "language": {
+      "label": "Dil",
+      "description": "kullanıcı arayüzünün görüntüleme dili. Bu, kaydetme verilerinizin dilinden ayrıdır.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano"
+    },
+    "volume": {
+      "label": "Hacim",
+      "master": "ana hacim",
+      "bgm": "BGM",
+      "sfx": "Ses efektleri"
+    },
+    "compute": {
+      "label": "GPU ivmesi",
+      "comingSoon": "Çok yakında",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU Aktif",
+      "statusInactive": "CPU aktif",
+      "restartRequired": "Ana program bu ayarı değiştirdikten sonra yeniden başlayacaktır.",
+      "restarting": "Yeniden başlatma...",
+      "restartFailed": "yeniden başlatma başarısız oldu",
+      "restartUnavailable": "Ayarlar kaydedildi. Değişiklikler, oyun bir sonraki başladığında yürürlüğe girecek",
+      "confirmRestart": "Hesaplama modunu {{mode}} olarak mı değiştiriyorsunuz? Ana program yeniden başlayacaktır.",
+      "restartAction": "yeniden başlamak"
+    },
+    "windowReset": {
+      "label": "Pencere konumu ve boyutu",
+      "action": "Ayarlamak"
+    },
+    "credits": {
+      "label": "kredi",
+      "description": "Bu oyunda kullanılan varlıklar ve yazılımlar için atıflar",
+      "action": "Görmek"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Yeni oyun",
+    "overwriteSave": "Kaydet Üzerine Yaz",
+    "saveAs": "Farklı kaydet",
+    "load": "Yükle",
+    "quitGame": "oyunu bırak",
+    "returnToTop": "üst menüye dön",
+    "loading": "Yükleniyor…",
+    "shuttingDown": "Kapatmak...",
+    "saveFailed": "Kaydet Başarısız",
+    "loadFailed": "Yükleme başarısız oldu",
+    "confirmNewGame": "mevcut veriler kaybolacaktır. Yeni bir oyun başlatmak mı?",
+    "confirmQuitGame": "Bırakmak istediğinden emin misin? Mevcut ilerlemeniz otomatik olarak kaydedilmez.",
+    "confirmReturnToTop": "üst menüye dön? Mevcut ilerlemeniz otomatik olarak kaydedilmez.",
+    "confirm": "Evet",
+    "cancel": "Hiçbir",
+    "saveAsScenario": "senaryo olarak kaydet",
+    "saveAsNewScenario": "Başka bir senaryo olarak kaydet",
+    "overwriteScenario": "Senaryo Üzerine Yaz",
+    "backToGame": "oyuna geri dön",
+    "saveName": "Adı Kaydet",
+    "confirmOverwrite": "“{{name}}” kaydetmenin üzerine yazılsın mı?",
+    "confirmOverwriteScenario": "“{{name}}” senaryosunun üzerine yazılsın mı?"
+  },
+  "saveList": {
+    "noSaves": "Kaydetme verisi bulunamadı",
+    "currentSave": "Mevcut veriler",
+    "population": "Nüfus",
+    "inGameDate": "Tarih",
+    "savedAt": "kaydedilmiş",
+    "loadButton": "Yükle",
+    "deleteButton": "Sil",
+    "confirmLoad": "Bu kaydetme verileri yüklensin mi?",
+    "confirmDelete": "Bu kaydetme verileri silinsin mi? Bu geri alınamaz.",
+    "loading": "Yükleniyor…",
+    "loadFailed": "Yükleme başarısız oldu",
+    "deleteFailed": "Silme Başarısız",
+    "openFolderButton": "Klasörü Kaydet",
+    "scenario": "Senaryo",
+    "autosaveName": "{{name}} (çıkışta otomatik kaydetme)"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Sugerir rota",
+    "mode": "Modo de altura",
+    "fixed": "Mantenha as alturas dos waypoints",
+    "adjust": "Ajuste a altura do ponto intermediário",
+    "help": "Disponível após terminar a forma. Pontos de extremidade e posições de waypoint XZ permanecem fixos.",
+    "searching": "Pesquisando…",
+    "cancel": "Cancelar",
+    "undo": "Desfazer sugestão",
+    "notFound": "Nenhuma rota foi encontrada.",
+    "failed": "Falha na sugestão da rota."
+  }
+}

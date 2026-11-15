@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Route vorschlagen",
+    "mode": "Höhenmodus",
+    "fixed": "Halten Sie Wegpunkthöhen",
+    "adjust": "Passen Sie die Höhen der Zwischenwege an",
+    "help": "Erhältlich nach Beendigung der Form. Endpunkte und Wegpunkt-XZ-Positionen bleiben fest.",
+    "searching": "Suche…",
+    "cancel": "Abbrechen",
+    "undo": "Vorschlag rückgängig machen",
+    "notFound": "Es wurde keine Route gefunden.",
+    "failed": "Routenvorschlag fehlgeschlagen."
+  }
+}

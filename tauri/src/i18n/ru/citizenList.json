@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Поиск граждан",
+    "tabTracking": "Список отслеживания",
+    "name": "Имя",
+    "age": "Возраст",
+    "ageSeparator": "к",
+    "search": "Поиск",
+    "noResults": "Ни один гражданин не совпадает.",
+    "truncated": "Показаны {{shown, number}} из {{total, number}} соответствующих граждан."
+  }
+}

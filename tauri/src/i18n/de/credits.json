@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Dieses Spiel verwendet die unten aufgeführten Assets. Autorennamen, Quellen, Lizenznamen und alle von einer Lizenz benötigten Zuordnungstexte werden wörtlich reproduziert.",
+    "empty": "Keine Einträge.",
+    "requiredText": "Erforderliche Zuordnung",
+    "categories": {
+      "bgm": "Musik-",
+      "sfx": "Soundeffekte",
+      "image": "Bilder & Symbole",
+      "font": "Schriften",
+      "model": "3D-Modelle",
+      "texture": "Texturen"
+    }
+  }
+}
