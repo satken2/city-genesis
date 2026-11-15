@@ -1,0 +1,39 @@
+{
+  "tag": {
+    "label": "Projeto",
+    "none": "(sem etiqueta)",
+    "createNew": "+ Nova tag…",
+    "newPlaceholder": "Insira um nome de tag",
+    "add": "Adicionar",
+    "cancel": "Cancelar",
+    "saveFailed": "Falha ao salvar a tag",
+    "showObject": "Mostrar na visualização 3D",
+    "hideObject": "Ocultar na visualização 3D"
+  },
+  "constructionProjects": {
+    "empty": "Nenhum tagged funciona ainda. Escolha uma etiqueta ao colocar em um painel de construção ou adicione uma no painel de detalhes de uma instalação pública ou estrada que esteja planejada ou em construção.",
+    "loadFailed": "Falha ao carregar projetos de construção",
+    "totalCost": "Custo estimado",
+    "duration": "tempo restante",
+    "progress": "Progresso",
+    "progressValue": "{{done}} / {{total}} concluída",
+    "monthsValue": "{{value}} meses",
+    "stalled": "parado",
+    "stalledWarning": "{{count}} O(s) trabalho(s) não progredirá porque a velocidade de construção é 0 (excluída do total da duração).",
+    "done": "Feito",
+    "unnamed": "#{{id}}",
+    "showAll": "Mostre tudo novamente ({{count}})",
+    "showTag": "Mostrar este projeto na visualização 3D",
+    "hideTag": "Ocultar este projeto na visualização 3D",
+    "showObject": "Mostrar na visualização 3D",
+    "hideObject": "Ocultar na visualização 3D",
+    "deleteTag": "Exclua esta tag",
+    "confirmDeleteTag": "Exclua a tag \"{{tag}}\"? Ele será removido de seus prédios e estradas (as obras permanecem).",
+    "columns": {
+      "name": "Alvo",
+      "status": "Estado",
+      "cost": "custo restante",
+      "remaining": "tempo restante"
+    }
+  }
+}

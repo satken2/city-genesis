@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "İstasyon",
+    "name": "İstasyon Adı",
+    "ridership": "yolcu gemisi",
+    "platforms": "platform listesi",
+    "noPlatforms": "Bu istasyona hiçbir platform ait değildir (çizginin geçtiği platformlar buraya aittir)",
+    "lines": "Servis hatları",
+    "noLines": "Bu istasyona hiçbir hat hizmet etmiyor",
+    "stops": "Durakla binicilik",
+    "noStops": "Bu istasyonda durak yok",
+    "lineRunning": "Çalışma",
+    "lineSuspended": "Askıda",
+    "houseEnds": "İstasyon binası yerleşimi",
+    "houseEnds_both": "her iki uç",
+    "houseEnds_start": "Başlangıç",
+    "houseEnds_end": "Son",
+    "passageMode": "Geçiş Yerleştirme",
+    "passageMode_elevated": "Yüksek",
+    "passageMode_ground": "Zemin kat",
+    "passageMode_underground": "Yeraltı"
+  }
+}

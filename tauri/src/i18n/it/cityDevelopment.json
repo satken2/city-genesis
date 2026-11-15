@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritmo",
+    "roadVariants": "Tipi di strade",
+    "patterns": {
+      "grid_1": "Griglia 1",
+      "grid_2": "Griglia 2",
+      "sprawl_1": "sprawl 1",
+      "sprawl_2": "sprawl 2",
+      "sprawl_3": "sprawl 3",
+      "planned_city_1": "Città pianificata 1",
+      "split_1": "Suddividere 1"
+    },
+    "spacing": "Spaziatura stradale",
+    "blockLength": "Lunghezza del blocco",
+    "splitHint": "Includere interi blocchi racchiusi da strade. Le strade parallele al lato lungo di ciascun blocco sono distanziate da una spaziatura stradale e attraversano strade per lunghezza di blocco.",
+    "createParcels": "Crea pacchi",
+    "parcelArea": "Area pacchi",
+    "hint": "Tieni premuto Ctrl e trascina per dipingere l'area da sviluppare. Trascina per fare una panoramica, scorri fino a Zoom.",
+    "clear": "Chiaro",
+    "preview": "Anteprima",
+    "previewing": "Calcolo...",
+    "create": "Conferma",
+    "creating": "Creazione...",
+    "previewed": "Leviga leggermente il terreno in {{area}} e può pianificare {{roads}} segmenti stradali e {{parcels}} pacchi ({{rejected}} rifiutati)",
+    "created": "Smussato il terreno e pianificato {{roads}} segmenti stradali e {{parcels}} pacchi ({{rejected}} respinti)"
+  }
+}

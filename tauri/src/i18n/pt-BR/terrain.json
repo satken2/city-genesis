@@ -1,0 +1,22 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Aguardando dados do Editor de Terrain..."
+  },
+  "groundCover": {
+    "label": "cobertura do solo",
+    "hint": "Muda a cor e a textura do solo no jogo e as cores dos mapas 2D. Não afeta a simulação.",
+    "1": "Pradaria",
+    "2": "Deserto",
+    "3": "Prado exuberante",
+    "4": "campo de neve",
+    "5": "semiárido"
+  },
+  "climate": {
+    "label": "Clima",
+    "hint": "Copia probabilidades mensais de temperatura, precipitação, luz solar e condições climáticas de uma predefinição. Edite os detalhes nas configurações do clima no modo de criação de cenários."
+  },
+  "assetPack": {
+    "label": "Pacote de ativos",
+    "standard": "Padrão"
+  }
+}

@@ -15,6 +15,7 @@ import { formatExactAmount } from "../../../utils/money";
 import { resolveIntlLocale } from "../../../utils/locale";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useMasterData } from "../../../contexts/MasterDataContext";
 import {
   LineChart,
   Line,
@@ -137,6 +138,7 @@ function KpiCard({
 
 export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
+  const master = useMasterData();
   useCurrencyUnit();
   const locale = resolveIntlLocale(i18n.language);
   const remPx = useRemPx();
@@ -389,7 +391,7 @@ export function EmploymentTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       <tr key={row.variant_id} className="emp-industry-table__row">
                         <td className="emp-industry-table__td emp-industry-table__td--name">
                           <span className="emp-industry-table__name">
-                            {row.variant_name}
+                            {master?.agents[row.variant_id]?.display_name ?? row.variant_name}
                           </span>
                           <span className="emp-industry-table__quota">
                             {row.total_labor.toFixed(0)}/{row.total_quota.toFixed(0)}

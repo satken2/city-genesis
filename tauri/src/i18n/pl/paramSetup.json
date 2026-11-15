@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Konfiguracja parametrów gry",
+    "description": "Wartości domyślne są zazwyczaj zalecane. Dostosuj tylko, jeśli chcesz dostosować.",
+    "skip": "Pominąć",
+    "start": "Rozpocznij grę",
+    "apply": "Zastosuj i zamknij",
+    "close": "Zamknij",
+    "loading": "Wczytywanie…",
+    "reload": "Przeładować",
+    "reloadHint": "Przeładuj po zakończeniu inicjowania zaplecza, aby uzyskać najnowsze wartości.",
+    "fetchError": "Nie udało się pobrać parametrów",
+    "category": {
+      "population": "Ludność i migracja",
+      "citizen": "Życie obywatelskie",
+      "economy": "Gospodarka",
+      "labor": "Praca i płace",
+      "education": "Edukacja",
+      "construction": "Budowa i nieruchomości",
+      "environment": "Środowisko",
+      "traffic": "Ruch drogowy",
+      "general": "Generał",
+      "pathfind": "Ruch i routing",
+      "building": "Budynki i budowa",
+      "disaster": "Katastrofy i bezpieczeństwo",
+      "slum": "Slumsy",
+      "production": "Produkcja i inwentaryzacja",
+      "zone": "Dzielnice i działki",
+      "financial": "Finanse"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Kondensacja miejska",
+        "desc": "Dzieli powierzchnię użytkową domy i obiekty według tej wartości, tak aby niewielka mapa mogła utrzymać aktywność gospodarczą dużego miasta. Wymiana po zbudowaniu choćby jednej drogi lub budynku przerywa miasto, więc zdecyduj o tym przed zbudowaniem czegokolwiek."
+      },
+      "TFR_TARGET": {
+        "label": "Docelowy współczynnik płodności (TFR)",
+        "desc": "Wskaźnik urodzeń gospodarstwa domowe dążą. Wyższe wartości zwiększają prawdopodobieństwo porodów."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Wskaźnik małżeństwa",
+        "desc": "Podstawowy współczynnik prawdopodobieństwa dla obywateli biorących ślub. Wyższe = więcej małżeństw."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Minimalny wiek rozrodczy",
+        "desc": "minimalny wiek, w którym mogą wystąpić porody. Brak porodów poniżej tego wieku."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Maksymalny wiek rozrodczy",
+        "desc": "Maksymalny wiek, w którym mogą wystąpić urodzenia. Żadnych urodzeń powyżej tego wieku."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Wskaźnik małżeństw imigrantów domowych",
+        "desc": "Prawdopodobieństwo, że przychodzące gospodarstwo domowe imigrantów jest małżeństwem."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "1. stawka dla dzieci (imigrantów)",
+        "desc": "Prawdopodobieństwo, że gospodarstwo domowe imigrantów odrodzi się z 1 dzieckiem."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "2. stawka dla dzieci (imigrantów)",
+        "desc": "Prawdopodobieństwo, że gospodarstwo domowe imigrantów odrodzi się z dwójką dzieci."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "3. stawka dla dzieci (imigrantów)",
+        "desc": "Prawdopodobieństwo, że gospodarstwo domowe imigrantów odrodzi się z trójką dzieci."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Minimalny wiek imigranta",
+        "desc": "Minimalny wiek dorosłych napływających jako imigranci."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Maksymalny wiek imigranta",
+        "desc": "Maksymalny wiek dorosłych napływających jako imigranci."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Współczynnik żywotności",
+        "desc": "Mnożnik dla maksymalnej żywotności obywateli. 1,08 ≈ 100 lat, 1,06 ≈ 150 lat.",
+        "graphX": "Wiek",
+        "graphY": "Roczne prawdopodobieństwo śmierci (Zdrowie 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Pojedyncza przestrzeń mieszkalna dla gospodarstw domowych (m²)",
+        "desc": "Minimalna powierzchnia mieszkalna wymagana przez jednoosobowe gospodarstwo domowe."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Dodatkowa przestrzeń dla małżonka (m²)",
+        "desc": "Dodatkowa część mieszkalna potrzebna, gdy gospodarstwo domowe ma współmałżonka."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Dodatkowa przestrzeń na dziecko (m²)",
+        "desc": "Dodatkowa powierzchnia mieszkalna potrzebna na dziecko w gospodarstwie domowym."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Wskaźnik czynszu do dochodów (maks.)",
+        "desc": "Maksymalny dochód gospodarstwa domowego, który można wydać na czynsz. 0,3 = do 30%."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Czas podróży Waga w wyborze obudowy",
+        "desc": "Wybierając dom, jak bardzo każda minuta podróży w obie strony do pracy, szkoły i zakupów liczy się jako wielokrotność średniej płacy w mieście. 1 = wyceniony na wynagrodzenie. Wyższe wartości faworyzują domy w pobliżu miejsc pracy i sklepów."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Średnie wynagrodzenie (wyjściowe)",
+        "desc": "Standardowa średnia płaca na początku symulacji."
+      },
+      "AVERAGE_RENT": {
+        "label": "Średni czynsz (podstawowy)",
+        "desc": "Referencyjny średni czynsz na starcie symulacji (dzień na m²)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "dywidendy majątkowe proporcjonalne udziały",
+        "desc": "Udział dywidend wypłacanych proporcjonalnie do oszczędności gotówkowych każdego gospodarstwa domowego. Reszta jest podzielona równo między wszystkie gospodarstwa domowe. 0 = wszystkie równe, 1 = wszystko proporcjonalnie do oszczędności."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Stawka amortyzacji sprzętu",
+        "desc": "stawka, po której kapitał z inwestycji w sprzęt amortyzuje każdą epokę."
+      },
+      "WORK_HOURS": {
+        "label": "Dzienne godziny pracy (h)",
+        "desc": "Standardowa liczba godzin, w których obywatel pracuje dziennie."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Edukacja podstawowa Zacznij wiek",
+        "desc": "Wiek, w którym dzieci rozpoczynają podstawową (podstawową) edukację."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Edukacja podstawowa Zakończ wiek",
+        "desc": "Wiek, w którym kończy się edukacja podstawowa (odpowiednik ukończenia szkoły średniej)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Ukończenie studiów / Wiek niezależności",
+        "desc": "Wiek, w którym obywatel kończy wyższe wykształcenie i staje się niezależny."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Minimalny wiek produkcyjny",
+        "desc": "Obywatele poniżej tego wieku są wykluczeni ze statystyk poszukiwania pracy i bezrobocia."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Maksymalne podłogi (podłogi)",
+        "desc": "Górny limit liczby pięter budynków budowanych automatycznie przez sektor prywatny."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Współczynnik kary piętra",
+        "desc": "Współczynnik dla kary kosztowej w wysokości. Wyższe = mniejsza kara dla wysokich budynków.",
+        "graphX": "Podłogi",
+        "graphY": "Mnożnik kosztów budowy"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Stosunek wydajności rozbiórki",
+        "desc": "O ile bardziej wydajna rozbiórka jest w porównaniu z nową konstrukcją (mnożnik)."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Upadek podstawowa stawka roczna",
+        "desc": "Podstawowe roczne prawdopodobieństwo zawalenia się budynku o trwałości 0,5."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Zwiń parametr kształtu weibulla",
+        "desc": "Wyższe wartości powodują, że prawdopodobieństwo zawalenia gwałtownie gwałtownie w pobliżu projektu."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Stosunek kosztów utrzymania",
+        "desc": "Koszt konserwacji jako ułamek nowych kosztów budowy."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Mnożnik starzenia bez konserwacji",
+        "desc": "jak szybko budynek lub ścieżka starzeje się, gdy nie otrzymuje codziennego utrzymania, jako wielokrotność jego starzenia się przy pełnym utrzymaniu. Zmienia się liniowo z 1 do tej wartości bez udziału utrzymania."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Przejście naprawcze Standardowe prawdopodobieństwo roczne",
+        "desc": "Podstawowe roczne prawdopodobieństwo, że kwalifikujący się budynek wejdzie w konserwację."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Początkowy dług budowlany (na m²)",
+        "desc": "Początkowy dług budowlany na m² powierzchni podłogi (rezerwy ujemne)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Współczynnik hałasu na drodze",
+        "desc": "Ile ruchu drogowego przyczynia się do hałasu mapy cieplnej. Wyższe = głośniejsze drogi."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Współczynnik hałasu ruchu pieszego",
+        "desc": "Ile ruchu pieszego przyczynia się do hałasu mapy cieplnej."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Próg hałasu dla pieszych",
+        "desc": "Tylko część ruchu pieszego powyżej tej wartości przyczynia się do hałasu."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Odległość tłumienia hałasu (m)",
+        "desc": "Hałas słabnie wraz z kwadratem odległości, a także spada do 1/E na każdym tylu metrach (osłona budynku, pochłanianie powietrza i gruntu). LOW = pozostaje bliżej źródła."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Współczynnik zanieczyszczenia powietrza na drogach",
+        "desc": "Ile ruchu drogowego przyczynia się do mapy cieplnej zanieczyszczenia powietrza."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Odległość tłumienia zanieczyszczenia powietrza (m)",
+        "desc": "Zanieczyszczenie powietrza i zapach słabną wraz z kwadratem odległości, a także spadają do 1/e nad każdym tylu metrów (dyspersja i osadzanie). LOW = pozostaje bliżej źródła."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Waga przestępczości bezrobocia",
+        "desc": "Jak silnie stopa bezrobocia wpływa na mapę cieplną przestępczości. Wyższe = bezrobocie prowadzi bardziej bezpośrednio do gorszego bezpieczeństwa publicznego."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Promień rozrzutu przestępczości (M)",
+        "desc": "Promień rozmycia Gaussa dla mapy cieplnej przestępczości."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Prędkość dla pieszych (km/h)",
+        "desc": "Prędkość chodu stosowana w obliczeniach kosztów wyszukiwania ścieżki."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Odległość przyspieszenia pojazdu (m)",
+        "desc": "Odległość przyspieszenia dla pojazdów. Wpływa na obliczanie prędkości na krótkich drogach."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Godziny aktywne na drodze dziennie (h)",
+        "desc": "Godziny dziennie Droga jest aktywna. Służy do konwersji natężenia ruchu."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Próg nasycenia premii drogowej",
+        "desc": "Ruch drogowy na poziomie lub powyżej tej wartości daje sklepom detalicznym maksymalną premię do ruchu."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Próg nasycenia premii dla ruchu pieszego",
+        "desc": "Ruch pieszy na poziomie lub powyżej tej wartości daje sklepom detalicznym maksymalną premię dla pieszych."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Wczytywanie…",
+    "noScenarios": "Brak dostępnych scenariuszy",
+    "starting": "Zaczynając...",
+    "startFailed": "Nie udało się uruchomić",
+    "confirmTitle": "Potwierdź ustawienia gry",
+    "confirmStartTitle": "Rozpocząć grę?",
+    "unsavedChangesWarning": "Rozpoczęcie spowoduje odrzucenie niezapisanych zmian w Twojej obecnej grze.",
+    "startSettingsHeading": "Ustawienia miasta",
+    "cityNameLabel": "Nazwa miasta",
+    "insigniaLabel": "Emblemat i flaga miasta",
+    "languageLabel": "Język miasta",
+    "languageNote": "*Nie można zmienić później",
+    "simulationDaysLabel": "Dni symulacji",
+    "simulationDaysNote": "*Nie można zmienić później",
+    "daysOption": "{{days}} dni",
+    "startButton": "Zaczynać",
+    "backButton": "Z powrotem",
+    "cleared": "wyczyszczone",
+    "tutorialBadge": "Samouczek",
+    "sectionDebug": "Odpluskwić",
+    "sectionTutorials": "Samouczki",
+    "sectionScenarios": "Scenariusze",
+    "detailPlaceholder": "Wybierz scenariusz z listy po lewej stronie.",
+    "detailMapSizeLabel": "Rozmiar mapy",
+    "detailUnknown": "Nieznany",
+    "detailObjectiveLabel": "Cele",
+    "detailCreditsLabel": "kredyty",
+    "detailNoObjective": "Brak celów",
+    "detailNoDescription": "Ten scenariusz nie ma opisu.",
+    "tutorialObjective": "Wykonaj każdy krok samouczka.",
+    "startScenarioButton": "Rozpocznij ten scenariusz",
+    "tabSelect": "Wybierz scenariusz",
+    "tabBrowse": "Znajdź scenariusze",
+    "tabTerrain": "Wybierz teren",
+    "relocalizeNote": "Ten scenariusz został utworzony w {{from}}. Począwszy od {{to}} zmienia nazwy dzielnic, obiektów, mieszkańców, stacji i innych nazw w {{to}}.",
+    "developmentNotice": {
+      "heading": "Ta gra jest eksperymentalną budową w rozwoju",
+      "subheading": "Przeczytaj przed rozpoczęciem gry",
+      "text": "Jego parametry ekonomiczne i logika są wciąż dostrojone, więc twoje miasto może nie rosnąć tak, jak powinno. Bezrobocie może wzrosnąć, a miasto może nawet się załamać, ale to nigdy nie jest wina twojej gry. Bądź na bieżąco z przyszłymi aktualizacjami! Dodaj grę do swojej listy życzeń i czekaj na oficjalne wydanie!"
+    }
+  }
+}

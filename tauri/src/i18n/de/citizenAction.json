@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "einen Namen geben",
+      "message": "Geben Sie den Namen ein, den Sie auf {{name}} vergeben möchten.",
+      "inputLabel": "Neuer Name",
+      "confirm": "Verleihen"
+    },
+    "reward": {
+      "label": "eine Belohnung gewähren",
+      "message": "Geben Sie dem Haushalt {{name}} eine Belohnung aus Stadtfonds. Stadtgeld: {{available}}",
+      "confirm": "Gib mal"
+    },
+    "expel": {
+      "label": "Wünsche ihnen viel Erfolg außerhalb der Stadt",
+      "message": "{{name}} aus der Stadt vertreiben?",
+      "confirm": "Vertreiben",
+      "results": {
+        "0": "{{name}} packte und verließ die Stadt leise. Niemand kam, um sie zu sehen.",
+        "1": "{{name}} überquerte die Stadtgrenze und rief: \"Ich komme nie zurück!\"",
+        "2": "{{name}} wurde höflich über die Stadtgrenzen geführt. Wir wünschen ihnen viel Erfolg woanders."
+      }
+    },
+    "donation": {
+      "label": "Bitten Sie um eine Spende",
+      "message": "Bitten Sie den Haushalt von {{name}} um eine Spende an die Stadt. Haushaltsgeld: {{available}}",
+      "confirm": "Fragen"
+    },
+    "relocate": {
+      "label": "Schlagen Sie ein neues Zuhause vor",
+      "message": "Der Haushalt von {{name}} aus dem jetzigen Zuhause räumen? Sie werden in der nächsten Epoche ein neues Zuhause suchen.",
+      "confirm": "Zur Räumung zwingen",
+      "results": {
+        "0": "Die Familie von {{name}} wurde aus ihrem Haus geworfen. Ihre Möbel sind an der Straße angehäuft.",
+        "1": "Die Sperren am Haus von {{name}} wurden geändert. Die Familie sucht nach einem neuen Platz.",
+        "2": "{{name}}s Familie wurde ein neues Zuhause angeboten. Sie können nicht zum alten zurückkehren."
+      }
+    }
+  }
+}

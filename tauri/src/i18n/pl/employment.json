@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Wymagane umiejętności",
+    "wage": "stawka płac",
+    "quota": "wymagana praca",
+    "totalLabor": "Praca najemna",
+    "employees": "Lista pracowników",
+    "hired": "Zatrudniony",
+    "vacant": "Pusty",
+    "noQuota": "Nie wymaga pracy",
+    "noEmployees": "Brak pracowników",
+    "statusTitle": "Status zatrudnienia"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Состав пола",
+    "parking": "Стоянка",
+    "type": "Тип здания",
+    "durability": "Долговечность",
+    "floors": "Полы",
+    "floorsValue": "{{floors}}F (площадка {{area, number}}㎡)",
+    "heightLabel": "Высота: {{value}}м",
+    "baseAreaLabel": "Базовая область: {{area, number}}㎡",
+    "underMaintenance": "На техобслуживании",
+    "parkingCapacity": "Парковочная вместимость",
+    "parkingCapacityValue": "{{capacity}} Автомобили",
+    "parkingDay": "Дневное время",
+    "parkingNight": "Ночь",
+    "parkingUsage": "{{used}} / {{capacity}} Автомобили"
+  },
+  "building_appearance": {
+    "variantLabel": "Внешний вид {{index}}",
+    "layoutHint": "Перетащите карту на сайт, чтобы поместить / Перетащите, чтобы переместить / Сдвиг + перетащите, чтобы повернуть / удалить клавишу, чтобы удалить",
+    "sizeLabel": "{{width}}×{{height}}m",
+    "deleteSelected": "Удалить выбранное",
+    "apply": "Применять",
+    "saveFailed": "Не удалось сохранить внешний вид",
+    "noSubbuildings": "Для этого типа здания не определены подстройки."
+  }
+}

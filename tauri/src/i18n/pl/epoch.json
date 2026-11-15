@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Aktualna data",
+    "afterDate": "Data po wykonaniu",
+    "epochCount": "epoki",
+    "message": "Zakończ pracę w tym zakręcie i czas na awans?",
+    "no": "Nie",
+    "yes": "Tak",
+    "executing": "Symulacja uruchomienia...",
+    "errorSteamLimit": "Weryfikacja Steam nie mogła zostać potwierdzona, więc nie można uruchomić więcej epok. (Bez weryfikacji możesz grać do populacji {{limit}}.)",
+    "errorAlreadyRunning": "Kolejna epoka już trwa. Spróbuj ponownie po zakończeniu.",
+    "errorFailed": "Nie udało się uruchomić epoki: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} epoki)",
+    "sectionConstruction": "W trakcie budowy",
+    "kindPath": "Droga",
+    "kindBuilding": "Łatwość",
+    "kindProject": "Projekt",
+    "noItems": "Żaden",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Ukończono",
+    "sectionStatistics": "Statystyka",
+    "sectionScore": "Wynik",
+    "scoreGain": "zyskuje",
+    "scoreLoss": "Kary",
+    "questState": {
+      "completed": "osiągnięty",
+      "active": "W trakcie",
+      "locked": "Zamknięty",
+      "failed": "Nieudane"
+    },
+    "trendHint": "Trend w ostatnich epokach {{count}}: {{trend}}",
+    "trend": {
+      "up": "Podniesienie",
+      "flat": "Stały",
+      "down": "Spadanie",
+      "none": "Za mało historii"
+    },
+    "statPopulation": "Populacja",
+    "statTourists": "Turyści",
+    "statGdp": "PKB",
+    "statPrice": "Ceny",
+    "statIncome": "Dochód",
+    "statUnemployment": "Bezrobocie",
+    "statHealthcare": "Healthcare",
+    "statNutrition": "Odżywianie",
+    "statLeisure": "Wolny czas",
+    "statFire": "Pożary",
+    "statTraffic": "Wypadki drogowe",
+    "statCrime": "Przestępstwo",
+    "questCompleted": "Osiągnięte!",
+    "questFailed": "Termin minął"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Mapowanie tras transportowych",
+      "prepare": "Przygotowanie tego terminu",
+      "transit": "Organizacja transportu publicznego",
+      "market": "towary handlowe",
+      "production": "Produkcja i konsumpcja",
+      "commute": "chodzenie do pracy i szkoły",
+      "growth": "Obywatele dorastający",
+      "evaluate": "ocenianie miasta",
+      "immigration": "Przyjmowanie imigrantów",
+      "labor": "Szukasz pracy",
+      "spawn": "Otwieranie nowych firm",
+      "relocate": "Przeprowadzka gospodarstw domowych",
+      "construction": "Budowa budynków",
+      "finance": "Rozliczenie finansów",
+      "plan": "Planowanie kolejnego semestru",
+      "incident": "Reagowanie na incydenty",
+      "finalize": "Kompilacja statystyk"
+    }
+  }
+}

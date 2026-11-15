@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Tip",
+    "kind": {
+      "land": "Arazi tesviyesi",
+      "shore": "Dolgu alanı yapımı"
+    },
+    "baseHeight": "taban yüksekliği",
+    "targetHeight": "Hedef yüksekliği",
+    "cutVolume": "kesme hacmi",
+    "fillVolume": "Doldurma hacmi",
+    "quayLength": "rıhtım uzunluğu",
+    "quayArea": "rıhtım alanı",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Yükseklik (tabandan ofset)",
+    "seaLevelHeight": "Yükseklik (deniz seviyesinin üstünde)",
+    "baseNote": {
+      "frontage": "0, karşı karşıya olduğu yolun yüzeyidir ({{value}} m)",
+      "terrain_mean": "0, alanın mevcut ortalama yüksekliğidir ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "Alan şekli geçersiz. Kenarları geçmeden çizin.",
+      "outside_city": "Alan şehir dışına uzanıyor.",
+      "too_large": "Alan çok büyük (sınır: {{limit}} km²).",
+      "on_water": "Tamamen denizin üzerinde bir alan geliştirilemez. Toprağa ulaşacak şekilde çizin.",
+      "no_land_overlap": "Alanı araziyle çakışacak şekilde çizin (aksi takdirde kıyı ile alan arasında bir deniz şeridi kalır).",
+      "overlaps_parcel": "Alan, mevcut bir arazi parseliyle örtüşmektedir.",
+      "overlaps_path": "Alan bir yol, yol veya başka bir yolla çakışıyor.",
+      "overlaps_water": "alan bir nehre veya göle dokunur.",
+      "overlaps_quay_band": "Alan, geri kazanılmış arazinin rıhtımıyla örtüşüyor.",
+      "invalid_height_offset": "Yükseklik aralık dışında (temel yükseklikten ±{{offsetLimit}} m'ye kadar).",
+      "below_sea_level": "Yükseklik deniz seviyesinin altına ayarlanamaz.",
+      "too_narrow": "Alan çok dar; Rıhtımın içini dolduracak hiçbir şey kalmadı.",
+      "no_work": "Zemin zaten hedef yüksekliğindedir, bu nedenle işe gerek yoktur.",
+      "insufficient_funds": "bu siparişi vermek için yetersiz fon."
+    },
+    "confirm": "Onayla",
+    "confirming": "Onaylama...",
+    "cancel": "İptal",
+    "confirmFailed": "Toprak işleri sipariş edilemedi."
+  }
+}

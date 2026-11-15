@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Scambiare",
+      "jct": "Giunzione"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "Da",
+      "to": "A",
+      "road": "{{type}} #{{id}}",
+      "none": "Nessuna coppia di strade collegate.",
+      "direction": {
+        "n": "Nord",
+        "ne": "Nord-est",
+        "e": "Est",
+        "se": "Sud-est",
+        "s": "Sud",
+        "sw": "sud-ovest",
+        "w": "Ovest",
+        "nw": "Nordovest"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

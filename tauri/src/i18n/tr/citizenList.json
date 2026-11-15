@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "vatandaşları ara",
+    "tabTracking": "takip listesi",
+    "name": "İsim",
+    "age": "Yaş",
+    "ageSeparator": "-e",
+    "search": "Arama",
+    "noResults": "Vatandaş eşleşmesi yok.",
+    "truncated": "{{total, number}} eşleşen vatandaşların {{shown, number}} gösterimi."
+  }
+}

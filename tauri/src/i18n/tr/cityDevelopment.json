@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Arap rakamları sistemi",
+    "roadVariants": "Yol Türleri",
+    "patterns": {
+      "grid_1": "Izgara 1",
+      "grid_2": "Izgara 2",
+      "sprawl_1": "yayılma 1",
+      "sprawl_2": "yayılma 2",
+      "sprawl_3": "yayılma 3",
+      "planned_city_1": "Planlanan Şehir 1",
+      "split_1": "alt bölüm 1"
+    },
+    "spacing": "yol aralığı",
+    "blockLength": "blok uzunluğu",
+    "splitHint": "Yollarla çevrili tüm blokları içerir. Her bloğun uzun kenarına paralel yollar, yol aralığına ve yolları blok uzunluğundan geçerek aralıklıdır.",
+    "createParcels": "Parseller Oluştur",
+    "parcelArea": "parsel",
+    "hint": "Geliştirilecek alanı boyamak için Ctrl'yi basılı tutun ve sürükleyin. Pan'a sürükleyin, Yakınlaştır'a kaydırın.",
+    "clear": "Açık",
+    "preview": "Gala öncesi özel gösterim",
+    "previewing": "Hesaplama...",
+    "create": "Onayla",
+    "creating": "yaratmak...",
+    "previewed": "{{area}} alanındaki araziyi hafifçe yumuşatır ve {{roads}} yol segmentlerini ve {{parcels}} parsellerini ({{rejected}} reddedildi) planlayabilir",
+    "created": "Araziyi düzeltti ve {{roads}} yol segmentlerini ve {{parcels}} parsellerini ({{rejected}} reddedildi)"
+  }
+}

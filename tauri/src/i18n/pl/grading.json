@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Typ",
+    "kind": {
+      "land": "Niwelacja terenu",
+      "shore": "Pozyskiwanie lądu"
+    },
+    "baseHeight": "Wysokość podstawy",
+    "targetHeight": "Wysokość docelowa",
+    "cutVolume": "Objętość wycinana",
+    "fillVolume": "Objętość wypełnienia",
+    "quayLength": "Długość nabrzeża",
+    "quayArea": "Obszar twarzy nabrzeża",
+    "unit": {
+      "height": "{{value}} M",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Wysokość (przesunięcie od podstawy)",
+    "seaLevelHeight": "Wysokość (powyżej poziomu morza)",
+    "baseNote": {
+      "frontage": "0 to nawierzchnia drogi, przed którą stoi ({{value}} m)",
+      "terrain_mean": "0 to aktualna średnia wysokość obszaru ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "Kształt obszaru jest nieprawidłowy. Narysuj go bez przecinających się krawędzi.",
+      "outside_city": "Teren rozciąga się poza miastem.",
+      "too_large": "Obszar jest zbyt duży (limit: {{limit}} km²).",
+      "on_water": "Obszar całkowicie nad morzem nie może być zagospodarowany. Narysuj tak, aby dotarł do lądu.",
+      "no_land_overlap": "Narysuj obszar tak, aby zachodził na ląd (w przeciwnym razie między brzegiem a obszarem pozostaje pas morza).",
+      "overlaps_parcel": "Obszar zachodzi na istniejącą działkę.",
+      "overlaps_path": "Obszar zachodzi na drogę, tor lub inną ścieżkę.",
+      "overlaps_water": "Obszar dotyka rzeki lub jeziora.",
+      "overlaps_quay_band": "Obszar zachodzi na nabrzeże odzyskanych gruntów.",
+      "invalid_height_offset": "Wysokość jest poza zakresem (do ±{{offsetLimit}} m od podstawy).",
+      "below_sea_level": "Wysokość nie może być ustawiana poniżej poziomu morza.",
+      "too_narrow": "Obszar jest zbyt wąski; Nic nie pozostaje do wypełnienia wewnątrz nabrzeża.",
+      "no_work": "Podłoże jest już na docelowej wysokości, więc praca nie jest potrzebna.",
+      "insufficient_funds": "niewystarczające środki na złożenie tego zamówienia."
+    },
+    "confirm": "Potwierdź",
+    "confirming": "Potwierdzam...",
+    "cancel": "Anuluj",
+    "confirmFailed": "Nie udało się zamówić robót ziemnych."
+  }
+}

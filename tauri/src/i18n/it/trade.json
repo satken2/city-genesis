@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Informazioni sulla fornitura",
+    "product": "Fornire prodotto",
+    "amount": "Importo dell'offerta",
+    "price": "prezzo di fornitura",
+    "soldAmount": "Importo venduto",
+    "profitRate": "Tasso di profitto",
+    "utilization": "Utilizzo"
+  },
+  "tourismSupply": {
+    "title": "ospitare turisti",
+    "touristCapacity": "Capacità turistica",
+    "persons": "{{value}} persone",
+    "218": {
+      "price": "Tassa di ammissione",
+      "amount": "Capacità del visitatore (totale)",
+      "soldAmount": "Visitatori (totale)"
+    },
+    "219": {
+      "price": "Tariffa",
+      "amount": "Capacità passeggeri (totale)",
+      "soldAmount": "Passeggeri (totale)"
+    }
+  },
+  "demand": {
+    "product": "Prodotto",
+    "demandAmount": "Richiesta",
+    "receivedAmount": "Acquisito",
+    "acquiredAmount": "Inventario"
+  },
+  "cargo": {
+    "title": "Operazioni di carico",
+    "description": "Questo hub importa merci dall'esterno della regione per rifornire i mercati della città e acquista la produzione in eccedenza della città per esportarla fuori dalla regione.",
+    "capacity": "Capacità di throughput",
+    "perPeriod": "/mese",
+    "perPeriod_week": "/settimana",
+    "materialCapacity": "Limite per materiali ricevuti",
+    "areaCapacity": "limite per superficie",
+    "importHandled": "Importazione gestita",
+    "exportHandled": "Esporta gestita",
+    "utilization": "Utilizzo",
+    "importSectionTitle": "Importazioni",
+    "exportSectionTitle": "Esportazioni",
+    "handledImport": "Venduto",
+    "handledExport": "acquistato",
+    "allocation": "assegnato",
+    "priceImport": "Prezzo di vendita",
+    "priceExport": "Prezzo d'acquisto",
+    "lost": "Vendite perse",
+    "noProducts": "Nessun prodotto gestito"
+  }
+}

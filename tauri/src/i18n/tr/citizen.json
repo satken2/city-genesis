@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} yaşında",
+    "male": "Erkek",
+    "female": "Kadın",
+    "single": "Tek",
+    "married": "Evli",
+    "household": "Hane",
+    "employer": "İşveren",
+    "unemployed": "İşsiz",
+    "school": "Okul",
+    "notEnrolled": "kayıtlı değil",
+    "major": "Majör",
+    "higherEducation": "Yüksek öğretim",
+    "graduated": "Tamamlandı",
+    "notGraduated": "Tamamlanmamıs",
+    "skills": "yetenek",
+    "criminality": "Suç eğilimi",
+    "commuteTime": "Değişim zamanı",
+    "automobile": "Araba",
+    "automobileOwned": "sahipli",
+    "automobileNone": "Hiçbiri",
+    "householdStatus": "ev durumu"
+  },
+  "household": {
+    "title": "Hane",
+    "familyType": "aile tipi",
+    "familySingle": "Tek",
+    "familyCouple": "Çift",
+    "familyFamily": "Aile",
+    "familySenior": "Kıdemli",
+    "hasAutomobile": "otomobili var",
+    "noAutomobile": "otomobil yok",
+    "discretionaryIncome": "harcanabilir gelir",
+    "livingStandard": "Yaşam standartı",
+    "livingStandardLevel": {
+      "0": "Muhtaç",
+      "1": "Kötü",
+      "2": "Orta sınıf",
+      "3": "Zengin"
+    },
+    "satisNutrition": "Beslenme",
+    "satisHealthcare": "sağlık",
+    "satisLeisure": "Boş",
+    "satisTourism": "Turizm",
+    "tourist": "turistler",
+    "partySize": "parti boyu",
+    "members": "Üyeler"
+  },
+  "education": {
+    "people": "insanlar"
+  }
+}

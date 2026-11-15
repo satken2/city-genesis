@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "simülasyon yükü",
+      "heading": "En son dönemin hesaplama süresi ({{days}} gün)",
+      "noData": "Ölçüm verisi yok",
+      "note": "Birkaç dönem arka arkaya çalıştığında, bu sonuncusunu gösterir. Operasyon sayısı, şehrin büyüklüğüne bağlı olarak ana karşılaştırmalardaki kombinasyonların sayısının kaba bir tahminidir.",
+      "colGroup": "İşlemek",
+      "colTime": "Zaman",
+      "colWorkload": "operasyon sayısı",
+      "workloadHint": "Kaba sayıda ana karşılaştırma (dizi elemanları). Arızayı görmek için bir değerin üzerine gelin.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} MS"
+    },
+    "group": {
+      "market": "mal piyasası",
+      "realestate": "emlâk piyasası",
+      "labor": "İşgücü piyasası",
+      "building_spawn": "yapı yumurtlaması",
+      "agent_spawn": "ajan yumurtlamak",
+      "routing": "vatandaş yol bulma",
+      "transit": "Transit yol bulma",
+      "environment": "Yaşam çevresi",
+      "other": "Diğer"
+    },
+    "workload": {
+      "market": "Alıcılar {{demanders}} × Satıcılar {{suppliers}} (ürün başına çarpılır ve toplanır)",
+      "realestate": "{{movers}} × Konut binaları {{housing}} hareketi düşünen haneler",
+      "labor": "İş arayanlar {{seekers}} × İşverenler {{employers}}",
+      "building_spawn": "Aday Parseller {{parcels}} × Bina Türleri × Kat Sayıları × Zemin Kullanımı",
+      "agent_spawn": "Ürünler × Bölgeler {{zones}} × Bölgeler {{zones}}",
+      "routing": "2 Seyahat Modu × Bölgeler {{zones}} × Bölgeler {{zones}} × 3 Aday Rotalar × Yollar {{paths}}",
+      "transit": "Durdurur {{stops}} × Düğümler {{nodes}}",
+      "environment": "Izgara {{width}} × {{height}} × Güneş Pozisyonları"
+    },
+    "entities": {
+      "colMetric": "Metrik",
+      "colCount": "Saymak",
+      "title": "varlık sayıları",
+      "agents": "acenta",
+      "households": "ev halkı",
+      "businesses": "işyeri",
+      "publicFacilities": "kamu tesisleri",
+      "buildings": "Site",
+      "citizens": "vatandaşlar",
+      "population": "Nüfus",
+      "zones": "bölgeler",
+      "parcels": "parsel",
+      "paths": "yol",
+      "roads": "Demirleme yeri",
+      "tracks": "Raylar",
+      "infra": "Faydalı Ağlar",
+      "nodes": "düğümler"
+    },
+    "approximation": {
+      "title": "Simülasyon Yaklaşımı",
+      "intro": "Büyük şehirler için hesaplamaları basitleştirme seçenekleri planlanmıştır. Bu ayarlar henüz değiştirilemez.",
+      "warning": "Bu değişiklikler oyun dengesini etkileyebilir. Onlar geri alınamaz.",
+      "irreversible": "Yaklaşımın neden olduğu değişiklikler daha sonraki dönemlerde devam eder. Etkinleştirildiğinde, yaklaşım devre dışı bırakılamaz veya azaltılamaz.",
+      "undecided": "TBD",
+      "candidates": "Adaylar Maks.",
+      "epochs": "İncelemeler arasındaki dönemler",
+      "off": "Kapalı",
+      "on": "Üzerinde",
+      "goods": {
+        "label": "Satın Alın Aday",
+        "description": "Tedarikçileri fiyat ve mesafe ile karşılaştırın."
+      },
+      "jobs": {
+        "label": "aday",
+        "description": "İşverenleri ücretler ve işe gidip gelme koşulları ile karşılaştırın."
+      },
+      "housing": {
+        "label": "Konut Adayları",
+        "description": "Kira ve konuma göre evleri sınırlayın."
+      },
+      "interval": {
+        "label": "rutin karar aralığı",
+        "description": "Alışveriş, iş ve konut seçimlerini daha az sıklıkta gözden geçirin."
+      },
+      "aggregation": {
+        "label": "Benzer vatandaşları ve haneleri gruplandırın",
+        "description": "benzer koşullara sahip vatandaşlar veya haneler için toplu olarak bazı kararlar verin."
+      }
+    },
+    "status": {
+      "title": "sistem durumu",
+      "gpuDisabled": "GPU hızlandırma: devre dışı bırakıldı",
+      "coreSimulator": "Çekirdek Simülatörü",
+      "currentMemory": "Geçerli bellek kullanımı: {{value}}",
+      "peakMemory": "Başlangıçtan bu yana en yüksek bellek kullanımı: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Geçerli VRAM kullanımı: {{value}}",
+      "usageTooltip": "Tüm PC {{pc}} / Bu oyun {{game}} / {{total}} yüklü",
+      "legendPc": "bütün bilgisayar",
+      "legendGame": "Bu oyun"
+    }
+  }
+}

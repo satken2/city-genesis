@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Lieferkette",
+    "selected": "Ausgewählt",
+    "providers": "{{product}} Lieferanten",
+    "executing": "Während der Simulation sind keine Lieferinformationen verfügbar.",
+    "fetchError": "Lieferinformationen konnten nicht geladen werden.",
+    "activeCount": "Aktiv {{active}} / {{count}}",
+    "production": "Letzte Produktion: {{amount}} {{unit}}",
+    "resourceRemaining": "Zugängliche Reserven: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Verfügbar",
+      "unknown": "Unbestimmt",
+      "missing": "Abwesend",
+      "inactive": "Inaktiv",
+      "partial": "teilweise betroffen",
+      "limited": "Begrenzt / gestoppt",
+      "disconnected": "Getrennt",
+      "supply_shortage": "Möglicher Versorgungsmangel",
+      "capacity_limited": "Mögliche Kapazitätsgrenze"
+    },
+    "facilities": {
+      "401": "Kraftwerke",
+      "402": "Wasseraufnahmeeinrichtungen",
+      "403": "Öllieferanten",
+      "404": "Güterbahnhöfe",
+      "405": "Erzlieferanten",
+      "406": "Schifffahrtswege (offenes Meer)",
+      "501": "Bahndepots",
+      "502": "Busdepots",
+      "503": "LRT-Depots",
+      "504": "Einschienenbahn-Depots",
+      "505": "Wartungsdock"
+    },
+    "consumers": {
+      "401": "Stromverbraucher",
+      "402": "Wasserpumpen",
+      "403": "Ölverbraucher",
+      "404": "Frachtverbraucher",
+      "405": "Erzverbraucher",
+      "406": "Ports",
+      "501": "Bahnstrecken",
+      "502": "Buslinien",
+      "503": "LRT-Routen",
+      "504": "Monorail-Routen",
+      "505": "Fährlinien"
+    }
+  }
+}

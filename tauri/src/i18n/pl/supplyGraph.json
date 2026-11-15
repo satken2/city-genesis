@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Łańcuch dostaw",
+    "selected": "Wybrany",
+    "providers": "{{product}} Dostawcy",
+    "executing": "Informacje o dostawie są niedostępne, gdy symulacja jest uruchomiona.",
+    "fetchError": "Nie można załadować informacji o dostawie.",
+    "activeCount": "aktywny {{active}} / {{count}}",
+    "production": "Ostatnia produkcja: {{amount}} {{unit}}",
+    "resourceRemaining": "Dostępne rezerwy: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Dostępny",
+      "unknown": "Nieokreślony",
+      "missing": "Nieobecny",
+      "inactive": "Nieaktywny",
+      "partial": "częściowo dotknięty",
+      "limited": "Ograniczone / zatrzymane",
+      "disconnected": "Niepowiązany",
+      "supply_shortage": "Możliwy niedobór dostaw",
+      "capacity_limited": "Możliwy limit pojemności"
+    },
+    "facilities": {
+      "401": "Elektrownie",
+      "402": "Urządzenia do poboru wody",
+      "403": "Dostawcy ropy",
+      "404": "Stacje towarowe",
+      "405": "Dostawcy rudy",
+      "406": "Trasa dużych statków (poza morzem)",
+      "501": "Magazyny kolejowe",
+      "502": "Magazyny autobusowe",
+      "503": "Składy LRT",
+      "504": "Magazyny jednoszynowe",
+      "505": "Dok konserwacyjny"
+    },
+    "consumers": {
+      "401": "odbiorcy energii",
+      "402": "Pompy wodne",
+      "403": "Konsumenci ropy",
+      "404": "Konsumenci frachtu",
+      "405": "Konsumenci rudy",
+      "406": "Porty",
+      "501": "Trasy kolejowe",
+      "502": "Trasy autobusowe",
+      "503": "Trasy LRT",
+      "504": "Trasy jednoszynowe",
+      "505": "Linie promowe"
+    }
+  }
+}

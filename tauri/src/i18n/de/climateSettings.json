@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Klimaeinstellungen",
+    "name": "Klimaname",
+    "probabilities": "Monatliche Wetterwahrscheinlichkeiten",
+    "probabilityHint": "Ziehen Sie die Farbgrenzen horizontal. Verwenden Sie die folgenden Felder, um auch das Wetter mit 0% zu bearbeiten.",
+    "month": "Monat {{month}}",
+    "preset": "Klimavorgabe",
+    "current": "Aktuelle Einstellungen",
+    "chartHint": "Wählen Sie eine Reihe in der Legende aus und ziehen Sie die monatlichen Punkte vertikal.",
+    "averageHint": "Temperatur, Niederschlag und Sonnenlicht sind monatliche Durchschnittswerte. Die tatsächlichen Werte variieren je nach Epoche um diese Mittelwerte.",
+    "apply": "Anwenden",
+    "chart": "Monatliche Klimatafel"
+  }
+}

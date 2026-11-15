@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "tedarik bilgisi",
+    "product": "tedarik eden ürün",
+    "amount": "arz tutarı",
+    "price": "arz fiyatı",
+    "soldAmount": "satılan miktar",
+    "profitRate": "kâr oranı",
+    "utilization": "Kullanım"
+  },
+  "tourismSupply": {
+    "title": "turistleri ağırlamak",
+    "touristCapacity": "turistik kapasite",
+    "persons": "{{value}} kişi",
+    "218": {
+      "price": "giriş ücreti",
+      "amount": "Ziyaretçi Kapasitesi (Toplam)",
+      "soldAmount": "Ziyaretçiler (toplam)"
+    },
+    "219": {
+      "price": "Bilet ücreti",
+      "amount": "Yolcu Kapasitesi (Toplam)",
+      "soldAmount": "Yolcular (toplam)"
+    }
+  },
+  "demand": {
+    "product": "Ürün",
+    "demandAmount": "Talep",
+    "receivedAmount": "Edinilen",
+    "acquiredAmount": "Envanter"
+  },
+  "cargo": {
+    "title": "kargo operasyonları",
+    "description": "Bu merkez, şehir pazarlarına tedarik etmek için bölge dışından mal ithal ediyor ve bölge dışına ihraç etmek için şehrin fazla üretimini satın alıyor.",
+    "capacity": "Verim Kapasitesi",
+    "perPeriod": "/ay",
+    "perPeriod_week": "/hafta",
+    "materialCapacity": "Alınan malzemelerle sınır",
+    "areaCapacity": "Zemin alanına göre sınır",
+    "importHandled": "İthal işlenmiş",
+    "exportHandled": "İhracat işlendi",
+    "utilization": "Kullanım",
+    "importSectionTitle": "İthalat",
+    "exportSectionTitle": "ihracat",
+    "handledImport": "satılmış",
+    "handledExport": "satın alınan",
+    "allocation": "tahsis edilmiş",
+    "priceImport": "Satış fiyatı",
+    "priceExport": "Satınalma fiyatı",
+    "lost": "kayıp satış",
+    "noProducts": "işlenen ürün yok"
+  }
+}

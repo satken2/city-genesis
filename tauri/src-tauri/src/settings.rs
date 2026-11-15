@@ -7,7 +7,9 @@ use tauri::Manager;
 const SETTINGS_FILE_NAME: &str = "settings.json";
 
 /// Supported UI languages. Keep in sync with SUPPORTED_LANGUAGES in src/utils/locale.ts and the table in steam::game_language.
-const SUPPORTED_LANGUAGES: [&str; 7] = ["ja", "en", "es-419", "zh-Hans", "zh-Hant", "fr", "ko"];
+const SUPPORTED_LANGUAGES: [&str; 14] = [
+    "ja", "en", "es-419", "zh-Hans", "zh-Hant", "fr", "ko", "de", "pl", "ru", "pt-BR", "es-ES", "tr", "it",
+];
 /// Initial language when neither Steam nor the OS gives a supported language.
 const FALLBACK_LANGUAGE: &str = "en";
 /// Regions that write Chinese in Traditional script, for tags without a script subtag (zh-TW, zh-HK, zh-MO).
@@ -73,11 +75,14 @@ fn initial_language() -> String {
 }
 
 /// Map a BCP 47 tag (ja-JP, zh-Hant-HK, ...) to a supported language by its primary subtag. Chinese resources are
-/// split by script, so infer the script from the region when the tag has no script subtag.
+/// split by script. Spain selects es-ES, while other Spanish tags retain the Latin American default.
 fn language_from_locale_tag(tag: &str) -> Option<&'static str> {
     let subtags: Vec<String> = tag.split(['-', '_']).map(str::to_ascii_lowercase).collect();
     let has = |subtag: &str| subtags.iter().any(|s| s == subtag);
     let primary = subtags.first()?.as_str();
+    if primary == "es" {
+        return Some(if subtags[1..].iter().any(|subtag| subtag == "es") { "es-ES" } else { "es-419" });
+    }
     if primary == "zh" {
         let traditional = has("hant") || (!has("hans") && TRADITIONAL_CHINESE_REGIONS.iter().any(|r| has(r)));
         return Some(if traditional { "zh-Hant" } else { "zh-Hans" });
@@ -183,8 +188,10 @@ mod tests {
         let cases = [
             ("ja-JP", Some("ja")),
             ("en-GB", Some("en")),
-            ("es-ES", Some("es-419")),
+            ("es-ES", Some("es-ES")),
             ("es-419", Some("es-419")),
+            ("es-MX", Some("es-419")),
+            ("es", Some("es-419")),
             ("zh-CN", Some("zh-Hans")),
             ("zh-SG", Some("zh-Hans")),
             ("zh-TW", Some("zh-Hant")),
@@ -193,7 +200,13 @@ mod tests {
             ("zh-Hant", Some("zh-Hant")),
             ("fr-CA", Some("fr")),
             ("ko-KR", Some("ko")),
-            ("de-DE", None),
+            ("de-DE", Some("de")),
+            ("pl-PL", Some("pl")),
+            ("ru-RU", Some("ru")),
+            ("pt_BR", Some("pt-BR")),
+            ("tr-TR", Some("tr")),
+            ("it-IT", Some("it")),
+            ("nl-NL", None),
             ("", None),
         ];
         for (tag, expected) in cases {

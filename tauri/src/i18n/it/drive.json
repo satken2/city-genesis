@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Guidare",
+    "car": "Auto",
+    "rail": "Percorsi ferroviari",
+    "running": "Veicoli in esecuzione",
+    "standard": "autovettura",
+    "commercial": "Veicolo commerciale",
+    "truck": "Camion",
+    "finishEditing": "Termina la modifica prima di avviare un'unità.",
+    "noLines": "Non sono disponibili percorsi ferroviari operativi.",
+    "pickRail": "Fare clic su una traccia sul percorso selezionato.",
+    "pickRoad": "Fare clic su una strada attiva.",
+    "pickVehicle": "Fare clic su un'automobile, un autobus o un treno in movimento (trascinare a Pan).",
+    "clickStart": "Selezionare una posizione di partenza (trascinare su Pan).",
+    "startSelected": "Avvia selezionato. partire nella direzione della freccia.",
+    "reverse": "Direzione inversa",
+    "start": "Partire",
+    "back": "Indietro",
+    "close": "Uscita (Esc)",
+    "invalidStart": "non può iniziare da qui. Seleziona una strada guidabile o una pista sul tuo percorso.",
+    "invalidVehicle": "Nessun veicolo selezionato. Fare clic su un'automobile, un autobus o un treno in movimento.",
+    "notReady": "questa direzione non è disponibile o l'ambiente circostante è in fase di caricamento. cambiare direzione o posizione, o attendere e riprovare."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "Bitkin",
+    "unhappy": "Mutsuz",
+    "neutral": "Nötr",
+    "happy": "Mutlu",
+    "delighted": "Memnun",
+    "zero": "sıfır memnuniyet"
+  }
+}

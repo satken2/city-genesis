@@ -2,7 +2,7 @@
  * Shared display language definitions. Manage UI language codes (i18next) and BCP47 number/date formatting
  * locales together. Add languages only through SUPPORTED_LANGUAGES and INTL_LOCALES here. Codes must match
  * src/i18n/<code>/ directories. Chinese uses script rather than region because Simplified/Traditional vocabulary
- * differs. Spanish uses es-419 for Latin American spelling/vocabulary. The first-launch language detection in
+ * differs. Spanish has separate Latin American (es-419) and Spain (es-ES) resources. The first-launch language detection in
  * src-tauri/src/settings.rs and steam.rs also lists these codes.
  */
 
@@ -15,6 +15,13 @@ export const SUPPORTED_LANGUAGES = [
   "zh-Hant",
   "fr",
   "ko",
+  "de",
+  "pl",
+  "ru",
+  "pt-BR",
+  "es-ES",
+  "tr",
+  "it",
 ] as const;
 
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
@@ -31,6 +38,13 @@ const INTL_LOCALES: Record<SupportedLanguage, string> = {
   "zh-Hant": "zh-Hant-TW",
   fr: "fr-FR",
   ko: "ko-KR",
+  de: "de-DE",
+  pl: "pl-PL",
+  ru: "ru-RU",
+  "pt-BR": "pt-BR",
+  "es-ES": "es-ES",
+  tr: "tr-TR",
+  it: "it-IT",
 };
 
 /** Fallback for unknown language codes. Match i18n fallbackLng. */
@@ -49,12 +63,14 @@ const TRADITIONAL_CHINESE_REGIONS = ["tw", "hk", "mo"];
 
 /**
  * Map a BCP 47 tag (ja-JP, zh-Hant-HK, ...) to a supported language by its primary subtag. Chinese is split by
- * script, so infer the script from the region when the tag has no script subtag. Same rule as
+ * script, so infer the script from the region when the tag has no script subtag. Spain selects es-ES,
+ * while other Spanish tags retain the Latin American default. Same rule as
  * language_from_locale_tag in src-tauri/src/settings.rs.
  */
 export function languageFromLocaleTag(tag: string): SupportedLanguage | undefined {
   const subtags = tag.toLowerCase().split(/[-_]/);
   const primary = subtags[0];
+  if (primary === "es") return subtags.slice(1).includes("es") ? "es-ES" : "es-419";
   if (primary === "zh") {
     const traditional =
       subtags.includes("hant") ||

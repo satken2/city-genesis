@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Godło",
+    "flag": "Flaga miasta",
+    "motif": "Motyw",
+    "fieldColor": "Kolor pola",
+    "motifColor": "Kolor motywu",
+    "pattern": "Wzorzec",
+    "accentColor": "Kolor akcentu",
+    "placement": "Pozycja emblematu",
+    "loadImage": "Załaduj obraz",
+    "randomize": "Randomize",
+    "apply": "Zastosować",
+    "imageLoadFailed": "Nie udało się załadować obrazu.",
+    "placements": {
+      "center": "Centrum",
+      "canton": "U góry z lewej",
+      "none": "Żaden"
+    },
+    "motifs": {
+      "wave": "Fala",
+      "mountain": "Góra",
+      "star": "Gwiazda",
+      "tree": "Drzewo",
+      "sun": "Słoneczny",
+      "moon": "Księżyc",
+      "flower": "Kwiat",
+      "leaf": "Liść",
+      "bird": "Ptak",
+      "fish": "Ryba",
+      "anchor": "Kotwica",
+      "gear": "Bieg",
+      "tower": "Zamek",
+      "bridge": "Most",
+      "key": "Klawisz",
+      "crown": "Korona",
+      "snowflake": "Płatek śniegu",
+      "flame": "Płomień",
+      "diamond": "Diament",
+      "cross": "Przejść przez"
+    },
+    "patterns": {
+      "plain": "Równina",
+      "bicolor": "Dwubarwny",
+      "triband": "Triband",
+      "diagonal": "Przekątna",
+      "border": "Granica",
+      "bands": "Kołnierz sutanny i togi"
+    }
+  }
+}

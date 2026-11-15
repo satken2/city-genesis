@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "Średni klimat w tym miesiącu",
+    "currentClimate_week": "Średni klimat w tym tygodniu",
+    "title": "Efektywność produkcji zakładu według klimatu",
+    "facility": "Łatwość",
+    "factor": "Efektywność produkcji"
+  }
+}

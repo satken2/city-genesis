@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Composição do piso",
+    "parking": "Estacionamento",
+    "type": "Tipo de construção",
+    "durability": "Durabilidade",
+    "floors": "Pisos",
+    "floorsValue": "{{floors}}F (área {{area, number}}㎡)",
+    "heightLabel": "altura: {{value}}m",
+    "baseAreaLabel": "Área da base: {{area, number}}㎡",
+    "underMaintenance": "Em manutenção",
+    "parkingCapacity": "Capacidade de estacionamento",
+    "parkingCapacityValue": "{{capacity}} carros",
+    "parkingDay": "Dia",
+    "parkingNight": "Noite",
+    "parkingUsage": "{{used}} / {{capacity}} carros"
+  },
+  "building_appearance": {
+    "variantLabel": "Aparência {{index}}",
+    "layoutHint": "Arraste um cartão para o local para colocar / arraste para mover / Shift + Drag para girar / excluir a tecla para remover",
+    "sizeLabel": "{{width}}×{{height}}M",
+    "deleteSelected": "Remover selecionado",
+    "apply": "Aplicar",
+    "saveFailed": "Falha ao salvar a aparência",
+    "noSubbuildings": "Nenhum sub-building é definido para este tipo de construção"
+  }
+}

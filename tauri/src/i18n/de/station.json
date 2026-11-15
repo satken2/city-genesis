@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Station",
+    "name": "Stationsname",
+    "ridership": "Fahrgast",
+    "platforms": "Plattformliste",
+    "noPlatforms": "Zu dieser Station gehören keine Bahnsteige (Plattformen, die von der Linie gekreuzt sind, gehören hier)",
+    "lines": "Servierlinien",
+    "noLines": "Keine Linien bedienen diese Station",
+    "stops": "Fahrerschaft durch Stopp",
+    "noStops": "Keine Haltestellen an dieser Station",
+    "lineRunning": "Laufen",
+    "lineSuspended": "Eingestellt",
+    "houseEnds": "Platzierung des Bahnhofsgebäudes",
+    "houseEnds_both": "Beide Enden",
+    "houseEnds_start": "Start",
+    "houseEnds_end": "Ende",
+    "passageMode": "Platzierung der Passage",
+    "passageMode_elevated": "Erhöht",
+    "passageMode_ground": "Ebenerdig",
+    "passageMode_underground": "Untergrund"
+  }
+}

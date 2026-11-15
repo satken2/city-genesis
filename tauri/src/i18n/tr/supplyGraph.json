@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Tedarik zinciri",
+    "selected": "Seçilmiş",
+    "providers": "{{product}} tedarikçiler",
+    "executing": "Simülasyon çalışırken tedarik bilgileri kullanılamıyor.",
+    "fetchError": "Tedarik bilgisi yüklenemedi.",
+    "activeCount": "Aktif {{active}} / {{count}}",
+    "production": "Son Üretim: {{amount}} {{unit}}",
+    "resourceRemaining": "Erişilebilir Rezervler: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Mevcut",
+      "unknown": "Belirsiz",
+      "missing": "Yok",
+      "inactive": "Pasif",
+      "partial": "kısmen etkilenmiş",
+      "limited": "Sınırlı / Durdurulmuş",
+      "disconnected": "Bağlantısız",
+      "supply_shortage": "Olası tedarik sıkıntısı",
+      "capacity_limited": "Olası kapasite sınırı"
+    },
+    "facilities": {
+      "401": "elektrik santralleri",
+      "402": "Su Alım Tesisleri",
+      "403": "petrol tedarikçileri",
+      "404": "navlun",
+      "405": "cevher tedarikçileri",
+      "406": "Okyanus Nakliye Yolları (Açık Deniz)",
+      "501": "Demiryolu Depoları",
+      "502": "otobüs depoları",
+      "503": "LRT depoları",
+      "504": "Monoray Depoları",
+      "505": "imdat iskelesi"
+    },
+    "consumers": {
+      "401": "Güç tüketicileri",
+      "402": "su pompaları",
+      "403": "petrol tüketicileri",
+      "404": "navlun tüketicileri",
+      "405": "cevher tüketicileri",
+      "406": "limanlar",
+      "501": "tren yolu",
+      "502": "Otobüs güzergahları",
+      "503": "LRT rotaları",
+      "504": "Monoraylı rotalar",
+      "505": "feribot hatları"
+    }
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "mapNavigation": {
+    "title": "Erkunden Sie die Stadt",
+    "back": "Zurück",
+    "search": "Suche nach einem Ort",
+    "origin": "Suche nach einem Ausgangspunkt",
+    "destination": "Suche nach einem Ziel",
+    "clear": "Klar",
+    "searching": "Suche…",
+    "error": "Verbindung nicht möglich. Laden Sie neu und versuchen Sie es erneut.",
+    "noResults": "Keine Orte gefunden",
+    "mode": "Reisemodus",
+    "pedestrian": "Gehen & Transit",
+    "automobile": "Fahrt",
+    "pickOrigin": "Wählen Sie Auf Karte starten",
+    "pickDestination": "Wählen Sie Ziel auf Karte",
+    "swap": "Tauschen",
+    "cancel": "Abbrechen",
+    "directions": "Richtungen",
+    "intro": "Suchen Sie nach Einrichtungen, Stationen, Bezirken oder Straßen oder wählen Sie einen Ort auf der Karte aus.",
+    "chooseOrigin": "Suchen Sie nach einem Startpunkt oder wählen Sie einen auf der Karte aus.",
+    "routing": "Weg finden …",
+    "showRoute": "Volle Route anzeigen",
+    "mapPoint": "Punkt auf Karte",
+    "minutes": "Über {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Schätzung basierend auf dem Straßennetz aus der Routenberechnung # {{epoch}}. Gepunktete Linien zeigen Gehen und Verbindungen zu Straßen.",
+    "busy": "Simulation läuft. Die Ergebnisse werden aktualisiert, wenn sie fertig sind.",
+    "not_ready": "Noch keine Routendaten. Führen Sie eine Simulation in dieser Stadt aus, um Routen anzuzeigen.",
+    "unreachable": "Keine Route verbindet diese beiden Orte.",
+    "no_access": "In der Nähe des ausgewählten Ortes wurde keine zugängliche Straße gefunden.",
+    "geometry_unavailable": "Die Transitgeometrie für diese Route ist nicht verfügbar.",
+    "place_missing": "Der ausgewählte Ort wurde entfernt. Bitte wählen Sie es erneut aus.",
+    "kind": {
+      "agent": "Einrichtung",
+      "zone": "Stadtbezirk",
+      "stop": "Haltestelle",
+      "station": "Station",
+      "point": "Punkt",
+      "road": "Straße"
+    },
+    "leg": {
+      "walk": "Walk",
+      "drive": "Fahrt",
+      "transit": "Transit",
+      "conveyor": "Fahrgastförderer",
+      "access": "Verbindung zur Straße",
+      "turn": "Kreuzung drehen"
+    },
+    "picking": {
+      "origin": "Klicken Sie auf Ihren Startpunkt auf der Karte.",
+      "destination": "Klicken Sie auf der Karte auf Ihr Ziel."
+    },
+    "pins": {
+      "tab": "Pins",
+      "hint": "Klicken Sie auf die Karte, um einen Pin in der ausgewählten Farbe zu platzieren. Klicken Sie mit der rechten Maustaste auf einen Pin, um ihn zu entfernen.",
+      "list": "PIN-Liste",
+      "remove": "Stift entfernen"
+    }
+  }
+}

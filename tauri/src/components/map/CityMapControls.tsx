@@ -76,7 +76,7 @@ function buildResourceAreas(resources: ApiResourceArea[], resourceTypes?: Master
     .filter(({ polygon }) => polygon.length >= 3)
     .map(({ resource_type, resource_type_label, polygon }) => ({
       resourceType: resource_type,
-      label: resource_type_label,
+      label: resourceTypes?.[resource_type]?.display_name ?? resource_type_label,
       polygon,
       // 水源以外は種別 ID ごとに色相を黄金角ずつずらす。
       color: waterTypes.has(resource_type) ? "#38bdf8" : `hsl(${(resource_type * 137.508) % 360}, 62%, 42%)`,

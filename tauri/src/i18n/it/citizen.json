@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} anni",
+    "male": "Maschio",
+    "female": "Femmina",
+    "single": "Singolo",
+    "married": "Sposato",
+    "household": "Nucleo familiare",
+    "employer": "Datore di lavoro",
+    "unemployed": "Disoccupato",
+    "school": "Scuola",
+    "notEnrolled": "non iscritto",
+    "major": "Principale",
+    "higherEducation": "Istruzione superiore",
+    "graduated": "Completato",
+    "notGraduated": "non completato",
+    "skills": "Competenze",
+    "criminality": "tendenza al crimine",
+    "commuteTime": "Tempo di pendolarismo",
+    "automobile": "Auto",
+    "automobileOwned": "Di proprietà",
+    "automobileNone": "Nessuna",
+    "householdStatus": "Stato familiare"
+  },
+  "household": {
+    "title": "Nucleo familiare",
+    "familyType": "Tipo di famiglia",
+    "familySingle": "Singolo",
+    "familyCouple": "Coppia",
+    "familyFamily": "Famiglia",
+    "familySenior": "Anziano",
+    "hasAutomobile": "ha un'automobile",
+    "noAutomobile": "Nessuna automobile",
+    "discretionaryIncome": "Reddito disponibile",
+    "livingStandard": "Standard di vita",
+    "livingStandardLevel": {
+      "0": "Indigente",
+      "1": "Povero",
+      "2": "Classe media",
+      "3": "Affluente"
+    },
+    "satisNutrition": "Nutrizione",
+    "satisHealthcare": "assistenza sanitaria",
+    "satisLeisure": "Tempo libero",
+    "satisTourism": "Turismo",
+    "tourist": "Turisti",
+    "partySize": "Dimensioni della festa",
+    "members": "membri"
+  },
+  "education": {
+    "people": "persone"
+  }
+}

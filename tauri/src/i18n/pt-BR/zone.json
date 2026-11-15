@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Distrito #{{id}}",
+    "color": "Cor do distrito",
+    "colorUpdateFailed": "Falha ao atualizar a cor do distrito",
+    "basicInfo": "Informações básicas",
+    "area": "Área",
+    "zonePopulation": "população residente",
+    "daytimePopulation": "população diurna",
+    "spaceAmount": "ocupação do piso",
+    "slotStarvationTitle": "Os inquilinos em espera não podem ser alojados",
+    "slotStarvationWarning": "\"{{tenant}}\" precisa de pelo menos {{required}} m2 de espaço em um único edifício, mas o maior buildable neste distrito é {{max}} m2. Forneça uma parcela maior.",
+    "restrictions": "Regulamentos de construção",
+    "restrictionUpdateFailed": "Falha ao atualizar os regulamentos distritais",
+    "restrictionRequired": "Taxa de cobertura, volume e altura não podem estar vazios",
+    "mergeConfirm": "Mesclar \"{{source}}\" em \"{{target}}\". O distrito de origem desaparece junto com suas configurações de regulamento.",
+    "mergeAction": "Fundir",
+    "mergeFailed": "Falha ao mesclar distritos (distritos que não são adjacentes não podem ser mesclados)",
+    "mergeNoRequest": "Nenhum distrito selecionado para mesclar",
+    "edit": {
+      "toolHeading": "Operação",
+      "toolCreate": "Crie um novo distrito",
+      "toolExpand": "Expandir distrito",
+      "toolExpandZone": "Expandir {{name}}",
+      "modeHeading": "Método de seleção",
+      "modeBlock": "bloco inteiro",
+      "modeRoad": "lado da rua",
+      "hint": {
+        "create": {
+          "block": "Segure Ctrl e arraste os blocos cercados por ruas; Os blocos pintados, com suas parcelas, se tornam um novo distrito. Arraste para panorâmica, role até o zoom.",
+          "road": "Segure Ctrl e arraste para um lado de uma rua (metade da estrada, ou as parcelas ao longo dela); Esse lado da rua, com seus pacotes, torna-se um novo distrito. Arraste para panorâmica, role até o zoom."
+        },
+        "expand": {
+          "block": "Passe o mouse sobre um distrito, segure Ctrl e arraste os blocos para adicioná-los, com seus pacotes, para aquele distrito. Arraste para panorâmica, role até o zoom.",
+          "road": "Passe o mouse sobre um distrito, segure Ctrl e arraste para um lado de uma rua (metade da estrada, ou as parcelas ao longo dele) para adicionar esse lado, com suas parcelas, para aquele distrito. Arraste para panorâmica, role até o zoom."
+        }
+      },
+      "failed": "Não foi possível mudar o distrito."
+    }
+  }
+}

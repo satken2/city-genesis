@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Przegląd",
+    "tabActivity": "Czynność",
+    "follow": "Śledź z aparatem",
+    "unfollow": "Przestań podążać",
+    "track": "Dodaj do listy śledzenia",
+    "trackRandom": "Śledź losowego obywatela",
+    "noUntrackedCitizens": "Nie ma dostępnych obywateli nieśledzonych.",
+    "trackRandomError": "nie mógł śledzić obywatela.",
+    "untrack": "Usuń z listy śledzenia",
+    "home": "Rezydencja",
+    "mobility": "Poruszanie się",
+    "mode": {
+      "automobile": "Samochód",
+      "pedestrian": "Spacery i transport publiczny"
+    },
+    "visits": "miejsca docelowe",
+    "visitKind": {
+      "home": "Dom",
+      "work": "Praca",
+      "school": "Szkoła",
+      "shop": "Zakupy"
+    },
+    "legs": {
+      "walk": "Spacerować",
+      "drive": "Samochód",
+      "transit": "Tranzyt",
+      "conveyor": "System transportu pasażerów"
+    },
+    "trip": "W jedną stronę {{minutes}} min · {{route}}",
+    "noRoute": "Brak trasy",
+    "noVisits": "nie ma dokąd pójść.",
+    "status": {
+      "not_ready": "pokazane po uruchomieniu symulacji.",
+      "busy": "niedostępne, gdy symulacja jest uruchomiona.",
+      "no_home": "Czekam na mieszkanie, więc nie ma zarejestrowanej aktywności.",
+      "missing": "Ten obywatel nie mieszka już w mieście.",
+      "error": "Nie udało się załadować."
+    },
+    "empty": "Żaden obywatel nie jest śledzony.",
+    "pickFailed": {
+      "not_ready": "Uruchom symulację, aby kliknąć samochody i pieszych i zobaczyć, kim są.",
+      "busy": "Obywatele nie mogą być pokazywane, gdy symulacja jest uruchomiona.",
+      "none": "Nie mogłem znaleźć, kto jest w tym samochodzie lub na piechotę.",
+      "missing": "Ten obywatel nie mieszka już w mieście.",
+      "no_home": "Ten obywatel czeka na mieszkanie.",
+      "error": "Nie mogłem pokazać obywatela."
+    }
+  }
+}

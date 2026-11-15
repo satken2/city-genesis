@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Concedi un nome",
+      "message": "Inserisci il nome che vorresti concedere a {{name}}.",
+      "inputLabel": "Nuovo nome",
+      "confirm": "Dare"
+    },
+    "reward": {
+      "label": "concedere una ricompensa",
+      "message": "Dai alla famiglia di {{name}} una ricompensa dai fondi della città. Contanti della città: {{available}}",
+      "confirm": "Dare"
+    },
+    "expel": {
+      "label": "Augura loro ogni successo fuori città",
+      "message": "espellere {{name}} dalla città?",
+      "confirm": "Espellere",
+      "results": {
+        "0": "{{name}} ha fatto le valigie e ha lasciato tranquillamente la città. Nessuno è venuto a salutarli.",
+        "1": "{{name}} ha attraversato i limiti della città gridando: \"Non tornerò mai più!\"",
+        "2": "{{name}} è stato cortesemente scortato oltre i limiti della città. Auguriamo loro ogni successo altrove."
+      }
+    },
+    "donation": {
+      "label": "Chiedi una donazione",
+      "message": "Chiedi alla famiglia di {{name}} una donazione alla città. Contanti domestici: {{available}}",
+      "confirm": "Chiedere"
+    },
+    "relocate": {
+      "label": "Suggerisci una nuova casa",
+      "message": "Evict {{name}} della famiglia dalla loro attuale casa? Cercheranno una nuova casa nella prossima epoca.",
+      "confirm": "Sfrattare",
+      "results": {
+        "0": "La famiglia di {{name}} è stata buttata fuori di casa. I loro mobili sono accatastati lungo la strada.",
+        "1": "Le serrature sulla casa di {{name}} sono state modificate. La famiglia ha iniziato a cercare un nuovo posto.",
+        "2": "Alla famiglia di {{name}} è stata offerta una nuova casa. Non possono tornare al vecchio."
+      }
+    }
+  }
+}

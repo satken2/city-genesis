@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Bodenzusammensetzung",
+    "parking": "Parken",
+    "type": "Gebäudetyp",
+    "durability": "Haltbarkeit",
+    "floors": "Böden",
+    "floorsValue": "{{floors}}F (Bodenfläche {{area, number}}㎡)",
+    "heightLabel": "Höhe: {{value}}M",
+    "baseAreaLabel": "Basisbereich: {{area, number}} ㎡",
+    "underMaintenance": "Wird gewartet",
+    "parkingCapacity": "Parkkapazität",
+    "parkingCapacityValue": "{{capacity}} Autos",
+    "parkingDay": "Tageszeit",
+    "parkingNight": "Nachtzeit",
+    "parkingUsage": "{{used}} / {{capacity}} Autos"
+  },
+  "building_appearance": {
+    "variantLabel": "Aussehen {{index}}",
+    "layoutHint": "Ziehen Sie eine Karte auf die zu platzierende Website / ziehen Sie sie, um sie zu bewegen / Umschalt + Ziehen zum Drehen / Löschen zum Entfernen",
+    "sizeLabel": "{{width}} × {{height}} m",
+    "deleteSelected": "Ausgewählte entfernen",
+    "apply": "Anwenden",
+    "saveFailed": "Fehler beim Speichern des Aussehens",
+    "noSubbuildings": "Für diesen Gebäudetyp sind keine Teilgebäude definiert"
+  }
+}

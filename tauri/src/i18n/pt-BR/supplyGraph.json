@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "cadeia de suprimentos",
+    "selected": "Selecionado",
+    "providers": "{{product}} Fornecedores",
+    "executing": "As informações de suprimento não estão disponíveis enquanto a simulação estiver em execução.",
+    "fetchError": "Não foi possível carregar as informações de suprimento.",
+    "activeCount": "ativo {{active}} / {{count}}",
+    "production": "Última produção: {{amount}} {{unit}}",
+    "resourceRemaining": "Reservas acessíveis: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Disponível",
+      "unknown": "Indeterminado",
+      "missing": "Ausente",
+      "inactive": "Inativo",
+      "partial": "parcialmente afetado",
+      "limited": "Limitado/parado",
+      "disconnected": "Desligado",
+      "supply_shortage": "Possível escassez de suprimentos",
+      "capacity_limited": "Possível limite de capacidade"
+    },
+    "facilities": {
+      "401": "Usinas de energia",
+      "402": "Instalações de ingestão de água",
+      "403": "Fornecedores de petróleo",
+      "404": "Estações de frete",
+      "405": "Fornecedores de minério",
+      "406": "rotas marítimas do oceano (mar aberto)",
+      "501": "Depósitos ferroviários",
+      "502": "Depósitos de ônibus",
+      "503": "Depósitos de LRT",
+      "504": "Depósitos de monotrilho",
+      "505": "Doca de manutenção"
+    },
+    "consumers": {
+      "401": "Consumidores de energia",
+      "402": "Bombas de água",
+      "403": "Consumidores de petróleo",
+      "404": "consumidores de carga",
+      "405": "consumidores de minério",
+      "406": "portas",
+      "501": "Rotas ferroviárias",
+      "502": "Rotas de ônibus",
+      "503": "Rotas LRT",
+      "504": "Rotas do monotrilho",
+      "505": "Linhas de balsa"
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "isim vermek",
+      "message": "{{name}} üzerine vermek istediğiniz adı girin.",
+      "inputLabel": "Yeni İsim",
+      "confirm": "Vermek"
+    },
+    "reward": {
+      "label": "ödül vermek",
+      "message": "{{name}}'un hanesine şehir fonlarından bir ödül verin. Şehir Nakit: {{available}}",
+      "confirm": "Vermek"
+    },
+    "expel": {
+      "label": "Onlara şehir dışında başarılar dilerim",
+      "message": "{{name}} şehirden kovmak mı?",
+      "confirm": "Çıkarmak",
+      "results": {
+        "0": "{{name}} toplandı ve sessizce şehirden ayrıldı. Kimse onları görmeye gelmedi.",
+        "1": "{{name}}, \"Asla geri dönmeyeceğim!\" diye bağırarak şehir sınırlarını aştı.",
+        "2": "{{name}}, şehir sınırlarını aşan nazikçe eşlik etti. Onlara başka yerlerde başarılar diliyoruz."
+      }
+    },
+    "donation": {
+      "label": "bağış istemek",
+      "message": "Şehre bağış için {{name}}'un hanesinden isteyin. Hanehalkı Nakit: {{available}}",
+      "confirm": "Sormak"
+    },
+    "relocate": {
+      "label": "Yeni bir ev öner",
+      "message": "{{name}} hanesini mevcut evlerinden tahliye ediyor mu? Bir sonraki çağda yeni bir ev arayacaklar.",
+      "confirm": "Tahliye ettirmek",
+      "results": {
+        "0": "{{name}} ailesinin evlerinden atıldı. Mobilyaları yoldan yığılmış.",
+        "1": "{{name}} evindeki kilitler değiştirildi. Aile yeni bir yer aramaya başladı.",
+        "2": "{{name}} ailesine yeni bir ev teklif edildi. Eskisine geri dönemezler."
+      }
+    }
+  }
+}

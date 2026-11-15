@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Kavşak",
+      "jct": "Kavşak"
+    },
+    "fallbackName": {
+      "ic": "ic #{{id}}",
+      "jct": "jct #{{id}}"
+    },
+    "connections": {
+      "from": "İtibaren",
+      "to": "-E",
+      "road": "{{type}} #{{id}}",
+      "none": "Bağlantılı yol çiftleri yok.",
+      "direction": {
+        "n": "Kuzeyinde",
+        "ne": "Kuzeydoğu",
+        "e": "Doğu",
+        "se": "Güneydoğu",
+        "s": "Güney",
+        "sw": "Güneybatı",
+        "w": "Batısında",
+        "nw": "Kuzeybatı"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

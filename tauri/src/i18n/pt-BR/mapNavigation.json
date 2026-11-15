@@ -1,0 +1,61 @@
+{
+  "mapNavigation": {
+    "title": "Explore a cidade",
+    "back": "De volta",
+    "search": "procurar um lugar",
+    "origin": "Pesquisar um ponto de partida",
+    "destination": "Pesquisar um destino",
+    "clear": "Claro",
+    "searching": "Pesquisando…",
+    "error": "Não foi possível conectar. Recarregue e tente novamente.",
+    "noResults": "Nenhum lugar encontrado",
+    "mode": "modo de viagem",
+    "pedestrian": "Caminhada e Trânsito",
+    "automobile": "Dirigir",
+    "pickOrigin": "Escolha Iniciar no mapa",
+    "pickDestination": "Escolha o destino no mapa",
+    "swap": "Trocar",
+    "cancel": "Cancelar",
+    "directions": "Instruções",
+    "intro": "Pesquise instalações, estações, distritos ou estradas ou selecione um lugar no mapa.",
+    "chooseOrigin": "Procure um ponto de partida ou escolha um no mapa.",
+    "routing": "Encontrar uma rota…",
+    "showRoute": "Mostrar rota completa",
+    "mapPoint": "Ponto no mapa",
+    "minutes": "sobre {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Estimativa com base na rede rodoviária do cálculo da rota #{{epoch}}. As linhas pontilhadas indicam caminhada e conexões com as estradas.",
+    "busy": "A simulação está em execução. Os resultados serão atualizados quando terminar.",
+    "not_ready": "Ainda não há dados da rota. Execute uma simulação nesta cidade para ver rotas.",
+    "unreachable": "Nenhuma rota conecta esses dois lugares.",
+    "no_access": "Nenhuma estrada acessível foi encontrada perto do local selecionado.",
+    "geometry_unavailable": "A geometria de trânsito para esta rota não está disponível.",
+    "place_missing": "O local selecionado foi removido. Por favor, selecione-o novamente.",
+    "kind": {
+      "agent": "Facilidade",
+      "zone": "Bairro",
+      "stop": "Parada",
+      "station": "Estação",
+      "point": "Ponto",
+      "road": "Via"
+    },
+    "leg": {
+      "walk": "Caminhada",
+      "drive": "Dirigir",
+      "transit": "Transito",
+      "conveyor": "Transportador de passageiros",
+      "access": "Ligação à estrada",
+      "turn": "volta de junção"
+    },
+    "picking": {
+      "origin": "Clique no seu ponto de partida no mapa.",
+      "destination": "Clique no seu destino no mapa."
+    },
+    "pins": {
+      "tab": "pinos",
+      "hint": "Clique no mapa para colocar um alfinete na cor escolhida. Clique com o botão direito do mouse em um pino para removê-lo.",
+      "list": "Lista de PINs",
+      "remove": "Remova o pino"
+    }
+  }
+}

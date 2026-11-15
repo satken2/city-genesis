@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Текущая дата",
+    "afterDate": "Дата после исполнения",
+    "epochCount": "эпохи",
+    "message": "закончить работу этого хода и время продвижения?",
+    "no": "Не",
+    "yes": "Да",
+    "executing": "Запуск моделирования...",
+    "errorSteamLimit": "Невозможно подтвердить паровую верификацию, так что эпохи больше не могут быть запущены. (Без проверки можно сыграть до численности {{limit}}.)",
+    "errorAlreadyRunning": "Другая эпоха уже запущена. Попробуйте еще раз после того, как он закончится.",
+    "errorFailed": "Не удалось запустить эпоху: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} эпохи)",
+    "sectionConstruction": "в стадии строительства",
+    "kindPath": "Дорога",
+    "kindBuilding": "Объект",
+    "kindProject": "Проект",
+    "noItems": "Никто",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Завершено",
+    "sectionStatistics": "Статистика",
+    "sectionScore": "Счет",
+    "scoreGain": "Выигрыш",
+    "scoreLoss": "штрафы",
+    "questState": {
+      "completed": "Достигнутый",
+      "active": "в процессе",
+      "locked": "Заблокированный",
+      "failed": "Не удалось"
+    },
+    "trendHint": "Тренд за последние {{count}} эпохи: {{trend}}",
+    "trend": {
+      "up": "Восстание",
+      "flat": "Устойчивый",
+      "down": "Падение",
+      "none": "Недостаточно истории"
+    },
+    "statPopulation": "Население",
+    "statTourists": "Туристы",
+    "statGdp": "ВВП",
+    "statPrice": "Цены",
+    "statIncome": "Доход",
+    "statUnemployment": "Безработица",
+    "statHealthcare": "здравоохранение",
+    "statNutrition": "Питание",
+    "statLeisure": "Досуг",
+    "statFire": "пожары",
+    "statTraffic": "Дорожные аварии",
+    "statCrime": "Преступление",
+    "questCompleted": "Achieved!",
+    "questFailed": "срок прошел"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Картирование транспортных маршрутов",
+      "prepare": "Подготовка этого термина",
+      "transit": "Организация общественного транспорта",
+      "market": "Торговые товары",
+      "production": "Производство и потребление",
+      "commute": "ходить на работу и учебу",
+      "growth": "Граждане взрослеют",
+      "evaluate": "Оценка города",
+      "immigration": "Приветствие иммигрантов",
+      "labor": "Ищу работу",
+      "spawn": "Открытие новых предприятий",
+      "relocate": "Перемещение домохозяйств",
+      "construction": "Строительство зданий",
+      "finance": "Урегулирование финансов",
+      "plan": "Планирование следующего срока",
+      "incident": "Реагирование на инциденты",
+      "finalize": "Компиляция статистики"
+    }
+  }
+}

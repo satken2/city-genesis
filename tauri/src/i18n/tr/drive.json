@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Sürücü",
+    "car": "Araba",
+    "rail": "tren yolu",
+    "running": "Koşu Araçları",
+    "standard": "binek arabası",
+    "commercial": "ticari araç",
+    "truck": "Kamyon",
+    "finishEditing": "Bir sürücüyü başlatmadan önce düzenlemeyi tamamlayın.",
+    "noLines": "Sürmek için herhangi bir işletim demiryolu güzergahı mevcut değildir.",
+    "pickRail": "Seçilen rotada bir parçayı tıklayın.",
+    "pickRoad": "Aktif bir yola tıklayın.",
+    "pickVehicle": "Hareket eden bir arabaya, otobüse veya trene tıklayın (tavaya sürükleyin).",
+    "clickStart": "Bir başlangıç konumu seçin (tava kaydırmak için).",
+    "startSelected": "Seçili Başlat. ok yönünde hareket edin.",
+    "reverse": "ters yön",
+    "start": "Ayrılmak",
+    "back": "Geri",
+    "close": "Çıkış (ESC)",
+    "invalidStart": "Buradan başlayamaz. Rotanızda sürülebilir bir yol veya parkur seçin.",
+    "invalidVehicle": "Araç seçilmedi. Hareket halindeki bir arabaya, otobüse veya trene tıklayın.",
+    "notReady": "Bu yön mevcut değil veya çevre yükleniyor. Yön veya konumu değiştirin veya bekleyin ve yeniden deneyin."
+  }
+}

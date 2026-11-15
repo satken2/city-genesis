@@ -64,7 +64,14 @@
       "zh-Hans": "简体中文",
       "zh-Hant": "繁體中文",
       "fr": "Français",
-      "ko": "한국어"
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano"
     },
     "volume": {
       "label": "Volume",

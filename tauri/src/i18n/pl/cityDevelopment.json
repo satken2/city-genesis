@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algorytm",
+    "roadVariants": "Rodzaje dróg",
+    "patterns": {
+      "grid_1": "Siatka 1",
+      "grid_2": "Siatka 2",
+      "sprawl_1": "Rozciągnięcie 1",
+      "sprawl_2": "Rozciągnięcie 2",
+      "sprawl_3": "Rozciągnięcie 3",
+      "planned_city_1": "Planowane miasto 1",
+      "split_1": "Podział 1"
+    },
+    "spacing": "Odstęp między drogami",
+    "blockLength": "Długość bloku",
+    "splitHint": "Obejmują całe bloki otoczone drogami. Drogi równoległe do długiego boku każdego bloku są rozmieszczone przez odstępy drogowe i skrzyżowanie dróg według długości bloku.",
+    "createParcels": "Twórz paczki",
+    "parcelArea": "Powierzchnia działki",
+    "hint": "Przytrzymaj Ctrl i przeciągnij, aby pomalować obszar do rozwoju. Przeciągnij do Pana, przewiń do powiększenia.",
+    "clear": "Oczyścić",
+    "preview": "Zapowiedź",
+    "previewing": "Obliczanie...",
+    "create": "Potwierdź",
+    "creating": "Tworząc...",
+    "previewed": "Lekko wygładza teren w {{area}} i może planować {{roads}} odcinki drogowe i {{parcels}} paczki (odrzucono {{rejected}})",
+    "created": "wygładził teren i zaplanował {{roads}} odcinki drogowe i {{parcels}} działki (odrzucono {{rejected}})"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Fahrt",
+    "car": "Auto",
+    "rail": "Bahnstrecken",
+    "running": "Fahrende Fahrzeuge",
+    "standard": "Pkw",
+    "commercial": "Nutzfahrzeug",
+    "truck": "Lastwagen",
+    "finishEditing": "Beenden Sie die Bearbeitung, bevor Sie ein Laufwerk starten.",
+    "noLines": "Es sind keine Bahnstrecken für die Fahrt verfügbar.",
+    "pickRail": "Klicken Sie auf der ausgewählten Route auf einen Track.",
+    "pickRoad": "Klicken Sie auf eine aktive Straße.",
+    "pickVehicle": "Klicken Sie auf ein fahrendes Auto, Bus oder Zug (Ziehen nach Pan).",
+    "clickStart": "Wählen Sie eine Startposition (Ziehen in Schwenken).",
+    "startSelected": "Start ausgewählt. Abfahrt in Pfeilrichtung.",
+    "reverse": "Richtung umkehren",
+    "start": "Abweichen",
+    "back": "Zurück",
+    "close": "Ausgang (ESC)",
+    "invalidStart": "kann hier nicht anfangen. Wählen Sie eine fahrbare Straße oder einen Track auf Ihrer Route aus.",
+    "invalidVehicle": "Kein Fahrzeug ausgewählt. Klicken Sie auf ein fahrendes Auto, Bus oder Zug.",
+    "notReady": "Diese Richtung ist nicht verfügbar oder die Umgebung wird geladen. Richtung oder Position ändern oder warten und erneut versuchen."
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "tag": {
+    "label": "Progetto",
+    "none": "(nessun tag)",
+    "createNew": "+ Nuovo tag...",
+    "newPlaceholder": "Immettere un nome di tag",
+    "add": "Aggiungere",
+    "cancel": "Annulla",
+    "saveFailed": "Impossibile salvare il tag",
+    "showObject": "Mostra nella vista 3D",
+    "hideObject": "Nascondi nella vista 3D"
+  },
+  "constructionProjects": {
+    "empty": "Nessun tag funziona ancora. Scegli un tag quando si posiziona da un pannello di costruzione o aggiungine uno dal pannello di dettaglio di una struttura pubblica o di una strada pianificata o in costruzione.",
+    "loadFailed": "Impossibile caricare i progetti di costruzione",
+    "totalCost": "costo stimato",
+    "duration": "Tempo rimasto",
+    "progress": "Progresso",
+    "progressValue": "{{done}} / {{total}} Fatto",
+    "monthsValue": "{{value}} mesi",
+    "stalled": "in stallo",
+    "stalledWarning": "{{count}} I lavori non avanzeranno perché la velocità di costruzione è 0 (esclusa dal totale della durata).",
+    "done": "Fatto",
+    "unnamed": "#{{id}}",
+    "showAll": "Mostra tutto di nuovo ({{count}})",
+    "showTag": "Mostra questo progetto nella vista 3D",
+    "hideTag": "Nascondi questo progetto nella vista 3D",
+    "showObject": "Mostra nella vista 3D",
+    "hideObject": "Nascondi nella vista 3D",
+    "deleteTag": "Elimina questo tag",
+    "confirmDeleteTag": "Eliminare il tag \"{{tag}}\"? Sarà rimosso dai suoi edifici e dalle sue strade (le opere rimangono).",
+    "columns": {
+      "name": "Obbiettivo",
+      "status": "Stato",
+      "cost": "Costo rimasto",
+      "remaining": "Tempo rimasto"
+    }
+  }
+}

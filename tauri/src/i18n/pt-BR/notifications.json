@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Notificações da cidade",
+    "empty": "sem problemas exigem atenção agora",
+    "loadFailed": "Falha ao carregar notificações",
+    "types": {
+      "resource_runway": "Espera-se que o recurso \"{{name}}\" seja esgotado em aproximadamente {{remaining_epochs}} epochs",
+      "resource_depleted": "O recurso \"{{name}}\" foi esgotado",
+      "facility_inoperative": "O recurso público \"{{name}}\" não está operando",
+      "facility_inoperative_labor": "O recurso público \"{{name}}\" não está operando devido a uma escassez de mão de obra",
+      "facility_inoperative_material": "A instalação pública \"{{name}}\" não está operando devido a uma escassez de material",
+      "facility_inoperative_high_skill": "A instalação pública \"{{name}}\" está funcionando com capacidade reduzida devido à falta de equipes qualificadas",
+      "facility_inoperative_budget": "O recurso público \"{{name}}\" está funcionando com capacidade reduzida devido a um déficit orçamentário",
+      "education_low_enrollment": "A instituição educacional \"{{name}}\" está subutilizada — poucos alunos estão matriculados ({{enrolled}} de {{max_students}} assentos)",
+      "infra_facility_down": "O recurso de infraestrutura \"{{name}}\" está fora de serviço",
+      "infra_disconnected": "{{count}} as instalações estão desconectadas da rede de infraestrutura",
+      "rail_capacity_exceeded": "A frequência do trem excede a capacidade da trilha em {{count}} segmento(s) de trilha",
+      "collapse": "{{count}} Edifícios/estradas entraram em colapso",
+      "collapse_with_deaths": "{{count}} Edifícios/estradas entraram em colapso, matando {{deaths}} pessoas",
+      "deaths_traffic": "{{count}} pessoas morreram em acidentes de trânsito",
+      "tenant_blocked_by_parcel_size": "Nenhum edifício para \"{{tenant_name}}\" pode ser construído no distrito \"{{zone_name}}\" (necessidades {{required}} m2, maior edificante {{max_capacity}} m2). Um pacote maior é necessário",
+      "unknown": "Ocorreu um evento crítico",
+      "sanitation": "O saneamento está se deteriorando para as famílias {{count}}. Melhore o tratamento de esgoto e resíduos."
+    }
+  }
+}

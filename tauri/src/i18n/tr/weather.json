@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Hava",
+    "choose": "hava durumunu seç",
+    "loading": "Hava durumunu kontrol etmek…",
+    "unknown": "Bilinmeyen",
+    "automatic": "{{weather}} (otomatik)",
+    "failed": "hava değiştiremedi",
+    "names": {
+      "clear": "Açık",
+      "high_clouds": "yüksek bulutlar",
+      "fair": "Adil",
+      "broken_clouds": "Güneşli Aralıklar",
+      "overcast": "Kapalı",
+      "rain_clouds": "yağmur bulutları",
+      "fog": "Sis",
+      "drizzle": "Serpiştirmek",
+      "rain": "Yağmur",
+      "heavy_rain": "şiddetli yağmur",
+      "light_snow": "hafif kar",
+      "snow": "Kar",
+      "blizzard": "Kar fırtınası"
+    },
+    "epochClimate": "Epoch İklim",
+    "temperature": "Sıcaklık",
+    "precipitation": "Yağış",
+    "sunlight": "güneş ışığı yoğunluğu",
+    "windSpeed": "Rüzgar hızı"
+  }
+}

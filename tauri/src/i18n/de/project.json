@@ -1,0 +1,39 @@
+{
+  "tag": {
+    "label": "Projekt",
+    "none": "(kein Tag)",
+    "createNew": "+ Neues Etikett…",
+    "newPlaceholder": "Geben Sie einen Tag-Namen ein",
+    "add": "Hinzufügen",
+    "cancel": "Abbrechen",
+    "saveFailed": "Fehler beim Speichern des Tags",
+    "showObject": "In der 3D-Ansicht anzeigen",
+    "hideObject": "In der 3D-Ansicht ausblenden"
+  },
+  "constructionProjects": {
+    "empty": "Noch keine getaggten Werke. Wählen Sie beim Platzieren ein Etikett aus einem Baufeld aus oder fügen Sie eines aus der Detailleiste einer öffentlichen Einrichtung oder Straße hinzu, die geplant oder im Bau ist.",
+    "loadFailed": "Bauprojekte konnten nicht geladen werden",
+    "totalCost": "Geschätzte Kosten",
+    "duration": "Zeit übrig",
+    "progress": "Progress",
+    "progressValue": "{{done}} / {{total}} fertig",
+    "monthsValue": "{{value}} Monate",
+    "stalled": "blockiert",
+    "stalledWarning": "{{count}} Arbeiten werden nicht fortgesetzt, da die Konstruktionsgeschwindigkeit 0 ist (ausgenommen von der Gesamtdauer).",
+    "done": "Getan",
+    "unnamed": "#{{id}}",
+    "showAll": "Alles wieder anzeigen ({{count}})",
+    "showTag": "Zeigen Sie dieses Projekt in der 3D-Ansicht",
+    "hideTag": "Verstecken Sie dieses Projekt in der 3D-Ansicht",
+    "showObject": "In der 3D-Ansicht anzeigen",
+    "hideObject": "In der 3D-Ansicht ausblenden",
+    "deleteTag": "Löschen Sie dieses Tag",
+    "confirmDeleteTag": "Löschen Sie das Tag \"{{tag}}\"? Es wird von seinen Gebäuden und Straßen entfernt (die Werke selbst bleiben).",
+    "columns": {
+      "name": "Ziel",
+      "status": "Status",
+      "cost": "Kosten übrig",
+      "remaining": "Zeit übrig"
+    }
+  }
+}

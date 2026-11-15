@@ -14,6 +14,7 @@ import { PLAY_MODE_SCENARIO, ROAD_COLOR_PALETTE } from "../../constants";
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useMasterData } from "../../contexts/MasterDataContext";
 import { invoke } from "@tauri-apps/api/core";
 import type { ZoneData, ZoneResponse, ZoneSlotStarvation } from "../../types";
 import { buildApiUrl, fetchApi } from "../../utils/api";
@@ -39,6 +40,7 @@ export function ZoneDetailPanel({
   initialEntityId,
 }: ZoneDetailPanelProps) {
   const { t } = useTranslation();
+  const master = useMasterData();
   const scenarioMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCENARIO;
 
   const [zoneData, setZoneData] = useState<ZoneData | null>(null);
@@ -288,7 +290,7 @@ export function ZoneDetailPanel({
                 className="zone-starvation-warning-row"
               >
                 {t("zone.slotStarvationWarning", {
-                  tenant: item.tenant_name,
+                  tenant: master?.agents[item.variant]?.display_name ?? item.tenant_name,
                   required: Math.ceil(item.required),
                   max: Math.floor(item.max_capacity),
                 })}

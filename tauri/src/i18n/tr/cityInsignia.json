@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Amblem",
+    "flag": "şehir bayrağı",
+    "motif": "Motif",
+    "fieldColor": "alan rengi",
+    "motifColor": "motif rengi",
+    "pattern": "Model",
+    "accentColor": "vurgu rengi",
+    "placement": "amblem pozisyonu",
+    "loadImage": "Resim yükle",
+    "randomize": "Rasgele seçmek",
+    "apply": "Uygulamak",
+    "imageLoadFailed": "Görüntü yüklenemedi.",
+    "placements": {
+      "center": "Merkez",
+      "canton": "Sol üst",
+      "none": "Hiçbiri"
+    },
+    "motifs": {
+      "wave": "Dalga",
+      "mountain": "Dağ",
+      "star": "Star",
+      "tree": "Ağaç",
+      "sun": "Güneş",
+      "moon": "Ay",
+      "flower": "Çiçek",
+      "leaf": "Yaprak",
+      "bird": "Kuş",
+      "fish": "Balık",
+      "anchor": "Çapa",
+      "gear": "Dişli",
+      "tower": "Kale",
+      "bridge": "Köprü",
+      "key": "Anahtar",
+      "crown": "Taç",
+      "snowflake": "Kar taneciği",
+      "flame": "Alev",
+      "diamond": "Elmas",
+      "cross": "Çapraz"
+    },
+    "patterns": {
+      "plain": "Düz",
+      "bicolor": "iki renkli",
+      "triband": "triband",
+      "diagonal": "Diyagonal",
+      "border": "Sınır",
+      "bands": "çeteler"
+    }
+  }
+}

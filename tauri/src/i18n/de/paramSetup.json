@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Spielparameter-Setup",
+    "description": "Standardwerte werden generell empfohlen. Passen Sie nur an, wenn Sie anpassen möchten.",
+    "skip": "Überspringen",
+    "start": "Spiel starten",
+    "apply": "Anwenden und schließen",
+    "close": "Schließen",
+    "loading": "Lädt…",
+    "reload": "Neu laden",
+    "reloadHint": "Das Neuladen nach der Backend-Initialisierung ist abgeschlossen, um die neuesten Werte zu erhalten.",
+    "fetchError": "Parameter konnten nicht abgerufen werden",
+    "category": {
+      "population": "Bevölkerung & Migration",
+      "citizen": "Bürgerleben",
+      "economy": "Wirtschaft",
+      "labor": "Arbeit & Löhne",
+      "education": "Bildung",
+      "construction": "Bau & Immobilien",
+      "environment": "Umwelt",
+      "traffic": "Verkehr",
+      "general": "General",
+      "pathfind": "Verkehr & Routing",
+      "building": "Gebäude & Bau",
+      "disaster": "Katastrophen & Sicherheit",
+      "slum": "Slums",
+      "production": "Produktion & Inventar",
+      "zone": "Bezirke & Pakete",
+      "financial": "Finanzen"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Stadtkondensation",
+        "desc": "Teilt die von Häusern und Einrichtungen genutzte Grundfläche durch diesen Wert, so dass eine kleine Karte die wirtschaftliche Aktivität einer Großstadt aufnehmen kann. Wenn Sie es nach dem Bau einer Straße oder eines Gebäudes ändern, wird die Stadt unterbrochen. Entscheiden Sie es also, bevor Sie etwas bauen."
+      },
+      "TFR_TARGET": {
+        "label": "Total Fertility Rate (TFR) Ziel",
+        "desc": "Die Geburtenrate der Haushalte zielen. Höhere Werte machen Geburten wahrscheinlicher."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Heiratsrate",
+        "desc": "Basis-Wahrscheinlichkeitskoeffizient für heiratende Bürger. höher = mehr Ehen."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Mindestalter im gebärfähigen Alter",
+        "desc": "Mindestalter, in dem Geburten auftreten können. Keine Geburten unter diesem Alter."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Maximales gebärfähiges Alter",
+        "desc": "Höchstalter, in dem Geburten auftreten können. Keine Geburten über diesem Alter."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Heiratsrate im Haushalt",
+        "desc": "Wahrscheinlichkeit, dass ein Einwandererhaushalt ein Ehepaar ist."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "1. Kinderrate (Einwanderer)",
+        "desc": "Wahrscheinlichkeit, dass ein Einwandererhaushalt mit 1 Kind erscheint."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "2. Kinderrate (Einwanderer)",
+        "desc": "Wahrscheinlichkeit, dass ein Einwandererhaushalt mit 2 Kindern erscheint."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "3. Kinderrate (Einwanderer)",
+        "desc": "Wahrscheinlichkeit, dass ein Einwandererhaushalt mit 3 Kindern auftaucht."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Mindestalter für Erwachsene mit Einwanderern",
+        "desc": "Mindestalter von Erwachsenen als Einwanderer."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Maximales Alter von Einwanderern für Erwachsene",
+        "desc": "Maximales Alter der Erwachsenen als Einwanderer."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Lebensdauerfaktor",
+        "desc": "Multiplikator für maximale Bürgerlebensdauer. 1,08 ≈ 100 Jahre, 1,06 ≈ 150 Jahre.",
+        "graphX": "Das alter",
+        "graphY": "Jährliche Todeswahrscheinlichkeit (Gesundheit 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Einzelhaushaltswohnfläche (m²)",
+        "desc": "Mindestwohnbereich, der von einem Einzelhaushalt benötigt wird."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Zusätzlicher Platz für Ehepartner (m²)",
+        "desc": "Zusätzlicher Wohnbereich benötigt, wenn ein Haushalt einen Ehepartner hat."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Zusätzlicher Platz pro Kind (m²)",
+        "desc": "Zusätzlicher Wohnbereich pro Kind im Haushalt benötigt."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Rent-to-Income-Verhältnis (max.)",
+        "desc": "Maximaler Anteil des Haushaltseinkommens, das für die Miete ausgegeben werden kann. 0,3 = bis zu 30%."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Reisezeitgewicht bei der Wahl des Gehäuses",
+        "desc": "Bei der Auswahl eines Hauses zählt, wie stark jede Minute der Hin- und Rückfahrten für Arbeit, Schule und Einkaufen als ein Vielfaches des Durchschnittslohns der Stadt zählt. 1 = am Lohn bewertet. Höhere Werte begünstigen Häuser in der Nähe von Arbeitsplätzen und Geschäften."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Durchschnittslohn (Basislinie)",
+        "desc": "Referenz-Durchschnittslohn bei Simulationsbeginn."
+      },
+      "AVERAGE_RENT": {
+        "label": "Durchschnittliche Miete (Basislinie)",
+        "desc": "Referenz-Durchschnittsmiete bei Simulationsbeginn (pro Tag pro m²)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Dividendenvermögen-Proportionalaktie",
+        "desc": "Anteil der Dividenden im Verhältnis zu den Geldeinsparungen jedes Haushalts. Der Rest ist gleichmäßig auf alle Haushalte aufgeteilt. 0 = alle gleich, 1 = alles im Verhältnis zur Einsparung."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Abschreibungsrate der Ausrüstung",
+        "desc": "Rate, zu dem der Grundstock aus Ausrüstungsinvestitionen jede Epoche abwertet."
+      },
+      "WORK_HOURS": {
+        "label": "Tägliche Arbeitszeiten (H)",
+        "desc": "Standardmäßige Anzahl von Stunden, die ein Bürger pro Tag arbeitet."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Grundschulbildung Startalter",
+        "desc": "Alter, in dem Kinder die Grundschulbildung beginnen."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Grundschulbildung Endalter",
+        "desc": "Alter, ab dem die Grundschulbildung endet (entspricht dem Abitur)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Hochschulabschluss / Unabhängigkeitsalter",
+        "desc": "Alter, in dem ein Bürger die Hochschulbildung abschließt und unabhängig wird."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Mindestarbeitsalter",
+        "desc": "Bürger unter diesem Alter sind von der Arbeitssuche und der Arbeitslosenstatistik ausgeschlossen."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Maximale Böden (Böden)",
+        "desc": "Obergrenze für die Anzahl der von der Privatwirtschaft gebauten Gebäude."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Bodenstraffaktor",
+        "desc": "Koeffizient für die Hochhauskostenstrafe. Höher = kleinere Strafe für hohe Gebäude.",
+        "graphX": "Böden",
+        "graphY": "Baukostenmultiplikator"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Abbruch-Effizienzverhältnis",
+        "desc": "Wie viel effizienter Abriss wird im Vergleich zum Neubau (Multiplier) gemacht."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Basis-Jahresrate einstürzen",
+        "desc": "Die jährliche Einsturzwahrscheinlichkeit für ein Gebäude mit einer Dauerhaftigkeit von 0,5."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Formparameter des Weibull-Formats reduzieren",
+        "desc": "Höhere Werte führen dazu, dass die Kollapswahrscheinlichkeit in der Nähe der Designlebensdauer stark ansteigt."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Wartungskostenverhältnis",
+        "desc": "Wartungskosten als Bruchteil der Neubaukosten."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Alternder Multiplikator ohne Wartung",
+        "desc": "Wie schnell ein Gebäude oder ein Weg altert, wenn es keinen täglichen Unterhalt erhält, als ein Vielfaches seines Alterns mit vollständiger Wartung. Es ändert sich linear von 1 auf diesen Wert, wobei der Anteil des Unterhalts nicht empfangen wird."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Wartungsübergangsbasis Jährliche Wahrscheinlichkeit",
+        "desc": "Basis-Jahreswahrscheinlichkeit, dass ein förderfähiges Gebäude in die Wartung eintritt."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Erste Bauschulden (pro m²)",
+        "desc": "Anfängliche Bauverschuldung pro m² Grundfläche (negative Reserven)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Lärmkoeffizient für den Straßenverkehr",
+        "desc": "Wie viel Straßenverkehr trägt zur Lärm-Heatmap bei. höher = lautere Straßen."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Verkehrslärmkoeffizient für Fußgänger",
+        "desc": "Wie viel Fußgängerverkehr trägt zur Lärm-Heatmap bei."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Fußgängerschwellenschwelle",
+        "desc": "Nur der Teil des Fußgängerverkehrs über diesem Wert trägt zum Lärm bei."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Geräuschdämpfungsentfernung (m)",
+        "desc": "Der Lärm schwächt sich mit dem Quadrat der Entfernung ab und sinkt auch über alle diese Meter auf 1 / e (Gebäudeabschirmung, Luft- und Bodenabsorption). Lower = bleibt näher an der Quelle."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Luftverschmutzungskoeffizient für den Straßenverkehr",
+        "desc": "Wie viel Straßenverkehr trägt zur Luftverschmutzungs-Heatmap bei."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Luftverschmutzungsdämpfungsentfernung (m)",
+        "desc": "Luftverschmutzung und Geruch schwächen sich mit dem Quadrat der Entfernung ab und fallen über alle diese Meter auf 1 / e (Dispersion und Ablagerung). Lower = bleibt näher an der Quelle."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Gewicht der Arbeitslosigkeit Kriminalität",
+        "desc": "Wie stark wirkt sich die Arbeitslosenquote auf die Kriminalitäts-Heatmap aus. Höhere = Arbeitslosigkeit führt direkter zu einer schlechteren öffentlichen Sicherheit."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Ausbreitungsradius (m)",
+        "desc": "Gaußsche Unschärfe-Radius für die Heatmap des Verbrechens."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Fußgängergeschwindigkeit (km/h)",
+        "desc": "Gehgeschwindigkeit, die bei der Berechnung der Wegfindung verwendet wird."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Fahrzeugbeschleunigungsentfernung (m)",
+        "desc": "Beschleunigungsdistanz für Fahrzeuge. Beeinflusst die Geschwindigkeitsberechnung auf kurzen Straßen."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Straßenaktive Stunden pro Tag (H)",
+        "desc": "Stunden am Tag Die Straße ist aktiv. Wird verwendet, um das Verkehrsvolumen zu konvertieren."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Sättigungsschwelle für den Straßenverkehr",
+        "desc": "Der Straßenverkehr bei oder über diesem Wert gibt Einzelhandelsgeschäften den maximalen Verkehrsbonus."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Sättigungsschwelle für den Fußgängerverkehr",
+        "desc": "Der Fußgängerverkehr bei oder über diesem Wert gibt Einzelhandelsgeschäften den maximalen Fußgängerbonus."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Lädt…",
+    "noScenarios": "Keine Szenarien verfügbar",
+    "starting": "Angefangen...",
+    "startFailed": "konnte nicht gestartet werden",
+    "confirmTitle": "Bestätigen Sie die Spieleinstellungen",
+    "confirmStartTitle": "das Spiel starten?",
+    "unsavedChangesWarning": "Beim Start werden nicht gespeicherte Änderungen in Ihrem aktuellen Spiel verworfen.",
+    "startSettingsHeading": "Stadteinstellungen",
+    "cityNameLabel": "Stadtname",
+    "insigniaLabel": "Emblem & Stadtflagge",
+    "languageLabel": "Stadtsprache",
+    "languageNote": "* Kann später nicht geändert werden",
+    "simulationDaysLabel": "Simulationstage",
+    "simulationDaysNote": "* Kann später nicht geändert werden",
+    "daysOption": "{{days}} Tage",
+    "startButton": "Start",
+    "backButton": "Zurück",
+    "cleared": "gelöscht",
+    "tutorialBadge": "Tutorial",
+    "sectionDebug": "Debuggen",
+    "sectionTutorials": "Tutorials",
+    "sectionScenarios": "Szenarien",
+    "detailPlaceholder": "Wählen Sie ein Szenario aus der Liste links aus.",
+    "detailMapSizeLabel": "Kartengröße",
+    "detailUnknown": "Unbekannt",
+    "detailObjectiveLabel": "Ziele",
+    "detailCreditsLabel": "Credits",
+    "detailNoObjective": "Keine Ziele",
+    "detailNoDescription": "Dieses Szenario hat keine Beschreibung.",
+    "tutorialObjective": "Führen Sie jeden Schritt des Tutorials aus.",
+    "startScenarioButton": "Starten Sie dieses Szenario",
+    "tabSelect": "Wählen Sie ein Szenario",
+    "tabBrowse": "Szenarien finden",
+    "tabTerrain": "Wählen Sie ein Terrain",
+    "relocalizeNote": "Dieses Szenario wurde in {{from}} erstellt. Ab {{to}} werden Bezirke, Einrichtungen, Bewohner, Stationen und andere Namen in {{to}} umbenannt.",
+    "developmentNotice": {
+      "heading": "Dieses Spiel ist ein experimenteller Build in der Entwicklung",
+      "subheading": "Bitte lesen Sie vor dem Spielen",
+      "text": "Seine wirtschaftlichen Parameter und Logik werden noch abgestimmt, sodass Ihre Stadt möglicherweise nicht so wächst, wie sie sollte. Die Arbeitslosigkeit kann steigen und die Stadt kann sogar zusammenbrechen, aber das ist niemals die Schuld Ihres Spiels. Seien Sie gespannt auf zukünftige Updates! Fügen Sie das Spiel Ihrer Wunschliste hinzu und freuen Sie sich auf die offizielle Veröffentlichung!"
+    }
+  }
+}

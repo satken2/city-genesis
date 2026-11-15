@@ -1,0 +1,752 @@
+{
+  "tutorial": {
+    "startButton": "Zaczynać",
+    "controls": {
+      "title": "Podstawowe kontrole",
+      "description": "Poznaj swoje cele jako burmistrza i jak planować przed wydłużeniem czasu. Po zbadaniu, co oznaczają informacje o mieście, co robi każdy przycisk i jak przenieść kamerę, rozszerzysz drogę, aby stworzyć nową dzielnicę mieszkalną i zapewnić jej domy, prąd i wodę.",
+      "step1": {
+        "title": "Zbuduj miasto jako burmistrz",
+        "role": "W City Genesis rozwijasz miasto jako jego burmistrz. Planujesz drogi i udogodnienia, decydujesz, w jaki sposób grunt jest używany, ustalasz podatki i przeznaczasz pieniądze na usługi publiczne. Twoim zadaniem jest stworzenie warunków, które wspierają mieszkańców i firmy. Naciśnij „Dalej”, aby kontynuować.",
+        "goal": "Celuj w miasto, w którym mieszkańcy mogą żyć wygodnie i bezpiecznie. Zapewnij domy i miejsca pracy, elektryczność, wodę i opiekę zdrowotną. Rozwój miasta również wymaga pieniędzy. Przy podejmowaniu decyzji, co poprawić, weź pod uwagę zarówno życie ludzi, jak i finanse miasta.",
+        "epoch": "Czas posuwa się z miesiąca na miesiąc. Najpierw ustaw budżety i plany budowy, a następnie naciśnij „Start”, gdy będziesz gotowy. Postępują w budownictwie i działaniach mieszkańców i firm; Przejrzyj wyniki przed przystąpieniem do następnych planów. Data pozostaje nieruchoma, dopóki nie zaczniesz, więc nie spiesz się.",
+        "epoch_week": "Czas posuwa się na tydzień. Najpierw ustaw budżety i plany budowy, a następnie naciśnij „Start”, gdy będziesz gotowy. Postępują w budownictwie i działaniach mieszkańców i firm; Przejrzyj wyniki przed przystąpieniem do następnych planów. Data pozostaje nieruchoma, dopóki nie zaczniesz, więc nie spiesz się."
+      },
+      "step2": {
+        "title": "Przeczytaj miasto z kokpitu",
+        "tools": "Kokpit na dole ekranu pomaga sprawdzić miasto i zdecydować, co dalej. „Widok” wykorzystuje kolory, aby pomóc znaleźć niedobory i obszary problemowe. „Mapa” pokazuje, gdzie miejsca znajdują się w całym mieście, pomagając znaleźć drogę w miarę jej rozwoju.",
+        "tracking": "„Lista obywateli” pozwala znaleźć mieszkańców po imieniu i zatrzymuje mieszkańców, których chcesz ponownie odwiedzić. Dodaj kogoś do śledzenia na podstawie danych obywateli, a następnie użyj tego przycisku, aby powrócić do swoich informacji i dojazdów. Poznaj indywidualne życie za postaciami w całym mieście.",
+        "bulldozer": "„Bulldozer” usuwa puste działki i anuluje zaplanowane budynki i drogi. Naciśnij przycisk, a następnie kliknij cel w widoku 3D; Naciśnij go ponownie, aby opuścić tryb. Aby usunąć ukończony budynek lub drogę, otwórz jego dane i wybierz rozbiórkę.",
+        "services": "Wskaźniki pioruny i kropli wody pokazują, ile miejsca na energię elektryczną i wodę muszą rosnąć. W miarę wypełniania popyt zbliża się do zdolności. Kliknij je, aby przejrzeć obiekty użyteczności publicznej i sprawdź, czy potrzebujesz więcej podaży, zanim rozbudujesz miasto.",
+        "score": "„Wynik” podsumowuje, jak mieszkańcy są zadowoleni z życia w Twoim mieście. Wyższe znaczy lepiej. Domy, miejsca pracy, opieka zdrowotna i przyjemne środowisko życia pomagają go poprawić. Jeśli upadnie, poszukaj trudności, z jakimi borykają się mieszkańcy.",
+        "budget": "„Budget” pokazuje oczekiwane wydatki w przyszłym miesiącu w stosunku do dochodów z zeszłego miesiąca. Gdy wskaźnik przesuwa się w prawo, wydatki przekraczają dochód. I odwrotnie, kiedy kołysze się w lewo, masz pieniądze do stracenia. Sprawdź to przed upływem czasu.",
+        "budget_week": "„Budget” pokazuje oczekiwane wydatki w przyszłym tygodniu w stosunku do dochodów z zeszłego tygodnia. Gdy wskaźnik przesuwa się w prawo, wydatki przekraczają dochód. I odwrotnie, kiedy kołysze się w lewo, masz pieniądze do stracenia. Sprawdź to przed upływem czasu.",
+        "budgetChanges": "Więcej budowy, wyższa praca w obiektach i szybsza budowa zwiększają potrzebne pieniądze i podnoszą wskaźnik budżetu. Niższa praca lub wolniejsza budowa może obniżyć oczekiwane koszty. Gdy dochody podatkowe rosną, wskaźnik spada, nawet jeśli wydatki pozostają takie same.",
+        "budgetPlanning": "Niski wskaźnik oznacza, że masz dostępne pieniądze dla miasta. Rozważ zainwestowanie w brakujące usługi lub udogodnienia, których będziesz potrzebować wkrótce.",
+        "date": "Data pokazuje, jak daleko posunął się czas miasta. Użyj go do śledzenia postępów budowy i zmian sezonowych. Pozostaje nieruchomy, gdy planujesz i aktualizujesz, gdy przesuwasz czas z „Start”.",
+        "climate": "Temperatura, opady deszczu, światło słoneczne i panel wiatrowy pokazują średni klimat w tym miesiącu. Warunki te wpływają na rolnictwo, energię wiatrową i energię słoneczną. Jeśli uprawy lub produkcja energii elektrycznej są niskie, sprawdź również klimat.",
+        "climate_week": "Temperatura, opady deszczu, światło słoneczne i panel wiatrowy pokazują średni klimat tego tygodnia. Warunki te wpływają na rolnictwo, energię wiatrową i energię słoneczną. Jeśli uprawy lub produkcja energii elektrycznej są niskie, sprawdź również klimat.",
+        "climateEffects": "Słabe światło słoneczne redukuje moc słoneczną, a słaby wiatr zmniejsza produkcję wiatru. Temperatura i opady również wpływają na rolnictwo. Kliknij panel klimatyczny, aby zobaczyć, jak warunki w tym miesiącu wpływają na wydajność produkcji każdego zakładu. Zaplanuj obiekty z uwzględnieniem sezonowych zmian w dostawach.",
+        "climateEffects_week": "Słabe światło słoneczne redukuje moc słoneczną, a słaby wiatr zmniejsza produkcję wiatru. Temperatura i opady również wpływają na rolnictwo. Kliknij panel klimatyczny, aby zobaczyć, jak warunki w tym tygodniu wpływają na wydajność produkcji każdego zakładu. Zaplanuj obiekty z uwzględnieniem sezonowych zmian w dostawach.",
+        "notifications": "Numer w „Powiadomieniach” liczy ostrzeżenia i ostrzeżenia do przejrzenia. Czerwony numer i migający przycisk oznaczają, że funkcje miasta są zakłócane i wymagają szybkiej uwagi. Żółte liczby wskazują ostrzeżenia, takie jak przygotowanie do wzrostu lub problemy, których poprawa wymaga czasu. Naciśnij przycisk, aby je przeczytać.",
+        "notificationActions": "Gdy powiadomienie identyfikuje obiekt lub dzielnicę, kliknij jego wiersz, aby go sprawdzić. Odpowiedz na przyczynę: Podłącz brakujące linie energetyczne lub zorganizuj materiały eksploatacyjne dla obiektu, w którym brakuje materiałów. Powiadomienia o bieżących problemach znikają, gdy ich przyczyna zostanie rozwiązana. Po podjęciu działań sprawdź wyniki w przyszłym miesiącu."
+      },
+      "step3": {
+        "title": "Zmień widok, aby znaleźć problemy",
+        "open": "Niedobory prądu i zatorów drogowych mogą być trudne do zauważenia z wyglądu miasta. Użyj „Widok”, aby wyświetlić potrzebne informacje na mapie. Naciśnij „Widok” w kokpicie, aby otworzyć panel.",
+        "tabs": "Pionowe zakładki pozwalają wybrać, co sprawdzić, takie jak budynki, drogi, działki lub dzielnice. Możesz również ukryć niechciane obiekty, gdy nakładające się informacje sprawiają, że widok jest trudny do odczytania. Naciśnij „Dalej”, aby zbadać opcje wyświetlania.",
+        "modes": "Przyciski na każdej karcie wybierają, które informacje pokolorują obiekty. Znajdź ruchliwe drogi lub niespokojne budynki i wykorzystaj je jako wskazówki do następnego działania. Kliknij obiekt w widoku 3D, aby sprawdzić go dalej. Naciśnij „Dalej”."
+      },
+      "step4": {
+        "title": "Odkryj swoje narzędzia do budowania miasta",
+        "grading": "Przyjrzyjmy się przyciskom po lewej stronie od góry do dołu. Poziomy „Earthworks” nachylenia do budowy lub odzyskiwania lądu z morza. Tworzy miejsce na rozwój, gdy potrzebujesz więcej domów lub miejsc pracy, ale masz zbyt mało gruntów użytkowych.",
+        "road": "„Drogi, kolej i infrastruktura” tworzy trasy dla ludzi, towarów, energii i wody. Połącz domy i miejsca pracy z drogami, połącz odległe miejsca z koleją i połącz urządzenia z liniami energetycznymi i rurami. Sieci te wspierają podróże, handel i dostawy mediów.",
+        "land": "„Przesyłki” przygotowuje miejsca pod budynki. Sama pusta ziemia nie jest placem budowy. Więcej domów i dużych obiektów potrzebują miejsc z wystarczającą ilością miejsca dla nich.",
+        "landDevelopment": "Przesyłki zapewniają przestrzeń dla budowy miast oraz na rozwój prywatnych domów i firm. Budynki prywatne rosną zgodnie z zasadami popytu i budynków powiatowych. Jeśli chcesz więcej domów lub pracy, sprawdź, czy dostępnych jest wystarczająco dużo wolnych paczek.",
+        "district": "„Dystrykt” pozwala zarządzać częściami miasta z różnymi priorytetami, takimi jak dzielnica mieszkalna lub obszar przemysłowy. Każda dzielnica może ograniczyć dozwolone rodzaje budynków, dając całej okolicy odpowiedni kierunek rozwoju.",
+        "districtRules": "Szczegóły dzielnicy pozwalają wybrać, jakie rodzaje budynków są dozwolone. Używaj ich w zależności od rodzaju miasta, które chcesz uprawiać, na przykład trzymania fabryk z dala od dzielnicy mieszkalnej. Możesz również porównać populację i warunki życia między dzielnicami, aby zdecydować, gdzie potrzebne jest wsparcie.",
+        "construction": "„Budowa” planuje budynki, których potrzebuje miasto. Możesz budować domy, miejsca pracy, szpitale, szkoły i elektrownie. Użyj go, aby zapewnić więcej mieszkań i miejsc pracy lub wypełnić luki w opiece zdrowotnej, edukacji, elektryczności i innych usługach.",
+        "transport": "„Transport publiczny” pomaga mieszkańcom podróżować autobusem lub koleją. Można ustawiać trasy i przystanki oraz dostosowywać ceny i okresy międzyobsługowe. Łączenie domów z miejscami pracy i szkołami pomaga zmniejszyć obciążenie dojazdów do pracy.",
+        "propPlacement": "„Umieszczanie prowizji” dodaje drzewa, skały i inne krajobrazy. Użyj go, aby dodać zieleń do ulic lub udekorować teren.",
+        "cityDevelopment": "„Automatyczne zagospodarowanie miasta” planuje jednocześnie drogi i działki gruntowe na dużym obszarze. Pomaluj obszar, który chcesz rozwinąć na mapie i wybierz układ ulicy, aby za jednym razem przygotować drogi i działki. Użyj go podczas otwierania nowej dzielnicy mieszkalnej lub miasta od podstaw.",
+        "constructionProjects": "„Projekty budowlane” gromadzą zaplanowane i bieżące prace w jednym miejscu. Przejrzyj postępy i koszty, aby zdecydować, które działania mają na celu postęp.",
+        "regulation": "„Przepisy” określają zasady życia i pracy w mieście, w tym ograniczenia prędkości, godziny pracy, imigrację i ubezpieczenie społeczne. Dostosuj je do swoich priorytetów pod względem bezpieczeństwa, czasu na cieszenie się życiem i rozwojem miasta.",
+        "stat": "„Statystyka” pomaga ocenić twoje decyzje. Wykresy pokazują zmiany w populacji, dochodach, dojazdach, zadowoleniu mieszkańców oraz wielkości gospodarki i cen. Po zmianie polityki lub udogodnień sprawdź, czy życie się poprawia, a czego wciąż brakuje. To uzupełnia przyciski po lewej stronie."
+      },
+      "step5": {
+        "title": "Uruchom swoje plany i przejrzyj wyniki",
+        "flow": "Po sprawdzeniu miasta i zaplanowaniu budowy i budżetów użyj „Start” w kokpicie, aby posunąć się do czasu. Postępy prac, mieszkańcy pracy, firmy produkują, a finanse i wyniki się zmieniają. Niektóre plany potrzebują kilku miesięcy, aby pokazać swoje efekty.",
+        "execute": "Po upływie czasu zapoznaj się z wynikami i powiadomieniami. Rozwiąż problemy w następnych planach, a następnie ponownie przesuń czas. Rozwijaj miasto, powtarzając „Planuj, awansuj, przeglądaj”. Nie musisz tutaj naciskać „Start”. Naciśnij „Dalej”, aby dowiedzieć się, jak steruje kamera."
+      },
+      "step6": {
+        "title": "Przesuń kamerę",
+        "description": "Możesz przesunąć kamerę w następujący sposób: Przeciągnij lewym przyciskiem, aby przesunąć widok, przeciągnij prawym przyciskiem, aby się obrócić, w/a/s/d (lub klawisze strzałek), aby się poruszać, q/e, aby obrócić, r/f zmienić wysokość, a kółkiem myszy powiększyć. Wypróbuj swobodnie, a następnie naciśnij \"Dalej\"."
+      },
+      "step7": {
+        "title": "Tryb latania i tryb kinowy",
+        "description": "Aparat ma dwa specjalne tryby. „Tryb lotu” zaczyna się od Shift+F: poruszaj się wzdłuż widoku z W/A/S/D, rozejrzyj się myszą i idź w górę lub w dół z R/F. Naciśnij ESC, aby go opuścić. „Tryb kina” zaczyna się od przycisku w lewym górnym rogu ekranu i pozwala okrążyć miasto. Rozejrzyj się myszką; Przełączanie przełącza między orbitowaniem a podróżowaniem, pauzy spacji, wsteczne cofania się i wyjścia ESC. Panele ekranowe są ukryte, gdy oba tryby są włączone i wracają po naciśnięciu Esc. Gdy je wypróbujesz, wyjdź z obu trybów i naciśnij „Dalej”."
+      },
+      "step8": {
+        "title": "Zobacz granicę miasta",
+        "description": "Przenieśliśmy kamerę na wschodni kraniec miasta. Obszar, którego możesz używać jako miasta, to ten prostokąt, w którym istnieje szczegółowy teren, a kamera też nie może go opuścić. To wszystko dla ekranu i sterowania. Następnie stwórzmy nową dzielnicę mieszkalną. Naciśnij „Dalej”."
+      },
+      "step9": {
+        "title": "przedłużyć drogę",
+        "description": "Teraz zbudujmy dzielnicę mieszkalną, aby powitać nowych mieszkańców. Domy i miejsca pracy nie są przydatne, chyba że drogi je połączą: ludzie nie mogą przychodzić i odchodzić, a towary nie mogą przybyć. Najpierw rozciągnij ulicę Wschód-Zachód na zachód, aby otworzyć drogę do nowej dzielnicy. Naciśnij „Roads, Rail & Infrastructure” na panelu ikon, aby otworzyć panel konstrukcyjny."
+      },
+      "step10": {
+        "title": "Ukończ drogę",
+        "description": "Droga jest nadal „zaplanowana budowa”. Planowana droga nie może być jeszcze wykorzystana — ludzie i samochody mogą z niej korzystać dopiero po zakończeniu pracy. Naciśnij „Start” w kokpicie 2–3 razy, aby przyspieszyć czas i poczekaj, aż zostanie ukończony. Budowa kosztuje co miesiąc, gdy jest w toku.",
+        "description_week": "Droga jest nadal „zaplanowana budowa”. Planowana droga nie może być jeszcze wykorzystana — ludzie i samochody mogą z niej korzystać dopiero po zakończeniu pracy. Naciśnij „Start” w kokpicie 2–3 razy, aby przyspieszyć czas i poczekaj, aż zostanie ukończony. Budowa kosztuje co tydzień, gdy jest w toku."
+      },
+      "step11": {
+        "title": "Twórz paczki",
+        "description": "Droga jest gotowa. Następnie przygotuj działki, które będą służyć jako place budowy. Budynki mogą stać tylko na paczkach, a działka z widokiem na drogę pozwala ludziom i towarom przychodzić i odchodzić. Naciśnij „Przesyłki” na panelu ikon.",
+        "create": "Upewnij się, że wybrano opcję „Utwórz wzdłuż drogi”, a następnie kliknij drogę, którą rozszerzyłeś w widoku 3D. Gdy czerwone kontury ustawiają się wzdłuż drogi, potwierdź, aby utworzyć przesyłki."
+      },
+      "step12": {
+        "title": "Stwórz dzielnicę",
+        "description": "Przed budową zdecyduj, czym ta ulica powinna się stać. Bez planu fabryka może wznosić się tuż obok domów. Takie plany są realizowane według „dystryktu”. Dzielnice są przydzielane drogą, a działka należy do dzielnicy drogi, do której jest zwrócony. Naciśnij „Dystrykt” na panelu ikon, aby otworzyć okno Edytuj dzielnice: W tej chwili całe miasto jest jedną dzielnicą.",
+        "create": "Użyj pędzla „Street Side”. Przełącz narzędzie na „Utwórz nową dzielnicę”, przytrzymaj Ctrl i przeciągnij wzdłuż drogi, którą wydłużyłeś. Obie strony drogi, którą malujesz, wraz z paczkami naprzeciw nich, stają się nową dzielnicą."
+      },
+      "step13": {
+        "title": "Utworzono dzielnicę",
+        "description": "Oddzieliłeś nową ulicę od centrum miasta jako własną dzielnicę. Możesz sprawdzić populację i ceny na dzielnicę i zdecydować, które budynki mogą tam być budowane, aby każdy obszar mógł rosnąć w sposób, który mu odpowiada. Po sprawdzeniu zamknij okno Edytuj dzielnice."
+      },
+      "step14": {
+        "title": "Otwarte szczegóły dzielnicy",
+        "description": "Niech nowa dzielnica stanie się dzielnicą mieszkaniową. Pokaż dzielnice z ikoną w lewym dolnym rogu ekranu, a następnie kliknij etykietę dzielnicy, którą właśnie utworzyłeś, aby otworzyć jej dane."
+      },
+      "step15": {
+        "title": "Zrób to mieszkalne",
+        "description": "Przepisy budowlane na dole panelu wybierają, które budynki mogą być budowane na działkach tego powiatu. Chcemy tutaj spokojnego miejsca do życia, więc kliknij każdy budynek inny niż „Apartament” i „Dom”, aby je wyłączyć."
+      },
+      "step16": {
+        "title": "Sprawdź paczkę",
+        "description": "Przepisy powiatu mają zastosowanie do każdej przesyłki w niej. Kliknij paczkę z żółtym znacznikiem, aby otworzyć jego dane."
+      },
+      "step17": {
+        "title": "Zastosowana regulacja",
+        "description": "W dolnej części panelu paczki widać regulamin okręgu zezwalający tylko na „apartament” i „dom”. Teraz na tej ulicy można budować tylko domy. Zamiast ustawiać paczki jeden po drugim, wybór kierunku dzielnicy sprawia, że cała ulica podąża za nim."
+      },
+      "step18": {
+        "title": "Buduj domy",
+        "description": "Teraz zapewnijmy domy. Mieszkania są zwykle budowane automatycznie przez sektor prywatny, gdy ludzie chcą tu mieszkać, ale budownictwo komunalne budowane przez miasto szybko rekompensuje niedobór. Zbudujmy tutaj publiczny budynek mieszkalny. Naciśnij „Konstrukcja” na panelu ikon.",
+        "select": "Wybierz „Kompleks mieszkaniowy” w kategorii „Mieszkanie”, kliknij dowolną paczkę w nowej dzielnicy jako witrynę i potwierdź."
+      },
+      "step19": {
+        "title": "Uzupełnij domy",
+        "description": "Podobnie jak drogi, budynków nie można mieszkać tylko dlatego, że są zaplanowane. Budynek mieszkalny zajmuje ponad pół roku, aby zakończyć. Naciśnij \"Start\", aby przyspieszyć czas i poczekaj, aż zostanie ukończony."
+      },
+      "step20": {
+        "title": "Sprawdź, czy nie ma prądu",
+        "description": "Same domy nie tworzą życia: ludzie również potrzebują prądu i wody. W tym mieście nie ma elektrowni i nie ma jeszcze wody. Kliknij budynek mieszkalny z żółtym znacznikiem, gdzie mieszkają mieszkańcy miasta, aby otworzyć swoje dane, wybierz jednego z najemców w zakładce „Informacje o budynku”, a następnie otwórz zakładkę „Zaopatrzenie, popyt i handel”: możesz potwierdzić, że nabyta ilość energii elektrycznej wynosi 0."
+      },
+      "step21": {
+        "title": "Zbuduj elektrownię słoneczną",
+        "description": "Aby dostarczyć energię elektryczną, najpierw potrzebujesz elektrowni, aby ją wytworzyć. Zbuduj „elektrownię słoneczną” na działce z żółtym znacznikiem. Zwykle ukończenie zajęłoby to trochę czasu, ale ponieważ jest to samouczek, okres budowy jest pomijany."
+      },
+      "step22": {
+        "title": "Zbuduj podstację",
+        "description": "Elektryczność wysokiego napięcia z elektrowni nie może być używana przez gospodarstwa domowe. Podstacja przekształca go w energię elektryczną, która może używać i dystrybuować do okolicznych budynków połączonych drogą. Zbuduj „podstację elektryczną” na działce z żółtym znacznikiem w pobliżu budynku mieszkalnego."
+      },
+      "step23": {
+        "title": "Połącz się z linią energetyczną",
+        "description": "Nawet gdy elektrownia i podstacja są oddzielone, łączy je trasa dla elektryczności. Otwórz „Drogi, kolej i infrastrukturę” na panelu ikon, wybierz „Linia przesyłowa zasilania” w sekcji „Elektryczność” i narysuj linię z terminala przyłączeniowego elektrowni słonecznej do terminala podstacji. Linia prosta między zaciskami robi to za jednym zamachem."
+      },
+      "step24": {
+        "title": "Potwierdź zasilanie",
+        "description": "Po podłączeniu upewnij się, że elektryczność naprawdę płynie. Naciśnij „Start”, aby przyspieszyć czas, kliknij podstację, aby otworzyć jej dane, a na karcie „Zasilanie, popyt i handel” sprawdź, czy otrzymana ilość energii elektrycznej wysokiego napięcia nie wynosi 0. Uruchomienie zakładu może zająć kilka miesięcy, a przybycie zasilania."
+      },
+      "step25": {
+        "title": "Moc dociera do domów",
+        "description": "Ze szczegółów budynku mieszkalnego otwórz zakładkę „Zaopatrzenie, popyt i handel” tak jak to zrobiłeś na początku i sprawdź, czy nabyta ilość energii elektrycznej nie wynosi już 0. Dotarcie do gospodarstw domowych może zająć kolejny miesiąc lub dwa. Wygeneruj go w elektrowni, przenieś przez linie energetyczne, rozdyś go z podstacji — tylko wtedy, gdy wszystkie trzy są podłączone, energia elektryczna dociera do domów."
+      },
+      "step26": {
+        "title": "Znajdź źródło wody",
+        "description": "Następna jest woda. Woda z kranu jest pompowana i wysyłana do miasta. Najpierw dowiedz się, gdzie można pompować wodę. Naciśnij „Widok” w kokpicie, aby otworzyć panel widoku.",
+        "show": "Wybierz „Zasoby naturalne” z zakładek pionowych i przełącz je na „Widoczne”. Źródła wody są na mapie jasnoniebieskie. Kliknij źródło wody z żółtym znacznikiem, aby otworzyć jego szczegóły."
+      },
+      "step27": {
+        "title": "Zbuduj pompę wód gruntowych",
+        "description": "Pompa wód gruntowych pobiera wodę z podziemia, więc musi być zbudowana tam, gdzie znajduje się źródło wody. Potrzebuje również energii elektrycznej i pracowników do działania, dlatego najpierw wnieśliśmy moc. Zbuduj „pompę odwiertu gruntowego” na paczce z żółtym znacznikiem na górze źródła wody. Ponieważ jest to samouczek, okres budowy jest pomijany."
+      },
+      "step28": {
+        "title": "Zbuduj przepompownię wody",
+        "description": "Woda pompowana nie może być przekazywana do gospodarstw domowych, jak jest. Tak jak podstacja rozprowadza energię elektryczną, przepompownia wody dostarcza wodę do okolicznych budynków połączonych drogą. Zbuduj „pompownię wody” na działce z żółtym znacznikiem w pobliżu budynku mieszkalnego."
+      },
+      "step29": {
+        "title": "Połącz się z rurą",
+        "description": "Potrzebujesz rury do przenoszenia wody z pompy wód gruntowych do przepompowni. Otwórz „Drogi, koleje i infrastrukturę” na panelu ikon, wybierz „Pula akweduktu wodnego” w sekcji „Woda” i umieść ją z terminala przyłączeniowego pompy wód gruntowych do terminalu pompowni. Aby zachować z dala od dróg i linii energetycznej, zjedź szerokim objazdem po wschodniej stronie."
+      },
+      "step30": {
+        "title": "Potwierdź dopływ wody",
+        "description": "Naciśnij „Start”, aby przyspieszyć czas, kliknij przepompownię wody, aby otworzyć jej dane, a na karcie „Zaopatrzenie, popyt i handel” sprawdź, czy otrzymana ilość wody pod wysokim ciśnieniem nie wynosi 0. przybyć."
+      },
+      "step31": {
+        "title": "Podstawy są na miejscu",
+        "description": "Woda dotarła do przepompowni, więc domy wokół niej mogą teraz korzystać z wody z kranu. Ułóż drogi, przygotuj działki, decyduj o kierunku każdego okręgu, buduj domy oraz dostarczaj energię elektryczną i wodę — to jest podstawowy przepływ budownictwa miejskiego. Naciśnij „Dalej”, aby zakończyć samouczek podstawowych kontroli."
+      }
+    },
+    "scenario4": {
+      "title": "Zbuduj kolej",
+      "description": "Chcemy połączyć dzielnicę mieszkalną i miejsca pracy koleją, ale prywatne budynki i szpital publiczny utrudniają trasę. W tym samouczku poznasz pozyskiwanie gruntów, rozbiórkę obiektów publicznych, podwyższone tory nad drogami, platformami i stacjami, zajezdnię, regulację krzywej i nachylenia, podłączenie zasilania i otwarcie usługi.",
+      "step1": {
+        "title": "Połóż podwyższone platformy",
+        "description": "Otwarte drogi, kolej i infrastruktura → Koleje. Zbuduj wysokie standardowe podwyższone platformy boczne po zachodniej stronie miasta i dwutorowe platformy boczne po wschodniej stronie. Kliknij lewym przyciskiem myszy oba oznaczone punkty końcowe na 6m, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdzić.",
+        "open": "Otwarte drogi, kolej i infrastruktura → Koleje. Zbuduj wysokie standardowe podwyższone platformy boczne po zachodniej stronie miasta i dwutorowe platformy boczne po wschodniej stronie. Kliknij lewym przyciskiem myszy oba oznaczone punkty końcowe na 6m, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdzić.",
+        "variant": "Otwarte drogi, kolej i infrastruktura → Koleje. Zbuduj wysokie standardowe podwyższone platformy boczne po zachodniej stronie miasta i dwutorowe platformy boczne po wschodniej stronie. Kliknij lewym przyciskiem myszy oba oznaczone punkty końcowe na 6m, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdzić.",
+        "start": "Otwarte drogi, kolej i infrastruktura → Koleje. Zbuduj wysokie standardowe podwyższone platformy boczne po zachodniej stronie miasta i dwutorowe platformy boczne po wschodniej stronie. Kliknij lewym przyciskiem myszy oba oznaczone punkty końcowe na 6m, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdzić.",
+        "end": "Otwarte drogi, kolej i infrastruktura → Koleje. Zbuduj wysokie standardowe podwyższone platformy boczne po zachodniej stronie miasta i dwutorowe platformy boczne po wschodniej stronie. Kliknij lewym przyciskiem myszy oba oznaczone punkty końcowe na 6m, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdzić.",
+        "confirm": "Otwarte drogi, kolej i infrastruktura → Koleje. Zbuduj wysokie standardowe podwyższone platformy boczne po zachodniej stronie miasta i dwutorowe platformy boczne po wschodniej stronie. Kliknij lewym przyciskiem myszy oba oznaczone punkty końcowe na 6m, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdzić.",
+        "town": "Zbuduj zachodnie podwyższone platformy boczne o wysokim standardzie na 6m. Kliknij lewym przyciskiem oba oznaczone punkty końcowe, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź.",
+        "new": "Zbuduj wschodnie dwutorowe platformy boczne. Skorzystaj z powrotem, aby wrócić do kart i wybrać tę platformę pod Kolejami. Kliknij lewym przyciskiem oba punkty końcowe na 6m, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź. Jeśli panel jest zamknięty, ponownie otwórz drogi, kolej i infrastrukturę.",
+        "east": "Zbuduj wschodnie dwutorowe platformy boczne. Skorzystaj z powrotem, aby wrócić do kart i wybrać tę platformę pod Kolejami. Kliknij lewym przyciskiem oba punkty końcowe na 6m, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź. Jeśli panel jest zamknięty, ponownie otwórz drogi, kolej i infrastrukturę."
+      },
+      "step2": {
+        "title": "Budowa wejść do stacji",
+        "description": "Wybierz prosty budynek stacji. Połącz każdą parę markerów z krótkim przejściem przez jego platformę. Umieść wejścia tuż poza obiema stronami platformy. Kliknij lewym przyciskiem zaznaczone punkty końcowe, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź oba fragmenty.",
+        "open": "Wybierz prosty budynek stacji. Połącz każdą parę markerów z krótkim przejściem przez jego platformę. Umieść wejścia tuż poza obiema stronami platformy. Kliknij lewym przyciskiem zaznaczone punkty końcowe, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź oba fragmenty.",
+        "variant": "Wybierz prosty budynek stacji. Połącz każdą parę markerów z krótkim przejściem przez jego platformę. Umieść wejścia tuż poza obiema stronami platformy. Kliknij lewym przyciskiem zaznaczone punkty końcowe, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź oba fragmenty.",
+        "start": "Wybierz prosty budynek stacji. Połącz każdą parę markerów z krótkim przejściem przez jego platformę. Umieść wejścia tuż poza obiema stronami platformy. Kliknij lewym przyciskiem zaznaczone punkty końcowe, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź oba fragmenty.",
+        "end": "Wybierz prosty budynek stacji. Połącz każdą parę markerów z krótkim przejściem przez jego platformę. Umieść wejścia tuż poza obiema stronami platformy. Kliknij lewym przyciskiem zaznaczone punkty końcowe, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź oba fragmenty.",
+        "confirm": "Wybierz prosty budynek stacji. Połącz każdą parę markerów z krótkim przejściem przez jego platformę. Umieść wejścia tuż poza obiema stronami platformy. Kliknij lewym przyciskiem zaznaczone punkty końcowe, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź oba fragmenty.",
+        "town": "Wybierz prosty budynek stacji. Połącz każdą parę markerów z krótkim przejściem przez jego platformę. Umieść wejścia tuż poza obiema stronami platformy. Kliknij lewym przyciskiem zaznaczone punkty końcowe, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź oba fragmenty.",
+        "new": "Wybierz prosty budynek stacji. Połącz każdą parę markerów z krótkim przejściem przez jego platformę. Umieść wejścia tuż poza obiema stronami platformy. Kliknij lewym przyciskiem zaznaczone punkty końcowe, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź oba fragmenty.",
+        "east": "Wybierz prosty budynek stacji. Połącz każdą parę markerów z krótkim przejściem przez jego platformę. Umieść wejścia tuż poza obiema stronami platformy. Kliknij lewym przyciskiem zaznaczone punkty końcowe, kliknij prawym przyciskiem myszy, aby zakończyć kształt, a następnie potwierdź oba fragmenty."
+      },
+      "step3": {
+        "title": "Zaplanuj sekcję przejęcia",
+        "description": "Wybierz podwójny tor kolejowy. Narysuj linię prostą na 6 m od wschodniego krańca platformy zachodniej do zachodniego krańca głównej drogi. Budynki zasłaniają ten odcinek, więc wymaga pozyskania gruntów. Potwierdź plan i naciśnij Dalej. Czas budowy nie jest tutaj pomijany.",
+        "open": "Wybierz podwójny tor kolejowy. Narysuj linię prostą na 6 m od wschodniego krańca platformy zachodniej do zachodniego krańca głównej drogi. Budynki zasłaniają ten odcinek, więc wymaga pozyskania gruntów. Potwierdź plan i naciśnij Dalej. Czas budowy nie jest tutaj pomijany.",
+        "variant": "Wybierz podwójny tor kolejowy. Narysuj linię prostą na 6 m od wschodniego krańca platformy zachodniej do zachodniego krańca głównej drogi. Budynki zasłaniają ten odcinek, więc wymaga pozyskania gruntów. Potwierdź plan i naciśnij Dalej. Czas budowy nie jest tutaj pomijany.",
+        "start": "Wybierz podwójny tor kolejowy. Narysuj linię prostą na 6 m od wschodniego krańca platformy zachodniej do zachodniego krańca głównej drogi. Budynki zasłaniają ten odcinek, więc wymaga pozyskania gruntów. Potwierdź plan i naciśnij Dalej. Czas budowy nie jest tutaj pomijany.",
+        "end": "Wybierz podwójny tor kolejowy. Narysuj linię prostą na 6 m od wschodniego krańca platformy zachodniej do zachodniego krańca głównej drogi. Budynki zasłaniają ten odcinek, więc wymaga pozyskania gruntów. Potwierdź plan i naciśnij Dalej. Czas budowy nie jest tutaj pomijany.",
+        "confirm": "Wybierz podwójny tor kolejowy. Narysuj linię prostą na 6 m od wschodniego krańca platformy zachodniej do zachodniego krańca głównej drogi. Budynki zasłaniają ten odcinek, więc wymaga pozyskania gruntów. Potwierdź plan i naciśnij Dalej. Czas budowy nie jest tutaj pomijany.",
+        "town": "Wybierz podwójny tor kolejowy. Narysuj linię prostą na 6 m od wschodniego krańca platformy zachodniej do zachodniego krańca głównej drogi. Budynki zasłaniają ten odcinek, więc wymaga pozyskania gruntów. Potwierdź plan i naciśnij Dalej. Czas budowy nie jest tutaj pomijany.",
+        "new": "Wybierz podwójny tor kolejowy. Narysuj linię prostą na 6 m od wschodniego krańca platformy zachodniej do zachodniego krańca głównej drogi. Budynki zasłaniają ten odcinek, więc wymaga pozyskania gruntów. Potwierdź plan i naciśnij Dalej. Czas budowy nie jest tutaj pomijany.",
+        "east": "Wybierz podwójny tor kolejowy. Narysuj linię prostą na 6 m od wschodniego krańca platformy zachodniej do zachodniego krańca głównej drogi. Budynki zasłaniają ten odcinek, więc wymaga pozyskania gruntów. Potwierdź plan i naciśnij Dalej. Czas budowy nie jest tutaj pomijany."
+      },
+      "step4": {
+        "title": "Zamów zburzony szpital",
+        "description": "Negocjacje w sprawie zakupu prywatnych działek rozpoczynają się automatycznie, ale szpital publiczny w mieście nie jest usuwany automatycznie i uniemożliwia rozpoczęcie budowy torów. Kliknij szpital i naciśnij Bulldoze w przyciskach u góry. Gdy pojawi się zaplanowana rozbiórka, naciśnij przycisk Dalej.",
+        "open": "Negocjacje w sprawie zakupu prywatnych działek rozpoczynają się automatycznie, ale szpital publiczny w mieście nie jest usuwany automatycznie i uniemożliwia rozpoczęcie budowy torów. Kliknij szpital i naciśnij Bulldoze w przyciskach u góry. Gdy pojawi się zaplanowana rozbiórka, naciśnij przycisk Dalej.",
+        "variant": "Negocjacje w sprawie zakupu prywatnych działek rozpoczynają się automatycznie, ale szpital publiczny w mieście nie jest usuwany automatycznie i uniemożliwia rozpoczęcie budowy torów. Kliknij szpital i naciśnij Bulldoze w przyciskach u góry. Gdy pojawi się zaplanowana rozbiórka, naciśnij przycisk Dalej.",
+        "start": "Negocjacje w sprawie zakupu prywatnych działek rozpoczynają się automatycznie, ale szpital publiczny w mieście nie jest usuwany automatycznie i uniemożliwia rozpoczęcie budowy torów. Kliknij szpital i naciśnij Bulldoze w przyciskach u góry. Gdy pojawi się zaplanowana rozbiórka, naciśnij przycisk Dalej.",
+        "end": "Negocjacje w sprawie zakupu prywatnych działek rozpoczynają się automatycznie, ale szpital publiczny w mieście nie jest usuwany automatycznie i uniemożliwia rozpoczęcie budowy torów. Kliknij szpital i naciśnij Bulldoze w przyciskach u góry. Gdy pojawi się zaplanowana rozbiórka, naciśnij przycisk Dalej.",
+        "confirm": "Negocjacje w sprawie zakupu prywatnych działek rozpoczynają się automatycznie, ale szpital publiczny w mieście nie jest usuwany automatycznie i uniemożliwia rozpoczęcie budowy torów. Kliknij szpital i naciśnij Bulldoze w przyciskach u góry. Gdy pojawi się zaplanowana rozbiórka, naciśnij przycisk Dalej.",
+        "town": "Negocjacje w sprawie zakupu prywatnych działek rozpoczynają się automatycznie, ale szpital publiczny w mieście nie jest usuwany automatycznie i uniemożliwia rozpoczęcie budowy torów. Kliknij szpital i naciśnij Bulldoze w przyciskach u góry. Gdy pojawi się zaplanowana rozbiórka, naciśnij przycisk Dalej.",
+        "new": "Negocjacje w sprawie zakupu prywatnych działek rozpoczynają się automatycznie, ale szpital publiczny w mieście nie jest usuwany automatycznie i uniemożliwia rozpoczęcie budowy torów. Kliknij szpital i naciśnij Bulldoze w przyciskach u góry. Gdy pojawi się zaplanowana rozbiórka, naciśnij przycisk Dalej.",
+        "east": "Negocjacje w sprawie zakupu prywatnych działek rozpoczynają się automatycznie, ale szpital publiczny w mieście nie jest usuwany automatycznie i uniemożliwia rozpoczęcie budowy torów. Kliknij szpital i naciśnij Bulldoze w przyciskach u góry. Gdy pojawi się zaplanowana rozbiórka, naciśnij przycisk Dalej."
+      },
+      "step5": {
+        "title": "Poczekaj na zakończenie sekcji akwizycji",
+        "description": "Przedłużenie czasu do prywatnego nabycia gruntów, rozbiórki szpitali i zakończenia budowy torów. Może to potrwać kilka miesięcy. Ta sekcja kończy się przez normalną konstrukcję.",
+        "open": "Przedłużenie czasu do prywatnego nabycia gruntów, rozbiórki szpitali i zakończenia budowy torów. Może to potrwać kilka miesięcy. Ta sekcja kończy się przez normalną konstrukcję.",
+        "variant": "Przedłużenie czasu do prywatnego nabycia gruntów, rozbiórki szpitali i zakończenia budowy torów. Może to potrwać kilka miesięcy. Ta sekcja kończy się przez normalną konstrukcję.",
+        "start": "Przedłużenie czasu do prywatnego nabycia gruntów, rozbiórki szpitali i zakończenia budowy torów. Może to potrwać kilka miesięcy. Ta sekcja kończy się przez normalną konstrukcję.",
+        "end": "Przedłużenie czasu do prywatnego nabycia gruntów, rozbiórki szpitali i zakończenia budowy torów. Może to potrwać kilka miesięcy. Ta sekcja kończy się przez normalną konstrukcję.",
+        "confirm": "Przedłużenie czasu do prywatnego nabycia gruntów, rozbiórki szpitali i zakończenia budowy torów. Może to potrwać kilka miesięcy. Ta sekcja kończy się przez normalną konstrukcję.",
+        "town": "Przedłużenie czasu do prywatnego nabycia gruntów, rozbiórki szpitali i zakończenia budowy torów. Może to potrwać kilka miesięcy. Ta sekcja kończy się przez normalną konstrukcję.",
+        "new": "Przedłużenie czasu do prywatnego nabycia gruntów, rozbiórki szpitali i zakończenia budowy torów. Może to potrwać kilka miesięcy. Ta sekcja kończy się przez normalną konstrukcję.",
+        "east": "Przedłużenie czasu do prywatnego nabycia gruntów, rozbiórki szpitali i zakończenia budowy torów. Może to potrwać kilka miesięcy. Ta sekcja kończy się przez normalną konstrukcję."
+      },
+      "step6": {
+        "title": "Połóż tor bezpośrednio nad główną drogą",
+        "description": "Połóż podwójny tor kolejowy na 6 m bezpośrednio nad środkiem głównej drogi z zachodu na wschód. Korzystanie z korytarza drogowego pozwala uniknąć nabywania przyległych działek. Zejście z drogi do budynków może nadal wymagać przejęcia lub rozbiórki obiektów publicznych.",
+        "open": "Połóż podwójny tor kolejowy na 6 m bezpośrednio nad środkiem głównej drogi z zachodu na wschód. Korzystanie z korytarza drogowego pozwala uniknąć nabywania przyległych działek. Zejście z drogi do budynków może nadal wymagać przejęcia lub rozbiórki obiektów publicznych.",
+        "variant": "Połóż podwójny tor kolejowy na 6 m bezpośrednio nad środkiem głównej drogi z zachodu na wschód. Korzystanie z korytarza drogowego pozwala uniknąć nabywania przyległych działek. Zejście z drogi do budynków może nadal wymagać przejęcia lub rozbiórki obiektów publicznych.",
+        "start": "Połóż podwójny tor kolejowy na 6 m bezpośrednio nad środkiem głównej drogi z zachodu na wschód. Korzystanie z korytarza drogowego pozwala uniknąć nabywania przyległych działek. Zejście z drogi do budynków może nadal wymagać przejęcia lub rozbiórki obiektów publicznych.",
+        "end": "Połóż podwójny tor kolejowy na 6 m bezpośrednio nad środkiem głównej drogi z zachodu na wschód. Korzystanie z korytarza drogowego pozwala uniknąć nabywania przyległych działek. Zejście z drogi do budynków może nadal wymagać przejęcia lub rozbiórki obiektów publicznych.",
+        "confirm": "Połóż podwójny tor kolejowy na 6 m bezpośrednio nad środkiem głównej drogi z zachodu na wschód. Korzystanie z korytarza drogowego pozwala uniknąć nabywania przyległych działek. Zejście z drogi do budynków może nadal wymagać przejęcia lub rozbiórki obiektów publicznych.",
+        "town": "Połóż podwójny tor kolejowy na 6 m bezpośrednio nad środkiem głównej drogi z zachodu na wschód. Korzystanie z korytarza drogowego pozwala uniknąć nabywania przyległych działek. Zejście z drogi do budynków może nadal wymagać przejęcia lub rozbiórki obiektów publicznych.",
+        "new": "Połóż podwójny tor kolejowy na 6 m bezpośrednio nad środkiem głównej drogi z zachodu na wschód. Korzystanie z korytarza drogowego pozwala uniknąć nabywania przyległych działek. Zejście z drogi do budynków może nadal wymagać przejęcia lub rozbiórki obiektów publicznych.",
+        "east": "Na koniec połóż podwójny tor kolejowy na 6 m od wschodniego krańca drogi arterii na zachodni kraniec wschodniego peronu. Po podłączeniu obu platform, Next kończy budowę."
+      },
+      "step7": {
+        "title": "Zbuduj magazyn kolejowy",
+        "description": "Wybierz Rail Depot w panelu budowlanym i zbuduj go na żółtej działce na północ od miasta. Sam załóż depot. Następnie pomija czas budowy.",
+        "open": "Wybierz Rail Depot w panelu budowlanym i zbuduj go na żółtej działce na północ od miasta. Sam załóż depot. Następnie pomija czas budowy.",
+        "variant": "Wybierz Rail Depot w panelu budowlanym i zbuduj go na żółtej działce na północ od miasta. Sam załóż depot. Następnie pomija czas budowy.",
+        "start": "Wybierz Rail Depot w panelu budowlanym i zbuduj go na żółtej działce na północ od miasta. Sam załóż depot. Następnie pomija czas budowy.",
+        "end": "Wybierz Rail Depot w panelu budowlanym i zbuduj go na żółtej działce na północ od miasta. Sam załóż depot. Następnie pomija czas budowy.",
+        "confirm": "Wybierz Rail Depot w panelu budowlanym i zbuduj go na żółtej działce na północ od miasta. Sam załóż depot. Następnie pomija czas budowy.",
+        "town": "Wybierz Rail Depot w panelu budowlanym i zbuduj go na żółtej działce na północ od miasta. Sam załóż depot. Następnie pomija czas budowy.",
+        "new": "Wybierz Rail Depot w panelu budowlanym i zbuduj go na żółtej działce na północ od miasta. Sam załóż depot. Następnie pomija czas budowy.",
+        "east": "Wybierz Rail Depot w panelu budowlanym i zbuduj go na żółtej działce na północ od miasta. Sam załóż depot. Następnie pomija czas budowy."
+      },
+      "step8": {
+        "title": "Kształt zakrzywionej gałęzi wspinaczkowej",
+        "description": "Wybierz tor kolejowy. Zacznij od wschodniego terminalu naziemnego zajezdni, wykonaj szeroką pętlę na wschód przez znacznik północno-wschodni i połącz się z punktem scalania linii głównej na 6 m. Aby pozostać w granicach krzywizny i nachylenia, umieść tor za pomocą żółtych punktów pośrednich jako przewodnika. Po kliknięciu prawym przyciskiem myszy, aby potwierdzić kształt, możesz go dostosować, przeciągając wierzchołki i kontrolki.",
+        "open": "Wybierz tor kolejowy. Zacznij od wschodniego terminalu naziemnego zajezdni, wykonaj szeroką pętlę na wschód przez znacznik północno-wschodni i połącz się z punktem scalania linii głównej na 6 m. Aby pozostać w granicach krzywizny i nachylenia, umieść tor za pomocą żółtych punktów pośrednich jako przewodnika. Po kliknięciu prawym przyciskiem myszy, aby potwierdzić kształt, możesz go dostosować, przeciągając wierzchołki i kontrolki.",
+        "variant": "Wybierz tor kolejowy. Zacznij od wschodniego terminalu naziemnego zajezdni, wykonaj szeroką pętlę na wschód przez znacznik północno-wschodni i połącz się z punktem scalania linii głównej na 6 m. Aby pozostać w granicach krzywizny i nachylenia, umieść tor za pomocą żółtych punktów pośrednich jako przewodnika. Po kliknięciu prawym przyciskiem myszy, aby potwierdzić kształt, możesz go dostosować, przeciągając wierzchołki i kontrolki.",
+        "start": "Wybierz tor kolejowy. Zacznij od wschodniego terminalu naziemnego zajezdni, wykonaj szeroką pętlę na wschód przez znacznik północno-wschodni i połącz się z punktem scalania linii głównej na 6 m. Aby pozostać w granicach krzywizny i nachylenia, umieść tor za pomocą żółtych punktów pośrednich jako przewodnika. Po kliknięciu prawym przyciskiem myszy, aby potwierdzić kształt, możesz go dostosować, przeciągając wierzchołki i kontrolki.",
+        "end": "Wybierz tor kolejowy. Zacznij od wschodniego terminalu naziemnego zajezdni, wykonaj szeroką pętlę na wschód przez znacznik północno-wschodni i połącz się z punktem scalania linii głównej na 6 m. Aby pozostać w granicach krzywizny i nachylenia, umieść tor za pomocą żółtych punktów pośrednich jako przewodnika. Po kliknięciu prawym przyciskiem myszy, aby potwierdzić kształt, możesz go dostosować, przeciągając wierzchołki i kontrolki.",
+        "confirm": "Wybierz tor kolejowy. Zacznij od wschodniego terminalu naziemnego zajezdni, wykonaj szeroką pętlę na wschód przez znacznik północno-wschodni i połącz się z punktem scalania linii głównej na 6 m. Aby pozostać w granicach krzywizny i nachylenia, umieść tor za pomocą żółtych punktów pośrednich jako przewodnika. Po kliknięciu prawym przyciskiem myszy, aby potwierdzić kształt, możesz go dostosować, przeciągając wierzchołki i kontrolki.",
+        "town": "Wybierz tor kolejowy. Zacznij od wschodniego terminalu naziemnego zajezdni, wykonaj szeroką pętlę na wschód przez znacznik północno-wschodni i połącz się z punktem scalania linii głównej na 6 m. Aby pozostać w granicach krzywizny i nachylenia, umieść tor za pomocą żółtych punktów pośrednich jako przewodnika. Po kliknięciu prawym przyciskiem myszy, aby potwierdzić kształt, możesz go dostosować, przeciągając wierzchołki i kontrolki.",
+        "new": "Wybierz tor kolejowy. Zacznij od wschodniego terminalu naziemnego zajezdni, wykonaj szeroką pętlę na wschód przez znacznik północno-wschodni i połącz się z punktem scalania linii głównej na 6 m. Aby pozostać w granicach krzywizny i nachylenia, umieść tor za pomocą żółtych punktów pośrednich jako przewodnika. Po kliknięciu prawym przyciskiem myszy, aby potwierdzić kształt, możesz go dostosować, przeciągając wierzchołki i kontrolki.",
+        "east": "Wybierz tor kolejowy. Zacznij od wschodniego terminalu naziemnego zajezdni, wykonaj szeroką pętlę na wschód przez znacznik północno-wschodni i połącz się z punktem scalania linii głównej na 6 m. Aby pozostać w granicach krzywizny i nachylenia, umieść tor za pomocą żółtych punktów pośrednich jako przewodnika. Po kliknięciu prawym przyciskiem myszy, aby potwierdzić kształt, możesz go dostosować, przeciągając wierzchołki i kontrolki."
+      },
+      "step9": {
+        "title": "Zasilanie magazynu z istniejącego zakładu",
+        "description": "Aby uruchomić pociągi, musisz podłączyć linię energetyczną z elektrowni. Użyj linii energetycznej, aby podłączyć terminal zakładu do wspólnego wschodniego terminalu zajezdni. Potwierdź linię.",
+        "open": "Aby uruchomić pociągi, musisz podłączyć linię energetyczną z elektrowni. Użyj linii energetycznej, aby podłączyć terminal zakładu do wspólnego wschodniego terminalu zajezdni. Potwierdź linię.",
+        "variant": "Aby uruchomić pociągi, musisz podłączyć linię energetyczną z elektrowni. Użyj linii energetycznej, aby podłączyć terminal zakładu do wspólnego wschodniego terminalu zajezdni. Potwierdź linię.",
+        "start": "Aby uruchomić pociągi, musisz podłączyć linię energetyczną z elektrowni. Użyj linii energetycznej, aby podłączyć terminal zakładu do wspólnego wschodniego terminalu zajezdni. Potwierdź linię.",
+        "end": "Aby uruchomić pociągi, musisz podłączyć linię energetyczną z elektrowni. Użyj linii energetycznej, aby podłączyć terminal zakładu do wspólnego wschodniego terminalu zajezdni. Potwierdź linię.",
+        "confirm": "Aby uruchomić pociągi, musisz podłączyć linię energetyczną z elektrowni. Użyj linii energetycznej, aby podłączyć terminal zakładu do wspólnego wschodniego terminalu zajezdni. Potwierdź linię.",
+        "town": "Aby uruchomić pociągi, musisz podłączyć linię energetyczną z elektrowni. Użyj linii energetycznej, aby podłączyć terminal zakładu do wspólnego wschodniego terminalu zajezdni. Potwierdź linię.",
+        "new": "Aby uruchomić pociągi, musisz podłączyć linię energetyczną z elektrowni. Użyj linii energetycznej, aby podłączyć terminal zakładu do wspólnego wschodniego terminalu zajezdni. Potwierdź linię.",
+        "east": "Aby uruchomić pociągi, musisz podłączyć linię energetyczną z elektrowni. Użyj linii energetycznej, aby podłączyć terminal zakładu do wspólnego wschodniego terminalu zajezdni. Potwierdź linię."
+      },
+      "step10": {
+        "title": "Otwórz usługę kolejową",
+        "description": "Otwórz komunikację miejską → nową linię i wybierz linię kolejową o średniej odległości. Umieść przystanki na platformach zachodnich i wschodnich, a następnie kliknij pierwszy przystanek, aby zamknąć pętlę. Ustaw taryfę na 0 i docelowy wzrost na 5 minut, a następnie potwierdź.",
+        "open": "Otwórz komunikację miejską → nową linię i wybierz linię kolejową o średniej odległości. Umieść przystanki na platformach zachodnich i wschodnich, a następnie kliknij pierwszy przystanek, aby zamknąć pętlę. Ustaw taryfę na 0 i docelowy wzrost na 5 minut, a następnie potwierdź.",
+        "variant": "Otwórz komunikację miejską → nową linię i wybierz linię kolejową o średniej odległości. Umieść przystanki na platformach zachodnich i wschodnich, a następnie kliknij pierwszy przystanek, aby zamknąć pętlę. Ustaw taryfę na 0 i docelowy wzrost na 5 minut, a następnie potwierdź.",
+        "start": "Otwórz komunikację miejską → nową linię i wybierz linię kolejową o średniej odległości. Umieść przystanki na platformach zachodnich i wschodnich, a następnie kliknij pierwszy przystanek, aby zamknąć pętlę. Ustaw taryfę na 0 i docelowy wzrost na 5 minut, a następnie potwierdź.",
+        "end": "Otwórz komunikację miejską → nową linię i wybierz linię kolejową o średniej odległości. Umieść przystanki na platformach zachodnich i wschodnich, a następnie kliknij pierwszy przystanek, aby zamknąć pętlę. Ustaw taryfę na 0 i docelowy wzrost na 5 minut, a następnie potwierdź.",
+        "confirm": "Otwórz komunikację miejską → nową linię i wybierz linię kolejową o średniej odległości. Umieść przystanki na platformach zachodnich i wschodnich, a następnie kliknij pierwszy przystanek, aby zamknąć pętlę. Ustaw taryfę na 0 i docelowy wzrost na 5 minut, a następnie potwierdź.",
+        "town": "Otwórz komunikację miejską → nową linię i wybierz linię kolejową o średniej odległości. Umieść przystanki na platformach zachodnich i wschodnich, a następnie kliknij pierwszy przystanek, aby zamknąć pętlę. Ustaw taryfę na 0 i docelowy wzrost na 5 minut, a następnie potwierdź.",
+        "new": "Otwórz komunikację miejską → nową linię i wybierz linię kolejową o średniej odległości. Umieść przystanki na platformach zachodnich i wschodnich, a następnie kliknij pierwszy przystanek, aby zamknąć pętlę. Ustaw taryfę na 0 i docelowy wzrost na 5 minut, a następnie potwierdź.",
+        "east": "Otwórz komunikację miejską → nową linię i wybierz linię kolejową o średniej odległości. Umieść przystanki na platformach zachodnich i wschodnich, a następnie kliknij pierwszy przystanek, aby zamknąć pętlę. Ustaw taryfę na 0 i docelowy wzrost na 5 minut, a następnie potwierdź."
+      },
+      "step11": {
+        "title": "Potwierdź pojazdy i serwis",
+        "description": "Przejdź i sprawdź pojemność linii i interwał pracy w zarządzaniu transportem publicznym. Zajezdnia potrzebuje kilku miesięcy na zdobycie pojazdów. Pozytywna pojemność potwierdza, że usługa jest uruchomiona. Mieszkańcy porównują również trasy spacerowe, więc ta krótka linia może nie mieć jeszcze pasażerów.",
+        "open": "Przejdź i sprawdź pojemność linii i interwał pracy w zarządzaniu transportem publicznym. Zajezdnia potrzebuje kilku miesięcy na zdobycie pojazdów. Pozytywna pojemność potwierdza, że usługa jest uruchomiona. Mieszkańcy porównują również trasy spacerowe, więc ta krótka linia może nie mieć jeszcze pasażerów.",
+        "variant": "Przejdź i sprawdź pojemność linii i interwał pracy w zarządzaniu transportem publicznym. Zajezdnia potrzebuje kilku miesięcy na zdobycie pojazdów. Pozytywna pojemność potwierdza, że usługa jest uruchomiona. Mieszkańcy porównują również trasy spacerowe, więc ta krótka linia może nie mieć jeszcze pasażerów.",
+        "start": "Przejdź i sprawdź pojemność linii i interwał pracy w zarządzaniu transportem publicznym. Zajezdnia potrzebuje kilku miesięcy na zdobycie pojazdów. Pozytywna pojemność potwierdza, że usługa jest uruchomiona. Mieszkańcy porównują również trasy spacerowe, więc ta krótka linia może nie mieć jeszcze pasażerów.",
+        "end": "Przejdź i sprawdź pojemność linii i interwał pracy w zarządzaniu transportem publicznym. Zajezdnia potrzebuje kilku miesięcy na zdobycie pojazdów. Pozytywna pojemność potwierdza, że usługa jest uruchomiona. Mieszkańcy porównują również trasy spacerowe, więc ta krótka linia może nie mieć jeszcze pasażerów.",
+        "confirm": "Przejdź i sprawdź pojemność linii i interwał pracy w zarządzaniu transportem publicznym. Zajezdnia potrzebuje kilku miesięcy na zdobycie pojazdów. Pozytywna pojemność potwierdza, że usługa jest uruchomiona. Mieszkańcy porównują również trasy spacerowe, więc ta krótka linia może nie mieć jeszcze pasażerów.",
+        "town": "Przejdź i sprawdź pojemność linii i interwał pracy w zarządzaniu transportem publicznym. Zajezdnia potrzebuje kilku miesięcy na zdobycie pojazdów. Pozytywna pojemność potwierdza, że usługa jest uruchomiona. Mieszkańcy porównują również trasy spacerowe, więc ta krótka linia może nie mieć jeszcze pasażerów.",
+        "new": "Przejdź i sprawdź pojemność linii i interwał pracy w zarządzaniu transportem publicznym. Zajezdnia potrzebuje kilku miesięcy na zdobycie pojazdów. Pozytywna pojemność potwierdza, że usługa jest uruchomiona. Mieszkańcy porównują również trasy spacerowe, więc ta krótka linia może nie mieć jeszcze pasażerów.",
+        "east": "Przejdź i sprawdź pojemność linii i interwał pracy w zarządzaniu transportem publicznym. Zajezdnia potrzebuje kilku miesięcy na zdobycie pojazdów. Pozytywna pojemność potwierdza, że usługa jest uruchomiona. Mieszkańcy porównują również trasy spacerowe, więc ta krótka linia może nie mieć jeszcze pasażerów."
+      },
+      "step12": {
+        "title": "Przejrzyj budowę kolei",
+        "description": "Kamera przeniosła się na zachodnią stację. Spójrz na pociągi zatrzymujące się na peronie. Zbudowałeś platformy, stacje, tory, magazyn, jego zakrzywioną gałąź, połączenie zasilania i usługę. Zajmowałeś się prywatnymi przejęciami i rozbiórką obiektów publicznych i uniknąłeś przejęć na drodze. Użyj sprzężenia zwrotnego krzywej i oceny w przyszłych projektach kolejowych.",
+        "open": "Kamera przeniosła się na zachodnią stację. Spójrz na pociągi zatrzymujące się na peronie. Zbudowałeś platformy, stacje, tory, magazyn, jego zakrzywioną gałąź, połączenie zasilania i usługę. Zajmowałeś się prywatnymi przejęciami i rozbiórką obiektów publicznych i uniknąłeś przejęć na drodze. Użyj sprzężenia zwrotnego krzywej i oceny w przyszłych projektach kolejowych.",
+        "variant": "Kamera przeniosła się na zachodnią stację. Spójrz na pociągi zatrzymujące się na peronie. Zbudowałeś platformy, stacje, tory, magazyn, jego zakrzywioną gałąź, połączenie zasilania i usługę. Zajmowałeś się prywatnymi przejęciami i rozbiórką obiektów publicznych i uniknąłeś przejęć na drodze. Użyj sprzężenia zwrotnego krzywej i oceny w przyszłych projektach kolejowych.",
+        "start": "Kamera przeniosła się na zachodnią stację. Spójrz na pociągi zatrzymujące się na peronie. Zbudowałeś platformy, stacje, tory, magazyn, jego zakrzywioną gałąź, połączenie zasilania i usługę. Zajmowałeś się prywatnymi przejęciami i rozbiórką obiektów publicznych i uniknąłeś przejęć na drodze. Użyj sprzężenia zwrotnego krzywej i oceny w przyszłych projektach kolejowych.",
+        "end": "Kamera przeniosła się na zachodnią stację. Spójrz na pociągi zatrzymujące się na peronie. Zbudowałeś platformy, stacje, tory, magazyn, jego zakrzywioną gałąź, połączenie zasilania i usługę. Zajmowałeś się prywatnymi przejęciami i rozbiórką obiektów publicznych i uniknąłeś przejęć na drodze. Użyj sprzężenia zwrotnego krzywej i oceny w przyszłych projektach kolejowych.",
+        "confirm": "Kamera przeniosła się na zachodnią stację. Spójrz na pociągi zatrzymujące się na peronie. Zbudowałeś platformy, stacje, tory, magazyn, jego zakrzywioną gałąź, połączenie zasilania i usługę. Zajmowałeś się prywatnymi przejęciami i rozbiórką obiektów publicznych i uniknąłeś przejęć na drodze. Użyj sprzężenia zwrotnego krzywej i oceny w przyszłych projektach kolejowych.",
+        "town": "Kamera przeniosła się na zachodnią stację. Spójrz na pociągi zatrzymujące się na peronie. Zbudowałeś platformy, stacje, tory, magazyn, jego zakrzywioną gałąź, połączenie zasilania i usługę. Zajmowałeś się prywatnymi przejęciami i rozbiórką obiektów publicznych i uniknąłeś przejęć na drodze. Użyj sprzężenia zwrotnego krzywej i oceny w przyszłych projektach kolejowych.",
+        "new": "Kamera przeniosła się na zachodnią stację. Spójrz na pociągi zatrzymujące się na peronie. Zbudowałeś platformy, stacje, tory, magazyn, jego zakrzywioną gałąź, połączenie zasilania i usługę. Zajmowałeś się prywatnymi przejęciami i rozbiórką obiektów publicznych i uniknąłeś przejęć na drodze. Użyj sprzężenia zwrotnego krzywej i oceny w przyszłych projektach kolejowych.",
+        "east": "Kamera przeniosła się na zachodnią stację. Spójrz na pociągi zatrzymujące się na peronie. Zbudowałeś platformy, stacje, tory, magazyn, jego zakrzywioną gałąź, połączenie zasilania i usługę. Zajmowałeś się prywatnymi przejęciami i rozbiórką obiektów publicznych i uniknąłeś przejęć na drodze. Użyj sprzężenia zwrotnego krzywej i oceny w przyszłych projektach kolejowych."
+      }
+    },
+    "complete": {
+      "title": "Samouczek ukończony",
+      "description": "Gratulacje! Ukończyłeś samouczek. Naciśnij \"Zakończ\", aby zamknąć przewodnik i swobodnie grać w to miasto.",
+      "button": "Wykończenie"
+    },
+    "nextButton": "Dalej",
+    "checking": "Weryfikacja...",
+    "failed": "Warunek nie spełniony. Spróbuj ponownie.",
+    "completed": "Samouczek zakończony! Brawo zrobione.",
+    "stepProgress": "Krok {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Otwórz panel konstrukcyjny za pomocą ikony Droga.",
+      "selectRoad": "Wybierz dwupasmową ulicę naziemną. Dostępny jest tylko wymagany wariant.",
+      "placeStart": "Kliknij lewym przyciskiem myszy wewnątrz cyjanowego koła, aby umieścić początek drogi.",
+      "placeEnd": "Kliknij lewym przyciskiem myszy wewnątrz żółtego kółka, aby umieścić koniec drogi.",
+      "finalizeRoad": "Kliknij prawym przyciskiem myszy widok 3D, aby zakończyć kształt drogi.",
+      "confirmRoad": "Potwierdź w panelu konstrukcyjnym, aby zapisać drogę, a następnie naciśnij przycisk „Dalej”.",
+      "failed": "Setup or communication failed. spróbować ponownie; Jeśli problem nie ustępuje, wyjdź i uruchom samouczek w nowym mieście.",
+      "retry": "Spróbować ponownie",
+      "placementRequired": "Użyj wariantu i pozycji pokazanych przez przewodnik.",
+      "preparing": "Przygotowanie miasta samouczka.",
+      "finishFailed": "Nie udało się ukończyć samouczka. Spróbuj ponownie."
+    },
+    "trade": {
+      "title": "Rozpocznij handel międzynarodowy",
+      "description": "Lokalna fabryka chce dotrzeć do zagranicznych klientów. W tym samouczku dowiesz się, jak eksportować żywność przez port i importować towary koleją frachtową z sąsiedniego kraju.",
+      "step1": {
+        "description": "Terminal eksportowy jest potrzebny do wysyłki żywności produkowanej na tej wyspie za granicą. Zbuduj „terminal kontenerowy” na działce przybrzeżnej z żółtym znacznikiem. Ponieważ jest to samouczek, okres budowy jest pomijany.",
+        "title": "Zbuduj port kontenerowy"
+      },
+      "step2": {
+        "description": "Rozpoczęcie produkcji i transportu fabryki zajmuje kilka miesięcy, więc poświęcaj czas i spójrz na wyniki eksportu portu. Zamknij szczegóły terminala kontenerowego i otwórz je ponownie, a wyniki importu i eksportu możesz zobaczyć na karcie ładunku.",
+        "title": "Potwierdź eksport żywności"
+      },
+      "step3": {
+        "description": "Masz teraz miejsce do importowania i eksportowania statkiem. Następnie zbudujmy miejsce do importu i eksportu towarów koleją. Zbuduj „międzynarodową stację frachtową” na paczce z żółtym znacznikiem wzdłuż drogi. Na wschodniej granicy znajduje się kolej prowadząca do sąsiedniego kraju i graniczny stacja frachtowa.",
+        "title": "Zbuduj międzynarodową stację towarową"
+      },
+      "step4": {
+        "open": "Otwórz „Drogi, koleje i infrastrukturę” na panelu ikon i wybierz „Platforma frachtowa kontenerowa” w sekcji „Kolejki”.",
+        "place": "Połóż platformę na północ od Międzynarodowej Stacji Freight, równolegle do niej. Kliknij lewym przyciskiem myszy wewnątrz cyjanowego okręgu (Zachód), aby umieścić początek i wewnątrz żółtego okręgu (Wschód), aby umieścić koniec, a następnie kliknij prawym przyciskiem myszy w widoku 3D, aby zakończyć kształt. Przełącz „stronę platformy” na „wewnątrz” i przed potwierdzeniem sprawdź, czy peron znajduje się po stronie budynku stacji (strona południowa). Gdy skończysz, naciśnij \"Dalej\".",
+        "title": "Zbuduj platformę obok stacji"
+      },
+      "step5": {
+        "description": "Naciśnij \"Wstecz\", aby powrócić do listy, wybierz \"Trailway Track\" i połóż ślad z wschodniego krańca peronu do zachodniego krańca toru przychodzącego z granicznej stacji frachtu poza miastem.",
+        "title": "Połóż ścieżkę do granicy"
+      },
+      "step6": {
+        "title": "Zbuduj magazyn",
+        "description": "Zbuduj „Zajezdnię szynową” na paczce z żółtym znacznikiem wzdłuż toru. Naciśnij \"Dalej\", a ponieważ jest to samouczek, okres budowy jest pomijany i skład jest zakończony."
+      },
+      "step7": {
+        "title": "Podłącz magazyn do głównej linii",
+        "description": "Połóż bocznicę od terminalu przyłączeniowego na wschodnim krańcu zajezdni do głównej linii. Dołącz do głównej linii pod płytkim kątem, kierując się na wschód, a nie pod kątem prostym. Gdy skończysz, naciśnij \"Dalej\"."
+      },
+      "step8": {
+        "description": "Otwórz „Drogi, kolej i infrastrukturę” na panelu ikon i użyj „Linia energetyczna” w sekcji „Elektryczność”, aby połączyć terminal przyłączeniowy elektrowni słonecznej na wschód od miasta do terminalu przyłączeniowego zajezdni.",
+        "title": "Dostarcz moc do magazynu"
+      },
+      "step9": {
+        "description": "W \"Transport publiczny\" naciśnij \"+ nowa linia\" i wybierz \"Międzynarodowa linia frachtu\" jako typ linii. Umieść przystanki na peronach Międzynarodowej Stacji Freight i granicznej stacji frachtowej, kliknij pierwszy przystanek, aby zamknąć pętlę i otwórz linię. Pociągi nie mogą mijać się nawzajem na jednym torze, więc ustaw cel na 45 minut, aby jeden pociąg mógł odbyć podróż w obie strony.",
+        "title": "Otwórz międzynarodową linię frachtu"
+      },
+      "step10": {
+        "description": "Przejdź i potwierdź, że pociągi towarowe zaczynają kursować na międzynarodowej linii towarowej. Zajezdnia zajmuje kilka miesięcy, aby zatrudnić personel, kupić materiały i przygotować pojazdy.",
+        "title": "Uruchom pociągi towarowe"
+      }
+    },
+    "highway": {
+      "title": "Zbuduj autostradę",
+      "description": "Miasto potrzebuje innej trasy dla pojazdów, gdy się rozwija. W tym samouczku dowiesz się, jak zbudować podwyższoną autostradę nad drogą lokalną i połączyć je z rampami, aby utworzyć węzeł.",
+      "step1": {
+        "title": "Przejdź nad ulicą",
+        "open": "Przejdź centralną ulicą z podwyższoną autostradą. Otwórz „Drogi, kolej i infrastrukturę” na panelu ikon i wybierz dwupasmową autostradę w sekcji „Motorways”.",
+        "start": "Kliknij lewym przyciskiem myszy wewnątrz cyjanowego koła, aby umieścić początek autostrady. Sięga do wiaduktu 7 m nad ziemią.",
+        "end": "Kliknij lewym przyciskiem myszy wewnątrz żółtego kółka, aby umieścić koniec. Sięga do tej samej wysokości 7 m po drugiej stronie ulicy.",
+        "confirm": "Potwierdź w panelu konstrukcyjnym, aby zapisać autostradę, a następnie naciśnij „Dalej”. Ponieważ jest to samouczek, czas budowy jest pomijany i jest od razu ukończony."
+      },
+      "step2": {
+        "title": "Nazwij autostradę",
+        "description": "Możesz zarządzać drogami, nadając im nazwy. Na samym szczycie okna szczegółów autostrady, którą zbudowałeś, droga, do której należy, jest obecnie „brak (nie jest częścią drogi)”, więc podaj jej dowolną nazwę."
+      },
+      "step3": {
+        "title": "Zbuduj rampę",
+        "description": "Zbuduj rampę, aby połączyć się z ulicą. Wybierz „Ramp” jako typ drogi i połącz gładko zakrzywioną rampę z pozycji żółtego znacznika na ekranie do autostrady."
+      },
+      "step4": {
+        "title": "Sprawdź wymianę",
+        "description": "Panel szczegółów wymiany można otworzyć, klikając „IC1” wyświetlane wokół rampy. Upewnij się, że ulica i autostrada są połączone."
+      }
+    },
+    "mining": {
+      "title": "Zasoby kopalni",
+      "description": "Pod wyspą leżą cenne zasoby, ale nie ma możliwości ich wyciągnięcia. W tym samouczku dowiesz się, jak skonfigurować kopalnię, kolej towarowy i port, aby wydobywać rudę, transportować ją i eksportować za granicę.",
+      "step1": {
+        "description": "Włącz zasoby naturalne i otwórz panel szczegółów południowo-wschodniego złoża rudy.",
+        "title": "Sprawdź żyłę rudy"
+      },
+      "step2": {
+        "description": "Zbuduj kopalnię na żółtej działce nad południowo-wschodnią żyłą rudy. Ponieważ jest to samouczek, czas budowy jest pomijany.",
+        "title": "Zbuduj kopalnię"
+      },
+      "step3": {
+        "description": "Zbuduj stację załadunku rudy na dużej istniejącej działce na południowy wschód od kopalni. Stacja załadunku rudy umożliwia załadowanie rudy wydobytej w kopalni do pociągów.",
+        "title": "Zbuduj stację załadunkową obok kopalni"
+      },
+      "step4": {
+        "description": "Zbuduj stację rozładunkową rudy na dużej istniejącej działce na południe od portu. Stacja rozładunku rudy pozwala przeprowadzić rudę przywiezioną pociągiem.",
+        "title": "Zbuduj stację rozładunkową w pobliżu portu"
+      },
+      "step5": {
+        "description": "Zbuduj port zbiorczy na żółtej działce przybrzeżnej.",
+        "title": "Zbuduj port zbiorczy"
+      },
+      "step6": {
+        "open": "Wybierz platformę Freight Ore i połącz każdą parę znaczników na południowy zachód od stacji załadunkowej i na południe od stacji rozładunkowej. Zmierz się z platformami w kierunku swoich obiektów.",
+        "loading": "Wybierz platformę Freight Ore i połącz każdą parę znaczników na południowy zachód od stacji załadunkowej i na południe od stacji rozładunkowej. Zmierz się z platformami w kierunku swoich obiektów.",
+        "unloading": "Wybierz platformę Freight Ore i połącz każdą parę znaczników na południowy zachód od stacji załadunkowej i na południe od stacji rozładunkowej. Zmierz się z platformami w kierunku swoich obiektów.",
+        "title": "Buduj platformy obok stacji"
+      },
+      "step7": {
+        "town": "Lay Freight Track od wschodniego portu-platformowego końca, przechodząc na południe od środka drogi, do północno-zachodniego końca platformy górskiej. Utwór nie jest jeszcze podłączony, więc połóż go sam. Użyj krzywych, aby wyrównać kierunek jazdy, ustaw teren w kierunku „No Follow” dla wspinania i dostosuj stopień i promień, aż znikną czerwone naruszenia. Dodaj punkty pośrednie, aby każda rozpiętość wynosiła 500 m lub mniej.",
+        "climb": "Lay Freight Track od wschodniego portu-platformowego końca, przechodząc na południe od środka drogi, do północno-zachodniego końca platformy górskiej. Utwór nie jest jeszcze podłączony, więc połóż go sam. Użyj krzywych, aby wyrównać kierunek jazdy, ustaw teren w kierunku „No Follow” dla wspinania i dostosuj stopień i promień, aż znikną czerwone naruszenia. Dodaj punkty pośrednie, aby każda rozpiętość wynosiła 500 m lub mniej.",
+        "title": "Połącz dwie stacje koleją"
+      },
+      "step8": {
+        "title": "Zbuduj magazyn",
+        "description": "Zbuduj skład kolejowy na istniejącej działce na południowy zachód od portu. Umieść go tak, aby tor mógł być prowadzony z terminalu przyłączeniowego na jego wschodnim krańcu do platformy po stronie portu."
+      },
+      "step9": {
+        "title": "Podłącz magazyn do głównej linii",
+        "description": "Połącz wschodni terminal zajezdni z zachodnim końcem portu-platformy z gładką, płytką gałązką."
+      },
+      "step10": {
+        "description": "Podłącz istniejący terminal elektrowni słonecznej do wschodniego terminalu współdzielonego zajezdni za pomocą linii energetycznej.",
+        "title": "Dostarcz moc do magazynu"
+      },
+      "step11": {
+        "description": "Utwórz linię transportu rudy, umieść przystanki na obu platformach transportu rudy i kliknij pierwszy przystanek, aby zamknąć pętlę powrotną. Pociągi nie mogą mijać się nawzajem na jednym torze, więc ustaw cel docelowy na 45 minut, aby jeden pociąg mógł odbyć podróż w obie strony, a następnie potwierdzić.",
+        "title": "Otwórz linię frachtu rudy"
+      },
+      "step12": {
+        "description": "Czas na wcześniejsze zdobycie wydobycia, załadunku, transportu kolejowego, rozładunku i eksportu. Zakup pojazdów i uruchomienie transportu trwa kilka miesięcy.",
+        "title": "czas wyprzedzenia"
+      },
+      "step13": {
+        "description": "Przesuń czas i sprawdź paragony rudy i eksport w danych przybrzeżnych portów zbiorczych. Wydobycie, zakupy pojazdów i transport trwa kilka miesięcy.",
+        "title": "Potwierdź eksport rudy"
+      }
+    },
+    "tourism": {
+      "title": "Rozwijaj turystykę",
+      "description": "Wyspa potrzebuje portu, zakwaterowania i trasy autobusowej, aby powitać gości w jej ruinach. Naucz się budować hotel i terminal pasażerski, stworzyć trasę autobusową i sprawdzić przyjazdy turystów, sprzedaż w restauracjach i korzystanie z autobusów.",
+      "step1": {
+        "description": "Zbuduj hotel turystyczny na działce oznaczonej żółtym na zachód od starożytnych ruin. Ponieważ jest to samouczek, czas budowy jest pomijany.",
+        "title": "Zbuduj hotel obok ruin"
+      },
+      "step2": {
+        "description": "Do przyjmowania turystów potrzebny jest port. Zbuduj terminal pasażerski na oznaczonej działce portowej.",
+        "title": "Zbuduj terminal pasażerski"
+      },
+      "step3": {
+        "description": "Turyści nie mają prywatnych samochodów, więc trzeba zapewnić transport publiczny. Otwórz transport publiczny → New Line i wybierz trasę autobusową. Umieść przystanki na drogach na żółtych znacznikach w następującej kolejności: Port → Obudowa → Ruiny → Obudowa, a następnie kliknij przystanek portowy, aby zamknąć pętlę. Ustaw taryfę na 0, a cel docelowy na 1 minutę, a następnie potwierdź.",
+        "title": "Stwórz trasę autobusową z portu do ruin"
+      },
+      "step4": {
+        "description": "Czas na przywitanie turystów. Udogodnienia i zakupy pojazdów autobusowych trwają kilka miesięcy.",
+        "title": "czas wyprzedzenia"
+      },
+      "step5": {
+        "description": "Sprawdź sprzedaż restauracji przy ruinach i pasażerów na stworzonej przez Ciebie trasie autobusu. Wykonaj ten krok, gdy przybyli turyści, sprzedaż restauracji przekracza swój poziom początkowy, a autobus ma pasażerów. W razie potrzeby przesunąć czas dalej.",
+        "title": "Sprawdź sprzedaż restauracji i pasażerów autobusów"
+      }
+    },
+    "intro": {
+      "controls": "Jako nowy burmistrz, pomóż zbudować miasto, w którym mieszkańcy mogą dobrze żyć i czuć się bezpiecznie. W tym mieście nie ma jeszcze domów dla nowo przybyłych, nie ma prądu ani zaopatrzenia w wodę. Ten samouczek uczy twojej roli burmistrza, jak posunąć czas, jak odczytywać stan miasta oraz przyciski i sterowanie kamerą, a następnie przeprowadzi cię przez przygotowywanie dróg i działek, wyznaczanie kierunku dzielnicy, budowanie domów oraz dostarczanie prądu i wody.",
+      "scenario4": "Chcemy połączyć dzielnicę mieszkalną i miejsca pracy koleją, ale prywatne budynki i szpital publiczny utrudniają trasę. W tym samouczku poznasz pozyskiwanie gruntów, rozbiórkę obiektów publicznych, podwyższone tory nad drogami, platformami i stacjami, zajezdnię, regulację krzywej i nachylenia, podłączenie zasilania i otwarcie usługi.",
+      "trade": "Lokalna fabryka żywności poprosiła o pomoc w sprzedaży swoich produktów za granicą. Miasto chce również przywiezić towary, których potrzebuje z zagranicy. W tym samouczku dowiesz się, jak eksportować żywność przez port i importować towary koleją frachtową z sąsiedniego kraju.",
+      "highway": "Wraz z rozwojem miasta coraz więcej pojazdów będzie przewozić ludzi i towary przez nie. Miasto chce, aby kolejna trasa była gotowa, aby przez ruch uliczny nie trafił na lokalną drogę. W tym samouczku dowiesz się, jak zbudować podwyższoną autostradę nad drogą lokalną i połączyć je z rampami, aby utworzyć węzeł.",
+      "mining": "Pod tą wyspą kryją się cenne zasoby, ale nie ma możliwości przewiezienia ich z góry do portu. Bez transportu wyspa nie może zmienić tego bogactwa w przemysł. W tym samouczku dowiesz się, jak skonfigurować kopalnię, kolej towarowy i port, aby wydobywać rudę, transportować ją i eksportować za granicę.",
+      "tourism": "Wyspiarze chcą podzielić się swoimi starożytnymi ruinami śródlądowymi z większą liczbą odwiedzających. Ale brakuje im portu pasażerskiego, zakwaterowania i linii autobusowej z portu do miasta. W tym samouczku nauczysz się budować hotel i terminal pasażerski, tworzyć trasę autobusową oraz sprawdzać przyjazdy turystów, sprzedaż restauracji i autobusy.",
+      "heading": "Prośba o burmistrza",
+      "windowTitle": "Samouczek",
+      "marine": "To miasto w Bayside nie ma jeszcze portu ani obiektów naftowych. W tym samouczku odzyskasz ziemię z morza i zbudujesz molo tankowców, zajmij ujście zatoki mostkiem wiszącym, odpompujesz ropę naftową z podmorskiego pola naftowego i wyślesz je rurociągiem na eksport i połącz odległą wyspę do miasta promem."
+    },
+    "marine": {
+      "title": "Rozwijaj morze",
+      "description": "To miasto w Bayside nie ma jeszcze portu ani obiektów naftowych. W tym samouczku odzyskasz ziemię z morza i zbudujesz molo tankowców, zajmij ujście zatoki mostkiem wiszącym, odpompujesz ropę naftową z podmorskiego pola naftowego i wyślesz je rurociągiem na eksport i połącz odległą wyspę do miasta promem.",
+      "step1": {
+        "title": "Zaplanuj projekt rekultywacji",
+        "description": "Port potrzebuje nabrzeża, w którym duże statki mogą zakotwiczyć i wylądować dla swoich obiektów. Odzyskaj morze na czele zatoki, aby stworzyć ląd dla portu. Otwórz narzędzie Earthworks, kliknij lewym przyciskiem myszy cztery żółte znaczniki, aby narysować obszar, i kliknij prawym przyciskiem myszy, aby go zamknąć. Sprawdź, czy oszacowanie dotyczy rekultywacji, a następnie potwierdź projekt."
+      },
+      "step2": {
+        "title": "Uzupełnij odzyskaną ziemię",
+        "description": "Użyj Rozpocznij, aby awansować o co najmniej jeden miesiąc, a następnie naciśnij Dalej. Ponieważ ta lekcja nie ma dostawców budowlanych, Next pomija pozostałe prace rekultywacyjne. Po zakończeniu morze staje się lądem, a jego brzeg morza staje się nabrzeżem, na którym mogą znajdować się statki."
+      },
+      "step3": {
+        "title": "Zbuduj drogę na odzyskanej ziemi",
+        "description": "Port lub terminal naftowy na odzyskanym terenie jest bezużyteczny bez drogi: ludzie nie mogą przychodzić do pracy, a towary nie mogą się ruszać. Zbuduj drogę od końca drogi miasta na odzyskany teren. W tej lekcji droga jest ukończona, gdy tylko ją potwierdzisz. Naciśnij „Roads, Rail & Infrastructure” na panelu ikon, aby otworzyć panel konstrukcyjny."
+      },
+      "step4": {
+        "title": "Zbuduj molo czołgów",
+        "description": "Tankowce, które przewożą ropę naftową, to duże statki, więc port można zbudować tylko tam, gdzie morze przed nabrzeżem jest wystarczająco głębokie. Nabrzeże odzyskanej ziemi wychodzi na głęboką wodę, która pasuje do portu. Otwórz narzędzie do budowania, wybierz „Tankowe molo” w kategorii „Porty”, kliknij lewym przyciskiem myszy w żółtym kółku na nabrzeżu, aby ustawić jego miejsce i potwierdź w panelu konstrukcyjnym. Po zbudowaniu portu pas łączący jest automatycznie rysowany na morzu żeglugi morskiej, dzięki czemu statki mogą przypływać i odchodzić. Ta lekcja pomija okres budowy."
+      },
+      "step5": {
+        "title": "Połącz ujście zatoki",
+        "description": "Autostrada zatrzymuje się po obu stronach ujścia zatoki. Ujście ma 1,6 km szerokości, jest zbyt szerokie na zwykły most na rzędach pomostów, więc połącz je mostem wiszącym, który może przekroczyć daleką odległość w jednym przęśle. Duże statki przechodzą pod nim na szlaku żeglugowym, więc most musi być wystarczająco wysoki, aby mogły się wyczyścić. Końce autostrady na obu brzegach są już na tej wysokości. Otwórz „Drogi, kolej i infrastrukturę” na panelu ikon, wybierz „4-pasmowy most wiszący” w sekcji „Motorways” i narysuj go z północnego krańca (Cyan Circle) do południowego końca (żółty okrąg). Kliknij prawym przyciskiem myszy, aby zakończyć kształt, potwierdź w panelu konstrukcyjnym, a następnie naciśnij przycisk Dalej."
+      },
+      "step6": {
+        "title": "Znajdź podmorskie pole naftowe",
+        "description": "Następnie wykorzystaj zasoby morza. Przed zbudowaniem terminalu naftowego sprawdź, czy pod pobliskim morzem znajduje się pole naftowe. Naciśnij „Widok” w kokpicie, aby otworzyć panel widoku.",
+        "show": "Wybierz „Zasoby naturalne” z zakładek pionowych i przełącz je na „Widoczne”. Możesz zobaczyć pole naftowe rozprzestrzeniające się pod zatoką. Kliknij pole naftowe w pobliżu żółtego znacznika, aby otworzyć jego szczegóły."
+      },
+      "step7": {
+        "title": "Zbuduj terminal olejowy",
+        "description": "Ropa naftowa pompowana z pola podmorskiego jest wysyłana rurociągiem do terminalu naftowego na lądzie i stamtąd sprzedawana. Terminal jest zbudowany zwrócony w stronę nabrzeża, w którym może wejść rurociąg. Otwórz narzędzie budowlane, wybierz „Conteral rurociągu naftowego” w kategorii „Porty”, kliknij lewym przyciskiem wewnątrz żółtego kółka na nabrzeżu, aby ustawić jego miejsce i potwierdzić w panelu konstrukcyjnym. Ta lekcja pomija okres budowy."
+      },
+      "step8": {
+        "title": "Zbuduj platformę naftową",
+        "description": "Platforma naftowa pompująca ropę naftową musi stać w morzu bezpośrednio nad polem naftowym. Otwórz narzędzie do budowania, wybierz „Offshore Oil Platform” w kategorii „Firming & Resources”, kliknij lewym przyciskiem myszy w żółtym kółku na morzu, aby ustawić jego miejsce i potwierdź w panelu konstrukcyjnym. Ta lekcja pomija okres budowy."
+      },
+      "step9": {
+        "title": "Połącz je z rurociągiem",
+        "description": "Wyślij ropę naftową pompowaną przez platformę do terminala naftowego za pomocą podmorskiego rurociągu. Otwórz „Roads, Rail & Infrastructure” na panelu ikon, wybierz „Subsea Oil Rurociąg” w sekcji „Olejek” i narysuj go z terminala przyłączeniowego platformy do terminalu przyłączeniowego terminala olejowego. Po potwierdzeniu naciśnij Dalej, a potok zostanie ukończony jednocześnie."
+      },
+      "step10": {
+        "title": "eksport ropy naftowej",
+        "description": "Terminal naftowy sprzedaje ropę naftową, którą otrzymuje na rynku, a tankowiec kupuje ją i eksportuje za granicę statkiem. Przybycie pracowników i rozpoczęcie sprzedaży ropy naftowej zajmuje kilka miesięcy. Użyj Rozpocznij, aby wydłużyć się o kilka miesięcy, a następnie naciśnij Dalej. Jeśli nic nie zostało jeszcze wyeksportowane, przejdź trochę dalej i naciśnij ponownie."
+      },
+      "step11": {
+        "title": "Zbuduj molo promowe",
+        "description": "Wyspa na morzu nie ma jak dotrzeć do miasta. Otwórz prom, aby jego mieszkańcy mogli podróżować do miasta. Najpierw zbuduj molo promowe na brzegu miasta. Otwórz „Drogi, koleje i infrastrukturę” na panelu ikon, wybierz „Przy molo” pod „Waterway” i narysuj go z brzegu (Cyan Circle) nad morzem (żółty okrąg). Kliknij prawym przyciskiem myszy, aby zakończyć kształt, potwierdź w panelu konstrukcyjnym, a następnie naciśnij przycisk Dalej."
+      },
+      "step12": {
+        "title": "Narysuj pas promowy",
+        "description": "Następnie narysuj pas, w którym prom popłynie z molo na wyspie na molo miejskie. Pas nie może przekroczyć lądu, więc omiń północną stronę wyspy, przejdź pod wiszącym mostem u ujścia zatoki i wejdź do zatoki, klikając lewym przyciskiem po drodze, aby umieścić punkty. Wybierz „Przez promowy” w sekcji „Waterway”, połącz końcówkę molo na wyspie z czubkiem molo miasta, potwierdź, a następnie naciśnij Dalej."
+      },
+      "step13": {
+        "title": "Otwórz linię promową",
+        "description": "Na koniec stwórz linię promową biegnącą na pasie. Utwórz linię promową, umieść przystanki na molo wyspy i miejskim molo, kliknij pierwszy przystanek, aby zamknąć pętlę i potwierdzić. Gdy linia istnieje, ten samouczek jest zakończony. Aby faktycznie uruchomić statki, potrzebujesz również doku konserwacyjnego, który je wydzierżawi."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Rozpocznij grę",
+    "nowLoading": "Teraz ładuje...",
+    "startError": "Nie można uruchomić. Spróbuj ponownie.",
+    "todaysTips": "Dzisiejsze wskazówki",
+    "gotIt": "Zamknij",
+    "items": {
+      "tip1": {
+        "title": "Pieniądze sprawiają, że miasto się kręci",
+        "description": "Wydatki miasta na budownictwo i płace w sektorze publicznym stają się dochodami dla firm i gospodarstw domowych, wspierając zakupy i produkcję. Same pobieranie podatków nie utrzyma gospodarki w ruchu. Fundusz potrzebne usługi i naprawy, aby wpłacić pieniądze z powrotem do miasta."
+      },
+      "tip2": {
+        "title": "Granie w długą grę",
+        "description": "Obywatele, którzy dorastają w niebezpiecznym otoczeniu, mają większą tendencję do popełniania przestępstw jako dorośli. Utrzymuj policję przestępczości i poprawę środowiska, w której dorastają dzieci. Zajmowanie się korzeniami słabego bezpieczeństwa publicznego zajmuje co najmniej pokolenie."
+      },
+      "tip3": {
+        "title": "Umów się!",
+        "description": "Strażacy muszą dotrzeć na miejsce, aby pomóc. Nawet przy dostępnej remizie strażackiej, duże odległości lub zatłoczone drogi pozwalają na wzrost szkody. Przejrzyj lokalizacje stacji i trasy dostępu wraz z ich budżetami."
+      },
+      "tip5": {
+        "title": "Wydatki pod górę",
+        "description": "Budowa dróg na stromych zboczach wymaga więcej pracy niż na płaskim terenie. Najkrótsza trasa na mapie nie zawsze jest najtańsza. Porównaj szacunki terenu i budowy oraz rozważ niewielki objazd."
+      },
+      "tip6": {
+        "title": "Wymagane pewne planowanie",
+        "description": "Więcej mieszkańców i fabryk oznacza większe zapotrzebowanie na energię i wodę. Rozpocznij budowę po pojawieniu się niedoboru, a będziesz czekać na zakończenie. Sprawdź zapasy mocy zapasowych przed założeniem nowej dzielnicy."
+      },
+      "tip7": {
+        "title": "Pośpiech czyni szkodę",
+        "description": "Wyższe ograniczenia prędkości przyspieszają podróże, ale zwiększają ryzyko wypadków. Ostre zakręty również wymagają opieki. Tam, gdzie wypadki są częste, sprawdź układ dróg i ograniczenie prędkości."
+      },
+      "tip8": {
+        "title": "Inwestowanie w przyszłość",
+        "description": "Sama rosnąca populacja nie rozwiąże niedoborów kadrowych w szpitalach lub zaawansowanych fabrykach. Ustal specjalizacje uniwersyteckie i zdolność przyjmowania do szkolenia potrzebnych specjalistów i daj czas studentom na ukończenie studiów."
+      },
+      "tip9": {
+        "title": "Zbudowane do końca",
+        "description": "Zaniedbane naprawy pozwalają na pogorszenie budynków i dróg, co ostatecznie ryzykuje zawalenie się. Pożary i załamania również pogarszają nastroje społeczne, więc wydawanie wszystkiego na nowe budownictwo jest ryzykowne. Zachowaj środki dostępne na naprawy i gaszenie pożarów."
+      },
+      "tip10": {
+        "title": "Małe miejsce do oddychania",
+        "description": "Ściśle upakowane budynki pozwalają łatwiej rozprzestrzenić się na sąsiadów. Obok straży pożarnej pozostawienie przestrzeni między budynkami pomaga chronić miasto."
+      },
+      "tip11": {
+        "title": "wkopać",
+        "description": "Sprawdź depozyty zasobów przed wyborem miejsc do kopalń i wydobycia ropy. Rezerwy spadają, gdy je wydobywasz. Miasto górnicze również potrzebuje planu miejsc pracy i dochodów podatkowych po wyczerpaniu się depozytów."
+      },
+      "tip12": {
+        "title": "Dojna krowa miasta",
+        "description": "Burmistrz może budować budynki mieszkalne i komercyjne, aby zarabiać na czynsz od najemców. Pusta przestrzeń nie przynosi czynszu, więc sprawdź, które zastosowania są poszukiwane, w pobliżu wakatów i lokalizacja przed budową."
+      },
+      "tip13": {
+        "title": "Przychodzi podatnik",
+        "description": "Stawki podatkowe wpływają na koszty biznesowe i rentowność, a także przychody miasta. Niższe podatki dla branży mogą pomóc w jego rozwoju. Gdy przychody nie spadają, sprawdź sytuację każdej branży przed podniesieniem podatków na całym świecie."
+      },
+      "tip14": {
+        "title": "Zawsze miej plan B",
+        "description": "Gdy wypadki lub katastrofy wyłączają elektrownie lub linie energetyczne, skutki rozprzestrzeniają się na fabryki i mieszkańców, którzy są uzależnieni od energii elektrycznej. Zapewnij zaplecze zapasowe i trasy dostaw dla ważnej infrastruktury, aby pojedyncza awaria nie zatrzymała całego miasta."
+      },
+      "tip15": {
+        "title": "Miejsce, które można nazwać domem",
+        "description": "Jeśli opuścisz pustą ziemię w centrum miasta nieużywaną, ludzie, którzy stracili domy, mogą się tam osiedlić, co czyni je prawdopodobnym miejscem dla slumsów. Zapewnij domy, na które mogą sobie pozwolić, a slumsy będą się stopniowo kurczyć, gdy mieszkańcy się do nich wprowadzą."
+      },
+      "tip16": {
+        "title": "Klastry przemysłowe",
+        "description": "Klastrowanie podobnych branż i ich producentów surowych materiałów sprawia, że lokalizacja jest korzystniejsza dla produkcji. Rozważ grupowanie powiązanych branż zamiast rozpraszania fabryk w całym mieście. W pobliżu obudowy pamiętaj o hałasie i zanieczyszczeniu powietrza, które mogą stworzyć."
+      },
+      "tip17": {
+        "title": "Wznieś się i zmiel",
+        "description": "Dłuższe godziny pracy w panelu Regulamin pozwalają tej samej sile roboczej wspierać większą produkcję. Ale zdrowie i wypoczynek cierpią, zmniejszając wydatki na rozrywkę. Zbyt dużo czasu na zarabianie pieniędzy nie pozostawia czasu na ich wydanie."
+      },
+      "tip18": {
+        "title": "jeść, dojeżdżać, spać, powtarzać",
+        "description": "Długie dojazdy skróciły czas wolny i wydatki na rozrywkę. Przejrzyj odległość między domami a miejscami pracy oraz zatłoczenie po drodze. Dla mieszkańców, którzy wracają do domu tylko na czas, aby spać, twoja tętniąca życiem dzielnica handlowa to tylko sceneria przez okno."
+      },
+      "tip19": {
+        "title": "Zostaw miejsce do wzrostu",
+        "description": "Dłuższe pociągi mogą jeździć tylko wtedy, gdy pasują do peronów na stacjach linii. Planuj długości platform podczas budowy stacji, aby umożliwić przyszłe zapotrzebowanie. Wydłużenie jednej stacji nie pomoże, jeśli pozostałe są jeszcze za krótkie."
+      },
+      "tip20": {
+        "title": "zamiataj to pod miastem",
+        "description": "Drogi podziemne nie powodują hałasu ani zanieczyszczenia powietrza, co czyni je opcją ochrony obszarów mieszkalnych. Niektóre problemy naprawdę można zmieść pod miastem."
+      },
+      "tip21": {
+        "title": "W cieniu postępu",
+        "description": "Wysokie budynki rzucają cienie na swoją północ, pogarszając pobliskie warunki życia. Uważaj na ich wysokość i odstępy. Teren taki jak góry również rzuca cienie. Przyszłość twojego miasta może być jasna, ale ziemia pod nim może być czarna jak smoła."
+      },
+      "tip22": {
+        "title": "Wymień klucze na przepustkę tranzytową",
+        "description": "Kiedy transport publiczny sprawia, że miejsca pracy, szkoły i sklepy są łatwo dostępne, gospodarstwa domowe częściej wybierają życie bez samochodu. Oszczędności na posiadaniu samochodu mogą iść na inne wydatki."
+      },
+      "tip23": {
+        "title": "Następny przystanek: Nikt",
+        "description": "Autobusy dodają ruch drogowy nawet bez pasażerów. Bieganie zbyt wielu może pogorszyć przekrwienie. Sprawdź jazdę i postępy, aby zdecydować, ile usług jest potrzebnych."
+      },
+      "tip24": {
+        "title": "Krety nie płacą czynszu",
+        "description": "Wystarczająco głębokie tunele mogą przejść bez kupowania ziemi powyżej. Płytkie odcinki nadal wymagają pozyskiwania gruntów, więc sprawdź głębokości i szacunki. Jeśli negocjacje stają się trudne, spróbuj kopać trochę głębiej."
+      },
+      "tip25": {
+        "title": "Zawieszony dojazd do pracy",
+        "description": "Kolejki linowe mogą zapewnić transport publiczny, gdzie góry i strome zbocza utrudniają drogi. Zapewnij dostęp do stacji i połączeń z innymi transportami. Jeśli podróżowanie po ziemi jest zbyt wielkim problemem, zostaw swoich obywateli w zawieszeniu."
+      },
+      "tip26": {
+        "title": "Aktualne warunki ruchu",
+        "description": "Zapasowa moc wytwórcza nie pomoże, jeśli linie energetyczne nie będą mogły przenosić wystarczającej ilości energii elektrycznej. Przed dodaniem elektrowni sprawdź połączenia i moce przesyłowe do dzielnicy z niedoborem. Jedna niewymiarowa linia może ograniczać podaż całego miasta."
+      },
+      "tip27": {
+        "title": "Nie ma tu nic do zobaczenia",
+        "description": "Możesz wysadzić budynek na drodze rozwoju i uchwalić go jako wypadek. Nastroje społeczne będą jednak bardzo ucierpieć. Przed wyczyszczeniem terenu zważ koszt zakupu i wyburzenia z wpływem silnego podejścia."
+      },
+      "tip28": {
+        "title": "Zabierz się w morze",
+        "description": "Krótki na lądzie? Odzyskaj nowe miejsca z morza. Platformy naftowe można również budować tam, gdzie znajdują się zasoby pod dnem morskim."
+      },
+      "tip29": {
+        "title": "Czerwone światło, czerwone światło",
+        "description": "Więcej złączy sterowanych sygnałem oznacza więcej czasu oczekiwania na światłach. Unikaj zbyt wielu na głównych drogach. Dzięki skrupulatnie przecinającej się siatce słońce może zajść, zanim twoi mieszkańcy zobaczą zieleń."
+      },
+      "tip30": {
+        "title": "Czy teraz mnie słyszysz?",
+        "description": "Wyższe wieże radiowe na wyższym terenie mogą pokryć szersze obszary. Sprawdź góry między wieżą a miejscami bez odbioru. Nie możesz uzyskać sygnału przez górę przez czysty entuzjazm, aby uzyskać więcej mocy."
+      },
+      "tip31": {
+        "title": "Po prostu dodaj moc",
+        "description": "Przybrzeżna instalacja odsalania może zapewnić miasto bez pobliskiego źródła świeżej wody. Potrzebuje jednak energii elektrycznej do działania. Najpierw polujesz na wodę, potem poszukujesz mocy."
+      },
+      "tip32": {
+        "title": "Praca w rytmie",
+        "description": "Bezrobocie jest jednym z czynników pogarszających bezpieczeństwo publiczne. Mieszkańcy potrzebują pracy, a także ochrony policji. Jeśli bezrobocie jest wysokie, sprawdź wakaty, umiejętności, których potrzebują pracodawcy i czy mieszkańcy mogą dotrzeć do tych miejsc pracy."
+      },
+      "tip33": {
+        "title": "To jest problem Future Me",
+        "description": "Budynki i drogi wymagają naprawy po budowie. Rozwijaj się tylko dlatego, że możesz sobie pozwolić na budowanie, a przyszłe budżety mogą zniknąć w utrzymaniu. Pamiętaj, przyszły burmistrz to także ty."
+      },
+      "tip34": {
+        "title": "Więcej pomp, ta sama woda",
+        "description": "Źródła wody uzupełniają się z czasem, ale wydobycie więcej niż odzyskanie zmniejsza rezerwy. Zabezpiecz inne źródła, zanim popyt wzrośnie. Więcej pomp nie ma więcej wody."
+      },
+      "tip35": {
+        "title": "To cecha",
+        "description": "Drogi i budynki nie są łatwe do przeniesienia po rozpoczęciu budowy. Przed potwierdzeniem sprawdź orientację, połączenia i pozostały teren wokół nich. Mimo to ta przypadkowo krzywa droga może wyrosnąć na ciebie jako lokalny charakter."
+      },
+      "tip36": {
+        "title": "Wielki burmistrz patrzy",
+        "description": "Kliknij pieszego lub samochód, aby dodać obywatela do swojej listy śledzenia. Użyj go, aby podążać za mieszkańcem, którego życie Cię interesuje. Obok statystyk w całym mieście możesz zobaczyć swoje miasto w codziennym życiu jednej osoby."
+      },
+      "tip37": {
+        "title": "kopia zapasowa prognozy",
+        "description": "Produkcja energii słonecznej i wiatrowej zmienia się wraz z pogodą. Planowanie wokół samej dostawy dobrej pogody może sprawić, że będziesz krótki, gdy zmienią się warunki. Połącz je ze źródłami mniej zależnymi od pogody, takimi jak energia termiczna lub jądrowa."
+      },
+      "tip38": {
+        "title": "Rozmiar ma znaczenie",
+        "description": "Niektóre budynki nie pasują do małych działek. Przed podziałem gruntu sprawdź przestrzeń potrzebną dla planowanego obiektu. Mnóstwo wolnej ziemi nie jest pomocne dla dużego budynku, jeśli wszystko jest w maleńkich działkach."
+      },
+      "tip39": {
+        "title": "To będzie cię kosztować",
+        "description": "Oczyszczanie ścieków, usuwanie odpadów, komunikacja i opieka zdrowotna mogą być domyślnie bezpłatne. Opłata ustalająca pozwala użytkownikom pokryć część kosztów operacyjnych. Przyjazne ceny czy ambitne metki z cenami? To jest wezwanie burmistrza."
+      },
+      "tip40": {
+        "title": "Kopiuj, wklej, zysk",
+        "description": "Jako burmistrz możesz budować kopie istniejących budynków. Zachowaj liczbę rodzajów i podłóg na niezmienionym poziomie i użyj działki, która pasuje do oryginału, aby obniżyć koszty budowy. Krajobraz uliczny może wyglądać na powtarzalny, ale Twój portfel będzie cieszyć się widokiem."
+      },
+      "tip41": {
+        "title": "Więcej niż czynsz",
+        "description": "Mieszkańcy porównują dojazdy do pracy, dojazdy do pracy i szkoły, wycieczki na zakupy, jakość mieszkania i środowisko życia przy wyborze nowego domu. Hałas, zanieczyszczenie powietrza, bezpieczeństwo publiczne i światło słoneczne mają znaczenie. Tanie, ale niewygodne domy są mniej atrakcyjne; Wygodne nadal potrzebują przystępnego czynszu i wystarczająco dużo miejsca, aby się wprowadzić."
+      },
+      "tip42": {
+        "title": "Lepiej głęboko niż przepraszam",
+        "description": "Duże porty, takie jak porty kontenerowe, luzem i cysterny, potrzebują wystarczająco głębokiej wody. Wybrzeża, na których stoki dna morskiego stromo pasują do portów, ponieważ głęboka woda jest blisko brzegu. Nawet na płaskim wybrzeżu z płytką wodą ciągnącą się na morzu, możesz zbudować port, odzyskując ziemię na głębszą wodę."
+      },
+      "tip43": {
+        "title": "Chwileczkę…",
+        "description": "Zbyt duża ilość parkowania na ulicy spowalnia ruch i zwiększa ryzyko wypadków. Zbuduj parkingi, aby dać tym samochodom gdzie indziej. „Jedna minuta” jednego kierowcy może stać się popołudniem wszystkich innych."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Wybierz paczkę, aby zaplanować budynek. Od planowania do realizacji zajmuje trochę czasu.",
+    "parcelCreation": "Przytrzymaj Ctrl, aby wybrać metodę tworzenia z menu radialnego, a następnie kliknij cel w widoku 3D. Dostosuj rozmiar w panelu i potwierdź.",
+    "transitCreation": "Kliknij lewym przyciskiem myszy, aby umieścić przystanki w kolejności; Kliknij pierwszy przystanek, aby zamknąć pętlę. Przeciągnij segment, aby dodać punkt, przeciągnij punkt, aby go przesunąć, kliknij prawym przyciskiem myszy, aby usunąć. W przypadku podróży w obie strony umieść również przystanki powrotne. Kliknij ponownie umieszczony przystanek lub upuść przystanek na kolejny przystanek, aby zatrzymać się tam ponownie.",
+    "transitManagement": "Lista linii transportu publicznego. Dostosuj taryfy i postępy lub utwórz i usuń wiersze. Taryfy wpływają na wybór trasy mieszkańców. Zbyt wysokie taryfy zmniejszają liczbę pasażerów i zwiększają posiadanie samochodu.",
+    "pathConstruction": "Buduj drogi i koleje. Kliknij teren w widoku 3D: kliknij lewym przyciskiem myszy, aby dodać wierzchołki, kliknij prawym przyciskiem myszy, aby potwierdzić kształt i przeciągnij wierzchołki, aby je zmienić. Przytrzymaj CTRL, aby otworzyć menu ustawień (krzywa/prosta i przyciąganie). Użyj klawiszy 3/4, aby zmienić wysokość nasypu/cięcia.",
+    "pathConstructionElevated": "Buduj drogi i koleje. Kliknij teren w widoku 3D: kliknij lewym przyciskiem myszy, aby dodać wierzchołki, kliknij prawym przyciskiem myszy, aby potwierdzić kształt i przeciągnij wierzchołki, aby je zmienić. Przytrzymaj CTRL, aby otworzyć menu ustawień (krzywa/prosta i przyciąganie). Użyj PageUp/PageDown lub 1/2, aby zmienić wysokość, oraz 3/4 klawiszy, aby zmienić wysokość nasypu/cięcia.",
+    "districtEdit": "Twórz, rozszerzaj i scalaj \"okręgi\", jednostki dla przepisów i statystyk. Przytrzymaj Ctrl w widoku 3D, aby przełączać narzędzia. Utwórz narzędzie: kliknij lewym przyciskiem myszy drogę, aby utworzyć nową dzielnicę w pokazanym kolorze (nowy kolor jest rysowany za każdym razem, gdy wybierasz narzędzie). Rozwiń narzędzie: kliknij prawym przyciskiem myszy, aby wybrać dzielnicę do wzrostu, a następnie kliknij lewym przyciskiem myszy, aby wciągnąć je do niego. Narzędzie do scalania: kliknij prawym przyciskiem myszy, aby wybrać dzielnicę do scalenia, a następnie kliknij lewym przyciskiem myszy inną dzielnicę, aby otworzyć panel potwierdzenia. Kolor i nazwa wybranego okręgu są wyświetlane obok kursora myszy. Naciśnij ponownie przycisk, aby wyjść.",
+    "bulldozer": "Tryb spychacza. Kliknij lewym przyciskiem myszy, aby usunąć puste działki, zaplanowane budynki, zaplanowane drogi i rekwizyty terenowe (rozproszone rekwizyty są usuwane jako cały obszar po potwierdzeniu). Naciśnij ponownie przycisk, aby wyjść.",
+    "bulldozerInstant": "Tryb spychacza. Kliknij lewym przyciskiem myszy, aby natychmiast usunąć budynki, drogi, puste działki i rekwizyty terenu bez potwierdzenia. Budynki są usuwane wraz z najemcami i mieszkańcami, a teren nie jest przywracany (rat miasta, punkt kontrolny granicznej i segmenty transportu publicznego nie można usunąć; rozproszone rekwizyty są nadal usuwane jako cały obszar po potwierdzeniu). Naciśnij ponownie przycisk, aby wyjść.",
+    "cityBudget": "Zdecyduj, jak przydzielić środki uzyskane z podatków i operacji biznesowych na następny okres. Kiedy rząd kupuje materiały do budowy dróg lub obiektów użyteczności publicznej, może to zrobić tylko w ramach ustalonego tutaj budżetu. Jeśli budżet jest niewystarczający, pracownicy obiektów użyteczności publicznej mogą zostać zwolnieni.",
+    "resourceEdit": "Stwórz obszar zasobów naturalnych. Wybierz typ zasobu, a następnie kliknij teren. Kliknij lewym przyciskiem myszy, aby dodać wierzchołek, kliknij krawędź, aby wstawić wierzchołek, a następnie kliknij prawym przyciskiem myszy, aby usunąć wierzchołek. Przeciągnij wierzchołek, aby go zmienić.",
+    "grading": "Kliknij lewym przyciskiem myszy, aby umieścić wierzchołki, a następnie kliknij prawym przyciskiem myszy, aby potwierdzić obszar."
+  }
+}

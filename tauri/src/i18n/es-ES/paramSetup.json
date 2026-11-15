@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Configuración de parámetros del juego",
+    "description": "En general se recomiendan los valores predeterminados. Ajústalos solo si quieres cambiarlos.",
+    "skip": "Omitir",
+    "start": "Iniciar la partida",
+    "apply": "Aplicar y cerrar",
+    "close": "Cerrar",
+    "loading": "Cargando...",
+    "reload": "Recargar",
+    "reloadHint": "Si recargas cuando el servidor haya terminado de inicializarse, verás los valores más recientes",
+    "fetchError": "No se pudieron obtener los parámetros",
+    "category": {
+      "population": "Población y migración",
+      "citizen": "Vida ciudadana",
+      "economy": "Economía",
+      "labor": "Trabajo y salarios",
+      "education": "Educación",
+      "construction": "Construcción e inmuebles",
+      "environment": "Medio ambiente",
+      "traffic": "Transporte",
+      "general": "General",
+      "pathfind": "Tráfico y rutas",
+      "building": "Edificios y construcción",
+      "disaster": "Desastres y seguridad",
+      "slum": "Barrios marginales",
+      "production": "Producción e inventario",
+      "zone": "Distritos y parcelas",
+      "financial": "Finanzas"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Condensación de la ciudad",
+        "desc": "Divide entre este valor la superficie que usan las viviendas y las instalaciones, para que un mapa pequeño albergue la actividad económica de una gran ciudad. Cambiarlo después de construir aunque sea una carretera o un edificio rompe la ciudad, así que decídelo antes de construir nada."
+      },
+      "TFR_TARGET": {
+        "label": "Tasa global de fecundidad (TGF) objetivo",
+        "desc": "Tasa de fecundidad que buscan los hogares. Cuanto más alta, más fácil es que nazcan niños."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Tasa de nupcialidad",
+        "desc": "Coeficiente de la probabilidad base de que los ciudadanos se casen. Cuanto mayor, más fácil es casarse."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Edad mínima para tener hijos",
+        "desc": "Edad mínima a la que pueden nacer hijos. Por debajo de esta edad no hay nacimientos."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Edad máxima para tener hijos",
+        "desc": "Edad máxima a la que pueden nacer hijos. Por encima de esta edad no hay nacimientos."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Tasa de matrimonio de los hogares migrantes",
+        "desc": "Probabilidad de que un hogar migrante que llega a la ciudad sea una pareja."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Probabilidad de 1 hijo (migrantes)",
+        "desc": "Probabilidad de que un hogar migrante aparezca con un hijo."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Probabilidad de 2 hijos (migrantes)",
+        "desc": "Probabilidad de que un hogar migrante aparezca con dos hijos."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Probabilidad de 3 hijos (migrantes)",
+        "desc": "Probabilidad de que un hogar migrante aparezca con tres hijos."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Edad mínima de los migrantes adultos",
+        "desc": "Edad mínima de los adultos que llegan como migrantes."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Edad máxima de los migrantes adultos",
+        "desc": "Edad máxima de los adultos que llegan como migrantes."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Coeficiente de esperanza de vida",
+        "desc": "Coeficiente aplicado a la vida máxima de los ciudadanos. Con 1.08 el tope es de unos 100 años; con 1.06, de 150.",
+        "graphX": "Edad",
+        "graphY": "Probabilidad anual de muerte (salud 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Espacio habitable de un hogar unipersonal (m²)",
+        "desc": "Superficie habitable mínima que necesita un hogar de una sola persona."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Espacio adicional por cónyuge (m²)",
+        "desc": "Superficie habitable adicional que necesita un hogar de pareja respecto a uno unipersonal."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Espacio adicional por hijo (m²)",
+        "desc": "Superficie habitable que se suma por cada hijo."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Proporción alquiler/ingreso (tope pagable)",
+        "desc": "Proporción máxima del ingreso del hogar que puede destinarse al alquiler. Con 0.3, hasta el 30 % del ingreso."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Peso del tiempo de viaje al elegir vivienda",
+        "desc": "Al elegir vivienda, cuánto pesa cada minuto de los viajes de ida y vuelta al trabajo, la escuela y las compras, como múltiplo del salario promedio de la ciudad. Con 1, se valora al salario. Cuanto mayor, más se prefieren las viviendas cerca del trabajo y las tiendas."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Salario promedio (valor de referencia)",
+        "desc": "Salario promedio de referencia al iniciar la simulación."
+      },
+      "AVERAGE_RENT": {
+        "label": "Alquiler promedio (valor de referencia)",
+        "desc": "Alquiler promedio de referencia al iniciar la simulación (por m² y por día)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Proporción de dividendos según el patrimonio",
+        "desc": "Parte de los dividendos que se reparte en proporción a los ahorros de cada hogar. El resto se divide en partes iguales entre todos los hogares. 0 = todo en partes iguales, 1 = todo según los ahorros."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Tasa de depreciación del equipo",
+        "desc": "Tasa de depreciación por época sobre el stock de capital invertido en equipo."
+      },
+      "WORK_HOURS": {
+        "label": "Horas de trabajo diarias (h)",
+        "desc": "Horas estándar que trabaja un ciudadano al día."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Edad de inicio de la educación básica",
+        "desc": "Edad a la que los niños comienzan la educación básica (equivalente a la primaria)."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Edad de término de la educación básica",
+        "desc": "Edad a la que termina la educación básica (equivalente al fin del bachillerato)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Edad de egreso universitario e independencia",
+        "desc": "Edad a la que se concluye la educación superior y se abandona el hogar familiar."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Edad mínima para trabajar",
+        "desc": "Los ciudadanos menores a esta edad no buscan empleo ni entran en el cálculo del desempleo."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Pisos máximos (pisos)",
+        "desc": "Límite de pisos de los edificios que el sector privado construye automáticamente."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Coeficiente de penalización por altura",
+        "desc": "Coeficiente de la penalización por construir en altura. Cuanto mayor, menor es la penalización.",
+        "graphX": "Pisos",
+        "graphY": "Multiplicador del coste de construcción"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Eficiencia relativa de la demolición",
+        "desc": "Cuánto más eficiente es demoler que construir de nuevo (multiplicador)."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Probabilidad anual base de derrumbe",
+        "desc": "Probabilidad base de que un edificio con durabilidad 0.5 se derrumbe en un año."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Parámetro de forma de Weibull del derrumbe",
+        "desc": "Cuanto mayor, más rápido crece la probabilidad de derrumbe cerca del fin de la vida útil."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Proporción del coste de reparación",
+        "desc": "Coste de reparación expresado como proporción del coste de construir de nuevo."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Multiplicador de envejecimiento sin mantenimiento",
+        "desc": "Velocidad a la que envejece un edificio o una vía que no recibe ningún mantenimiento diario, como múltiplo de su envejecimiento con mantenimiento completo. Varía linealmente de 1 a este valor según la parte del mantenimiento que no recibe."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Probabilidad anual base de entrar en reparación",
+        "desc": "Probabilidad anual base de que un edificio candidato entre efectivamente en reparación."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Deuda inicial de construcción (por m²)",
+        "desc": "Deuda inicial de construcción por cada m² de superficie construida (reservas negativas)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Coeficiente de ruido del tránsito vial",
+        "desc": "Coeficiente con que el tránsito vial alimenta el mapa de calor de ruido. Cuanto mayor, más ruidosas resultan las calles."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Coeficiente de ruido peatonal",
+        "desc": "Coeficiente con que el flujo peatonal alimenta el mapa de calor de ruido."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Umbral de ruido peatonal",
+        "desc": "Solo la parte del flujo peatonal que supera este valor contribuye al ruido."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Distancia de atenuación del ruido (m)",
+        "desc": "El ruido se debilita con el cuadrado de la distancia y además cae a 1/e cada vez que se recorre esta distancia (apantallamiento de los edificios, absorción del aire y del suelo). Cuanto menor, más cerca de la fuente se queda."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Coeficiente de contaminación del tránsito vial",
+        "desc": "Coeficiente con que el tránsito vial alimenta el mapa de calor de contaminación del aire."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Distancia de atenuación de la contaminación (m)",
+        "desc": "La contaminación del aire y los olores se debilitan con el cuadrado de la distancia y además caen a 1/e cada vez que se recorre esta distancia (dispersión y deposición). Cuanto menor, más cerca de la fuente se quedan."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Peso del desempleo en la delincuencia",
+        "desc": "Peso del desempleo en el mapa de calor de seguridad. Cuanto mayor, más directamente empeora la seguridad."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Alcance de dispersión de la delincuencia (m)",
+        "desc": "Radio del desenfoque gaussiano del mapa de calor de seguridad."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Velocidad peatonal (km/h)",
+        "desc": "Velocidad de desplazamiento de los peatones. Se usa para calcular el coste de las rutas."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Distancia de aceleración de los automóviles (m)",
+        "desc": "Distancia que emplean los automóviles para acelerar. Afecta el cálculo de velocidad en calles cortas."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Horas diarias de operación de las calles (h)",
+        "desc": "Horas al día en que la calle está en operación. Se usa para convertir los volúmenes de tránsito."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Umbral de saturación de la bonificación por tránsito vial",
+        "desc": "A partir de este volumen de tránsito vial, la bonificación de tránsito para los comercios llega a su máximo."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Umbral de saturación de la bonificación peatonal",
+        "desc": "A partir de este flujo peatonal, la bonificación peatonal para los comercios llega a su máximo."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Cargando...",
+    "noScenarios": "No hay escenarios disponibles",
+    "starting": "Iniciando...",
+    "startFailed": "No se pudo iniciar",
+    "confirmTitle": "Confirmación de la configuración del juego",
+    "confirmStartTitle": "¿Iniciar la partida?",
+    "unsavedChangesWarning": "Al iniciar, se perderán los cambios sin guardar de tu partida actual.",
+    "startSettingsHeading": "Configuración de la ciudad",
+    "cityNameLabel": "Nombre de la ciudad",
+    "insigniaLabel": "Escudo y bandera",
+    "languageLabel": "Idioma de la ciudad",
+    "languageNote": "* No podrá cambiarse después",
+    "simulationDaysLabel": "Días de simulación",
+    "simulationDaysNote": "* No podrá cambiarse después",
+    "daysOption": "{{days}} días",
+    "startButton": "Iniciar",
+    "backButton": "Volver",
+    "cleared": "Completado",
+    "tutorialBadge": "Tutorial",
+    "sectionDebug": "Depuración",
+    "sectionTutorials": "Tutoriales",
+    "sectionScenarios": "Escenarios",
+    "detailPlaceholder": "Elige un escenario de la lista de la izquierda.",
+    "detailMapSizeLabel": "Tamaño del mapa",
+    "detailUnknown": "Desconocido",
+    "detailObjectiveLabel": "Condiciones de logro",
+    "detailCreditsLabel": "Créditos",
+    "detailNoObjective": "Sin condiciones de logro",
+    "detailNoDescription": "Este escenario no tiene descripción.",
+    "tutorialObjective": "Completa todos los pasos del tutorial.",
+    "startScenarioButton": "Empezar este escenario",
+    "tabSelect": "Elegir escenario",
+    "tabBrowse": "Buscar escenarios",
+    "tabTerrain": "Elegir terreno",
+    "relocalizeNote": "Este escenario se creó en {{from}}. Si empiezas en {{to}}, los nombres de distritos, instalaciones, residentes, estaciones y otros se cambian a {{to}}.",
+    "developmentNotice": {
+      "heading": "Este juego es una versión experimental en desarrollo",
+      "subheading": "Lee esto antes de jugar",
+      "text": "Los parámetros y la lógica de la economía aún se están ajustando, así que es posible que la ciudad no crezca con normalidad. El desempleo puede aumentar e incluso la ciudad puede quebrar, pero eso nunca será culpa de tu forma de jugar. ¡Espera las próximas actualizaciones! ¡Agrega el juego a tu lista de deseados y espera el lanzamiento oficial!"
+    }
+  }
+}

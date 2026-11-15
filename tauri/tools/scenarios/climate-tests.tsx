@@ -32,6 +32,7 @@ for (const weather of [preset.months[0].weather, { clear: 100, rain: 0, snow: 0,
 let playMode = PLAY_MODE_SCENARIO;
 let writes: any[] = [];
 let reject = false;
+const requestedLanguages: (string | null)[] = [];
 const saved = copyClimatePreset({ ...preset, display_name: "作者の気候" });
 globalThis.fetch = async (input, init) => {
   const url = String(input);
@@ -45,7 +46,10 @@ globalThis.fetch = async (input, init) => {
   const kinds = ["bd_types", "skills", "vehicle_types", "space_categories", "product_types", "parcel_types", "path_types",
     "agent_types", "agents", "subbuildings", "landmarks", "products", "paths", "transit", "combined_paths", "budgets",
     "resource_types", "prop_types"];
-  return new Response(JSON.stringify({ session_id: null, ...Object.fromEntries(kinds.map(kind => [kind, {}])), climates: { 1: preset },
+  const language = new URL(url).searchParams.get("language");
+  requestedLanguages.push(language);
+  const localized = language === "es-ES" ? { ...preset, display_name: "Clima de prueba" } : preset;
+  return new Response(JSON.stringify({ session_id: null, ...Object.fromEntries(kinds.map(kind => [kind, {}])), climates: { 1: localized },
     weather: Object.fromEntries(Object.keys(preset.months[0].weather).map(id => [id, { display_name: id }])) }));
 };
 const container = document.createElement("div");
@@ -104,6 +108,14 @@ assert.deepEqual(preset, original);
 await act(async () => { await emit("session-state", { session: { play_mode: PLAY_MODE_NORMAL } }); });
 assert.ok(button("climateSettings.apply").disabled, "normal mode cannot apply climate changes");
 assert.ok(input(".climate-settings-name").disabled);
+const nameBeforeLanguageChange = input(".climate-settings-name").value;
+state.language = "es-ES";
+await act(async () => { root.render(render()); });
+await settle();
+assert.equal(requestedLanguages.at(-1), "es-ES");
+assert.ok(container.querySelector("select")?.textContent?.includes("Clima de prueba"));
+assert.equal(input(".climate-settings-name").value, nameBeforeLanguageChange);
+state.language = "ja";
 await act(async () => { root.unmount(); });
 container.remove();
 console.log("PASS: climate preset copies, probability conservation, dynamic weather fields, draft/cancel/apply, chart editing, save errors and scenario mode restriction");

@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Ustawienia klimatu",
+    "name": "Nazwa klimatu",
+    "probabilities": "Miesięczne prawdopodobieństwo pogody",
+    "probabilityHint": "Przeciągnij granice kolorów w poziomie. Użyj poniższych pól, aby edytować pogodę na poziomie 0%.",
+    "month": "miesiąc {{month}}",
+    "preset": "Ustawienie klimatu",
+    "current": "Aktualne ustawienia",
+    "chartHint": "Wybierz serię w legendzie, a następnie przeciągnij jej miesięczne punkty w pionie.",
+    "averageHint": "Temperatura, opady i światło słoneczne to średnie miesięczne. Rzeczywiste wartości zmieniają się w każdej epoce wokół tych średnich.",
+    "apply": "Zastosować",
+    "chart": "Miesięczny wykres klimatyczny"
+  }
+}

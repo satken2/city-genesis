@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "filiera",
+    "selected": "Selezionato",
+    "providers": "{{product}} Fornitori",
+    "executing": "Le informazioni sull'offerta non sono disponibili mentre la simulazione è in esecuzione.",
+    "fetchError": "Impossibile caricare le informazioni di alimentazione.",
+    "activeCount": "Attivo {{active}} / {{count}}",
+    "production": "Ultima produzione: {{amount}} {{unit}}",
+    "resourceRemaining": "Riserve accessibili: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Disponibile",
+      "unknown": "indeterminato",
+      "missing": "Assente",
+      "inactive": "Inattivo",
+      "partial": "parzialmente interessato",
+      "limited": "limitato/fermato",
+      "disconnected": "Scollegato",
+      "supply_shortage": "Possibile carenza di forniture",
+      "capacity_limited": "Possibile limite di capacità"
+    },
+    "facilities": {
+      "401": "Centrali elettriche",
+      "402": "Strutture di aspirazione dell'acqua",
+      "403": "Fornitori di petrolio",
+      "404": "Stazioni di trasporto",
+      "405": "Fornitori di minerali",
+      "406": "Vie di navigazione marittime (mare aperto)",
+      "501": "Depositi ferroviari",
+      "502": "Depositi di autobus",
+      "503": "Depositi LRT",
+      "504": "Depositi della monorotaia",
+      "505": "Bacino di manutenzione"
+    },
+    "consumers": {
+      "401": "Consumatori di potere",
+      "402": "Pompe dell'acqua",
+      "403": "consumatori di petrolio",
+      "404": "Consumatori di merci",
+      "405": "consumatori di minerali",
+      "406": "Porti",
+      "501": "Percorsi ferroviari",
+      "502": "linee di autobus",
+      "503": "Percorsi LRT",
+      "504": "Percorsi della monorotaia",
+      "505": "Linee di traghetti"
+    }
+  }
+}

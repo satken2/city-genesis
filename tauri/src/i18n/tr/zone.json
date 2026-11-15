@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Bölge #{{id}}",
+    "color": "ilçe rengi",
+    "colorUpdateFailed": "Bölge rengi güncellenemedi",
+    "basicInfo": "Temel Bilgi",
+    "area": "Alan",
+    "zonePopulation": "Yerleşik nüfus",
+    "daytimePopulation": "gündüz nüfus",
+    "spaceAmount": "kat doluluk",
+    "slotStarvationTitle": "Bekleyen kiracılar barındırılamaz",
+    "slotStarvationWarning": "\"{{tenant}}\", tek bir binada en az {{required}} m2 alana ihtiyaç duyar, ancak bu bölgedeki en büyük inşa edilebilir en büyük olanı {{max}} m2'dir. Daha büyük bir parsel sağlayın.",
+    "restrictions": "yapı yönetmelikleri",
+    "restrictionUpdateFailed": "Bölge düzenlemeleri güncellenemedi",
+    "restrictionRequired": "Kapsama oranı, hacim oranı ve yükseklik boş olamaz",
+    "mergeConfirm": "\"{{source}}\" ile \"{{target}}\" ile birleştirin. Kaynak bölge, düzenleme ayarlarıyla birlikte ortadan kalkar.",
+    "mergeAction": "Birleşmek",
+    "mergeFailed": "Bölgeler birleştirilemedi (bitişik olmayan ilçeler birleştirilemez)",
+    "mergeNoRequest": "Birleştirmek için seçilmiş hiçbir bölge",
+    "edit": {
+      "toolHeading": "İşlem",
+      "toolCreate": "yeni bölge oluştur",
+      "toolExpand": "Bölgeyi Genişlet",
+      "toolExpandZone": "{{name}} alanı genişletin",
+      "modeHeading": "Seçim Yöntemi",
+      "modeBlock": "tüm blok",
+      "modeRoad": "sokak tarafı",
+      "hint": {
+        "create": {
+          "block": "Ctrl'yi basılı tutun ve sokaklarla çevrili blokların üzerine sürükleyin; Boyalı bloklar, parselleriyle yeni bir bölge haline geliyor. Pan'a sürükleyin, Yakınlaştır'a kaydırın.",
+          "road": "Ctrl'yi tutun ve bir sokağın bir tarafına sürükleyin (yolun yarısı veya etrafındaki parseller); Caddenin o tarafı, kolileriyle yeni bir bölge haline geliyor. Pan'a sürükleyin, Yakınlaştır'a kaydırın."
+        },
+        "expand": {
+          "block": "Bir bölgenin üzerine gelin, ardından Ctrl'yi tutun ve blokları parselleriyle o bölgeye eklemek için blokları sürükleyin. Pan'a sürükleyin, Yakınlaştır'a kaydırın.",
+          "road": "Bir bölgenin üzerine gelin, ardından Ctrl'yi tutun ve bir sokağın bir tarafına (yolun yarısı veya üzerindeki parseller) o tarafı, parselleriyle birlikte o bölgeye eklemek için sürükleyin. Pan'a sürükleyin, Yakınlaştır'a kaydırın."
+        }
+      },
+      "failed": "ilçe değiştiremedi."
+    }
+  }
+}

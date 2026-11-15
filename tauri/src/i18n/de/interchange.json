@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Austausch",
+      "jct": "Kreuzung"
+    },
+    "fallbackName": {
+      "ic": "ic #{{id}}",
+      "jct": "jct #{{id}}"
+    },
+    "connections": {
+      "from": "Von",
+      "to": "Zu",
+      "road": "{{type}} #{{id}}",
+      "none": "Keine verbundenen Straßenpaare.",
+      "direction": {
+        "n": "Nördlich",
+        "ne": "Nordost-",
+        "e": "Morgenland",
+        "se": "Südost-",
+        "s": "Mittag",
+        "sw": "Südwesten",
+        "w": "Abend",
+        "nw": "Nordwest"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

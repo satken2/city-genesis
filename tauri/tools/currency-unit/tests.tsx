@@ -8,6 +8,7 @@ import { Money } from "../../src/components/common/Money";
 import { useAppDisplaySettings } from "../../src/hooks/useAppDisplaySettings";
 import { useCurrencyUnit } from "../../src/hooks/useCurrencyUnit";
 import { formatExactAmount, getCurrencyUnit, setCurrencyUnit } from "../../src/utils/money";
+import { languageFromLocaleTag, resolveIntlLocale } from "../../src/utils/locale";
 import { loadSettings } from "../../web/shell/settings";
 import { state, emit } from "./runtime";
 import ja from "../../src/i18n/ja/settings.json";
@@ -16,8 +17,25 @@ import fr from "../../src/i18n/fr/settings.json";
 
 const storageKey = "city-genesis.settings";
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
-for (const [language, unit] of Object.entries({ ja: "円", en: "$", "es-419": "$", "zh-Hans": "元", "zh-Hant": "元", fr: "€", ko: "₩" })) {
+for (const [language, unit] of Object.entries({
+  ja: "円", en: "$", "es-419": "$", "zh-Hans": "元", "zh-Hant": "元", fr: "€", ko: "₩",
+  de: "€", pl: "zł", ru: "₽", "pt-BR": "R$", "es-ES": "€", tr: "₺", it: "€",
+})) {
   assert.equal(getCurrencyUnit(language), unit);
+}
+for (const [tag, language, locale] of [
+  ["de-AT", "de", "de-DE"],
+  ["pl-PL", "pl", "pl-PL"],
+  ["ru-RU", "ru", "ru-RU"],
+  ["pt_BR", "pt-BR", "pt-BR"],
+  ["es-ES", "es-ES", "es-ES"],
+  ["es-MX", "es-419", "es-419"],
+  ["es", "es-419", "es-419"],
+  ["tr-TR", "tr", "tr-TR"],
+  ["it-IT", "it", "it-IT"],
+]) {
+  assert.equal(languageFromLocaleTag(tag), language);
+  assert.equal(resolveIntlLocale(tag), locale);
 }
 assert.equal(getCurrencyUnit("fr-CA"), "€");
 setCurrencyUnit("コイン");

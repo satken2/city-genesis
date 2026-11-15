@@ -14,6 +14,7 @@ import { useCurrencyUnit } from "../../../hooks/useCurrencyUnit";
 import { useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
+import { useMasterData } from "../../../contexts/MasterDataContext";
 import { ResponsiveContainer, Sankey, Tooltip } from "recharts";
 import { resolveIntlLocale } from "../../../utils/locale";
 import { formatCompactAmount, formatExactAmount } from "../../../utils/money";
@@ -44,6 +45,7 @@ type ZoneRow = {
 type TopFirm = {
   agent_id: number;
   name: string;
+  variant?: number;
   variant_name: string;
   zone_name: string;
   value_added: number;
@@ -354,6 +356,7 @@ function MagnitudeBar({ value, max }: { value: number; max: number }) {
 
 function IndustryCard({ b, fmt }: { b: GdpBreakdown; fmt: Formatters }) {
   const { t } = useTranslation();
+  const master = useMasterData();
   const [expanded, setExpanded] = useState<number | null>(null);
   const total = b.gdp - indirectTaxes(b);
   const max = Math.max(0, ...b.industries.map((row) => row.value_added));
@@ -382,7 +385,7 @@ function IndustryCard({ b, fmt }: { b: GdpBreakdown; fmt: Formatters }) {
                   {row.variants.map((v) => (
                     <li key={v.variant} className="gdp-row gdp-row--sub">
                       <span className="gdp-row__name">
-                        {v.name}
+                        {master?.agents[v.variant]?.display_name ?? v.name}
                         <span className="gdp-row__meta">
                           {t("financialPolicy.facilityCount")} {fmt.count(v.agents)}
                           {v.workers > 0 &&
@@ -427,6 +430,7 @@ function ZoneCard({ b, fmt }: { b: GdpBreakdown; fmt: Formatters }) {
 
 function TopFirmsCard({ b, fmt }: { b: GdpBreakdown; fmt: Formatters }) {
   const { t } = useTranslation();
+  const master = useMasterData();
   if (b.top_firms.length === 0) return null;
   const openAgentDetail = (agentId: number) => {
     void invoke("open_registered_window", { windowType: "agent_detail", entityId: String(agentId) });
@@ -453,7 +457,7 @@ function TopFirmsCard({ b, fmt }: { b: GdpBreakdown; fmt: Formatters }) {
                   {firm.name}
                 </button>
               </td>
-              <td>{firm.variant_name}</td>
+              <td>{(firm.variant === undefined ? undefined : master?.agents[firm.variant]?.display_name) ?? firm.variant_name}</td>
               <td>{firm.zone_name || t("financialPolicy.noZone")}</td>
               <td className="gdp-table__num">{fmt.count(firm.workers)}</td>
               <td className="gdp-table__num">{firm.workers > 0 ? fmt.money(firm.value_added / firm.workers) : "-"}</td>

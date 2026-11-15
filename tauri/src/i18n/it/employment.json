@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Abilità richiesta",
+    "wage": "Tasso salariale",
+    "quota": "lavoro richiesto",
+    "totalLabor": "manodopera assunta",
+    "employees": "Elenco dei dipendenti",
+    "hired": "Ingaggiato",
+    "vacant": "Vacante",
+    "noQuota": "Nessun lavoro richiesto",
+    "noEmployees": "Nessun dipendente",
+    "statusTitle": "Stato occupazionale"
+  }
+}

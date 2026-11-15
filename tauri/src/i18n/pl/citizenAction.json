@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "nadać nazwę",
+      "message": "Wpisz nazwę, którą chcesz nadać {{name}}.",
+      "inputLabel": "Nowa nazwa",
+      "confirm": "Obdarzyć"
+    },
+    "reward": {
+      "label": "przyznać nagrodę",
+      "message": "Daj gospodarstwie domowym {{name}} nagrodę z funduszy miejskich. Gotówka miejska: {{available}}",
+      "confirm": "Dać"
+    },
+    "expel": {
+      "label": "Życzę im powodzenia poza miastem",
+      "message": "Wyrzuć {{name}} z miasta?",
+      "confirm": "Usunąć",
+      "results": {
+        "0": "{{name}} spakowane i po cichu opuściły miasto. Nikt ich nie przyszedł, żeby ich odwieść.",
+        "1": "{{name}} przekroczył granice miasta, krzycząc: „Nigdy nie wrócę!”",
+        "2": "{{name}} został uprzejmie eskortowany poza granice miasta. Życzymy im wszystkich sukcesów gdzie indziej."
+      }
+    },
+    "donation": {
+      "label": "Poproś o darowiznę",
+      "message": "Zapytaj gospodarstwo domowe {{name}} o darowiznę na rzecz miasta. Gotówka domowa: {{available}}",
+      "confirm": "Zapytać"
+    },
+    "relocate": {
+      "label": "Zaproponuj nowy dom",
+      "message": "Eksmińcie gospodarstwa domowego {{name}} z obecnego domu? Będą szukać nowego domu w następnej epoce.",
+      "confirm": "Eksmitować",
+      "results": {
+        "0": "Rodzina {{name}} została wyrzucona z domu. Ich meble są ułożone przy drodze.",
+        "1": "Zamki w domu {{name}} zostały zmienione. Rodzina zaczęła szukać nowego miejsca.",
+        "2": "Rodzinie {{name}} zaoferowano nowy dom. Nie mogą wrócić do starego."
+      }
+    }
+  }
+}

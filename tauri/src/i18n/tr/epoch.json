@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "geçerli tarih",
+    "afterDate": "Yürütme Sonrası Tarih",
+    "epochCount": "çağlar",
+    "message": "Bu sıranın işini ve ilerleme zamanını bitirmek mi?",
+    "no": "Hiçbir",
+    "yes": "Evet",
+    "executing": "Simülasyonu çalıştırıyor...",
+    "errorSteamLimit": "Steam doğrulaması doğrulanamadı, bu nedenle daha fazla dönem çalıştırılamaz. (Doğrulama olmadan, {{limit}} nüfusa kadar oynayabilirsiniz.)",
+    "errorAlreadyRunning": "Başka bir çağ zaten çalışıyor. Bitirdikten sonra tekrar deneyin.",
+    "errorFailed": "Epoch çalıştırılamadı: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} çağlar)",
+    "sectionConstruction": "yapım aşamasında",
+    "kindPath": "Yol",
+    "kindBuilding": "Tesis",
+    "kindProject": "Proje",
+    "noItems": "Hiçbiri",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Tamamlandı",
+    "sectionStatistics": "İstatistik",
+    "sectionScore": "Puan",
+    "scoreGain": "kazanç",
+    "scoreLoss": "ceza",
+    "questState": {
+      "completed": "elde edilen",
+      "active": "ilerlemekte olan",
+      "locked": "Kilitli",
+      "failed": "başarısız"
+    },
+    "trendHint": "Son {{count}} çağındaki eğilim: {{trend}}",
+    "trend": {
+      "up": "Yükselen",
+      "flat": "Sabit",
+      "down": "Düşen",
+      "none": "Yetersiz Tarih"
+    },
+    "statPopulation": "Nüfus",
+    "statTourists": "turistler",
+    "statGdp": "GSYİH",
+    "statPrice": "fiyatlar",
+    "statIncome": "Gelir",
+    "statUnemployment": "İşsizlik",
+    "statHealthcare": "sağlık",
+    "statNutrition": "Beslenme",
+    "statLeisure": "Boş",
+    "statFire": "YANGIN",
+    "statTraffic": "trafik kazaları",
+    "statCrime": "Suç",
+    "questCompleted": "Başar!",
+    "questFailed": "Son Tarih Geçti"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Taşıma yollarını haritalama",
+      "prepare": "Bu dönemin hazırlanması",
+      "transit": "Toplu taşımanın düzenlenmesi",
+      "market": "ticari mal",
+      "production": "üretmek ve tüketmek",
+      "commute": "işe ve okula gitmek",
+      "growth": "büyüyen vatandaşlar",
+      "evaluate": "Şehri değerlendirmek",
+      "immigration": "Göçmenleri Karşılamak",
+      "labor": "iş arıyorum",
+      "spawn": "Yeni işletmeler açmak",
+      "relocate": "hanehalkını taşımak",
+      "construction": "binalar inşa etmek",
+      "finance": "Finansmanı Çözmek",
+      "plan": "Gelecek dönem planlamak",
+      "incident": "olaylara yanıt vermek",
+      "finalize": "İstatistikleri Derleme"
+    }
+  }
+}

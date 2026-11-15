@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Aktuelles Datum",
+    "afterDate": "Datum nach der Ausführung",
+    "epochCount": "Epochen",
+    "message": "Beenden Sie die Arbeit dieser Runde und die Vorauszeit?",
+    "no": "Nein",
+    "yes": "Ja",
+    "executing": "Laufsimulation...",
+    "errorSteamLimit": "Die Steam-Überprüfung konnte nicht bestätigt werden, sodass keine Epochen mehr ausgeführt werden können. (Ohne Überprüfung können Sie bis zu einer Population von {{limit}} spielen.)",
+    "errorAlreadyRunning": "Eine andere Epoche läuft bereits. Versuchen Sie es erneut, nachdem es beendet ist.",
+    "errorFailed": "Die Epoche konnte nicht ausgeführt werden: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} Epochen)",
+    "sectionConstruction": "Im Bau",
+    "kindPath": "Straße",
+    "kindBuilding": "Einrichtung",
+    "kindProject": "Projekt",
+    "noItems": "Keiner",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Fertiggestellt",
+    "sectionStatistics": "Statistiken",
+    "sectionScore": "Ergebnis",
+    "scoreGain": "Gewinne",
+    "scoreLoss": "Strafen",
+    "questState": {
+      "completed": "Erreicht haben",
+      "active": "In Bearbeitung",
+      "locked": "Verschlossen",
+      "failed": "Nicht bestanden"
+    },
+    "trendHint": "Trend über die letzten {{count}} Epochen: {{trend}}",
+    "trend": {
+      "up": "Aufstand",
+      "flat": "Stabilisieren",
+      "down": "Rückläufig",
+      "none": "Nicht genug Geschichte"
+    },
+    "statPopulation": "Bevölkerung",
+    "statTourists": "Touristen",
+    "statGdp": "BIP",
+    "statPrice": "Preise",
+    "statIncome": "Einkommen",
+    "statUnemployment": "Die Arbeitslosigkeit",
+    "statHealthcare": "Gesundheitswesen",
+    "statNutrition": "Ernährung",
+    "statLeisure": "Freizeit",
+    "statFire": "Feuer",
+    "statTraffic": "Verkehrsunfälle",
+    "statCrime": "Kriminalität",
+    "questCompleted": "erreicht!",
+    "questFailed": "Frist abgelaufen"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Zuordnung von Transportwegen",
+      "prepare": "Vorbereitung dieses Begriffs",
+      "transit": "Vermittlung öffentlicher Verkehrsmittel",
+      "market": "Handelswaren",
+      "production": "Produzieren und konsumieren",
+      "commute": "zur Arbeit und zur Schule gehen",
+      "growth": "Bürger aufwachsen",
+      "evaluate": "Bewertung der Stadt",
+      "immigration": "Einwanderer begrüßen",
+      "labor": "Auf der Suche nach Jobs",
+      "spawn": "Neue Geschäfte eröffnen",
+      "relocate": "Umzug von Haushalten",
+      "construction": "Gebäude bauen",
+      "finance": "Finanzen beruhigen",
+      "plan": "Planen des nächsten Semesters",
+      "incident": "Reagieren auf Vorfälle",
+      "finalize": "Statistiken zusammenstellen"
+    }
+  }
+}

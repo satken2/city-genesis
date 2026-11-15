@@ -1,8 +1,13 @@
 """全言語の翻訳キーが日本語(原本)と一致しているか検査する。"""
 import json, os, glob, sys
+import re
+from pathlib import Path
 
 I18N = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src", "i18n")
-LANGS = ["ja", "en", "es-419", "zh-Hans", "zh-Hant", "fr", "ko"]
+definition = (Path(I18N).parent / "utils" / "locale.ts").read_text(encoding="utf-8")
+LANGS = re.findall(r'"([^"]+)"', definition.split("export const SUPPORTED_LANGUAGES = [", 1)[1].split("] as const", 1)[0])
+PLURAL_SUFFIXES = {"pl": ("few", "many"), "ru": ("few", "many")}
+PLURAL_KEYS = ("publicServiceTrend.months", "publicServiceTrend.years")
 
 
 def leaves(d, prefix, out):
@@ -32,8 +37,9 @@ print("ja: %d keys / %d files" % (len(base), len(base_files)))
 ok = True
 for lang in LANGS[1:]:
     cur, files = load(lang)
-    missing = sorted(set(base) - set(cur))
-    extra = sorted(set(cur) - set(base))
+    extra_plurals = {f"{key}_{suffix}" for key in PLURAL_KEYS for suffix in PLURAL_SUFFIXES.get(lang, ())}
+    missing = sorted((set(base) | extra_plurals) - set(cur))
+    extra = sorted(set(cur) - set(base) - extra_plurals)
     missing_files = sorted(set(base_files) - set(files))
     extra_files = sorted(set(files) - set(base_files))
     status = "OK" if not (missing or extra or missing_files or extra_files) else "NG"
@@ -50,16 +56,16 @@ for lang in LANGS[1:]:
         print("    EXTRA KEY:", k)
 
 # 補間プレースホルダの整合（{{name}} の集合が原本と一致するか）
-import re
-
 PH = re.compile(r"\{\{\s*([A-Za-z0-9_]+)")
 for lang in LANGS[1:]:
     cur, _ = load(lang)
-    for k, v in base.items():
-        if k not in cur:
+    for k, value in cur.items():
+        source_key = k if k in base else k.rsplit("_", 1)[0]
+        if source_key not in base:
             continue
+        v = base[source_key]
         want = set(PH.findall(v)) if isinstance(v, str) else set()
-        got = set(PH.findall(cur[k])) if isinstance(cur[k], str) else set()
+        got = set(PH.findall(value)) if isinstance(value, str) else set()
         if want != got:
             ok = False
             print("    PLACEHOLDER MISMATCH [%s] %s: ja=%s %s=%s" % (lang, k, sorted(want), lang, sorted(got)))

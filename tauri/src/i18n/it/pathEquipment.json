@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Attrezzature stradali",
+    "streetlight_type": "lampioni",
+    "fence_type": "Recinzioni",
+    "street_tree_type": "Alberi di strada",
+    "utility_mode": "Cablaggio di utilità",
+    "none": "Nessuna",
+    "standard": "Standard",
+    "overhead": "Alto",
+    "underground": "Sotterraneo",
+    "apply": "Applicare",
+    "bench_type": "Panchine",
+    "bin_type": "bidoni",
+    "planter_type": "fioriere",
+    "advert_type": "Pubblicità"
+  }
+}

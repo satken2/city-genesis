@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} лет",
+    "male": "Мужчина",
+    "female": "Самка",
+    "single": "Одинокий",
+    "married": "Состоите в браке",
+    "household": "Домохозяйство",
+    "employer": "Работодатель",
+    "unemployed": "Безработные",
+    "school": "Школа",
+    "notEnrolled": "Не зарегистрирован",
+    "major": "Основной",
+    "higherEducation": "Высшее образование",
+    "graduated": "Завершено",
+    "notGraduated": "не завершено",
+    "skills": "Навыки и умения",
+    "criminality": "Склонность к преступности",
+    "commuteTime": "Время в пути",
+    "automobile": "Машина",
+    "automobileOwned": "В собственности",
+    "automobileNone": "Никто",
+    "householdStatus": "Статус домашнего хозяйства"
+  },
+  "household": {
+    "title": "Домохозяйство",
+    "familyType": "Тип семьи",
+    "familySingle": "Одинокий",
+    "familyCouple": "Пара",
+    "familyFamily": "Семья",
+    "familySenior": "Старший",
+    "hasAutomobile": "Имеет автомобиль",
+    "noAutomobile": "нет автомобиля",
+    "discretionaryIncome": "Чистый доход",
+    "livingStandard": "Уровень жизни",
+    "livingStandardLevel": {
+      "0": "Нуждающиеся",
+      "1": "Бедные",
+      "2": "Средний класс",
+      "3": "Богатый"
+    },
+    "satisNutrition": "Питание",
+    "satisHealthcare": "здравоохранение",
+    "satisLeisure": "Досуг",
+    "satisTourism": "Туризм",
+    "tourist": "Туристы",
+    "partySize": "Размер вечеринки",
+    "members": "Члены"
+  },
+  "education": {
+    "people": "люди"
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "diagnosis": {
+    "refresh": "Re-diagnosticar",
+    "note": "Rastreia as causas do problema com base no resultado da última simulação. Após a correção, execute a próxima época para atualizar.",
+    "noProblem": {
+      "title": "Nenhum problema encontrado",
+      "description": "Não há nada a relatar para este agente agora."
+    },
+    "target": {
+      "agent": "Instalação #{{id}}",
+      "path": "caminho #{{id}}",
+      "node": "Junção #{{id}}",
+      "nodeAt": "ponto ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": {
+        "title": "Agente não encontrado",
+        "description": ""
+      },
+      "cycle": {
+        "title": "causa circular",
+        "description": "Esta facilidade já está sendo diagnosticada mais adiante (dependência mútua)."
+      },
+      "depth_limit": {
+        "title": "parou de cavar mais fundo",
+        "description": "A cadeia de causas é muito longa. Diagnosticar a instalação diretamente."
+      },
+      "no_alert": {
+        "title": "Esta instalação em si não relata nenhum problema",
+        "description": "Sua saída pode simplesmente ser limitada pelo seu tamanho ou meta de utilização."
+      },
+      "facility_inactive": {
+        "title": "A instalação não está operando",
+        "description": "Não está produzindo porque está em construção, pausado, colapso ou em um estado semelhante. Verifique os detalhes da instalação."
+      },
+      "producer_ref": {
+        "title": "Instalação de fornecedores",
+        "description": ""
+      },
+      "material_shortage": {
+        "title": "Não é possível obter matérias-primas",
+        "description": "Alguns materiais necessários não chegaram, então a produção ficou aquém do plano."
+      },
+      "material_unmet": {
+        "title": "Escassez de {{product_name}}",
+        "description": "Recebido {{received}} do {{demand}} necessário ({{ratio}}%)."
+      },
+      "material_unmet_unknown": {
+        "title": "Não foi possível identificar o material que faltava",
+        "description": "Isso pode acontecer logo após a demanda encolher. Verifique o resultado da próxima época."
+      },
+      "infra_disconnected": {
+        "title": "Não conectado à rede {{product_name}}",
+        "description": ""
+      },
+      "infra_no_terminal": {
+        "title": "Nenhum terminal de conexão",
+        "description": "Este recurso não possui um nó terminal para {{product_name}}."
+      },
+      "infra_terminal_unconnected": {
+        "title": "Nenhum caminho atinge o terminal de conexão",
+        "description": ""
+      },
+      "infra_link_not_active": {
+        "title": "O caminho do alimentador ainda não está ativo",
+        "description": "{{count}} Caminhos que atingem o terminal estão em construção ou não foram iniciados."
+      },
+      "infra_link_incompatible": {
+        "title": "O caminho do alimentador não pode transportar {{product_name}}",
+        "description": "O caminho que atinge o terminal é de um tipo que não pode transportar este bem (por exemplo, trilha não eletrificada)."
+      },
+      "infra_no_producer": {
+        "title": "Nenhum produtor {{product_name}} na cidade",
+        "description": ""
+      },
+      "infra_producers_inactive": {
+        "title": "{{product_name}} Os produtores não estão operando",
+        "description": "Nenhum dos produtores {{count}} da cidade está ativo."
+      },
+      "infra_producers_unconnected": {
+        "title": "Os produtores não estão conectados à rede",
+        "description": "{{count}} Produtores estão ativos, mas nenhum está conectado à rede {{product_name}}."
+      },
+      "infra_network_split": {
+        "title": "esta rede não tem produtor",
+        "description": "Os produtores {{product_name}} ({{producers}}) estão em uma rede diferente. As duas redes estão separadas ou nunca foram unidas."
+      },
+      "infra_link_under_construction": {
+        "title": "Um caminho de conexão está em construção",
+        "description": "{{count}} Caminhos que ingressarão nessa rede estão pendentes."
+      },
+      "infra_gap_detected": {
+        "title": "a rede está quebrada aqui",
+        "description": "Os terminais das duas redes estão separados apenas {{distance}} m."
+      },
+      "infra_tap_missing": {
+        "title": "Não explorado na rede de produtores",
+        "description": ""
+      },
+      "infra_generation_shortage": {
+        "title": "Não foi produzido o suficiente {{product_name}}",
+        "description": "Esta rede produz {{supply}} contra uma demanda de {{demand}} ({{producers}} produtores)."
+      },
+      "infra_transmission_bottleneck": {
+        "title": "A capacidade da rede está saturada",
+        "description": "Os caminhos {{count}} estão sendo executados em plena capacidade."
+      },
+      "infra_unexplained": {
+        "title": "A rede parece saudável",
+        "description": "A produção e a conectividade são suficientes, portanto, a escassez pode ter sido transitória. Verifique o resultado da próxima época."
+      },
+      "market_no_supplier": {
+        "title": "Nenhum fornecedor de {{product_name}} na cidade",
+        "description": "Não há produtor nacional ativo e nenhuma importação."
+      },
+      "market_supply_insufficient": {
+        "title": "A oferta de {{product_name}} fica aquém da demanda",
+        "description": "Forneça {{supply}} contra pedidos de toda a cidade de {{demand}} ({{producers}} produtores, {{hubs}} importação hub(s))."
+      },
+      "market_unmatched": {
+        "title": "Não foi possível adquirir {{product_name}} no mercado",
+        "description": "O suprimento de toda a cidade {{supply}} cobre pedidos de {{demand}}, mas não chegou a esse recurso. A distância ou o preço podem ser a causa."
+      },
+      "service_out_of_range": {
+        "title": "Fora do intervalo de serviços de {{product_name}}",
+        "description": "O site desta instalação não está dentro do alcance de qualquer instalação que forneça {{product_name}} ({{producers}} na cidade)."
+      },
+      "high_skill_shortage": {
+        "title": "Não é possível proteger funcionários qualificados",
+        "description": "Não há trabalhadores de alta qualificação suficientes; portanto, o plano de produção é reduzido ao que a equipe disponível pode lidar. Trabalhadores de alta qualificação são treinados em universidades: construa um e aloque suas cotas de admissão para a habilidade exigida."
+      },
+      "labor_shortage": {
+        "title": "Não há funcionários suficientes",
+        "description": "Protegido {{total_labor}} do trabalho necessário {{quota}}."
+      },
+      "labor_market_tight": {
+        "title": "Nenhum trabalhador saiu na cidade",
+        "description": "O desemprego é apenas {{unemployment_rate}}%, portanto, ninguém está disponível para contratar. Adicione moradia para atrair moradores."
+      },
+      "labor_unfilled": {
+        "title": "Os candidatos a emprego existem, mas não vêm",
+        "description": "O desemprego é {{unemployment_rate}}%. São prováveis deslocamentos longos, baixos salários ou uma incompatibilidade de habilidades."
+      },
+      "budget_capped": {
+        "title": "O orçamento é insuficiente",
+        "description": "O orçamento alocado está muito abaixo do necessário. Revise a alocação do orçamento."
+      },
+      "construction_shortage": {
+        "title": "Não é possível obter {{product_name}}",
+        "description": ""
+      },
+      "line_paused_route_disconnected": {
+        "title": "A rota entre as paradas está quebrada",
+        "description": "Paradas consecutivas no loop não são conectadas por pista ou rua que podem ser percorridas na direção necessária. Reconstrua a seção quebrada ou revise a rota. Para voltar para os trilhos unidirecionais, volte para uma estação na pista que corre em ambos os sentidos (como uma pista dupla colocada como um único caminho), ou deixe os trens se moverem para o trilho oposto, unindo os trilhos em um único nó ou colocando um crossover e coloque as paradas de retorno nas plataformas para na direção oposta."
+      },
+      "line_paused_no_underlay": {
+        "title": "Stop não tem um caminho subjacente",
+        "description": "A pista ou rua em que estava parada não existe mais."
+      },
+      "line_paused_train_too_long": {
+        "title": "O trem é mais longo que a seção de parada",
+        "description": "Reduza os vagões por trem ou estenda a seção em que a parada está (uma plataforma da estação, ou uma seção de rua ou trilha)."
+      },
+      "line_no_vehicle_product": {
+        "title": "Este tipo de linha não possui um veículo definido",
+        "description": ""
+      },
+      "line_vehicle_shortage": {
+        "title": "Não é possível adquirir veículos",
+        "description": "adquirido {{received}} dos carros obrigatórios {{required}}."
+      },
+      "line_off_network": {
+        "title": "A linha não está em uma rede em execução",
+        "description": "A rota subjacente da linha não está vinculada a nenhuma pista ou rua."
+      },
+      "transit_no_depot": {
+        "title": "Não {{product_name}} Depósito na cidade",
+        "description": "Construa um depósito e conecte-o à rede em execução."
+      },
+      "transit_depots_inactive": {
+        "title": "Os depósitos não estão operando",
+        "description": "Nenhum dos depósitos {{count}} da cidade está ativo."
+      },
+      "transit_depots_unconnected": {
+        "title": "Os depósitos não estão conectados à rede em execução",
+        "description": "Nenhum dos depósitos {{count}} está vinculado à trilha ou à rua. Para o trilho, coloque um tapume da linha principal até o terminal do depósito."
+      },
+      "transit_depot_other_network": {
+        "title": "Os depósitos estão em uma rede diferente",
+        "description": "{{count}} Depósito(s) estão conectados a uma rede de trilhas que não atinge essa linha. Vincule as redes ou construa um depósito neste."
+      },
+      "transit_vehicle_insufficient": {
+        "title": "Não são produzidos veículos suficientes",
+        "description": "Os depósitos nesta rede ({{depots}}) fornecem {{supply}} carros contra {{demand}} exigidos pelas linhas."
+      },
+      "transit_unexplained": {
+        "title": "Os depósitos parecem saudáveis",
+        "description": "O fornecimento e a conectividade são suficientes, portanto, a escassez pode ter sido transitória. Verifique o resultado da próxima época."
+      }
+    }
+  }
+}
