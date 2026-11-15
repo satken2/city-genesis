@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Mengetik",
+    "kind": {
+      "land": "Perataan lahan",
+      "shore": "Reklamasi lahan"
+    },
+    "baseHeight": "tinggi dasar",
+    "targetHeight": "tinggi target",
+    "cutVolume": "Potong volume",
+    "fillVolume": "mengisi volume",
+    "quayLength": "Panjang dermaga",
+    "quayArea": "Area Wajah Quay",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Tinggi (diimbangi dari dasar)",
+    "seaLevelHeight": "Tinggi (di atas permukaan laut)",
+    "baseNote": {
+      "frontage": "0 adalah permukaan jalan yang dihadapinya ({{value}} m)",
+      "terrain_mean": "0 adalah tinggi rata-rata saat ini dari area ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "Bentuk area tidak valid. Gambarlah tanpa menyilangkan tepi.",
+      "outside_city": "Daerah itu meluas di luar kota.",
+      "too_large": "Luasnya terlalu besar (batas: {{limit}} km²).",
+      "on_water": "Area yang sepenuhnya di atas laut tidak dapat dikembangkan. Gambarlah sehingga mencapai daratan.",
+      "no_land_overlap": "Gambarlah area tersebut sehingga tumpang tindih dengan daratan (jika tidak, sebidang laut tertinggal di antara pantai dan area tersebut).",
+      "overlaps_parcel": "Area tersebut tumpang tindih dengan bidang tanah yang ada.",
+      "overlaps_path": "Area tumpang tindih jalan, jalur, atau jalur lainnya.",
+      "overlaps_water": "Area tersebut menyentuh sungai atau danau.",
+      "overlaps_quay_band": "Area tersebut tumpang tindih dengan dermaga tanah reklamasi.",
+      "invalid_height_offset": "Tingginya di luar jangkauan (hingga ±{{offsetLimit}} m dari ketinggian dasar).",
+      "below_sea_level": "Ketinggian tidak dapat diatur di bawah permukaan laut.",
+      "too_narrow": "Areanya terlalu sempit; Tidak ada yang tersisa untuk diisi di dalam dermaga.",
+      "no_work": "Tanah sudah berada di ketinggian target, jadi tidak ada pekerjaan yang diperlukan.",
+      "insufficient_funds": "dana tidak mencukupi untuk melakukan pemesanan ini."
+    },
+    "confirm": "Konfirmasi",
+    "confirming": "Konfirmasi...",
+    "cancel": "Batal",
+    "confirmFailed": "Gagal memesan pekerjaan tanah."
+  }
+}

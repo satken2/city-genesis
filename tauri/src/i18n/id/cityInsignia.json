@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Lambang",
+    "flag": "Bendera kota",
+    "motif": "Motif",
+    "fieldColor": "Warna bidang",
+    "motifColor": "Warna motif",
+    "pattern": "Pola",
+    "accentColor": "Warna aksen",
+    "placement": "Posisi lambang",
+    "loadImage": "memuat gambar",
+    "randomize": "mengacak",
+    "apply": "Terapkan",
+    "imageLoadFailed": "Tidak dapat memuat gambar.",
+    "placements": {
+      "center": "Pusat",
+      "canton": "kiri atas",
+      "none": "Tidak ada"
+    },
+    "motifs": {
+      "wave": "Gelombang",
+      "mountain": "Gunung",
+      "star": "Bintang",
+      "tree": "Pohon",
+      "sun": "Matahari",
+      "moon": "Bulan",
+      "flower": "Bunga",
+      "leaf": "Daun",
+      "bird": "Burung",
+      "fish": "Ikan",
+      "anchor": "Jangkar",
+      "gear": "Gigi",
+      "tower": "Kastil",
+      "bridge": "Jembatan",
+      "key": "Kunci",
+      "crown": "Mahkota",
+      "snowflake": "Kepingan salju",
+      "flame": "Api",
+      "diamond": "Berlian",
+      "cross": "Menyeberang"
+    },
+    "patterns": {
+      "plain": "Polos",
+      "bicolor": "dua warna",
+      "triband": "Triband",
+      "diagonal": "Diagonal",
+      "border": "Berbatasan",
+      "bands": "band"
+    }
+  }
+}

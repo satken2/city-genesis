@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "menyarankan rute",
+    "mode": "modus tinggi",
+    "fixed": "Pertahankan ketinggian titik jalan",
+    "adjust": "Sesuaikan ketinggian titik jalan menengah",
+    "help": "Tersedia setelah selesai bentuknya. Titik akhir dan posisi waypoint XZ tetap tetap.",
+    "searching": "Mencari…",
+    "cancel": "Batal",
+    "undo": "membatalkan saran",
+    "notFound": "Tidak ada rute yang ditemukan.",
+    "failed": "Saran rute gagal."
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Rantai pasokan",
+    "selected": "Terpilih",
+    "providers": "{{product}} Pemasok",
+    "executing": "Informasi pasokan tidak tersedia saat simulasi sedang berjalan.",
+    "fetchError": "Tidak dapat memuat informasi pasokan.",
+    "activeCount": "{{active}} / {{count}} aktif",
+    "production": "Produksi terakhir: {{amount}} {{unit}}",
+    "resourceRemaining": "Cadangan yang dapat diakses: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Tersedia",
+      "unknown": "Yg tak dpt ditentukan",
+      "missing": "Tidak hadir",
+      "inactive": "Non-aktif",
+      "partial": "sebagian terpengaruh",
+      "limited": "Terbatas/berhenti",
+      "disconnected": "Yg dicopot",
+      "supply_shortage": "Kemungkinan kekurangan pasokan",
+      "capacity_limited": "Batas kapasitas yang mungkin"
+    },
+    "facilities": {
+      "401": "Pembangkit listrik",
+      "402": "Fasilitas air minum",
+      "403": "Pemasok minyak",
+      "404": "stasiun pengangkutan",
+      "405": "pemasok bijih",
+      "406": "Jalur pelayaran laut (laut terbuka)",
+      "501": "Depot rel",
+      "502": "Depot Bis",
+      "503": "Depot LRT",
+      "504": "Depot Monorel",
+      "505": "Dermaga Pemeliharaan"
+    },
+    "consumers": {
+      "401": "Konsumen kekuasaan",
+      "402": "pompa air",
+      "403": "Konsumen minyak",
+      "404": "konsumen barang",
+      "405": "konsumen bijih",
+      "406": "Pelabuhan",
+      "501": "rute kereta api",
+      "502": "rute bus",
+      "503": "Rute LRT",
+      "504": "Rute Monorel",
+      "505": "jalur feri"
+    }
+  }
+}

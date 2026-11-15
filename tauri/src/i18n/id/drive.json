@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Mendorong",
+    "car": "Mobil",
+    "rail": "rute kereta api",
+    "running": "Kendaraan Berjalan",
+    "standard": "Mobil penumpang",
+    "commercial": "kendaraan komersial",
+    "truck": "Truk",
+    "finishEditing": "Selesaikan pengeditan sebelum memulai drive.",
+    "noLines": "Tidak ada rute kereta api yang tersedia untuk dikendarai.",
+    "pickRail": "Klik trek pada rute yang dipilih.",
+    "pickRoad": "Klik jalan aktif.",
+    "pickVehicle": "Klik mobil, bus, atau kereta yang bergerak (seret ke panci).",
+    "clickStart": "Pilih posisi awal (seret ke panci).",
+    "startSelected": "mulai dipilih. berangkat ke arah panah.",
+    "reverse": "arah terbalik",
+    "start": "Berangkat",
+    "back": "Kembali",
+    "close": "Keluar (ESC)",
+    "invalidStart": "tidak bisa mulai dari sini. Pilih jalan yang dapat dikendarai atau trek di rute Anda.",
+    "invalidVehicle": "Tidak ada kendaraan yang dipilih. Klik mobil, bus, atau kereta yang bergerak.",
+    "notReady": "Arah ini tidak tersedia atau sekitarnya sedang dimuat. mengubah arah atau posisi, atau menunggu dan mencoba lagi."
+  }
+}

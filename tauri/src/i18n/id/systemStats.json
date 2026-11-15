@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "beban simulasi",
+      "heading": "Waktu komputasi Siklus terakhir ({{days}} hari)",
+      "noData": "Tidak ada data pengukuran",
+      "note": "Ketika beberapa Siklus berjalan berturut-turut, ini menunjukkan yang terakhir. Hitungan operasi adalah perkiraan kasar jumlah kombinasi dalam perbandingan utama, berdasarkan ukuran kota.",
+      "colGroup": "Proses",
+      "colTime": "Waktu",
+      "colWorkload": "Hitungan Operasi",
+      "workloadHint": "Jumlah kasar perbandingan utama (elemen array). Arahkan kursor ke nilai untuk melihat kerusakan.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "pasar barang",
+      "realestate": "Pasar Real Estat",
+      "labor": "pasar tenaga kerja",
+      "building_spawn": "bibit bangunan",
+      "agent_spawn": "bibit agen",
+      "routing": "Pencarian Jalan Warga",
+      "transit": "Pencarian Jalan Transit",
+      "environment": "Lingkungan tempat tinggal",
+      "other": "Lainnya"
+    },
+    "workload": {
+      "market": "Pembeli {{demanders}} × Penjual {{suppliers}} (dikalikan per produk dan dijumlahkan)",
+      "realestate": "Rumah Tangga Mempertimbangkan Pindah {{movers}} × Bangunan Tempat Tinggal {{housing}}",
+      "labor": "Pencari Kerja {{seekers}} × Majikan {{employers}}",
+      "building_spawn": "Paket Kandidat {{parcels}} × Jenis Bangunan × Jumlah Lantai × Penggunaan Lantai",
+      "agent_spawn": "Produk × Zona {{zones}} × Zona {{zones}}",
+      "routing": "2 mode perjalanan × zona {{zones}} × zona {{zones}} × 3 kandidat rute × jalur {{paths}}",
+      "transit": "Berhenti {{stops}} × node {{nodes}}",
+      "environment": "Grid {{width}} × {{height}} × posisi matahari"
+    },
+    "entities": {
+      "colMetric": "Metrik",
+      "colCount": "Menghitung",
+      "title": "Hitungan entitas",
+      "agents": "Agen",
+      "households": "Tepung kasar",
+      "businesses": "bisnis",
+      "publicFacilities": "fasilitas umum",
+      "buildings": "bangunan",
+      "citizens": "Warga",
+      "population": "Jumlah penduduk",
+      "zones": "zona",
+      "parcels": "paket",
+      "paths": "jalan",
+      "roads": "jalan",
+      "tracks": "Trek",
+      "infra": "Jaringan Utilitas",
+      "nodes": "Node"
+    },
+    "approximation": {
+      "title": "Perkiraan simulasi",
+      "intro": "Pilihan untuk menyederhanakan perhitungan untuk kota-kota besar direncanakan. Pengaturan ini belum dapat diubah.",
+      "warning": "Perubahan ini dapat mempengaruhi keseimbangan permainan. Mereka tidak dapat diurungkan.",
+      "irreversible": "Perubahan yang disebabkan oleh pendekatan bertahan di Siklus selanjutnya. Setelah diaktifkan, perkiraan tidak dapat dinonaktifkan atau dikurangi.",
+      "undecided": "TBD",
+      "candidates": "Kandidat Max.",
+      "epochs": "Siklus di antara ulasan",
+      "off": "Lepas",
+      "on": "Pada",
+      "goods": {
+        "label": "membeli kandidat",
+        "description": "Batasi pemasok dibandingkan dengan harga dan jarak."
+      },
+      "jobs": {
+        "label": "Kandidat pekerjaan",
+        "description": "membatasi majikan dibandingkan dengan upah dan kondisi perjalanan."
+      },
+      "housing": {
+        "label": "Kandidat Perumahan",
+        "description": "Batasi rumah dibandingkan dengan sewa dan lokasi."
+      },
+      "interval": {
+        "label": "Interval keputusan rutin",
+        "description": "Tinjau pilihan belanja, pekerjaan, dan perumahan lebih jarang."
+      },
+      "aggregation": {
+        "label": "kelompok warga dan rumah tangga yang sama",
+        "description": "membuat beberapa keputusan secara kolektif untuk warga negara atau rumah tangga dengan keadaan serupa."
+      }
+    },
+    "status": {
+      "title": "Status sistem",
+      "gpuDisabled": "Akselerasi GPU: Dinonaktifkan",
+      "coreSimulator": "Mesin simulasi",
+      "currentMemory": "Penggunaan memori saat ini: {{value}}",
+      "peakMemory": "Penggunaan memori puncak sejak startup: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Penggunaan VRAM saat ini: {{value}}",
+      "usageTooltip": "seluruh pc {{pc}} / game ini {{game}} / diinstal {{total}}",
+      "legendPc": "seluruh PC",
+      "legendGame": "Permainan ini"
+    }
+  }
+}

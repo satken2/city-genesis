@@ -1,0 +1,22 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Menunggu data dari editor medan…"
+  },
+  "groundCover": {
+    "label": "Penutup lantai",
+    "hint": "Mengubah warna dan tekstur tanah dalam permainan dan warna peta 2D. itu tidak mempengaruhi simulasi.",
+    "1": "Padang rumput",
+    "2": "Gurun",
+    "3": "padang rumput yang rimbun",
+    "4": "Ladang Salju",
+    "5": "setengah kering"
+  },
+  "climate": {
+    "label": "Iklim",
+    "hint": "Menyalin suhu bulanan, curah hujan, sinar matahari dan probabilitas cuaca dari preset. Edit detail dalam pengaturan iklim dalam mode pembuatan skenario."
+  },
+  "assetPack": {
+    "label": "Paket Aset",
+    "standard": "Standar"
+  }
+}

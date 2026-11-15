@@ -1,0 +1,61 @@
+{
+  "mapNavigation": {
+    "title": "Jelajahi kota",
+    "back": "Kembali",
+    "search": "mencari tempat",
+    "origin": "mencari titik awal",
+    "destination": "Cari Tujuan",
+    "clear": "Bersih",
+    "searching": "Mencari…",
+    "error": "Tidak dapat terhubung. Muat ulang dan coba lagi.",
+    "noResults": "Tidak ada tempat yang ditemukan",
+    "mode": "Mode perjalanan",
+    "pedestrian": "Berjalan & transit",
+    "automobile": "Mendorong",
+    "pickOrigin": "Pilih Mulai di Peta",
+    "pickDestination": "Pilih tujuan di peta",
+    "swap": "Menukar",
+    "cancel": "Batal",
+    "directions": "Aturan",
+    "intro": "Cari fasilitas, stasiun, distrik atau jalan, atau pilih tempat di peta.",
+    "chooseOrigin": "Cari titik awal atau pilih satu di peta.",
+    "routing": "Mencari rute…",
+    "showRoute": "Tampilkan rute lengkap",
+    "mapPoint": "titik di peta",
+    "minutes": "Tentang {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Perkiraan berdasarkan jaringan jalan dari perhitungan rute #{{epoch}}. Garis putus-putus menunjukkan jalan kaki dan koneksi ke jalan.",
+    "busy": "simulasi berjalan. Hasil akan refresh setelah selesai.",
+    "not_ready": "Belum ada data rute. Jalankan simulasi di kota ini untuk melihat rute.",
+    "unreachable": "Tidak ada rute yang menghubungkan kedua tempat ini.",
+    "no_access": "Tidak ada jalan yang dapat diakses di dekat tempat yang dipilih.",
+    "geometry_unavailable": "Geometri transit untuk rute ini tidak tersedia.",
+    "place_missing": "Tempat yang dipilih telah dihapus. Silakan pilih lagi.",
+    "kind": {
+      "agent": "Fasilitas",
+      "zone": "Distrik",
+      "stop": "Halte",
+      "station": "Stasiun",
+      "point": "Titik",
+      "road": "Jalan"
+    },
+    "leg": {
+      "walk": "Berjalan",
+      "drive": "Mendorong",
+      "transit": "Transit",
+      "conveyor": "Konveyor penumpang",
+      "access": "koneksi ke jalan",
+      "turn": "giliran persimpangan"
+    },
+    "picking": {
+      "origin": "Klik titik awal Anda di peta.",
+      "destination": "Klik tujuan Anda di peta."
+    },
+    "pins": {
+      "tab": "pin",
+      "hint": "Klik peta untuk menempatkan pin pada warna yang dipilih. Klik kanan pin untuk menghapusnya.",
+      "list": "Daftar PIN",
+      "remove": "Hapus PIN"
+    }
+  }
+}

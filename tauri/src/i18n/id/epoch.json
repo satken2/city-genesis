@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Tanggal saat ini",
+    "afterDate": "Tanggal setelah simulasi",
+    "epochCount": "Siklus",
+    "message": "Selesaikan perencanaan siklus ini dan majukan waktu?",
+    "no": "Tidak",
+    "yes": "Ya",
+    "executing": "Simulasi sedang berjalan…",
+    "errorSteamLimit": "Verifikasi Steam tidak dapat dikonfirmasi, sehingga tidak ada lagi Siklus yang dapat dijalankan. (Tanpa verifikasi, Anda dapat memutar hingga populasi {{limit}}.)",
+    "errorAlreadyRunning": "Siklus lain sudah berjalan. Coba lagi setelah selesai.",
+    "errorFailed": "Gagal menjalankan siklus: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} Siklus)",
+    "sectionConstruction": "Sedang dibangun",
+    "kindPath": "Jalan",
+    "kindBuilding": "Fasilitas",
+    "kindProject": "Proyek",
+    "noItems": "Tidak ada",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Selesai",
+    "sectionStatistics": "Statistik",
+    "sectionScore": "Skor",
+    "scoreGain": "Kemajuan",
+    "scoreLoss": "Hukuman",
+    "questState": {
+      "completed": "Kesampaian",
+      "active": "Sedang berlangsung",
+      "locked": "Terkunci",
+      "failed": "Gagal"
+    },
+    "trendHint": "Tren selama {{count}} Siklus terakhir: {{trend}}",
+    "trend": {
+      "up": "Kenaikan",
+      "flat": "Menenangkan",
+      "down": "Kejatuhan",
+      "none": "Tidak cukup sejarah"
+    },
+    "statPopulation": "Jumlah penduduk",
+    "statTourists": "wisatawan",
+    "statGdp": "PDB",
+    "statPrice": "Harga",
+    "statIncome": "Pendapatan",
+    "statUnemployment": "Pengangguran",
+    "statHealthcare": "Kesehatan",
+    "statNutrition": "Makanan",
+    "statLeisure": "Waktu luang",
+    "statFire": "kebakaran",
+    "statTraffic": "kecelakaan lalu lintas",
+    "statCrime": "Kejahatan",
+    "questCompleted": "tercapai!",
+    "questFailed": "Batas waktu berlalu"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Pemetaan rute transportasi",
+      "prepare": "Mempersiapkan istilah ini",
+      "transit": "Mengatur angkutan umum",
+      "market": "Barang dagangan",
+      "production": "memproduksi dan mengkonsumsi",
+      "commute": "pergi bekerja dan sekolah",
+      "growth": "Warga negara yang sedang tumbuh",
+      "evaluate": "Mengevaluasi kota",
+      "immigration": "Penyambut imigran",
+      "labor": "Mencari pekerjaan",
+      "spawn": "Membuka bisnis baru",
+      "relocate": "Pindah rumah tangga",
+      "construction": "Membangun bangunan",
+      "finance": "Menyelesaikan keuangan",
+      "plan": "Merencanakan istilah berikutnya",
+      "incident": "Menanggapi insiden",
+      "finalize": "Mengkompilasi Statistik"
+    }
+  }
+}

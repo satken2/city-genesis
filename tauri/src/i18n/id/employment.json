@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Keterampilan yang dibutuhkan",
+    "wage": "Upah rata-rata",
+    "quota": "tenaga kerja yang dibutuhkan",
+    "totalLabor": "tenaga kerja sewaan",
+    "employees": "Daftar Karyawan",
+    "hired": "Yg diupahi",
+    "vacant": "Kosong",
+    "noQuota": "Tidak diperlukan tenaga kerja",
+    "noEmployees": "Tidak ada karyawan",
+    "statusTitle": "Status Pekerjaan"
+  }
+}

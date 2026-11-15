@@ -1,0 +1,148 @@
+{
+  "settings": {
+    "title": "Pengaturan",
+    "groups": {
+      "general": "Umum",
+      "display": "Tampilan",
+      "sound": "Suara",
+      "system": "Sistem",
+      "about": "Tentang",
+      "developer": "Pengaturan Pengembang"
+    },
+    "swagger": {
+      "label": "Swagger (dokumentasi API)",
+      "description": "Lihat API backend yang terhubung di browser default Anda",
+      "action": "Buka di peramban"
+    },
+    "currencyUnit": {
+      "label": "satuan mata uang",
+      "description": "unit yang ditunjukkan dengan jumlah moneter. Biarkan kosong untuk mengikuti bahasa tampilan."
+    },
+    "fontSize": {
+      "label": "Ukuran huruf",
+      "large": "Besar",
+      "medium": "Sedang",
+      "small": "Kecil",
+      "custom": "Atur sendiri",
+      "preview": "Ukuran saat ini"
+    },
+    "monitor": {
+      "label": "Tampilan",
+      "prev": "Tampilan sebelumnya",
+      "next": "Tampilan berikutnya"
+    },
+    "graphicMonitor": {
+      "label": "Tampilan tampilan 3D"
+    },
+    "multiDisplay": {
+      "label": "Mode multi-tampilan",
+      "description": "Menampilkan jendela pada tampilan yang berbeda dari layar game",
+      "on": "Pada",
+      "off": "Lepas"
+    },
+    "popupMonitor": {
+      "label": "Tampilan jendela"
+    },
+    "hintbar": {
+      "label": "bilah petunjuk",
+      "show": "Menunjukkan",
+      "hide": "Menyembunyikan",
+      "description": "Bar di bagian atas layar yang menampilkan petunjuk operasi"
+    },
+    "citizenVoice": {
+      "label": "Suara warga",
+      "show": "Menunjukkan",
+      "hide": "Menyembunyikan",
+      "description": "kartu di kanan atas layar yang menunjukkan komentar warga secara bergantian"
+    },
+    "language": {
+      "label": "Bahasa",
+      "description": "Bahasa antarmuka. Bahasa nama di kota ditentukan saat permainan dimulai.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia"
+    },
+    "volume": {
+      "label": "Volume",
+      "master": "volume master",
+      "bgm": "BGM",
+      "sfx": "Efek suara"
+    },
+    "compute": {
+      "label": "Akselerasi GPU",
+      "comingSoon": "Segera hadir",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU aktif",
+      "statusInactive": "CPU aktif",
+      "restartRequired": "Program utama akan restart setelah mengubah pengaturan ini",
+      "restarting": "Memulai ulang...",
+      "restartFailed": "restart gagal",
+      "restartUnavailable": "Pengaturan disimpan. Perubahan akan berlaku saat permainan dimulai",
+      "confirmRestart": "Ganti mode komputasi ke {{mode}}? Program utama akan dimulai ulang.",
+      "restartAction": "Mengulang kembali"
+    },
+    "windowReset": {
+      "label": "Posisi & Ukuran Jendela",
+      "action": "Memasang kembali"
+    },
+    "credits": {
+      "label": "Kredit",
+      "description": "Atribusi untuk aset dan perangkat lunak yang digunakan dalam game ini",
+      "action": "Melihat"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Permainan baru",
+    "overwriteSave": "Timpa data simpanan",
+    "saveAs": "Simpan sebagai",
+    "load": "Muat",
+    "quitGame": "Keluar dari permainan",
+    "returnToTop": "kembali ke menu atas",
+    "loading": "Memuat…",
+    "shuttingDown": "Menutup permainan…",
+    "saveFailed": "Gagal menyimpan",
+    "loadFailed": "Gagal memuat",
+    "confirmNewGame": "Data saat ini akan hilang. memulai permainan baru?",
+    "confirmQuitGame": "Apakah Anda yakin ingin berhenti? Kemajuan Anda saat ini tidak disimpan secara otomatis.",
+    "confirmReturnToTop": "kembali ke menu atas? Kemajuan Anda saat ini tidak disimpan secara otomatis.",
+    "confirm": "Ya",
+    "cancel": "Tidak",
+    "saveAsScenario": "Simpan Sebagai Skenario",
+    "saveAsNewScenario": "Simpan sebagai skenario lain",
+    "overwriteScenario": "menimpa skenario",
+    "backToGame": "Kembali ke permainan",
+    "saveName": "Simpan Nama",
+    "confirmOverwrite": "menimpa simpanan “{{name}}”?",
+    "confirmOverwriteScenario": "menimpa skenario “{{name}}”?"
+  },
+  "saveList": {
+    "noSaves": "Tidak Ada Simpan Data Ditemukan",
+    "currentSave": "data saat ini",
+    "population": "Jumlah penduduk",
+    "inGameDate": "Tanggal",
+    "savedAt": "disimpan di",
+    "loadButton": "Muat",
+    "deleteButton": "Hapus",
+    "confirmLoad": "memuat ini menyimpan data?",
+    "confirmDelete": "hapus ini simpan data? ini tidak dapat diurungkan.",
+    "loading": "Memuat…",
+    "loadFailed": "Gagal memuat",
+    "deleteFailed": "Hapus gagal",
+    "openFolderButton": "Buka Simpan Folder",
+    "scenario": "Skenario",
+    "autosaveName": "{{name}} (Simpan otomatis saat keluar)"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Cari warga",
+    "tabTracking": "daftar pelacakan",
+    "name": "Nama",
+    "age": "Usia",
+    "ageSeparator": "untuk",
+    "search": "Pencarian",
+    "noResults": "Tidak ada warga yang cocok.",
+    "truncated": "Menampilkan {{shown, number}} dari {{total, number}} warga negara yang cocok."
+  }
+}

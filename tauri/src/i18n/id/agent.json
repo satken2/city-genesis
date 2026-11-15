@@ -1,0 +1,204 @@
+{
+  "agent": {
+    "back": "Kembali",
+    "editAppearance": "mengubah penampilan",
+    "relocateCityHall": "Pindah Balai Kota",
+    "publicFacility": "Fasilitas umum",
+    "underAcquisition": "Negosiasi pembebasan lahan",
+    "publicFacilityPanel": {
+      "title": "Fasilitas umum"
+    },
+    "abandon": "Meninggalkan",
+    "abandonHint": "menyerah pemeliharaan dan biarkan membusuk tanpa perbaikan",
+    "statusSince": {
+      "founded": "Didirikan di",
+      "householdFormed": "rumah tangga terbentuk",
+      "arrived": "tiba",
+      "opened": "dibuka",
+      "schoolOpened": "dibuka",
+      "completed": "Selesai",
+      "operatingSince": "aktif sejak",
+      "resumed": "dilanjutkan",
+      "paused": "berhenti",
+      "suspended": "Layanan dihentikan sementara",
+      "schoolClosed": "Layanan dihentikan sementara",
+      "constructionStarted": "Konstruksi dimulai",
+      "demolitionScheduled": "Pembongkaran dijadwalkan",
+      "demolitionStarted": "Pembongkaran dimulai",
+      "demolished": "Tandas",
+      "collapsed": "Runtuh",
+      "burnedDown": "Terbakar",
+      "default": "status sejak"
+    },
+    "reserves": "Pasukan cadangan",
+    "revenues": "Pendapatan",
+    "expenses": "Perbelanjaan",
+    "zone": "Distrik",
+    "building": "Bangunan",
+    "rent": "Menyewa",
+    "floorOccupancy": "hunian lantai",
+    "tenants": "penyewa",
+    "guests": "tamu",
+    "tabBasicInfo": "Info Dasar",
+    "utilizationTarget": "pemanfaatan target",
+    "currentUtilization": "pemanfaatan saat ini",
+    "constructionSpeed": "kecepatan konstruksi",
+    "constructionCostPerEpoch": "Biaya Konstruksi / Siklus",
+    "remainingConstruction": "Sisa waktu konstruksi",
+    "remainingEpochs": "~{{n}} Siklus",
+    "tabBuildingInfo": "Info bangunan",
+    "tabCargoInfo": "Muatan",
+    "tabTradeInfo": "Pasokan, Permintaan & Perdagangan",
+    "tabTourismInfo": "Pariwisata",
+    "tabEmploymentInfo": "Pekerjaan",
+    "action": {
+      "purchase": "Membeli",
+      "bulldoze": "Bongkar",
+      "cancelBulldoze": "Batalkan pembongkaran",
+      "pause": "Berhenti sebentar",
+      "resume": "Lanjutkan",
+      "delete": "Hapus",
+      "repair": "Perbaikan",
+      "rebuild": "Membangun kembali",
+      "edit": "Memimpin redaksi",
+      "startConstruction": "Mulai pembangunan",
+      "stopConstruction": "Menangguhkan Konstruksi",
+      "cancelAbandon": "Batalkan pengabaian",
+      "explode": "meledak",
+      "explodeConfirm": "Meledakkan bangunan ini dan mementaskannya sebagai kecelakaan? Bangunan itu runtuh sekaligus dan semua orang yang tinggal atau bekerja di dalamnya terbunuh. Sentimen publik akan sangat menderita, dan ini tidak dapat dibatalkan.",
+      "explodeTitle": "Meledakkan bangunan",
+      "explodeConfirmAction": "meledak"
+    },
+    "pendingWarning": "Bangunan ini direncanakan. Silakan perintah untuk memulai konstruksi.",
+    "alerts": {
+      "diagnoseHint": "Klik untuk mendiagnosis penyebabnya",
+      "title": "Peringatan",
+      "constructionShortage": {
+        "title": "Kekurangan jasa konstruksi",
+        "description": "Anggaran konstruksi tidak mencukupi, sehingga menyebabkan keterlambatan konstruksi."
+      },
+      "onFire": {
+        "title": "Insiden kebakaran!",
+        "description": "Kebakaran terjadi di dalam gedung."
+      },
+      "accidentalFire": {
+        "title": "Kebakaran yang tidak disengaja (kecil)",
+        "description": "Kebakaran kecil yang tidak disengaja terjadi tetapi tetap kecil."
+      },
+      "infraDisconnected": {
+        "title": "Tidak terhubung ke jaringan infrastruktur",
+        "description": "Tidak ada jalur infrastruktur yang terhubung ke terminal fasilitas ini. Itu tidak dapat mengirim atau menerima persediaan sampai terhubung ke jaringan."
+      },
+      "capacityTight": {
+        "title": "Kapasitas dekat",
+        "description": "Fasilitas ini menangani 90% atau lebih dari kapasitasnya. Hampir tidak dapat memenuhi permintaan lagi."
+      },
+      "nonconforming": {
+        "title": "tidak memenuhi peraturan",
+        "description": "Bangunan ini tidak memenuhi peraturan paketnya. Itu tidak akan diperbaiki dan akan dihancurkan setelah memburuk."
+      },
+      "crime": {
+        "title": "Kejahatan terjadi",
+        "description": "Kejahatan telah terjadi di gedung ini."
+      },
+      "crimeSign": {
+        "title": "Tanda-tanda kejahatan",
+        "description": "Tanda-tanda kejahatan telah diamati di gedung ini. Waspadai keselamatan publik yang semakin memburuk."
+      },
+      "laborShortage": {
+        "title": "Kekurangan tenaga kerja",
+        "description": "Tidak cukup pekerja yang dipekerjakan, sehingga produksi dan jasa tidak sesuai dengan rencana."
+      },
+      "materialShortage": {
+        "title": "Kekurangan bahan",
+        "description": "Pengadaan bahan baku tidak mencukupi, sehingga produksi dan jasa tidak sesuai dengan rencana."
+      },
+      "highSkillShortage": {
+        "title": "Kekurangan staf yang terampil",
+        "description": "Tidak ada cukup staf yang sangat terampil, sehingga output dikurangi menjadi apa yang dapat ditangani oleh staf yang tersedia."
+      },
+      "budgetCapped": {
+        "title": "Kekurangan anggaran",
+        "description": "Anggaran yang dialokasikan jauh di bawah jumlah yang diperlukan, sehingga operasi telah diperkecil. Tinjau alokasi anggaran."
+      },
+      "facilityWarning": {
+        "title": "Fasilitas umum tidak beroperasi",
+        "description": "Fasilitas ini memberikan layanan yang jauh lebih sedikit dari yang direncanakan. Periksa pengadaan tenaga kerja dan bahannya."
+      },
+      "sanitationWarning": {
+        "title": "Sanitasi yang memburuk",
+        "description": "Sanitasi pada bidang bangunan ini telah sangat memburuk, mempengaruhi rumah tangga penduduk. Meningkatkan pasokan limbah dan limbah."
+      },
+      "infraWarning": {
+        "title": "Fasilitas infrastruktur berhenti atau runtuh",
+        "description": "Fasilitas ini telah berhenti beroperasi atau runtuh, mempengaruhi pasokan infrastruktur. Periksa status dan koneksi pasokannya."
+      }
+    },
+    "infra": {
+      "title": "Koneksi Infrastruktur",
+      "connected": "Bersambung",
+      "disconnected": "Yg dicopot",
+      "received": "Diterima"
+    },
+    "tabConstructionInfo": "Pembangunan",
+    "tabEducationInfo": "Pendidikan",
+    "education": {
+      "totalStudents": "siswa yang terdaftar",
+      "totalCapacity": "kapasitas total",
+      "statusTitle": "Pendaftaran",
+      "enrolled": "Terdaftar",
+      "vacant": "kursi terbuka",
+      "noCapacity": "tidak ada kapasitas",
+      "countLabel": "Menghitung",
+      "enrollmentBySkill": "Pendaftaran dengan Keterampilan",
+      "settingsTitle": "Kuota Penerimaan",
+      "settingsHint": "Atur bobot alokasi untuk setiap keterampilan. Total kapasitas dibagi secara proporsional dengan bobot.",
+      "skillHeader": "Keahlian",
+      "weightHeader": "Berat",
+      "previewHeader": "Kapasitas",
+      "save": "Simpan",
+      "saving": "Menyimpan…",
+      "saveFailed": "Gagal menyimpan",
+      "sumMustBePositive": "Jumlah kuota harus minimal 1",
+      "invalidWeight": "Bobot harus bilangan bulat 0 atau lebih",
+      "studentsList": "Daftar Mahasiswa",
+      "noStudents": "Tidak ada siswa",
+      "showMore": "tampilkan lebih banyak ({{count}})"
+    }
+  },
+  "agentList": {
+    "filterType": "Mengetik",
+    "filterVariant": "Varian",
+    "filterZone": "Daerah",
+    "allVariants": "Semua varian",
+    "allZones": "semua zona",
+    "resultCount": "{{count}} Hasil",
+    "capped": "(dari {{total}} total)",
+    "loading": "Memuat…",
+    "noResults": "Tidak ada agen yang cocok",
+    "colStatus": "Status",
+    "colVariant": "Varian",
+    "colName": "Nama",
+    "colProduct": "Produk",
+    "colPrice": "Harga",
+    "colProduction": "Produksi",
+    "colStock": "Persediaan",
+    "colSold": "Terjual",
+    "colWage": "Upah rata-rata",
+    "colEmployment": "Pekerjaan",
+    "colUtilization": "Pemanfaatan",
+    "colBdType": "Jenis bangunan",
+    "colDurability": "Daya tahan",
+    "colRent": "Menyewa",
+    "colFloors": "lantai",
+    "colFloorArea": "luas lantai",
+    "colOccupancy": "Pemilikan",
+    "colFamilyType": "Tipe Keluarga",
+    "colDiscretionaryIncome": "pendapatan yang dapat dibelanjakan",
+    "colSatisNutrition": "Makanan",
+    "colSatisHealthcare": "Kesehatan",
+    "colSatisLeisure": "Waktu luang",
+    "colSatisResidential": "Yg berhubung dgn tempat kediaman",
+    "colAutomobile": "Mobil"
+  }
+}

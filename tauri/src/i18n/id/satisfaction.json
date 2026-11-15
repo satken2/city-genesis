@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "Habis",
+    "unhappy": "Tidak bahagia",
+    "neutral": "Netral",
+    "happy": "Senang",
+    "delighted": "Gembira",
+    "zero": "kepuasan nol"
+  }
+}

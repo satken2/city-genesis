@@ -1,0 +1,39 @@
+{
+  "tag": {
+    "label": "Proyek",
+    "none": "(tidak ada tag)",
+    "createNew": "+ Tag baru…",
+    "newPlaceholder": "Masukkan Nama Tag",
+    "add": "Menambahkan",
+    "cancel": "Batal",
+    "saveFailed": "Gagal menyimpan tag",
+    "showObject": "tampilkan dalam tampilan 3D",
+    "hideObject": "Sembunyikan dalam tampilan 3D"
+  },
+  "constructionProjects": {
+    "empty": "Belum ada tag yang berfungsi. Pilih tag saat menempatkan dari panel konstruksi, atau tambahkan satu dari panel detail fasilitas umum atau jalan yang direncanakan atau sedang dibangun.",
+    "loadFailed": "Gagal memuat proyek konstruksi",
+    "totalCost": "Estimasi biaya",
+    "duration": "Waktu tersisa",
+    "progress": "Kemajuan",
+    "progressValue": "{{done}} / {{total}} Selesai",
+    "monthsValue": "{{value}} bulan",
+    "stalled": "terhenti",
+    "stalledWarning": "{{count}} Pekerjaan tidak akan berkembang karena kecepatan konstruksi 0 (dikecualikan dari total durasi).",
+    "done": "Kesiap-siagaan",
+    "unnamed": "#{{id}}",
+    "showAll": "Tampilkan semuanya lagi ({{count}})",
+    "showTag": "Tampilkan proyek ini dalam tampilan 3D",
+    "hideTag": "Sembunyikan proyek ini dalam tampilan 3D",
+    "showObject": "tampilkan dalam tampilan 3D",
+    "hideObject": "Sembunyikan dalam tampilan 3D",
+    "deleteTag": "Hapus tag ini",
+    "confirmDeleteTag": "Hapus tag \"{{tag}}\"? Itu akan dihapus dari bangunan dan jalannya (pekerjaan itu sendiri tetap ada).",
+    "columns": {
+      "name": "Target",
+      "status": "Status",
+      "cost": "biaya yang tersisa",
+      "remaining": "Waktu tersisa"
+    }
+  }
+}

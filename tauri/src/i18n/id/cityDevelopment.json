@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "algoritma",
+    "roadVariants": "Jenis jalan",
+    "patterns": {
+      "grid_1": "Kisi 1",
+      "grid_2": "Kisi 2",
+      "sprawl_1": "Pengembangan menyebar 1",
+      "sprawl_2": "Pengembangan menyebar 2",
+      "sprawl_3": "Pengembangan menyebar 3",
+      "planned_city_1": "Kota yang Direncanakan 1",
+      "split_1": "Bagi 1"
+    },
+    "spacing": "jarak jalan",
+    "blockLength": "panjang blok",
+    "splitHint": "Sertakan seluruh blok yang tertutup oleh jalan raya. Jalan sejajar dengan sisi panjang masing-masing blok berjarak dengan jarak jalan, dan melintasi jalan dengan panjang blok.",
+    "createParcels": "Buat kavling",
+    "parcelArea": "daerah parsel",
+    "hint": "Tahan Ctrl dan seret untuk mengecat area untuk berkembang. Seret ke Pan, Gulir ke Zoom.",
+    "clear": "Bersih",
+    "preview": "Peninjauan",
+    "previewing": "menghitung...",
+    "create": "Konfirmasi",
+    "creating": "Menciptakan...",
+    "previewed": "Menghaluskan medan di {{area}} dan dapat merencanakan {{roads}} segmen jalan dan {{parcels}} paket ({{rejected}} ditolak)",
+    "created": "Menghaluskan medan dan merencanakan {{roads}} ruas jalan dan {{parcels}} bidang ({{rejected}} ditolak)"
+  }
+}

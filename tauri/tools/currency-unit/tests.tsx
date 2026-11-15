@@ -19,7 +19,7 @@ const storageKey = "city-genesis.settings";
 const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 for (const [language, unit] of Object.entries({
   ja: "円", en: "$", "es-419": "$", "zh-Hans": "元", "zh-Hant": "元", fr: "€", ko: "₩",
-  de: "€", pl: "zł", ru: "₽", "pt-BR": "R$", "es-ES": "€", tr: "₺", it: "€",
+  de: "€", pl: "zł", ru: "₽", "pt-BR": "R$", "es-ES": "€", tr: "₺", it: "€", id: "Rp",
 })) {
   assert.equal(getCurrencyUnit(language), unit);
 }
@@ -33,6 +33,7 @@ for (const [tag, language, locale] of [
   ["es", "es-419", "es-419"],
   ["tr-TR", "tr", "tr-TR"],
   ["it-IT", "it", "it-IT"],
+  ["id-ID", "id", "id-ID"],
 ]) {
   assert.equal(languageFromLocaleTag(tag), language);
   assert.equal(resolveIntlLocale(tag), locale);

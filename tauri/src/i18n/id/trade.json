@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Info Pasokan",
+    "product": "produk pasokan",
+    "amount": "jumlah pasokan",
+    "price": "harga pasokan",
+    "soldAmount": "jumlah yang terjual",
+    "profitRate": "tingkat keuntungan",
+    "utilization": "Pemanfaatan"
+  },
+  "tourismSupply": {
+    "title": "menjadi tuan rumah wisatawan",
+    "touristCapacity": "Kapasitas wisata",
+    "persons": "{{value}} orang",
+    "218": {
+      "price": "biaya masuk",
+      "amount": "Kapasitas Pengunjung (Total)",
+      "soldAmount": "Pengunjung (total)"
+    },
+    "219": {
+      "price": "Tarif",
+      "amount": "Kapasitas Penumpang (Total)",
+      "soldAmount": "Penumpang (total)"
+    }
+  },
+  "demand": {
+    "product": "Produk",
+    "demandAmount": "Permintaan",
+    "receivedAmount": "Yg diperoleh",
+    "acquiredAmount": "Inventaris"
+  },
+  "cargo": {
+    "title": "operasi kargo",
+    "description": "Hub ini mengimpor barang dari luar wilayah untuk memasok pasar kota, dan membeli surplus produksi kota untuk mengekspornya keluar dari wilayah tersebut.",
+    "capacity": "Kapasitas throughput",
+    "perPeriod": "/bulan",
+    "perPeriod_week": "/minggu",
+    "materialCapacity": "batasi berdasarkan materi yang diterima",
+    "areaCapacity": "batasi luas lantai",
+    "importHandled": "Impor Ditangani",
+    "exportHandled": "Ekspor ditangani",
+    "utilization": "Pemanfaatan",
+    "importSectionTitle": "impor",
+    "exportSectionTitle": "Ekspor",
+    "handledImport": "Terjual",
+    "handledExport": "dibeli",
+    "allocation": "dialokasikan",
+    "priceImport": "Harga penjualan",
+    "priceExport": "Harga pembelian",
+    "lost": "Penjualan yang hilang",
+    "noProducts": "Tidak ada produk yang ditangani"
+  }
+}

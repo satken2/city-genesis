@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Game ini menggunakan aset yang tercantum di bawah ini. Nama penulis, sumber, nama lisensi, dan teks atribusi apa pun yang diperlukan oleh lisensi direproduksi kata demi kata.",
+    "empty": "Tidak ada entri.",
+    "requiredText": "atribusi yang diperlukan",
+    "categories": {
+      "bgm": "Musik",
+      "sfx": "Efek suara",
+      "image": "Gambar & Ikon",
+      "font": "font",
+      "model": "Model 3D",
+      "texture": "tekstur"
+    }
+  }
+}

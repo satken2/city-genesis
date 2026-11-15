@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Stasiun",
+    "name": "Nama stasiun",
+    "ridership": "Penumpang",
+    "platforms": "Daftar Platform",
+    "noPlatforms": "Tidak ada peron milik stasiun ini (platform yang dilintasi jalur di sini)",
+    "lines": "Garis penyajian",
+    "noLines": "Tidak ada jalur yang melayani stasiun ini",
+    "stops": "Penumpang dengan berhenti",
+    "noStops": "Tidak ada pemberhentian di stasiun ini",
+    "lineRunning": "Berturut-turut",
+    "lineSuspended": "Layanan dihentikan sementara",
+    "houseEnds": "Penempatan gedung stasiun",
+    "houseEnds_both": "Kedua ujung",
+    "houseEnds_start": "Mulai",
+    "houseEnds_end": "Akhir",
+    "passageMode": "penempatan bagian",
+    "passageMode_elevated": "Tinggi",
+    "passageMode_ground": "Lantai dasar",
+    "passageMode_underground": "Bawah tanah"
+  }
+}

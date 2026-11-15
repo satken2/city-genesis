@@ -17,6 +17,7 @@ const DEFAULT_CURRENCY_UNITS: Record<SupportedLanguage, string> = {
   "es-ES": "€",
   tr: "₺",
   it: "€",
+  id: "Rp",
 };
 
 /** null は言語に追従する。通貨設定は各 WebView で復元し、React 外の確認文も同じ値を参照する。 */

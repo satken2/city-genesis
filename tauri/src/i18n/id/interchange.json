@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Tukar-menukar",
+      "jct": "Persimpangan jalan"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "Dari",
+      "to": "Untuk",
+      "road": "{{type}} #{{id}}",
+      "none": "Tidak ada pasangan jalan yang terhubung.",
+      "direction": {
+        "n": "Utara",
+        "ne": "Timur laut",
+        "e": "Timur",
+        "se": "Tenggara",
+        "s": "Selatan",
+        "sw": "Barat daya",
+        "w": "Barat",
+        "nw": "Barat laut"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

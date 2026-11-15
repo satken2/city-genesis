@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Peralatan jalan",
+    "streetlight_type": "lampu jalan",
+    "fence_type": "pagar",
+    "street_tree_type": "pohon jalanan",
+    "utility_mode": "Kabel Utilitas",
+    "none": "Tidak ada",
+    "standard": "Standar",
+    "overhead": "Atas",
+    "underground": "Bawah tanah",
+    "apply": "Terapkan",
+    "bench_type": "Bangku",
+    "bin_type": "tempat sampah",
+    "planter_type": "pekebun",
+    "advert_type": "Pengiklanan"
+  }
+}

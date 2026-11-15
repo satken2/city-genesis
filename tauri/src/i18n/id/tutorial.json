@@ -1,0 +1,752 @@
+{
+  "tutorial": {
+    "startButton": "Mulai",
+    "controls": {
+      "title": "Kontrol Dasar",
+      "description": "Pelajari tujuan Anda sebagai walikota dan cara merencanakan sebelum memajukan waktu. Setelah menjelajahi apa arti informasi kota, apa yang dilakukan setiap tombol dan bagaimana memindahkan kamera, Anda akan memperluas jalan untuk membuat area perumahan baru dan menyediakannya dengan rumah, listrik, dan air.",
+      "step1": {
+        "title": "Bangun kota sebagai walikota",
+        "role": "Di kota Genesis, Anda menumbuhkan kota sebagai walikotanya. Anda merencanakan jalan dan fasilitas, memutuskan bagaimana tanah digunakan, menetapkan pajak dan mengalokasikan uang untuk layanan publik. Tugas Anda adalah menciptakan kondisi yang mendukung penghuni dan bisnis. Tekan \"Selanjutnya\" untuk melanjutkan.",
+        "goal": "Bertujuan untuk kota di mana penduduk dapat hidup dengan nyaman dan aman. Menyediakan rumah dan pekerjaan, listrik, air dan kesehatan. Menumbuhkan kota juga membutuhkan uang. Pertimbangkan kehidupan masyarakat dan keuangan kota ketika memutuskan apa yang akan ditingkatkan.",
+        "epoch": "Waktu maju satu bulan pada suatu waktu. Pertama-tama tetapkan anggaran dan rencana konstruksi, lalu tekan \"Start\" saat Anda siap. konstruksi dan kegiatan penduduk dan bisnis maju; Tinjau hasilnya sebelum membuat rencana Anda selanjutnya. Tanggal tetap diam sampai Anda mulai, jadi luangkan waktu Anda.",
+        "epoch_week": "Waktu maju satu minggu pada suatu waktu. Pertama-tama tetapkan anggaran dan rencana konstruksi, lalu tekan \"Start\" saat Anda siap. konstruksi dan kegiatan penduduk dan bisnis maju; Tinjau hasilnya sebelum membuat rencana Anda selanjutnya. Tanggal tetap diam sampai Anda mulai, jadi luangkan waktu Anda."
+      },
+      "step2": {
+        "title": "Baca kota dari kokpit",
+        "tools": "Kokpit di bagian bawah layar membantu Anda memeriksa kota dan memutuskan apa yang harus dilakukan selanjutnya. \"Lihat\" menggunakan warna untuk membantu menemukan kekurangan dan area masalah. “Peta” menunjukkan di mana tempat-tempat berada di seluruh kota, membantu Anda menemukan jalan saat tumbuh.",
+        "tracking": "“Daftar Warga” memungkinkan Anda menemukan penduduk dengan nama dan membuat penduduk yang ingin Anda kunjungi kembali. Tambahkan seseorang untuk melacak dari detail warga mereka, lalu gunakan tombol ini untuk kembali ke informasi dan perjalanan mereka. Jelajahi kehidupan individu di belakang tokoh-tokoh di seluruh kota.",
+        "bulldozer": "“Bulldozer” menghapus paket kosong dan membatalkan rencana bangunan dan jalan. Tekan tombol, lalu klik target dalam tampilan 3D; Tekan lagi untuk keluar dari mode. Untuk menghapus bangunan atau jalan yang telah selesai, buka detailnya dan pilih pembongkaran.",
+        "services": "Petir dan pengukur tetesan air menunjukkan berapa banyak ruang yang harus ditumbuhkan oleh listrik dan air Anda. Saat mereka memenuhi, permintaan mendekati kapasitas. Klik mereka untuk meninjau fasilitas umum, dan periksa apakah Anda membutuhkan lebih banyak persediaan sebelum memperluas kota.",
+        "score": "“Skor” merangkum betapa puasnya penghuni dengan kehidupan di kota Anda. lebih tinggi lebih baik. Rumah, pekerjaan, perawatan kesehatan, dan lingkungan hidup yang menyenangkan membantu memperbaikinya. Jika jatuh, carilah kesulitan yang dihadapi warga.",
+        "budget": "“Anggaran” menunjukkan pengeluaran yang diharapkan bulan depan relatif terhadap pendapatan bulan lalu. Ketika pengukur berayun ke kanan, pengeluaran melebihi pendapatan. Sebaliknya, ketika berayun ke kiri, Anda punya uang. Periksa sebelum waktunya maju.",
+        "budget_week": "“Anggaran” menunjukkan pengeluaran yang diharapkan minggu depan relatif terhadap pendapatan minggu lalu. Ketika pengukur berayun ke kanan, pengeluaran melebihi pendapatan. Sebaliknya, ketika berayun ke kiri, Anda punya uang. Periksa sebelum waktunya maju.",
+        "budgetChanges": "Lebih banyak konstruksi, operasi fasilitas yang lebih tinggi dan konstruksi yang lebih cepat meningkatkan uang yang dibutuhkan dan meningkatkan pengukur anggaran. Operasi yang lebih rendah atau konstruksi yang lebih lambat dapat mengurangi biaya yang diharapkan. Ketika pendapatan pajak meningkat, pengukur turun bahkan jika pengeluaran tetap sama.",
+        "budgetPlanning": "Pengukur rendah berarti Anda memiliki uang yang tersedia untuk kota. Pertimbangkan untuk berinvestasi dalam layanan atau fasilitas yang hilang yang akan Anda butuhkan segera.",
+        "date": "Tanggal menunjukkan seberapa jauh waktu kota telah maju. Gunakan untuk melacak kemajuan konstruksi dan perubahan musim. Itu tetap diam saat Anda merencanakan dan memperbarui saat Anda memajukan waktu dengan \"mulai\".",
+        "climate": "Suhu, curah hujan, sinar matahari, dan panel angin menunjukkan iklim rata-rata bulan ini. Kondisi ini mempengaruhi pertanian, tenaga angin dan tenaga surya. Jika tanaman atau produksi listrik rendah, periksa juga iklimnya.",
+        "climate_week": "Suhu, curah hujan, sinar matahari, dan panel angin menunjukkan iklim rata-rata minggu ini. Kondisi ini mempengaruhi pertanian, tenaga angin dan tenaga surya. Jika tanaman atau produksi listrik rendah, periksa juga iklimnya.",
+        "climateEffects": "Sinar matahari yang lemah mengurangi output matahari, dan angin lemah mengurangi output angin. Suhu dan curah hujan juga mempengaruhi pertanian. Klik panel iklim untuk melihat bagaimana kondisi bulan ini memengaruhi efisiensi produksi setiap fasilitas. Rencanakan fasilitas dengan mempertimbangkan perubahan musiman dalam pikiran.",
+        "climateEffects_week": "Sinar matahari yang lemah mengurangi output matahari, dan angin lemah mengurangi output angin. Suhu dan curah hujan juga mempengaruhi pertanian. Klik panel iklim untuk melihat bagaimana kondisi minggu ini memengaruhi efisiensi produksi setiap fasilitas. Rencanakan fasilitas dengan mempertimbangkan perubahan musiman dalam pikiran.",
+        "notifications": "Jumlah pada \"Pemberitahuan\" menghitung peringatan dan peringatan untuk ditinjau. Nomor merah dan tombol berkedip berarti fungsi kota sedang terganggu dan membutuhkan perhatian segera. Angka kuning menunjukkan peringatan, seperti mempersiapkan pertumbuhan atau masalah yang membutuhkan waktu untuk ditingkatkan. Tekan tombol untuk membacanya.",
+        "notificationActions": "Saat pemberitahuan mengidentifikasi fasilitas atau distrik, klik barisnya untuk memeriksanya. Menanggapi penyebabnya: Hubungkan saluran listrik yang hilang atau atur persediaan untuk fasilitas kekurangan bahan. Pemberitahuan tentang masalah yang sedang berlangsung hilang ketika penyebabnya teratasi. Setelah mengambil tindakan, periksa hasil bulan depan."
+      },
+      "step3": {
+        "title": "Ubah tampilan untuk menemukan masalah",
+        "open": "Kekurangan listrik dan kemacetan lalu lintas bisa sulit dilihat dari penampilan kota. Gunakan \"Lihat\" untuk menampilkan informasi yang Anda butuhkan di peta. Tekan \"Lihat\" di kokpit untuk membuka panel.",
+        "tabs": "Tab vertikal memungkinkan Anda memilih apa yang akan diperiksa, seperti bangunan, jalan, persil, atau distrik. Anda juga dapat menyembunyikan objek yang tidak diinginkan saat informasi yang tumpang tindih membuat tampilan sulit dibaca. Tekan \"Next\" untuk menjelajahi opsi tampilan.",
+        "modes": "Tombol di setiap tab memilih informasi mana yang mewarnai objek. Temukan jalan yang sibuk atau bangunan bermasalah dan gunakan sebagai petunjuk untuk tindakan Anda selanjutnya. Klik objek dalam tampilan 3D untuk memeriksanya lebih lanjut. Tekan \"Selanjutnya\"."
+      },
+      "step4": {
+        "title": "Temukan alat pembangunan kota Anda",
+        "grading": "Mari kita jelajahi tombol di sebelah kiri dari atas ke bawah. \"Earthworks\" tingkat kemiringan untuk membangun atau merebut kembali tanah dari laut. Ini menciptakan ruang untuk pertumbuhan ketika Anda membutuhkan lebih banyak rumah atau tempat kerja tetapi memiliki terlalu sedikit lahan yang dapat digunakan.",
+        "road": "“Jalan, Kereta Api & Infrastruktur” menciptakan rute untuk orang, barang, listrik, dan air. Hubungkan rumah dan tempat kerja dengan jalan, hubungkan tempat yang jauh dengan rel, dan hubungkan fasilitas dengan saluran listrik dan pipa. Jaringan ini mendukung perjalanan, perdagangan, dan persediaan utilitas.",
+        "land": "“Paket tanah” menyiapkan lokasi untuk bangunan. Tanah kosong saja bukan lokasi bangunan. Lebih banyak rumah dan fasilitas besar keduanya membutuhkan situs dengan ruang yang cukup untuk mereka.",
+        "landDevelopment": "Paket menyediakan ruang untuk pembangunan kota dan untuk rumah dan bisnis pribadi untuk dikembangkan. Bangunan pribadi tumbuh sesuai dengan permintaan dan aturan bangunan distrik. Saat Anda menginginkan lebih banyak rumah atau pekerjaan, periksa apakah tersedia paket kosong yang cukup.",
+        "district": "“Distrik” memungkinkan Anda mengelola bagian kota dengan prioritas yang berbeda, seperti lingkungan perumahan atau kawasan industri. Setiap distrik dapat membatasi jenis bangunan yang diizinkan, memberikan seluruh lingkungan arah yang sesuai untuk pembangunan.",
+        "districtRules": "Detail Distrik memungkinkan Anda memilih jenis bangunan yang diperbolehkan. Gunakan mereka sesuai dengan jenis kota yang ingin Anda tanam, seperti menjauhkan pabrik dari lingkungan perumahan. Anda juga dapat membandingkan populasi dan kondisi kehidupan antar kabupaten untuk memutuskan di mana dukungan diperlukan.",
+        "construction": "“Konstruksi” merencanakan bangunan yang dibutuhkan kota. Anda dapat membangun rumah, tempat kerja, rumah sakit, sekolah dan pembangkit listrik. Gunakan itu untuk menyediakan lebih banyak perumahan dan pekerjaan atau mengisi kesenjangan dalam perawatan kesehatan, pendidikan, listrik dan layanan lainnya.",
+        "transport": "“Transportasi umum” membantu penduduk melakukan perjalanan dengan bus atau kereta api. Anda dapat mengatur rute dan pemberhentian, dan menyesuaikan tarif dan interval layanan. Menghubungkan rumah dengan tempat kerja dan sekolah membantu mengurangi beban perjalanan.",
+        "propPlacement": "“Placement Prop” menambahkan pohon, bebatuan, dan pemandangan lainnya. Gunakan untuk menambahkan tanaman hijau ke jalan atau menghias medan.",
+        "cityDevelopment": "“Pengembangan Kota Otomatis” merencanakan jalan dan bidang tanah di area yang luas sekaligus. Cat area yang ingin Anda kembangkan di peta dan pilih tata letak jalan untuk menyiapkan jalan dan parsel sekaligus. Gunakan saat membuka area perumahan baru atau kota dari awal.",
+        "constructionProjects": "“Proyek Konstruksi” mengumpulkan pekerjaan yang direncanakan dan sedang berlangsung di satu tempat. Tinjau kemajuan dan biaya untuk memutuskan pekerjaan mana yang harus dimajukan.",
+        "regulation": "“Peraturan” menetapkan aturan untuk tinggal dan bekerja di kota, termasuk batas kecepatan, jam kerja, imigrasi dan jaminan sosial. Sesuaikan mereka agar sesuai dengan prioritas Anda untuk keamanan, waktu untuk menikmati kehidupan dan pertumbuhan kota.",
+        "stat": "\"Statistik\" membantu Anda mengevaluasi keputusan Anda. Bagan menunjukkan perubahan populasi, pendapatan, perjalanan, kepuasan penduduk, dan ukuran ekonomi dan harga. Setelah mengubah kebijakan atau fasilitas, periksa apakah hidup membaik dan apa yang masih hilang. Itu melengkapi tombol di sebelah kiri."
+      },
+      "step5": {
+        "title": "Jalankan rencana Anda dan tinjau hasil",
+        "flow": "Setelah memeriksa kota dan merencanakan konstruksi dan anggaran, gunakan \"mulai\" di kokpit untuk memajukan waktu. Pekerjaan berkembang, pekerjaan penduduk, produksi bisnis, dan keuangan serta skor berubah. Beberapa rencana membutuhkan beberapa bulan untuk menunjukkan efeknya.",
+        "execute": "Setelah maju, tinjau hasil dan pemberitahuannya. Atasi masalah dalam rencana Anda selanjutnya, lalu lanjutkan waktu lagi. Kembangkan kota dengan mengulangi \"Rencana, Maju, Tinjau\". Anda tidak perlu menekan \"Start\" di sini. Tekan \"Next\" untuk mempelajari kontrol kamera."
+      },
+      "step6": {
+        "title": "Pindahkan kamera",
+        "description": "Anda dapat memindahkan kamera seperti ini: Seret dengan tombol kiri untuk memindahkan tampilan, seret dengan tombol kanan untuk memutar, w/a/s/d (atau tombol panah) untuk bergerak, q/e untuk memutar, r/f untuk mengubah ketinggian, dan roda mouse ke zoom. Cobalah dengan bebas, lalu tekan \"Selanjutnya\"."
+      },
+      "step7": {
+        "title": "Mode Terbang dan Mode Bioskop",
+        "description": "Kamera memiliki dua mode khusus. \"Mode Terbang\" dimulai dengan Shift + F: Bergerak di sepanjang pandangan Anda dengan W/A/S/D, lihat sekeliling dengan mouse, dan naik atau turun dengan R/F. Tekan ESC untuk meninggalkannya. \"Mode bioskop\" dimulai dari tombol di sudut kiri atas layar dan memungkinkan Anda mengelilingi kota. lihat sekeliling dengan mouse; Pergeseran beralih antara mengorbit dan bepergian, jeda ruang, ruang belakang terbalik, dan keluar ESC. Panel di layar disembunyikan saat salah satu mode menyala dan kembali saat Anda menekan ESC. Ketika Anda sudah mencobanya, keluar dari kedua mode dan tekan \"Next\"."
+      },
+      "step8": {
+        "title": "lihat batas kota",
+        "description": "Kami memindahkan kamera ke tepi timur kota. Area yang dapat Anda gunakan sebagai kota adalah persegi panjang di mana medan yang terperinci ada, dan kamera juga tidak dapat meninggalkannya. Itu semua untuk layar dan kontrol. Selanjutnya, mari kita membuat area perumahan baru. Tekan \"Selanjutnya\"."
+      },
+      "step9": {
+        "title": "Perpanjang jalan",
+        "description": "Sekarang mari kita bangun kawasan pemukiman untuk menyambut penghuni baru. Rumah dan tempat kerja tidak ada gunanya kecuali jalan menghubungkannya: orang tidak bisa datang dan pergi, dan barang tidak bisa datang. Pertama, perluas jalan timur-barat kota ke barat untuk membuka jalan ke lingkungan baru. Tekan “Jalan, Rel & Infrastruktur” pada panel ikon untuk membuka panel konstruksi."
+      },
+      "step10": {
+        "title": "Selesaikan pembangunan jalan",
+        "description": "Jalan tersebut masih “rencana konstruksi”. Jalan yang direncanakan belum dapat digunakan — orang dan mobil hanya dapat menggunakannya setelah pekerjaan selesai. Tekan \"Start\" di kokpit 2-3 kali untuk memajukan waktu dan tunggu sampai selesai. Konstruksi membutuhkan biaya setiap bulan saat sedang berlangsung.",
+        "description_week": "Jalan tersebut masih “rencana konstruksi”. Jalan yang direncanakan belum dapat digunakan — orang dan mobil hanya dapat menggunakannya setelah pekerjaan selesai. Tekan \"Start\" di kokpit 2-3 kali untuk memajukan waktu dan tunggu sampai selesai. Konstruksi membutuhkan uang setiap minggu saat sedang berlangsung."
+      },
+      "step11": {
+        "title": "Buat kavling",
+        "description": "Jalan sudah siap. Selanjutnya, siapkan parsel untuk dijadikan lokasi bangunan. Bangunan hanya bisa berdiri di atas parsel, dan sebidang tanah yang menghadap ke jalan memungkinkan orang dan barang datang dan pergi. Tekan \"Paket Tanah\" pada panel ikon.",
+        "create": "Pastikan \"Create Along Road\" dipilih, lalu klik jalan yang Anda perluas dalam tampilan 3D. Saat garis merah berbaris di sepanjang jalan, konfirmasikan untuk membuat paket."
+      },
+      "step12": {
+        "title": "Buat distrik",
+        "description": "Sebelum membangun, putuskan seperti apa jalan ini. Tanpa rencana, pabrik mungkin naik tepat di sebelah rumah. Rencana tersebut dibuat per \"distrik\". Distrik ditugaskan jalan melalui jalan darat, dan sebidang tanah milik distrik jalan yang dihadapinya. Tekan \"Distrik\" pada panel ikon untuk membuka jendela Edit Distrik: Saat ini seluruh kota adalah satu distrik.",
+        "create": "Gunakan sikat \"Sisi Jalan\". Ganti alat untuk \"Membuat Distrik Baru\", tahan Ctrl dan seret di sepanjang jalan yang Anda perluas. Kedua sisi jalan yang Anda cat, bersama dengan bungkusan yang menghadap mereka, menjadi distrik baru."
+      },
+      "step13": {
+        "title": "Distrik telah dibuat",
+        "description": "Anda telah memisahkan jalan baru dari pusat kota sebagai distriknya sendiri. Anda dapat memeriksa populasi dan harga per distrik dan memutuskan bangunan mana yang dapat dibangun di sana, sehingga setiap area dapat tumbuh dengan cara yang sesuai. Setelah Anda memeriksanya, tutup jendela Edit Distrik."
+      },
+      "step14": {
+        "title": "Buka rincian distrik",
+        "description": "Mari kita jadikan distrik baru sebagai daerah pemukiman. Tampilkan distrik dengan ikon di kiri bawah layar, lalu klik label distrik yang baru saja Anda buat untuk membuka detailnya."
+      },
+      "step15": {
+        "title": "Tetapkan untuk permukiman",
+        "description": "Peraturan bangunan di dekat bagian bawah panel memilih bangunan mana yang dapat dibangun di atas paket distrik ini. Kami ingin tempat yang tenang untuk tinggal di sini, jadi klik setiap bangunan selain \"apartemen\" dan \"rumah\" untuk menonaktifkannya."
+      },
+      "step16": {
+        "title": "Periksa kavling",
+        "description": "Peraturan distrik berlaku untuk setiap bidang di dalamnya. Klik parsel dengan spidol kuning untuk membuka detailnya."
+      },
+      "step17": {
+        "title": "Regulasi diterapkan",
+        "description": "Di dekat bagian bawah panel parsel, Anda dapat melihat peraturan distrik yang hanya mengizinkan \"apartemen\" dan \"rumah\". Sekarang hanya rumah yang bisa dibangun di jalan ini. Alih-alih menetapkan paket satu per satu, memutuskan arah distrik membuat seluruh jalan mengikutinya."
+      },
+      "step18": {
+        "title": "membangun rumah",
+        "description": "Sekarang mari kita sediakan rumah. Perumahan biasanya dibangun secara otomatis oleh sektor swasta ketika orang ingin tinggal di sini, tetapi perumahan umum yang dibangun oleh kota dengan cepat menebus kekurangan. Mari kita membangun gedung apartemen umum di sini. Tekan \"Konstruksi\" pada panel ikon.",
+        "select": "Pilih \"Kompleks Apartemen\" dalam kategori \"Perumahan\", klik paket mana saja di distrik baru sebagai situs, dan konfirmasi."
+      },
+      "step19": {
+        "title": "menyelesaikan rumah",
+        "description": "Seperti jalan, bangunan tidak bisa ditinggali hanya karena direncanakan. Sebuah gedung apartemen membutuhkan waktu lebih dari setengah tahun untuk diselesaikan. Tekan \"Start\" untuk memajukan waktu dan tunggu sampai selesai."
+      },
+      "step20": {
+        "title": "Periksa listrik",
+        "description": "Rumah saja tidak membuat hidup: orang juga membutuhkan listrik dan air. Kota ini belum memiliki pembangkit listrik dan belum ada pasokan air. Klik gedung apartemen dengan spidol kuning, di mana penduduk kota tinggal, untuk membuka detailnya, pilih salah satu penyewa di tab \"Info Bangunan\", lalu buka tab \"Penawaran, Permintaan & Perdagangan\": Anda dapat mengonfirmasi bahwa jumlah listrik yang diperoleh adalah 0."
+      },
+      "step21": {
+        "title": "Bangun pembangkit listrik tenaga surya",
+        "description": "Untuk menyalurkan listrik, pertama-tama Anda membutuhkan pembangkit listrik untuk menghasilkannya. Bangun \"pembangkit listrik tenaga surya\" di parsel dengan spidol kuning. Biasanya membutuhkan waktu untuk menyelesaikannya, tetapi karena ini adalah tutorial, periode konstruksi dilewati."
+      },
+      "step22": {
+        "title": "membangun gardu induk",
+        "description": "Listrik tegangan tinggi dari pembangkit listrik tidak dapat digunakan oleh rumah tangga sebagaimana adanya. Sebuah gardu induk mengubahnya menjadi rumah listrik dapat digunakan dan mendistribusikannya ke bangunan di sekitarnya yang terhubung melalui jalan raya. Bangun \"gardu listrik\" di atas bungkusan dengan penanda kuning di dekat gedung apartemen."
+      },
+      "step23": {
+        "title": "Terhubung dengan saluran listrik",
+        "description": "Bahkan ketika pembangkit listrik dan gardu terpisah, rute untuk listrik menghubungkan mereka. Buka “Jalan, Rel & Infrastruktur” pada panel ikon, pilih “Power Transmission Line” di bawah “Electricity”, dan tarik jalur dari terminal koneksi pembangkit listrik tenaga surya ke terminal gardu induk. Garis lurus antara terminal melakukannya dalam sekali jalan."
+      },
+      "step24": {
+        "title": "Konfirmasikan catu daya",
+        "description": "Setelah terhubung, pastikan listrik benar-benar mengalir. Tekan \"Start\" untuk memajukan waktu, klik gardu induk untuk membuka detailnya, dan di tab \"Pasokan, Permintaan & Perdagangan\" periksa bahwa jumlah listrik tegangan tinggi yang diterima bukan 0. Mungkin diperlukan beberapa bulan agar pembangkit listrik dapat memulai dan daya akan tiba."
+      },
+      "step25": {
+        "title": "Kekuasaan mencapai rumah",
+        "description": "Dari rincian gedung apartemen, buka tab \"Penawaran, Permintaan & Perdagangan\" penyewa seperti yang Anda lakukan pada awalnya, dan periksa apakah jumlah listrik yang diperoleh tidak lagi 0. Mungkin diperlukan satu atau dua bulan lagi untuk mencapai rumah tangga. Hasilkan di pembangkit listrik, bawa melalui saluran listrik, distribusikan dari gardu induk — hanya jika ketiganya terhubung, listrik mencapai rumah."
+      },
+      "step26": {
+        "title": "Temukan sumber air",
+        "description": "Berikutnya adalah air. Air keran adalah air tanah yang dipompa dan dikirim ke kota. Pertama, cari tahu di mana air dapat dipompa. Tekan \"View\" di kokpit untuk membuka panel tampilan.",
+        "show": "Pilih \"Sumber Daya Alam\" dari tab vertikal dan alihkan ke \"Terlihat\". Sumber air muncul dengan warna biru muda di peta. Klik sumber air dengan spidol kuning untuk membuka detailnya."
+      },
+      "step27": {
+        "title": "Membangun pompa air tanah",
+        "description": "Pompa air tanah mengambil air dari bawah tanah, sehingga harus dibangun di tempat yang memiliki sumber air. Itu juga membutuhkan listrik dan pekerja untuk dijalankan, itulah sebabnya kami membawa listrik terlebih dahulu. Bangun \"pompa sumur air tanah\" di atas parsel dengan penanda kuning di atas sumber air. Karena ini adalah tutorial, periode konstruksi dilewati."
+      },
+      "step28": {
+        "title": "Bangun stasiun pompa air",
+        "description": "Air yang dipompa tidak dapat diserahkan kepada rumah tangga apa adanya. Sama seperti gardu induk yang mendistribusikan listrik, stasiun pompa air mengalirkan air ke bangunan di sekitarnya yang terhubung melalui jalan raya. Bangun \"stasiun pompa air\" di parsel dengan penanda kuning di dekat gedung apartemen."
+      },
+      "step29": {
+        "title": "terhubung dengan pipa",
+        "description": "Anda membutuhkan pipa untuk membawa air dari pompa air tanah ke stasiun pompa. Buka “Jalan, Rel & Infrastruktur” pada panel ikon, pilih “Pipa Saluran Air” di bawah “Air”, dan letakkan dari terminal sambungan pompa air tanah ke terminal stasiun pompa. Untuk menjaganya agar tetap bersih dari jalan dan kabel listrik, ambil jalan memutar yang lebar di sekitar sisi timur."
+      },
+      "step30": {
+        "title": "Konfirmasi pasokan air",
+        "description": "Tekan \"Start\" untuk memajukan waktu, klik stasiun pompa air untuk membuka detailnya, dan di tab \"Pasokan, Permintaan & Perdagangan\" periksa apakah jumlah air bertekanan tinggi yang diterima tidak 0. Mungkin perlu beberapa bulan bagi pekerja untuk berkumpul di pompa air tanah dan air untuk tiba."
+      },
+      "step31": {
+        "title": "Dasar-dasarnya sudah ada",
+        "description": "Air telah mencapai stasiun pemompaan, sehingga rumah di sekitarnya sekarang dapat menggunakan air keran. Jalankan jalan, siapkan parsel, tentukan arah setiap distrik, bangun rumah, dan bawa listrik dan air — yaitu aliran dasar pembangunan kota. Tekan \"Next\" untuk menyelesaikan tutorial kontrol dasar."
+      }
+    },
+    "scenario4": {
+      "title": "membangun kereta api",
+      "description": "Kami ingin menghubungkan area perumahan dan tempat kerja dengan kereta api, tetapi bangunan pribadi dan rumah sakit umum menghalangi rute. Dalam tutorial ini Anda akan belajar akuisisi lahan, pembongkaran fasilitas publik, jalur yang ditinggikan di atas jalan, peron dan stasiun, depot, penyesuaian kurva dan grade, sambungan daya, dan pembukaan layanan.",
+      "step1": {
+        "title": "Laykan platform yang ditinggikan",
+        "description": "Jalan terbuka, kereta api & infrastruktur → Kereta api. Bangun platform sisi terangkat berstandar tinggi di sisi barat kota dan platform sisi jalur ganda di sisi timur. Klik kiri kedua titik akhir yang ditandai pada 6m, klik kanan untuk menyelesaikan bentuk, lalu konfirmasi.",
+        "open": "Jalan terbuka, kereta api & infrastruktur → Kereta api. Bangun platform sisi terangkat berstandar tinggi di sisi barat kota dan platform sisi jalur ganda di sisi timur. Klik kiri kedua titik akhir yang ditandai pada 6m, klik kanan untuk menyelesaikan bentuk, lalu konfirmasi.",
+        "variant": "Jalan terbuka, kereta api & infrastruktur → Kereta api. Bangun platform sisi terangkat berstandar tinggi di sisi barat kota dan platform sisi jalur ganda di sisi timur. Klik kiri kedua titik akhir yang ditandai pada 6m, klik kanan untuk menyelesaikan bentuk, lalu konfirmasi.",
+        "start": "Jalan terbuka, kereta api & infrastruktur → Kereta api. Bangun platform sisi terangkat berstandar tinggi di sisi barat kota dan platform sisi jalur ganda di sisi timur. Klik kiri kedua titik akhir yang ditandai pada 6m, klik kanan untuk menyelesaikan bentuk, lalu konfirmasi.",
+        "end": "Jalan terbuka, kereta api & infrastruktur → Kereta api. Bangun platform sisi terangkat berstandar tinggi di sisi barat kota dan platform sisi jalur ganda di sisi timur. Klik kiri kedua titik akhir yang ditandai pada 6m, klik kanan untuk menyelesaikan bentuk, lalu konfirmasi.",
+        "confirm": "Jalan terbuka, kereta api & infrastruktur → Kereta api. Bangun platform sisi terangkat berstandar tinggi di sisi barat kota dan platform sisi jalur ganda di sisi timur. Klik kiri kedua titik akhir yang ditandai pada 6m, klik kanan untuk menyelesaikan bentuk, lalu konfirmasi.",
+        "town": "Bangun platform sisi tinggi berstandar tinggi barat pada ketinggian 6m. Klik kiri kedua titik akhir yang ditandai, klik kanan untuk menyelesaikan bentuk, lalu konfirmasi.",
+        "new": "Bangun platform sisi jalur ganda Timur. Gunakan kembali untuk kembali ke kartu dan pilih platform ini di bawah Railways. Klik kiri kedua titik akhir pada 6m, klik kanan untuk menyelesaikan bentuk, lalu konfirmasi. Jika panel ditutup, buka kembali jalan, kereta api & infrastruktur.",
+        "east": "Bangun platform sisi jalur ganda Timur. Gunakan kembali untuk kembali ke kartu dan pilih platform ini di bawah Railways. Klik kiri kedua titik akhir pada 6m, klik kanan untuk menyelesaikan bentuk, lalu konfirmasi. Jika panel ditutup, buka kembali jalan, kereta api & infrastruktur."
+      },
+      "step2": {
+        "title": "Membangun pintu masuk stasiun",
+        "description": "Pilih bangunan stasiun sederhana. Hubungkan setiap pasangan penanda dengan bagian pendek di seluruh platformnya. Tempatkan pintu masuk tepat di luar kedua sisi platform. Klik kiri titik akhir yang ditandai, klik kanan untuk menyelesaikan bentuk, lalu konfirmasikan kedua bagian.",
+        "open": "Pilih bangunan stasiun sederhana. Hubungkan setiap pasangan penanda dengan bagian pendek di seluruh platformnya. Tempatkan pintu masuk tepat di luar kedua sisi platform. Klik kiri titik akhir yang ditandai, klik kanan untuk menyelesaikan bentuk, lalu konfirmasikan kedua bagian.",
+        "variant": "Pilih bangunan stasiun sederhana. Hubungkan setiap pasangan penanda dengan bagian pendek di seluruh platformnya. Tempatkan pintu masuk tepat di luar kedua sisi platform. Klik kiri titik akhir yang ditandai, klik kanan untuk menyelesaikan bentuk, lalu konfirmasikan kedua bagian.",
+        "start": "Pilih bangunan stasiun sederhana. Hubungkan setiap pasangan penanda dengan bagian pendek di seluruh platformnya. Tempatkan pintu masuk tepat di luar kedua sisi platform. Klik kiri titik akhir yang ditandai, klik kanan untuk menyelesaikan bentuk, lalu konfirmasikan kedua bagian.",
+        "end": "Pilih bangunan stasiun sederhana. Hubungkan setiap pasangan penanda dengan bagian pendek di seluruh platformnya. Tempatkan pintu masuk tepat di luar kedua sisi platform. Klik kiri titik akhir yang ditandai, klik kanan untuk menyelesaikan bentuk, lalu konfirmasikan kedua bagian.",
+        "confirm": "Pilih bangunan stasiun sederhana. Hubungkan setiap pasangan penanda dengan bagian pendek di seluruh platformnya. Tempatkan pintu masuk tepat di luar kedua sisi platform. Klik kiri titik akhir yang ditandai, klik kanan untuk menyelesaikan bentuk, lalu konfirmasikan kedua bagian.",
+        "town": "Pilih bangunan stasiun sederhana. Hubungkan setiap pasangan penanda dengan bagian pendek di seluruh platformnya. Tempatkan pintu masuk tepat di luar kedua sisi platform. Klik kiri titik akhir yang ditandai, klik kanan untuk menyelesaikan bentuk, lalu konfirmasikan kedua bagian.",
+        "new": "Pilih bangunan stasiun sederhana. Hubungkan setiap pasangan penanda dengan bagian pendek di seluruh platformnya. Tempatkan pintu masuk tepat di luar kedua sisi platform. Klik kiri titik akhir yang ditandai, klik kanan untuk menyelesaikan bentuk, lalu konfirmasikan kedua bagian.",
+        "east": "Pilih bangunan stasiun sederhana. Hubungkan setiap pasangan penanda dengan bagian pendek di seluruh platformnya. Tempatkan pintu masuk tepat di luar kedua sisi platform. Klik kiri titik akhir yang ditandai, klik kanan untuk menyelesaikan bentuk, lalu konfirmasikan kedua bagian."
+      },
+      "step3": {
+        "title": "Rencanakan bagian akuisisi",
+        "description": "Pilih jalur kereta api ganda. Gambarlah garis lurus pada 6m dari ujung timur platform barat ke ujung barat jalan utama. Bangunan menghalangi bagian ini, sehingga memerlukan pembebasan lahan. Konfirmasikan rencana dan tekan Berikutnya. Waktu konstruksi tidak dilewati di sini.",
+        "open": "Pilih jalur kereta api ganda. Gambarlah garis lurus pada 6m dari ujung timur platform barat ke ujung barat jalan utama. Bangunan menghalangi bagian ini, sehingga memerlukan pembebasan lahan. Konfirmasikan rencana dan tekan Berikutnya. Waktu konstruksi tidak dilewati di sini.",
+        "variant": "Pilih jalur kereta api ganda. Gambarlah garis lurus pada 6m dari ujung timur platform barat ke ujung barat jalan utama. Bangunan menghalangi bagian ini, sehingga memerlukan pembebasan lahan. Konfirmasikan rencana dan tekan Berikutnya. Waktu konstruksi tidak dilewati di sini.",
+        "start": "Pilih jalur kereta api ganda. Gambarlah garis lurus pada 6m dari ujung timur platform barat ke ujung barat jalan utama. Bangunan menghalangi bagian ini, sehingga memerlukan pembebasan lahan. Konfirmasikan rencana dan tekan Berikutnya. Waktu konstruksi tidak dilewati di sini.",
+        "end": "Pilih jalur kereta api ganda. Gambarlah garis lurus pada 6m dari ujung timur platform barat ke ujung barat jalan utama. Bangunan menghalangi bagian ini, sehingga memerlukan pembebasan lahan. Konfirmasikan rencana dan tekan Berikutnya. Waktu konstruksi tidak dilewati di sini.",
+        "confirm": "Pilih jalur kereta api ganda. Gambarlah garis lurus pada 6m dari ujung timur platform barat ke ujung barat jalan utama. Bangunan menghalangi bagian ini, sehingga memerlukan pembebasan lahan. Konfirmasikan rencana dan tekan Berikutnya. Waktu konstruksi tidak dilewati di sini.",
+        "town": "Pilih jalur kereta api ganda. Gambarlah garis lurus pada 6m dari ujung timur platform barat ke ujung barat jalan utama. Bangunan menghalangi bagian ini, sehingga memerlukan pembebasan lahan. Konfirmasikan rencana dan tekan Berikutnya. Waktu konstruksi tidak dilewati di sini.",
+        "new": "Pilih jalur kereta api ganda. Gambarlah garis lurus pada 6m dari ujung timur platform barat ke ujung barat jalan utama. Bangunan menghalangi bagian ini, sehingga memerlukan pembebasan lahan. Konfirmasikan rencana dan tekan Berikutnya. Waktu konstruksi tidak dilewati di sini.",
+        "east": "Pilih jalur kereta api ganda. Gambarlah garis lurus pada 6m dari ujung timur platform barat ke ujung barat jalan utama. Bangunan menghalangi bagian ini, sehingga memerlukan pembebasan lahan. Konfirmasikan rencana dan tekan Berikutnya. Waktu konstruksi tidak dilewati di sini."
+      },
+      "step4": {
+        "title": "Pesan rumah sakit dibongkar",
+        "description": "Negosiasi untuk membeli plot pribadi dimulai secara otomatis, tetapi rumah sakit umum kota tidak dihapus secara otomatis dan mencegah dimulainya konstruksi jalur. Klik rumah sakit dan tekan Bulldoze di tombol di bagian atas. Setelah itu menunjukkan pembongkaran yang direncanakan, tekan Berikutnya.",
+        "open": "Negosiasi untuk membeli plot pribadi dimulai secara otomatis, tetapi rumah sakit umum kota tidak dihapus secara otomatis dan mencegah dimulainya konstruksi jalur. Klik rumah sakit dan tekan Bulldoze di tombol di bagian atas. Setelah itu menunjukkan pembongkaran yang direncanakan, tekan Berikutnya.",
+        "variant": "Negosiasi untuk membeli plot pribadi dimulai secara otomatis, tetapi rumah sakit umum kota tidak dihapus secara otomatis dan mencegah dimulainya konstruksi jalur. Klik rumah sakit dan tekan Bulldoze di tombol di bagian atas. Setelah itu menunjukkan pembongkaran yang direncanakan, tekan Berikutnya.",
+        "start": "Negosiasi untuk membeli plot pribadi dimulai secara otomatis, tetapi rumah sakit umum kota tidak dihapus secara otomatis dan mencegah dimulainya konstruksi jalur. Klik rumah sakit dan tekan Bulldoze di tombol di bagian atas. Setelah itu menunjukkan pembongkaran yang direncanakan, tekan Berikutnya.",
+        "end": "Negosiasi untuk membeli plot pribadi dimulai secara otomatis, tetapi rumah sakit umum kota tidak dihapus secara otomatis dan mencegah dimulainya konstruksi jalur. Klik rumah sakit dan tekan Bulldoze di tombol di bagian atas. Setelah itu menunjukkan pembongkaran yang direncanakan, tekan Berikutnya.",
+        "confirm": "Negosiasi untuk membeli plot pribadi dimulai secara otomatis, tetapi rumah sakit umum kota tidak dihapus secara otomatis dan mencegah dimulainya konstruksi jalur. Klik rumah sakit dan tekan Bulldoze di tombol di bagian atas. Setelah itu menunjukkan pembongkaran yang direncanakan, tekan Berikutnya.",
+        "town": "Negosiasi untuk membeli plot pribadi dimulai secara otomatis, tetapi rumah sakit umum kota tidak dihapus secara otomatis dan mencegah dimulainya konstruksi jalur. Klik rumah sakit dan tekan Bulldoze di tombol di bagian atas. Setelah itu menunjukkan pembongkaran yang direncanakan, tekan Berikutnya.",
+        "new": "Negosiasi untuk membeli plot pribadi dimulai secara otomatis, tetapi rumah sakit umum kota tidak dihapus secara otomatis dan mencegah dimulainya konstruksi jalur. Klik rumah sakit dan tekan Bulldoze di tombol di bagian atas. Setelah itu menunjukkan pembongkaran yang direncanakan, tekan Berikutnya.",
+        "east": "Negosiasi untuk membeli plot pribadi dimulai secara otomatis, tetapi rumah sakit umum kota tidak dihapus secara otomatis dan mencegah dimulainya konstruksi jalur. Klik rumah sakit dan tekan Bulldoze di tombol di bagian atas. Setelah itu menunjukkan pembongkaran yang direncanakan, tekan Berikutnya."
+      },
+      "step5": {
+        "title": "Tunggu sampai bagian akuisisi selesai",
+        "description": "Uang muka sampai pengadaan lahan swasta, pembongkaran rumah sakit dan penyelesaian konstruksi lintasan. Ini mungkin memakan waktu beberapa bulan. Bagian ini selesai melalui konstruksi normal.",
+        "open": "Uang muka sampai pengadaan lahan swasta, pembongkaran rumah sakit dan penyelesaian konstruksi lintasan. Ini mungkin memakan waktu beberapa bulan. Bagian ini selesai melalui konstruksi normal.",
+        "variant": "Uang muka sampai pengadaan lahan swasta, pembongkaran rumah sakit dan penyelesaian konstruksi lintasan. Ini mungkin memakan waktu beberapa bulan. Bagian ini selesai melalui konstruksi normal.",
+        "start": "Uang muka sampai pengadaan lahan swasta, pembongkaran rumah sakit dan penyelesaian konstruksi lintasan. Ini mungkin memakan waktu beberapa bulan. Bagian ini selesai melalui konstruksi normal.",
+        "end": "Uang muka sampai pengadaan lahan swasta, pembongkaran rumah sakit dan penyelesaian konstruksi lintasan. Ini mungkin memakan waktu beberapa bulan. Bagian ini selesai melalui konstruksi normal.",
+        "confirm": "Uang muka sampai pengadaan lahan swasta, pembongkaran rumah sakit dan penyelesaian konstruksi lintasan. Ini mungkin memakan waktu beberapa bulan. Bagian ini selesai melalui konstruksi normal.",
+        "town": "Uang muka sampai pengadaan lahan swasta, pembongkaran rumah sakit dan penyelesaian konstruksi lintasan. Ini mungkin memakan waktu beberapa bulan. Bagian ini selesai melalui konstruksi normal.",
+        "new": "Uang muka sampai pengadaan lahan swasta, pembongkaran rumah sakit dan penyelesaian konstruksi lintasan. Ini mungkin memakan waktu beberapa bulan. Bagian ini selesai melalui konstruksi normal.",
+        "east": "Uang muka sampai pengadaan lahan swasta, pembongkaran rumah sakit dan penyelesaian konstruksi lintasan. Ini mungkin memakan waktu beberapa bulan. Bagian ini selesai melalui konstruksi normal."
+      },
+      "step6": {
+        "title": "Lay track tepat di atas jalan utama",
+        "description": "Letakkan rel kereta api ganda di 6m tepat di atas pusat jalan utama dari barat ke timur. Menggunakan koridor jalan menghindari perolehan plot pribadi yang berdampingan. Pindah dari jalan ke gedung-gedung masih memerlukan akuisisi atau pembongkaran fasilitas publik.",
+        "open": "Letakkan rel kereta api ganda di 6m tepat di atas pusat jalan utama dari barat ke timur. Menggunakan koridor jalan menghindari perolehan plot pribadi yang berdampingan. Pindah dari jalan ke gedung-gedung masih memerlukan akuisisi atau pembongkaran fasilitas publik.",
+        "variant": "Letakkan rel kereta api ganda di 6m tepat di atas pusat jalan utama dari barat ke timur. Menggunakan koridor jalan menghindari perolehan plot pribadi yang berdampingan. Pindah dari jalan ke gedung-gedung masih memerlukan akuisisi atau pembongkaran fasilitas publik.",
+        "start": "Letakkan rel kereta api ganda di 6m tepat di atas pusat jalan utama dari barat ke timur. Menggunakan koridor jalan menghindari perolehan plot pribadi yang berdampingan. Pindah dari jalan ke gedung-gedung masih memerlukan akuisisi atau pembongkaran fasilitas publik.",
+        "end": "Letakkan rel kereta api ganda di 6m tepat di atas pusat jalan utama dari barat ke timur. Menggunakan koridor jalan menghindari perolehan plot pribadi yang berdampingan. Pindah dari jalan ke gedung-gedung masih memerlukan akuisisi atau pembongkaran fasilitas publik.",
+        "confirm": "Letakkan rel kereta api ganda di 6m tepat di atas pusat jalan utama dari barat ke timur. Menggunakan koridor jalan menghindari perolehan plot pribadi yang berdampingan. Pindah dari jalan ke gedung-gedung masih memerlukan akuisisi atau pembongkaran fasilitas publik.",
+        "town": "Letakkan rel kereta api ganda di 6m tepat di atas pusat jalan utama dari barat ke timur. Menggunakan koridor jalan menghindari perolehan plot pribadi yang berdampingan. Pindah dari jalan ke gedung-gedung masih memerlukan akuisisi atau pembongkaran fasilitas publik.",
+        "new": "Letakkan rel kereta api ganda di 6m tepat di atas pusat jalan utama dari barat ke timur. Menggunakan koridor jalan menghindari perolehan plot pribadi yang berdampingan. Pindah dari jalan ke gedung-gedung masih memerlukan akuisisi atau pembongkaran fasilitas publik.",
+        "east": "Terakhir, layani rel kereta api ganda pada 6 m dari ujung timur jalan arteri ke ujung barat peron timur. Setelah kedua platform terhubung, selanjutnya menyelesaikan konstruksi."
+      },
+      "step7": {
+        "title": "Bangun Depot Rel",
+        "description": "Pilih Rail Depot di panel konstruksi dan bangun di atas plot kuning di utara kota. Tempatkan depot sendiri. Selanjutnya melewatkan waktu konstruksinya.",
+        "open": "Pilih Rail Depot di panel konstruksi dan bangun di atas plot kuning di utara kota. Tempatkan depot sendiri. Selanjutnya melewatkan waktu konstruksinya.",
+        "variant": "Pilih Rail Depot di panel konstruksi dan bangun di atas plot kuning di utara kota. Tempatkan depot sendiri. Selanjutnya melewatkan waktu konstruksinya.",
+        "start": "Pilih Rail Depot di panel konstruksi dan bangun di atas plot kuning di utara kota. Tempatkan depot sendiri. Selanjutnya melewatkan waktu konstruksinya.",
+        "end": "Pilih Rail Depot di panel konstruksi dan bangun di atas plot kuning di utara kota. Tempatkan depot sendiri. Selanjutnya melewatkan waktu konstruksinya.",
+        "confirm": "Pilih Rail Depot di panel konstruksi dan bangun di atas plot kuning di utara kota. Tempatkan depot sendiri. Selanjutnya melewatkan waktu konstruksinya.",
+        "town": "Pilih Rail Depot di panel konstruksi dan bangun di atas plot kuning di utara kota. Tempatkan depot sendiri. Selanjutnya melewatkan waktu konstruksinya.",
+        "new": "Pilih Rail Depot di panel konstruksi dan bangun di atas plot kuning di utara kota. Tempatkan depot sendiri. Selanjutnya melewatkan waktu konstruksinya.",
+        "east": "Pilih Rail Depot di panel konstruksi dan bangun di atas plot kuning di utara kota. Tempatkan depot sendiri. Selanjutnya melewatkan waktu konstruksinya."
+      },
+      "step8": {
+        "title": "Bentuk cabang memanjat melengkung",
+        "description": "Pilih jalur kereta api. Mulailah di terminal tingkat dasar timur depot, buat lingkaran lebar ke timur melalui penanda Timur Laut, dan hubungkan ke titik penggabungan jalur utama pada 6m. Untuk tetap berada dalam batas kelengkungan dan kemiringan, tempatkan trek menggunakan titik perantara kuning sebagai panduan. Setelah mengklik kanan untuk mengonfirmasi bentuknya, Anda dapat menyesuaikannya dengan menyeret simpul dan pegangan kontrol.",
+        "open": "Pilih jalur kereta api. Mulailah di terminal tingkat dasar timur depot, buat lingkaran lebar ke timur melalui penanda Timur Laut, dan hubungkan ke titik penggabungan jalur utama pada 6m. Untuk tetap berada dalam batas kelengkungan dan kemiringan, tempatkan trek menggunakan titik perantara kuning sebagai panduan. Setelah mengklik kanan untuk mengonfirmasi bentuknya, Anda dapat menyesuaikannya dengan menyeret simpul dan pegangan kontrol.",
+        "variant": "Pilih jalur kereta api. Mulailah di terminal tingkat dasar timur depot, buat lingkaran lebar ke timur melalui penanda Timur Laut, dan hubungkan ke titik penggabungan jalur utama pada 6m. Untuk tetap berada dalam batas kelengkungan dan kemiringan, tempatkan trek menggunakan titik perantara kuning sebagai panduan. Setelah mengklik kanan untuk mengonfirmasi bentuknya, Anda dapat menyesuaikannya dengan menyeret simpul dan pegangan kontrol.",
+        "start": "Pilih jalur kereta api. Mulailah di terminal tingkat dasar timur depot, buat lingkaran lebar ke timur melalui penanda Timur Laut, dan hubungkan ke titik penggabungan jalur utama pada 6m. Untuk tetap berada dalam batas kelengkungan dan kemiringan, tempatkan trek menggunakan titik perantara kuning sebagai panduan. Setelah mengklik kanan untuk mengonfirmasi bentuknya, Anda dapat menyesuaikannya dengan menyeret simpul dan pegangan kontrol.",
+        "end": "Pilih jalur kereta api. Mulailah di terminal tingkat dasar timur depot, buat lingkaran lebar ke timur melalui penanda Timur Laut, dan hubungkan ke titik penggabungan jalur utama pada 6m. Untuk tetap berada dalam batas kelengkungan dan kemiringan, tempatkan trek menggunakan titik perantara kuning sebagai panduan. Setelah mengklik kanan untuk mengonfirmasi bentuknya, Anda dapat menyesuaikannya dengan menyeret simpul dan pegangan kontrol.",
+        "confirm": "Pilih jalur kereta api. Mulailah di terminal tingkat dasar timur depot, buat lingkaran lebar ke timur melalui penanda Timur Laut, dan hubungkan ke titik penggabungan jalur utama pada 6m. Untuk tetap berada dalam batas kelengkungan dan kemiringan, tempatkan trek menggunakan titik perantara kuning sebagai panduan. Setelah mengklik kanan untuk mengonfirmasi bentuknya, Anda dapat menyesuaikannya dengan menyeret simpul dan pegangan kontrol.",
+        "town": "Pilih jalur kereta api. Mulailah di terminal tingkat dasar timur depot, buat lingkaran lebar ke timur melalui penanda Timur Laut, dan hubungkan ke titik penggabungan jalur utama pada 6m. Untuk tetap berada dalam batas kelengkungan dan kemiringan, tempatkan trek menggunakan titik perantara kuning sebagai panduan. Setelah mengklik kanan untuk mengonfirmasi bentuknya, Anda dapat menyesuaikannya dengan menyeret simpul dan pegangan kontrol.",
+        "new": "Pilih jalur kereta api. Mulailah di terminal tingkat dasar timur depot, buat lingkaran lebar ke timur melalui penanda Timur Laut, dan hubungkan ke titik penggabungan jalur utama pada 6m. Untuk tetap berada dalam batas kelengkungan dan kemiringan, tempatkan trek menggunakan titik perantara kuning sebagai panduan. Setelah mengklik kanan untuk mengonfirmasi bentuknya, Anda dapat menyesuaikannya dengan menyeret simpul dan pegangan kontrol.",
+        "east": "Pilih jalur kereta api. Mulailah di terminal tingkat dasar timur depot, buat lingkaran lebar ke timur melalui penanda Timur Laut, dan hubungkan ke titik penggabungan jalur utama pada 6m. Untuk tetap berada dalam batas kelengkungan dan kemiringan, tempatkan trek menggunakan titik perantara kuning sebagai panduan. Setelah mengklik kanan untuk mengonfirmasi bentuknya, Anda dapat menyesuaikannya dengan menyeret simpul dan pegangan kontrol."
+      },
+      "step9": {
+        "title": "Nyalakan depot dari pabrik yang ada",
+        "description": "Untuk menjalankan kereta, Anda perlu menghubungkan saluran listrik dari pembangkit listrik. Gunakan saluran listrik untuk menghubungkan terminal pabrik ke terminal timur depot bersama. Konfirmasi garis.",
+        "open": "Untuk menjalankan kereta, Anda perlu menghubungkan saluran listrik dari pembangkit listrik. Gunakan saluran listrik untuk menghubungkan terminal pabrik ke terminal timur depot bersama. Konfirmasi garis.",
+        "variant": "Untuk menjalankan kereta, Anda perlu menghubungkan saluran listrik dari pembangkit listrik. Gunakan saluran listrik untuk menghubungkan terminal pabrik ke terminal timur depot bersama. Konfirmasi garis.",
+        "start": "Untuk menjalankan kereta, Anda perlu menghubungkan saluran listrik dari pembangkit listrik. Gunakan saluran listrik untuk menghubungkan terminal pabrik ke terminal timur depot bersama. Konfirmasi garis.",
+        "end": "Untuk menjalankan kereta, Anda perlu menghubungkan saluran listrik dari pembangkit listrik. Gunakan saluran listrik untuk menghubungkan terminal pabrik ke terminal timur depot bersama. Konfirmasi garis.",
+        "confirm": "Untuk menjalankan kereta, Anda perlu menghubungkan saluran listrik dari pembangkit listrik. Gunakan saluran listrik untuk menghubungkan terminal pabrik ke terminal timur depot bersama. Konfirmasi garis.",
+        "town": "Untuk menjalankan kereta, Anda perlu menghubungkan saluran listrik dari pembangkit listrik. Gunakan saluran listrik untuk menghubungkan terminal pabrik ke terminal timur depot bersama. Konfirmasi garis.",
+        "new": "Untuk menjalankan kereta, Anda perlu menghubungkan saluran listrik dari pembangkit listrik. Gunakan saluran listrik untuk menghubungkan terminal pabrik ke terminal timur depot bersama. Konfirmasi garis.",
+        "east": "Untuk menjalankan kereta, Anda perlu menghubungkan saluran listrik dari pembangkit listrik. Gunakan saluran listrik untuk menghubungkan terminal pabrik ke terminal timur depot bersama. Konfirmasi garis."
+      },
+      "step10": {
+        "title": "Buka layanan kereta api",
+        "description": "Buka angkutan umum → Jalur baru dan pilih jalur kereta api jarak menengah. Tempatkan pemberhentian di platform yang ditinggikan barat dan timur, lalu klik pemberhentian pertama untuk menutup loop. Atur tarif ke 0 dan targetkan headway menjadi 5 menit, lalu konfirmasi.",
+        "open": "Buka angkutan umum → Jalur baru dan pilih jalur kereta api jarak menengah. Tempatkan pemberhentian di platform yang ditinggikan barat dan timur, lalu klik pemberhentian pertama untuk menutup loop. Atur tarif ke 0 dan targetkan headway menjadi 5 menit, lalu konfirmasi.",
+        "variant": "Buka angkutan umum → Jalur baru dan pilih jalur kereta api jarak menengah. Tempatkan pemberhentian di platform yang ditinggikan barat dan timur, lalu klik pemberhentian pertama untuk menutup loop. Atur tarif ke 0 dan targetkan headway menjadi 5 menit, lalu konfirmasi.",
+        "start": "Buka angkutan umum → Jalur baru dan pilih jalur kereta api jarak menengah. Tempatkan pemberhentian di platform yang ditinggikan barat dan timur, lalu klik pemberhentian pertama untuk menutup loop. Atur tarif ke 0 dan targetkan headway menjadi 5 menit, lalu konfirmasi.",
+        "end": "Buka angkutan umum → Jalur baru dan pilih jalur kereta api jarak menengah. Tempatkan pemberhentian di platform yang ditinggikan barat dan timur, lalu klik pemberhentian pertama untuk menutup loop. Atur tarif ke 0 dan targetkan headway menjadi 5 menit, lalu konfirmasi.",
+        "confirm": "Buka angkutan umum → Jalur baru dan pilih jalur kereta api jarak menengah. Tempatkan pemberhentian di platform yang ditinggikan barat dan timur, lalu klik pemberhentian pertama untuk menutup loop. Atur tarif ke 0 dan targetkan headway menjadi 5 menit, lalu konfirmasi.",
+        "town": "Buka angkutan umum → Jalur baru dan pilih jalur kereta api jarak menengah. Tempatkan pemberhentian di platform yang ditinggikan barat dan timur, lalu klik pemberhentian pertama untuk menutup loop. Atur tarif ke 0 dan targetkan headway menjadi 5 menit, lalu konfirmasi.",
+        "new": "Buka angkutan umum → Jalur baru dan pilih jalur kereta api jarak menengah. Tempatkan pemberhentian di platform yang ditinggikan barat dan timur, lalu klik pemberhentian pertama untuk menutup loop. Atur tarif ke 0 dan targetkan headway menjadi 5 menit, lalu konfirmasi.",
+        "east": "Buka angkutan umum → Jalur baru dan pilih jalur kereta api jarak menengah. Tempatkan pemberhentian di platform yang ditinggikan barat dan timur, lalu klik pemberhentian pertama untuk menutup loop. Atur tarif ke 0 dan targetkan headway menjadi 5 menit, lalu konfirmasi."
+      },
+      "step11": {
+        "title": "Konfirmasi kendaraan dan layanan",
+        "description": "memajukan waktu dan memeriksa kapasitas saluran dan interval operasi dalam manajemen transportasi umum. Depot membutuhkan waktu beberapa bulan untuk mendapatkan kendaraan. Kapasitas positif menegaskan bahwa layanan berjalan. Warga juga membandingkan rute jalan kaki, jadi jalur pendek ini mungkin belum memiliki penumpang.",
+        "open": "memajukan waktu dan memeriksa kapasitas saluran dan interval operasi dalam manajemen transportasi umum. Depot membutuhkan waktu beberapa bulan untuk mendapatkan kendaraan. Kapasitas positif menegaskan bahwa layanan berjalan. Warga juga membandingkan rute jalan kaki, jadi jalur pendek ini mungkin belum memiliki penumpang.",
+        "variant": "memajukan waktu dan memeriksa kapasitas saluran dan interval operasi dalam manajemen transportasi umum. Depot membutuhkan waktu beberapa bulan untuk mendapatkan kendaraan. Kapasitas positif menegaskan bahwa layanan berjalan. Warga juga membandingkan rute jalan kaki, jadi jalur pendek ini mungkin belum memiliki penumpang.",
+        "start": "memajukan waktu dan memeriksa kapasitas saluran dan interval operasi dalam manajemen transportasi umum. Depot membutuhkan waktu beberapa bulan untuk mendapatkan kendaraan. Kapasitas positif menegaskan bahwa layanan berjalan. Warga juga membandingkan rute jalan kaki, jadi jalur pendek ini mungkin belum memiliki penumpang.",
+        "end": "memajukan waktu dan memeriksa kapasitas saluran dan interval operasi dalam manajemen transportasi umum. Depot membutuhkan waktu beberapa bulan untuk mendapatkan kendaraan. Kapasitas positif menegaskan bahwa layanan berjalan. Warga juga membandingkan rute jalan kaki, jadi jalur pendek ini mungkin belum memiliki penumpang.",
+        "confirm": "memajukan waktu dan memeriksa kapasitas saluran dan interval operasi dalam manajemen transportasi umum. Depot membutuhkan waktu beberapa bulan untuk mendapatkan kendaraan. Kapasitas positif menegaskan bahwa layanan berjalan. Warga juga membandingkan rute jalan kaki, jadi jalur pendek ini mungkin belum memiliki penumpang.",
+        "town": "memajukan waktu dan memeriksa kapasitas saluran dan interval operasi dalam manajemen transportasi umum. Depot membutuhkan waktu beberapa bulan untuk mendapatkan kendaraan. Kapasitas positif menegaskan bahwa layanan berjalan. Warga juga membandingkan rute jalan kaki, jadi jalur pendek ini mungkin belum memiliki penumpang.",
+        "new": "memajukan waktu dan memeriksa kapasitas saluran dan interval operasi dalam manajemen transportasi umum. Depot membutuhkan waktu beberapa bulan untuk mendapatkan kendaraan. Kapasitas positif menegaskan bahwa layanan berjalan. Warga juga membandingkan rute jalan kaki, jadi jalur pendek ini mungkin belum memiliki penumpang.",
+        "east": "memajukan waktu dan memeriksa kapasitas saluran dan interval operasi dalam manajemen transportasi umum. Depot membutuhkan waktu beberapa bulan untuk mendapatkan kendaraan. Kapasitas positif menegaskan bahwa layanan berjalan. Warga juga membandingkan rute jalan kaki, jadi jalur pendek ini mungkin belum memiliki penumpang."
+      },
+      "step12": {
+        "title": "Tinjau konstruksi kereta api",
+        "description": "Kamera telah pindah ke stasiun barat. Lihatlah kereta yang berhenti di peron. Anda membangun platform, stasiun, trek, depot, cabang melengkung, sambungan daya, dan layanan. Anda menangani akuisisi swasta dan pembongkaran fasilitas publik, dan menghindari akuisisi di jalan. Gunakan radius kurva dan umpan balik kelas dalam proyek kereta api di masa depan.",
+        "open": "Kamera telah pindah ke stasiun barat. Lihatlah kereta yang berhenti di peron. Anda membangun platform, stasiun, trek, depot, cabang melengkung, sambungan daya, dan layanan. Anda menangani akuisisi swasta dan pembongkaran fasilitas publik, dan menghindari akuisisi di jalan. Gunakan radius kurva dan umpan balik kelas dalam proyek kereta api di masa depan.",
+        "variant": "Kamera telah pindah ke stasiun barat. Lihatlah kereta yang berhenti di peron. Anda membangun platform, stasiun, trek, depot, cabang melengkung, sambungan daya, dan layanan. Anda menangani akuisisi swasta dan pembongkaran fasilitas publik, dan menghindari akuisisi di jalan. Gunakan radius kurva dan umpan balik kelas dalam proyek kereta api di masa depan.",
+        "start": "Kamera telah pindah ke stasiun barat. Lihatlah kereta yang berhenti di peron. Anda membangun platform, stasiun, trek, depot, cabang melengkung, sambungan daya, dan layanan. Anda menangani akuisisi swasta dan pembongkaran fasilitas publik, dan menghindari akuisisi di jalan. Gunakan radius kurva dan umpan balik kelas dalam proyek kereta api di masa depan.",
+        "end": "Kamera telah pindah ke stasiun barat. Lihatlah kereta yang berhenti di peron. Anda membangun platform, stasiun, trek, depot, cabang melengkung, sambungan daya, dan layanan. Anda menangani akuisisi swasta dan pembongkaran fasilitas publik, dan menghindari akuisisi di jalan. Gunakan radius kurva dan umpan balik kelas dalam proyek kereta api di masa depan.",
+        "confirm": "Kamera telah pindah ke stasiun barat. Lihatlah kereta yang berhenti di peron. Anda membangun platform, stasiun, trek, depot, cabang melengkung, sambungan daya, dan layanan. Anda menangani akuisisi swasta dan pembongkaran fasilitas publik, dan menghindari akuisisi di jalan. Gunakan radius kurva dan umpan balik kelas dalam proyek kereta api di masa depan.",
+        "town": "Kamera telah pindah ke stasiun barat. Lihatlah kereta yang berhenti di peron. Anda membangun platform, stasiun, trek, depot, cabang melengkung, sambungan daya, dan layanan. Anda menangani akuisisi swasta dan pembongkaran fasilitas publik, dan menghindari akuisisi di jalan. Gunakan radius kurva dan umpan balik kelas dalam proyek kereta api di masa depan.",
+        "new": "Kamera telah pindah ke stasiun barat. Lihatlah kereta yang berhenti di peron. Anda membangun platform, stasiun, trek, depot, cabang melengkung, sambungan daya, dan layanan. Anda menangani akuisisi swasta dan pembongkaran fasilitas publik, dan menghindari akuisisi di jalan. Gunakan radius kurva dan umpan balik kelas dalam proyek kereta api di masa depan.",
+        "east": "Kamera telah pindah ke stasiun barat. Lihatlah kereta yang berhenti di peron. Anda membangun platform, stasiun, trek, depot, cabang melengkung, sambungan daya, dan layanan. Anda menangani akuisisi swasta dan pembongkaran fasilitas publik, dan menghindari akuisisi di jalan. Gunakan radius kurva dan umpan balik kelas dalam proyek kereta api di masa depan."
+      }
+    },
+    "complete": {
+      "title": "Tutorial selesai",
+      "description": "Selamat! Anda telah menyelesaikan tutorial. Tekan \"Selesai\" untuk menutup panduan dan terus bermain kota ini dengan bebas.",
+      "button": "Selesai"
+    },
+    "nextButton": "Lanjut",
+    "checking": "verifikasi...",
+    "failed": "kondisi tidak terpenuhi. Silakan coba lagi.",
+    "completed": "Tutorial selesai! Kerja bagus.",
+    "stepProgress": "Langkah {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Buka panel konstruksi menggunakan ikon jalan.",
+      "selectRoad": "Pilih jalan dua jalur di permukaan tanah. Hanya tersedia varian yang diperlukan.",
+      "placeStart": "Klik kiri di dalam lingkaran cyan untuk menempatkan awal jalan.",
+      "placeEnd": "Klik kiri di dalam lingkaran kuning untuk menempatkan ujung jalan.",
+      "finalizeRoad": "Klik kanan pada tampilan 3D untuk menyelesaikan bentuk jalan.",
+      "confirmRoad": "Konfirmasi di panel konstruksi untuk menyimpan jalan, lalu tekan \"Next\".",
+      "failed": "pengaturan atau komunikasi gagal. coba lagi; Jika masalah berlanjut, keluar dan mulai tutorial di kota baru.",
+      "retry": "Mencoba kembali",
+      "placementRequired": "Gunakan varian dan posisi yang ditunjukkan oleh panduan.",
+      "preparing": "Mempersiapkan kota tutorial.",
+      "finishFailed": "Tidak bisa menyelesaikan tutorial. Silakan coba lagi."
+    },
+    "trade": {
+      "title": "memulai perdagangan internasional",
+      "description": "Sebuah pabrik lokal ingin menjangkau pelanggan luar negeri. Dalam tutorial ini, Anda akan belajar cara mengekspor makanan melalui pelabuhan dan mengimpor barang dengan kereta barang dari negara tetangga.",
+      "step1": {
+        "description": "Terminal ekspor diperlukan untuk mengirimkan makanan yang diproduksi di pulau ini di luar negeri. Bangun \"terminal wadah\" di bidang pesisir dengan penanda kuning. Karena ini adalah tutorial, periode konstruksi dilewati.",
+        "title": "Bangun port kontainer"
+      },
+      "step2": {
+        "description": "Dibutuhkan beberapa bulan untuk produksi dan transportasi pabrik untuk memulai, jadi memajukan waktu dan melihat hasil ekspor pelabuhan. Tutup detail terminal kontainer sekali dan buka kembali, dan Anda dapat melihat hasil impor dan ekspornya di tab kargo.",
+        "title": "Konfirmasi ekspor makanan"
+      },
+      "step3": {
+        "description": "Anda sekarang memiliki tempat untuk mengimpor dan mengekspor dengan kapal. Selanjutnya, mari kita bangun tempat untuk mengimpor dan mengekspor barang dengan kereta api. Bangun \"Stasiun Pengangkutan Internasional\" di parsel dengan penanda kuning di sepanjang jalan. Di perbatasan timur, ada rel kereta api yang mengarah ke negara tetangga dan stasiun pengangkutan perbatasan.",
+        "title": "Bangun stasiun angkutan internasional"
+      },
+      "step4": {
+        "open": "Buka \"Jalan, Rel & Infrastruktur\" pada panel ikon dan pilih \"Platform Pengiriman Kontainer\" di bawah \"Kereta Api\".",
+        "place": "Letakkan sebuah peron di utara Stasiun Pengangkutan Internasional, sejajar dengannya. Klik kiri di dalam lingkaran cyan (barat) untuk menempatkan awal dan di dalam lingkaran kuning (timur) untuk menempatkan akhir, lalu klik kanan pada tampilan 3D untuk menyelesaikan bentuknya. Ganti \"sisi platform\" ke \"di dalam\" dan periksa apakah peron berada di sisi gedung stasiun (sisi selatan) sebelum mengkonfirmasi. Setelah selesai, tekan \"Selanjutnya\".",
+        "title": "membangun platform di samping stasiun"
+      },
+      "step5": {
+        "description": "Tekan \"Back\" untuk kembali ke daftar, pilih \"Railway Track\", dan lay track dari ujung timur peron ke ujung barat trek yang datang dari Border Freight Station di luar kota.",
+        "title": "Lay track ke perbatasan"
+      },
+      "step6": {
+        "title": "membangun depot",
+        "description": "Bangun \"depot rel\" di parsel dengan spidol kuning di sepanjang lintasan. Tekan \"Next\" dan, karena ini adalah tutorial, periode konstruksi dilewati dan depot selesai."
+      },
+      "step7": {
+        "title": "Hubungkan depot ke jalur utama",
+        "description": "Letakkan dinding dari terminal koneksi di ujung timur depot ke jalur utama. Gabungkan garis utama pada sudut dangkal menuju ke timur bukan pada sudut siku-siku. Setelah selesai, tekan \"Selanjutnya\"."
+      },
+      "step8": {
+        "description": "Buka \"Jalan, Rel & Infrastruktur\" pada panel ikon dan gunakan \"saluran listrik\" di bawah \"listrik\" untuk menghubungkan terminal koneksi pembangkit listrik tenaga surya di sebelah timur kota ke terminal koneksi depot.",
+        "title": "Pasokan daya ke depot"
+      },
+      "step9": {
+        "description": "Dalam \"Transportasi Publik\", tekan \"+ baris baru\" dan pilih \"Jalur Angkutan Internasional\" sebagai jenis garis. Tempatkan pemberhentian di peron Stasiun Barang Internasional dan Stasiun Pengangkutan Perbatasan, klik pemberhentian pertama untuk menutup loop, dan buka jalurnya. Kereta tidak dapat melewati satu sama lain dalam satu jalur, jadi tetapkan target menuju 45 menit sehingga satu kereta dapat melakukan perjalanan pulang pergi.",
+        "title": "Buka Jalur Pengangkutan Internasional"
+      },
+      "step10": {
+        "description": "memajukan waktu dan memastikan bahwa kereta barang mulai berjalan di jalur angkutan internasional. Dibutuhkan beberapa bulan bagi depot untuk mempekerjakan staf, membeli bahan dan menyiapkan kendaraan.",
+        "title": "Jalankan kereta barang"
+      }
+    },
+    "highway": {
+      "title": "membangun jalan raya",
+      "description": "Kota membutuhkan rute lain untuk kendaraan saat tumbuh. Dalam tutorial ini, Anda akan belajar bagaimana membangun jalan raya yang ditinggikan di atas jalan lokal dan menghubungkannya dengan landai untuk membuat pertukaran.",
+      "step1": {
+        "title": "menyeberang di atas jalan",
+        "open": "Seberangi jalan tengah dengan jalan tol yang ditinggikan. Buka \"Jalan, Rel & Infrastruktur\" pada panel ikon dan pilih jalan raya dua jalur di bawah \"Jalan Motor\".",
+        "start": "Klik kiri di dalam lingkaran cyan untuk menempatkan awal jalan raya. Itu terkunci ke jembatan 7 m di atas tanah.",
+        "end": "Klik kiri di dalam lingkaran kuning untuk menempatkan ujungnya. Itu tersentak ke ketinggian 7 m yang sama di sisi jalan yang jauh.",
+        "confirm": "Konfirmasikan di panel konstruksi untuk menyimpan jalan tol, lalu tekan \"Next\". Karena ini adalah tutorial, waktu konstruksi dilewati dan segera selesai."
+      },
+      "step2": {
+        "title": "Sebutkan jalan tol",
+        "description": "Anda dapat mengelola jalan dengan memberi mereka nama. Di bagian paling atas jendela detail jalan raya yang Anda bangun, jalan yang dimilikinya saat ini \"tidak ada (bukan bagian dari jalan)\", jadi beri nama apa pun yang Anda suka."
+      },
+      "step3": {
+        "title": "membangun jalan",
+        "description": "Bangun jalan untuk terhubung ke jalan. Pilih \"Ramp\" sebagai tipe jalan, dan sambungkan ramp melengkung halus dari posisi penanda kuning di layar ke jalan raya."
+      },
+      "step4": {
+        "title": "Periksa persimpangan",
+        "description": "Anda dapat membuka panel Detail Interchange dengan mengklik \"IC1\" yang ditampilkan di sekitar jalan. Konfirmasikan bahwa jalan dan jalan raya terhubung."
+      }
+    },
+    "mining": {
+      "title": "Sumber daya tambang",
+      "description": "Sumber daya berharga terletak di bawah pulau, tetapi tidak ada cara untuk mengangkutnya. Dalam tutorial ini, Anda akan belajar cara menyiapkan tambang, kereta api, dan pelabuhan untuk mengekstrak bijih, mengangkutnya, dan mengekspornya ke luar negeri.",
+      "step1": {
+        "description": "Aktifkan sumber daya alam dan buka panel detail deposit bijih tenggara.",
+        "title": "Periksa vena bijih"
+      },
+      "step2": {
+        "description": "Bangun tambang di atas plot kuning di atas urat bijih tenggara. Karena ini adalah tutorial, waktu konstruksi dilewati.",
+        "title": "membangun tambang"
+      },
+      "step3": {
+        "description": "Bangun stasiun pemuatan bijih di petak besar yang ada di tenggara tambang. Stasiun pemuatan bijih memungkinkan Anda memuat bijih yang diekstraksi di tambang ke kereta.",
+        "title": "Bangun stasiun pemuatan di sebelah tambang"
+      },
+      "step4": {
+        "description": "Bangun stasiun pembongkaran bijih di petak besar yang ada di selatan pelabuhan. Stasiun pembongkaran bijih memungkinkan Anda membawa bijih yang dibawa dengan kereta api.",
+        "title": "Bangun stasiun pembongkaran di dekat pelabuhan"
+      },
+      "step5": {
+        "description": "Bangun pelabuhan curah di petak pantai kuning.",
+        "title": "Bangun port massal"
+      },
+      "step6": {
+        "open": "Pilih platform pengiriman bijih dan hubungkan setiap pasangan penanda di barat daya stasiun pemuatan dan selatan stasiun pembongkaran. menghadapi platform menuju fasilitas mereka.",
+        "loading": "Pilih platform pengiriman bijih dan hubungkan setiap pasangan penanda di barat daya stasiun pemuatan dan selatan stasiun pembongkaran. menghadapi platform menuju fasilitas mereka.",
+        "unloading": "Pilih platform pengiriman bijih dan hubungkan setiap pasangan penanda di barat daya stasiun pemuatan dan selatan stasiun pembongkaran. menghadapi platform menuju fasilitas mereka.",
+        "title": "membangun platform di samping stasiun"
+      },
+      "step7": {
+        "town": "Letakkan jalur barang dari ujung platform pelabuhan timur, melewati selatan titik tengah jalan, ke ujung platform gunung barat laut. Treknya belum terhubung, jadi taruh sendiri. Gunakan kurva untuk menyelaraskan arah perjalanan, atur medan ikuti ke \"tidak mengikuti\" untuk pendakian, dan sesuaikan kemiringan dan radius sampai pelanggaran merah hilang. Tambahkan titik antara sehingga setiap rentang adalah 500m atau kurang.",
+        "climb": "Letakkan jalur barang dari ujung platform pelabuhan timur, melewati selatan titik tengah jalan, ke ujung platform gunung barat laut. Treknya belum terhubung, jadi taruh sendiri. Gunakan kurva untuk menyelaraskan arah perjalanan, atur medan ikuti ke \"tidak mengikuti\" untuk pendakian, dan sesuaikan kemiringan dan radius sampai pelanggaran merah hilang. Tambahkan titik antara sehingga setiap rentang adalah 500m atau kurang.",
+        "title": "Hubungkan kedua stasiun dengan kereta api"
+      },
+      "step8": {
+        "title": "membangun depot",
+        "description": "Bangun depot kereta api di petak yang ada di barat daya pelabuhan. Orientasikan sehingga lintasan dapat dipimpin dari terminal koneksi di ujung timurnya ke platform sisi pelabuhan."
+      },
+      "step9": {
+        "title": "Hubungkan depot ke jalur utama",
+        "description": "Hubungkan terminal timur depot ke ujung platform pelabuhan barat dengan cabang sudut dangkal yang halus."
+      },
+      "step10": {
+        "description": "Hubungkan terminal pembangkit listrik tenaga surya yang ada ke terminal bersama timur depot dengan saluran listrik.",
+        "title": "Pasokan daya ke depot"
+      },
+      "step11": {
+        "description": "Buat jalur transportasi bijih, tempatkan pemberhentian di kedua platform pengiriman bijih, dan klik pemberhentian pertama untuk menutup loop kembali. Kereta tidak dapat melewati satu sama lain dalam satu jalur, jadi tetapkan target menuju 45 menit sehingga satu kereta dapat melakukan perjalanan pulang pergi, lalu konfirmasi.",
+        "title": "Buka jalur pengangkutan bijih"
+      },
+      "step12": {
+        "description": "Waktu awal untuk mendapatkan penambangan, pemuatan, transportasi kereta api, pembongkaran, dan ekspor. Pengadaan kendaraan dan menjalankan dan menjalankan transportasi membutuhkan waktu beberapa bulan.",
+        "title": "waktu muka"
+      },
+      "step13": {
+        "description": "Waktu lanjutan dan periksa penerimaan dan ekspor bijih di rincian pelabuhan curah pesisir. Pertambangan, pengadaan kendaraan dan transportasi memakan waktu beberapa bulan.",
+        "title": "Konfirmasi ekspor bijih"
+      }
+    },
+    "tourism": {
+      "title": "mengembangkan pariwisata",
+      "description": "Pulau ini membutuhkan pelabuhan, akomodasi, dan rute bus untuk menyambut pengunjung ke reruntuhannya. Belajar membangun hotel dan terminal penumpang, membuat rute bus, dan memeriksa kedatangan wisatawan, penjualan restoran, dan penggunaan bus.",
+      "step1": {
+        "description": "Bangun hotel wisata di tempat yang ditandai di barat kuning reruntuhan kuno. Karena ini adalah tutorial, waktu konstruksi dilewati.",
+        "title": "membangun hotel di samping reruntuhan"
+      },
+      "step2": {
+        "description": "Pelabuhan diperlukan untuk menerima wisatawan. Bangun terminal penumpang di tempat pelabuhan yang ditandai.",
+        "title": "Bangun terminal penumpang"
+      },
+      "step3": {
+        "description": "Wisatawan tidak memiliki mobil pribadi, sehingga transportasi umum perlu disediakan. Buka angkutan umum → jalur baru dan pilih rute bus. Tempatkan pemberhentian di jalan pada penanda kuning dalam urutan ini: Pelabuhan → Perumahan → Reruntuhan → Perumahan, lalu klik pemberhentian pelabuhan untuk menutup loop. Atur tarif ke 0 dan target headway menjadi 1 menit, lalu konfirmasi.",
+        "title": "Buat rute bus dari pelabuhan ke reruntuhan"
+      },
+      "step4": {
+        "description": "waktu yang lebih baik untuk menyambut wisatawan. Fasilitas dan pengadaan kendaraan bus membutuhkan waktu beberapa bulan untuk memulai.",
+        "title": "waktu muka"
+      },
+      "step5": {
+        "description": "Periksa penjualan restoran di dekat reruntuhan dan penumpang di rute bus yang Anda buat. Selesaikan langkah ini ketika wisatawan telah tiba, penjualan restoran melebihi level awal mereka, dan bus memiliki penumpang. memajukan waktu lebih jauh jika diperlukan.",
+        "title": "Periksa penjualan restoran dan penumpang bus"
+      }
+    },
+    "intro": {
+      "controls": "Sebagai walikota baru, bantulah membangun kota di mana penduduk dapat hidup dengan baik dan merasa aman. Kota ini belum memiliki rumah untuk pendatang baru, dan tidak ada listrik atau pasokan air. Tutorial ini mengajarkan peran Anda sebagai walikota, cara memajukan waktu, cara membaca kondisi kota, dan tombol serta kontrol kamera, kemudian memandu Anda melalui persiapan jalan dan parsel, menetapkan arah distrik, membangun rumah, dan memasok listrik dan air.",
+      "scenario4": "Kami ingin menghubungkan area perumahan dan tempat kerja dengan kereta api, tetapi bangunan pribadi dan rumah sakit umum menghalangi rute. Dalam tutorial ini Anda akan belajar akuisisi lahan, pembongkaran fasilitas publik, jalur yang ditinggikan di atas jalan, peron dan stasiun, depot, penyesuaian kurva dan grade, sambungan daya, dan pembukaan layanan.",
+      "trade": "Sebuah pabrik makanan lokal telah meminta bantuan untuk menjual produknya di luar negeri. Kota ini juga menginginkan cara untuk membawa barang-barang yang dibutuhkannya dari luar negeri. Dalam tutorial ini, Anda akan belajar cara mengekspor makanan melalui pelabuhan dan mengimpor barang dengan kereta barang dari negara tetangga.",
+      "highway": "Seiring pertumbuhan kota, lebih banyak kendaraan akan membawa orang dan barang melewatinya. Kota ingin rute lain siap sehingga melalui lalu lintas tidak akan berakhir di jalan lokal. Dalam tutorial ini, Anda akan belajar bagaimana membangun jalan raya yang ditinggikan di atas jalan lokal dan menghubungkannya dengan landai untuk membuat pertukaran.",
+      "mining": "Sumber daya yang berharga terletak di bawah pulau ini, tetapi tidak ada cara untuk mengangkutnya dari gunung ke pelabuhan. Tanpa transportasi, pulau itu tidak dapat mengubah kekayaan itu menjadi industri. Dalam tutorial ini, Anda akan belajar cara menyiapkan tambang, kereta api, dan pelabuhan untuk mengekstrak bijih, mengangkutnya, dan mengekspornya ke luar negeri.",
+      "tourism": "Penduduk pulau ingin berbagi reruntuhan pedalaman kuno mereka dengan lebih banyak pengunjung. Tetapi mereka tidak memiliki pelabuhan penumpang, akomodasi, dan rute bus dari pelabuhan ke kota. Dalam tutorial ini, Anda akan belajar membangun hotel dan terminal penumpang, membuat rute bus, dan memeriksa kedatangan wisatawan, penjualan restoran, dan penggunaan bus.",
+      "heading": "Permintaan Walikota",
+      "windowTitle": "Tutorial",
+      "marine": "Kota tepi teluk ini belum memiliki pelabuhan dan fasilitas minyak. Dalam tutorial ini, Anda akan mendapatkan kembali daratan dari laut dan membangun dermaga kapal tanker, menjangkau mulut teluk dengan jembatan gantung, memompa minyak mentah dari ladang minyak bawah laut dan mengirimkannya melalui pipa untuk ekspor, dan menghubungkan pulau terpencil ke kota dengan feri."
+    },
+    "marine": {
+      "title": "mengembangkan laut",
+      "description": "Kota tepi teluk ini belum memiliki pelabuhan dan fasilitas minyak. Dalam tutorial ini, Anda akan mendapatkan kembali daratan dari laut dan membangun dermaga kapal tanker, menjangkau mulut teluk dengan jembatan gantung, memompa minyak mentah dari ladang minyak bawah laut dan mengirimkannya melalui pipa untuk ekspor, dan menghubungkan pulau terpencil ke kota dengan feri.",
+      "step1": {
+        "title": "Rencanakan proyek reklamasi",
+        "description": "Sebuah pelabuhan membutuhkan dermaga di mana kapal-kapal besar dapat berlabuh dan mendarat untuk fasilitasnya. merebut kembali laut di ujung teluk untuk menciptakan tanah untuk sebuah pelabuhan. Buka alat Earthworks, klik kiri empat penanda kuning untuk menggambar area, dan klik kanan untuk menutupnya. Periksa apakah perkiraan untuk reklamasi, lalu konfirmasikan proyek."
+      },
+      "step2": {
+        "title": "Lengkapi tanah reklamasi",
+        "description": "Gunakan Mulai untuk memajukan setidaknya satu bulan, lalu tekan Berikutnya. Karena pelajaran ini tidak memiliki pemasok konstruksi, selanjutnya melewatkan pekerjaan reklamasi yang tersisa. Setelah selesai, laut menjadi daratan, dan tepi lautnya menjadi dermaga di mana kapal dapat berlabuh."
+      },
+      "step3": {
+        "title": "membangun jalan menuju tanah reklamasi",
+        "description": "Sebuah pelabuhan atau terminal minyak di tanah reklamasi tidak berguna tanpa jalan: orang tidak bisa datang bekerja dan barang tidak bisa bergerak. Bangun jalan dari ujung jalan kota menuju tanah reklamasi. Dalam pelajaran ini, jalan selesai segera setelah Anda mengkonfirmasinya. Tekan “Jalan, Rel & Infrastruktur” pada panel ikon untuk membuka panel konstruksi."
+      },
+      "step4": {
+        "title": "Bangun Dermaga Tanker",
+        "description": "Kapal tanker yang membawa minyak mentah adalah kapal besar, sehingga pelabuhan hanya dapat dibangun di mana laut di depan dermaga cukup dalam. Dermaga dari tanah reklamasi menghadap ke perairan dalam, yang sesuai dengan pelabuhan. Buka alat bangunan, pilih \"Piara Tanker\" dalam kategori \"Port\", klik kiri di dalam lingkaran kuning di dermaga untuk mengatur tempatnya, dan konfirmasikan di panel konstruksi. Ketika sebuah pelabuhan dibangun, jalur penghubung ditarik secara otomatis ke jalur pelayaran laut lepas pantai sehingga kapal bisa datang dan pergi. Pelajaran ini melewatkan masa konstruksi."
+      },
+      "step5": {
+        "title": "Jembatan mulut teluk",
+        "description": "Jalan raya berhenti di kedua sisi mulut teluk. Mulut lebarnya 1,6 km, terlalu lebar untuk jembatan biasa di deretan dermaga, jadi hubungkan dengan jembatan gantung yang bisa menyeberang jarak jauh dalam satu bentang. Kapal-kapal besar melewatinya di jalur pelayaran, jadi jembatan harus cukup tinggi untuk dibersihkan. Ujung jalan raya di kedua pantai sudah berada pada ketinggian itu. Buka “Jalan, Rel & Infrastruktur” pada panel ikon, pilih “Jembatan Gantung 4-Lane” di bawah “Jalan Motor”, dan tarik dari ujung utara (lingkaran cyan) ke ujung selatan (lingkaran kuning). Klik kanan untuk menyelesaikan bentuk, konfirmasi di panel konstruksi, lalu tekan Berikutnya."
+      },
+      "step6": {
+        "title": "Temukan ladang minyak bawah laut",
+        "description": "Selanjutnya, gunakan sumber daya laut untuk digunakan. Sebelum membangun terminal minyak, periksa apakah ada ladang minyak di bawah laut terdekat. Tekan \"View\" di kokpit untuk membuka panel tampilan.",
+        "show": "Pilih \"Sumber Daya Alam\" dari tab vertikal dan alihkan ke \"Terlihat\". Anda dapat melihat ladang minyak menyebar di bawah teluk. Klik ladang minyak di dekat penanda kuning untuk membuka detailnya."
+      },
+      "step7": {
+        "title": "Bangun terminal minyak",
+        "description": "Minyak mentah yang dipompa dari ladang bawah laut dikirim melalui pipa ke terminal minyak di pantai dan dijual dari sana. Terminal dibangun menghadap ke dermaga, di mana pipa bisa masuk. Buka alat bangunan, pilih \"Terminal Pipa Oli\" dalam kategori \"Port\", klik kiri di dalam lingkaran kuning di dermaga untuk mengatur tempatnya, dan konfirmasi di panel konstruksi. Pelajaran ini melewatkan masa konstruksi."
+      },
+      "step8": {
+        "title": "Bangun Platform Minyak",
+        "description": "Sebuah platform minyak yang memompa minyak mentah harus berdiri di laut tepat di atas ladang minyak. Buka alat bangunan, pilih \"Platform Minyak Lepas Pantai\" dalam kategori \"Pertanian & Sumber Daya\", klik kiri di dalam lingkaran kuning di laut untuk mengatur tempatnya, dan konfirmasikan di panel konstruksi. Pelajaran ini melewatkan masa konstruksi."
+      },
+      "step9": {
+        "title": "Hubungkan mereka dengan pipa",
+        "description": "Kirim minyak mentah yang dipompa oleh platform ke terminal oli melalui pipa bawah laut. Buka “Jalan, Rel & Infrastruktur” pada panel ikon, pilih “Subsea Oil Pipeline” di bawah “Oil”, dan tarik dari terminal koneksi platform ke terminal koneksi terminal oli. Setelah Anda mengonfirmasinya, tekan Berikutnya dan pipa selesai sekaligus."
+      },
+      "step10": {
+        "title": "Ekspor minyak mentah",
+        "description": "Terminal minyak menjual minyak mentah yang diterimanya di pasaran, dan dermaga kapal tanker membelinya dan mengekspornya ke luar negeri dengan kapal. Dibutuhkan beberapa bulan bagi pekerja untuk tiba dan minyak untuk mulai menjual. Gunakan Mulai untuk memajukan beberapa bulan, lalu tekan Berikutnya. Jika belum ada yang diekspor, maju sedikit lebih jauh dan tekan lagi."
+      },
+      "step11": {
+        "title": "Bangun dermaga feri",
+        "description": "Pulau lepas pantai tidak memiliki cara untuk mencapai kota. Buka feri sehingga penghuninya dapat melakukan perjalanan ke kota. Pertama, bangun dermaga feri di tepi kota. Buka “Jalan, Rel & Infrastruktur” di panel ikon, pilih “Derawan Ferry” di bawah “Waterway”, dan tarik dari pantai (Cyan Circle) di atas laut (Lingkaran Kuning). Klik kanan untuk menyelesaikan bentuk, konfirmasi di panel konstruksi, lalu tekan Berikutnya."
+      },
+      "step12": {
+        "title": "Gambar jalur feri",
+        "description": "Selanjutnya, tarik jalur feri akan berlayar dari dermaga pulau ke dermaga kota. Sebuah jalur tidak dapat menyeberangi daratan, jadi kelilingi sisi utara pulau, lewati jembatan gantung di mulut teluk, dan masuki teluk, klik kiri di sepanjang jalan untuk menempatkan titik. Pilih \"Ferry Lane\" di bawah \"Waterway\", hubungkan ujung dermaga pulau ke ujung dermaga kota, konfirmasi, lalu tekan Berikutnya."
+      },
+      "step13": {
+        "title": "Buka jalur feri",
+        "description": "Terakhir, buat jalur feri yang membentang di jalur. Buat jalur feri, tempat pemberhentian di dermaga pulau dan dermaga kota, klik pemberhentian pertama untuk menutup loop, dan konfirmasikan. Setelah garis ada, tutorial ini selesai. Untuk benar-benar menjalankan kapal, Anda juga memerlukan dok pemeliharaan yang menyewakannya."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Mulai permainan",
+    "nowLoading": "sekarang loading...",
+    "startError": "tidak dapat memulai. Silakan coba lagi.",
+    "todaysTips": "Tips hari ini",
+    "gotIt": "Tutup",
+    "items": {
+      "tip1": {
+        "title": "Uang membuat kota berputar",
+        "description": "Pengeluaran kota untuk konstruksi dan upah sektor publik menjadi pendapatan bagi bisnis dan rumah tangga, mendukung belanja dan produksi. Mengumpulkan pajak saja tidak akan membuat ekonomi bergerak. Dana diperlukan layanan dan perbaikan untuk mengembalikan uang ke kota."
+      },
+      "tip2": {
+        "title": "Mainkan permainan panjang",
+        "description": "Warga negara yang tumbuh di lingkungan yang tidak aman mempertahankan kecenderungan yang lebih besar untuk melakukan kejahatan sebagai orang dewasa. Teruslah mengawasi kejahatan dan memperbaiki lingkungan, anak-anak tumbuh. Mengatasi akar keselamatan publik yang buruk membutuhkan setidaknya satu generasi."
+      },
+      "tip3": {
+        "title": "Pergi!",
+        "description": "Petugas pemadam kebakaran harus mencapai tempat kejadian untuk membantu. Bahkan dengan stasiun pemadam kebakaran yang tersedia, jarak yang jauh atau jalan yang padat membiarkan kerusakan tumbuh. Tinjau lokasi stasiun dan akses rute di samping anggaran mereka."
+      },
+      "tip5": {
+        "title": "biaya yang menanjak",
+        "description": "Membangun jalan di lereng yang curam membutuhkan lebih banyak pekerjaan daripada di tanah datar. Rute terpendek di peta tidak selalu yang termurah. Bandingkan perkiraan medan dan konstruksi, dan pertimbangkan sedikit jalan memutar."
+      },
+      "tip6": {
+        "title": "Beberapa perencanaan diperlukan",
+        "description": "Lebih banyak penduduk dan pabrik berarti lebih banyak permintaan akan listrik dan air. Mulailah membangun setelah kekurangan muncul, dan Anda akan menunggu penyelesaiannya. Periksa kapasitas pasokan cadangan sebelum mengembangkan distrik baru."
+      },
+      "tip7": {
+        "title": "tergesa-gesa membuat limbah",
+        "description": "Batas kecepatan yang lebih tinggi membuat perjalanan lebih cepat tetapi meningkatkan risiko kecelakaan. Kurva tajam juga membutuhkan perawatan. Di mana kecelakaan sering terjadi, tinjau tata letak jalan dan batas kecepatan."
+      },
+      "tip8": {
+        "title": "Berinvestasi di masa depan",
+        "description": "Populasi yang terus bertambah tidak akan menyelesaikan kekurangan staf di rumah sakit atau pabrik maju. Tetapkan spesialisasi universitas dan kapasitas penerimaan untuk melatih spesialis yang dibutuhkan, dan memberikan waktu bagi siswa untuk lulus."
+      },
+      "tip9": {
+        "title": "Dibangun tetap kokoh",
+        "description": "Perbaikan yang terabaikan membuat bangunan dan jalan memburuk, akhirnya berisiko runtuh. Kebakaran dan keruntuhan juga memperburuk sentimen publik, jadi menghabiskan semuanya untuk konstruksi baru berisiko. Siapkan dana untuk perbaikan dan pemadaman kebakaran."
+      },
+      "tip10": {
+        "title": "sedikit ruang bernapas",
+        "description": "Bangunan yang padat, biarkan api menyebar lebih mudah ke tetangga mereka. Di samping layanan pemadam kebakaran, menyisakan ruang di antara bangunan membantu melindungi kota."
+      },
+      "tip11": {
+        "title": "menggali",
+        "description": "Periksa setoran sumber daya sebelum memilih lokasi tambang dan ekstraksi minyak. Cadangan jatuh saat Anda mengekstraknya. Sebuah kota pertambangan juga membutuhkan rencana untuk pekerjaan dan pendapatan pajak setelah depositonya habis."
+      },
+      "tip12": {
+        "title": "sapi perah kota",
+        "description": "Walikota dapat membangun perumahan dan bangunan komersial untuk mendapatkan sewa dari penyewa. Ruang kosong tidak membawa sewa, jadi periksa penggunaan mana yang diminati, lowongan terdekat, dan lokasi sebelum pembangunan."
+      },
+      "tip13": {
+        "title": "petugas pajak datang",
+        "description": "Tarif pajak mempengaruhi biaya bisnis dan profitabilitas serta pendapatan kota. Pajak yang lebih rendah pada suatu industri dapat membantu Anda mendukung pertumbuhannya. Ketika pendapatan gagal, periksa situasi masing-masing industri sebelum menaikkan pajak secara keseluruhan."
+      },
+      "tip14": {
+        "title": "Selalu punya rencana B",
+        "description": "Ketika kecelakaan atau bencana melumpuhkan pembangkit listrik atau saluran listrik, efeknya menyebar ke pabrik dan penduduk yang bergantung pada listrik. Menyediakan fasilitas cadangan dan rute pengiriman untuk infrastruktur penting sehingga satu kegagalan tidak membuat seluruh kota terhenti."
+      },
+      "tip15": {
+        "title": "Tempat yang disebut rumah",
+        "description": "Jika Anda meninggalkan tanah kosong di pusat kota tanpa terpakai, orang-orang yang kehilangan rumah mereka mungkin menetap di sana, menjadikannya tempat yang mungkin untuk daerah kumuh. Menyediakan rumah yang mereka mampu, dan daerah kumuh secara bertahap akan menyusut saat penduduk pindah ke mereka."
+      },
+      "tip16": {
+        "title": "klaster industri",
+        "description": "Mengelompokkan industri serupa dan produsen bahan mentahnya membuat lokasi lebih menguntungkan untuk produksi. Pertimbangkan untuk mengelompokkan industri terkait alih-alih menyebarkan pabrik di seluruh kota. Di dekat perumahan, ingatlah kebisingan dan polusi udara yang dapat mereka ciptakan."
+      },
+      "tip17": {
+        "title": "Bangkit dan giling",
+        "description": "Jam kerja yang lebih lama di panel peraturan membiarkan tenaga kerja yang sama mendukung lebih banyak produksi. Tetapi kesehatan dan waktu luang menderita, mengurangi pengeluaran untuk hiburan. Terlalu banyak waktu untuk menghasilkan uang tidak menyisakan waktu untuk menghabiskannya."
+      },
+      "tip18": {
+        "title": "Makan, jalan-jalan, tidur, ulangi",
+        "description": "Perjalanan panjang memotong waktu luang dan menghabiskan waktu untuk hiburan. Tinjau jarak antara rumah dan pekerjaan, dan kemacetan di sepanjang jalan. Bagi warga yang baru pulang tepat waktu untuk tidur, kawasan perbelanjaan Anda yang semarak hanyalah pemandangan melalui jendela."
+      },
+      "tip19": {
+        "title": "Tinggalkan ruang untuk tumbuh",
+        "description": "Kereta yang lebih panjang hanya dapat berjalan jika mereka cocok dengan peron di stasiun jalur. Rencanakan panjang platform saat membangun stasiun untuk memungkinkan permintaan di masa depan. Memperpanjang satu stasiun tidak akan membantu jika yang lain masih terlalu pendek."
+      },
+      "tip20": {
+        "title": "menyapu di bawah kota",
+        "description": "Jalan bawah tanah tidak menghasilkan kebisingan atau polusi udara, menjadikannya pilihan untuk melindungi daerah pemukiman. Beberapa masalah benar-benar dapat tersapu di bawah kota."
+      },
+      "tip21": {
+        "title": "Dalam bayang-bayang kemajuan",
+        "description": "Bangunan-bangunan tinggi membuat bayangan ke utara, memburuknya kondisi kehidupan di dekatnya. perhatikan ketinggian dan jarak mereka. Medan seperti gunung juga membuat bayangan. Masa depan kota Anda mungkin cerah, tetapi tanah di bawahnya mungkin gelap gulita."
+      },
+      "tip22": {
+        "title": "Tukarkan kunci untuk pass transit",
+        "description": "Ketika transportasi umum membuat tempat kerja, sekolah, dan toko mudah dijangkau, rumah tangga lebih cenderung memilih hidup tanpa mobil. Penghematan kepemilikan mobil dapat digunakan untuk pengeluaran lainnya."
+      },
+      "tip23": {
+        "title": "Pemberhentian berikutnya: Tidak ada",
+        "description": "Bus menambah lalu lintas jalan bahkan tanpa penumpang. Berlari terlalu banyak dapat memperburuk kemacetan. Periksa penumpang dan headway untuk memutuskan berapa banyak layanan yang dibutuhkan."
+      },
+      "tip24": {
+        "title": "Tahi lalat tidak membayar sewa",
+        "description": "Terowongan yang cukup dalam dapat lewat tanpa membeli tanah di atas. Bagian dangkal masih memerlukan pembebasan lahan, jadi periksa kedalaman dan perkiraan. Jika negosiasi menjadi sulit, cobalah menggali lebih dalam."
+      },
+      "tip25": {
+        "title": "perjalanan yang ditangguhkan",
+        "description": "Kereta gantung dapat menyediakan transportasi umum di mana pegunungan dan lereng curam membuat jalan menjadi sulit. Menyediakan akses ke stasiun dan koneksi ke transportasi lain juga. Jika perjalanan di tanah terlalu merepotkan, biarkan warga Anda menggantung."
+      },
+      "tip26": {
+        "title": "Kondisi lalu lintas saat ini",
+        "description": "Kapasitas pembangkitan cadangan tidak akan membantu jika saluran listrik tidak dapat membawa listrik yang cukup. Sebelum menambahkan pembangkit listrik, periksa koneksi dan kapasitas transmisi ke distrik dengan kekurangannya. Satu jalur berukuran kecil mungkin membatasi pasokan seluruh kota."
+      },
+      "tip27": {
+        "title": "Tidak ada yang bisa dilihat di sini",
+        "description": "Anda dapat meledakkan sebuah bangunan di jalan pembangunan dan melewatkannya sebagai kecelakaan. Sentimen publik akan sangat menderita. Sebelum membersihkan situs, pertimbangkan biaya pembelian dan pembongkarannya terhadap dampak pendekatan yang kuat."
+      },
+      "tip28": {
+        "title": "pergi ke laut",
+        "description": "Pendek di darat? merebut kembali situs baru dari laut. Platform minyak juga dapat dibangun di mana ada sumber daya di bawah dasar laut."
+      },
+      "tip29": {
+        "title": "lampu merah, lampu merah",
+        "description": "Lebih banyak persimpangan yang dikendalikan sinyal berarti lebih banyak waktu menunggu di lampu. Hindari terlalu banyak di jalan utama. Dengan kisi-kisi yang berpotongan dengan cermat, matahari mungkin terbenam sebelum penghuni Anda melihat warna hijau."
+      },
+      "tip30": {
+        "title": "Bisakah kamu mendengarku sekarang?",
+        "description": "Menara radio yang lebih tinggi di tempat yang lebih tinggi dapat mencakup area yang lebih luas. Periksa gunung antara menara dan tempat-tempat tanpa penerimaan. Anda tidak bisa mendapatkan sinyal melalui gunung dengan antusiasme belaka untuk lebih banyak kekuatan."
+      },
+      "tip31": {
+        "title": "Cukup tambahkan kekuatan",
+        "description": "Pabrik desalinasi pesisir dapat memasok kota tanpa sumber air tawar di dekatnya. Namun, dibutuhkan listrik untuk beroperasi. Pertama Anda berburu air, lalu Anda berburu listrik."
+      },
+      "tip32": {
+        "title": "pekerjaan di ketukan",
+        "description": "Pengangguran merupakan salah satu faktor yang memperburuk keselamatan masyarakat. Warga membutuhkan pekerjaan serta perlindungan polisi. Jika pengangguran tinggi, periksa lowongan, keterampilan yang dibutuhkan pengusaha, dan apakah penghuni dapat mencapai pekerjaan tersebut."
+      },
+      "tip33": {
+        "title": "Itu masalah masa depan ME",
+        "description": "Bangunan dan jalan tetap membutuhkan perbaikan setelah konstruksi. Perluas hanya karena Anda mampu membangun, dan anggaran masa depan mungkin hilang menjadi pemeliharaan. Ingat, walikota masa depan juga Anda."
+      },
+      "tip34": {
+        "title": "Lebih banyak pompa, air yang sama",
+        "description": "Sumber air mengisi kembali dari waktu ke waktu, tetapi mengekstraksi lebih dari mereka memulihkan mengurangi cadangan. mengamankan sumber lain sebelum permintaan tumbuh. Lebih banyak pompa tidak datang dengan lebih banyak air."
+      },
+      "tip35": {
+        "title": "itu fitur",
+        "description": "Jalan dan bangunan tidak mudah dipindahkan setelah konstruksi dimulai. Sebelum mengkonfirmasi, periksa orientasi, sambungan, dan tanah yang tertinggal di sekitarnya. Namun, jalan yang secara tidak sengaja bengkok itu mungkin tumbuh pada Anda sebagai karakter lokal."
+      },
+      "tip36": {
+        "title": "Walikota besar sedang menonton",
+        "description": "Klik pejalan kaki atau mobil untuk menambahkan warga negara ke daftar pelacakan Anda. Gunakan untuk mengikuti penduduk yang hidupnya menarik minat Anda. Bersamaan dengan statistik di seluruh kota, Anda dapat melihat kota Anda melalui kehidupan sehari-hari satu orang."
+      },
+      "tip37": {
+        "title": "cadangan untuk ramalan",
+        "description": "Output matahari dan angin berubah dengan cuaca. Perencanaan di sekitar pasokan cuaca yang baik saja dapat membuat Anda kekurangan ketika kondisi berubah. Kombinasikan mereka dengan sumber yang kurang bergantung pada cuaca, seperti tenaga termal atau nuklir."
+      },
+      "tip38": {
+        "title": "Ukuran diperhitungkan",
+        "description": "Beberapa bangunan tidak akan muat di bidang kecil. Periksa ruang yang dibutuhkan untuk fasilitas yang direncanakan sebelum membagi lahan. Banyak tanah cadangan tidak membantu untuk bangunan besar jika semuanya dalam bidang kecil."
+      },
+      "tip39": {
+        "title": "Itu akan dikenakan biaya",
+        "description": "Pengolahan limbah, pembuangan limbah, komunikasi, dan perawatan kesehatan mungkin gratis secara default. Pengaturan biaya memungkinkan pengguna menutupi sebagian dari biaya operasi. Harga bersahabat atau label harga yang ambisius? Itu panggilan walikota."
+      },
+      "tip40": {
+        "title": "Salin, tempel, untung",
+        "description": "Sebagai walikota, Anda dapat membuat salinan bangunan yang ada. Jaga agar jumlah jenis dan lantai tidak berubah dan gunakan paket yang sesuai dengan aslinya untuk mengurangi biaya konstruksi. Pemandangan jalanan mungkin terlihat berulang, tetapi dompet Anda akan menikmati pemandangannya."
+      },
+      "tip41": {
+        "title": "Lebih dari sewa",
+        "description": "Warga membandingkan sewa, pekerjaan dan perjalanan sekolah, perjalanan belanja, kualitas perumahan, dan lingkungan hidup saat memilih rumah baru. Kebisingan, polusi udara, keselamatan publik, dan sinar matahari semuanya penting. Rumah murah tapi tidak nyaman kurang menarik; Yang nyaman masih membutuhkan sewa yang terjangkau dan ruang yang cukup untuk pindah."
+      },
+      "tip42": {
+        "title": "Lebih baik dalam daripada menyesal",
+        "description": "Pelabuhan besar, seperti peti kemas, curah, dan pelabuhan kapal tanker, membutuhkan air yang cukup dalam. Pantai di mana dasar laut lereng sangat cocok untuk pelabuhan karena air dalam dekat dengan pantai. Bahkan di pantai datar dengan air dangkal yang membentang di lepas pantai, Anda dapat membangun pelabuhan dengan merebut kembali tanah ke perairan yang lebih dalam."
+      },
+      "tip43": {
+        "title": "Sebentar saja…",
+        "description": "Terlalu banyak parkir di jalan memperlambat lalu lintas dan meningkatkan risiko kecelakaan. Bangun tempat parkir untuk memberikan mobil-mobil itu di tempat lain untuk menginap. \"Hanya satu menit\" pengemudi bisa menjadi sore orang lain."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Pilih paket untuk merencanakan bangunan. Dibutuhkan beberapa waktu dari perencanaan hingga penyelesaian.",
+    "parcelCreation": "Tahan Ctrl untuk memilih metode pembuatan dari menu radial, lalu klik target dalam tampilan 3D. Sesuaikan ukuran di panel dan konfirmasi.",
+    "transitCreation": "klik kiri untuk menempatkan pemberhentian secara berurutan; Klik pemberhentian pertama untuk menutup loop. Seret segmen untuk menambahkan titik jalan, seret titik untuk memindahkannya, klik kanan untuk menghapus. Untuk perjalanan pulang pergi, tempatkan juga pemberhentian kembali. Klik stop yang ditempatkan lagi, atau berhenti di halte lain, untuk berhenti di situ lagi.",
+    "transitManagement": "Daftar jalur angkutan umum. Sesuaikan tarif dan headway, atau buat dan hapus baris. Tarif mempengaruhi pilihan rute warga. Tarif yang terlalu tinggi mengurangi jumlah penumpang dan meningkatkan kepemilikan mobil.",
+    "pathConstruction": "Membangun jalan dan rel kereta api. Klik pada medan dalam tampilan 3D: klik kiri untuk menambahkan simpul, klik kanan untuk mengonfirmasi bentuk, dan seret simpul untuk memposisikannya kembali. Tahan Ctrl untuk membuka menu pengaturan (kurva/lurus dan gertakan). Gunakan 3/4 kunci untuk mengubah tinggi tanggul/potong.",
+    "pathConstructionElevated": "Membangun jalan dan rel kereta api. Klik pada medan dalam tampilan 3D: klik kiri untuk menambahkan simpul, klik kanan untuk mengonfirmasi bentuk, dan seret simpul untuk memposisikannya kembali. Tahan Ctrl untuk membuka menu pengaturan (kurva/lurus dan gertakan). Gunakan PageUp/PageDown atau 1/2 untuk mengubah ketinggian, dan 3/4 kunci untuk mengubah tinggi tanggul/potong.",
+    "districtEdit": "Buat, perluas, dan gabungkan \"distrik\", unit untuk peraturan dan statistik. Tahan Ctrl dalam tampilan 3D untuk beralih alat. Buat alat: Klik kiri jalan untuk membuat distrik baru dalam warna yang ditampilkan (warna baru digambar setiap kali Anda memilih alat). Perluas Alat: Klik kanan untuk memilih distrik untuk tumbuh, lalu klik kiri jalan untuk menariknya ke dalamnya. Gabungkan Alat: Klik kanan untuk memilih distrik yang akan digabung, lalu klik kiri distrik lain untuk membuka panel konfirmasi. Warna dan nama distrik yang dipilih ditampilkan di sebelah kursor mouse. Tekan tombol lagi untuk keluar.",
+    "bulldozer": "Mode buldoser. Klik kiri untuk menghapus paket kosong, bangunan terencana, jalan yang direncanakan, dan alat peraga medan (alat peraga yang tersebar dibuang secara keseluruhan setelah konfirmasi). Tekan tombol lagi untuk keluar.",
+    "bulldozerInstant": "Mode buldoser. Klik kiri untuk langsung menghapus bangunan, jalan, paket kosong, dan alat peraga medan tanpa konfirmasi. Bangunan dipindahkan bersama dengan penyewa dan penghuninya, dan medannya tidak dipulihkan (Balai Kota, Pos Pemeriksaan Perbatasan, dan segmen angkutan umum tidak dapat dihapus; Alat peraga yang tersebar masih dihapus secara keseluruhan setelah konfirmasi). Tekan tombol lagi untuk keluar.",
+    "cityBudget": "Putuskan bagaimana mengalokasikan dana yang diperoleh dari pajak dan operasi bisnis untuk periode berikutnya. Ketika pemerintah membeli bahan untuk pembangunan jalan atau operasi fasilitas umum, pemerintah hanya dapat melakukannya sesuai anggaran yang diputuskan di sini. Jika anggaran tidak mencukupi, pegawai fasilitas umum dapat diberhentikan.",
+    "resourceEdit": "membuat kawasan sumber daya alam. Pilih jenis sumber daya, lalu klik pada medan. Klik kiri Untuk menambahkan vertex, klik edge untuk menyisipkan vertex, dan klik kanan untuk menghapus vertex. Seret simpul untuk memposisikan ulang.",
+    "grading": "Klik kiri untuk menempatkan simpul, lalu klik kanan untuk mengonfirmasi area tersebut."
+  }
+}

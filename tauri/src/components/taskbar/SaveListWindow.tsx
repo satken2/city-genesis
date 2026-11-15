@@ -41,7 +41,7 @@ type Pending = { kind: "load" | "delete"; entry: SaveEntry };
 /** City-language flag emoji. Country follows the Intl locale region in utils/locale.ts; use Mexico for es-419, which has no country region. */
 const LANGUAGE_FLAGS: Record<SupportedLanguage, string> = {
   ja: "🇯🇵", en: "🇺🇸", "es-419": "🇲🇽", "zh-Hans": "🇨🇳", "zh-Hant": "🇹🇼", fr: "🇫🇷", ko: "🇰🇷",
-  de: "🇩🇪", pl: "🇵🇱", ru: "🇷🇺", "pt-BR": "🇧🇷", "es-ES": "🇪🇸", tr: "🇹🇷", it: "🇮🇹",
+  de: "🇩🇪", pl: "🇵🇱", ru: "🇷🇺", "pt-BR": "🇧🇷", "es-ES": "🇪🇸", tr: "🇹🇷", it: "🇮🇹", id: "🇮🇩",
 };
 
 /** Format real saved_at timestamps ("20240115_123045") in the display locale. Preserve the original string if its format differs. */

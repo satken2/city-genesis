@@ -22,6 +22,7 @@ export const SUPPORTED_LANGUAGES = [
   "es-ES",
   "tr",
   "it",
+  "id",
 ] as const;
 
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
@@ -45,6 +46,7 @@ const INTL_LOCALES: Record<SupportedLanguage, string> = {
   "es-ES": "es-ES",
   tr: "tr-TR",
   it: "it-IT",
+  id: "id-ID",
 };
 
 /** Fallback for unknown language codes. Match i18n fallbackLng. */

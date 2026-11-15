@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "memberikan nama",
+      "message": "Masukkan nama yang ingin Anda berikan pada {{name}}.",
+      "inputLabel": "Nama baru",
+      "confirm": "Memberikan"
+    },
+    "reward": {
+      "label": "memberikan hadiah",
+      "message": "Berikan penghargaan dari kas kota kepada rumah tangga {{name}}.\nKas kota: {{available}}",
+      "confirm": "Memberikan"
+    },
+    "expel": {
+      "label": "Semoga mereka sukses di luar kota",
+      "message": "Keluarkan {{name}} dari kota?",
+      "confirm": "Mengeluarkan",
+      "results": {
+        "0": "{{name}} berkemas dan diam-diam meninggalkan kota. Tidak ada yang datang untuk melihat mereka pergi.",
+        "1": "{{name}} melewati batas kota sambil berteriak, \"Aku tidak akan pernah kembali!\"",
+        "2": "{{name}} telah dikawal dengan sopan melewati batas kota. Kami berharap mereka sukses di tempat lain."
+      }
+    },
+    "donation": {
+      "label": "Minta donasi",
+      "message": "Minta sumbangan untuk kota dari rumah tangga {{name}}.\nKas rumah tangga: {{available}}",
+      "confirm": "Meminta"
+    },
+    "relocate": {
+      "label": "Sarankan rumah baru",
+      "message": "menggusur rumah tangga {{name}} dari rumah mereka saat ini? Mereka akan mencari rumah baru di Siklus berikutnya.",
+      "confirm": "Mengusir",
+      "results": {
+        "0": "Keluarga {{name}} telah diusir dari rumah mereka. Perabotan mereka ditumpuk di pinggir jalan.",
+        "1": "Kunci di rumah {{name}} telah diubah. Keluarga sudah mulai mencari tempat baru.",
+        "2": "Keluarga {{name}} telah ditawari rumah baru. Mereka tidak bisa kembali ke yang lama."
+      }
+    }
+  }
+}

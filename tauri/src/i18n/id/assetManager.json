@@ -1,0 +1,16 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "bangunan",
+      "paths": "jalan",
+      "vehicles": "kendaraan",
+      "props": "alat peraga"
+    },
+    "additional": "Model tambahan",
+    "loading": "Memuat model dari tampilan 3D…",
+    "noModel": "Tidak ada model",
+    "noImage": "tidak ada gambar",
+    "weight": "Berat",
+    "applyNote": "Perubahan berat badan berlaku saat berikutnya Anda memulai atau memuat permainan."
+  }
+}
