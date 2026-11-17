@@ -72,6 +72,8 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         public Vector3[] positions, directions;
         public string[] keys, modelKeys;   // Working array where DrawLine places one train's vehicle keys, sized to car count.
         public VehicleModelConfig.TransitCarModel[] models;
+        /// <summary>編成と車両の番号ごとの車両キー。毎フレーム文字列を組み立てないよう、モデルが変わったときだけ作り直す。</summary>
+        public readonly Dictionary<(int train, int identity), (string part, string modelKey, string key)> carKeys = new();
         public Color32? livery;             // Line color for body stripes; unset retains original paint.
     }
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -287,8 +289,12 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
                 int identity = reversed ? cars-1-car : car;
                 var model = VehicleModelConfig.GetTransitCarModel(line.data.path_variant, variant, identity, cars);
                 line.models[car] = model;
-                string modelKey = line.type + ":" + model.Part;
-                string key = line.data.line_agent_id+":"+train+":"+identity+":"+modelKey;
+                if (!line.carKeys.TryGetValue((train, identity), out var names) || names.part != model.Part)
+                {
+                    string modelName = line.type + ":" + model.Part;
+                    line.carKeys[(train, identity)] = names = (model.Part, modelName, line.data.line_agent_id+":"+train+":"+identity+":"+modelName);
+                }
+                string modelKey = names.modelKey, key = names.key;
                 line.modelKeys[car] = modelKey; line.keys[car] = key;
                 if (visible.ContainsKey(key)) anyVisible = true;
                 else if (!pool.TryGetValue(modelKey, out var stock) || stock.Count == 0) needsCreation = true;
@@ -396,16 +402,18 @@ public sealed partial class TransitVehicleManager : MonoBehaviour
         direction=(direction*Mathf.Cos(angle)-right*Mathf.Sign(offset)*Mathf.Sin(angle)).normalized;
     }
 
+    private readonly List<string> hidden = new List<string>();
+
     private void HideUnused(bool all)
     {
-        var remove = new List<string>();
+        hidden.Clear();
         foreach(var entry in visible)
         {
             if(!all && used.Contains(entry.Key)) continue;
             var go=entry.Value; go.SetActive(false);
             if(!pool.TryGetValue(go.name,out var stack)) { stack=new Stack<GameObject>();pool[go.name]=stack; }
-            stack.Push(go);remove.Add(entry.Key);
+            stack.Push(go);hidden.Add(entry.Key);
         }
-        foreach(var key in remove)visible.Remove(key);
+        foreach(var key in hidden)visible.Remove(key);
     }
 }
