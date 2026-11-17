@@ -28,5 +28,5 @@ New generators should follow one of these two approaches rather than adding inde
 
 ## Replacement after generation
 
-Hover, planned or construction state colors, district colors, and heatmaps are applied afterward by visual-mode components replacing renderer materials and restoring them when the mode ends ([Unity visual modes](../programs/unity-visual-modes.md)). Materials resolved here define the ordinary appearance. Building scatter parts are not part of the building's renderers, so they are not replaced: they keep their ordinary appearance and follow only the building's visibility ([building meshes](F_building-meshes.md)).
+Hover, planned or construction state colors, district colors, and heatmaps are applied afterward by visual-mode components replacing renderer materials and restoring them when the mode ends ([Unity visual modes](../programs/unity-visual-modes.md)). Materials resolved here define the ordinary appearance. Building scatter parts and the roadside equipment of paths shown in the city are not part of their owner's renderers, so they are not replaced: they keep their ordinary appearance and follow only the owner's visibility ([building meshes](F_building-meshes.md), [road meshes](G_road-meshes.md)).
 

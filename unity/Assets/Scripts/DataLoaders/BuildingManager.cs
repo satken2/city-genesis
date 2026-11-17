@@ -1595,7 +1595,7 @@ public class BuildingManager : BaseApiDataManager
         }
         // Distant combined batches and instanced scatter parts do not detect position changes themselves, so notify them from the code moving the object.
         FarBuildingMember.RefreshObject(buildingGO);
-        BuildingScatterMember.RefreshObject(buildingGO);
+        InstancedPartMember.RefreshObject(buildingGO);
     }
 
     /// <summary>
@@ -1980,7 +1980,7 @@ public class BuildingManager : BaseApiDataManager
 
         if (meshResult?.Mesh != null) buildingGO.AddComponent<FarBuildingMember>().Configure(mr, meshResult.Mesh);
         buildingGO.AddComponent<UndergroundGhostObject>();
-        BuildingScatterMember.Add(buildingGO, meshResult?.Scatter);
+        InstancedPartMember.Add(buildingGO, meshResult?.Scatter);
 
         // Update the dictionary to the new object immediately.
         // This prevents duplicate objects if the same ID is redrawn again shortly afterward.
@@ -2645,7 +2645,7 @@ public class BuildingManager : BaseApiDataManager
             int flags = VisualModeHandler.Instance != null ? VisualModeHandler.Instance.GetFlags(InputObjectType.BUILDING) : VisualFlag.SHOW_PLAN;
             mr.enabled = (flags & VisualFlag.SHOW_PLAN) != 0;
         }
-        BuildingScatterMember.Add(buildingGO, meshResult?.Scatter);
+        InstancedPartMember.Add(buildingGO, meshResult?.Scatter);
 
         // Update the dictionary to the new object immediately.
         // This prevents duplicate objects if the same ID is redrawn again shortly afterward.

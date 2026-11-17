@@ -32,9 +32,12 @@ public static class RoadEquipmentGenerator
         if (master == null || (path.streetlight_type == 0 && path.fence_type == 0 && path.street_tree_type == 0 && path.utility_mode == 0
             && path.bench_type == 0 && path.bin_type == 0 && path.planter_type == 0 && path.advert_type == 0)) return;
         var prefabs = new Dictionary<string, GameObject>();
+        var sink = PathDrawContext.BatchedDrawing ? new InstanceSink() : null;
         GameObject Prefab(string part)
         {
-            if (!prefabs.TryGetValue(part, out var prefab)) prefabs[part] = prefab = Resolve(path, part);
+            if (prefabs.TryGetValue(part, out var prefab)) return prefab;
+            prefabs[part] = prefab = Resolve(path, part, out string resource);
+            if (prefab != null && sink != null) sink.resources[prefab] = resource;
             return prefab;
         }
         float length = spline.CalculateLength();
@@ -90,7 +93,7 @@ public static class RoadEquipmentGenerator
                 // Do not connect across omitted poles, preventing wires from piercing overhead paths.
                 if (Covered(utilityPart, pose)) { previous = null; continue; }
                 if (!Reserve(occupied, pose.position, 2f)) continue;
-                if (!PlacePrefab(parent, Prefab(utilityPart), pose))
+                if (!PlacePrefab(parent, Prefab(utilityPart), pose, sink))
                 {
                     if (overhead)
                     {
@@ -117,7 +120,7 @@ public static class RoadEquipmentGenerator
                     if (access?.Blocks(side, distance, 1f) == true) continue;
                     Pose pose = Sample(spline, distance, offset * side, surface);
                     if (Covered("streetlight", pose) || !Reserve(occupied, pose.position, 2f)) continue;
-                    if (PlacePrefab(parent, Prefab("streetlight"), pose, faceRoad: true)) continue;
+                    if (PlacePrefab(parent, Prefab("streetlight"), pose, sink, faceRoad: true)) continue;
                     metal.Box(pose, new Vector3(0f, 3f, 0f), new Vector3(0.12f, 6f, 0.12f));
                     metal.Box(pose, new Vector3(-0.65f, 6f, 0f), new Vector3(1.4f, 0.12f, 0.12f));
                     lamp.Box(pose, new Vector3(-1.15f, 5.9f, 0f), new Vector3(0.65f, 0.12f, 0.35f));
@@ -135,7 +138,7 @@ public static class RoadEquipmentGenerator
                 {
                     if (distance < centerWidth * .5f + EndClearance || distance > length - centerWidth * .5f - EndClearance) continue;
                     Pose pose = Sample(spline, distance, 0f, centerSurface);
-                    if (!Covered("center_tree", pose) && Reserve(occupied, pose.position, 3f)) PlacePrefab(parent, centerTree, pose);
+                    if (!Covered("center_tree", pose) && Reserve(occupied, pose.position, 3f)) PlacePrefab(parent, centerTree, pose, sink);
                 }
             }
             foreach (float distance in Distances(length, spacing, spacing * 0.5f, outdoorClear))
@@ -144,7 +147,7 @@ public static class RoadEquipmentGenerator
                     if (access?.Blocks(side, distance, 1.5f) == true) continue;
                     Pose pose = Sample(spline, distance, offset * side, surface);
                     if (Covered("tree", pose) || !Reserve(occupied, pose.position, 3f)) continue;
-                    if (PlacePrefab(parent, Prefab("tree"), pose)) continue;
+                    if (PlacePrefab(parent, Prefab("tree"), pose, sink)) continue;
                     concrete.Box(pose, new Vector3(0f, 1f, 0f), new Vector3(0.2f, 2f, 0.2f));
                     leaves.Box(pose, new Vector3(0f, 3f, 0f), new Vector3(1.8f, 2.5f, 1.8f));
                 }
@@ -169,7 +172,7 @@ public static class RoadEquipmentGenerator
                     // Center-island benches face outward. Two-row layouts face the central aisle, keeping shop fronts clear.
                     if (centralMall && part == "bench") pose.rotation *= Quaternion.Euler(0f, 180f, 0f);
                     if (Reserve(occupied, pose.position, part == "bench" && centralMall ? 1.8f : clearance))
-                        PlacePrefab(parent, prefab, pose);
+                        PlacePrefab(parent, prefab, pose, sink);
                 }
         }
         if (master.fence_type_allowed && path.fence_type == Constants.PATH_EQUIPMENT_STANDARD)
@@ -196,7 +199,7 @@ public static class RoadEquipmentGenerator
                         metal.Box(next, new Vector3(0f, 0.5f, 0f), new Vector3(0.07f, 1f, 0.07f));
                     if (access?.Blocks(side, (d + previousDistance) * .5f, (d - previousDistance) * .5f + .05f) == true)
                     { previous = next; continue; }
-                    if (!PlaceFencePanel(parent, Prefab("fence"), previous.position, next.position))
+                    if (!PlaceFencePanel(parent, Prefab("fence"), previous.position, next.position, sink))
                     {
                         metal.Bar(previous.position + Vector3.up * 0.5f, next.position + Vector3.up * 0.5f, 0.05f);
                         metal.Bar(previous.position + Vector3.up * 0.95f, next.position + Vector3.up * 0.95f, 0.05f);
@@ -206,6 +209,14 @@ public static class RoadEquipmentGenerator
             }
         }
         metal.Finish(); concrete.Finish(); lamp.Finish(); leaves.Finish();
+        if (sink != null) InstancedPartMember.Add(parent, sink.instances, road: true);
+    }
+
+    /// <summary>共有モデルのインスタンシングで描く設備の受け皿。resources はモデルからリソースパスを引く。</summary>
+    private sealed class InstanceSink
+    {
+        public readonly Dictionary<GameObject, string> resources = new();
+        public readonly List<InstancedPartRenderer.Instance> instances = new();
     }
 
     private static IEnumerable<float> Distances(float length, float spacing, float phase, IReadOnlyList<Vector2> keepClear)
@@ -278,21 +289,35 @@ public static class RoadEquipmentGenerator
         return new Vector2(Mathf.Max(-min.x, max.x) * Mathf.Abs(scale.x), Mathf.Max(-min.z, max.z) * Mathf.Abs(scale.z)).magnitude;
     }
 
-    private static GameObject Resolve(PathSummary path, string part) =>
-        ModelManager.Instance?.GetModel($"{PathParts.Folder(path)}/{part}")
-        ?? ModelManager.Instance?.GetModel($"Models/Paths/p{path.path_type}/{part}");
+    private static GameObject Resolve(PathSummary path, string part, out string resource)
+    {
+        resource = $"{PathParts.Folder(path)}/{part}";
+        var prefab = ModelManager.Instance?.GetModel(resource);
+        if (prefab != null) return prefab;
+        resource = $"Models/Paths/p{path.path_type}/{part}";
+        return ModelManager.Instance?.GetModel(resource);
+    }
 
-    private static bool PlacePrefab(GameObject parent, GameObject prefab, Pose pose, bool faceRoad = false)
+    private static bool PlacePrefab(GameObject parent, GameObject prefab, Pose pose, InstanceSink sink, bool faceRoad = false)
     {
         if (prefab == null) return false;
         // FBX axis conversion can flip X; use the imported lamp's projection side as reference.
         var mesh = prefab.GetComponent<MeshFilter>()?.sharedMesh;
         if (faceRoad && mesh != null && mesh.bounds.center.x > 0f)
             pose.rotation *= Quaternion.Euler(0f, 180f, 0f);
+        if (sink != null)
+        {
+            AddInstance(parent, prefab, Matrix4x4.TRS(pose.position, pose.rotation, prefab.transform.localScale), sink);
+            return true;
+        }
         var go = Object.Instantiate(prefab, pose.position, pose.rotation, parent.transform);
         PreparePrefab(go);
         return true;
     }
+
+    /// <summary>world は子オブジェクトとして置いたときのモデルのルートと同じ姿勢。</summary>
+    private static void AddInstance(GameObject parent, GameObject prefab, Matrix4x4 world, InstanceSink sink) =>
+        sink.instances.Add(new InstancedPartRenderer.Instance { path = sink.resources[prefab], local = parent.transform.worldToLocalMatrix * world });
 
     private static void PreparePrefab(GameObject go)
     {
@@ -305,13 +330,20 @@ public static class RoadEquipmentGenerator
         }
     }
 
-    private static bool PlaceFencePanel(GameObject parent, GameObject prefab, Vector3 a, Vector3 b)
+    private static bool PlaceFencePanel(GameObject parent, GameObject prefab, Vector3 a, Vector3 b, InstanceSink sink)
     {
         var mesh = prefab != null ? prefab.GetComponent<MeshFilter>()?.sharedMesh : null;
         if (mesh == null || mesh.bounds.size.z < 0.001f || (b-a).sqrMagnitude < 0.00001f) return false;
         // Preserve panel width/height; fit only length between posts. Posts remain independently upright.
-        var go = Object.Instantiate(prefab, (a+b)*0.5f, Quaternion.LookRotation(b-a), parent.transform);
         float scale = Vector3.Distance(a,b) / mesh.bounds.size.z;
+        if (sink != null)
+        {
+            Quaternion rotation = Quaternion.LookRotation(b-a);
+            Vector3 position = (a+b)*0.5f - rotation * Vector3.forward * (mesh.bounds.center.z * scale);
+            AddInstance(parent, prefab, Matrix4x4.TRS(position, rotation, new Vector3(1f, 1f, scale)), sink);
+            return true;
+        }
+        var go = Object.Instantiate(prefab, (a+b)*0.5f, Quaternion.LookRotation(b-a), parent.transform);
         go.transform.localScale = new Vector3(1f, 1f, scale);
         go.transform.position -= go.transform.forward * (mesh.bounds.center.z * scale);
         PreparePrefab(go);

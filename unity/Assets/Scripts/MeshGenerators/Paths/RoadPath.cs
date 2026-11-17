@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using Dreamteck.Splines;
 using System;
+using System.Collections;
 using GeneratedModels;
 
 /// <summary>
@@ -345,7 +346,7 @@ public class RoadPath : IPathMeshGenerator
         }
 
         // Sections are fractions of the given spline itself, so each span spline of a bent road is sectioned on its own.
-        if (roadSurface && !singleSpan && !isDashed && spline.CalculateLength() >= 256f
+        if (roadSurface && !singleSpan && !isDashed && spline.CalculateLength() >= SECTION_LOD_MIN_LENGTH
             && parent.GetComponentInParent<SplinePartLod>() == null)
         {
             var group = new GameObject(prefabName + "_LOD");
@@ -647,7 +648,236 @@ public class RoadPath : IPathMeshGenerator
 
         if (mf != null && mf.sharedMesh != null)
             partCreated?.Invoke(go, spline, mf.sharedMesh, clipFrom, clipTo);
+        if (channel != null && mf != null && mf.sharedMesh != null && mf.sharedMesh.bounds.size.y <= GROUND_SLAB_MAX_HEIGHT)
+            ApplyGroundSurfaceShadow(go.GetComponent<MeshRenderer>(),
+                SamplePositions(spline, channel.clipFrom, channel.clipTo, offsetY + mf.sharedMesh.bounds.min.y));
         return go;
+    }
+
+    /// <summary>部品を固定区間に分けて区間ごとに描画LODを選ぶ、スプラインの長さの下限(m)。</summary>
+    private const float SECTION_LOD_MIN_LENGTH = 256f;
+
+    /// <summary>同じ部品を敷く1か所(左右のどちらか、出入口で分かれた区間の1つ)。</summary>
+    private readonly struct PartPlacement
+    {
+        public readonly float CenterOffsetX;
+        public readonly bool MirrorX;
+        public readonly double From, To;
+        public PartPlacement(float centerOffsetX, bool mirrorX, double from, double to)
+        {
+            CenterOffsetX = centerOffsetX; MirrorX = mirrorX; From = from; To = to;
+        }
+    }
+
+    /// <summary>
+    /// 同じ部品を複数の場所(左右、出入口で分かれた区間)へ敷く。<see cref="PathDrawContext.BatchedDrawing"/> のときは1つのレンダラーにまとめ、
+    /// 区間LODも部品1つぶんにする。場所ごとのレンダラーのままだと、同じ材質でも場所の数だけ描画と影の描画が増える。
+    /// </summary>
+    private static void CreateSplineMeshes(GameObject parent, SplineComputer spline, string prefabName, float width, float offsetY,
+        string fallbackPrefabName, List<PartPlacement> placements)
+    {
+        if (!PathDrawContext.BatchedDrawing || placements.Count < 2)
+        {
+            foreach (var placement in placements)
+                CreateSplineMesh(parent, spline, prefabName, width, placement.CenterOffsetX, offsetY, placement.MirrorX, fallbackPrefabName,
+                    clipFrom: placement.From, clipTo: placement.To);
+            return;
+        }
+        GameObject Build(GameObject owner, double from, double to)
+        {
+            var holder = new GameObject(prefabName);
+            holder.transform.SetParent(owner.transform, false);
+            foreach (var placement in placements)
+            {
+                double a = Math.Max(placement.From, from), b = Math.Min(placement.To, to);
+                if (b > a)
+                    CreateSplineMesh(holder, spline, prefabName, width, placement.CenterOffsetX, offsetY, placement.MirrorX, fallbackPrefabName,
+                        clipFrom: a, clipTo: b);
+            }
+            return MergeParts(holder);
+        }
+        if (spline.CalculateLength() < SECTION_LOD_MIN_LENGTH || parent.GetComponentInParent<SplinePartLod>() != null)
+        {
+            Build(parent, 0.0, 1.0);
+            return;
+        }
+        var group = new GameObject(prefabName + "_LOD");
+        group.transform.SetParent(parent.transform, false);
+        float adaptive = PathDrawContext.AdaptiveTileLength;
+        Color? paint = PathDrawContext.PaintColor;
+        double first = 1.0, last = 0.0;
+        float lateral = 0f;
+        foreach (var placement in placements)
+        {
+            first = Math.Min(first, placement.From);
+            last = Math.Max(last, placement.To);
+            lateral = Mathf.Max(lateral, Mathf.Abs(placement.CenterOffsetX));
+        }
+        group.AddComponent<SplinePartLod>().Configure(spline, width, lateral, offsetY, false, 0, PathDrawContext.PathAppearance,
+            PathDrawContext.PathWidth, false, first, last,
+            (lod, from, to) =>
+            {
+                PathDrawContext.Begin(lod, from, to);
+                PathDrawContext.SetAdaptiveTileLength(adaptive);
+                PathDrawContext.PaintColor = paint;
+                try { return Build(group, from, to); }
+                finally { PathDrawContext.End(); }
+            });
+    }
+
+    /// <summary>
+    /// holder の下に作った部品を1つのメッシュとレンダラーにまとめる。部品が無ければ holder を消して null を返し、
+    /// 材質・配置・頂点の形式が揃わなければ部品を分けたまま返す。
+    /// </summary>
+    private static GameObject MergeParts(GameObject holder)
+    {
+        var filters = holder.GetComponentsInChildren<MeshFilter>(true);
+        if (filters.Length == 0)
+        {
+            DestroyObject(holder);
+            return null;
+        }
+        if (filters.Length == 1) return holder;
+        var meshes = new List<Mesh>();
+        Material[] materials = null;
+        var shadows = UnityEngine.Rendering.ShadowCastingMode.Off;
+        foreach (var filter in filters)
+        {
+            var renderer = filter.GetComponent<MeshRenderer>();
+            if (renderer == null || filter.sharedMesh == null) return holder;
+            // 頂点をそのまま並べるので、部品は holder と同じ座標系に置かれていること。
+            for (Transform t = filter.transform; t != holder.transform; t = t.parent)
+                if (t.localPosition != Vector3.zero || t.localRotation != Quaternion.identity || t.localScale != Vector3.one) return holder;
+            var partMaterials = renderer.sharedMaterials;
+            if (materials == null) materials = partMaterials;
+            else if (!((IStructuralEquatable)materials).Equals(partMaterials, EqualityComparer<Material>.Default)) return holder;
+            // 地表から離れた場所が1つでもあれば、まとめた全体が影を落とす。
+            if (renderer.shadowCastingMode != UnityEngine.Rendering.ShadowCastingMode.Off) shadows = renderer.shadowCastingMode;
+            meshes.Add(filter.sharedMesh);
+        }
+        Mesh merged = ConcatenateMeshes(meshes, holder.name);
+        if (merged == null) return holder;
+        for (int i = holder.transform.childCount - 1; i >= 0; i--)
+        {
+            // Destroy はフレームの終わりまで残るので、先に親から外して、このあとレンダラーを集める処理に拾わせない。
+            GameObject part = holder.transform.GetChild(i).gameObject;
+            part.transform.SetParent(null, false);
+            DestroyObject(part);
+        }
+        holder.AddComponent<MeshFilter>().sharedMesh = merged;
+        var target = holder.AddComponent<MeshRenderer>();
+        target.sharedMaterials = materials;
+        target.shadowCastingMode = shadows;
+        holder.AddComponent<IntersectionMeshOwner>().OwnedMesh = merged;
+        return holder;
+    }
+
+    private static void DestroyObject(GameObject target)
+    {
+        if (Application.isPlaying) UnityEngine.Object.Destroy(target);
+        else UnityEngine.Object.DestroyImmediate(target);
+    }
+
+    /// <summary>
+    /// 同じ座標系・同じ頂点形式・同じサブメッシュ数のメッシュを、頂点を並べてつなぐ。サブメッシュは番号ごとに1つにする。
+    /// 頂点の列は元の形式のまま写す。どれかが揃わなければ null を返す。
+    /// </summary>
+    private static Mesh ConcatenateMeshes(List<Mesh> meshes, string name)
+    {
+        Mesh head = meshes[0];
+        var layout = head.GetVertexAttributes();
+        int streams = head.vertexBufferCount, subMeshes = head.subMeshCount, vertexCount = 0, indexCount = 0;
+        foreach (Mesh mesh in meshes)
+        {
+            if (!mesh.isReadable || mesh.subMeshCount != subMeshes || mesh.vertexBufferCount != streams) return null;
+            var attributes = mesh.GetVertexAttributes();
+            if (attributes.Length != layout.Length) return null;
+            for (int i = 0; i < layout.Length; i++)
+                if (!attributes[i].Equals(layout[i])) return null;
+            for (int s = 0; s < subMeshes; s++)
+            {
+                if (mesh.GetTopology(s) != MeshTopology.Triangles) return null;
+                indexCount += (int)mesh.GetIndexCount(s);
+            }
+            vertexCount += mesh.vertexCount;
+        }
+        using var sources = Mesh.AcquireReadOnlyMeshData(meshes);
+        var targets = Mesh.AllocateWritableMeshData(1);
+        var target = targets[0];
+        target.SetVertexBufferParams(vertexCount, layout);
+        target.SetIndexBufferParams(indexCount, UnityEngine.Rendering.IndexFormat.UInt32);
+        for (int stream = 0; stream < streams; stream++)
+        {
+            var bytes = target.GetVertexData<byte>(stream);
+            int size = 0;
+            for (int i = 0; i < sources.Length; i++) size += sources[i].GetVertexData<byte>(stream).Length;
+            if (size != bytes.Length)
+            {
+                targets.Dispose();
+                return null;
+            }
+            int offset = 0;
+            for (int i = 0; i < sources.Length; i++)
+            {
+                var part = sources[i].GetVertexData<byte>(stream);
+                Unity.Collections.NativeArray<byte>.Copy(part, 0, bytes, offset, part.Length);
+                offset += part.Length;
+            }
+        }
+        var indices = target.GetIndexData<uint>();
+        target.subMeshCount = subMeshes;
+        int written = 0;
+        for (int s = 0; s < subMeshes; s++)
+        {
+            int start = written, firstVertex = 0;
+            for (int i = 0; i < sources.Length; i++)
+            {
+                var source = sources[i];
+                var sub = source.GetSubMesh(s);
+                int shift = firstVertex + sub.baseVertex;
+                if (source.indexFormat == UnityEngine.Rendering.IndexFormat.UInt16)
+                {
+                    var from = source.GetIndexData<ushort>();
+                    for (int k = 0; k < sub.indexCount; k++) indices[written++] = (uint)(from[sub.indexStart + k] + shift);
+                }
+                else
+                {
+                    var from = source.GetIndexData<uint>();
+                    for (int k = 0; k < sub.indexCount; k++) indices[written++] = (uint)(from[sub.indexStart + k] + shift);
+                }
+                firstVertex += source.vertexCount;
+            }
+            target.SetSubMesh(s, new UnityEngine.Rendering.SubMeshDescriptor(start, written - start));
+        }
+        var merged = new Mesh { name = name };
+        Mesh.ApplyAndDisposeWritableMeshData(targets, merged);
+        merged.RecalculateBounds();
+        return merged;
+    }
+
+    /// <summary>路面・歩道のように地表へ敷く薄い部品とみなす、元モデルの高さの上限(m)。これより高い壁や管は影を落とす。</summary>
+    private const float GROUND_SLAB_MAX_HEIGHT = 0.5f;
+    /// <summary>面が地表に接しているとみなす、地面からの高さの上限(m)。</summary>
+    private const float GROUND_CONTACT_HEIGHT = 1f;
+
+    /// <summary>
+    /// 地表に敷いた面は影を落とさない。落ちる影は面の厚みぶんしか無いのに、影のパスで毎フレーム描かれるため。受ける影は変えない。
+    /// 高架・橋・水上の面は下に影を落とすので、surfacePoints(ワールド座標)のどれかが地面から離れていれば影を落とす。
+    /// </summary>
+    public static void ApplyGroundSurfaceShadow(Renderer renderer, IEnumerable<Vector3> surfacePoints)
+    {
+        if (renderer == null) return;
+        bool onGround = true;
+        foreach (Vector3 point in surfacePoints)
+            if (point.y - Utils.GetGroundHeight(point) > GROUND_CONTACT_HEIGHT) { onGround = false; break; }
+        renderer.shadowCastingMode = onGround ? UnityEngine.Rendering.ShadowCastingMode.Off : UnityEngine.Rendering.ShadowCastingMode.On;
+    }
+
+    /// <summary>スプラインの区間に沿った、スプラインから height だけ上の点。</summary>
+    private static IEnumerable<Vector3> SamplePositions(SplineComputer spline, double from, double to, float height)
+    {
+        const int steps = 4;
+        for (int i = 0; i <= steps; i++) yield return spline.Evaluate(from + (to - from) * i / steps).position + Vector3.up * height;
     }
 
     /// <summary>Avoid tiny shadows from internal pavement/track end faces in low-angle light; close only placement-section ends.</summary>
@@ -969,14 +1199,10 @@ public class RoadPath : IPathMeshGenerator
         if (hasLine)
         {
             // Mirror left-side X for symmetric results even with asymmetric prefabs.
-            GameObject leftLine = null;
-            foreach (var range in access.Remaining(-1))
-                leftLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, -sideLineCenterOffset, lineOffsetY, true, $"{typeBase}/line", clipFrom: range.x, clipTo: range.y);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] side line(左): {(leftLine != null ? "生成成功" : "生成失敗")}");
-            GameObject rightLine = null;
-            foreach (var range in access.Remaining(1))
-                rightLine = CreateSplineMesh(container, spline, $"{variantBase}/line", lineWidth, sideLineCenterOffset, lineOffsetY, false, $"{typeBase}/line", clipFrom: range.x, clipTo: range.y);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] side line(右): {(rightLine != null ? "生成成功" : "生成失敗")}");
+            var sideLines = new List<PartPlacement>();
+            foreach (var range in access.Remaining(-1)) sideLines.Add(new PartPlacement(-sideLineCenterOffset, true, range.x, range.y));
+            foreach (var range in access.Remaining(1)) sideLines.Add(new PartPlacement(sideLineCenterOffset, false, range.x, range.y));
+            CreateSplineMeshes(container, spline, $"{variantBase}/line", lineWidth, lineOffsetY, $"{typeBase}/line", sideLines);
         }
         else
         {
@@ -1042,14 +1268,10 @@ public class RoadPath : IPathMeshGenerator
             GetSidewalkClipRange(splineLenForClip, startSidewalkSetback.LeftOutwardSetback, endSidewalkSetback.RightOutwardSetback, out double leftClipFrom, out double leftClipTo);
             GetSidewalkClipRange(splineLenForClip, startSidewalkSetback.RightOutwardSetback, endSidewalkSetback.LeftOutwardSetback, out double rightClipFrom, out double rightClipTo);
 
-            GameObject leftSidewalk = null;
-            foreach (var range in access.Remaining(-1, leftClipFrom, leftClipTo))
-                leftSidewalk = CreateSplineMesh(container, spline, $"{variantBase}/sidewalk", sidewalkWidth, -sidewalkCenterOffset, RoadPartHeights.SIDEWALK_ABOVE_SPLINE, false, $"{typeBase}/sidewalk", clipFrom: range.x, clipTo: range.y);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] sidewalk(左): {(leftSidewalk != null ? "生成成功" : "生成失敗")} clip=({leftClipFrom:F3}〜{leftClipTo:F3})");
-            GameObject rightSidewalk = null;
-            foreach (var range in access.Remaining(1, rightClipFrom, rightClipTo))
-                rightSidewalk = CreateSplineMesh(container, spline, $"{variantBase}/sidewalk", sidewalkWidth, sidewalkCenterOffset, RoadPartHeights.SIDEWALK_ABOVE_SPLINE, true, $"{typeBase}/sidewalk", clipFrom: range.x, clipTo: range.y);
-            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] sidewalk(右・ミラー): {(rightSidewalk != null ? "生成成功" : "生成失敗")} clip=({rightClipFrom:F3}〜{rightClipTo:F3})");
+            var sidewalks = new List<PartPlacement>();
+            foreach (var range in access.Remaining(-1, leftClipFrom, leftClipTo)) sidewalks.Add(new PartPlacement(-sidewalkCenterOffset, false, range.x, range.y));
+            foreach (var range in access.Remaining(1, rightClipFrom, rightClipTo)) sidewalks.Add(new PartPlacement(sidewalkCenterOffset, true, range.x, range.y));
+            CreateSplineMeshes(container, spline, $"{variantBase}/sidewalk", sidewalkWidth, RoadPartHeights.SIDEWALK_ABOVE_SPLINE, $"{typeBase}/sidewalk", sidewalks);
         }
         else
         {
@@ -1065,14 +1287,16 @@ public class RoadPath : IPathMeshGenerator
             // (opposite sidewalks' left-side convention; see CreateRoadParts sidewalk block).
             // Omit intervening walls and walls overlapping neighboring surfaces at main-line/ramp joins.
             float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
+            var walls = new List<PartPlacement>();
             foreach (var range in WallRanges(corridor, left: true))
                 foreach (var ground in PathTunnelParts.Outside(range.From, range.To, tunnels))
                     foreach (var remaining in access.Remaining(-1, ground.From, ground.To))
-                        CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: remaining.x, clipTo: remaining.y);
+                        walls.Add(new PartPlacement(-wallCenterOffset, true, remaining.x, remaining.y));
             foreach (var range in WallRanges(corridor, left: false))
                 foreach (var ground in PathTunnelParts.Outside(range.From, range.To, tunnels))
                     foreach (var remaining in access.Remaining(1, ground.From, ground.To))
-                        CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: remaining.x, clipTo: remaining.y);
+                        walls.Add(new PartPlacement(wallCenterOffset, false, remaining.x, remaining.y));
+            CreateSplineMeshes(container, spline, $"{variantBase}/wall", wallWidth, RoadPartHeights.WALL_ABOVE_SPLINE, $"{typeBase}/wall", walls);
         }
         else
         {
@@ -1429,6 +1653,7 @@ public class RoadPath : IPathMeshGenerator
                         cornerObj.AddComponent<IntersectionMeshOwner>().OwnedMesh = cornerResult.Mesh;
                         MeshRenderer mr = cornerObj.AddComponent<MeshRenderer>();
                         if (cornerResult.Material != null) mr.material = cornerResult.Material;
+                        ApplyGroundSurfaceShadow(mr, new[] { wpPos });
                         if (cornerResult.Markings != null) cornerObj.AddComponent<RoadMarkingSurface>().Configure(cornerResult.Markings);
 
                         // Corners use real-node connection geometry, joining clipped main paths with tracks/wires.

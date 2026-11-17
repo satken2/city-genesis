@@ -28,6 +28,8 @@ public sealed class PropRenderModel : IDisposable
     /// </summary>
     public float Clearance(float scale) => Mathf.Min(8f, Mathf.Max(bounds.extents.x, bounds.extents.z) * 0.15f * scale);
     private readonly List<UnityEngine.Object> owned = new List<UnityEngine.Object>();
+    /// <summary>モデルの材質から、描画に使う共有プールの材質を引く。null のときは材質を写して所有する。</summary>
+    private Func<Material, Material> pooledMaterial;
 
     public PropRenderModel(int type) : this(type.ToString(), type == 1 || type == 2) { }
 
@@ -62,10 +64,13 @@ public sealed class PropRenderModel : IDisposable
         if (distantTree) CreateDistantTree();
     }
 
-    /// <summary>Load a model by resource path with the same `_close` / `_far` rules (building scatter parts).</summary>
-    public static PropRenderModel FromPath(string path)
+    /// <summary>
+    /// Load a model by resource path with the same `_close` / `_far` rules (building scatter parts, roadside equipment).
+    /// pooledMaterial を渡すと材質を写さず、共有プールの材質をそのまま使う(道路の部品。同名のアセットパックの材質や夜の発光を保つ)。
+    /// </summary>
+    public static PropRenderModel FromPath(string path, Func<Material, Material> pooledMaterial = null)
     {
-        var model = new PropRenderModel();
+        var model = new PropRenderModel { pooledMaterial = pooledMaterial };
         model.Load(path);
         return model;
     }
@@ -163,8 +168,10 @@ public sealed class PropRenderModel : IDisposable
                 {
                     // Instancing is enabled at runtime; keep GraphicsSettings Instancing Variants at Keep All
                     // (Strip Unused removes required shader variants in builds, preventing rendering).
-                    mat = new Material(source[i]) { enableInstancing = true };
-                    materials.Add(source[i], mat); owned.Add(mat);
+                    mat = pooledMaterial != null ? pooledMaterial(source[i]) : new Material(source[i]);
+                    mat.enableInstancing = true;
+                    materials.Add(source[i], mat);
+                    if (pooledMaterial == null) owned.Add(mat);
                 }
                 // Cancel root transforms and retain only child local transforms. The model origin becomes its placement point.
                 parts.Add(new Part { mesh = filter.sharedMesh, submesh = i, material = mat,

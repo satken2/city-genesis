@@ -14,11 +14,20 @@ public static class PropRenderPolicy
         : DrawLodEvaluator.PropHiddenByDistance(distance, previous);
 
     /// <summary>Whether props whose bounds are this far from the camera cast shadows: everything the sun's shadow maps reach, at every render LOD.</summary>
-    public static bool WithinShadowDistance(Bounds bounds, Vector3 camera)
+    public static bool WithinShadowDistance(Bounds bounds, Vector3 camera) => WithinShadowDistance(bounds, camera, ShadowDistance);
+
+    /// <summary>毎フレーム多数のバッチを判定する側は、ShadowDistance を1度だけ読んでこちらへ渡す。</summary>
+    public static bool WithinShadowDistance(Bounds bounds, Vector3 camera, float shadowDistance)
+        => bounds.SqrDistance(camera) < shadowDistance * shadowDistance;
+
+    /// <summary>太陽の影を描く距離(m)。</summary>
+    public static float ShadowDistance
     {
-        var asset = UnityEngine.Rendering.Universal.UniversalRenderPipeline.asset;
-        float distance = asset != null ? asset.shadowDistance : 0f;
-        return bounds.SqrDistance(camera) < distance * distance;
+        get
+        {
+            var asset = UnityEngine.Rendering.Universal.UniversalRenderPipeline.asset;
+            return asset != null ? asset.shadowDistance : 0f;
+        }
     }
 
     // Divide by an upper bound on circle-intersecting patches to prevent grass replacement as movement changes allocations.

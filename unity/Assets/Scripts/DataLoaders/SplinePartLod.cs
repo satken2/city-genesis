@@ -291,6 +291,7 @@ public sealed class PathPresentation : MonoBehaviour
         state.parts = next.GetComponentsInChildren<SplinePartLod>(true);
         state.pending = true;
         state.HidePending(next);
+        InstancedPartMember.RefreshObject(next);
         state.TryCommit();
     }
 
@@ -320,6 +321,7 @@ public sealed class PathPresentation : MonoBehaviour
         foreach (var item in hidden)
             if (item.Key != null) item.Key.forceRenderingOff = item.Value;
         hidden.Clear();
+        InstancedPartMember.RefreshObject(gameObject);
         var old = TakeFallback();
         if (old != null) cache.Park(old);
     }
