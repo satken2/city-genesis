@@ -3,7 +3,7 @@
  *
  * Horizontal layout: [common tools, 2 rows × 2 columns] [public service adequacy] [city name/date / realized
  * climate / score/budget] [alerts] [policy] [start epoch].
- * Render to content width and use its measured width for the window. Referencing window width creates a resize
+ * Render to content size and use its measured size for the window. Referencing window size creates a resize
  * loop.
  * Adequacy meter styles are in PublicServiceGauges.css.
  */
@@ -11,10 +11,37 @@
 .cockpit {
   position: relative;
   width: max-content;
-  height: 100%;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* The row plus the panel border equals COCKPIT_HEIGHT in `window.rs`. */
+.cockpit-main {
+  display: flex;
   align-items: center;
   gap: 10px;
+  height: 74px;
   padding: 8px 10px;
+}
+
+/*
+ * Unstarted-work band above the row. The panel's rounded corners and overflow clip it, so it reads as part of the
+ * cockpit, like the system tray's unverified label. Yellow marks a reminder, not a crisis.
+ */
+.cockpit-unstarted {
+  padding: 2px 8px;
+  border: none;
+  background: #f0b429;
+  color: #1c1508;
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cockpit-unstarted:hover {
+  background: #f7c64f;
 }
 
 /*

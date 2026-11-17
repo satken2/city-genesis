@@ -81,16 +81,21 @@ export async function fetchTags(
   return res.tags ?? [];
 }
 
-/** Fetch construction projects by tag (item lists and aggregates). */
+/**
+ * Construction projects by tag, plus `all`: every unfinished city work (tagged or not) as one project with an
+ * empty tag name, ordered on hold → planned → under construction.
+ */
+export type TagProjects = {
+  projects: TagProject[];
+  all: TagProject;
+};
+
+/** Fetch construction projects (item lists and aggregates). */
 export async function fetchTagProjects(
   apiBaseUrl: string,
   signal?: AbortSignal,
-): Promise<TagProject[]> {
-  const res = await fetchApi<{ projects: TagProject[] }>(
-    buildApiUrl(apiBaseUrl, "/api/v1/tags/projects"),
-    { signal },
-  );
-  return res.projects ?? [];
+): Promise<TagProjects> {
+  return fetchApi<TagProjects>(buildApiUrl(apiBaseUrl, "/api/v1/tags/projects"), { signal });
 }
 
 /**

@@ -247,10 +247,11 @@ fn resize_system_tray(app: tauri::AppHandle, state: tauri::State<'_, SharedState
     window::resize_system_tray(&app, state.inner(), width, height);
 }
 
-/// Fit the cockpit to its content width for the current language, date, and font size.
+/// Fit the cockpit to its measured content: width for the current language, date, and font size; height for
+/// the unstarted-work band.
 #[tauri::command]
-fn resize_cockpit(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, width: f64) {
-    window::resize_cockpit(&app, state.inner(), width);
+fn resize_cockpit(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, width: f64, height: f64) {
+    window::resize_cockpit(&app, state.inner(), width, height);
 }
 
 /// Fit the citizen voice window to the measured card; React reports 0×0 while there is no card.

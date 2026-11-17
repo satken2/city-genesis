@@ -133,6 +133,7 @@
     "trayTutorialMode": "Modo tutorial",
     "trayReadOnlyMode": "Modo de solo lectura",
     "trayUnverified": "No verificado · Demo",
+    "cockpitUnstarted": "Sin iniciar: {{scheduled}} · Esperando orden de inicio: {{pending}}",
     "bulldozerOn": "Bulldozer: ACTIVADO (clic para eliminar)",
     "bulldozerConfirmScatter": "Se eliminarán todos los props “{{name}}” del área dispersa. ¿Eliminar toda el área?",
     "bulldozerOff": "Bulldozer (elimina parcelas vacías, obras planeadas y props del terreno)",

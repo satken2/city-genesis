@@ -133,6 +133,7 @@
     "trayTutorialMode": "Mode tutoriel",
     "trayReadOnlyMode": "Mode lecture seule",
     "trayUnverified": "Non vérifié · Démo",
+    "cockpitUnstarted": "Non démarrés : {{scheduled}} · En attente de l'ordre de lancement : {{pending}}",
     "bulldozerOn": "Bulldozer : ACTIVÉ (cliquez pour supprimer)",
     "bulldozerConfirmScatter": "Tous les décors « {{name}} » de la zone dispersée seront supprimés. Supprimer toute la zone ?",
     "bulldozerOff": "Bulldozer (supprime terrains vides, bâtiments/routes en projet et décors du terrain)",

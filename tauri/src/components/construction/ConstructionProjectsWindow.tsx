@@ -3,6 +3,9 @@
  *
  * Group construction work by tags attached to buildings and roads (= construction projects), showing total
  * estimated construction cost and construction time (maximum remaining epochs).
+ * The first card, "All", lists every unfinished city work regardless of tags, with work awaiting the player's
+ * order to start at the top. The cockpit's unstarted-work band opens this window to show that list. It is not a
+ * tag, so it has no delete button, and no completion count because finished work leaves it.
  *
  * - Data comes from GET /api/v1/tags/projects. The backend aggregates remaining project costs and time; this
  *   panel only displays them, avoiding a second implementation of cost formulas.
@@ -31,6 +34,7 @@ import {
   fetchTagProjects,
   type TagProject,
   type TagProjectItem,
+  type TagProjects,
 } from "../../utils/constructionTags";
 import { formatCompactAmount, formatExactAmount } from "../../utils/money";
 import { resolveIntlLocale } from "../../utils/locale";
@@ -50,7 +54,7 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
   useCurrencyUnit();
   const masterData = useMasterData();
   const locale = resolveIntlLocale(i18n.language);
-  const [projects, setProjects] = useState<TagProject[] | null>(null);
+  const [data, setData] = useState<TagProjects | null>(null);
   const [simulationDays, setSimulationDays] = useState(0);
   const [loadFailed, setLoadFailed] = useState(false);
   const visibility = useObjectVisibility(WINDOW_TYPE);
@@ -59,12 +63,12 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
     async (signal?: AbortSignal) => {
       try {
         // Popups may survive city changes, so refetch days per epoch along with the list.
-        const [list, cityRes] = await Promise.all([
+        const [loaded, cityRes] = await Promise.all([
           fetchTagProjects(apiBaseUrl, signal),
           fetchApi<{ city: { simulation_days: number } }>(buildApiUrl(apiBaseUrl, "/api/v1/city/"), { signal }),
         ]);
         if (signal?.aborted) return;
-        setProjects(list);
+        setData(loaded);
         setSimulationDays(cityRes.city.simulation_days);
         setLoadFailed(false);
       } catch (err) {
@@ -145,7 +149,8 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
     return t("constructionProjects.monthsValue", { value: months.toFixed(1) });
   }
 
-  function renderProject(project: TagProject) {
+  /** Render one card. `isAll` marks the card for every unfinished work, which has no tag of its own. */
+  function renderProject(project: TagProject, isAll = false) {
     const targets = project.items.map((item) => ({ kind: item.kind, id: item.id }));
     // Toggle to Hide All if any item is visible, or Show All if all are hidden.
     const allHidden = targets.every((target) => visibility.isHidden(target.kind, target.id));
@@ -161,7 +166,7 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
           >
             {allHidden ? "🚫" : "👁"}
           </button>
-          <h3 className="cp-project-title">{project.tag}</h3>
+          <h3 className="cp-project-title">{isAll ? t("constructionProjects.all") : project.tag}</h3>
           <dl className="cp-project-summary">
             <div className="cp-summary-item">
               <dt>{t("constructionProjects.totalCost")}</dt>
@@ -173,24 +178,28 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
               <dt>{t("constructionProjects.duration")}</dt>
               <dd>{formatRemaining(project.in_progress_count > 0 ? project.max_remaining_epochs : 0)}</dd>
             </div>
-            <div className="cp-summary-item">
-              <dt>{t("constructionProjects.progress")}</dt>
-              <dd>
-                {t("constructionProjects.progressValue", {
-                  done: project.completed_count,
-                  total: project.items.length,
-                })}
-              </dd>
-            </div>
+            {!isAll && (
+              <div className="cp-summary-item">
+                <dt>{t("constructionProjects.progress")}</dt>
+                <dd>
+                  {t("constructionProjects.progressValue", {
+                    done: project.completed_count,
+                    total: project.items.length,
+                  })}
+                </dd>
+              </div>
+            )}
           </dl>
-          <button
-            type="button"
-            className="cp-delete-btn"
-            title={t("constructionProjects.deleteTag")}
-            onClick={() => void handleDeleteTag(project.tag)}
-          >
-            ×
-          </button>
+          {!isAll && (
+            <button
+              type="button"
+              className="cp-delete-btn"
+              title={t("constructionProjects.deleteTag")}
+              onClick={() => void handleDeleteTag(project.tag)}
+            >
+              ×
+            </button>
+          )}
         </header>
 
         {project.stalled_count > 0 && (
@@ -265,12 +274,15 @@ export function ConstructionProjectsWindow({ apiBaseUrl }: ConstructionProjectsW
         </div>
       )}
 
-      {projects === null ? (
+      {data === null ? (
         <p className="cp-empty">{loadFailed ? t("constructionProjects.loadFailed") : "…"}</p>
-      ) : projects.length === 0 ? (
+      ) : data.all.items.length === 0 && data.projects.length === 0 ? (
         <p className="cp-empty">{t("constructionProjects.empty")}</p>
       ) : (
-        projects.map(renderProject)
+        <>
+          {data.all.items.length > 0 && renderProject(data.all, true)}
+          {data.projects.map((project) => renderProject(project))}
+        </>
       )}
     </div>
   );

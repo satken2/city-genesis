@@ -133,6 +133,7 @@
     "trayTutorialMode": "教學模式",
     "trayReadOnlyMode": "唯讀模式",
     "trayUnverified": "未驗證 · 試玩版",
+    "cockpitUnstarted": "未開工：{{scheduled}}項　等待開工指令：{{pending}}項",
     "bulldozerOn": "推土機：開（點擊拆除）",
     "bulldozerConfirmScatter": "將刪除散布範圍內的全部「{{name}}」裝飾物。確定要整片刪除嗎？",
     "bulldozerOff": "推土機（拆除空地、規劃中的建築／道路及地形裝飾物）",
