@@ -772,6 +772,24 @@ export async function sendSessionReload(): Promise<void> {
   });
 }
 
+/**
+ * `world.objects_committed`
+ * Notify graphics that the UI committed a building or parcels to the backend. Graphics draws the listed objects
+ * first, then synchronizes the rest of the city. Unlike `session:reload`, display state is kept and city-level
+ * data is not refetched.
+ *
+ * @param parcelIds Parcels the commit created or changed (for a building, its site).
+ * @param agentId Building the commit created or changed. Omit when only parcels were committed.
+ */
+export async function sendObjectsCommitted(parcelIds: number[], agentId?: number): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "",
+    entity: null,
+    action: "world:objects_committed",
+    params: { parcel_ids: parcelIds, agent_id: agentId ?? 0 },
+  });
+}
+
 /** After the demolition-by-explosion API succeeds, ask Unity to refetch the building, switch to rubble, and play a one-shot effect. */
 export async function sendBuildingExploded(agentId: number): Promise<void> {
   await invoke("send_window_action", {

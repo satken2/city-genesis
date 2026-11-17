@@ -58,7 +58,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     /// animate is for shown buildings: the crane top (CraneTop) and the model's moving parts (Motion) are returned
     /// instead of being combined, and the caller must attach them before initializing the visual mode.
     /// separateExterior is for shown buildings: ground panels (for every model type) and other site decorations (where applicable)
-    /// become ExteriorJobs, and scatter and fill parts become Scatter for <see cref="BuildingScatterRenderer"/> instead of being combined.
+    /// become ExteriorJobs, and scatter and fill parts become Scatter for <see cref="InstancedPartRenderer"/> instead of being combined.
     /// At Far only Scatter is separated, because FarBuildingBatcher combines the distant mesh including its ground panel.
     /// </summary>
     public BuildingMeshResult Generate(BuildingSummary buildingData, bool isDynamic, DrawLod drawLod, bool separateExterior = false, bool animate = false)
@@ -78,16 +78,16 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
         DrawLod previous = BuildingMeshUtils.CurrentDrawLod;
         var previousCapture = BuildingExteriorRenderer.Capture;
         bool previousDefer = BuildingExteriorRenderer.DeferSiteDecorations;
-        var previousSink = BuildingScatterRenderer.Sink;
+        var previousSink = InstancedPartRenderer.Sink;
         var previousMotion = BuildingMotionParts.Sink;
         int modelType = GetModelType(buildingData);
         var jobs = separateExterior && !far ? new List<BuildingExteriorRenderer.Build>() : null;
-        var scatter = separateExterior ? new List<BuildingScatterRenderer.Instance>() : null;
+        var scatter = separateExterior ? new List<InstancedPartRenderer.Instance>() : null;
         var motion = animate ? new BuildingMotionParts() : null;
         BuildingMeshUtils.CurrentDrawLod = drawLod;
         BuildingExteriorRenderer.Capture = jobs;
         BuildingExteriorRenderer.DeferSiteDecorations = separateExterior && (IsApplicableModelType(modelType) || modelType == Constants.MODEL_PREBUILT);
-        BuildingScatterRenderer.Sink = scatter;
+        InstancedPartRenderer.Sink = scatter;
         BuildingMotionParts.Sink = motion;
         try
         {
@@ -105,7 +105,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             BuildingMeshUtils.CurrentDrawLod = previous;
             BuildingExteriorRenderer.Capture = previousCapture;
             BuildingExteriorRenderer.DeferSiteDecorations = previousDefer;
-            BuildingScatterRenderer.Sink = previousSink;
+            InstancedPartRenderer.Sink = previousSink;
             BuildingMotionParts.Sink = previousMotion;
         }
     }

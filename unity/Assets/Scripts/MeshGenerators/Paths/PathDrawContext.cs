@@ -56,6 +56,13 @@ public static class PathDrawContext
     /// <summary>Paint color of the current path (API `color`) for RoadPath.GetOrCreatePartMaterial; null keeps model colors.</summary>
     public static Color? PaintColor { get; set; }
 
+    /// <summary>
+    /// 生成物を自分の材質のまま都市に表示するので、描画をまとめる。沿道設備は共有モデルのインスタンシング
+    /// (<see cref="InstancedPartRenderer"/>)にし、左右や出入口で分かれた同じ部品は1つのレンダラーにする。
+    /// プレビューや計画中のパスのように生成物のレンダラーの材質を差し替えて描く呼び出し側と、コンテキストの外の生成は false のまま使う。
+    /// </summary>
+    public static bool BatchedDrawing { get; private set; }
+
     public static bool HasDetailRange => !SuppressDetailRange && (DetailFrom > 0.0001 || DetailTo < 0.9999);
 
     /// <summary>Close-up part suffix (e.g. Models/Paths/p411/body_close).</summary>
@@ -85,6 +92,7 @@ public static class PathDrawContext
         PathAppearance = Constants.PATH_APPEARANCE_STANDARD;
         PathWidth = 0f;
         PaintColor = null;
+        BatchedDrawing = false;
     }
 
     public static void End()
@@ -100,6 +108,7 @@ public static class PathDrawContext
         PathAppearance = Constants.PATH_APPEARANCE_STANDARD;
         PathWidth = 0f;
         PaintColor = null;
+        BatchedDrawing = false;
     }
 
     /// <summary>Set the path being drawn (its variant, appearance, width, and paint color) after <see cref="Begin"/>.</summary>
@@ -109,6 +118,8 @@ public static class PathDrawContext
         PathAppearance = path.appearance;
         PathWidth = path.width;
         PaintColor = RoadPath.PaintColorOf(path);
+        BatchedDrawing = path.status != Constants.STATUS_TEMPORARY && path.status != Constants.STATUS_SCHEDULED_CONSTRUCTION
+            && path.status != Constants.STATUS_PENDING;
     }
 
     public static void SetAdaptiveTileLength(float length)

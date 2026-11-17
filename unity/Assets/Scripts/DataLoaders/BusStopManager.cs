@@ -14,6 +14,9 @@ public sealed class BusStopManager : MonoBehaviour
     private readonly Dictionary<int, List<(int road, bool forward)>> dwellSides = new();   // Stop node → street and direction of each bus arrival.
     private readonly List<Matrix4x4[]> batches = new();
     private readonly List<Bounds> bounds = new();
+    private readonly List<Matrix4x4> placements = new();
+    private readonly List<Matrix4x4> shown = new();   // batches を作ったときの配置。
+    private readonly HashSet<int> seen = new();
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     private static void Bootstrap()
@@ -60,10 +63,8 @@ public sealed class BusStopManager : MonoBehaviour
 
     private void Rebuild(Vector3 center)
     {
-        batches.Clear(); bounds.Clear();
-        if (model.normal.Count == 0) return;
-        var placements = new List<Matrix4x4>();
-        var seen = new HashSet<int>();
+        if (model.normal.Count == 0) { batches.Clear(); bounds.Clear(); return; }
+        placements.Clear(); seen.Clear();
         foreach (var node in paths.QueryNearbyNodes(center, Radius))
         {
             if (!seen.Add(node.node_id) || !node.station_path_id.HasValue) continue;
@@ -92,6 +93,12 @@ public sealed class BusStopManager : MonoBehaviour
                 placements.Add(Matrix4x4.TRS(position, rotation, Vector3.one));
             }
         }
+        // 配置が前回と同じなら、描画用の配列を作り直さない。
+        bool unchanged = shown.Count == placements.Count && batches.Count == (placements.Count + 510) / 511 * model.normal.Count;
+        for (int i = 0; unchanged && i < placements.Count; i++) unchanged = shown[i] == placements[i];
+        if (unchanged) return;
+        batches.Clear(); bounds.Clear();
+        shown.Clear(); shown.AddRange(placements);
         for (int start = 0; start < placements.Count; start += 511)
             foreach (var part in model.normal)
             {

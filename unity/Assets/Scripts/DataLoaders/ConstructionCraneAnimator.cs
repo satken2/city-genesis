@@ -46,7 +46,8 @@ public sealed class ConstructionCraneAnimator : MonoBehaviour
 
     private void Update()
     {
-        if (craneRenderer == null || !craneRenderer.enabled || craneRenderer.forceRenderingOff) return;
+        // 映っていないクレーンは回さない。向きは時刻から決まるので、映れば今の向きになる。
+        if (craneRenderer == null || !craneRenderer.isVisible) return;
         ApplyPose();
     }
 

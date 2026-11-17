@@ -11,7 +11,8 @@
     "hideObject": "Hide in the 3D view"
   },
   "constructionProjects": {
-    "empty": "No tagged works yet. Choose a tag when placing from a construction panel, or add one from the detail panel of a public facility or road that is planned or under construction.",
+    "all": "All",
+    "empty": "No works yet. Choose a tag when placing from a construction panel, or add one from the detail panel of a public facility or road that is planned or under construction, to group works into projects.",
     "loadFailed": "Failed to load construction projects",
     "totalCost": "Estimated cost",
     "duration": "Time left",

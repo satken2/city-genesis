@@ -15,6 +15,8 @@ Unity assembles path models for roads, tracks, power lines, ropeways, and simila
 
 Rendering does not modify saved data. Intersection trimming, ramp height blending, and pillar omission are visual adjustments that do not alter saved geometry, connectivity, or traffic. Changing street-parked cars and ropeway cabins are rendered separately by [vehicle rendering](O_vehicle-rendering.md). Placement previews use the same generators.
 
+For paths shown in the city, copies of the same part split between left and right or by roadside entrances, such as sidewalks and walls, are combined into one render object. Thin parts laid on the ground, such as road surfaces and sidewalks, and intersection surfaces cast no shadows; only sections away from the ground, such as viaducts and bridges, cast them.
+
 ## Cross-sections and height
 
 Path `width`, copied from the variant when the core creates the path, is total road width. Sidewalks lie inside its edges, walls and guardrails outside, and medians at the center. Master fields such as `sidewalk_width`, `wall_width`, and `center_width` size the parts. Height has two layers: the spline floats slightly above terrain, and parts sit at fixed offsets from it. `RoadPartHeights` centralizes these values for intersections, vehicles, and pedestrians too. Models are authored with this placement position as their origin, and rendering uses vertex heights relative to that origin directly. Road surfaces and track beds place their top at the origin; structures rising above ground, such as water conduits, place their geometry above it.
@@ -59,6 +61,8 @@ The same generator renders underground-path cuttings and tunnels according to th
 ## Roadside equipment
 
 Saved per-path values select equipment; `PATH_EQUIPMENT_FIELDS` lists fields. Values are `PATH_EQUIPMENT_NONE` or `PATH_EQUIPMENT_STANDARD`, except `utility_mode`, which uses `PATH_UTILITY_NONE`, `PATH_UTILITY_OVERHEAD`, or `PATH_UTILITY_UNDERGROUND`. Master `*_allowed` fields permit equipment and `default_*` fields set new-path defaults. Equipment is visual only and does not affect the economy.
+
+Roadside equipment of paths shown in the city is not part of the path's render objects. Like building scatter parts ([building meshes](F_building-meshes.md)), its shared models are drawn with GPU instancing across paths. Its draw LOD is selected per item with the terrain-prop rules regardless of the path, including the handling of `_close` and `_far`. It casts shadows according to the tree and prop shadow setting. Placement previews and planned paths are painted in a single color as a whole, so their equipment stays part of the path's render objects.
 
 ## Construction display
 

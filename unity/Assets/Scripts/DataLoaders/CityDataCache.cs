@@ -37,7 +37,8 @@ public sealed class CityDataCache : MonoBehaviour
     public static float ActiveHoursPerDay => Instance != null && Instance.MotionActiveHours > 0
         ? Instance.MotionActiveHours : MasterDataStore.Instance.GeneralParams.PATH_ACTIVE_HOURS;
 
-    private const int IdsPerRequest = 500;
+    /// <summary>IDs per request of the list APIs' ids query.</summary>
+    public const int IdsPerRequest = 500;
     private const int MotionPerRequest = 4096;   // Upper bound accepted by POST /paths/motion.
 
     private readonly SpatialTable<BuildingSummary> buildings = new(b => b.agent_id, b => b.version, PointBounds<BuildingSummary>(b => b.centerPointArray));

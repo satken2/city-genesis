@@ -175,7 +175,7 @@ export function relayoutForViewport(): void {
 export function layoutHudWindows(
   iconPanelHeight: number | null,
   systemTraySize: { width: number; height: number } | null,
-  cockpitWidth: number | null = null,
+  cockpitSize: { width: number; height: number } | null = null,
   citizenVoiceSize: { width: number; height: number } | null = null,
 ): void {
   const m = host.monitor();
@@ -187,13 +187,17 @@ export function layoutHudWindows(
   }
   const cockpit = host.rect(LABEL_COCKPIT);
   if (cockpit) {
-    const current = cockpit.width > 1 ? cockpit.width : COCKPIT_WIDTH;
-    const width = clamp(cockpitWidth ?? current, 1, m.width - HUD_MARGIN * 2);
+    const current = cockpit.width > 1 && cockpit.height > 1
+      ? cockpit
+      : { width: COCKPIT_WIDTH, height: COCKPIT_HEIGHT };
+    const size = cockpitSize ?? current;
+    const width = clamp(size.width, 1, m.width - HUD_MARGIN * 2);
+    const height = clamp(size.height, 1, m.height - HUD_MARGIN * 2);
     host.place(LABEL_COCKPIT, {
       x: m.x + (m.width - width) / 2,
-      y: m.y + m.height - COCKPIT_HEIGHT - HUD_MARGIN,
+      y: m.y + m.height - height - HUD_MARGIN,
       width,
-      height: COCKPIT_HEIGHT,
+      height,
     });
   }
   const systemTray = host.rect(LABEL_SYSTEM_TRAY);
@@ -252,8 +256,8 @@ export function resizeSystemTray(width: number, height: number): void {
   layoutHudWindows(null, { width, height });
 }
 
-export function resizeCockpit(width: number): void {
-  layoutHudWindows(null, null, width);
+export function resizeCockpit(width: number, height: number): void {
+  layoutHudWindows(null, null, { width, height });
 }
 
 export function resizeCitizenVoice(width: number, height: number): void {

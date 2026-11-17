@@ -8,6 +8,7 @@ Unity renders city data from the core's HTTP API within resident cells. It keeps
 | --- | --- |
 | Camera movement or projection change | Draw resident-cell differences from the copy and retire departing cells |
 | Epoch completion, confirmed edits, `session:reload` | Synchronize the copy with the core, then mark resident ranges stale and redraw by diff |
+| Confirmed building or parcels (`world:objects_committed`) | Fetch the confirmed building and parcels by ID and draw them first, then synchronize as above |
 | District detail save (`zone:updated`) | Reload that district only |
 | Forced reload | Remove all rendering objects and reload |
 | Session switch or game exit | Clear pending work and all data |

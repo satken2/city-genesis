@@ -46,6 +46,10 @@ export type HudSession = {
   epochWindSpeed: number | null;
   /** Epoch execution in progress; disable all HUD buttons while running. */
   epochExecuting: boolean;
+  /** City works planned but not started yet (waiting for the next epoch or for land). */
+  scheduledWorks: number;
+  /** City works on hold until the player orders construction to start. */
+  pendingWorks: number;
 };
 
 export function useHudSession(): HudSession {
@@ -64,6 +68,8 @@ export function useHudSession(): HudSession {
   const [epochPrecipitation, setEpochPrecipitation] = useState<number | null>(null);
   const [epochWindSpeed, setEpochWindSpeed] = useState<number | null>(null);
   const [epochExecuting, setEpochExecuting] = useState(false);
+  const [scheduledWorks, setScheduledWorks] = useState(0);
+  const [pendingWorks, setPendingWorks] = useState(0);
 
   useEffect(() => {
     let unlistenSession: (() => void) | undefined;
@@ -100,6 +106,9 @@ export function useHudSession(): HudSession {
       setEpochPrecipitation((cityData?.epoch_precipitation as number) ?? null);
       setEpochWindSpeed((cityData?.epoch_wind_speed as number) ?? null);
       setCityHallPlaced((cityData?.city_hall_placed as boolean) ?? false);
+      const unstartedWorks = cityData?.unstarted_works as { scheduled: number; pending: number } | undefined;
+      setScheduledWorks(unstartedWorks?.scheduled ?? 0);
+      setPendingWorks(unstartedWorks?.pending ?? 0);
       const sessionUnverified = payload.session?.verification_status !== GAME_VERIFIED;
       setUnverified(sessionUnverified);
       setPopulationLimitReached(sessionUnverified && ((cityData?.population as number) ?? 0) > MAX_UNVERIFIED_POPULATION);
@@ -152,6 +161,8 @@ export function useHudSession(): HudSession {
     epochPrecipitation,
     epochWindSpeed,
     epochExecuting,
+    scheduledWorks,
+    pendingWorks,
   };
 }
 

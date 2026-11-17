@@ -2078,7 +2078,7 @@ public partial class TerrainManager : BaseApiDataManager
         terrainGO.transform.position = pos;
 
         Terrain terrainComp = terrainGO.GetComponent<Terrain>();
-        terrainComp.drawInstanced = false;
+        terrainComp.drawInstanced = true;
         terrainComp.heightmapPixelError = LocalConstants.TERRAIN_HEIGHTMAP_PIXEL_ERROR;
         terrainComp.detailObjectDistance = 1000f;
         terrainComp.detailObjectDensity = 1f;
@@ -2753,6 +2753,8 @@ public partial class TerrainManager : BaseApiDataManager
             resources.Own(terrain.materialTemplate);
         }
 
+        // Terrain のインスタンシング描画は、マテリアル側でもインスタンシングを有効にしないと使われない。
+        terrain.materialTemplate.enableInstancing = true;
         ApplyTerrainMaterialSettings(terrain.materialTemplate);
     }
 

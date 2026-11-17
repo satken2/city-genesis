@@ -555,6 +555,29 @@ public class CellDataLoader : MonoBehaviour
         ApplyReload();
     }
 
+    /// <summary>Drawing of the objects an edit just committed, followed by ReloadAllData. Stopped by ClearAllManagerData.</summary>
+    private Coroutine committedReload;
+
+    /// <summary>
+    /// ReloadAllData after the UI commits a building or parcels. The synchronization compares the whole city before anything is redrawn,
+    /// so first fetch the committed objects by ID and draw them. The synchronization still follows for what the edit changed
+    /// around them (shaved or removed parcels, props).
+    /// </summary>
+    public void ReloadAfterCommit(IReadOnlyList<int> parcelIds, int agentId)
+    {
+        if (committedReload != null) RenderWorkScheduler.Stop(this, committedReload);
+        committedReload = RenderWorkScheduler.Start(this, DrawCommittedThenReload(parcelIds, agentId), "CellDataLoader");
+    }
+
+    private IEnumerator DrawCommittedThenReload(IReadOnlyList<int> parcelIds, int agentId)
+    {
+        // Buildings read their parcel (base elevation, reuse key), so apply parcels first.
+        if (parcelManager != null && parcelIds.Count > 0) yield return parcelManager.FetchParcels(parcelIds);
+        if (buildingManager != null && agentId > 0) yield return buildingManager.FetchBuilding(agentId);
+        committedReload = null;
+        ReloadAllData();
+    }
+
     private void ApplyReload()
     {
         PropManager.Instance?.InvalidateForestOverview();
@@ -668,6 +691,8 @@ public class CellDataLoader : MonoBehaviour
         CityDataCache.Ensure().Clear();
         if (reloadAfterSync != null) RenderWorkScheduler.Stop(this, reloadAfterSync);
         reloadAfterSync = null;
+        if (committedReload != null) RenderWorkScheduler.Stop(this, committedReload);
+        committedReload = null;
 
         // Invalidate the GPU height window and per-frame terrain height cache.
         // Otherwise, while loading the next save, Utils.GetGroundHeight would return
@@ -734,12 +759,6 @@ public class CellDataLoader : MonoBehaviour
     {
         if (pathManager != null)
             RenderWorkScheduler.Start(this, pathManager.FetchPath(pathId), "CellDataLoader");
-    }
-
-    public void FetchParcel(int parcelId)
-    {
-        if (parcelManager != null)
-            RenderWorkScheduler.Start(this, parcelManager.FetchParcel(parcelId), "CellDataLoader");
     }
 
     public void FetchZone(int zoneId)

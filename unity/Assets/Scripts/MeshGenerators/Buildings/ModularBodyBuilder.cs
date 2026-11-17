@@ -947,17 +947,17 @@ public static class ModularBodyBuilder
 
     /// <summary>
     /// Add {series}1, 2, … sequentially from 1, stopping at the first gap.
-    /// While <see cref="BuildingScatterRenderer.Sink"/> is set (shown buildings), resolve shared models for instanced rendering;
+    /// While <see cref="InstancedPartRenderer.Sink"/> is set (shown buildings), resolve shared models for instanced rendering;
     /// otherwise combine parts including node transforms. Both measure placement bounds from the combined part mesh.
     /// </summary>
     private static void CollectSiteParts(string prefix, int suffix, string series, bool single, SiteParts parts, List<Mesh> temporaryMeshes)
     {
         for (int n = 1; n <= MAX_SCATTER_PARTS; n++)
         {
-            if (BuildingScatterRenderer.Sink != null)
+            if (InstancedPartRenderer.Sink != null)
             {
                 string path = BuildingMeshUtils.PartPath(prefix, $"{series}{n}", suffix);
-                BuildingScatterRenderer.Model model = BuildingScatterRenderer.GetModel(path);
+                InstancedPartRenderer.Model model = InstancedPartRenderer.GetModel(path);
                 if (model == null)
                 {
                     break;
@@ -989,12 +989,12 @@ public static class ModularBodyBuilder
     /// <summary>
     /// Place actual-size parts at items, aligning each origin to its placement ground. For terrain conformity, ground is the lowest of
     /// four bounding-box-corner heights, burying the uphill side to prevent floating (same as port-yard cargo).
-    /// Hand placements to <see cref="BuildingScatterRenderer.Sink"/> when set; otherwise combine them.
+    /// Hand placements to <see cref="InstancedPartRenderer.Sink"/> when set; otherwise combine them.
     /// </summary>
     private static void PlaceSiteParts(SiteParts parts, List<ScatterLayout.Item> items, Vector3 centerPointWorld, bool deformToTerrain,
         List<CombineInstance> combineInstances, List<Material> allMaterials)
     {
-        var sink = BuildingScatterRenderer.Sink;
+        var sink = InstancedPartRenderer.Sink;
         foreach (ScatterLayout.Item item in items)
         {
             float baseY = 0f;
@@ -1010,7 +1010,7 @@ public static class ModularBodyBuilder
             Matrix4x4 matrix = Matrix4x4.TRS(new Vector3(item.Position.x, baseY, item.Position.y), item.Rotation, Vector3.one * item.Scale);
             if (sink != null)
             {
-                sink.Add(new BuildingScatterRenderer.Instance { path = parts.paths[item.Kind], local = matrix });
+                sink.Add(new InstancedPartRenderer.Instance { path = parts.paths[item.Kind], local = matrix });
                 continue;
             }
             Mesh mesh = parts.meshes[item.Kind];

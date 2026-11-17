@@ -38,7 +38,8 @@ pub const ICON_PANEL_WIDTH: f64 = 58.0;
 pub const ICON_PANEL_DEFAULT_HEIGHT: f64 = 660.0;
 
 /// Cockpit size (bottom center: tracking list, frequent tools, public service fulfillment, city name/date, budget meter,
-/// alerts, and epoch execution). Width is initial only; React's `resize_cockpit` fits the measured width for the language and date.
+/// alerts, and epoch execution). Initial size only; React's `resize_cockpit` fits the measured width for the language and
+/// date, and the measured height while the unstarted-work band extends the panel upward.
 pub const COCKPIT_WIDTH: f64 = 908.0;
 pub const COCKPIT_HEIGHT: f64 = 76.0;
 
@@ -61,6 +62,7 @@ pub const CITIZEN_VOICE_EMPTY_SIZE: f64 = 1.0;
 
 /// Height occupied by the bottom-center cockpit (from the screen bottom to its
 /// top). Shift centered popups and bottom-center panels upward by this amount.
+/// The cockpit's unstarted-work band is not reserved: it may overlap those windows while shown.
 pub const HUD_BOTTOM_RESERVED: f64 = COCKPIT_HEIGHT + HUD_MARGIN;
 
 /// Width occupied by the left icon panel (from the screen left to
@@ -256,7 +258,7 @@ pub fn create_hud_windows(
 /// top right).
 ///
 /// `icon_panel_height` explicitly sets icon panel height, `system_tray_size` the system tray size,
-/// `cockpit_width` the cockpit width, and `citizen_voice_size` the citizen voice card size. None preserves current
+/// `cockpit_size` the cockpit size, and `citizen_voice_size` the citizen voice card size. None preserves current
 /// dimensions (already measured and reported by React) and only recalculates position.
 pub fn layout_hud_windows(
     app: &AppHandle,
@@ -264,7 +266,7 @@ pub fn layout_hud_windows(
     monitor_index: usize,
     icon_panel_height: Option<f64>,
     system_tray_size: Option<LogicalSize<f64>>,
-    cockpit_width: Option<f64>,
+    cockpit_size: Option<LogicalSize<f64>>,
     citizen_voice_size: Option<LogicalSize<f64>>,
 ) {
     let Some(monitor) = monitors.get(monitor_index) else {
@@ -300,21 +302,20 @@ pub fn layout_hud_windows(
         );
     }
 
-    // Cockpit: bottom center.
+    // Cockpit: bottom center. Resize from the bottom edge so the unstarted-work band grows upward.
     if let Some(win) = app.get_webview_window(LABEL_COCKPIT) {
         let current = current_size(&win)
-            .map(|s| s.width)
-            .filter(|w| *w > 1.0)
-            .unwrap_or(COCKPIT_WIDTH);
-        let width = cockpit_width
-            .unwrap_or(current)
-            .clamp(1.0, m_size.width - HUD_MARGIN * 2.0);
+            .filter(|s| s.width > 1.0 && s.height > 1.0)
+            .unwrap_or(LogicalSize::new(COCKPIT_WIDTH, COCKPIT_HEIGHT));
+        let size = cockpit_size.unwrap_or(current);
+        let width = size.width.clamp(1.0, m_size.width - HUD_MARGIN * 2.0);
+        let height = size.height.clamp(1.0, m_size.height - HUD_MARGIN * 2.0);
         place(
             &win,
             width,
-            COCKPIT_HEIGHT,
+            height,
             m_pos.x + (m_size.width - width) / 2.0,
-            m_pos.y + m_size.height - COCKPIT_HEIGHT - HUD_MARGIN,
+            m_pos.y + m_size.height - height - HUD_MARGIN,
         );
     }
 
@@ -517,11 +518,11 @@ pub fn resize_system_tray(app: &AppHandle, state: &SharedState, width: f64, heig
     layout_hud_windows(app, &monitors, monitor_index, None, Some(LogicalSize::new(width, height)), None, None);
 }
 
-/// Fit cockpit width to measured content and realign at the bottom center.
-pub fn resize_cockpit(app: &AppHandle, state: &SharedState, width: f64) {
+/// Fit the cockpit to its measured content and realign at the bottom center.
+pub fn resize_cockpit(app: &AppHandle, state: &SharedState, width: f64, height: f64) {
     let monitor_index = state.lock().current_monitor_index;
     let monitors = app.available_monitors().unwrap_or_default();
-    layout_hud_windows(app, &monitors, monitor_index, None, None, Some(width), None);
+    layout_hud_windows(app, &monitors, monitor_index, None, None, Some(LogicalSize::new(width, height)), None);
 }
 
 /// Fit the citizen voice window to the measured card (0 while there is no card) and realign at the top right.

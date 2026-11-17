@@ -207,6 +207,8 @@ public sealed class RoadAccessPlan
         mesh.colors32 = colors; // Keep connection surfaces intact even with unpaved-road edge erosion masks.
         go.AddComponent<IntersectionMeshOwner>().OwnedMesh = mesh;
         go.AddComponent<MeshFilter>().sharedMesh = mesh;
-        go.AddComponent<MeshRenderer>().sharedMaterial = material;
+        var renderer = go.AddComponent<MeshRenderer>();
+        renderer.sharedMaterial = material;
+        RoadPath.ApplyGroundSurfaceShadow(renderer, new[] { parent.transform.TransformPoint(vertices[0]) });
     }
 }

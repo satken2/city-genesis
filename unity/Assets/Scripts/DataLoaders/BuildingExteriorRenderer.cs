@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// Generate ground panels and site decorations as work separate from the structure and collider. Scatter parts go to <see cref="BuildingScatterRenderer"/>.
+/// Generate ground panels and site decorations as work separate from the structure and collider. Scatter parts go to <see cref="InstancedPartRenderer"/>.
 /// One shared worker serves every building. It runs at low priority (only with budget left after normal render work, so it never delays
 /// building or road generation) and each step picks the pending building nearest to the camera.
 /// Building GameObjects have no scheduler lifetime component (RenderWorkLifetime), so the worker runs on a shared host;
@@ -101,15 +101,15 @@ public sealed class BuildingExteriorRenderer : MonoBehaviour
         var parts = new List<CombineInstance>();
         var materials = new List<Material>();
         var temporary = new List<Mesh>();
-        var scatter = new List<BuildingScatterRenderer.Instance>();
+        var scatter = new List<InstancedPartRenderer.Instance>();
         Mesh mesh = null;
         DrawLod previous = BuildingMeshUtils.CurrentDrawLod;
-        var previousSink = BuildingScatterRenderer.Sink;
+        var previousSink = InstancedPartRenderer.Sink;
         try
         {
             // Share decoration geometry with the normal model, independent of structure close-up switching.
             BuildingMeshUtils.CurrentDrawLod = DrawLod.Normal;
-            BuildingScatterRenderer.Sink = scatter;
+            InstancedPartRenderer.Sink = scatter;
             job(parts, materials, temporary);
             if (parts.Count > 0)
             {
@@ -127,7 +127,7 @@ public sealed class BuildingExteriorRenderer : MonoBehaviour
                 mesh = null;
                 GetComponent<VisualModeObject>()?.RefreshMaterials();
             }
-            BuildingScatterMember.Add(gameObject, scatter);
+            InstancedPartMember.Add(gameObject, scatter);
         }
         catch (Exception ex)
         {
@@ -136,7 +136,7 @@ public sealed class BuildingExteriorRenderer : MonoBehaviour
         finally
         {
             BuildingMeshUtils.CurrentDrawLod = previous;
-            BuildingScatterRenderer.Sink = previousSink;
+            InstancedPartRenderer.Sink = previousSink;
             foreach (var item in temporary) if (item != null) Destroy(item);
             if (mesh != null) Destroy(mesh);
         }

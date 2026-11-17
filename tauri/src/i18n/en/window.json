@@ -132,6 +132,7 @@
     "trayTutorialMode": "Tutorial Mode",
     "trayReadOnlyMode": "Read-Only Mode",
     "trayUnverified": "Unverified · Demo",
+    "cockpitUnstarted": "Not started: {{scheduled}} · Awaiting start order: {{pending}}",
     "bulldozerOn": "Bulldozer: ON (click to remove)",
     "bulldozerConfirmScatter": "This will delete every “{{name}}” prop in the scattered area. Delete the whole area?",
     "bulldozerOff": "Bulldozer (remove empty parcels, planned buildings/roads & terrain props)",

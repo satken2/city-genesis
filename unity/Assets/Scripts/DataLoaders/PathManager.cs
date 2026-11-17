@@ -5736,6 +5736,7 @@ public partial class PathManager : BaseApiDataManager
         {
             mr.material = meshResult.Material;
         }
+        RoadPath.ApplyGroundSurfaceShadow(mr, new[] { absolutePos });
 
         var markingSurface = meshGO.GetComponent<RoadMarkingSurface>();
         if (meshResult.Markings != null)

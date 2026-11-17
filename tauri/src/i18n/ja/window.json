@@ -132,6 +132,7 @@
     "trayTutorialMode": "チュートリアルモード",
     "trayReadOnlyMode": "読み取り専用モード",
     "trayUnverified": "未認証・体験版",
+    "cockpitUnstarted": "未着工: {{scheduled}}件　着工指示待ち: {{pending}}件",
     "bulldozerOn": "ブルドーザ: ON（クリックで削除）",
     "bulldozerConfirmScatter": "範囲配置されたプロップ「{{name}}」を、散布範囲ごとすべて削除します。本当に削除しますか？",
     "bulldozerOff": "ブルドーザ（空き地・計画中の建物/道路・地形プロップを削除）",

@@ -24,7 +24,7 @@ import {
   sendEditParcelUpdatePreview,
   sendEditParcelResetSelection,
   sendEditParcelSetRectParams,
-  sendSessionReload,
+  sendObjectsCommitted,
   IPC_EVENT_EDIT_PARCEL_SELECT_POINT,
   IPC_EVENT_EDIT_PARCEL_SELECT_PATH,
   IPC_EVENT_EDIT_PARCEL_SELECT_PARCEL,
@@ -716,7 +716,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
     setStatusMessage(null);
     setIsConfirming(true);
     try {
-      const result = await fetchApi<Record<string, unknown>>(`${baseUrl}/api/v1/parcels`, {
+      const result = await fetchApi<{ parcel?: number | null; new_parcels?: number[] }>(`${baseUrl}/api/v1/parcels`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -734,7 +734,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
       // the player can click in 3D immediately to create the next parcel (consecutive creation).
       // Retain inputs such as width/depth.
       void sendEditParcelUpdatePreview(selectedMode, [], null);
-      void sendSessionReload();
+      void sendObjectsCommitted(result?.new_parcels ?? (result?.parcel != null ? [result.parcel] : []));
       clearSelectionState();
       void sendEditParcelResetSelection();
     } catch (err) {

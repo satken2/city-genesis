@@ -26,6 +26,9 @@
  *   would weaken the signal for real crises. Blinking is sufficient to attract attention, so no interrupting
  *   toast is shown.
  *   アイコンから開く窓(政策立案)が、通知ごとの原因と対策を示す。
+ * - Unstarted work: while the city has planned works that have not started or works on hold awaiting the order to
+ *   start, a yellow band extends the panel upward with both counts. Click to open construction projects, whose
+ *   "All" card lists them. The counts come with the shared session state, so they follow orders within one poll.
  * - Epoch execution: from start until the simulation returns, an overlay covering the whole panel shows the core's
  *   progress (`epoch:progress_visible` from Rust). Afterwards the panel stays dimmed until the results close.
  *
@@ -82,7 +85,7 @@ const L1_NOTIFICATION_POLL_INTERVAL_MS = 30_000;
 export function Cockpit() {
   const { t, i18n } = useTranslation();
   const { visible, apiBaseUrl, isLocked, populationLimitReached, cityName, currentDate, epochExecuting, playMode,
-    epochTemperature, epochPrecipitation, epochSunlight, epochWindSpeed } = useHudSession();
+    epochTemperature, epochPrecipitation, epochSunlight, epochWindSpeed, scheduledWorks, pendingWorks } = useHudSession();
   const scenarioMode = playMode === PLAY_MODE_SCENARIO;
   const { weather, failed: weatherFailed, select: selectWeather } = useWeather(visible, scenarioMode);
   const mode = useHudMode();
@@ -94,16 +97,20 @@ export function Cockpit() {
   const [l1Notifications, setL1Notifications] = useState<L1Notification[]>([]);
   const [progressVisible, setProgressVisible] = useState(false);
 
-  // Report only content width changes caused by language, date, or font size, keeping transparent margins from blocking the 3D view.
+  // Report the measured panel size (width follows language, date, and font size; height grows with the
+  // unstarted-work band), keeping transparent margins from blocking the 3D view.
   useEffect(() => {
     const element = panelRef.current;
     if (!element) return;
-    let lastSent = 0;
+    let lastSent = { width: 0, height: 0 };
     const observer = new ResizeObserver(() => {
-      const width = Math.ceil(element.getBoundingClientRect().width);
-      if (width <= 0 || width === lastSent) return;
-      lastSent = width;
-      void invoke("resize_cockpit", { width }).catch(console.error);
+      const rect = element.getBoundingClientRect();
+      const width = Math.ceil(rect.width);
+      const height = Math.ceil(rect.height);
+      if (width <= 0 || height <= 0) return;
+      if (width === lastSent.width && height === lastSent.height) return;
+      lastSent = { width, height };
+      void invoke("resize_cockpit", { width, height }).catch(console.error);
     });
     observer.observe(element);
     return () => observer.disconnect();
@@ -363,91 +370,103 @@ export function Cockpit() {
       ref={panelRef}
       className={`hud-panel cockpit ${mode === "bulldozer" ? "cockpit--bulldozer" : ""} ${dimmed ? "hud-disabled" : ""}`}
     >
-      <div className="cockpit-tools">
-        {TOOL_ICONS.map((icon) => {
-          const active = icon.id === "bulldozer" && mode === "bulldozer";
-          const bulldozerTooltipKey = scenarioMode
-            ? (active ? "taskbar.bulldozerInstantOn" : "taskbar.bulldozerInstantOff")
-            : (active ? "taskbar.bulldozerOn" : "taskbar.bulldozerOff");
-          const tooltip = icon.id === "bulldozer" ? t(bulldozerTooltipKey) : t(icon.tooltipKey);
-          return (
-            <button
-              key={icon.id}
-              id={icon.id}
-              className={`hud-icon-btn cockpit-tool${active ? " hud-icon-btn--active" : ""}`}
-              type="button"
-              title={tooltip}
-              aria-pressed={icon.id === "bulldozer" ? active : undefined}
-              style={{ padding: icon.padding }}
-              onClick={() => void handleToolClick(icon)}
-            >
-              <img src={icon.src} alt={tooltip} className="hud-icon-img" draggable={false} />
-            </button>
-          );
-        })}
-      </div>
-
-      <PublicServiceGauges
-        apiBaseUrl={apiBaseUrl}
-        epochExecuting={epochExecuting}
-        onOpen={() => void openRegisteredWindow("public_facilities")}
-      />
-
-      <div className="cockpit-status">
+      {scheduledWorks + pendingWorks > 0 && (
         <button
-          className="cockpit-city"
+          className="cockpit-unstarted"
           type="button"
-          title={t("cityGovernment.tooltip")}
-          onClick={() => void openRegisteredWindow("city_government")}
+          title={t("taskbar.menuConstructionProjects")}
+          onClick={() => void openRegisteredWindow("construction_projects")}
         >
-          {cityName || "—"}
+          {t("taskbar.cockpitUnstarted", { scheduled: scheduledWorks, pending: pendingWorks })}
         </button>
-        <button type="button" className="cockpit-climate"
-          disabled={isLocked || epochExecuting} data-guide="hud.climate"
-          aria-label={t(scenarioMode ? "climateSettings.title" : "windowType.climate_effects")}
-          title={t(scenarioMode ? "climateSettings.title" : "windowType.climate_effects")}
-          onClick={() => void openRegisteredWindow(scenarioMode ? "climate_settings" : "climate_effects")}>
-          {CLIMATE_ELEMENTS.map(({ key, label }) => <span key={key} className="cockpit-climate-row" title={t(label)}>
-            <ClimateIcon element={key} />
-            <span>{formatClimateValue(key, epochClimate[key], locale)}</span>
-          </span>)}
-        </button>
-        <ScoreMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("achievements")} />
-        <div className="cockpit-date-weather" data-guide="hud.date">
-          <span className="cockpit-date">{formattedDate}</span>
-          <WeatherStatus weather={weather} editable={scenarioMode} failed={weatherFailed} onSelect={selectWeather} />
+      )}
+      <div className="cockpit-main">
+        <div className="cockpit-tools">
+          {TOOL_ICONS.map((icon) => {
+            const active = icon.id === "bulldozer" && mode === "bulldozer";
+            const bulldozerTooltipKey = scenarioMode
+              ? (active ? "taskbar.bulldozerInstantOn" : "taskbar.bulldozerInstantOff")
+              : (active ? "taskbar.bulldozerOn" : "taskbar.bulldozerOff");
+            const tooltip = icon.id === "bulldozer" ? t(bulldozerTooltipKey) : t(icon.tooltipKey);
+            return (
+              <button
+                key={icon.id}
+                id={icon.id}
+                className={`hud-icon-btn cockpit-tool${active ? " hud-icon-btn--active" : ""}`}
+                type="button"
+                title={tooltip}
+                aria-pressed={icon.id === "bulldozer" ? active : undefined}
+                style={{ padding: icon.padding }}
+                onClick={() => void handleToolClick(icon)}
+              >
+                <img src={icon.src} alt={tooltip} className="hud-icon-img" draggable={false} />
+              </button>
+            );
+          })}
         </div>
-        <BudgetMiniMeter
+
+        <PublicServiceGauges
           apiBaseUrl={apiBaseUrl}
-          onOpen={() => void openRegisteredWindow("city_budget")}
+          epochExecuting={epochExecuting}
+          onOpen={() => void openRegisteredWindow("public_facilities")}
         />
+
+        <div className="cockpit-status">
+          <button
+            className="cockpit-city"
+            type="button"
+            title={t("cityGovernment.tooltip")}
+            onClick={() => void openRegisteredWindow("city_government")}
+          >
+            {cityName || "—"}
+          </button>
+          <button type="button" className="cockpit-climate"
+            disabled={isLocked || epochExecuting} data-guide="hud.climate"
+            aria-label={t(scenarioMode ? "climateSettings.title" : "windowType.climate_effects")}
+            title={t(scenarioMode ? "climateSettings.title" : "windowType.climate_effects")}
+            onClick={() => void openRegisteredWindow(scenarioMode ? "climate_settings" : "climate_effects")}>
+            {CLIMATE_ELEMENTS.map(({ key, label }) => <span key={key} className="cockpit-climate-row" title={t(label)}>
+              <ClimateIcon element={key} />
+              <span>{formatClimateValue(key, epochClimate[key], locale)}</span>
+            </span>)}
+          </button>
+          <ScoreMiniMeter apiBaseUrl={apiBaseUrl} onOpen={() => void openRegisteredWindow("achievements")} />
+          <div className="cockpit-date-weather" data-guide="hud.date">
+            <span className="cockpit-date">{formattedDate}</span>
+            <WeatherStatus weather={weather} editable={scenarioMode} failed={weatherFailed} onSelect={selectWeather} />
+          </div>
+          <BudgetMiniMeter
+            apiBaseUrl={apiBaseUrl}
+            onOpen={() => void openRegisteredWindow("city_budget")}
+          />
+        </div>
+
+        <button
+          id="notifications"
+          className={`hud-icon-btn cockpit-alert${warningCount > 0 ? " cockpit-alert--active" : ""}`}
+          type="button"
+          title={t("notifications.trayTooltip")}
+          onClick={() => void openRegisteredWindow("city_notifications")}
+        >
+          <img src={iconUrl("tray_notifications.png")} alt={t("notifications.trayTooltip")} className="hud-icon-img" draggable={false} />
+          {warningCount > 0 && <span className="cockpit-alert-badge">{warningCount}</span>}
+          {cautionCount > 0 && (
+            <span className="cockpit-alert-badge cockpit-alert-badge--caution">{cautionCount}</span>
+          )}
+        </button>
+
+        <button
+          id="execute"
+          className="cockpit-execute"
+          type="button"
+          title={t("taskbar.menuExecute")}
+          disabled={isLocked}
+          onClick={handleExecuteClick}
+        >
+          {t("taskbar.menuExecute")}
+          <img src={iconUrl("menu_execute.png")} alt="" className="cockpit-execute-img" draggable={false} />
+        </button>
       </div>
-
-      <button
-        id="notifications"
-        className={`hud-icon-btn cockpit-alert${warningCount > 0 ? " cockpit-alert--active" : ""}`}
-        type="button"
-        title={t("notifications.trayTooltip")}
-        onClick={() => void openRegisteredWindow("city_notifications")}
-      >
-        <img src={iconUrl("tray_notifications.png")} alt={t("notifications.trayTooltip")} className="hud-icon-img" draggable={false} />
-        {warningCount > 0 && <span className="cockpit-alert-badge">{warningCount}</span>}
-        {cautionCount > 0 && (
-          <span className="cockpit-alert-badge cockpit-alert-badge--caution">{cautionCount}</span>
-        )}
-      </button>
-
-      <button
-        id="execute"
-        className="cockpit-execute"
-        type="button"
-        title={t("taskbar.menuExecute")}
-        disabled={isLocked}
-        onClick={handleExecuteClick}
-      >
-        {t("taskbar.menuExecute")}
-        <img src={iconUrl("menu_execute.png")} alt="" className="cockpit-execute-img" draggable={false} />
-      </button>
 
       {progressVisible && <EpochProgressOverlay apiBaseUrl={apiBaseUrl} />}
     </div>

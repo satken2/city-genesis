@@ -14,7 +14,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>
     /// Outline data for one parcel. Store endpoints in world coordinates;
-    /// UpdateAllParcelOutlines passes them to OverlayMeshRenderer when the camera moves.
+    /// the outline chunk of the centroid cell draws them, and highlights and data visualization fills reuse them.
     /// CreateParcelOutline replaces the instance when geometry/heights change (contents are immutable).
     /// </summary>
     private class ParcelOutlineData
@@ -104,6 +104,26 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     private const float LINE_THICKNESS = 1.0f;
     private Color parcelLineColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+
+    /// <summary>
+    /// Outlines of the parcels whose centroids lie in one cell, as a single static mesh.
+    /// The GPU expands the lines and fades them by distance, so camera movement never rebuilds it.
+    /// </summary>
+    private class OutlineChunk
+    {
+        public OverlayMeshRenderer renderer;
+        /// <summary>Bounds of the member outlines for the drawing-distance test. Exact after a rebuild; only grown by outlines added since.</summary>
+        public Bounds bounds;
+        /// <summary>Member outlines changed since the mesh was built. Rebuilt once the chunk is within drawing distance.</summary>
+        public bool dirty = true;
+    }
+
+    /// <summary>Centroid cell to outline chunk. A chunk lives while parcelIdsByCenterCell holds its cell.</summary>
+    private readonly Dictionary<Vector2Int, OutlineChunk> outlineChunks = new Dictionary<Vector2Int, OutlineChunk>();
+    private readonly List<Vector2Int> emptyOutlineCellScratch = new List<Vector2Int>();
+
+    /// <summary>Material shared by every outline chunk (GPU billboard + distance fade). Owned by this manager.</summary>
+    private Material outlineChunkMaterial;
 
     /// <summary>
     /// Track coroutines launched by LoadLodCells and cancel them on new camera movement.
@@ -327,6 +347,10 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         // Render outlines/highlights without depth testing (alwaysOnTop) to keep them above uneven terrain.
         overlayRenderer = OverlayMeshRenderer.Create("ParcelOverlayMesh", alwaysOnTop: true, persistent: true);
         overlayMeshObj = overlayRenderer.gameObject;
+
+        outlineChunkMaterial = OverlayMeshRenderer.CreateBillboardMaterial(alwaysOnTop: true);
+        outlineChunkMaterial.EnableKeyword("OVERLAY_DISTANCE_FADE");
+        outlineChunkMaterial.SetVector("_DistanceFadeRange", new Vector4(DISTANCE_START_FADE, DISTANCE_INVISIBLE, 0f, 0f));
 
         // Dedicated renderer for data visualization (colored fills). Parent under overlayMeshObj to share visibility toggles.
         // Use the depth-tested (LEqual) Custom/OverlayFillTerrainConform shader.
@@ -655,6 +679,11 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
         outlines.Clear();
         parcelIdToOutlineIndex.Clear();
+        foreach (OutlineChunk chunk in outlineChunks.Values)
+        {
+            Destroy(chunk.renderer.gameObject);
+        }
+        outlineChunks.Clear();
         parcelCache.Clear();
         parcelObjectsCache.Clear();
         parcelVisualObjects.Clear();
@@ -803,21 +832,38 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         }
     }
 
-    /// <summary>Refetch one parcel in the list form (the same form the city cache holds) and redraw it.</summary>
-    public IEnumerator FetchParcel(int parcelId)
+    /// <summary>
+    /// Refetch parcels in the list form (the same form the city cache holds) and redraw those whose centroid cell is loaded.
+    /// The others are only registered in the cache; loading their cell draws them.
+    /// </summary>
+    public IEnumerator FetchParcels(IReadOnlyList<int> parcelIds)
     {
-        yield return ApiClient.GetBulk<ParcelListResponse>(
-            $"/parcels/?ids={parcelId}",
-            response =>
+        var slice = System.Diagnostics.Stopwatch.StartNew();
+        for (int start = 0; start < parcelIds.Count; start += CityDataCache.IdsPerRequest)
+        {
+            var ids = new List<int>(CityDataCache.IdsPerRequest);
+            for (int i = start; i < parcelIds.Count && ids.Count < CityDataCache.IdsPerRequest; i++) ids.Add(parcelIds[i]);
+            ParcelListResponse response = null;
+            yield return ApiClient.GetBulk<ParcelListResponse>(
+                $"/parcels/?ids={string.Join(",", ids)}",
+                value => response = value,
+                error => Debug.LogError($"FetchParcels failed: {error}")
+            );
+            if (response?.parcels == null) continue;
+            slice.Restart();
+            foreach (ParcelSummary parcel in response.parcels)
             {
-                if (response?.parcels == null || response.parcels.Count == 0) return;
-                ParcelSummary parcel = response.parcels[0];
+                if (slice.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
+                {
+                    yield return RenderWorkScheduler.Continue;
+                    slice.Restart();
+                }
                 CityDataCache.Ensure().Register(parcel);
+                if (!TryGetCenterCell(parcel, out Vector2Int cell) || !loadedCells.Contains(cell)) continue;
                 CreateOrUpdateParcelObject(parcel);
                 parcelVersionCache[parcel.parcel_id] = parcel.version;
-            },
-            error => Debug.LogError($"FetchParcel({parcelId}) failed: {error}")
-        );
+            }
+        }
     }
 
     private void RegisterParcelDataForLines(ParcelSummary parcelData)
@@ -1086,6 +1132,13 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         {
             VisualModeHandler.Instance.UnregisterObject(InputObjectType.PARCEL, this);
         }
+        // Chunks live under the persistent overlay object, so release them here together with their material.
+        foreach (OutlineChunk chunk in outlineChunks.Values)
+        {
+            if (chunk.renderer != null) Destroy(chunk.renderer.gameObject);
+        }
+        outlineChunks.Clear();
+        if (outlineChunkMaterial != null) Destroy(outlineChunkMaterial);
     }
 
     /// <summary>
@@ -1391,7 +1444,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
         // If camera position/rotation changed less than their thresholds,
         // skip rebuilding the 3D-space mesh.
-        // Moving less than 1m or rotating less than 2° changes outlines little visually,
+        // Moving less than 1m or rotating less than 2° changes highlights and fills little visually,
         // so updating every frame is rarely necessary.
         Vector3 currentCamPos = cam.transform.position;
         Quaternion currentCamRot = cam.transform.rotation;
@@ -1404,6 +1457,8 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
         lastCamPos = currentCamPos;
         lastCamRot = currentCamRot;
+
+        RefreshOutlineChunks(currentCamPos);
 
         // If there are no outlines, clear the persistent overlay mesh once and return.
         // Reaching this point without an earlier return prevents the previous frame's mesh
@@ -1421,10 +1476,11 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     }
 
     /// <summary>
-    /// Update outlines and highlights for every parcel.
+    /// Update the overlays rebuilt on camera movement: highlights, the road access arrow, and data visualization fills.
     /// Pass world coordinates directly to OverlayMeshRenderer for batched 3D-space mesh rendering.
     /// If highlightedParcelId is not -1, also add that parcel's filled polygon.
     /// Data visualization modes (land price, buildability, etc.) draw colored polygons for every parcel.
+    /// Outlines themselves are static meshes (RefreshOutlineChunks) and stay visible in every mode as polygon boundaries.
     /// </summary>
     private void UpdateAllParcelOutlines(Camera cam)
     {
@@ -1454,52 +1510,30 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             }
         }
 
-        // Check whether this is a data visualization mode
-        bool isDataVisMode = currentParcelVisualMode >= 200;
-
-        for (int oi = 0; oi < outlines.Count; oi++)
+        // Data visualization modes (200 and above) draw colored polygons
+        if (currentParcelVisualMode >= 200)
         {
-            ParcelOutlineData outline = outlines[oi];
-            Vector3[] pts = outline.worldPoints;
-
-            // Calculate squared camera distance using the cached center point.
-            // This avoids expensive Terrain elevation queries (Utils.GetGroundHeight) in the per-frame loop.
-            Vector3 center = outline.center;
-            float distSq = (camPos.x - center.x) * (camPos.x - center.x) + 
-                           (camPos.y - center.y) * (camPos.y - center.y) + 
-                           (camPos.z - center.z) * (camPos.z - center.z);
-
-            // Skip immediately without a square root beyond the fully hidden distance threshold.
-            // This culling reduces CPU load by avoiding unnecessary Mathf.Sqrt calls for most distant parcels.
-            if (distSq >= DISTANCE_INVISIBLE_SQ) continue;
-            if (!parcelCache.ContainsKey(outline.parcelId)) continue;
-
-            // Calculate alpha from squared distance.
-            float alpha = CalculateAlphaByDistanceSq(distSq);
-            if (alpha <= 0.01f) continue;
-
-            // Draw colored polygons in data visualization modes
-            if (isDataVisMode)
+            for (int oi = 0; oi < outlines.Count; oi++)
             {
+                ParcelOutlineData outline = outlines[oi];
+
+                // Calculate squared camera distance using the cached center point.
+                // This avoids expensive Terrain elevation queries (Utils.GetGroundHeight) in the per-frame loop.
+                Vector3 center = outline.center;
+                float distSq = (camPos.x - center.x) * (camPos.x - center.x) + 
+                               (camPos.y - center.y) * (camPos.y - center.y) + 
+                               (camPos.z - center.z) * (camPos.z - center.z);
+
+                // Skip immediately without a square root beyond the fully hidden distance threshold.
+                // This culling reduces CPU load by avoiding unnecessary Mathf.Sqrt calls for most distant parcels.
+                if (distSq >= DISTANCE_INVISIBLE_SQ) continue;
+                if (!parcelCache.ContainsKey(outline.parcelId)) continue;
+
+                // Calculate alpha from squared distance.
+                float alpha = CalculateAlphaByDistanceSq(distSq);
+                if (alpha <= 0.01f) continue;
+
                 DrawDataVisPolygon(outline, alpha);
-            }
-
-            // Draw boundaries in data visualization modes too, serving as polygon outlines
-            int ptCount = pts.Length;
-            for (int i = 0; i < ptCount; i++)
-            {
-                int nextI = (i + 1) % ptCount;
-                Vector3 ws = pts[i];
-                Vector3 we = pts[nextI];
-
-                Vector3 ca = ws;
-                Vector3 cb = we;
-                if (!ClipLineToNearPlaneWithPlane(ref ca, ref cb, nearPlane))
-                    continue;
-
-                Color c = parcelLineColor;
-                c.a = alpha;
-                overlayRenderer.AddSolidLine(ca, cb, c, LINE_THICKNESS);
             }
         }
 
@@ -1508,6 +1542,93 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
         overlayRenderer.EndFrame(cam);
         dataVisRenderer.EndFrame(cam);
+    }
+
+    /// <summary>
+    /// Mark the chunk of the cell containing an outline centered at center for rebuild.
+    /// Pass the points of an added outline to create the chunk on first use and keep the drawing-distance test covering them until the rebuild.
+    /// </summary>
+    private void MarkOutlineChunkDirty(Vector3 center, Vector3[] addedPoints = null)
+    {
+        Vector2Int cell = TerrainManager.WorldToCell(center.x, center.z);
+        if (!outlineChunks.TryGetValue(cell, out OutlineChunk chunk))
+        {
+            if (addedPoints == null || addedPoints.Length == 0) return;
+            chunk = new OutlineChunk
+            {
+                renderer = OverlayMeshRenderer.CreateStatic($"ParcelOutlineChunk_{cell.x}_{cell.y}", outlineChunkMaterial, overlayMeshObj.transform),
+                bounds = new Bounds(addedPoints[0], Vector3.zero)
+            };
+            outlineChunks[cell] = chunk;
+        }
+        chunk.dirty = true;
+        if (addedPoints == null) return;
+        for (int i = 0; i < addedPoints.Length; i++)
+        {
+            chunk.bounds.Encapsulate(addedPoints[i]);
+        }
+    }
+
+    /// <summary>
+    /// Show only chunks within drawing distance of the camera and rebuild the changed ones among them.
+    /// Changed chunks out of range wait until they come into range, so loading distant cells costs nothing here.
+    /// Discard chunks whose cells no longer hold parcels.
+    /// </summary>
+    private void RefreshOutlineChunks(Vector3 camPos)
+    {
+        emptyOutlineCellScratch.Clear();
+        foreach (var kv in outlineChunks)
+        {
+            OutlineChunk chunk = kv.Value;
+            if (!parcelIdsByCenterCell.TryGetValue(kv.Key, out HashSet<int> parcelIds))
+            {
+                emptyOutlineCellScratch.Add(kv.Key);
+                continue;
+            }
+
+            bool inRange = chunk.bounds.SqrDistance(camPos) < DISTANCE_INVISIBLE_SQ;
+            if (inRange && chunk.dirty)
+            {
+                RebuildOutlineChunk(chunk, parcelIds);
+            }
+            GameObject chunkObj = chunk.renderer.gameObject;
+            if (chunkObj.activeSelf != inRange) chunkObj.SetActive(inRange);
+        }
+
+        foreach (Vector2Int cell in emptyOutlineCellScratch)
+        {
+            Destroy(outlineChunks[cell].renderer.gameObject);
+            outlineChunks.Remove(cell);
+        }
+    }
+
+    private void RebuildOutlineChunk(OutlineChunk chunk, HashSet<int> parcelIds)
+    {
+        OverlayMeshRenderer renderer = chunk.renderer;
+        Bounds bounds = default;
+        bool hasBounds = false;
+        foreach (int parcelId in parcelIds)
+        {
+            if (!parcelIdToOutlineIndex.TryGetValue(parcelId, out int index)) continue;
+            Vector3[] pts = outlines[index].worldPoints;
+            int ptCount = pts.Length;
+            for (int i = 0; i < ptCount; i++)
+            {
+                renderer.AddSolidLine(pts[i], pts[(i + 1) % ptCount], parcelLineColor, LINE_THICKNESS);
+                if (hasBounds)
+                {
+                    bounds.Encapsulate(pts[i]);
+                }
+                else
+                {
+                    bounds = new Bounds(pts[i], Vector3.zero);
+                    hasBounds = true;
+                }
+            }
+        }
+        renderer.EndStaticFrame();
+        chunk.bounds = bounds;
+        chunk.dirty = false;
     }
 
     /// <summary>DrawHighlightPolygon scratch list. Reusable because OverlayMeshRenderer.AddPolygon copies its contents.</summary>
@@ -1691,7 +1812,6 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>
     /// Register parcel outline data, storing polygon vertices in world coordinates.
-    /// UpdateAllParcelOutlines performs actual screen coordinate conversion each frame.
     /// Receive the same sampled heights (SampleParcelGround) as the top mesh to avoid sampling identical positions twice.
     /// Replace existing outlines in place, preserving hover highlights.
     /// </summary>
@@ -1715,6 +1835,8 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
         if (parcelIdToOutlineIndex.TryGetValue(parcelId, out int index))
         {
+            // The centroid may have moved to another cell
+            MarkOutlineChunkDirty(outlines[index].center);
             outlines[index] = data;
         }
         else
@@ -1722,6 +1844,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             parcelIdToOutlineIndex[parcelId] = outlines.Count;
             outlines.Add(data);
         }
+        MarkOutlineChunkDirty(data.center, worldPoints);
 
         // Draw new parcel outlines on the next frame even while the camera is stationary.
         ForceOutlineRedraw();
@@ -1731,6 +1854,8 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     {
         if (!parcelIdToOutlineIndex.TryGetValue(parcelId, out int index))
             return;
+
+        MarkOutlineChunkDirty(outlines[index].center);
 
         int lastIndex = outlines.Count - 1;
         if (index != lastIndex)
@@ -2015,7 +2140,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         return new Vector3(xz.x, y, xz.y);
     }
 
-    /// <summary>Draw the road access arrow in the overlay. Called every frame by UpdateAllParcelOutlines.</summary>
+    /// <summary>Draw the road access arrow in the overlay. Called by UpdateAllParcelOutlines on every rebuild.</summary>
     private void DrawFrontPathArrow(Plane nearPlane)
     {
         if (!frontPathArrowActive) return;

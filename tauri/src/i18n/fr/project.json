@@ -11,7 +11,8 @@
     "hideObject": "Masquer dans la vue 3D"
   },
   "constructionProjects": {
-    "empty": "Aucun chantier étiqueté pour l'instant. Choisissez une étiquette en plaçant depuis un panneau de construction, ou ajoutez-la depuis le panneau de détail d'un équipement public ou d'une route prévus ou en chantier.",
+    "all": "Tous",
+    "empty": "Aucun chantier pour l'instant. Choisissez une étiquette en plaçant depuis un panneau de construction, ou ajoutez-la depuis le panneau de détail d'un équipement public ou d'une route prévus ou en chantier, pour regrouper les chantiers par projet.",
     "loadFailed": "Échec du chargement des projets de construction",
     "totalCost": "Coût estimé",
     "duration": "Durée restante",
