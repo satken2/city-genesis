@@ -22,9 +22,31 @@ public class OverlayMeshRenderer : MonoBehaviour
     private List<Vector3> verts = new List<Vector3>();
     private List<Color> colors = new List<Color>();
     private List<int> indices = new List<int>();
-    private bool sharedBillboardMaterial;
+
+    /// <summary>Static batch (CreateStatic): finalized by EndStaticFrame and expanded toward the camera on the GPU.</summary>
+    private bool isStatic;
+
+    private enum MaterialOwner
+    {
+        Self,
+        BillboardPool,
+        Caller,
+    }
+
+    /// <summary>Who destroys the rendering material: this renderer, the last user of billboardMaterials, or the caller that passed it.</summary>
+    private MaterialOwner materialOwner = MaterialOwner.Self;
     private static readonly Material[] billboardMaterials = new Material[2];
     private static int billboardUsers;
+
+    /// <summary>
+    /// Build buffers shared by every static renderer. The mesh keeps the result, and static builds run synchronously
+    /// on the main thread, so no renderer retains its own copy.
+    /// </summary>
+    private static readonly List<Vector3> staticVerts = new List<Vector3>();
+    private static readonly List<Color> staticColors = new List<Color>();
+    private static readonly List<int> staticIndices = new List<int>();
+    private static readonly List<Vector3> staticEnds = new List<Vector3>();
+    private static readonly List<Vector4> staticParameters = new List<Vector4>();
 
     private struct LineEntry
     {
@@ -124,13 +146,26 @@ public class OverlayMeshRenderer : MonoBehaviour
         int index = alwaysOnTop ? 1 : 0;
         if (billboardMaterials[index] == null)
         {
-            billboardMaterials[index] = CreateOverlayLineMaterial(alwaysOnTop);
-            billboardMaterials[index].EnableKeyword("OVERLAY_GPU_BILLBOARD");
+            billboardMaterials[index] = CreateBillboardMaterial(alwaysOnTop);
         }
         var renderer = CreateObject(name, parent, false);
-        renderer.sharedBillboardMaterial = true;
+        renderer.isStatic = true;
+        renderer.materialOwner = MaterialOwner.BillboardPool;
         billboardUsers++;
         renderer.Initialize(billboardMaterials[index]);
+        return renderer;
+    }
+
+    /// <summary>
+    /// CreateStatic with a caller-owned material from <see cref="CreateBillboardMaterial"/>, for settings the shared material
+    /// cannot carry (such as distance fade). The caller may share it among its own renderers and destroys it.
+    /// </summary>
+    public static OverlayMeshRenderer CreateStatic(string name, Material billboardMaterial, Transform parent = null)
+    {
+        var renderer = CreateObject(name, parent, false);
+        renderer.isStatic = true;
+        renderer.materialOwner = MaterialOwner.Caller;
+        renderer.Initialize(billboardMaterial);
         return renderer;
     }
 
@@ -151,14 +186,24 @@ public class OverlayMeshRenderer : MonoBehaviour
         return mat;
     }
 
+    /// <summary>Create an OverlayLine material for static renderers (GPU billboard expansion). Depth testing follows <see cref="Create"/>.</summary>
+    public static Material CreateBillboardMaterial(bool alwaysOnTop)
+    {
+        Material mat = CreateOverlayLineMaterial(alwaysOnTop);
+        mat.EnableKeyword("OVERLAY_GPU_BILLBOARD");
+        return mat;
+    }
+
     /// <summary>
-    /// Rendering material: exclusive for Create, shared for CreateStatic. Do not modify shared settings.
+    /// Rendering material: exclusive for Create, shared for CreateStatic (among all users, or among the caller's renderers
+    /// when the caller passed it). Do not modify shared settings.
     /// </summary>
     public Material Material => meshRenderer != null ? meshRenderer.sharedMaterial : null;
 
     /// <summary>
     /// Initialize with the specified material, automatically adding MeshFilter/MeshRenderer.
     /// Release exclusive materials with the mesh; release CreateStatic's shared material when its last user is destroyed.
+    /// Caller-owned materials are left to the caller.
     /// </summary>
     public void Initialize(Material material)
     {
@@ -172,7 +217,11 @@ public class OverlayMeshRenderer : MonoBehaviour
         // Large cell fills such as effect-range overlays may exceed the 16-bit vertex-index
         // limit of 65535, so use 32-bit indices to remove that restriction.
         mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-        if (!sharedBillboardMaterial)
+        if (isStatic)
+        {
+            verts = staticVerts; colors = staticColors; indices = staticIndices;
+        }
+        else
         {
             mesh.MarkDynamic();
             verts.Capacity = 4096; colors.Capacity = 4096; indices.Capacity = 8192;
@@ -186,7 +235,7 @@ public class OverlayMeshRenderer : MonoBehaviour
     private void OnDestroy()
     {
         if (mesh != null) Destroy(mesh);
-        if (sharedBillboardMaterial)
+        if (materialOwner == MaterialOwner.BillboardPool)
         {
             if (--billboardUsers == 0)
                 for (int i = 0; i < billboardMaterials.Length; i++)
@@ -194,7 +243,7 @@ public class OverlayMeshRenderer : MonoBehaviour
                     Destroy(billboardMaterials[i]); billboardMaterials[i] = null;
                 }
         }
-        else if (meshRenderer != null && meshRenderer.sharedMaterial != null) Destroy(meshRenderer.sharedMaterial);
+        else if (materialOwner == MaterialOwner.Self && meshRenderer != null && meshRenderer.sharedMaterial != null) Destroy(meshRenderer.sharedMaterial);
     }
 
     /// <summary>
@@ -355,8 +404,9 @@ public class OverlayMeshRenderer : MonoBehaviour
     public void EndStaticFrame()
     {
         verts.Clear(); colors.Clear(); indices.Clear();
-        var ends = new List<Vector3>();
-        var parameters = new List<Vector4>();
+        List<Vector3> ends = staticEnds;
+        List<Vector4> parameters = staticParameters;
+        ends.Clear(); parameters.Clear();
         foreach (var line in frameLines)
         {
             int start = verts.Count;
