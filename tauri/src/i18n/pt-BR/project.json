@@ -11,7 +11,8 @@
     "hideObject": "Ocultar na visualização 3D"
   },
   "constructionProjects": {
-    "empty": "Nenhum tagged funciona ainda. Escolha uma etiqueta ao colocar em um painel de construção ou adicione uma no painel de detalhes de uma instalação pública ou estrada que esteja planejada ou em construção.",
+    "all": "Todas",
+    "empty": "Nenhuma obra ainda. Escolha uma tag ao posicionar a partir de um painel de construção ou adicione uma no painel de detalhes de uma instalação pública ou estrada planejada ou em construção para ver as obras agrupadas por projeto.",
     "loadFailed": "Falha ao carregar projetos de construção",
     "totalCost": "Custo estimado",
     "duration": "tempo restante",

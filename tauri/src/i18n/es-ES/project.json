@@ -11,7 +11,8 @@
     "hideObject": "Ocultar en la vista 3D"
   },
   "constructionProjects": {
-    "empty": "Todavía no hay obras con etiqueta. Elige una al colocar desde un panel de construcción, o agrégala desde el panel de detalle de un edificio público o una calle planificados o en construcción.",
+    "all": "Todas",
+    "empty": "Aún no hay obras. Elige una etiqueta al colocar desde un panel de construcción, o añádela desde el panel de detalle de un edificio público o una calle planificados o en construcción, para ver las obras agrupadas por proyecto.",
     "loadFailed": "No se pudieron cargar los proyectos de construcción",
     "totalCost": "Coste estimado",
     "duration": "Tiempo restante",

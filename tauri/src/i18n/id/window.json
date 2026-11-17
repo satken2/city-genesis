@@ -132,6 +132,7 @@
     "trayTutorialMode": "Mode tutorial",
     "trayReadOnlyMode": "Mode hanya-baca",
     "trayUnverified": "Tidak Diverifikasi · Demo",
+    "cockpitUnstarted": "Belum dimulai: {{scheduled}} · Menunggu perintah mulai: {{pending}}",
     "bulldozerOn": "Bulldozer: Aktif (klik untuk menghapus)",
     "bulldozerConfirmScatter": "Ini akan menghapus setiap prop \"{{name}}\" di area yang tersebar. Hapus seluruh area?",
     "bulldozerOff": "Bulldozer (menghapus paket kosong, bangunan/jalan & alat peraga medan)",

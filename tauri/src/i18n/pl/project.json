@@ -11,7 +11,8 @@
     "hideObject": "Ukryj się w widoku 3D"
   },
   "constructionProjects": {
-    "empty": "Żadne oznaczone nie działa jeszcze. Wybierz tag podczas umieszczania z panelu konstrukcyjnego lub dodaj go z panelu szczegółów obiektu użyteczności publicznej lub drogi, która jest zaplanowana lub w trakcie budowy.",
+    "all": "Wszystkie",
+    "empty": "Brak robót. Wybierz tag podczas umieszczania w panelu budowy albo dodaj go w panelu szczegółów planowanego lub budowanego obiektu publicznego czy drogi, aby przeglądać roboty pogrupowane według projektów.",
     "loadFailed": "Nie udało się załadować projektów budowlanych",
     "totalCost": "Szacowany koszt",
     "duration": "Pozostały czas",

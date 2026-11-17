@@ -11,7 +11,8 @@
     "hideObject": "Nascondi nella vista 3D"
   },
   "constructionProjects": {
-    "empty": "Nessun tag funziona ancora. Scegli un tag quando si posiziona da un pannello di costruzione o aggiungine uno dal pannello di dettaglio di una struttura pubblica o di una strada pianificata o in costruzione.",
+    "all": "Tutti",
+    "empty": "Ancora nessun lavoro. Scegli un tag quando posizioni da un pannello di costruzione, oppure aggiungilo dal pannello dei dettagli di una struttura pubblica o di una strada pianificata o in costruzione, per vedere i lavori raggruppati per progetto.",
     "loadFailed": "Impossibile caricare i progetti di costruzione",
     "totalCost": "costo stimato",
     "duration": "Tempo rimasto",

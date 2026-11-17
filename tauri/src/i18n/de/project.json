@@ -11,7 +11,8 @@
     "hideObject": "In der 3D-Ansicht ausblenden"
   },
   "constructionProjects": {
-    "empty": "Noch keine getaggten Werke. Wählen Sie beim Platzieren ein Etikett aus einem Baufeld aus oder fügen Sie eines aus der Detailleiste einer öffentlichen Einrichtung oder Straße hinzu, die geplant oder im Bau ist.",
+    "all": "Alle",
+    "empty": "Noch keine Bauarbeiten. Wählen Sie beim Platzieren in einem Baupanel einen Tag oder fügen Sie einen im Detailpanel einer geplanten oder im Bau befindlichen öffentlichen Einrichtung oder Straße hinzu, um die Bauarbeiten nach Projekten gebündelt zu sehen.",
     "loadFailed": "Bauprojekte konnten nicht geladen werden",
     "totalCost": "Geschätzte Kosten",
     "duration": "Zeit übrig",

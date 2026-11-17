@@ -132,6 +132,7 @@
     "trayTutorialMode": "Tryb samouczka",
     "trayReadOnlyMode": "Tryb tylko do odczytu",
     "trayUnverified": "Niezweryfikowane · demo",
+    "cockpitUnstarted": "Nierozpoczęte: {{scheduled}} · Oczekujące na polecenie rozpoczęcia: {{pending}}",
     "bulldozerOn": "Bulldozer: na (kliknij, aby usunąć)",
     "bulldozerConfirmScatter": "Spowoduje to usunięcie każdego prop „{{name}}” w obszarze rozproszonym. Usunąć cały obszar?",
     "bulldozerOff": "Bulldozer (usuń puste działki, planowane budynki / drogi i rekwizyty terenowe)",

@@ -11,7 +11,8 @@
     "hideObject": "3D görünümde gizle"
   },
   "constructionProjects": {
-    "empty": "Henüz etiketli çalışma yok. Bir inşaat panelinden yerleştirirken bir etiket seçin veya planlanmış veya yapım aşamasında olan bir kamu tesisi veya yolun detay panelinden bir etiket ekleyin.",
+    "all": "Tümü",
+    "empty": "Henüz iş yok. İşleri projelere göre gruplanmış görmek için bir inşaat panelinden yerleştirirken bir etiket seçin veya planlanan ya da yapımı süren bir kamu tesisinin veya yolun ayrıntı panelinden etiket ekleyin.",
     "loadFailed": "İnşaat projeleri yüklenemedi",
     "totalCost": "tahmini maliyet",
     "duration": "Kalan Zaman",

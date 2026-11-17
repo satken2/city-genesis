@@ -132,6 +132,7 @@
     "trayTutorialMode": "Modalità tutorial",
     "trayReadOnlyMode": "Modalità di sola lettura",
     "trayUnverified": "Non verificato · Demo",
+    "cockpitUnstarted": "Non avviati: {{scheduled}} · In attesa dell'ordine di avvio: {{pending}}",
     "bulldozerOn": "Bulldozer: On (clicca per rimuovere)",
     "bulldozerConfirmScatter": "Questo eliminerà ogni prop \"{{name}}\" nell'area sparsa. cancellare l'intera area?",
     "bulldozerOff": "Bulldozer (rimuovere pacchi vuoti, edifici/strade e oggetti di scena per il terreno)",

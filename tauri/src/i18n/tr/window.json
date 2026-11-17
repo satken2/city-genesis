@@ -132,6 +132,7 @@
     "trayTutorialMode": "öğretici mod",
     "trayReadOnlyMode": "salt okunur mod",
     "trayUnverified": "Doğrulanmamış · Demo",
+    "cockpitUnstarted": "Başlanmamış: {{scheduled}} · Başlatma emri bekleyen: {{pending}}",
     "bulldozerOn": "Buldozer: Açık (kaldırmak için tıklayın)",
     "bulldozerConfirmScatter": "Bu, dağınık alandaki her \"{{name}}\" propunu siler. tüm alanı sil?",
     "bulldozerOff": "Buldozer (boş parselleri, planlı binaları/yolları ve arazi sahnelerini kaldırın)",

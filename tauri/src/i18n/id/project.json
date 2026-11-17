@@ -11,7 +11,8 @@
     "hideObject": "Sembunyikan dalam tampilan 3D"
   },
   "constructionProjects": {
-    "empty": "Belum ada tag yang berfungsi. Pilih tag saat menempatkan dari panel konstruksi, atau tambahkan satu dari panel detail fasilitas umum atau jalan yang direncanakan atau sedang dibangun.",
+    "all": "Semua",
+    "empty": "Belum ada pekerjaan. Pilih tag saat menempatkan dari panel konstruksi, atau tambahkan dari panel detail fasilitas umum atau jalan yang direncanakan atau sedang dibangun, untuk melihat pekerjaan dikelompokkan per proyek.",
     "loadFailed": "Gagal memuat proyek konstruksi",
     "totalCost": "Estimasi biaya",
     "duration": "Waktu tersisa",

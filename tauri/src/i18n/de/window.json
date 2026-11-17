@@ -132,6 +132,7 @@
     "trayTutorialMode": "Tutorial-Modus",
     "trayReadOnlyMode": "schreibgeschützter Modus",
     "trayUnverified": "Ungeprüft · Demo",
+    "cockpitUnstarted": "Nicht begonnen: {{scheduled}} · Warten auf Baufreigabe: {{pending}}",
     "bulldozerOn": "Bulldozer: Ein (zum Entfernen klicken)",
     "bulldozerConfirmScatter": "Dadurch wird jede Requisite \"{{name}}\" im verstreuten Bereich gelöscht. Den gesamten Bereich löschen?",
     "bulldozerOff": "Bulldozer (leere Parzellen, geplante Gebäude/Straßen und Geländerequisiten entfernen)",

@@ -132,6 +132,7 @@
     "trayTutorialMode": "Modo tutorial",
     "trayReadOnlyMode": "Modo somente leitura",
     "trayUnverified": "Não verificado · Demo",
+    "cockpitUnstarted": "Não iniciadas: {{scheduled}} · Aguardando ordem de início: {{pending}}",
     "bulldozerOn": "Bulldozer: ativado (clique para remover)",
     "bulldozerConfirmScatter": "Isso excluirá todos os adereços “{{name}}” na área espalhada. Excluir toda a área?",
     "bulldozerOff": "Bulldozer (remover parcelas vazias, edifícios planejados/estradas e adereços de terreno)",
