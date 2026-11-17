@@ -57,6 +57,9 @@ public class IpcClient : MonoBehaviour
     public event Action OnSessionReload;
     public event Action OnSessionForceReload;
     public event Action<int> OnZoneUpdated;
+    // The UI committed a building or parcels to the backend: (parcel IDs to draw first, building agent ID or 0).
+    // The city is unchanged, so unlike session:reload nothing city-level is refetched and display state is kept.
+    public event Action<int[], int> OnWorldObjectsCommitted;
     public event Action OnEditPathFinish;
     // Abort path merge/split selection. Rust (window.rs) sends this when the path detail panel closes.
     // Windows are only hidden, not destroyed, so React unmount does not run;
@@ -802,6 +805,10 @@ public class IpcClient : MonoBehaviour
 
                 case "building:exploded":
                     OnBuildingExploded?.Invoke(GetParamInt(payload, "agent_id"));
+                    break;
+
+                case "world:objects_committed":
+                    OnWorldObjectsCommitted?.Invoke(GetParamInt1D(payload, "parcel_ids") ?? Array.Empty<int>(), GetParamInt(payload, "agent_id"));
                     break;
 
                 case "session:force_reload":

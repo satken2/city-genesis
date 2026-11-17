@@ -2,5 +2,5 @@
 public static class FrontendVersion
 {
     public const string Version = "0.0.17";
-    public const int IpcContract = 8;
+    public const int IpcContract = 9;
 }

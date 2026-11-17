@@ -49,7 +49,7 @@ import {
   sendBuildingPlacementCommand,
   IPC_EVENT_BUILDING_PLACEMENT_STATE,
   sendFocusGraphic,
-  sendSessionReload,
+  sendObjectsCommitted,
   sendPickCopySource,
   sendHighlightObjects,
   sendClearHighlights,
@@ -1377,13 +1377,14 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
  * Shared processing after construction confirmation succeeds. New construction in scenario
  * creation mode clears the position, randomizes the next building's appearance, and continues placing.
  * Explicitly clear service area overlays (unmount cleanup may not arrive after closing the window),
- * then send Unity a session reload to draw the new building.
+ * then tell Unity which building and site were committed so it draws them.
  * For normal/tutorial mode, existing-building edits, and City Hall relocation, return to STATE_NORMAL
  * before changing view mode. Otherwise view:change_view is not stored in _normalStateMemory,
  * and a later STATE_NORMAL from Rust would restore default.
  * Finally enable planned-building display so the player can inspect the result, then close the panel.
  */
-  async function finishAfterConfirm() {
+  async function finishAfterConfirm(agentId: number | undefined, siteParcelId: number | null | undefined) {
+    const siteParcelIds = siteParcelId != null ? [siteParcelId] : [];
     await sendEditBuildingUpdateEffectRange(null).catch(() => {});
     await sendClearHighlights(HIGHLIGHT_SOURCE).catch(() => {});
     if (continueAfterConfirm && selectedVariant !== null) {
@@ -1398,10 +1399,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         setPlacedLandmarkIds(previous => previous.includes(landmark) ? previous : [...previous, landmark]);
       }
       await sendBuildingPlacementCommand(selectedVariant, { reset: true });
-      await sendSessionReload();
+      await sendObjectsCommitted(siteParcelIds, agentId);
       return;
     }
-    await sendSessionReload();
+    await sendObjectsCommitted(siteParcelIds, agentId);
     await sendChangeState("STATE_NORMAL");
     await sendChangeDisplay("building", "default", null, ["plan"]);
     onClose();
@@ -1436,6 +1437,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     if (selectedVariant === null || parcelId === null || selectedVariantData === null) return;
     const baseUrl = apiBaseUrl.replace(/\/+$/, "");
     try {
+      let agentId: number | undefined = editAgentId ?? undefined;
       if (editAgentId != null) {
         await fetchApi(`${baseUrl}/api/v1/agents/${editAgentId}`, {
           method: "PATCH",
@@ -1465,6 +1467,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
           }),
         });
         notifyTagAssigned();
+        agentId = created?.agent_id;
         if (!continueAfterConfirm && created && created.agent_id) {
           void invoke("open_registered_window", {
             windowType: "agent_detail",
@@ -1472,7 +1475,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
           });
         }
       }
-      await finishAfterConfirm();
+      await finishAfterConfirm(agentId, parcelId);
     } catch (err) {
       notifyConfirmError(err);
     }
@@ -1489,7 +1492,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     if (selectedVariant === null || pickedPosition === null || selectedVariantData === null || !directPreviewReady) return;
     const baseUrl = apiBaseUrl.replace(/\/+$/, "");
     try {
-      const created = await fetchApi<{ agent_id: number }>(`${baseUrl}/api/v1/buildings/direct`, {
+      const created = await fetchApi<{ agent_id: number; parcel_id?: number | null }>(`${baseUrl}/api/v1/buildings/direct`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1514,7 +1517,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
           entityId: String(created.agent_id),
         });
       }
-      await finishAfterConfirm();
+      await finishAfterConfirm(created?.agent_id, created?.parcel_id);
     } catch (err) {
       notifyConfirmError(err);
     }

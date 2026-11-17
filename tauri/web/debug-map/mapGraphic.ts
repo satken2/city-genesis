@@ -72,6 +72,7 @@ function receive(json: string): void {
       break;
     case "session:reload":
     case "session:force_reload":
+    case "world:objects_committed":
       emitTo(LABEL_DEBUG_MAP, "session:reload", {});
       break;
   }

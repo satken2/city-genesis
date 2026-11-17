@@ -803,21 +803,38 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         }
     }
 
-    /// <summary>Refetch one parcel in the list form (the same form the city cache holds) and redraw it.</summary>
-    public IEnumerator FetchParcel(int parcelId)
+    /// <summary>
+    /// Refetch parcels in the list form (the same form the city cache holds) and redraw those whose centroid cell is loaded.
+    /// The others are only registered in the cache; loading their cell draws them.
+    /// </summary>
+    public IEnumerator FetchParcels(IReadOnlyList<int> parcelIds)
     {
-        yield return ApiClient.GetBulk<ParcelListResponse>(
-            $"/parcels/?ids={parcelId}",
-            response =>
+        var slice = System.Diagnostics.Stopwatch.StartNew();
+        for (int start = 0; start < parcelIds.Count; start += CityDataCache.IdsPerRequest)
+        {
+            var ids = new List<int>(CityDataCache.IdsPerRequest);
+            for (int i = start; i < parcelIds.Count && ids.Count < CityDataCache.IdsPerRequest; i++) ids.Add(parcelIds[i]);
+            ParcelListResponse response = null;
+            yield return ApiClient.GetBulk<ParcelListResponse>(
+                $"/parcels/?ids={string.Join(",", ids)}",
+                value => response = value,
+                error => Debug.LogError($"FetchParcels failed: {error}")
+            );
+            if (response?.parcels == null) continue;
+            slice.Restart();
+            foreach (ParcelSummary parcel in response.parcels)
             {
-                if (response?.parcels == null || response.parcels.Count == 0) return;
-                ParcelSummary parcel = response.parcels[0];
+                if (slice.Elapsed.TotalMilliseconds > PerformanceConfig.SliceBudgetMs)
+                {
+                    yield return RenderWorkScheduler.Continue;
+                    slice.Restart();
+                }
                 CityDataCache.Ensure().Register(parcel);
+                if (!TryGetCenterCell(parcel, out Vector2Int cell) || !loadedCells.Contains(cell)) continue;
                 CreateOrUpdateParcelObject(parcel);
                 parcelVersionCache[parcel.parcel_id] = parcel.version;
-            },
-            error => Debug.LogError($"FetchParcel({parcelId}) failed: {error}")
-        );
+            }
+        }
     }
 
     private void RegisterParcelDataForLines(ParcelSummary parcelData)
