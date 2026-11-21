@@ -27,7 +27,7 @@
  *   - coastline: coastline polygons (outer land boundaries and hole rings for inland lake and pond shores).
  *   - zoneBorders: district outlines.
  *   - parcels: parcel outlines.
- *   - buildings: building footprints.
+ *   - buildings: building footprints. A mashup building stands as separate wings, so it is drawn as its wings' rectangles.
  *   - buildings3d: simple 3D buildings extruded by floor count × floor height (effective only when buildings is on).
  *     Treat the viewpoint as directly above the screen center. Translate the roof, retaining the footprint's shape, by
  *     (building center − screen center) × height / viewpoint height, then connect it to the footprint with side faces.
@@ -122,6 +122,7 @@ import {
   type InfrastructureStats, type ServiceCoverageData,
 } from "./infraOverlay";
 import { interchangeDisplayName } from "../intersection/interchangeName";
+import { placementCorners, type SubBuildingPlacement } from "../../utils/subBuilding";
 import { fetchRoadList, hasRoad, ROADS_CHANGED_EVENT } from "../road/roadApi";
 import type { RoadSummary } from "../road/roadTypes";
 import {
@@ -422,6 +423,8 @@ type ApiPolygonItem = {
   /** Buildings only: floor count and tourist attraction type (0 = not a tourist attraction). Used for simple 3D height. */
   floors?: number;
   landmark?: number;
+  /** Buildings only: wings of a mashup building, with each wing's floor count and floor height (m). */
+  sub_buildings?: (SubBuildingPlacement & { floors?: number; height_per_floor?: number })[] | null;
   /** Parcels only: parcel ID, used for selection and matching caller-provided values. */
   parcel_id?: number;
   /** Parcels only: adjoining path ID (0 or less if none) and which side of the road the parcel is on (PATH_SIDE_*; -1 if undetermined). */
@@ -442,7 +445,10 @@ type RoadBandKind = "street" | "motorway";
 /** Rendering unit grouping road surfaces with the same style and centerlines used for minimum stroke widths in distant views. */
 type RoadBand = { kind: RoadBandKind; trunk: boolean; width: number; path: Path2D; surface: Path2D; color?: string };
 
-/** One building extruded into simple 3D. The footprint is in world coordinates. */
+/** One body a building is drawn with: a footprint local to center_point and its height (m). */
+type BuildingBody = Pick<ApiPolygonItem, "polygon" | "center_point"> & { height: number };
+
+/** One building body extruded into simple 3D. The footprint is in world coordinates. */
 type BuildingSolid = {
   ring: [number, number][];
   cx: number;
@@ -975,7 +981,7 @@ export function pathCenterline(item: ApiPathItem): [number, number][] {
  * With localPolygon=true, treat polygon as local to center_point and add center_point as the offset
  * (the format used by buildings).
  */
-function buildPolygonPath(items: ApiPolygonItem[], localPolygon: boolean): Path2D {
+function buildPolygonPath(items: Pick<ApiPolygonItem, "polygon" | "center_point">[], localPolygon: boolean): Path2D {
   const path = new Path2D();
   for (const item of items) {
     const poly = item.polygon;
@@ -998,8 +1004,30 @@ function wallColorOf(color: string): string {
   return `rgb(${rgb.map((v) => Math.round(v * BUILDING_WALL_SHADE)).join(", ")})`;
 }
 
-/** Convert a building footprint (local to center_point) into a world-coordinate solid. Return null for zero-area footprints. */
-function buildBuildingSolid(item: ApiPolygonItem, height: number, color: string, wallColor: string): BuildingSolid | null {
+/**
+ * Bodies a building is drawn with. A building with wing placements (mashup) has no single body, so each wing's
+ * rectangle is a body; any other building is its own footprint. floorHeight is the building's floor height (m).
+ */
+function buildingBodies(building: ApiPolygonItem, md: MasterData | null, floorHeight: number): BuildingBody[] {
+  const center = toXZ(building.center_point);
+  if (!building.sub_buildings?.length || !center) {
+    return [{ polygon: building.polygon, center_point: building.center_point, height: (building.floors ?? 0) * floorHeight }];
+  }
+  return building.sub_buildings.map((wing) => {
+    const wx = center[0] + wing.position[0];
+    const wz = center[1] + wing.position[1];
+    return {
+      polygon: placementCorners(wing, center, md?.subbuildings?.[wing.subbuilding_id])
+        .map(([x, z]): [number, number] => [x - wx, z - wz]),
+      center_point: [wx, wz],
+      height: (wing.floors ?? 0) * (wing.height_per_floor ?? floorHeight),
+    };
+  });
+}
+
+/** Convert a building body into a world-coordinate solid. Return null for zero-area footprints. */
+function buildBuildingSolid(item: BuildingBody, color: string, wallColor: string): BuildingSolid | null {
+  const { height } = item;
   const poly = item.polygon;
   const center = toXZ(item.center_point);
   if (!poly || poly.length < 3 || !center) return null;
@@ -2327,7 +2355,12 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
         }
         const isPark = (building: ApiPolygonItem) => building.variant !== undefined
           && md?.agents?.[building.variant]?.model_type === MODEL_PARK;
-        vec.buildingPath = buildPolygonPath(vec.buildings.filter((b) => !isPark(b)), true);
+        // Tourist attractions have their own floor heights, which take precedence (as in the construction panel).
+        const bodiesOf = (building: ApiPolygonItem) => buildingBodies(building, md,
+          md?.landmarks?.[building.landmark ?? 0]?.height_per_floor
+            ?? (building.variant === undefined ? undefined : md?.agents?.[building.variant]?.height_per_floor)
+            ?? DEFAULT_HEIGHT_PER_FLOOR);
+        vec.buildingPath = buildPolygonPath(vec.buildings.filter((b) => !isPark(b)).flatMap(bodiesOf), true);
         vec.parkPath = buildPolygonPath(vec.buildings.filter(isPark), true);
         const sourceBin = (value: number | undefined) => heat.mode === "sources" && value && value > 0
           ? Math.min(HEATMAP_BIN_COUNT - 1, Math.floor(value * HEATMAP_BIN_COUNT)) : -1;
@@ -2341,19 +2374,15 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
           if (bin >= 0) return heat.binColors[bin];
           return isPark(building) ? null : COLOR_BUILDING;
         };
-        // Tourist attractions have their own floor heights, which take precedence (as in the construction panel).
-        const heightOf = (building: ApiPolygonItem) => (building.floors ?? 0)
-          * (md?.landmarks?.[building.landmark ?? 0]?.height_per_floor
-            ?? (building.variant === undefined ? undefined : md?.agents?.[building.variant]?.height_per_floor)
-            ?? DEFAULT_HEIGHT_PER_FLOOR);
-        const colorGroups = new Map<string, ApiPolygonItem[]>();
+        const colorGroups = new Map<string, BuildingBody[]>();
         const wallColors = new Map<string, string>();
         vec.buildingSolids = [];
         for (const building of vec.buildings) {
           const color = buildingColor(building);
           if (color === null) continue;
+          const bodies = bodiesOf(building);
           const items = colorGroups.get(color) ?? [];
-          items.push(building);
+          items.push(...bodies);
           colorGroups.set(color, items);
           // Ground-type facilities also use their floor count for capacities such as housing, so no solid is extruded from it.
           if (isPark(building) || (building.variant !== undefined
@@ -2363,8 +2392,10 @@ export const CityMapCanvas = forwardRef<CityMapCanvasHandle, CityMapCanvasProps>
             wallColor = wallColorOf(color);
             wallColors.set(color, wallColor);
           }
-          const solid = buildBuildingSolid(building, heightOf(building), color, wallColor);
-          if (solid) vec.buildingSolids.push(solid);
+          for (const body of bodies) {
+            const solid = buildBuildingSolid(body, color, wallColor);
+            if (solid) vec.buildingSolids.push(solid);
+          }
         }
         vec.buildingBands = [...colorGroups].map(([color, items]) => ({ path: buildPolygonPath(items, true), color }));
         const railBins = new Map<number, Path2D>();

@@ -37,21 +37,9 @@ import { fetchApi } from "../../utils/api";
 import { sendSessionReload } from "../../utils/ipc";
 import { showNotification } from "../../utils/notification";
 import { useMasterData } from "../../contexts/MasterDataContext";
-import { MASHUP_CELL_SIZE, MODEL_MASHUP } from "../../constants";
+import { MODEL_MASHUP } from "../../constants";
+import { placementCorners, subbuildingSize, type SubBuildingPlacement } from "../../utils/subBuilding";
 import "./BuildingAppearancePanel.css";
-
-/**
- * Placement entry for one sub-building (sub_buildings in GET /buildings/{id} and the format of
- * PUT /buildings/{id}/sub-buildings). Floors are not editable; the backend derives them from
- * parent floors on delivery.
- */
-type SubBuildingPlacement = {
-  subbuilding_id: number;
-  /** Relative XZ coordinates [x, z] from the building center. */
-  position: number[];
-  /** Rotation in the XZ plane (degrees, counterclockwise from +X). */
-  rotation: number;
-};
 
 /** Canvas drag state. */
 type DragState =
@@ -107,42 +95,6 @@ const SUBBUILDING_COLORS = [
 function colorForSubbuilding(subbuildingId: number): string {
   const index = Math.abs(Math.trunc(subbuildingId)) % SUBBUILDING_COLORS.length;
   return SUBBUILDING_COLORS[index];
-}
-
-/**
- * Sub-building footprint dimensions (m). Master width / height use cells (1 unit = MASHUP_CELL_SIZE m).
- * Treat undefined dimensions as one cell, following the backend convention.
- */
-function subbuildingSize(entry: SubBuildingMasterEntry | undefined): [number, number] {
-  return [(entry?.width ?? 1) * MASHUP_CELL_SIZE, (entry?.height ?? 1) * MASHUP_CELL_SIZE];
-}
-
-/**
- * Return the four world-space corners of a placement entry's footprint rectangle.
- * The rotation axes u (width) = (cosθ, sinθ), v (depth) = (-sinθ, cosθ)
- * follow the backend cell grid convention (generate_mashup_cells).
- */
-function placementCorners(
-  placement: SubBuildingPlacement,
-  centerPoint: number[],
-  entry: SubBuildingMasterEntry | undefined,
-): [number, number][] {
-  const [width, height] = subbuildingSize(entry);
-  const rad = (placement.rotation * Math.PI) / 180;
-  const ux = Math.cos(rad);
-  const uz = Math.sin(rad);
-  const vx = -uz;
-  const vz = ux;
-  const cx = centerPoint[0] + placement.position[0];
-  const cz = centerPoint[1] + placement.position[1];
-  const hw = width / 2;
-  const hh = height / 2;
-  return [
-    [cx - ux * hw - vx * hh, cz - uz * hw - vz * hh],
-    [cx + ux * hw - vx * hh, cz + uz * hw - vz * hh],
-    [cx + ux * hw + vx * hh, cz + uz * hw + vz * hh],
-    [cx - ux * hw + vx * hh, cz - uz * hw + vz * hh],
-  ];
 }
 
 /** Whether a world point lies inside a placement footprint rectangle (test local coordinates after accounting for rotation). */
