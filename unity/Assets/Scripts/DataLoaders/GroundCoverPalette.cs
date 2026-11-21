@@ -263,17 +263,17 @@ public class GroundCoverProfile
             {
                 groundCover = Constants.GROUND_COVER_SEMI_ARID,
                 textureResource = dryGrassTexture, textureTileSize = new Vector2(3f, 3f),
-                textureColorWeight = 0.4f, textureLuminance = 0.327f, textureContrast = 1f, smoothness = 0.12f,
+                textureColorWeight = 0f, textureLuminance = 0.327f, textureContrast = 1.4f, smoothness = 0.12f,
                 proceduralBlend = 0.70f, proceduralScale = 25f,
-                groundColorA = new Color(0.53f, 0.48f, 0.30f),
-                groundColorB = new Color(0.49f, 0.46f, 0.30f), // 土色に近い色で、草の濃淡が独立した斑点に見えるのを抑える。
-                groundColorC = new Color(0.58f, 0.54f, 0.38f),
+                groundColorA = new Color(0.36f, 0.35f, 0.17f),
+                groundColorB = new Color(0.30f, 0.27f, 0.14f), // 乾いた土とステップ草地の落ち着いた濃淡。
+                groundColorC = new Color(0.45f, 0.42f, 0.23f),
                 detailNormalStrength = 0.25f, rippleStrength = 0f, rippleWavelength = 0.6f,
-                macroVariationStrength = 0.08f, macroVariationTint = new Color(0.95f, 0.84f, 0.62f),
+                macroVariationStrength = 0.18f, macroVariationTint = new Color(0.72f, 0.66f, 0.42f),
                 colorGradeStrength = 0.18f,
-                lowColor = new Color(0.98f, 0.92f, 0.80f),
-                highColor = new Color(0.92f, 0.92f, 0.95f),
-                slopeColor = new Color(0.80f, 0.66f, 0.52f),
+                lowColor = new Color(0.78f, 0.75f, 0.58f),
+                highColor = new Color(0.88f, 0.88f, 0.90f),
+                slopeColor = new Color(0.70f, 0.58f, 0.44f),
                 rockTint = new Color(1.05f, 0.99f, 0.90f), shoreSandColor = new Color(0.80f, 0.72f, 0.56f),
                 rockStartAngle = 56.633f, rockFullAngle = 68.284f, shoreRockStartAngle = 56.633f, shoreRockFullAngle = 68.284f, // Dry coasts stay sandy up to cliff angles
             },

@@ -124,24 +124,24 @@ MonoBehaviour:
   - groundCover: 5
     textureResource: Textures/ground-dry-grass-albedo
     textureTileSize: {x: 3, y: 3}
-    textureColorWeight: 0.4
+    textureColorWeight: 0
     textureLuminance: 0.327
-    textureContrast: 1
+    textureContrast: 1.4
     smoothness: 0.12
     proceduralBlend: 0.7
     proceduralScale: 25
-    groundColorA: {r: 0.53, g: 0.48, b: 0.3, a: 1}
-    groundColorB: {r: 0.49, g: 0.46, b: 0.3, a: 1}
-    groundColorC: {r: 0.58, g: 0.54, b: 0.38, a: 1}
+    groundColorA: {r: 0.36, g: 0.35, b: 0.17, a: 1}
+    groundColorB: {r: 0.3, g: 0.27, b: 0.14, a: 1}
+    groundColorC: {r: 0.45, g: 0.42, b: 0.23, a: 1}
     detailNormalStrength: 0.25
     rippleStrength: 0
     rippleWavelength: 0.6
-    macroVariationStrength: 0.08
-    macroVariationTint: {r: 0.95, g: 0.84, b: 0.62, a: 1}
+    macroVariationStrength: 0.18
+    macroVariationTint: {r: 0.72, g: 0.66, b: 0.42, a: 1}
     colorGradeStrength: 0.18
-    lowColor: {r: 0.98, g: 0.92, b: 0.8, a: 1}
-    highColor: {r: 0.92, g: 0.92, b: 0.95, a: 1}
-    slopeColor: {r: 0.8, g: 0.66, b: 0.52, a: 1}
+    lowColor: {r: 0.78, g: 0.75, b: 0.58, a: 1}
+    highColor: {r: 0.88, g: 0.88, b: 0.9, a: 1}
+    slopeColor: {r: 0.7, g: 0.58, b: 0.44, a: 1}
     rockTint: {r: 1.05, g: 0.99, b: 0.9, a: 1}
     rockStartAngle: 56.633
     rockFullAngle: 68.284

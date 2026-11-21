@@ -29,17 +29,37 @@ float2 ForestCoverageAt(float3 position)
     return SAMPLE_TEXTURE2D_LOD(_ForestCoverage, sampler_ForestCoverage, uv, 0).rg;
 }
 
-float ForestSurfaceWeight(float3 position)
+float ForestOverviewBlend(float3 position)
 {
-    float2 coverage = ForestCoverageAt(position);
     // 下地が薄いまま木を間引くと、両方の被覆が不足して明るい帯になる。
     // 距離・常駐境界ともに、樹冠の下地を完成させてからモデルを減らす。
-    float distanceWeight = smoothstep(800,1100,distance(position,_WorldSpaceCameraPos));
-    float boundaryWeight = 1 - smoothstep(.7,1,ForestDetailAt(position.xz));
-    // 被覆は真上から見た樹冠の割合。日の当たる林床が見えるのは視線と日差しの両方が樹冠の隙間を抜ける所だけで、
-    // 残りの林床は樹冠の陰になり遠目には樹冠と同じ色に見える。そこで真上の隙間率を、視線と日差しが樹冠の層を通る長さ(鉛直の何倍か)の和で累乗する。
-    float open = (1-coverage.r)*(1-coverage.g);
-    float path = 1/max(GetWorldSpaceNormalizeViewDir(position).y,.05) + 1/max(_MainLightPosition.y,.05);
-    return (1 - pow(open,path)) * max(distanceWeight,boundaryWeight);
+    float distanceWeight = smoothstep(800, 1100, distance(position, _WorldSpaceCameraPos));
+    float boundaryWeight = 1 - smoothstep(.7, 1, ForestDetailAt(position.xz));
+    return max(distanceWeight, boundaryWeight);
+}
+
+float ForestSurfaceWeight(float3 position, float3 normalWS)
+{
+    float2 coverage = ForestCoverageAt(position);
+    // 視線が樹冠の層を通る長さを地形法線に対する角度から求め、実際に葉で見える割合だけを返す。
+    // 水平に近い浅い角度や疎林で地面全体が緑に塗り潰れないよう、倍率に上限を設ける。
+    float open = (1 - coverage.r) * (1 - coverage.g);
+    float viewCos = max(abs(dot(normalWS, GetWorldSpaceNormalizeViewDir(position))), .35);
+    return (1 - pow(open, 1 / viewCos)) * ForestOverviewBlend(position);
+}
+
+float ForestSurfaceWeight(float3 position)
+{
+    return ForestSurfaceWeight(position, float3(0, 1, 0));
+}
+
+// 樹冠の隙間から見えている地面に落ちる木の影(明度倍率)。
+// 影は葉の色に置き換えず、元の地表色(砂・雪・草など)のまま暗くする。
+float ForestGroundShadow(float2 coverage, float3 position, float3 normalWS)
+{
+    float open = (1 - coverage.r) * (1 - coverage.g);
+    float lightCos = max(dot(normalWS, _MainLightPosition.xyz), .25);
+    float sunOpen = pow(open, 1 / lightCos);
+    return lerp(1, lerp(.55, 1, sunOpen), ForestOverviewBlend(position));
 }
 #endif

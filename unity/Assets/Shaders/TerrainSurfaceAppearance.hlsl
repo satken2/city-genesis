@@ -87,9 +87,16 @@ float TerrainMacroFbm(float2 p)
     return sum; // 0.5 + 0.25 + 0.125 = 0.875 が上限
 }
 
+float3 TerrainGeoNormalWS(float3 positionWS)
+{
+    float3 crossN = cross(ddy(positionWS), ddx(positionWS));
+    float lenSq = dot(crossN, crossN);
+    return lenSq > 1e-12 ? crossN * rsqrt(lenSq) : float3(0, 1, 0);
+}
+
 half3 ApplyTerrainMacroVariation(half3 color, float3 positionWS)
 {
-    float strength = saturate(_TerrainMacroVariationStrength) * (1 - ForestSurfaceWeight(positionWS));
+    float strength = saturate(_TerrainMacroVariationStrength) * (1 - ForestSurfaceWeight(positionWS, TerrainGeoNormalWS(positionWS)));
     if (strength <= 0.0001)
         return color;
 
@@ -114,7 +121,8 @@ half3 ApplyTerrainMacroVariation(half3 color, float3 positionWS)
 /// </summary>
 half3 ApplyTerrainColorGrade(half3 color, float3 positionWS)
 {
-    float strength = saturate(_TerrainColorGradeStrength) * (1 - ForestSurfaceWeight(positionWS));
+    float3 geoN = TerrainGeoNormalWS(positionWS);
+    float strength = saturate(_TerrainColorGradeStrength) * (1 - ForestSurfaceWeight(positionWS, geoN));
     if (strength <= 0.0001)
         return color;
 
@@ -122,8 +130,7 @@ half3 ApplyTerrainColorGrade(half3 color, float3 positionWS)
     float hT = saturate((positionWS.y - _TerrainColorGradeLowHeight) / span);
     half3 tint = (half3)lerp(_TerrainLowColor.rgb, _TerrainHighColor.rgb, hT);
 
-    // 面法線を画面微分から復元して傾斜を求める(0=水平, 1=垂直)。
-    float3 geoN = normalize(cross(ddy(positionWS), ddx(positionWS)));
+    // 面法線から傾斜を求める(0=水平, 1=垂直)。
     float slope = saturate((1.0 - abs(geoN.y)) * 1.5);
     tint = lerp(tint, (half3)_TerrainSlopeColor.rgb, (half)slope);
 
@@ -324,10 +331,13 @@ half4 CliffTerrainFragmentPBR(InputData inputData, half3 albedo, half metallic, 
     ApplyCliffRock(inputData.positionWS, cliffGeoNormalWS, inputData.normalWS, albedo, smoothness, riverRock);
     ApplyRiverBedWet(riverBed, albedo, smoothness);
     ApplySeabedShade(inputData.positionWS, albedo);
-    float forest = ForestSurfaceWeight(inputData.positionWS) * (1 - riverBed);
+    float forest = ForestSurfaceWeight(inputData.positionWS, cliffGeoNormalWS) * (1 - riverBed);
     if (forest > .001)
     {
         float2 coverage = ForestCoverageAt(inputData.positionWS);
+        // 樹冠の隙間から見える地面は葉の色に置き換えず、元の地表色のまま木の影で暗くする。
+        float groundShade = lerp(1, ForestGroundShadow(coverage, inputData.positionWS, cliffGeoNormalWS), 1 - riverBed);
+        albedo *= (half)groundShade;
         half3 leaf = lerp(_ForestPineColor.rgb, _ForestLeafColor.rgb, coverage.g / max(.001, coverage.r + coverage.g));
         float2 uv = inputData.positionWS.xz / 5;
         float2 cell = floor(uv), offset = 0;
