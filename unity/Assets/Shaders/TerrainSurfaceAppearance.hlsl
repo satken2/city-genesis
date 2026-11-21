@@ -332,6 +332,7 @@ half4 CliffTerrainFragmentPBR(InputData inputData, half3 albedo, half metallic, 
     ApplyRiverBedWet(riverBed, albedo, smoothness);
     ApplySeabedShade(inputData.positionWS, albedo);
     float forest = ForestSurfaceWeight(inputData.positionWS, cliffGeoNormalWS) * (1 - riverBed);
+    half3 forestLeaf = 0;
     if (forest > .001)
     {
         float2 coverage = ForestCoverageAt(inputData.positionWS);
@@ -354,17 +355,29 @@ half4 CliffTerrainFragmentPBR(InputData inputData, half3 albedo, half metallic, 
         float detail = 1 - smoothstep(.35,1.5,max(length(ddx(uv)),length(ddy(uv))));
         float crown = saturate(1 - closest);
         float macro = TerrainMacroNoise(inputData.positionWS.xz / 55);
-        leaf *= lerp(.78, lerp(.62,1,crown), detail) * lerp(.93,1.07,macro);
-        // 平面に描いた凹凸はどの向きからも同じ面が見えるが、立体の樹冠はカメラ側の面が見え、隣の木が下側を隠す。
-        // 凹凸の軸を真上とカメラ方向の中間に取り、光の向きで変わる日なたと陰・浅い角度の空の映り込みを木のモデルに揃える。
-        float3 crownAxis = normalize(float3(0,1,0) + inputData.viewDirectionWS);
-        float3 crownNormal = normalize(crownAxis + float3(offset.x * 1.5 * detail,0,offset.y * 1.5 * detail));
+        // _Forest*Color には MeanShade が織り込み済みのため、凹凸・色むらの平均倍率は1に揃える(Foliage.hlsl と同じ規則)。
+        leaf *= lerp(1.0, lerp(.76, 1.10, crown), detail) * lerp(.93, 1.07, macro);
+        // 平面に描いた凹凸はどの向きからも同じ面が見えるが、立体の樹冠はカメラ側の上部が見え、隣の木が下側を隠す。
+        // 軸をカメラ方向へ適度に寄せる(倒しすぎると低角度の逆光で法線が太陽と真逆を向いて黒潰れする)。
+        float3 crownAxis = normalize(float3(0,1,0) + inputData.viewDirectionWS * .45);
+        float3 crownNormal = normalize(crownAxis + float3(offset.x * .85 * detail,0,offset.y * .85 * detail));
         inputData.normalWS = normalize(lerp(inputData.normalWS,crownNormal,forest));
         inputData.bakedGI = lerp(inputData.bakedGI,SampleSH(inputData.normalWS),forest);
         albedo = lerp(albedo,leaf,forest);
         smoothness = lerp(smoothness,.1,forest);
+        forestLeaf = leaf;
     }
-    return UniversalFragmentPBR(inputData, albedo, metallic, specular, smoothness, occlusion, emission, alpha);
+    half4 color = UniversalFragmentPBR(inputData, albedo, metallic, specular, smoothness, occlusion, emission, alpha);
+    if (forest > .001)
+    {
+        // 3Dの木(Foliage.hlsl)と同じ回り込み光と逆光透過を足し、低い角度や逆光で地面の森だけ暗く沈むのを防ぐ。
+        Light mainLight = GetMainLight(inputData.shadowCoord, inputData.positionWS, inputData.shadowMask);
+        half nl = dot(inputData.normalWS, mainLight.direction);
+        half wrap = saturate((nl + 0.5) / 1.5) - saturate(nl);
+        half back = 0.25 * pow(saturate(dot(inputData.viewDirectionWS, -mainLight.direction)), 4);
+        color.rgb += (half)forest * forestLeaf * mainLight.color * mainLight.distanceAttenuation * (wrap * mainLight.shadowAttenuation + back);
+    }
+    return color;
 }
 
 

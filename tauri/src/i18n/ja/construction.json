@@ -210,6 +210,7 @@
     "rotation": "回転角(度)",
     "scale": "スケール",
     "density": "密度(本/ha)",
+    "edgeFadeWidth": "境界のぼかし幅(m)",
     "seed": "シード",
     "confirm": "確定",
     "confirming": "確定中...",

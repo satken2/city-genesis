@@ -210,6 +210,7 @@
     "rotation": "Angle de rotation (degrés)",
     "scale": "Échelle",
     "density": "Densité (unités/ha)",
+    "edgeFadeWidth": "Largeur de fondu des bords (m)",
     "seed": "Graine aléatoire",
     "confirm": "Valider",
     "confirming": "Validation...",

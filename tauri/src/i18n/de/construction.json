@@ -210,6 +210,7 @@
     "rotation": "Rotation (DEG)",
     "scale": "Rahmen",
     "density": "Dichte (pro ha)",
+    "edgeFadeWidth": "Randübergangsbreite (m)",
     "seed": "Samen",
     "confirm": "Bestätigen",
     "confirming": "bestätigen...",

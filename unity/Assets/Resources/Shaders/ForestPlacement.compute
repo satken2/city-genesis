@@ -7,13 +7,15 @@ StructuredBuffer<float4> _Rings;
 Texture2D<float4> _Heightmap;
 SamplerState linearClampSampler;
 int4 _Grid;
-int _Count, _Seed, _RegionRings, _RingCount, _HeightResolution;
+int _Count, _Seed, _RegionRings, _RingCount;
+int2 _HeightResolution;
 // 地形セル1つ・散布1件で共有する点のバッファのうち、このパッチの範囲の先頭。
 int _PointOffset;
 float _Spacing, _Clearance;
 float _EdgeFadeWidth, _WaterFadeWidth;
 float4 _Rect;
 float3 _TileOrigin, _TileSize, _Offset;
+float2 _HeightScaleBias;
 
 uint Hash(uint v) { v ^= v >> 16; v *= 0x7feb352d; v ^= v >> 15; v *= 0x846ca68b; return v ^ (v >> 16); }
 float Unit(uint v) { return (Hash(v) & 0xffffff) / 16777216.0; }
@@ -90,10 +92,10 @@ void Generate(uint3 id : SV_DispatchThreadID)
     bool visible = all(p >= _Rect.xy) && all(p < _Rect.zw);
     if (visible) visible = Covered(p,0,_RegionRings,0,false,Unit(h+6),0) && !Covered(p,_RegionRings,_RingCount,min(8,_Clearance*scale),true,0,Unit(h+7));
     float2 world = p + _Offset.xz;
-    float2 grid = (world-_TileOrigin.xz)/_TileSize.xz * (_HeightResolution-1);
-    float2 uv = (grid+.5)/_HeightResolution;
-    // Unity の heightmapTexture は高さを 0〜0.5 に詰めて格納しているので、2倍してから地形の高さに戻す。
-    float height = _Heightmap.SampleLevel(linearClampSampler,uv,0).r * 2 * _TileSize.y + _TileOrigin.y;
+    float2 grid = (world-_TileOrigin.xz)/_TileSize.xz * float2(_HeightResolution-1);
+    float2 uv = (grid+.5)/float2(_HeightResolution);
+    // Unity の heightmapTexture は 0〜0.5 正規化、背景地形は絶対標高(RFloat)のためスケールとバイアスで統一する。
+    float height = _Heightmap.SampleLevel(linearClampSampler,uv,0).r * _HeightScaleBias.x + _HeightScaleBias.y;
     ForestPoint result;
     result.positionScale = float4(world.x,height,world.y,scale);
     result.rotationVisible = float4(Unit(h+2)*6.28318530718,visible ? 1 : 0,Unit(h+4),Unit(h+5));

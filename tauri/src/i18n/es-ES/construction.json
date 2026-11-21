@@ -210,6 +210,7 @@
     "rotation": "Ángulo de rotación (grados)",
     "scale": "Escala",
     "density": "Densidad (unidades/ha)",
+    "edgeFadeWidth": "Ancho de difuminado del borde (m)",
     "seed": "Semilla",
     "confirm": "Confirmar",
     "confirming": "Confirmando...",

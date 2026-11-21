@@ -210,6 +210,7 @@
     "rotation": "旋转角（度）",
     "scale": "缩放",
     "density": "密度（个/公顷）",
+    "edgeFadeWidth": "边缘渐隐宽度（米）",
     "seed": "种子",
     "confirm": "确定",
     "confirming": "确定中...",

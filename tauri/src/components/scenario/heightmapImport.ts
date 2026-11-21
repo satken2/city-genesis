@@ -169,6 +169,7 @@ export async function fetchHeightmapPreview(
 type ScenarioTerrainResponse = {
   settings: { map_width: number; map_height: number; near_spacing: number; grid_rows: number; grid_cols: number };
   near_base64: string;
+  ground_cover?: number;
 };
 
 /** Render a plan view from scenario terrain (north up, sea transparent) and register it as the scenario image. */
@@ -182,6 +183,7 @@ export async function registerTerrainThumbnail(apiBaseUrl: string, scenarioId: s
   const image = renderTerrainThumbnail({
     elev: decodeFloat16Array(bytes, grid_rows * grid_cols), rows: grid_rows, cols: grid_cols,
     mapWidth: map_width, mapHeight: map_height, spacing: near_spacing,
+    groundCover: terrain.ground_cover,
   });
   await uploadScenarioThumbnail(apiBaseUrl, scenarioId, await encodePng(image));
 }

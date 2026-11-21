@@ -675,7 +675,7 @@ public partial class CameraController : MonoBehaviour
                 Vector3 zoomTarget;
                 bool hasTarget = false;
 
-                if (Physics.Raycast(ray, out RaycastHit hit, rotationRaycastDistance, rotationGroundMask))
+                if (Physics.Raycast(ray, out RaycastHit hit, GetGroundRaycastDistance(), rotationGroundMask))
                 {
                     zoomTarget = hit.point;
                     hasTarget = true;
@@ -1325,9 +1325,15 @@ public partial class CameraController : MonoBehaviour
             ? pivot : transform.position + transform.forward * 10f;
     }
 
+    private float GetGroundRaycastDistance()
+    {
+        return cam != null ? Mathf.Max(rotationRaycastDistance, cam.farClipPlane) : rotationRaycastDistance;
+    }
+
     private bool TryGetRotationPivotPoint(out Vector3 pivot, bool includeBuildingsAndSea)
     {
         Ray ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+        float maxDistance = GetGroundRaycastDistance();
         int groundMask = LayerMask.GetMask("Ground");
         bool hasGround = false;
         bool found = false;
@@ -1337,7 +1343,7 @@ public partial class CameraController : MonoBehaviour
         // Normal right-drag targets only the ground; capture mode also targets buildings and the sea surface.
         // Parcel and road selection colliders in front must not take over the rotation pivot.
         int mask = includeBuildingsAndSea ? rotationGroundMask.value | groundMask : groundMask;
-        foreach (RaycastHit hit in Physics.RaycastAll(ray, rotationRaycastDistance, mask, QueryTriggerInteraction.Ignore))
+        foreach (RaycastHit hit in Physics.RaycastAll(ray, maxDistance, mask, QueryTriggerInteraction.Ignore))
         {
             bool isGround = (groundMask & (1 << hit.collider.gameObject.layer)) != 0;
             hasGround |= isGround;
@@ -1350,7 +1356,7 @@ public partial class CameraController : MonoBehaviour
         }
 
         // Include intersections with the existing height array even for distant terrain without colliders.
-        if (!hasGround && RaycastTerrainHeightField(ray, out Vector3 marchPoint)
+        if (!hasGround && RaycastTerrainHeightField(ray, maxDistance, out Vector3 marchPoint)
             && Vector3.Distance(ray.origin, marchPoint) < closest)
         {
             pivot = marchPoint;
@@ -1365,7 +1371,7 @@ public partial class CameraController : MonoBehaviour
     /// even where terrain colliders are absent.
     /// Linearly interpolate the first interval where ray height drops below terrain height to find the intersection.
     /// </summary>
-    private bool RaycastTerrainHeightField(Ray ray, out Vector3 hitPoint)
+    private bool RaycastTerrainHeightField(Ray ray, float maxDistance, out Vector3 hitPoint)
     {
         hitPoint = Vector3.zero;
 
@@ -1376,14 +1382,15 @@ public partial class CameraController : MonoBehaviour
             return false;
         }
 
-        const float step = 5f; // Sampling interval (m).
+        // Cap sample count when the camera is far above the ground so pivot lookup stays fast at high altitude.
+        float step = Mathf.Max(5f, maxDistance / 1000f);
         Vector3 prevPos = ray.origin;
         float prevDiff = ray.origin.y - Utils.GetGroundHeight(ray.origin);
         // Fixed-altitude capture may enter terrain. Do not correct a downward ray starting below the surface
         // to the ground overhead: that point is not at screen center and would make the view jump.
         if (prevDiff < 0f) return false;
 
-        for (float traveled = step; traveled <= rotationRaycastDistance; traveled += step)
+        for (float traveled = step; traveled <= maxDistance; traveled += step)
         {
             Vector3 pos = ray.origin + ray.direction * traveled;
             float diff = pos.y - Utils.GetGroundHeight(pos);
@@ -1423,7 +1430,7 @@ public partial class CameraController : MonoBehaviour
         }
 
         // Raycast against the Terrain layer to obtain ground coordinates.
-        if (Physics.Raycast(ray, out RaycastHit hit, rotationRaycastDistance, mask))
+        if (Physics.Raycast(ray, out RaycastHit hit, GetGroundRaycastDistance(), mask))
         {
             return hit.point;
         }

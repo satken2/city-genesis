@@ -1032,6 +1032,7 @@ public class IpcStateCoordinator : MonoBehaviour
         float rotation = 0f;
         float scale = 1f;
         float density = 400f;
+        float edgeFadeWidth = 0f;
         int seed = 0;
         if (ipcParams != null)
         {
@@ -1047,6 +1048,8 @@ public class IpcStateCoordinator : MonoBehaviour
                 scale = Convert.ToSingle(sObj);
             if (ipcParams.TryGetValue("density", out object dObj) && dObj != null)
                 density = Convert.ToSingle(dObj);
+            if (ipcParams.TryGetValue("edge_fade_width", out object efwObj) && efwObj != null)
+                edgeFadeWidth = Convert.ToSingle(efwObj);
             if (ipcParams.TryGetValue("seed", out object seedObj) && seedObj != null)
                 seed = Convert.ToInt32(seedObj);
         }
@@ -1058,7 +1061,7 @@ public class IpcStateCoordinator : MonoBehaviour
             var go = new GameObject("PropPlacementManager");
             propPlacementManager = go.AddComponent<PropPlacementManager>();
         }
-        propPlacementManager.InitializePlacement(placementMode, propType, rotation, scale, density, seed, height);
+        propPlacementManager.InitializePlacement(placementMode, propType, rotation, scale, density, seed, height, edgeFadeWidth);
 
         Debug.Log($"IpcStateCoordinator: プロップ配置モード -> prop_type={propType}, mode={placementMode}");
     }

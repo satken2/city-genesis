@@ -416,9 +416,14 @@ public sealed class WeatherController : MonoBehaviour
             ambient[c, 1] = (skylight[c] - bounce[c]) * 0.5f;
         }
         RenderSettings.ambientProbe = ambient;
+        // Scale visibility exponentially with haze and extend it with camera altitude so high views keep the ground clear while blending the horizon.
+        float clearness = 1f - look.Haze;
+        float altitude = Camera.main != null ? Mathf.Max(0f, Camera.main.transform.position.y) : 0f;
+        float fogEnd = 1400f * Mathf.Pow(12f, clearness) + altitude * 4.5f * clearness;
+        float fogStart = Mathf.Min(fogEnd * 0.15f + altitude * 1.5f * clearness, fogEnd * 0.7f);
         RenderSettings.fogColor = horizon;
-        RenderSettings.fogStartDistance = Mathf.Lerp(1000, 60, look.Haze);
-        RenderSettings.fogEndDistance = Mathf.Lerp(6500, 1200, look.Haze);
+        RenderSettings.fogStartDistance = fogStart;
+        RenderSettings.fogEndDistance = fogEnd;
         precipitation.SetLevels(look.Rain, look.Snow, 1f - darkness);
     }
 

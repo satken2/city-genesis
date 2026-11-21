@@ -210,10 +210,12 @@ public class PropManager : BaseApiDataManager
         anchor = GetContainer("PropContainer");
         worker = RenderWorkScheduler.Start(this, DrawWorker(), "PropManager", () => HasPendingDrawWork);
         TerrainManager.OnTerrainTileReady += TerrainReady;
+        TerrainManager.OnBackgroundHeightsReady += BackgroundHeightsReady;
     }
     private void OnDestroy()
     {
         TerrainManager.OnTerrainTileReady -= TerrainReady;
+        TerrainManager.OnBackgroundHeightsReady -= BackgroundHeightsReady;
         ClearAllCells();
         if (Instance == this) Instance = null;
     }
@@ -268,7 +270,9 @@ public class PropManager : BaseApiDataManager
         overviewCancel?.Dispose();
         overviewCancel = new System.Threading.CancellationTokenSource();
         var token = overviewCancel.Token;
-        var task = BackgroundWork.Run(() => ForestOverview.Build(response, token), token);
+        if (terrainManager == null) terrainManager = FindAnyObjectByType<TerrainManager>();
+        var background = terrainManager != null ? terrainManager.GetBackgroundHeightSnapshot() : default;
+        var task = BackgroundWork.Run(() => ForestOverview.Build(response, background, token), token);
         while (!task.IsCompleted) yield return null;
         if (task.IsFaulted) Debug.LogException(task.Exception);
         else if (!task.IsCanceled && revision == overviewRevision && visible)
@@ -794,7 +798,23 @@ public class PropManager : BaseApiDataManager
                         var patch = chunk.forests[f];
                         if (!patch.dirty && !chunk.heightDirty && chunk.offset == Offset) continue;
                         if (terrainManager == null) terrainManager = FindAnyObjectByType<TerrainManager>();
-                        if (terrainManager == null || !terrainManager.LoadedTerrainTiles.TryGetValue(chunk.spec.cell, out var terrain)) continue;
+                        if (terrainManager == null) continue;
+                        bool isCity = terrainManager.IsCityCell(chunk.spec.cell);
+                        Terrain terrain = null;
+                        Texture2D bgTex = null;
+                        Vector2 bgOrigin = default, bgSize = default;
+                        Vector2Int bgRes = default;
+                        float bgMin = 0f, bgMax = 0f;
+                        if (isCity)
+                        {
+                            if (!terrainManager.LoadedTerrainTiles.TryGetValue(chunk.spec.cell, out terrain)) continue;
+                        }
+                        else if (!terrainManager.TryGetBackgroundHeightTexture(out bgTex, out bgOrigin, out bgSize, out bgRes, out bgMin, out bgMax))
+                        {
+                            // In cities without background terrain, clear dirty on outside-city patches so the resident worker can finish.
+                            if (terrainManager.BackgroundHeightsReady) patch.dirty = false;
+                            continue;
+                        }
                         // Compute has negligible CPU cost and time budgets cannot stop it; limit per-frame work by generated point count.
                         if (dispatchFrame != Time.frameCount) { dispatchFrame = Time.frameCount; dispatched = 0; }
                         if (dispatched >= ForestDispatchBudget)
@@ -803,9 +823,29 @@ public class PropManager : BaseApiDataManager
                             timer.Restart();
                             dispatchFrame = Time.frameCount; dispatched = 0;
                             if (!chunks.TryGetValue(key, out live) || live != chunk || patch.group == null) break;
-                            if (terrainManager == null || !terrainManager.LoadedTerrainTiles.TryGetValue(chunk.spec.cell, out terrain)) continue;
+                            if (terrainManager == null) continue;
+                            if (isCity)
+                            {
+                                if (!terrainManager.LoadedTerrainTiles.TryGetValue(chunk.spec.cell, out terrain)) continue;
+                            }
+                            else if (!terrainManager.TryGetBackgroundHeightTexture(out bgTex, out bgOrigin, out bgSize, out bgRes, out bgMin, out bgMax))
+                            {
+                                if (terrainManager.BackgroundHeightsReady) patch.dirty = false;
+                                continue;
+                            }
                         }
-                        if (forestRenderer.Generate(patch, terrain, Offset)) { dispatched += patch.count; forestStateVersion++; }
+                        bool generated;
+                        if (isCity)
+                        {
+                            generated = forestRenderer.Generate(patch, terrain, Offset);
+                        }
+                        else
+                        {
+                            if (!terrainManager.TryGetCellHeightRange(chunk.spec.cell, out float cellMin, out float cellMax))
+                            { cellMin = bgMin; cellMax = bgMax; }
+                            generated = forestRenderer.Generate(patch, bgTex, bgOrigin, bgSize, bgRes, cellMin, cellMax, Offset);
+                        }
+                        if (generated) { dispatched += patch.count; forestStateVersion++; }
                     }
                     if (!chunks.TryGetValue(key, out live) || live != chunk) continue;
                     if (chunk.points.Length == 0)
@@ -994,6 +1034,24 @@ public class PropManager : BaseApiDataManager
         }
         // Resample scatter preview heights even in cells without props if obstacles were fetched.
         if (hasChunks || obstacleReadyCells.Contains(cell)) previewRevision++;
+    }
+    private void BackgroundHeightsReady()
+    {
+        if (terrainManager == null) terrainManager = FindAnyObjectByType<TerrainManager>();
+        if (terrainManager != null)
+        {
+            foreach (var chunk in chunks.Values)
+            {
+                if (terrainManager.IsCityCell(chunk.spec.cell)) continue;
+                chunk.heightDirty = true;
+                chunk.revision++;
+                foreach (var patch in chunk.forests) patch.dirty = true;
+            }
+        }
+        previewRevision++;
+        InvalidateForestOverview();
+        if (visible && GpuForests && overviewLoading == null)
+            overviewLoading = RenderWorkScheduler.Start(this, LoadForestOverview(), "ForestOverview");
     }
     public List<Rect> PreviewRects(Rect bounds)
     {

@@ -210,6 +210,7 @@
     "rotation": "旋轉角（度）",
     "scale": "縮放",
     "density": "密度（個/公頃）",
+    "edgeFadeWidth": "邊緣漸隱寬度（公尺）",
     "seed": "種子",
     "confirm": "確定",
     "confirming": "確定中...",

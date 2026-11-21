@@ -49,6 +49,7 @@ public class PropPlacementManager : MonoBehaviour
     private float scale = 1f;
     private float height = 0f;
     private float density = 400f;
+    private float edgeFadeWidth = 0f;
     private int seed = 0;
 
     private bool active = false;
@@ -176,9 +177,9 @@ public class PropPlacementManager : MonoBehaviour
 
     /// <summary>
     /// Initializes prop placement mode. placementMode is "instance" or "scatter".
-    /// Uses rotation / scale / height as initial individual settings, or density / seed for area mode.
+    /// Uses rotation / scale / height as initial individual settings, or density / edgeFadeWidth / seed for area mode.
     /// </summary>
-    public void InitializePlacement(string placementMode, int propType, float rotation, float scale, float density, int seed, float height = 0f)
+    public void InitializePlacement(string placementMode, int propType, float rotation, float scale, float density, int seed, float height = 0f, float edgeFadeWidth = 0f)
     {
         if (gameCamera == null) gameCamera = Camera.main;
         EnsureContainer();
@@ -200,6 +201,7 @@ public class PropPlacementManager : MonoBehaviour
         this.scale = scale;
         this.height = height;
         this.density = density;
+        this.edgeFadeWidth = Mathf.Max(0f, edgeFadeWidth);
         this.seed = seed;
         this.shapeFinalized = false;
         active = true;
@@ -226,7 +228,7 @@ public class PropPlacementManager : MonoBehaviour
 
     /// <summary>
     /// UI settings update (edit_prop:change_settings). Apply only keys received.
-    /// In individual mode, apply rotation / scale / height to the ghost; in area mode, density / seed to the scatter preview.
+    /// In individual mode, apply rotation / scale / height to the ghost; in area mode, density / edge_fade_width / seed to the scatter preview.
     /// </summary>
     public void OnChangeSettingsFromIpc(Dictionary<string, object> settings)
     {
@@ -242,6 +244,11 @@ public class PropPlacementManager : MonoBehaviour
         if (settings.TryGetValue("density", out object dObj) && dObj != null)
         {
             density = System.Convert.ToSingle(dObj);
+            scatterDirty = true;
+        }
+        if (settings.TryGetValue("edge_fade_width", out object efwObj) && efwObj != null)
+        {
+            edgeFadeWidth = Mathf.Max(0f, System.Convert.ToSingle(efwObj));
             scatterDirty = true;
         }
         if (settings.TryGetValue("seed", out object seedObj) && seedObj != null)
@@ -458,7 +465,7 @@ public class PropPlacementManager : MonoBehaviour
         foreach (var rect in manager.PreviewRects(region.bounds))
         {
             var matrices = new List<Matrix4x4>();
-            foreach (var point in PropGeometry.Scatter(rect, regions, density, seed))
+            foreach (var point in PropGeometry.Scatter(rect, regions, density, seed, edgeFadeWidth))
             {
                 if (++candidates > manager.CandidateBudget) yield break;
                 var position = new Vector3(point.position.x, 0, point.position.y) + previewOffset;

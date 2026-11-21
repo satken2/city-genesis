@@ -197,10 +197,31 @@ public sealed class ForestRenderer : IDisposable
 
     public bool Generate(Patch p, Terrain terrain, Vector3 offset)
     {
-        // A hidden patch keeps its range zeroed until the reloaded snapshot replaces it.
-        if (p.hidden) { p.dirty = false; return false; }
         if (terrain == null || terrain.terrainData == null) return false;
         var data = terrain.terrainData;
+        var pos = terrain.transform.position;
+        return DispatchHeightmap(p, data.heightmapTexture, pos, data.size,
+            new Vector2Int(data.heightmapResolution, data.heightmapResolution),
+            2f * data.size.y, pos.y, pos.y, pos.y + data.size.y, offset);
+    }
+
+    public bool Generate(Patch p, Texture heightmap, Vector2 origin, Vector2 size, Vector2Int resolution,
+        float minHeight, float maxHeight, Vector3 offset)
+    {
+        if (heightmap == null || size.x <= 0f || size.y <= 0f || resolution.x < 2 || resolution.y < 2) return false;
+        float span = Mathf.Max(1f, maxHeight - minHeight);
+        return DispatchHeightmap(p, heightmap,
+            new Vector3(origin.x + offset.x, 0f, origin.y + offset.z),
+            new Vector3(size.x, span, size.y),
+            resolution, 1f, offset.y, minHeight + offset.y, maxHeight + offset.y, offset);
+    }
+
+    private bool DispatchHeightmap(Patch p, Texture heightmap, Vector3 tileOrigin, Vector3 tileSize, Vector2Int resolution,
+        float heightScale, float heightBias, float minHeight, float maxHeight, Vector3 offset)
+    {
+        // A hidden patch keeps its range zeroed until the reloaded snapshot replaces it.
+        if (p.hidden) { p.dirty = false; return false; }
+        if (heightmap == null) return false;
         var group = p.group;
         group.EnsureLayout();
         compute.SetBuffer(kernel, "_Points", group.points);
@@ -215,20 +236,21 @@ public sealed class ForestRenderer : IDisposable
         compute.SetFloat("_WaterFadeWidth", PropGeometry.WaterFadeWidth);
         compute.SetVector("_Rect", new Vector4(p.rect.xMin, p.rect.yMin, p.rect.xMax, p.rect.yMax));
         compute.SetVector("_Offset", offset);
-        compute.SetVector("_TileOrigin", terrain.transform.position);
-        compute.SetVector("_TileSize", data.size);
-        compute.SetInt("_HeightResolution", data.heightmapResolution);
-        compute.SetTexture(kernel, "_Heightmap", data.heightmapTexture);
+        compute.SetVector("_TileOrigin", tileOrigin);
+        compute.SetVector("_TileSize", tileSize);
+        compute.SetInts("_HeightResolution", resolution.x, resolution.y);
+        compute.SetVector("_HeightScaleBias", new Vector4(heightScale, heightBias, 0f, 0f));
+        compute.SetTexture(kernel, "_Heightmap", heightmap);
         compute.Dispatch(kernel, (p.count + 63) / 64, 1, 1);
         // Conservative bounds include the full terrain height range, enabling culling without reading back each tree height.
         float extent = p.model.Radius * 1.2f;
-        p.bounds = new Bounds(new Vector3(p.rect.center.x + offset.x,
-            terrain.transform.position.y + data.size.y * .5f, p.rect.center.y + offset.z),
-            new Vector3(p.rect.width + extent*2, data.size.y + extent*2, p.rect.height + extent*2));
+        float heightSpan = Mathf.Max(1f, maxHeight - minHeight);
+        float centerY = (minHeight + maxHeight) * .5f;
+        p.bounds = new Bounds(new Vector3(p.rect.center.x + offset.x, centerY, p.rect.center.y + offset.z),
+            new Vector3(p.rect.width + extent*2, heightSpan + extent*2, p.rect.height + extent*2));
         float cellSize = TerrainManager.CellSize;
-        group.bounds = new Bounds(new Vector3((group.cell.x + .5f) * cellSize + offset.x,
-            terrain.transform.position.y + data.size.y * .5f, (group.cell.y + .5f) * cellSize + offset.z),
-            new Vector3(cellSize + extent*2, data.size.y + extent*2, cellSize + extent*2));
+        group.bounds = new Bounds(new Vector3((group.cell.x + .5f) * cellSize + offset.x, centerY, (group.cell.y + .5f) * cellSize + offset.z),
+            new Vector3(cellSize + extent*2, heightSpan + extent*2, cellSize + extent*2));
         group.hasBounds = true;
         p.dirty = false; p.ready = true;
         return true;

@@ -71,6 +71,7 @@ type PropInstance = {
 const DEFAULT_ROTATION = 0;
 const DEFAULT_SCALE = 1.0;
 const DEFAULT_DENSITY = 400;
+const DEFAULT_EDGE_FADE_WIDTH = 0;
 const DEFAULT_SEED = 12345;
 
 export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelProps) {
@@ -88,6 +89,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
 
   // Area-mode scatter settings.
   const [density, setDensity] = useState<number>(DEFAULT_DENSITY);
+  const [edgeFadeWidth, setEdgeFadeWidth] = useState<number>(DEFAULT_EDGE_FADE_WIDTH);
   const [seed, setSeed] = useState<number>(DEFAULT_SEED);
 
   // Placement data from Unity: instance sequence for individual mode; polygon vertices [x,z] for area mode.
@@ -118,12 +120,13 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
           rotation,
           scale,
           density,
+          edge_fade_width: edgeFadeWidth,
           seed,
         },
         "prop_placement",
       );
     },
-    [rotation, scale, height, density, seed],
+    [rotation, scale, height, density, edgeFadeWidth, seed],
   );
 
   /* ---- Receive placement data and session state from Unity ---- */
@@ -244,6 +247,11 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
     void sendEditPropChangeSettings({ density: v });
   }, []);
 
+  const handleEdgeFadeWidthChange = useCallback((v: number) => {
+    setEdgeFadeWidth(v);
+    void sendEditPropChangeSettings({ edge_fade_width: v });
+  }, []);
+
   const handleSeedChange = useCallback((v: number) => {
     setSeed(v);
     void sendEditPropChangeSettings({ seed: v });
@@ -285,6 +293,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
             prop_type: selectedType,
             polygon,
             density,
+            edge_fade_width: edgeFadeWidth,
             seed,
           }),
         });
@@ -297,7 +306,7 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
       const displayMessage = describeError(err, t);
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
-  }, [mode, selectedType, instances, polygon, density, seed, apiBaseUrl, onClose, t]);
+  }, [mode, selectedType, instances, polygon, density, edgeFadeWidth, seed, apiBaseUrl, onClose, t]);
 
   if (!masterData) {
     return <p className="pc-muted">{t("common.loading")}</p>;
@@ -400,6 +409,19 @@ export function PropPlacementPanel({ apiBaseUrl, onClose }: PropPlacementPanelPr
                     min={1}
                     max={100000}
                     step={10}
+                    integerOnly={true}
+                  />
+                </div>
+              </div>
+              <div className="pc-settings-row">
+                <span className="pc-settings-label">{t("prop_placement.edgeFadeWidth")}</span>
+                <div className="pc-stepper-row">
+                  <NumberStepper
+                    value={edgeFadeWidth}
+                    onChange={handleEdgeFadeWidthChange}
+                    min={0}
+                    max={1000}
+                    step={5}
                     integerOnly={true}
                   />
                 </div>

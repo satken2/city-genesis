@@ -27,7 +27,7 @@ public sealed class ForestOverview : IDisposable
     private ulong publishedHash;
     public bool Ready => coverage != null;
 
-    public static Raster Build(ForestOverviewResponse response, CancellationToken cancel)
+    public static Raster Build(ForestOverviewResponse response, TerrainManager.BackgroundHeightSnapshot background, CancellationToken cancel)
     {
         var regions = new List<(PropGeometry.Region region, int type, float density, float fadeWidth, bool allowWater)>();
         Rect bounds = new Rect();
@@ -52,6 +52,25 @@ public sealed class ForestOverview : IDisposable
             var coordinates = response.coastline["coordinates"] as JArray;
             if ((string)response.coastline["type"] == "Polygon") coordinates = new JArray { coordinates };
             foreach (var region in PropGeometry.Parse(coordinates)) Fill(raster, region, cancel, index => land[index] = true);
+            if (background.Valid)
+            {
+                // Outside the city rect, classify land from background heights (same bilinear surface as the 3D background mesh) so forests do not stop at the city border.
+                float dx = bounds.width / raster.width, dz = bounds.height / raster.height;
+                Rect city = background.cityRect;
+                for (int y = 0; y < raster.height; y++)
+                {
+                    cancel.ThrowIfCancellationRequested();
+                    float wz = bounds.yMin + (y + .5f) * dz;
+                    bool zInCity = wz >= city.yMin && wz <= city.yMax;
+                    int row = y * raster.width;
+                    for (int x = 0; x < raster.width; x++)
+                    {
+                        float wx = bounds.xMin + (x + .5f) * dx;
+                        if (zInCity && wx >= city.xMin && wx <= city.xMax) continue;
+                        if (background.Sample(wx, wz, out float h) && h > 1e-3f) land[row + x] = true;
+                    }
+                }
+            }
         }
         float[] waterWeights = land != null ? WaterWeights(raster, land, cancel) : null;
         foreach (var item in regions)

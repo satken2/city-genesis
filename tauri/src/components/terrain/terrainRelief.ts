@@ -51,12 +51,18 @@ export function buildTerrainHillshade(elev: Float32Array, rows: number, cols: nu
 }
 
 /** Overlays soft-light shading on the elevation colors shared by city maps and Scenario images. */
-export function terrainReliefColor(elev: number, minLand: number, maxLand: number, shade: number): Rgb {
+export function terrainReliefColor(
+  elev: number,
+  minLand: number,
+  maxLand: number,
+  shade: number,
+  ramp: readonly Rgb[] = ELEVATION_RAMP,
+): Rgb {
   const t = Math.max(0, Math.min(1, (elev - minLand) / (maxLand - minLand)));
-  const segment = t * (ELEVATION_RAMP.length - 1);
-  const index = Math.min(ELEVATION_RAMP.length - 2, Math.floor(segment));
-  const from = ELEVATION_RAMP[index];
-  const to = ELEVATION_RAMP[index + 1];
+  const segment = t * (ramp.length - 1);
+  const index = Math.min(ramp.length - 2, Math.floor(segment));
+  const from = ramp[index];
+  const to = ramp[index + 1];
   const f = segment - index;
   const light = 2 * shade - 1;
   return from.map((channel, k) => {

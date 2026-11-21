@@ -679,15 +679,16 @@ export async function sendEditGradingPreviewHeight(height: number | null): Promi
 
 /**
  * `edit_prop:change_settings`
- * Change numeric settings outside dropdowns (rotation, scale, density, seed) during prop placement. Unity
+ * Change numeric settings outside dropdowns (rotation, scale, height, density, edge_fade_width, seed) during prop placement. Unity
  * immediately applies them to ghost/scatter previews, like `edit_path:change_curved` for road previews.
- * Individual mode uses rotation / scale / height (ground-relative m); area mode uses density / seed.
+ * Individual mode uses rotation / scale / height (ground-relative m); area mode uses density / edge_fade_width / seed.
  */
 export async function sendEditPropChangeSettings(params: {
   height?: number;
   rotation?: number;
   scale?: number;
   density?: number;
+  edge_fade_width?: number;
   seed?: number;
 }): Promise<void> {
   await invoke("send_window_action", {

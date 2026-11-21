@@ -66,8 +66,27 @@ assert.equal(actions().at(-1).action, "edit_prop:reset");
 await update([tree]);
 await click(button("prop_placement.modeScatter"));
 assert.equal(button("prop_placement.confirm").disabled, true);
+assert.equal(actions().at(-1).params.edge_fade_width, 0);
+const fadeRow = [...container.querySelectorAll(".pc-settings-row")]
+  .find(row => row.textContent?.includes("prop_placement.edgeFadeWidth"));
+assert.ok(fadeRow, "edgeFadeWidth row missing");
+const fadeButtons = fadeRow.querySelectorAll<HTMLButtonElement>("button");
+await click(fadeButtons[fadeButtons.length - 1]);
+assert.deepEqual(actions().at(-1), {
+  windowType: "prop_placement", entity: null, action: "edit_prop:change_settings", params: { edge_fade_width: 5 },
+});
 await act(async () => { await emit("edit_prop:update_shape", { polygon: [[0, 0], [10, 0], [0, 10]], finalized: true }); });
 assert.equal(button("prop_placement.confirm").disabled, false);
+await click(button("prop_placement.confirm"));
+assert.equal(requests.at(-1)?.url, "http://test/api/v1/props/scatters");
+assert.equal(requests.at(-1)?.body.edge_fade_width, 5);
+
+await act(async () => { root.unmount(); });
+root = createRoot(container);
+await mount();
+await select("Tree");
+await click(button("prop_placement.modeScatter"));
+await act(async () => { await emit("edit_prop:update_shape", { polygon: [[0, 0], [10, 0], [0, 10]], finalized: true }); });
 await select("Rock");
 assert.equal(button("prop_placement.confirm").disabled, true, "scatter type change retained old polygon");
 await click(button("prop_placement.modeInstance"));

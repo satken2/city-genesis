@@ -7,6 +7,38 @@ using UnityEngine.Networking;
 
 public partial class TerrainManager
 {
+    public static event Action OnBackgroundHeightsReady;
+
+    /// <summary>Thread-safe snapshot of static background heights for ForestOverview background builds.</summary>
+    public readonly struct BackgroundHeightSnapshot
+    {
+        public readonly float[] heights;
+        public readonly int rows, cols;
+        public readonly float originX, originZ, spacing;
+        public readonly Rect cityRect;
+        public bool Valid => heights != null && rows >= 2 && cols >= 2 && spacing > 0f;
+
+        public BackgroundHeightSnapshot(float[] heights, int rows, int cols, float originX, float originZ, float spacing, Rect cityRect)
+        {
+            this.heights = heights; this.rows = rows; this.cols = cols;
+            this.originX = originX; this.originZ = originZ; this.spacing = spacing; this.cityRect = cityRect;
+        }
+
+        public bool Sample(float wx, float wz, out float height)
+        {
+            height = 0f;
+            if (!Valid) return false;
+            float x = (wx - originX) / spacing, z = (wz - originZ) / spacing;
+            if (x < 0f || z < 0f || x > cols - 1 || z > rows - 1) return false;
+            int ix = Mathf.Min((int)x, cols - 2), iz = Mathf.Min((int)z, rows - 2);
+            float fx = x - ix, fz = z - iz;
+            int i = iz * cols + ix;
+            height = Mathf.Lerp(Mathf.Lerp(heights[i], heights[i + 1], fx),
+                Mathf.Lerp(heights[i + cols], heights[i + cols + 1], fx), fz);
+            return true;
+        }
+    }
+
     private float[] backgroundHeights;
     private int backgroundRows, backgroundCols;
     private float backgroundX, backgroundZ, backgroundSpacing;
@@ -16,11 +48,37 @@ public partial class TerrainManager
     // Whether height arrays (or 204) arrived. Grounding/range calculations need only arrays, so batches wait only until this point.
     private bool backgroundHeightsReady;
     private float backgroundMinHeight, backgroundMaxHeight;
+    private Texture2D backgroundHeightTexture;
     private Material backgroundMaterial;
     private readonly List<GameObject> backgroundObjects = new List<GameObject>();
     // Membership table allowing InputHandler to treat background chunks as terrain.
     private readonly HashSet<GameObject> backgroundObjectSet = new HashSet<GameObject>();
     private readonly List<Mesh> backgroundMeshes = new List<Mesh>();
+
+    public bool BackgroundHeightsReady => backgroundHeightsReady;
+
+    public BackgroundHeightSnapshot GetBackgroundHeightSnapshot()
+    {
+        var cityRect = new Rect(-GetMapWidth() * .5f, -GetMapHeight() * .5f, GetMapWidth(), GetMapHeight());
+        return new BackgroundHeightSnapshot(backgroundHeights, backgroundRows, backgroundCols, backgroundX, backgroundZ, backgroundSpacing, cityRect);
+    }
+
+    public bool TryGetBackgroundHeightTexture(out Texture2D texture, out Vector2 origin, out Vector2 size,
+        out Vector2Int resolution, out float minHeight, out float maxHeight)
+    {
+        texture = backgroundHeightTexture;
+        if (texture == null || backgroundRows < 2 || backgroundCols < 2)
+        {
+            origin = size = default; resolution = default; minHeight = maxHeight = 0f;
+            return false;
+        }
+        origin = new Vector2(backgroundX, backgroundZ);
+        size = new Vector2((backgroundCols - 1) * backgroundSpacing, (backgroundRows - 1) * backgroundSpacing);
+        resolution = new Vector2Int(backgroundCols, backgroundRows);
+        minHeight = backgroundMinHeight;
+        maxHeight = backgroundMaxHeight;
+        return true;
+    }
 
     /// <summary>
     /// Whether this is a background terrain chunk outside the map. Clicks selecting outside-city facilities (such as border freight stations)
@@ -82,6 +140,8 @@ public partial class TerrainManager
         backgroundMeshes.Clear();
         if (backgroundMaterial != null) Destroy(backgroundMaterial);
         backgroundMaterial = null;
+        if (backgroundHeightTexture != null) Destroy(backgroundHeightTexture);
+        backgroundHeightTexture = null;
         backgroundHeights = null;
         backgroundLoaded = false;
     }
@@ -112,6 +172,7 @@ public partial class TerrainManager
                 {
                     backgroundHeightsReady = true;
                     backgroundLoaded = true;
+                    OnBackgroundHeightsReady?.Invoke();
                     yield break;
                 }
                 if (request.result != UnityWebRequest.Result.Success)
@@ -138,7 +199,17 @@ public partial class TerrainManager
                     backgroundMaxHeight = Mathf.Max(backgroundMaxHeight, h);
                 }
             }
+            if (backgroundHeightTexture != null) Destroy(backgroundHeightTexture);
+            backgroundHeightTexture = new Texture2D(backgroundCols, backgroundRows, TextureFormat.RFloat, false, true)
+            {
+                wrapMode = TextureWrapMode.Clamp,
+                filterMode = FilterMode.Bilinear,
+                name = "BackgroundHeightmap"
+            };
+            backgroundHeightTexture.SetPixelData(backgroundHeights, 0);
+            backgroundHeightTexture.Apply(false, true);
             backgroundHeightsReady = true;
+            OnBackgroundHeightsReady?.Invoke();
             UpdateCameraClipDistance();
             // Background exists only outside the city and never overlaps detailed terrain; set _FarSinkAmount to 0 rather than the shader default.
             backgroundMaterial = new Material(ResolveFarTerrainShader()) { name = "BackgroundTerrain" };
