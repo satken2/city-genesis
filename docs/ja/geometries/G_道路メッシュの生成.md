@@ -38,7 +38,7 @@
 | `pillar`・`pillar_cap` | 高架の柱と、その上に載るキャップ |
 | `pillar_leg`・`pillar_crossbeam` | 門型橋脚の柱と横梁 |
 | `span` | 橋脚と橋脚の間に1体ずつ伸ばして置く橋の構造(トラス・アーチなど) |
-| `tree`・`center_tree`・`streetlight`・`utility_pole`・`utility_box`・`fence`・`bench`・`bin`・`planter`・`advert` | 沿道設備 |
+| `tree`・`center_tree`・`streetlight`・`utility_pole`・`utility_box`・`fence`・`bench`・`bin`・`planter`・`hedge`・`center_hedge`・`advert` | 沿道設備 |
 | `far` | 遠景モデル |
 | `{パーツ名}_close` | 接写用のモデル |
 
@@ -59,6 +59,8 @@
 ## 沿道設備
 
 沿道設備はパスごとの保存値(項目の一覧は共有定数 `PATH_EQUIPMENT_FIELDS`)で選ぶ。値は `PATH_EQUIPMENT_NONE`(なし)か `PATH_EQUIPMENT_STANDARD`(標準)で、配線の `utility_mode` だけは `PATH_UTILITY_NONE`・`PATH_UTILITY_OVERHEAD`(架空)・`PATH_UTILITY_UNDERGROUND`(地中)をとる。マスターの `*_allowed` はそのバリアントに置けるか、`default_*` は新設時の値である。設備は描画専用で、経済に影響しない。
+
+植え込み(`planter_type`)は、点のモデル `planter` を持つ道路では一定間隔の点設備、帯のモデル `hedge`・`center_hedge` を持つ道路では歩道の縁と中央分離帯に沿う帯になる。
 
 街に表示するパスの沿道設備はパスの描画物に含めず、建物の散布パーツ([建物メッシュの生成](F_建物メッシュの生成.md))と同じく共有モデルのGPUインスタンシングでパスをまたいで描く。描画LODもパスによらず地形プロップと同じ規則で1個ずつ選び、`_close`・`_far` の扱いも地形プロップに従う。影は木とプロップの影の設定に従って落とす。敷設中のプレビューと計画中のパスは全体を単色で塗るので、設備もパスの描画物に含める。
 

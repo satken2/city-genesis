@@ -5,6 +5,8 @@ Shader "CityGenesis/Foliage"
     {
         [MainTexture] _BaseMap("Color", 2D) = "white" {}
         [MainColor] _BaseColor("Tint", Color) = (1,1,1,1)
+        _LeafMap("Leaf cards (RGB brightness x0.5, A cutout)", 2D) = "white" {}
+        _Tint("Per-tree colour variation", Range(0,1)) = 1
         _Smoothness("Smoothness", Range(0,1)) = 0.05
         _Metallic("Metallic", Range(0,1)) = 0
     }
@@ -17,15 +19,17 @@ Shader "CityGenesis/Foliage"
         #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
         #include "Assets/Shaders/Foliage.hlsl"
         TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
+        TEXTURE2D(_LeafMap); SAMPLER(sampler_LeafMap);
         CBUFFER_START(UnityPerMaterial)
         float4 _BaseMap_ST;
         half4 _BaseColor;
-        half _Smoothness, _Metallic;
+        half _Smoothness, _Metallic, _Tint;
         CBUFFER_END
         float3 _LightDirection, _LightPosition;
-        struct Attributes { float3 positionOS : POSITION; float3 normalOS : NORMAL; half4 color : COLOR; UNITY_VERTEX_INPUT_INSTANCE_ID };
+        struct Attributes { float3 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; half4 color : COLOR; UNITY_VERTEX_INPUT_INSTANCE_ID };
+        // card は xy=葉の房の抜き画像のUV、z=板なら1。
         struct Varyings { float4 positionCS : SV_POSITION; float3 positionWS : TEXCOORD0; float3 normalWS : TEXCOORD1;
-            float3 positionOS : TEXCOORD2; float3 origin : TEXCOORD3; half shade : TEXCOORD4; };
+            float3 positionOS : TEXCOORD2; float3 origin : TEXCOORD3; half shade : TEXCOORD4; float3 card : TEXCOORD5; };
         Varyings FoliageVertex(Attributes input)
         {
             UNITY_SETUP_INSTANCE_ID(input);
@@ -36,22 +40,34 @@ Shader "CityGenesis/Foliage"
             o.positionOS = input.positionOS;
             o.origin = TransformObjectToWorld(float3(0,0,0));
             o.shade = input.color.r;
+            o.card = float3(input.uv, 1 - input.color.a);
             return o;
         }
         half4 FoliageFragment(Varyings input) : SV_Target
         {
+            half3 leaf = FoliageCard(TEXTURE2D_ARGS(_LeafMap,sampler_LeafMap),input.card.xy,input.card.z);
             InputData lighting = FoliageInputData(input.positionWS,input.normalWS,input.positionCS);
-            half3 albedo = FoliageAlbedo(TEXTURE2D_ARGS(_BaseMap,sampler_BaseMap),input.positionWS,lighting.normalWS) * _BaseColor.rgb;
-            half3 color = FoliageShade(lighting,albedo,_Smoothness,_Metallic,input.shade,input.positionOS,input.origin,1);
+            half3 albedo = FoliageAlbedo(TEXTURE2D_ARGS(_BaseMap,sampler_BaseMap),input.positionWS,lighting.normalWS) * _BaseColor.rgb * leaf;
+            half3 color = FoliageShade(lighting,albedo,_Smoothness,_Metallic,input.shade,input.positionOS,input.origin,1,_Tint);
             // Terrain/Litと同じビュー空間距離を使い、正投影でも霧の濃さを揃える。
             float fog = InitializeInputDataFog(float4(input.positionWS,1),0);
             return half4(MixFog(color,fog),1);
         }
-        half4 DepthFragment(Varyings input) : SV_Target { return 0; }
-        half4 NormalFragment(Varyings input) : SV_Target { return half4(normalize(input.normalWS),0); }
+        half4 DepthFragment(Varyings input) : SV_Target
+        {
+            FoliageCard(TEXTURE2D_ARGS(_LeafMap,sampler_LeafMap),input.card.xy,input.card.z);
+            return 0;
+        }
+        half4 NormalFragment(Varyings input) : SV_Target
+        {
+            FoliageCard(TEXTURE2D_ARGS(_LeafMap,sampler_LeafMap),input.card.xy,input.card.z);
+            return half4(normalize(input.normalWS),0);
+        }
+        half4 ShadowFragment(Varyings input) : SV_Target { return 0; }
         Varyings ShadowVertex(Attributes input)
         {
             Varyings o = FoliageVertex(input);
+            if (o.card.z > .5) { o.positionCS = float4(2,2,2,1); return o; }
             #if _CASTING_PUNCTUAL_LIGHT_SHADOW
             float3 lightDirection = normalize(_LightPosition - o.positionWS);
             #else
@@ -109,7 +125,7 @@ Shader "CityGenesis/Foliage"
             Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" } ColorMask 0
             HLSLPROGRAM
             #pragma vertex ShadowVertex
-            #pragma fragment DepthFragment
+            #pragma fragment ShadowFragment
             #pragma multi_compile_instancing
             #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
             ENDHLSL

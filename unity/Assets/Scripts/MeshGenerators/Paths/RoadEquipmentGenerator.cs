@@ -13,6 +13,9 @@ public static class RoadEquipmentGenerator
     private const float LampSpacing = 24f;
     private const float PoleSpacing = 32f;
     private const float BoxSpacing = 64f;
+    private const float PanelLength = 2f;        // 柵・植え込みの帯のモデル1枚の長さ。
+    private const float HedgeOffset = 0.46f;     // 歩道の車道側の端から、植え込みの帯の中心まで。縁石の上の柵(0.12m)の歩道側に並ぶ。
+    private const float HedgeBandWidth = 0.75f;  // 歩道の車道側の端から、帯の歩道側の縁まで。
     private static readonly Dictionary<string, Material> Materials = new();
 
     // Street-equipment materials resolve by name and may come from asset packs. Reload on city switches.
@@ -36,7 +39,10 @@ public static class RoadEquipmentGenerator
         GameObject Prefab(string part)
         {
             if (prefabs.TryGetValue(part, out var prefab)) return prefab;
-            prefabs[part] = prefab = Resolve(path, part, out string resource);
+            string resource = null;
+            // 単色で塗るプレビューは葉の板を抜けない。板を持たない専用の遠景モデルがあれば、それを置く。
+            if (sink == null) prefab = Resolve(path, part + "_far", out resource);
+            prefabs[part] = prefab = prefab ?? Resolve(path, part, out resource);
             if (prefab != null && sink != null) sink.resources[prefab] = resource;
             return prefab;
         }
@@ -156,6 +162,34 @@ public static class RoadEquipmentGenerator
         Furniture("bin", master.bin_type_allowed, path.bin_type, 24f, 3f, 1.2f);
         Furniture("planter", master.planter_type_allowed, path.planter_type, 24f, 17f, 2.5f);
         Furniture("advert", master.advert_type_allowed, path.advert_type, 48f, 21f, 2f);
+        // 植え込みは、点設備のモデル(planter)を持つ道路では上の点設備、帯のモデルを持つ道路では縁に沿う帯になる。
+        // 帯は歩道の縁(hedge)と中央分離帯(center_hedge)。中央分離帯は街路樹と同じ区間に敷き、木は帯の中に立つ。
+        if (master.planter_type_allowed && path.planter_type == Constants.PATH_EQUIPMENT_STANDARD)
+        {
+            if (sidewalkWidth > 0f && Prefab("hedge") != null)
+            {
+                float hedgeSurface = SurfaceHeight(path, "sidewalk", 0.5f - HedgeOffset / sidewalkWidth);
+                for (int side = -1; side <= 1; side += 2)
+                    Strip("hedge", side, side * (edge - sidewalkWidth + HedgeOffset), hedgeSurface, EndClearance, length - EndClearance);
+            }
+            float medianWidth = master.center_width.GetValueOrDefault();
+            if (medianWidth > 0f && Prefab("center_hedge") != null)
+                Strip("center_hedge", 0, 0f, SurfaceHeight(path, "center"), medianWidth * .5f + EndClearance, length - medianWidth * .5f - EndClearance);
+        }
+
+        // 帯のモデルを from〜to に隙間なく並べる。建物の出入口と、点設備を置かない区間では切る。side=0 は道路の中央。
+        void Strip(string part, int side, float lateral, float height, float from, float to)
+        {
+            for (float d = from; d < to - .01f;)
+            {
+                float start = d;
+                d = Mathf.Min(d + PanelLength, to);
+                float middle = (start + d) * .5f;
+                if (LrtPlatformParts.Contains(keepClear, middle)) continue;
+                if (side != 0 && access?.Blocks(side, middle, (d - start) * .5f + .05f) == true) continue;
+                PlacePanel(parent, Prefab(part), Sample(spline, start, lateral, height).position, Sample(spline, d, lateral, height).position, sink);
+            }
+        }
 
         void Furniture(string part, bool allowed, int selected, float spacing, float phase, float clearance)
         {
@@ -193,13 +227,13 @@ public static class RoadEquipmentGenerator
                 for (float d = EndClearance; d < length - EndClearance;)
                 {
                     float previousDistance = d;
-                    d = Mathf.Min(d + 2f, length - EndClearance);
+                    d = Mathf.Min(d + PanelLength, length - EndClearance);
                     Pose next = Sample(spline, d, side * fenceOffset, fenceSurface);
                     if (access?.Blocks(side, d, .05f) != true)
                         metal.Box(next, new Vector3(0f, 0.5f, 0f), new Vector3(0.07f, 1f, 0.07f));
                     if (access?.Blocks(side, (d + previousDistance) * .5f, (d - previousDistance) * .5f + .05f) == true)
                     { previous = next; continue; }
-                    if (!PlaceFencePanel(parent, Prefab("fence"), previous.position, next.position, sink))
+                    if (!PlacePanel(parent, Prefab("fence"), previous.position, next.position, sink))
                     {
                         metal.Bar(previous.position + Vector3.up * 0.5f, next.position + Vector3.up * 0.5f, 0.05f);
                         metal.Bar(previous.position + Vector3.up * 0.95f, next.position + Vector3.up * 0.95f, 0.05f);
@@ -280,6 +314,16 @@ public static class RoadEquipmentGenerator
         path.utility_mode != Constants.PATH_UTILITY_NONE || path.streetlight_type != Constants.PATH_EQUIPMENT_NONE
         || path.street_tree_type != Constants.PATH_EQUIPMENT_NONE;
 
+    /// <summary>
+    /// 歩道の縁の植え込みの帯が、歩道の車道側の端から占める幅。帯を敷かない道路は0。歩行者はこの内側を歩かない。
+    /// </summary>
+    public static float SidewalkHedgeWidth(PathSummary path, float sidewalkWidth)
+    {
+        if (sidewalkWidth <= 0f || path.planter_type != Constants.PATH_EQUIPMENT_STANDARD) return 0f;
+        var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
+        return master != null && master.planter_type_allowed && Resolve(path, "hedge", out _) != null ? HedgeBandWidth : 0f;
+    }
+
     /// <summary>Maximum horizontal distance from origin (foot) to outline, independent of placement orientation.</summary>
     private static float HorizontalRadius(GameObject prefab)
     {
@@ -292,10 +336,10 @@ public static class RoadEquipmentGenerator
     private static GameObject Resolve(PathSummary path, string part, out string resource)
     {
         resource = $"{PathParts.Folder(path)}/{part}";
-        var prefab = ModelManager.Instance?.GetModel(resource);
+        var prefab = ModelManager.Instance?.GetModel(resource, true);
         if (prefab != null) return prefab;
         resource = $"Models/Paths/p{path.path_type}/{part}";
-        return ModelManager.Instance?.GetModel(resource);
+        return ModelManager.Instance?.GetModel(resource, true);
     }
 
     private static bool PlacePrefab(GameObject parent, GameObject prefab, Pose pose, InstanceSink sink, bool faceRoad = false)
@@ -330,11 +374,12 @@ public static class RoadEquipmentGenerator
         }
     }
 
-    private static bool PlaceFencePanel(GameObject parent, GameObject prefab, Vector3 a, Vector3 b, InstanceSink sink)
+    /// <summary>柵・植え込みの帯のモデル1枚を a〜b に渡す。</summary>
+    private static bool PlacePanel(GameObject parent, GameObject prefab, Vector3 a, Vector3 b, InstanceSink sink)
     {
         var mesh = prefab != null ? prefab.GetComponent<MeshFilter>()?.sharedMesh : null;
         if (mesh == null || mesh.bounds.size.z < 0.001f || (b-a).sqrMagnitude < 0.00001f) return false;
-        // Preserve panel width/height; fit only length between posts. Posts remain independently upright.
+        // Preserve panel width/height; fit only length between its ends. Fence posts remain independently upright.
         float scale = Vector3.Distance(a,b) / mesh.bounds.size.z;
         if (sink != null)
         {

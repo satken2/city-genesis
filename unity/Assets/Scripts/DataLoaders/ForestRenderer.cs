@@ -267,6 +267,7 @@ public sealed class ForestRenderer : IDisposable
         result.SetFloat("_Metallic", source.HasProperty("_Metallic") ? source.GetFloat("_Metallic") : 0f);
         result.SetFloat("_Foliage", source.shader == foliageShader ? 1f : 0f);
         result.SetTexture("_BaseMap", source.mainTexture != null ? source.mainTexture : Texture2D.whiteTexture);
+        if (source.HasProperty("_LeafMap")) result.SetTexture("_LeafMap", source.GetTexture("_LeafMap"));
         result.SetVector("_BaseMap_ST", new Vector4(source.mainTextureScale.x, source.mainTextureScale.y,
             source.mainTextureOffset.x, source.mainTextureOffset.y));
         materials.Add(source, result);

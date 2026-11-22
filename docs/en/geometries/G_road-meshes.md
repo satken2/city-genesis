@@ -38,7 +38,7 @@ Models use `Models/Paths/p{path_variant}/{part}`, falling back to `Models/Paths/
 | `pillar`, `pillar_cap` | Elevated support and cap |
 | `pillar_leg`, `pillar_crossbeam` | Portal-frame support legs and beam |
 | `span` | Bridge structure stretched across each span between piers (trusses, arches, and the like) |
-| `tree`, `center_tree`, `streetlight`, `utility_pole`, `utility_box`, `fence`, `bench`, `bin`, `planter`, `advert` | Roadside equipment |
+| `tree`, `center_tree`, `streetlight`, `utility_pole`, `utility_box`, `fence`, `bench`, `bin`, `planter`, `hedge`, `center_hedge`, `advert` | Roadside equipment |
 | `far` | Far model |
 | `{part}_close` | Close-up model |
 
@@ -61,6 +61,8 @@ The same generator renders underground-path cuttings and tunnels according to th
 ## Roadside equipment
 
 Saved per-path values select equipment; `PATH_EQUIPMENT_FIELDS` lists fields. Values are `PATH_EQUIPMENT_NONE` or `PATH_EQUIPMENT_STANDARD`, except `utility_mode`, which uses `PATH_UTILITY_NONE`, `PATH_UTILITY_OVERHEAD`, or `PATH_UTILITY_UNDERGROUND`. Master `*_allowed` fields permit equipment and `default_*` fields set new-path defaults. Equipment is visual only and does not affect the economy.
+
+Planters (`planter_type`) become point equipment at regular intervals on roads that have the point model `planter`, and continuous strips along the sidewalk edge and the median on roads that have the strip models `hedge` and `center_hedge`.
 
 Roadside equipment of paths shown in the city is not part of the path's render objects. Like building scatter parts ([building meshes](F_building-meshes.md)), its shared models are drawn with GPU instancing across paths. Its draw LOD is selected per item with the terrain-prop rules regardless of the path, including the handling of `_close` and `_far`. It casts shadows according to the tree and prop shadow setting. Placement previews and planned paths are painted in a single color as a whole, so their equipment stays part of the path's render objects.
 

@@ -5,6 +5,8 @@
 // モデルは樹冠全体へ寄せた法線と、樹冠の奥・下ほど暗い明るさの倍率(頂点色R)を持つ(genesis-gallery の foliage.py が焼く)。
 // 葉群の凹凸・光の回り込み・逆光の透け・1本ごとの色むらは、頂点を増やさず画素の計算で足す。
 // 凹凸と色むらの倍率は平均が1になるようにし、遠景の森の色と近景の木の平均の明るさを揃える。
+// 葉の板(頂点色Aが0の面。塊は1)は、葉の房の抜き画像の A で抜き、RGB を葉の色へ掛ける。板は影を落とさない(影は塊だけ)。
+// 板は通常・接写のモデルだけが持つ。小さく映る遠景は抜きの縁がちらつくので、板の無い専用の遠景モデルに任せる。
 
 static const float FoliageClumpSize = .7;    // 葉群の大きさ(m)
 static const float FoliageClumpDepth = .12;  // 葉群の凹凸の深さ(m)
@@ -13,6 +15,7 @@ static const half FoliageWrap = .5;          // 光が影の側へ回り込む�
 static const half FoliageTranslucency = .35; // 逆光で外側の葉が透ける強さ
 static const half FoliageTint = .16;         // 1本ごとの明るさと色合いのばらつき
 static const float FoliageTextureTile = 2;   // 葉の色画像1枚の大きさ(m)
+static const half FoliageCardCutoff = .5;    // 板を抜く A のしきい値。抜き画像の取り込み設定(縮小時に抜きの面積を保つ基準値)と揃える
 
 InputData FoliageInputData(float3 positionWS, float3 normalWS, float4 positionCS)
 {
@@ -49,6 +52,14 @@ half3 FoliageAlbedo(TEXTURE2D_PARAM(map, mapSampler), float3 positionWS, float3 
         + SAMPLE_TEXTURE2D(map, mapSampler, p.xy).rgb * weight.z;
 }
 
+// 板の面を葉の房の形に抜き、葉の色へ掛ける明るさ(塊は1)を返す。card は 1 - 頂点色A。抜き画像の RGB は平均が0.5。
+half3 FoliageCard(TEXTURE2D_PARAM(map, mapSampler), float2 uv, half card)
+{
+    half4 leaf = SAMPLE_TEXTURE2D(map, mapSampler, uv);
+    clip(lerp(1, leaf.a - FoliageCardCutoff, card));
+    return lerp(1, leaf.rgb * 2, card);
+}
+
 float FoliageHash(float3 p)
 {
     p = frac(p * .3183099 + .1) * 17;
@@ -67,7 +78,8 @@ float FoliageNoise(float3 p)
 
 // clumpPosition は木に固定した座標(m。葉群が木と一緒に回る)、origin は木の置き場所で色むらと葉群の配置の種になる。
 // shade は頂点色R、amount は葉の陰影を掛ける割合(葉は1、幹は0)。分岐せず割合で混ぜ、画面微分を分岐の外に保つ。
-half3 FoliageShade(InputData lighting, half3 albedo, half smoothness, half metallic, half shade, float3 clumpPosition, float3 origin, half amount)
+// tint は1本ごとの色むらの割合。同じモデルを隙間なく並べる植え込みは0にして、継ぎ目に色の段を作らない。
+half3 FoliageShade(InputData lighting, half3 albedo, half smoothness, half metallic, half shade, float3 clumpPosition, float3 origin, half amount, half tint)
 {
     float3 seed = float3(FoliageHash(origin), FoliageHash(origin + 31.7), FoliageHash(origin + 57.3));
     float3 p = clumpPosition / FoliageClumpSize + seed * 64;
@@ -83,8 +95,8 @@ half3 FoliageShade(InputData lighting, half3 albedo, half smoothness, half metal
     if (dot(bumped, bumped) > 1e-20) lighting.normalWS = normalize(bumped);
     lighting.bakedGI = SampleSH(lighting.normalWS);
 
-    albedo *= lerp(1, shade * (1 + 2 * FoliageClumpShade * (lerp(.5, clump, detail) - .5)) * (1 + FoliageTint * (seed.x - .5)), amount);
-    albedo.r *= 1 + amount * FoliageTint * (seed.y - .5);
+    albedo *= lerp(1, shade * (1 + 2 * FoliageClumpShade * (lerp(.5, clump, detail) - .5)) * (1 + tint * FoliageTint * (seed.x - .5)), amount);
+    albedo.r *= 1 + amount * tint * FoliageTint * (seed.y - .5);
     half3 color = FoliageLit(lighting, albedo, smoothness, metallic);
 
     Light light = GetMainLight(lighting.shadowCoord, lighting.positionWS, lighting.shadowMask);

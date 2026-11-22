@@ -27,6 +27,10 @@ Material:
         m_Texture: {fileID: 2800000, guid: fe90dcc29a1084244954268a0ee417a0, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _LeafMap:
+        m_Texture: {fileID: 2800000, guid: e4ea089270244a5f89539ca3df125d72, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _Metallic: 0

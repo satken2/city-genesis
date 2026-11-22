@@ -75,6 +75,7 @@ description: City Genesisの道路・線路パーツ3Dモデル(body/line/sidewa
 | 防音壁・ガードレール | `wall` | `wall_width` |
 | 地下トンネルの壁・天井の専用形状 | `wall_underground` / `ceiling_underground` | 壁幅は `wall_width`、高さはパスのクリアランス |
 | 街路樹 | `tree` | `tree_spacing` |
+| 歩道の縁・中央分離帯の植え込みの帯 | `hedge` / `center_hedge` | `planter_type_allowed`(中央分離帯は `center_width` も) |
 | 高架にできる道路の柱 | `pillar` (+ `pillar_cap`) | `height_editable=true`, `pillar_spacing` |
 | 他パスをまたぐ門型橋脚 | `pillar_leg`（柱1本） / `pillar_crossbeam`（横梁） | 通常橋脚の干渉時に組み立てる。原点・伸縮方向・幅上限は `PortalPillar.cs` のコメント。現行は鉄道共通 `p4` に無印のみ |
 | **線路**: 軌道(レール+枕木) | `track` | `lanes` |
@@ -122,7 +123,8 @@ p472 17個 461の軌道・架線(共有) + 幅16mの道床・高架桁・橋脚 
 | `body` | **路面の上面**(上面を高さ0に著作し、厚みは下方向へ伸ばす。Unityは高さを補正しない) | 中心線に配置。**最上面(最高点から2mm以内の頂点)のX幅**が `width` にスケールされる(全体boundsではない) |
 | `line` / `sidewalk` / `wall` | **下端**(上方向へ伸ばす) | 左右2つずつ配置 |
 | `center` | 下端 | 中心線に配置 |
-| `tree` | **接地点**(原点=地面) | Instantiate配置。スケールなし。葉は [[genesis-prop-parts]] の「樹木・植え込みの葉」に従う |
+| `tree` | **接地点**(原点=地面) | Instantiate配置。スケールなし。葉は [[genesis-prop-parts]] の「樹木・植え込みの葉」に従う。葉の板を持つ木は板の無い `tree_far` を必ず持つ |
+| `hedge` / `center_hedge` | **下端**(歩道・中央分離帯の上面に置く) | 柵と同じ長さ2mの単位(Blender Y±1)。幅と高さは実寸で、長さだけ伸縮される。両端は同じ断面で閉じる |
 | `pillar` | **天端=原点**(柱は下方向へ長めに伸ばす) | 中心線。地下パスには配置されない |
 | `pillar_cap` | 路面原点(下方向へ厚みを持つ) | 中心線。Zスケールされない |
 | `track` / `rail` | **枕木の下面** | 軌道スロットに実寸配置(スケールなし) |
@@ -210,6 +212,7 @@ p472 17個 461の軌道・架線(共有) + 幅16mの道床・高架桁・橋脚 
 | `wall` | **`wall_width`。null だと防音壁は一切描画されない** |
 | `center` | **`center_width`。null だと中央分離帯は描画されない** |
 | `tree` | `street_tree_type_allowed` / `default_street_tree_type`。個別Pathの `street_tree_type` で有無を選ぶ。`tree_spacing` がnull/0なら20m |
+| `hedge` / `center_hedge` | `planter_type_allowed` / `default_planter_type`。個別Pathの `planter_type` で有無を選ぶ。点設備の `planter` と同じ項目で、帯のモデルを持つ道路では帯になる |
 | `streetlight` / `fence` / `utility_pole` / `utility_box` | `streetlight_type_allowed` / `fence_type_allowed` / `utility_mode_allowed` と各 `default_*`。描画は個別Pathの設備設定に従う(`RoadEquipmentGenerator.cs`) |
 | `pillar` / `pillar_cap` | `height_editable=true` と `pillar_spacing`(高架にできないバリアントでは柱は出ない) |
 | `pole` / `beam` | **`wire_spacing`。null は非電化を意味し架線・柱・梁を一切描画しない** |

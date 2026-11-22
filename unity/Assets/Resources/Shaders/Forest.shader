@@ -4,6 +4,7 @@ Shader "CityGenesis/Forest"
     {
         _BaseMap("Color", 2D) = "white" {}
         _BaseColor("Tint", Color) = (1,1,1,1)
+        _LeafMap("Leaf cards (RGB brightness x0.5, A cutout)", 2D) = "white" {}
         _Smoothness("Smoothness", Range(0,1)) = 0.1
         _Metallic("Metallic", Range(0,1)) = 0
         _UndergroundAlpha("Underground opacity", Range(0,1)) = 1
@@ -22,6 +23,7 @@ Shader "CityGenesis/Forest"
         struct ForestPoint { float4 positionScale; float4 rotationVisible; };
         StructuredBuffer<ForestPoint> _ForestPoints;
         TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
+        TEXTURE2D(_LeafMap); SAMPLER(sampler_LeafMap);
         float4 _BaseColor, _BaseMap_ST;
         half _Smoothness, _Metallic, _UndergroundAlpha, _Foliage;
         float4x4 _PartLocal, _PartNormal;
@@ -31,7 +33,7 @@ Shader "CityGenesis/Forest"
         float3 _LightDirection;
         struct Attributes { float3 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; half4 color : COLOR; };
         struct Varyings { float4 positionCS : SV_POSITION; float3 positionWS : TEXCOORD0; float3 normalWS : TEXCOORD1; float2 uv : TEXCOORD2;
-            float3 clumpPosition : TEXCOORD3; float3 origin : TEXCOORD4; half shade : TEXCOORD5; };
+            float3 clumpPosition : TEXCOORD3; float3 origin : TEXCOORD4; half shade : TEXCOORD5; float3 card : TEXCOORD6; };
         float3 Rotate(float3 p, float angle)
         {
             float s,c; sincos(angle,s,c);
@@ -58,25 +60,38 @@ Shader "CityGenesis/Forest"
             o.uv = input.uv * _BaseMap_ST.xy + _BaseMap_ST.zw;
             o.origin = p.positionScale.xyz;
             o.shade = input.color.r;
+            // xy=葉の房の抜き画像のUV、z=板なら1。葉の材質だけが板を持つ。
+            o.card = float3(input.uv, (1 - input.color.a) * _Foliage);
             return o;
         }
         half4 ForestFragment(Varyings input) : SV_Target
         {
             // 配置だけを独自処理とし、陰影は本編のURP Litと、葉は他の木の Foliage と共通にする。
+            half3 leaf = FoliageCard(TEXTURE2D_ARGS(_LeafMap,sampler_LeafMap),input.card.xy,input.card.z);
             InputData lighting = FoliageInputData(input.positionWS,input.normalWS,input.positionCS);
             half3 albedo = lerp(SAMPLE_TEXTURE2D(_BaseMap,sampler_BaseMap,input.uv).rgb,
-                FoliageAlbedo(TEXTURE2D_ARGS(_BaseMap,sampler_BaseMap),input.positionWS,lighting.normalWS),_Foliage) * _BaseColor.rgb;
-            half3 color = FoliageShade(lighting,albedo,_Smoothness,_Metallic,input.shade,input.clumpPosition,input.origin,_Foliage);
+                FoliageAlbedo(TEXTURE2D_ARGS(_BaseMap,sampler_BaseMap),input.positionWS,lighting.normalWS) * leaf,_Foliage) * _BaseColor.rgb;
+            half3 color = FoliageShade(lighting,albedo,_Smoothness,_Metallic,input.shade,input.clumpPosition,input.origin,_Foliage,1);
             // Terrain/Litと同じビュー空間距離を使い、正投影でも霧の濃さを揃える。
             float fog = InitializeInputDataFog(float4(input.positionWS,1),0);
             return half4(MixFog(color,fog),_UndergroundAlpha);
         }
-        half4 DepthFragment(Varyings input) : SV_Target { return 0; }
-        half4 NormalFragment(Varyings input) : SV_Target { return half4(normalize(input.normalWS),0); }
+        half4 DepthFragment(Varyings input) : SV_Target
+        {
+            FoliageCard(TEXTURE2D_ARGS(_LeafMap,sampler_LeafMap),input.card.xy,input.card.z);
+            return 0;
+        }
+        half4 NormalFragment(Varyings input) : SV_Target
+        {
+            FoliageCard(TEXTURE2D_ARGS(_LeafMap,sampler_LeafMap),input.card.xy,input.card.z);
+            return half4(normalize(input.normalWS),0);
+        }
+        half4 ShadowFragment(Varyings input) : SV_Target { return 0; }
         Varyings ShadowVertex(Attributes input, uint id : SV_InstanceID)
         {
             Varyings o = ForestVertex(input,id);
             if (o.positionCS.w == 1 && all(o.positionCS.xyz == 2)) return o;
+            if (o.card.z > .5) { o.positionCS = float4(2,2,2,1); return o; }
             o.positionCS = TransformWorldToHClip(ApplyShadowBias(o.positionWS,o.normalWS,_LightDirection));
             #if UNITY_REVERSED_Z
             o.positionCS.z = min(o.positionCS.z, UNITY_NEAR_CLIP_VALUE * o.positionCS.w);
@@ -128,7 +143,7 @@ Shader "CityGenesis/Forest"
             Name "ShadowCaster" Tags { "LightMode"="ShadowCaster" } ColorMask 0
             HLSLPROGRAM
             #pragma vertex ShadowVertex
-            #pragma fragment DepthFragment
+            #pragma fragment ShadowFragment
             ENDHLSL
         }
     }

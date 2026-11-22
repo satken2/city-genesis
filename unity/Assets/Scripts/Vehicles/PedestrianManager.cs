@@ -306,6 +306,7 @@ public sealed partial class PedestrianManager : MonoBehaviour
             RoadPath.GetPathMasterParams(data, out float width, out float sidewalk, out _, out _, out _, out _, out _, out _, out _, out _, out _);
             walk.halfWidth = width * .5f;
             ResolveBand(data.path_type, data.path_variant, width, sidewalk, bandMargin, shoulderWidth, out walk.inner, out walk.outer, out walk.surface, out walk.centered);
+            walk.inner = Mathf.Min(walk.outer, walk.inner + RoadEquipmentGenerator.SidewalkHedgeWidth(data, sidewalk));
         }
         return walk;
     }
