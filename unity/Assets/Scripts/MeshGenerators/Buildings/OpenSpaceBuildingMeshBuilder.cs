@@ -7,26 +7,68 @@ using NetTopologySuite.Triangulate.Polygon;
 /// <summary>Convert placement plans to terrain-following surfaces and actual-size FBXs. Do not alter pathfinding data.</summary>
 public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
 {
-    static readonly string[] Parts={"floor","site_asphalt","site_paving","site_grass","site_marking","site_curb","site_yellow","site_tactile",
-        "site_stop","site_bench","site_tree","site_shelter","site_light","site_clock","site_taxi","site_bollard","site_planter","site_vending"};
+    static readonly string[] Parts={"floor","site_asphalt","site_paving","site_grass","site_marking","site_curb","site_yellow","site_tactile","site_gravel","site_sand",
+        "site_stop","site_bench","site_tree","site_shelter","site_light","site_clock","site_taxi","site_bollard","site_planter","site_vending",
+        "site_hedge","site_bin","site_drink"};
+    // 番号付きの部品。1から連番である分だけ使う。
+    static readonly string[] Series={"site_tree","site_shrub","site_feature","site_play","site_flower"};
+    // 公園の配置計画は描画LODが変わるたびに作り直すと重いので、建物ごとに入力が同じ間は使い回す。
+    static readonly Dictionary<int,(string signature,OpenSpaceLayout.Plan plan)> parkPlans=new Dictionary<int,(string,OpenSpaceLayout.Plan)>();
+    const int ParkPlanCacheSize=256;
+    static OpenSpaceBuildingMeshBuilder()=>AssetPackStore.CityChanging+=parkPlans.Clear;
     const float SideStep=1.25f; // Maximum subdivision length for terrain-following curb sides (m).
     const float SideFooting=.05f; // Lower side bottoms below ground by this amount to hide slope gaps (m).
     public BuildingMeshResult Generate(BuildingSummary data,bool isDynamic=false)
     {
         BuildingMeshUtils.ResolveParcelContext(data,out _,out Vector3 center);
         var naming=BuildingMeshUtils.ResolveModelNaming(data);
-        var parts=new Dictionary<string,GameObject>();
+        var parts=new Dictionary<string,GameObject>();var paths=new Dictionary<string,string>();
         int modelId=BuildingMeshUtils.ResolveModelId(naming.Prefix,data.visual_variant);
-        foreach(string part in Parts)
+        bool Collect(string part)
         {
-            var prefab=BuildingMeshUtils.GetPartBySuffixScan(naming.Prefix,part,modelId);
-            if(prefab!=null)parts[part]=prefab;
+            int suffix=BuildingMeshUtils.FindPartSuffix(naming.Prefix,part,modelId);
+            var prefab=suffix<0?null:BuildingMeshUtils.GetPartNoPosition(naming.Prefix,part,suffix,true);
+            if(prefab==null)return false;
+            parts[part]=prefab;paths[part]=BuildingMeshUtils.PartPath(naming.Prefix,part,suffix);
+            return true;
         }
-        var plan=BuildingRoadAccessIndex.GetOpenSpacePlan(data);
-        return Build(plan,parts,center,true,BuildingMeshUtils.ResolveFloorMaterialFromMaster(data,naming.Prefix));
+        foreach(string part in Parts)Collect(part);
+        foreach(string series in Series)for(int n=1;Collect(series+n);n++){}
+        int modelType=MasterDataStore.Instance?.GetAgentMaster(data.variant)?.model_type??Constants.MODEL_PARKING;
+        bool park=modelType==Constants.MODEL_PARK;
+        var plan=park?ParkPlan(data,paths):BuildingRoadAccessIndex.GetOpenSpacePlan(data);
+        // 小物をインスタンシングで描くのは、木や低木が数千本になる公園だけ。駐車場とロータリーは建物のメッシュに結合する。
+        return Build(plan,parts,center,true,BuildingMeshUtils.ResolveFloorMaterialFromMaster(data,naming.Prefix),park?paths:null);
     }
-    /// <summary>Validation/exhibits use the same placement and actual FBXs as gameplay. flat is only for terrain-free exhibits.</summary>
-    public static BuildingMeshResult Build(OpenSpaceLayout.Plan plan,Dictionary<string,GameObject> parts,Vector3 center,bool terrain,Material floorOverride=null)
+    /// <summary>公園の配置計画。小物は部品の実寸から置くので、選んだモデルフォルダの部品の寸法も入力になる。</summary>
+    static OpenSpaceLayout.Plan ParkPlan(BuildingSummary data,Dictionary<string,string> paths)
+    {
+        var key=new System.Text.StringBuilder();
+        void Add(float value)=>key.Append(value.ToString("R",System.Globalization.CultureInfo.InvariantCulture)).Append(':');
+        Add(data.visual_variant2);Add(data.visual_variant3);
+        if(data.polygonArray!=null)foreach(var point in data.polygonArray)foreach(float v in point)Add(v);
+        foreach(var pair in paths)key.Append(pair.Value).Append(':');
+        string signature=key.ToString();
+        if(parkPlans.TryGetValue(data.agent_id,out var cached) && cached.signature==signature)return cached.plan;
+        var sizes=new Dictionary<string,Vector2>();
+        foreach(var pair in paths)
+        {
+            var model=InstancedPartRenderer.GetModel(pair.Value);
+            if(model?.render==null)continue;
+            // 部品は原点を水平の中心に置いて作るが、ずれたモデルでもはみ出さないよう原点からの最大の張り出しで測る。
+            Bounds b=model.layout;
+            sizes[pair.Key]=new Vector2(2*Mathf.Max(-b.min.x,b.max.x),2*Mathf.Max(-b.min.z,b.max.z));
+        }
+        var plan=OpenSpaceLayout.Create(BuildingMeshUtils.GetFootprint(data),Constants.MODEL_PARK,data.visual_variant2,data.visual_variant3,sizes);
+        if(parkPlans.Count>=ParkPlanCacheSize)parkPlans.Clear();
+        parkPlans[data.agent_id]=(signature,plan);
+        return plan;
+    }
+    /// <summary>
+    /// Validation/exhibits use the same placement and actual FBXs as gameplay. flat is only for terrain-free exhibits.
+    /// paths(部品のリソースパス)を渡すと、表示中の建物(<see cref="InstancedPartRenderer.Sink"/> がある)では小物をメッシュに結合せずインスタンシングへ渡す。
+    /// </summary>
+    public static BuildingMeshResult Build(OpenSpaceLayout.Plan plan,Dictionary<string,GameObject> parts,Vector3 center,bool terrain,Material floorOverride=null,Dictionary<string,string> paths=null)
     {
         var instances=new List<CombineInstance>();var materials=new List<Material>();var owned=new List<Mesh>();
         var colliders=new List<CombineInstance>();
@@ -71,31 +113,46 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
                 if(side==null)continue;
                 owned.Add(side);Append(side,new[]{Resolve(surface.Side)??mat},Matrix4x4.identity);
             }
+            var sink=paths!=null?InstancedPartRenderer.Sink:null;
+            var raised=new List<OpenSpaceLayout.Surface>();
+            foreach(var surface in plan.Surfaces)if(surface.Side!=null)raised.Add(surface);
             foreach(var prop in plan.Props)
             {
                 if(!parts.TryGetValue(prop.Part,out var prefab))continue;
-                if(!loaded.TryGetValue(prop.Part,out Mesh mesh))
+                Bounds b;Mesh mesh=null;string path=null;
+                if(sink!=null && paths.TryGetValue(prop.Part,out path))
                 {
-                    mesh=BuildingMeshUtils.CombineModuleMeshes(prefab,out Material[] partMaterials);
-                    if(mesh==null)continue;
-                    owned.Add(mesh);loaded[prop.Part]=mesh;loadedMaterials[prop.Part]=partMaterials;
+                    var model=InstancedPartRenderer.GetModel(path);
+                    if(model?.render==null)continue;
+                    b=model.layout;
+                }
+                else
+                {
+                    if(!loaded.TryGetValue(prop.Part,out mesh))
+                    {
+                        mesh=BuildingMeshUtils.CombineModuleMeshes(prefab,out Material[] partMaterials);
+                        if(mesh==null)continue;
+                        owned.Add(mesh);loaded[prop.Part]=mesh;loadedMaterials[prop.Part]=partMaterials;
+                    }
+                    b=mesh.bounds;
                 }
                 // Props are authored at actual size with origin at horizontal contact-plane center and front toward local +Z (Blender −Y).
                 Quaternion rotation=Quaternion.LookRotation(new Vector3(prop.Forward.x,0,prop.Forward.y));
-                Bounds b=mesh.bounds;
                 var rect=new Vector2[4];
                 for(int i=0;i<4;i++)
                 {
-                    var local=new Vector3(i==0||i==3?b.min.x:b.max.x,0,i<2?b.min.z:b.max.z);
+                    var local=new Vector3(i==0||i==3?b.min.x:b.max.x,0,i<2?b.min.z:b.max.z)*prop.Scale;
                     var transformed=rotation*local;
                     rect[i]=prop.Position+new Vector2(transformed.x,transformed.z);
                 }
                 // Recheck actual FBX occupancy to prevent boundary protrusion when models are replaced.
-                if(!OpenSpaceLayout.ContainsPolygon(plan.Polygon,rect))continue;
+                if(!prop.Fitted && !OpenSpaceLayout.ContainsPolygon(plan.Polygon,rect))continue;
                 float y=terrain?Utils.GetGroundHeight(new Vector3(center.x+prop.Position.x,1000,center.z+prop.Position.y))-center.y:0f;
-                var position=new Vector3(prop.Position.x,y+.02f+PropLift(plan,prop.Position),prop.Position.y);
-                Append(mesh,loadedMaterials[prop.Part],Matrix4x4.TRS(position,rotation,Vector3.one));
-                var collider=BuildingMeshBuilder.GenerateColliderMesh(rect,Mathf.Max(.1f,b.max.y));
+                var position=new Vector3(prop.Position.x,y+.02f+PropLift(raised,prop.Position),prop.Position.y);
+                var matrix=Matrix4x4.TRS(position,rotation,Vector3.one*prop.Scale);
+                if(mesh==null)sink.Add(new InstancedPartRenderer.Instance {path=path,local=matrix});
+                else Append(mesh,loadedMaterials[prop.Part],matrix);
+                var collider=BuildingMeshBuilder.GenerateColliderMesh(rect,Mathf.Max(.1f,b.max.y*prop.Scale));
                 if(collider!=null){owned.Add(collider);colliders.Add(new CombineInstance {mesh=collider,transform=Matrix4x4.Translate(new Vector3(0,y,0))});}
             }
             var result=new Mesh {name="OpenSpace",indexFormat=UnityEngine.Rendering.IndexFormat.UInt32};
@@ -107,12 +164,12 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
         finally {foreach(var mesh in owned)Object.Destroy(mesh);}
     }
     /// <summary>Decorations rest on the curb-raised top (sidewalk/island) at their placement.</summary>
-    static float PropLift(OpenSpaceLayout.Plan plan,Vector2 position)
+    static float PropLift(List<OpenSpaceLayout.Surface> raised,Vector2 position)
     {
         float lift=0;
-        foreach(var surface in plan.Surfaces)
+        foreach(var surface in raised)
         {
-            if(surface.Side==null || surface.Lift<=lift || !PolygonUtils.Contains(surface.Polygon,position))continue;
+            if(surface.Lift<=lift || !PolygonUtils.Contains(surface.Polygon,position))continue;
             bool inHole=false;
             if(surface.Holes!=null)foreach(var hole in surface.Holes)inHole|=PolygonUtils.Contains(hole,position);
             if(!inHole)lift=surface.Lift;

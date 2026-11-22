@@ -18,7 +18,7 @@ public static class OpenSpaceQA
     static void Require(bool ok,string message){checks++;if(!ok)throw new Exception(message);}
     [Serializable] public class Ring {public Vector2[] points;}
     [Serializable] public class Surface {public string material;public Vector2[] polygon;public List<Ring> holes=new List<Ring>();public float lift;public string side;public Vector2[] points;public int[] triangles;}
-    [Serializable] public class Prop {public string part;public Vector2 position;public Vector2 forward;}
+    [Serializable] public class Prop {public string part;public Vector2 position;public Vector2 forward;public float scale;}
     [Serializable] public class Snapshot {public Vector2[] polygon;public List<Surface> surfaces=new List<Surface>();public List<Prop> props=new List<Prop>();}
     // The gallery renders faces using the same triangulation as the main assembly, so export the triangulated vertices and indices for faces with holes as well.
     static Snapshot Export(object plan)
@@ -33,9 +33,27 @@ public static class OpenSpaceQA
             surface.points=((List<Vector2>)args[1]).ToArray();surface.triangles=((List<int>)args[2]).ToArray();
             s.surfaces.Add(surface);
         }
-        foreach(var item in (IEnumerable)Field(plan,"Props"))s.props.Add(new Prop {part=(string)Field(item,"Part"),position=(Vector2)Field(item,"Position"),forward=(Vector2)Field(item,"Forward")});
+        foreach(var item in (IEnumerable)Field(plan,"Props"))s.props.Add(new Prop {part=(string)Field(item,"Part"),position=(Vector2)Field(item,"Position"),forward=(Vector2)Field(item,"Forward"),scale=(float)Field(item,"Scale")});
         return s;
     }
+    // The park places furniture from the actual part sizes (X width, Z depth about the origin), measured as the main assembly does.
+    static Dictionary<string,Vector2> Sizes(Dictionary<string,GameObject> parts)
+    {
+        var sizes=new Dictionary<string,Vector2>();
+        foreach(var pair in parts)
+        {
+            bool any=false;var bounds=new Bounds();
+            foreach(var filter in pair.Value.GetComponentsInChildren<MeshFilter>())
+                foreach(var v in filter.sharedMesh.vertices)
+                {var w=filter.transform.TransformPoint(v);if(any)bounds.Encapsulate(w);else{bounds=new Bounds(w,Vector3.zero);any=true;}}
+            if(any)sizes[pair.Key]=new Vector2(2*Mathf.Max(-bounds.min.x,bounds.max.x),2*Mathf.Max(-bounds.min.z,bounds.max.z));
+        }
+        return sizes;
+    }
+    static object Plan(Vector2[] polygon,int model,float seed,Dictionary<string,GameObject> parts,float density=.5f)
+        =>layout.GetMethod("Create").Invoke(null,new object[]{polygon,model,seed,density,model==12?Sizes(parts):null});
+    static object Build(object plan,Dictionary<string,GameObject> parts,Vector3 center,bool terrain)
+        =>builder.GetMethod("Build").Invoke(null,new object[]{plan,parts,center,terrain,null,null});
     [InitializeOnLoadMethod] static void Resume()
     {
         EditorApplication.delayCall+=()=>{if(SessionState.GetBool("OpenSpaceQA.Pending",false)&&EditorApplication.isPlaying){SessionState.SetBool("OpenSpaceQA.Pending",false);Run();}};
@@ -76,8 +94,8 @@ public static class OpenSpaceQA
                 var parts=LoadParts(variant);
                 foreach(var pair in cases)
                 {
-                    object plan=layout.GetMethod("Create").Invoke(null,new object[]{pair.Value,model,.5f});
-                    object again=layout.GetMethod("Create").Invoke(null,new object[]{pair.Value,model,.5f});
+                    object plan=Plan(pair.Value,model,.5f,parts);
+                    object again=Plan(pair.Value,model,.5f,parts);
                     var snapshot=Export(plan);
                     Require(JsonUtility.ToJson(snapshot)==JsonUtility.ToJson(Export(again)),"Non deterministic "+pair.Key);
                     foreach(var s in snapshot.surfaces)Require((bool)layout.GetMethod("ContainsPolygon").Invoke(null,new object[]{pair.Value,s.polygon}),"Surface outside "+pair.Key);
@@ -90,15 +108,25 @@ public static class OpenSpaceQA
                         Require(model!=11 || new[]{"site_shelter","site_light","site_clock","site_tree"}.All(n=>snapshot.props.Any(x=>x.part==n)),"Missing rotary furniture");
                         Require(model!=11 || snapshot.surfaces.Any(x=>x.side!=null),"Missing raised curb surfaces");
                         Require(snapshot.props.Count>0,"Missing furniture");
+                        Require(model!=12 || new[]{"site_paving","site_curb"}.All(n=>snapshot.surfaces.Any(x=>x.material==n)),"Missing park paths");
+                        Require(model!=12 || new[]{"site_tree","site_shrub","site_feature","site_play","site_bench","site_light","site_hedge"}.All(n=>snapshot.props.Any(x=>x.part.StartsWith(n))),"Missing park furniture");
                     }
                     var rotated=new Vector2[pair.Value.Length];var q=Quaternion.Euler(0,0,37);
                     for(int i=0;i<rotated.Length;i++){var v=q*(Vector3)pair.Value[i];rotated[i]=new Vector2(v.x+100,v.y-55);}
-                    var rplan=layout.GetMethod("Create").Invoke(null,new object[]{rotated,model,.5f});
+                    var rplan=Plan(rotated,model,.5f,parts);
                     Require(((ICollection)Field(plan,"ParkingBays")).Count==((ICollection)Field(rplan,"ParkingBays")).Count,"Rotation changes bay count "+pair.Key);
                     // The loop road is created in the local coordinates of the roadside edge, so rotation and translation do not change the number of decorations or whether the loop road is present (allow a difference of 1–2 due to rounding errors near the boundary).
                     Require(model!=11 || (bool)Field(plan,"HasLoop")==(bool)Field(rplan,"HasLoop"),"Rotation changes rotary loop "+pair.Key);
                     Require(model!=11 || Math.Abs(snapshot.props.Count-Export(rplan).props.Count)<=2,"Rotation changes rotary furniture "+pair.Key);
-                    object result=builder.GetMethod("Build").Invoke(null,new object[]{plan,parts,Vector3.zero,false,null});
+                    // The park is also laid out in the local coordinates of the roadside edge, so rotated sites keep their surfaces and furniture inside and nearly the same counts.
+                    if(model==12)
+                    {
+                        var rsnapshot=Export(rplan);
+                        foreach(var s in rsnapshot.surfaces)Require((bool)layout.GetMethod("ContainsPolygon").Invoke(null,new object[]{rotated,s.polygon}),"Rotated surface outside "+pair.Key);
+                        foreach(var prop in rsnapshot.props)Require(ContainsPoint(rotated,prop.position),"Rotated prop outside "+pair.Key);
+                        Require(Math.Abs(snapshot.props.Count-rsnapshot.props.Count)<=2+snapshot.props.Count*.03f,"Rotation changes park furniture "+pair.Key);
+                    }
+                    object result=Build(plan,parts,Vector3.zero,false);
                     Mesh mesh=(Mesh)Field(result,"Mesh"),collider=(Mesh)Field(result,"ColliderMesh");
                     Require(mesh.vertexCount>0 && collider.vertexCount>0,"Empty surface/collider");
                     foreach(var v in mesh.vertices)Require(!float.IsNaN(v.x)&&!float.IsInfinity(v.y),"Non finite vertex");
@@ -109,14 +137,31 @@ public static class OpenSpaceQA
                     if(model==11&&pair.Key=="rectangle")
                         foreach(float other in new[]{.12f,.87f})
                         {
-                            var alt=Export(layout.GetMethod("Create").Invoke(null,new object[]{pair.Value,model,other}));
+                            var altPlan=Plan(pair.Value,model,other,parts);
+                            var alt=Export(altPlan);
                             foreach(var s2 in alt.surfaces)Require((bool)layout.GetMethod("ContainsPolygon").Invoke(null,new object[]{pair.Value,s2.polygon}),"Surface outside seed "+other);
-                            var altPlan=layout.GetMethod("Create").Invoke(null,new object[]{pair.Value,model,other});
-                            object altResult=builder.GetMethod("Build").Invoke(null,new object[]{altPlan,parts,Vector3.zero,false,null});
+                            object altResult=Build(altPlan,parts,Vector3.zero,false);
                             Mesh altMesh=(Mesh)Field(altResult,"Mesh");
                             Render(altMesh,(Material[])Field(altResult,"Materials"),output+"/"+variant+"-rectangle-"+Mathf.RoundToInt(other*100)+".png");
                             UnityEngine.Object.Destroy(altMesh);UnityEngine.Object.Destroy((Mesh)Field(altResult,"ColliderMesh"));
                         }
+                    // visual_variant3 is the park's tree density: a denser value places more trees, and every value stays inside the site.
+                    if(model==12&&pair.Key=="rectangle")
+                    {
+                        int Trees(Snapshot s)=>s.props.Count(x=>x.part.StartsWith("site_tree"));
+                        var sparse=Export(Plan(pair.Value,model,.5f,parts,.05f));
+                        foreach(float density in new[]{.05f,.95f})
+                        {
+                            var altPlan=Plan(pair.Value,model,.5f,parts,density);
+                            var alt=Export(altPlan);
+                            foreach(var prop in alt.props)Require(ContainsPoint(pair.Value,prop.position),"Prop outside density "+density);
+                            if(density>.5f)Require(Trees(alt)>Trees(snapshot)&&Trees(snapshot)>Trees(sparse),"Tree density does not follow visual_variant3");
+                            object altResult=Build(altPlan,parts,Vector3.zero,false);
+                            Mesh altMesh=(Mesh)Field(altResult,"Mesh");
+                            Render(altMesh,(Material[])Field(altResult,"Materials"),output+"/"+variant+"-rectangle-density"+Mathf.RoundToInt(density*100)+".png");
+                            UnityEngine.Object.Destroy(altMesh);UnityEngine.Object.Destroy((Mesh)Field(altResult,"ColliderMesh"));
+                        }
+                    }
                     if(pair.Key=="rectangle")File.WriteAllText(output+"/a"+variant+".json",JsonUtility.ToJson(snapshot,true));
                     UnityEngine.Object.Destroy(mesh);UnityEngine.Object.Destroy(collider);
                 }
@@ -133,8 +178,9 @@ public static class OpenSpaceQA
             Vector3 center=new Vector3(0,terrain.SampleHeight(Vector3.zero),0);
             foreach(int model in new[]{10,11,12})
             {
-                object plan=layout.GetMethod("Create").Invoke(null,new object[]{cases["rectangle"],model,.5f});
-                object result=builder.GetMethod("Build").Invoke(null,new object[]{plan,LoadParts(model==12?3004:model==10?3001:3002),center,true,null});
+                var terrainParts=LoadParts(model==12?3004:model==10?3001:3002);
+                object plan=Plan(cases["rectangle"],model,.5f,terrainParts);
+                object result=Build(plan,terrainParts,center,true);
                 var mesh=(Mesh)Field(result,"Mesh");Require(mesh.bounds.size.y>.5f,"Terrain height not applied");
                 // The rendered surface keeps the same slope as the shared terrain grid and does not sink into the terrain.
                 var surface=builder.GetMethod("SurfaceMesh",BindingFlags.NonPublic|BindingFlags.Static);
@@ -158,7 +204,8 @@ public static class OpenSpaceQA
             if(!importer.isReadable){importer.isReadable=true;importer.SaveAndReimport();}
             parts[Path.GetFileNameWithoutExtension(f)]=AssetDatabase.LoadAssetAtPath<GameObject>(path);
         }
-        if(parts.TryGetValue("site_tree",out var tree))
+        // The station-front roundabout tree keeps its budget; park trees are instanced and follow the validator's budget.
+        if(variant==3002 && parts.TryGetValue("site_tree",out var tree))
         {
             var treeMesh=tree.GetComponentInChildren<MeshFilter>().sharedMesh;
             Require(treeMesh.triangles.Length/3==144,"Tree triangle budget changed");

@@ -7,7 +7,7 @@ using NetTopologySuite.Operation.OverlayNG;
 using UnityEngine;
 
 /// <summary>Ground-use placement plan. Planar geometry independent of loading order, rendering LOD, and finalized IDs.</summary>
-public static class OpenSpaceLayout
+public static partial class OpenSpaceLayout
 {
     public const float CellSize = 2.5f;
     const int MaxAxis = 128;
@@ -25,6 +25,8 @@ public static class OpenSpaceLayout
         public string Part;
         public Vector2 Position;
         public Vector2 Forward;
+        public float Scale = 1f;
+        public bool Fitted;        // Placed from the actual model size, so the renderer skips its protrusion recheck.
     }
     public sealed class Plan
     {
@@ -54,16 +56,20 @@ public static class OpenSpaceLayout
             if (y+1<Height) yield return i+Width;
         }
     }
-    public static Plan Create(Vector2[] polygon, int modelType, float visualVariant)
+    /// <summary>
+    /// visualVariant2 seeds the layout. Parks also take visualVariant3 (tree density) and the actual sizes (X width, Z depth) of the parts
+    /// in the model folder; without sizes a park gets its paths only.
+    /// </summary>
+    public static Plan Create(Vector2[] polygon, int modelType, float visualVariant2, float visualVariant3 = .5f, IReadOnlyDictionary<string, Vector2> partSizes = null)
     {
         var plan = new Plan { Polygon = polygon };
         if (polygon == null || polygon.Length < 3) return plan;
+        uint seed = (uint)Mathf.RoundToInt(Mathf.Clamp01(visualVariant2)*1000000f);
+        if (modelType == Constants.MODEL_PARK) { Park(plan, seed, visualVariant3, partSizes); return plan; }
         var grid = MakeGrid(polygon);
         if (grid.Entry < 0) return plan;
-        uint seed = (uint)Mathf.RoundToInt(Mathf.Clamp01(visualVariant)*1000000f);
         if (modelType == Constants.MODEL_PARKING) Parking(plan, grid);
         else if (modelType == Constants.MODEL_ROTARY) Rotary(plan, grid, seed);
-        else if (modelType == Constants.MODEL_PARK) Park(plan, grid, seed);
         return plan;
     }
     static Grid MakeGrid(Vector2[] polygon)
@@ -140,55 +146,6 @@ public static class OpenSpaceLayout
                 bool forward=y%6==2;
                 Line(p,forward?q[3]:q[0],forward?q[2]:q[1],.10f);
                 p.Props.Add(new Prop {Part="site_stop",Position=g.Point(x+.5f,forward?y+1.7f:y+.3f),Forward=forward?g.V:-g.V});
-            }
-        }
-    }
-    static void Park(Plan p,Grid g,uint seed)
-    {
-        int hub=g.Entry;float hubDistance=float.MaxValue;
-        var fromEntry=Flood(g,g.Inside,g.Entry);
-        Vector2 middle=g.Point(g.Width*.5f,g.Height*.5f);
-        for(int i=0;i<fromEntry.Length;i++) if(fromEntry[i]>=0 && (g.Center(i)-middle).sqrMagnitude<hubDistance)
-        {hub=i;hubDistance=(g.Center(i)-middle).sqrMagnitude;}
-        int[] parent=Flood(g,g.Inside,hub);
-        var paths=new bool[parent.Length];
-        // Traverse a tree of width-bearing cells so garden paths do not cross outside concave parcels.
-        for(int direction=0;direction<5;direction++)
-        {
-            int best=g.Entry;float score=float.MinValue;
-            for(int i=0;i<parent.Length;i++) if(parent[i]>=0)
-            {
-                float value=direction==0?i%g.Width:direction==1?-(i%g.Width):direction==2?i/g.Width:-(i/g.Width);
-                value-=.001f*(g.Center(i)-middle).sqrMagnitude;
-                if(value>score) {score=value;best=i;}
-            }
-            if(direction==4)best=g.Entry;
-            while(!paths[best]) {paths[best]=true;if(parent[best]==best)break;best=parent[best];}
-        }
-        // Add a loop garden path connected to the main path in wide rectangles. Do not force closure in concave parcels.
-        if(g.Width>=12 && g.Height>=12)
-        {
-            var ring=new List<int>();bool valid=true;
-            for(int y=2;y<g.Height-2;y++)for(int x=2;x<g.Width-2;x++)
-                if(x==2 || y==2 || x==g.Width-3 || y==g.Height-3)
-                {int i=y*g.Width+x;ring.Add(i);valid&=parent[i]>=0;}
-            if(valid){foreach(int i in ring)paths[i]=true;p.HasLoop=true;}
-        }
-        for(int i=0;i<paths.Length;i++)
-        {
-            if(paths[i]) {Add(p,"site_paving",g.Box(i%g.Width,i/g.Width,1,1));p.AccessCells.Add(g.Center(i));continue;}
-            if(parent[i]<0) continue;
-            int x=i%g.Width,y=i/g.Width;
-            uint h=Hash((uint)i ^ seed);
-            bool nearPath=false;Vector2 facing=g.V;
-            foreach(int n in g.Neighbors(i))if(paths[n]){nearPath=true;facing=(g.Center(n)-g.Center(i)).normalized;break;}
-            if(p.Props.Count>=512)continue;
-            if(nearPath && h%13==0)
-                p.Props.Add(new Prop {Part="site_bench",Position=g.Center(i),Forward=facing});
-            else if(!nearPath && x%2==1 && y%2==1 && h%5!=0)
-            {
-                var crown=g.Box(x-.15f,y-.15f,1.3f,1.3f);
-                if(ContainsPolygon(p.Polygon,crown)) p.Props.Add(new Prop {Part="site_tree",Position=g.Center(i),Forward=g.V});
             }
         }
     }
@@ -342,15 +299,7 @@ public static class OpenSpaceLayout
     static void Rotary(Plan p, Grid g, uint seed)
     {
         var f = new Frame {O = (p.Polygon[0] + p.Polygon[1]) * .5f, U = g.U, V = g.V};
-        var ring = new Coordinate[p.Polygon.Length + 1];
-        // Quantize to 0.1mm and place the road-facing edge exactly at t=0 (prevent floating-point overlap-test failures).
-        for (int i = 0; i < p.Polygon.Length; i++)
-        {
-            var c = f.Local(p.Polygon[i]);
-            ring[i] = new Coordinate(Math.Round(c.X * 1e4) / 1e4, Math.Round(c.Y * 1e4) / 1e4);
-        }
-        ring[ring.Length - 1] = ring[0].Copy();
-        Geometry site = Largest(Nts.CreatePolygon(ring).Buffer(0));
+        Geometry site = LocalSite(p, f);
         if (site == null || site.Area < 60) return;
         var env = site.EnvelopeInternal;
         double halfFront = Vector2.Distance(p.Polygon[0], p.Polygon[1]) * .5;
