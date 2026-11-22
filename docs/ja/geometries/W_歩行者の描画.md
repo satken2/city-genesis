@@ -14,10 +14,6 @@
 
 ## 描画とモデルの命名
 
-歩行者はGameObjectを持たず、全員をGPUインスタンシングで描く。手足はボーンを使わず、姿勢の違う3つのモデルを歩いた距離に応じて差し替えるコマ送りで動かす。モデルは `Assets/Models/Props/` に固定名で置き、Unityは `pedestrian_0` から番号が欠けるまで順に読む(1つも無ければ人型の箱で描く)。原本は `blender/props.blend`。
+歩行者はGameObjectを持たず、全員をGPUインスタンシングで描く。モデルは直立した1姿勢だけで、骨もアニメーションも持たない。歩く動きは、頂点シェーダーが歩いた距離に応じて手足を関節まわりに回して作る。関節の位置と、頂点がどの関節に従うかはモデルの頂点が持ち、その並びはシェーダー `Resources/Shaders/Pedestrian.shader` の冒頭に定める。この情報を持たないモデルは、姿勢を変えずに進む。
 
-| モデル名 | 姿勢 |
-|---|---|
-| `pedestrian_{n}` | 両足を揃えた姿勢 |
-| `pedestrian_{n}_right` | 右足を前へ出した姿勢 |
-| `pedestrian_{n}_left` | 左足を前へ出した姿勢 |
+モデルは `Assets/Models/Props/` に `pedestrian_{n}` の固定名で置き、Unityは `pedestrian_0` から番号が欠けるまで順に読む(1つも無ければ人型の箱で描く)。原本は `blender/props.blend`。

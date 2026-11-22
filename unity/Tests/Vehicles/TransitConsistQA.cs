@@ -193,7 +193,7 @@ public static partial class VehicleQA
                         Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/22/{part}{suffix}.fbx"),"Freight uses wrong FBX/LOD");
                         if (!locomotive)
                             foreach (var material in renderer.sharedMaterials)
-                                Check(!material.name.EndsWith("_line"),"Wagon is painted with locomotive livery");
+                                Check(!material.name.EndsWith("_paint"),"Wagon is painted with locomotive livery");
                     }
                     Check(Vector3.Dot(car.transform.forward,Vector3.forward) > .99f,"Freight body flips like a passenger rear cab");
                     if (time == 34 || time == 68)

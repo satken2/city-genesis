@@ -37,6 +37,8 @@ Models live in `Assets/Models/Vehicles/{vehicle_type}/`, with originals in `blen
 | `wagon`, `wagon_{n}` | Freight wagons |
 | `{model}_close`, `{model}_far` | Optional Close and Far models |
 
+Body colors of ordinary and parked vehicles are chosen per vehicle, by weight, from the colors in `Resources/Config/vehicle_paint.json`, even within one appearance. Only materials whose names start with `SLOT_CAR_PAINT` are recolored, so use a material of that name for body paint and for nothing else. Models without such a material keep their own colors.
+
 Numeric aliases of the same geometry are registered as [terrain props](M_terrain-props.md) for free placement.
 
 ## Traffic clock

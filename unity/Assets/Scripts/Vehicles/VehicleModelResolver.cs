@@ -24,6 +24,14 @@ public static class VehicleModelResolver
 
     private static Material sharedBoxMaterial;
 
+    /// <summary>
+    /// Projected ratio at or above which a body shows its `_close` model. The unsuffixed model's flat lamps and ten-sided wheels
+    /// start to read as coarse near this size. PropRenderModel sorts a body's LOD levels by the same value.
+    /// </summary>
+    public const float CloseScreenRatio = .12f;
+    /// <summary>Projected ratio below which a body shows its `_far` model.</summary>
+    public const float FarScreenRatio = .035f;
+
     public static float GetVehicleLength(int type)
     {
         var prefab = ResolvePrefab(type,0);
@@ -85,8 +93,8 @@ public static class VehicleModelResolver
             model.SetActive(true);
             return model.GetComponentsInChildren<Renderer>();
         }
-        if (closePrefab != null) levels.Add(new LOD(.25f, InstantiateLod(closePrefab)));
-        levels.Add(new LOD(farPrefab != null ? .035f : 0f, normal.GetComponentsInChildren<Renderer>()));
+        if (closePrefab != null) levels.Add(new LOD(CloseScreenRatio, InstantiateLod(closePrefab)));
+        levels.Add(new LOD(farPrefab != null ? FarScreenRatio : 0f, normal.GetComponentsInChildren<Renderer>()));
         if (farPrefab != null) levels.Add(new LOD(0f, InstantiateLod(farPrefab)));
         var lod = root.AddComponent<LODGroup>();
         lod.SetLODs(levels.ToArray());

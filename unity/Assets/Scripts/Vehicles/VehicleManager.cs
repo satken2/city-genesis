@@ -130,6 +130,7 @@ public partial class VehicleManager : MonoBehaviour
         foreach (var go in pooled) if (go != null) Destroy(go);
         pooled.Clear();
         pool.Clear();
+        VehiclePaint.Reset();
     }
 
     /// <summary>
@@ -746,6 +747,7 @@ public partial class VehicleManager : MonoBehaviour
         if (lane < 0) return false;
         int variant = VehicleModelResolver.PickVariantId(b.type, Random.Range(0, int.MaxValue));
         var go = Acquire(b.type, ref variant);
+        VehiclePaint.Apply(go, (uint)Random.Range(0, int.MaxValue));
         var v = new Vehicle { vehicleType = b.type, variantId = variant,
             speed = Mathf.Max(.1f, MeanSpeed(b.road.data.path_id,b.type)),
             go = go, spawnBlendRemaining = seeding ? 0 : 15, age = seeding ? fadeDuration : 0 };

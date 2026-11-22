@@ -9,7 +9,7 @@ using GeneratedModels;
 /// Counts follow VehicleManager: use a total cap from pedestrian traffic and per-road time-averaged density
 /// to regulate spawning and roadside arrivals. Do not remove at path ends.
 /// No following, signals, or collision checks; pedestrians pass through each other and vehicles.
-/// Entities have no GameObjects and render each frame through Graphics.RenderMeshInstanced.
+/// Entities have no GameObjects; each frame their placement and gait phase go to the Pedestrian shader, which moves the limbs.
 /// </summary>
 public sealed partial class PedestrianManager : MonoBehaviour
 {
@@ -31,7 +31,7 @@ public sealed partial class PedestrianManager : MonoBehaviour
     [SerializeField] private float shoulderWidth = 1f;
     [SerializeField] private float connectorTension = .3f;
     [SerializeField] private float fadeDuration = .4f;
-    [SerializeField] private float stepLength = .65f;   // Stride length (m). Replace pose models every half-step.
+    [SerializeField] private float stepLength = .65f;   // Step length (m). One gait cycle of the shader is two steps.
     [SerializeField] private bool showDebugOverlay;
 
     /// <summary>Average walking speed (m/s): the city's PEDESTRIAN_SPEED, given in km/h.</summary>
@@ -60,11 +60,13 @@ public sealed partial class PedestrianManager : MonoBehaviour
     private int densityTick;
     private readonly List<Model> models = new List<Model>();
     private bool modelsProbed;
-    private List<Matrix4x4>[] batches = new List<Matrix4x4>[0];
-    private static readonly Matrix4x4[] chunk = new Matrix4x4[1023];
+    private Shader figureShader;
+    private MaterialPropertyBlock figureProperties;
     private const int MaxModelVariants = 16;
-    private static readonly string[] PoseSuffixes = { "", "_right", "_left" };   // Pose indices: 0=feet together, 1=right foot forward, 2=left foot forward.
-    private static readonly int[] GaitCycle = { 1, 0, 2, 0 };                    // Pose-index sequence per half-step.
+    private static readonly int FiguresId = Shader.PropertyToID("_Pedestrians");
+    private static readonly int StepLengthId = Shader.PropertyToID("_StepLength");
+    private static readonly int PartLocalId = Shader.PropertyToID("_PartLocal");
+    private static readonly int PartNormalId = Shader.PropertyToID("_PartNormal");
 
     private sealed class Walk
     {
@@ -98,10 +100,26 @@ public sealed partial class PedestrianManager : MonoBehaviour
         public int signature;
         public List<Entrance> entries;
     }
+    /// <summary>One figure as the Pedestrian shader reads it; the layout must match its PedestrianInstance.</summary>
+    private struct Figure
+    {
+        public Vector4 positionScale;   // Foot position and uniform scale.
+        public Vector4 headingGait;     // Heading x, heading z, gait phase in cycles, 1 while walking or 0 while standing.
+    }
     private sealed class Model
     {
-        public readonly List<PropRenderModel> sources = new List<PropRenderModel>();
-        public List<PropRenderModel.Part>[] poses;   // In pose-index order. Incomplete walking-pose sets use only the feet-together pose.
+        public PropRenderModel source;   // Null for the box used without FBX assets.
+        public readonly List<PropRenderModel.Part> parts = new List<PropRenderModel.Part>();   // Materials use the Pedestrian shader and are owned here.
+        public readonly List<Figure> figures = new List<Figure>();
+        public GraphicsBuffer buffer;
+
+        public void Dispose()
+        {
+            foreach (var part in parts) UnityEngine.Object.Destroy(part.material);
+            parts.Clear();
+            source?.Dispose();
+            buffer?.Dispose(); buffer = null;
+        }
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -163,8 +181,7 @@ public sealed partial class PedestrianManager : MonoBehaviour
     private void OnDestroy()
     {
         AssetPackStore.CityChanging -= ForgetModels;
-        foreach (var model in models)
-            foreach (var source in model.sources) source.Dispose();
+        foreach (var model in models) model.Dispose();
         models.Clear();
     }
 
@@ -172,8 +189,7 @@ public sealed partial class PedestrianManager : MonoBehaviour
     private void ForgetModels()
     {
         ClearPedestrians();
-        foreach (var model in models)
-            foreach (var source in model.sources) source.Dispose();
+        foreach (var model in models) model.Dispose();
         models.Clear();
         modelsProbed = false;
     }
@@ -777,13 +793,7 @@ public sealed partial class PedestrianManager : MonoBehaviour
         if (active.Count == 0 && transitStops.Count == 0) return;
         EnsureModels();
         if (models.Count == 0) return;
-        int poseSlots = PoseSuffixes.Length;
-        if (batches.Length != models.Count * poseSlots)
-        {
-            batches = new List<Matrix4x4>[models.Count * poseSlots];
-            for (int i = 0; i < batches.Length; i++) batches[i] = new List<Matrix4x4>();
-        }
-        foreach (var list in batches) list.Clear();
+        foreach (var model in models) model.figures.Clear();
         float fadeTime = Mathf.Max(.01f, fadeDuration);
         foreach (var p in active)
         {
@@ -793,81 +803,82 @@ public sealed partial class PedestrianManager : MonoBehaviour
         AddTransitFigures();
         float radius = renderRadius + despawnMargin;
         var bounds = new Bounds(lastCenter, new Vector3(radius * 2, 2000, radius * 2));
-        for (int m = 0; m < models.Count; m++)
-            for (int pose = 0; pose < models[m].poses.Length; pose++)
+        figureProperties ??= new MaterialPropertyBlock();
+        figureProperties.SetFloat(StepLengthId, stepLength);
+        foreach (var model in models)
+        {
+            int count = model.figures.Count;
+            if (count == 0) continue;
+            if (model.buffer == null || model.buffer.count < count)
             {
-                var list = batches[m * poseSlots + pose];
-                if (list.Count == 0) continue;
-                foreach (var part in models[m].poses[pose])
-                {
-                    var rp = new RenderParams(part.material) { worldBounds = bounds, shadowCastingMode = ShadowCastingMode.On, receiveShadows = true };
-                    for (int start = 0; start < list.Count; start += chunk.Length)
-                    {
-                        int count = Mathf.Min(chunk.Length, list.Count - start);
-                        for (int i = 0; i < count; i++) chunk[i] = list[start + i] * part.local;
-                        Graphics.RenderMeshInstanced(rp, part.mesh, part.submesh, chunk, count);
-                    }
-                }
+                model.buffer?.Dispose();
+                model.buffer = new GraphicsBuffer(GraphicsBuffer.Target.Structured, Mathf.NextPowerOfTwo(Mathf.Max(64, count)), 32);
             }
+            model.buffer.SetData(model.figures);
+            figureProperties.SetBuffer(FiguresId, model.buffer);
+            foreach (var part in model.parts)
+            {
+                figureProperties.SetMatrix(PartLocalId, part.local);
+                figureProperties.SetMatrix(PartNormalId, part.local.inverse.transpose);
+                var rp = new RenderParams(part.material) { worldBounds = bounds, matProps = figureProperties,
+                    shadowCastingMode = ShadowCastingMode.On, receiveShadows = true };
+                Graphics.RenderMeshPrimitives(rp, part.mesh, part.submesh, count);
+            }
+        }
     }
 
-    /// <summary>Add one pedestrian to the render batch, selecting pose by distance walked and using feet-together while stopped.</summary>
+    /// <summary>Queue one pedestrian for this frame. The gait phase follows distance walked, so faster walkers step faster; a stopped figure stands upright.</summary>
     private void AddFigure(Vector3 position, Vector3 heading, int variant, float walked, bool moving, float scale)
     {
         heading.y = 0;
-        if (heading.sqrMagnitude < .0001f) heading = Vector3.forward;
-        int m = variant % models.Count;
-        int pose = models[m].poses.Length == PoseSuffixes.Length ? ResolvePose(walked, stepLength, moving) : 0;
-        batches[m * PoseSuffixes.Length + pose].Add(Matrix4x4.TRS(position, Quaternion.LookRotation(heading, Vector3.up), Vector3.one * scale));
+        heading = heading.sqrMagnitude < .0001f ? Vector3.forward : heading.normalized;
+        float phase = stepLength > 0 ? Mathf.Repeat(walked / (stepLength * 2), 1) : 0;
+        models[variant % models.Count].figures.Add(new Figure { positionScale = new Vector4(position.x, position.y, position.z, scale),
+            headingGait = new Vector4(heading.x, heading.z, phase, moving ? 1 : 0) });
     }
 
     /// <summary>
-    /// Determine pose index from walking distance: 0=feet together, 1=right foot forward, 2=left foot forward.
-    /// Each half-step cycles right-forward -> together -> left-forward -> together, so faster walkers step faster. Use together while stopped.
-    /// </summary>
-    public static int ResolvePose(float walked, float stepLength, bool moving)
-    {
-        if (!moving || stepLength <= 0) return 0;
-        return GaitCycle[(int)(Mathf.Repeat(walked, stepLength * 2) / (stepLength * .5f)) & 3];
-    }
-
-    /// <summary>
-    /// Load Models/Props/pedestrian_{n} from 0 upward, along with matching _right / _left walking poses.
-    /// If either walking pose is missing, use only feet-together; if no models exist, use humanoid boxes so rendering works without FBX assets.
+    /// Load Models/Props/pedestrian_{n} from 0 upward; if no models exist, use humanoid boxes so rendering works without FBX assets.
     /// Defer model checks on frames before ModelManager exists.
-    /// All three poses must share the ground-contact origin between the feet and matching torso/head positions; apply no correction on swapping.
+    /// The Pedestrian shader moves the limbs from joint data in the models' UV channels; a model without it glides in its authored pose.
     /// </summary>
     private void EnsureModels()
     {
         if (modelsProbed || ModelManager.Instance == null) return;
         modelsProbed = true;
+        if (figureShader == null) figureShader = Resources.Load<Shader>("Shaders/Pedestrian");
         for (int i = 0; i < MaxModelVariants; i++)
         {
-            var model = new Model();
-            foreach (string suffix in PoseSuffixes)
+            string name = $"pedestrian_{i}";
+            if (ModelManager.Instance.GetModel($"Models/Props/{name}", true) == null) break;
+            var source = new PropRenderModel(name);
+            if (source.normal.Count == 0) { source.Dispose(); break; }
+            var model = new Model { source = source };
+            foreach (var part in source.normal)
             {
-                string name = $"pedestrian_{i}{suffix}";
-                if (ModelManager.Instance.GetModel($"Models/Props/{name}", true) == null) break;
-                var source = new PropRenderModel(name);
-                if (source.normal.Count == 0) { source.Dispose(); break; }
-                model.sources.Add(source);
+                var color = part.material.HasProperty("_BaseColor") ? part.material.GetColor("_BaseColor") : part.material.color;
+                model.parts.Add(new PropRenderModel.Part { mesh = part.mesh, submesh = part.submesh, local = part.local,
+                    material = FigureMaterial(part.material.name, color,
+                        part.material.HasProperty("_Smoothness") ? part.material.GetFloat("_Smoothness") : .15f,
+                        part.material.HasProperty("_Metallic") ? part.material.GetFloat("_Metallic") : 0f) });
             }
-            if (model.sources.Count == 0) break;
-            if (model.sources.Count < PoseSuffixes.Length)
-            {
-                for (int s = 1; s < model.sources.Count; s++) model.sources[s].Dispose();
-                model.sources.RemoveRange(1, model.sources.Count - 1);
-            }
-            model.poses = model.sources.ConvertAll(source => source.normal).ToArray();
             models.Add(model);
         }
         if (models.Count > 0) return;
-        var mesh = Resources.GetBuiltinResource<Mesh>("Cube.fbx");
-        var shader = Shader.Find("Universal Render Pipeline/Lit") ?? Shader.Find("Standard");
-        var material = new Material(shader) { name = "PedestrianBoxMaterial", enableInstancing = true };
-        material.SetColor("_BaseColor", new Color(.85f, .75f, .6f)); material.SetColor("_Color", new Color(.85f, .75f, .6f));
-        models.Add(new Model { poses = new[] { new List<PropRenderModel.Part> { new PropRenderModel.Part { mesh = mesh, submesh = 0, material = material,
-            local = Matrix4x4.TRS(new Vector3(0, .85f, 0), Quaternion.identity, new Vector3(.4f, 1.7f, .3f)) } } } });
+        var box = new Model();
+        box.parts.Add(new PropRenderModel.Part { mesh = Resources.GetBuiltinResource<Mesh>("Cube.fbx"), submesh = 0,
+            material = FigureMaterial("PedestrianBoxMaterial", new Color(.85f, .75f, .6f), .15f, 0f),
+            local = Matrix4x4.TRS(new Vector3(0, .85f, 0), Quaternion.identity, new Vector3(.4f, 1.7f, .3f)) });
+        models.Add(box);
+    }
+
+    private Material FigureMaterial(string name, Color color, float smoothness, float metallic)
+    {
+        var material = new Material(figureShader) { name = name };
+        material.SetColor("_BaseColor", color);
+        material.SetFloat("_Smoothness", smoothness);
+        material.SetFloat("_Metallic", metallic);
+        return material;
     }
 
     private static bool Walkable(PathSummary p) => p != null && p.status == Constants.STATUS_ACTIVE &&

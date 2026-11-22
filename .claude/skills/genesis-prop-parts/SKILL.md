@@ -159,6 +159,7 @@ description: City Genesisの地形プロップ3Dモデル(森の木・岩・茂�
 道路車両・編成車両の制作にも共通のBlender基盤を使うが、保存先は `blender/vehicles.blend` と `Assets/Models/Vehicles/{車種}/{モデル名}.fbx`。走行用の全モデルは自由配置用の数値ID 308〜333・350〜367・370〜395でも `prop_master` に登録する。制作前に公開 `geometries/O_車両の走行描画.md` と `unity/Assets/Scripts/Vehicles/AGENTS.md`、モデルの前提を書いた `Vehicles/VehicleModelResolver.cs` のコメントを読む。
 
 - 原点は接地面・水平中心、Blender -Yが前方。1FBX=1メッシュで既存の車両用 `PROP_*` 材質を共有する。
+- 乗用車・バン・トラックの運転台の塗装には `SLOT_CAR_PAINT_{色}` の材質を使う。Unityがこの名前で始まる材質を1台ごとの色へ塗り替えるので、ナンバー・ホイール・荷台など塗装以外の部位には使わない。色は自由配置の別名で見える既定の色で、粗さと金属度は全色で揃える。
 - 先頭・後尾は数値バリアント、中間は `middle` / `middle_{外観}`(外観0が `middle`)。貨物22の貨車は `wagon` / `wagon_1` / `wagon_2`。最後尾の反転はUnityが行う。
 - 外観候補は `Resources/Config/model_weights.json`(Unity の `Tools/Asset Packs/Update Standard Model Weights` で実在のモデルから作り直す)、路線種別の車種は transit_master の `vehicle_type`、貨車の対応は `transit_vehicle_models.json`。既存IDを確認して登録する。
 - exportのカテゴリは `vehicles`、検証対象は `Assets/Models/Vehicles/{車種}`、ギャラリーは `Vehicles`。Unity回帰は `Tests/Vehicles/run.ps1 -TransitOnly`。自動生成されたResourcesラッパーとFBXのGUIDが対応することを確認する。
@@ -174,4 +175,4 @@ LRT14・メトロ20・中距離21・モノレール24は各5外観(0=スタン�
 貨物22は機関車3外観(0=JR貨物風・1=アメリカ風・2=インド国鉄風)と貨車3種(`wagon`=2段積みコンテナ車・`wagon_1`=石炭ホッパ車・`wagon_2`=タンク車)。貨車は機関車の外観と独立に選ぶ前提で、middle系の名前を持たず、機関車の路線色の材質を使わない。非公開制作ツールの外観モジュール`freight_vehicles.py`が通常・接写・遠景を同じ寸法表から著作する(各ジョブの`--freight-only`)。全モデルの連結面は±10m・連結器の中心高さ0.88mで揃え、天端は架線のトロリ線(レール面上約5.1m)より低く保つ(2段積みのコンテナは背高でない高さで5.05m)。路線色の部位は機関車の車体の青・オレンジとインドの赤の帯(`PROP_FrJrBlue`・`PROP_FrUsOrange`・`PROP_FrInRed`)で、`transit_vehicle_livery.json`に登録してある。自由配置別名は機関車380・381・394、貨車382・383・395。試作は`render_freight_vehicles.py`がライブラリへ保存せずに外観モジュールを組み立てて撮る。仕様・再生成・制作記録は非公開制作ツールの`pipeline/jobs/freight_vehicles.md`。
 
 
-鉄道の専用遠景は14/20/21/22/23/24の全モデルにある。非公開制作ツールの`build_rail_far.py`が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨物22は外観モジュールが運転台・フード・コンテナ・タンクの側面形の柱と台枠の帯で作る。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。鉄道12〜42三角形・モノレール64三角形以内、既存材質を共有する。`build_vehicle_props.py`は別名の遠景も同期する。走行版は画面比率3.5%未満で`_far`を選び、25%以上では存在する`_close`を選ぶ。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。
+鉄道の専用遠景は14/20/21/22/23/24の全モデルにある。非公開制作ツールの`build_rail_far.py`が車体箱と左右各一枚の窓帯を著作し、車輪・台車・屋上機器を省略する。貨物22は外観モジュールが運転台・フード・コンテナ・タンクの側面形の柱と台枠の帯で作る。原点と水平範囲は通常版を維持し、車輪・集電装置を省くため上下の範囲は通常版の内側でよい。鉄道12〜42三角形・モノレール64三角形以内、既存材質を共有する。`build_vehicle_props.py`は別名の遠景も同期する。走行版は画面比率で`_far`・通常・存在する`_close`を切り替える(しきい値は `Vehicles/VehicleModelResolver.cs`)。専用版がないLODは通常へフォールバックする。自由配置はPropRenderModelの既存の投影LODで専用遠景を使う。通常・接写モデルは保持する。

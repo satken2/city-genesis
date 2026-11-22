@@ -16,11 +16,6 @@ Bus stops and station entrances connect to road pedestrians. Passersby enter or 
 
 ## Rendering and model names
 
-Pedestrians have no GameObjects and use GPU instancing. Limbs animate without bones by switching three pose models according to distance walked. Fixed-name models live in `Assets/Models/Props/`. Unity reads consecutively from `pedestrian_0` until a number is missing, falling back to humanoid boxes if none exist. Originals are in `blender/props.blend`.
+Pedestrians have no GameObjects and use GPU instancing. A model holds one upright pose, without bones or animation. The vertex shader makes the walk by rotating the limbs around their joints according to distance walked. The model's vertices carry the joint positions and which joints each vertex follows; the header of the shader `Resources/Shaders/Pedestrian.shader` defines the layout. A model without this data moves along without changing pose.
 
-| Name | Pose |
-| --- | --- |
-| `pedestrian_{n}` | Feet together |
-| `pedestrian_{n}_right` | Right foot forward |
-| `pedestrian_{n}_left` | Left foot forward |
-
+Fixed-name models `pedestrian_{n}` live in `Assets/Models/Props/`. Unity reads consecutively from `pedestrian_0` until a number is missing, falling back to humanoid boxes if none exist. Originals are in `blender/props.blend`.

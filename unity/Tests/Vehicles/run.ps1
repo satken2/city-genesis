@@ -43,6 +43,10 @@ New-Item -ItemType Directory -Path $configDestination -Force | Out-Null
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Config/transit_vehicle_models.json') -Destination $configDestination -Force
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Config/model_weights.json') -Destination $configDestination -Force
 Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Config/transit_vehicle_livery.json') -Destination $configDestination -Force
+Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Config/vehicle_paint.json') -Destination $configDestination -Force
+$shaderDestination = Join-Path $qaRoot 'Assets/Resources/Shaders'
+New-Item -ItemType Directory -Path $shaderDestination -Force | Out-Null
+Copy-Item -LiteralPath (Join-Path $unityRoot 'Assets/Resources/Shaders/Pedestrian.shader') -Destination $shaderDestination -Force
 $resultPath = Join-Path $qaRoot 'result.txt' 
 Set-Content -LiteralPath $resultPath -Value 'RUNNING'
 $qaArguments = @(

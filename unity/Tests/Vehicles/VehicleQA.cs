@@ -78,8 +78,8 @@ public static partial class VehicleQA
             }
             if (Array.IndexOf(args, "-pedestrianModelsOnly") >= 0)
             {
-                PedestrianModels(); PedestrianPoses(); accessTimings.Add(PedestrianDrawTiming());
-                File.WriteAllText(result, "PASS\nPedestrian FBX topology, normals, budgets, scale, ground, walking poses and draw timing\n" + string.Join("\n", accessTimings));
+                PedestrianModels(); accessTimings.Add(PedestrianDrawTiming());
+                File.WriteAllText(result, "PASS\nPedestrian FBX topology, normals, budgets, scale, ground, joint data and draw timing\n" + string.Join("\n", accessTimings));
                 EditorApplication.Exit(0);
                 return;
             }
@@ -97,7 +97,7 @@ public static partial class VehicleQA
             }
             StreetParking();
             Geometry(); Budget(); PopulationCoverage(); Junction(); Congestion(); RoadsideExit(); MotionContract(); TransitModels(); TransitPlacement(); TransitConsistGeometry(); TransitHighlightSelection(); DriveCamera();
-            PedestrianBands(); PedestrianModels(); PedestrianPoses(); accessTimings.Add(PedestrianDrawTiming());
+            PedestrianBands(); PedestrianModels(); accessTimings.Add(PedestrianDrawTiming());
             var report = new List<string>();
             foreach(int split in new[]{1,5}) report.Add(PedestrianNetwork(split,12,1200,false,true));
             // Measure fractional capacity on a network with an entrance (a closed network stops replenishment but retains existing pedestrians, so the average does not fall). Pedestrians that have passed the entrance
@@ -515,7 +515,7 @@ public static partial class VehicleQA
         var lod=car.GetComponent<LODGroup>();
         Check(lod!=null,"Road vehicle LOD missing: "+type+"/"+variant);
         var levels=lod.GetLODs();
-        Check(levels.Length==3 && levels[0].screenRelativeTransitionHeight==.25f && levels[1].screenRelativeTransitionHeight==.035f && levels[2].screenRelativeTransitionHeight==0,"Road vehicle LOD thresholds: "+type+"/"+variant);
+        Check(levels.Length==3 && levels[0].screenRelativeTransitionHeight==.12f && levels[1].screenRelativeTransitionHeight==.035f && levels[2].screenRelativeTransitionHeight==0,"Road vehicle LOD thresholds: "+type+"/"+variant);
         string[] suffix={"_close","","_far"};
         for(int i=0;i<3;i++)
             foreach(var renderer in levels[i].renderers)
@@ -591,7 +591,7 @@ public static partial class VehicleQA
                     var lod=car.GetComponent<LODGroup>();
                     Check(lod!=null,"Close LOD missing");
                     var levels=lod.GetLODs();
-                    Check(levels.Length==3 && levels[0].screenRelativeTransitionHeight==.25f && levels[1].screenRelativeTransitionHeight==.035f && levels[2].screenRelativeTransitionHeight==0,"Vehicle LOD thresholds");
+                    Check(levels.Length==3 && levels[0].screenRelativeTransitionHeight==.12f && levels[1].screenRelativeTransitionHeight==.035f && levels[2].screenRelativeTransitionHeight==0,"Vehicle LOD thresholds");
                     foreach(var renderer in levels[0].renderers)
                         Check(AssetDatabase.GetAssetPath(renderer.GetComponent<MeshFilter>().sharedMesh).EndsWith($"/{expected}_close.fbx"),"Close LOD uses wrong asset");
                     foreach(var renderer in levels[1].renderers)
@@ -1149,7 +1149,6 @@ public static partial class VehicleQA
         foreach (double volume in volumes.Values)
             Check(volume > 1e-8, "Pedestrian body part faces inward");
     }
-    static readonly string[] PedestrianPoseSuffixes={"","_right","_left"};
     static void PedestrianModels()
     {
         var manager=new GameObject("PedestrianModelsQA").AddComponent(game.GetType("ModelManager"));
@@ -1158,80 +1157,63 @@ public static partial class VehicleQA
         int count=0;
         for(int i=0;i<16;i++)
         {
-            if(getModel.Invoke(manager,new object[]{$"Models/Props/pedestrian_{i}",true})==null) break;
-            Bounds standing=default,standingHair=default;
-            for(int pose=0;pose<PedestrianPoseSuffixes.Length;pose++)
+            string name=$"pedestrian_{i}";
+            var prefab=(GameObject)getModel.Invoke(manager,new object[]{$"Models/Props/{name}",true});
+            if(prefab==null) break;
+            var filters=prefab.GetComponentsInChildren<MeshFilter>(true);Check(filters.Length>0,"Pedestrian FBX has no mesh");
+            int triangles=0;Bounds bounds=default;bool any=false,anyHair=false;
+            var limbs=new HashSet<int>();
+            foreach(var filter in filters)
             {
-                string name=$"pedestrian_{i}{PedestrianPoseSuffixes[pose]}";
-                var prefab=(GameObject)getModel.Invoke(manager,new object[]{$"Models/Props/{name}",true});
-                Check(prefab!=null,$"{name} is missing while pedestrian_{i} exists");
-                var filters=prefab.GetComponentsInChildren<MeshFilter>(true);Check(filters.Length>0,"Pedestrian FBX has no mesh");
-                int triangles=0;Bounds bounds=default,hair=default;bool any=false,anyHair=false;
-                Vector3 front=new Vector3(0,0,float.NegativeInfinity);
-                foreach(var filter in filters)
+                Check(filter.sharedMesh.isReadable,"Pedestrian FBX is not readable");
+                triangles+=filter.sharedMesh.triangles.Length/3;
+                CheckPedestrianSurface(filter.sharedMesh);
+                CheckPedestrianRig(filter.sharedMesh,name,limbs);
+                var m=prefab.transform.worldToLocalMatrix*filter.transform.localToWorldMatrix;
+                foreach(var v in filter.sharedMesh.vertices)
                 {
-                    Check(filter.sharedMesh.isReadable,"Pedestrian FBX is not readable");
-                    triangles+=filter.sharedMesh.triangles.Length/3;
-                    CheckPedestrianSurface(filter.sharedMesh);
-                    var m=prefab.transform.worldToLocalMatrix*filter.transform.localToWorldMatrix;
-                    var vertices=filter.sharedMesh.vertices;
-                    foreach(var v in vertices)
-                    {
-                        var point=m.MultiplyPoint3x4(v);
-                        if(!any){bounds=new Bounds(point,Vector3.zero);any=true;}else bounds.Encapsulate(point);
-                        if(point.y<.06f && point.z>front.z) front=point;
-                    }
-                    var materials=filter.GetComponent<MeshRenderer>().sharedMaterials;
-                    for(int s=0;s<filter.sharedMesh.subMeshCount && s<materials.Length;s++)
-                    {
-                        if(materials[s]==null || !materials[s].name.Contains("HAIR")) continue;
-                        foreach(int index in filter.sharedMesh.GetIndices(s))
-                        {
-                            var point=m.MultiplyPoint3x4(vertices[index]);
-                            if(!anyHair){hair=new Bounds(point,Vector3.zero);anyHair=true;}else hair.Encapsulate(point);
-                        }
-                    }
+                    var point=m.MultiplyPoint3x4(v);
+                    if(!any){bounds=new Bounds(point,Vector3.zero);any=true;}else bounds.Encapsulate(point);
                 }
-                Check(anyHair,$"{name} has no hair part");
-                Check(triangles<400,$"{name} exceeds 400 triangles: {triangles}");
-                Check(bounds.size.y>1.4f && bounds.size.y<2f,$"{name} height is not human scale: {bounds.size}");
-                Check(Mathf.Abs(bounds.min.y)<.05f,$"{name} is not grounded: {bounds.min.y}");
-                Check(Mathf.Abs(bounds.center.x)<.3f && Mathf.Abs(bounds.center.z)<.3f,$"{name} is off centre: {bounds.center}");
-                if(pose==0){standing=bounds;standingHair=hair;}
-                else
-                {
-                    // Rendering only swaps the pose and does not correct the position, so if the head is not at the same position as in the aligned pose, it jumps every time the pose is swapped.
-                    Check(Vector3.Distance(hair.center,standingHair.center)<.001f && Vector3.Distance(hair.size,standingHair.size)<.001f,
-                        $"{name} head does not align with the standing pose: {hair.center} vs {standingHair.center}");
-                    Check(bounds.size.z>standing.size.z+.2f,$"{name} does not open the legs: {bounds.size.z} vs {standing.size.z}");
-                    // Forward is +Z and the character's right-hand side is +X. The frontmost shoe sole must belong to the foot indicated by its name.
-                    Check(pose==1 ? front.x>0 : front.x<0,$"{name} puts the wrong foot forward: {front}");
-                }
-                accessTimings.Add($"{name} triangles={triangles} size={bounds.size}");
+                foreach(var material in filter.GetComponent<MeshRenderer>().sharedMaterials) anyHair|=material!=null && material.name.Contains("HAIR");
             }
+            Check(anyHair,$"{name} has no hair part");
+            Check(limbs.SetEquals(new[]{-2,-1,1,2}),$"{name} does not carry both legs and both arms in the joint data");
+            Check(triangles<400,$"{name} exceeds 400 triangles: {triangles}");
+            Check(bounds.size.y>1.4f && bounds.size.y<2f,$"{name} height is not human scale: {bounds.size}");
+            Check(Mathf.Abs(bounds.min.y)<.05f,$"{name} is not grounded: {bounds.min.y}");
+            Check(Mathf.Abs(bounds.center.x)<.3f && Mathf.Abs(bounds.center.z)<.3f,$"{name} is off centre: {bounds.center}");
+            accessTimings.Add($"{name} triangles={triangles} size={bounds.size}");
             count++;
         }
         Check(count>=1,"No pedestrian model found");
         UnityEngine.Object.DestroyImmediate(manager.gameObject);
     }
-    static void PedestrianPoses()
+    // The Pedestrian shader reads joint data from UV channels 0-3 (see its header). A limb vertex needs joints stacked root > middle > tip
+    // inside the body height and weights within 0-1; the torso and head carry zeros in every channel.
+    static void CheckPedestrianRig(Mesh mesh,string name,HashSet<int> limbs)
     {
-        var resolve=game.GetType("PedestrianManager").GetMethod("ResolvePose");
-        Func<float,float,bool,int> pose=(walked,step,moving)=>(int)resolve.Invoke(null,new object[]{walked,step,moving});
-        var sequence=new List<int>();var runs=new List<float>();float runStart=0;
-        for(int i=0;i<=260;i++)
+        var channels=new List<Vector2>[4];
+        for(int channel=0;channel<4;channel++)
         {
-            float walked=i*.01f;int current=pose(walked,.65f,true);
-            Check(pose(walked,.65f,false)==0,"Standing pedestrian is not drawn in the standing pose");
-            if(sequence.Count>0 && sequence[sequence.Count-1]==current) continue;
-            if(sequence.Count>0) runs.Add(walked-runStart);
-            sequence.Add(current);runStart=walked;
+            channels[channel]=new List<Vector2>();mesh.GetUVs(channel,channels[channel]);
+            Check(channels[channel].Count==mesh.vertexCount,$"{name} lacks joint data in UV channel {channel}");
         }
-        Check(string.Join(",",sequence)=="1,0,2,0,1,0,2,0,1",$"Gait order is not right-standing-left-standing: {string.Join(",",sequence)}");
-        foreach(float run in runs) Near(run,.325f,.011f,"Pose does not change every half step");
-        Check(pose(1f,0f,true)==0,"Zero step length must not animate");
+        float height=mesh.bounds.max.y;
+        for(int i=0;i<mesh.vertexCount;i++)
+        {
+            int limb=Mathf.RoundToInt(channels[3][i].y);
+            Vector3 weights=new Vector3(channels[2][i].x,channels[2][i].y,channels[3][i].x);
+            if(limb==0){Check(channels[0][i]==Vector2.zero && channels[1][i]==Vector2.zero && weights==Vector3.zero,$"{name} torso vertex carries joint data");continue;}
+            limbs.Add(limb);
+            Check(Mathf.Abs(limb)<=2,$"{name} has an unknown limb kind: {limb}");
+            float root=channels[0][i].x,middle=channels[1][i].x,tip=channels[1][i].y;
+            Check(root<height && root>middle && middle>tip && tip>=0,$"{name} joints are not stacked: {root} {middle} {tip}");
+            Check(weights.x>0 && weights.x<=1 && weights.y>=0 && weights.y<=1 && weights.z>=0 && weights.z<=1,$"{name} joint weights are out of range: {weights}");
+            Check(Mathf.Abs(limb)==1 || weights.z==0,$"{name} arm vertex follows a tip joint");
+        }
     }
-    // Render 1,000 people using the same matrix calculation and draw request, and measure the difference from rendering everyone in the aligned pose (draw calls are not split by pose).
+    // Render 1,000 people through the manager's own per-frame submission, walking and standing (the pose does not split draw calls).
     static string PedestrianDrawTiming()
     {
         var models=new GameObject("PedestrianTimingModels").AddComponent(game.GetType("ModelManager"));
@@ -1254,13 +1236,13 @@ public static partial class VehicleQA
             return watch.Elapsed.TotalMilliseconds/frames;
         };
         double walking=measure(200);
-        int slots=0;foreach(IList list in (IList)Get(manager,"batches")) if(list.Count>0) slots++;
+        int slots=0;foreach(var model in (IList)Get(manager,"models")) if(((IList)Get(model,"figures")).Count>0) slots++;
         foreach(var p in active) Set(p,"moving",false);
         double standing=measure(200);
         Check(((IList)Get(manager,"models")).Count>0,"Timing ran without pedestrian models");
         Call(manager,"OnDestroy");
         UnityEngine.Object.DestroyImmediate(manager.gameObject);UnityEngine.Object.DestroyImmediate(models.gameObject);
-        return $"pedestrian draw 1000 people: walking={walking:F3}ms/frame (model x pose groups={slots}) standing-only={standing:F3}ms/frame";
+        return $"pedestrian draw 1000 people: walking={walking:F3}ms/frame (models drawn={slots}) standing={standing:F3}ms/frame";
     }
     static void PedestrianAccessFixture(object manager, List<GameObject> cleanup, int frontPath)
     {

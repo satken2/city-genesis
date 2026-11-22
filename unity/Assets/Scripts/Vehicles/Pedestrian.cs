@@ -13,8 +13,8 @@ public sealed class Pedestrian
     public int side;                 // Side relative to path geometry: +1=right, -1=left; 0 for pedestrian-only roads using a central band.
     public float lateral;            // Signed lateral offset from centerline (m).
     public float surface;            // Height above the polyline's spline reference surface.
-    public float walked;             // Accumulated walking distance for pose phase (m), initialized randomly per entity so footsteps do not synchronize.
-    public bool moving;              // Whether the latest movement step advanced. Use the feet-together pose while stopped.
+    public float walked;             // Accumulated walking distance for gait phase (m), initialized randomly per entity so footsteps do not synchronize.
+    public bool moving;              // Whether the latest movement step advanced. Stand upright while stopped.
     public VehiclePolyline road, connector;
     public float connectorS;
     public bool arrivalPending, fading;

@@ -12,6 +12,7 @@ public sealed class ParkedVehicleManager : MonoBehaviour
     private const float ScanInterval = .5f;
     private readonly List<ParkedVehicleLayout.Model> models = new();
     private readonly List<PropRenderModel> renderModels = new();
+    private readonly Dictionary<(Material, int), Material> paints = new();   // Body-paint material per VehiclePaint color index; owned here.
     private readonly Dictionary<int, Road> roads = new();
     private List<Batch> batches = new();
     private PathManager paths;
@@ -102,8 +103,7 @@ public sealed class ParkedVehicleManager : MonoBehaviour
             {
                 if (ModelManager.Instance == null) yield break;
                 // Discard partial previous loads. models and renderModels correspond by index, so do not append midway.
-                foreach (var model in renderModels) model.Dispose();
-                renderModels.Clear(); models.Clear();
+                DisposeModels();
                 foreach (int type in new[] { Constants.VEHICLE_STANDARD, Constants.VEHICLE_COMMERCIAL, Constants.VEHICLE_TRUCK })
                 {
                     var variants = ModelWeights.Models(VehicleModelResolver.Unit(type));
@@ -160,7 +160,9 @@ public sealed class ParkedVehicleManager : MonoBehaviour
             foreach (int id in new List<int>(roads.Keys))
                 if (!seen.Contains(id)) { roads.Remove(id); changed = true; }
             if (!changed) yield break;
-            var placements = new List<Matrix4x4>[models.Count];
+            // Row 0 of a model holds every placement; row 1 + c holds those painted with VehiclePaint color c.
+            int rows = 1 + VehiclePaint.Colors.Count;
+            var placements = new List<Matrix4x4>[models.Count * rows];
             for (int i = 0; i < placements.Length; i++) placements[i] = new List<Matrix4x4>();
             foreach (var entry in roads)
             {
@@ -170,24 +172,37 @@ public sealed class ParkedVehicleManager : MonoBehaviour
                 {
                     var p = road.slots[i];
                     if (Utils.XZDistanceSquared(p.position, center) > Radius * Radius) continue;
-                    placements[p.model].Add(Matrix4x4.TRS(p.position, p.rotation, Vector3.one));
+                    var matrix = Matrix4x4.TRS(p.position, p.rotation, Vector3.one);
+                    placements[p.model * rows].Add(matrix);
+                    // The slot's fixed priority keeps a parked car's color while counts and the camera change.
+                    int paint = VehiclePaint.PickIndex(p.priority);
+                    if (paint >= 0) placements[p.model * rows + 1 + paint].Add(matrix);
                 }
                 yield return RenderWorkScheduler.Continue;
             }
             var next = new List<Batch>();
             for (int model = 0; model < models.Count; model++)
-            for (int start = 0; start < placements[model].Count; start += 511)
             foreach (var part in renderModels[model].normal)
             {
-                var batch = new Batch { part = part, matrices = new Matrix4x4[Mathf.Min(511, placements[model].Count - start)] };
-                for (int i = 0; i < batch.matrices.Length; i++)
+                bool painted = rows > 1 && VehiclePaint.IsPaint(part.material);
+                for (int row = painted ? 1 : 0; row < (painted ? rows : 1); row++)
                 {
-                    batch.matrices[i] = placements[model][start + i] * part.local;
-                    var bounds = Utils.TransformBounds(part.mesh.bounds, batch.matrices[i]);
-                    if (i == 0) batch.bounds = bounds; else batch.bounds.Encapsulate(bounds);
+                    var placed = placements[model * rows + row];
+                    var drawn = painted ? new PropRenderModel.Part { mesh = part.mesh, submesh = part.submesh, local = part.local,
+                        material = Paint(part.material, row - 1) } : part;
+                    for (int start = 0; start < placed.Count; start += 511)
+                    {
+                        var batch = new Batch { part = drawn, matrices = new Matrix4x4[Mathf.Min(511, placed.Count - start)] };
+                        for (int i = 0; i < batch.matrices.Length; i++)
+                        {
+                            batch.matrices[i] = placed[start + i] * part.local;
+                            var bounds = Utils.TransformBounds(part.mesh.bounds, batch.matrices[i]);
+                            if (i == 0) batch.bounds = bounds; else batch.bounds.Encapsulate(bounds);
+                        }
+                        next.Add(batch);
+                        yield return RenderWorkScheduler.Continue;
+                    }
                 }
-                next.Add(batch);
-                yield return RenderWorkScheduler.Continue;
             }
             batches = next;
             lastCenter = center; hasCenter = true; forceRebatch = false;
@@ -195,16 +210,28 @@ public sealed class ParkedVehicleManager : MonoBehaviour
         finally { worker = null; }
     }
 
+    private Material Paint(Material source, int color)
+    {
+        if (!paints.TryGetValue((source, color), out var material))
+            paints[(source, color)] = material = VehicleRepaint.Tint(source, VehiclePaint.Colors[color]);
+        return material;
+    }
+
+    /// <summary>Release the models with the paint materials cloned from them.</summary>
+    private void DisposeModels()
+    {
+        foreach (var material in paints.Values) if (material != null) Destroy(material);
+        paints.Clear();
+        foreach (var model in renderModels) model.Dispose();
+        renderModels.Clear(); models.Clear();
+    }
+
     private void Clear()
     {
         if (worker != null) RenderWorkScheduler.Stop(this, worker);
         worker = null;
         roads.Clear(); batches.Clear(); hasCenter = false; hasTrackedCenter = false; forceRebatch = false; nextScan = 0;
-        if (!modelsReady)
-        {
-            foreach (var model in renderModels) model.Dispose();
-            renderModels.Clear(); models.Clear();
-        }
+        if (!modelsReady) DisposeModels();
     }
 
     private void OnDisable() => Clear();
@@ -219,8 +246,7 @@ public sealed class ParkedVehicleManager : MonoBehaviour
     private void ForgetModels()
     {
         Clear();
-        foreach (var model in renderModels) model.Dispose();
-        renderModels.Clear(); models.Clear();
+        DisposeModels();
         modelsReady = false;
     }
 }

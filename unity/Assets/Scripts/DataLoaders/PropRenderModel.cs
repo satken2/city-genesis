@@ -42,7 +42,7 @@ public sealed class PropRenderModel : IDisposable
         {
             foreach (var level in lod.GetLODs())
             {
-                var target = level.screenRelativeTransitionHeight >= .25f ? close
+                var target = level.screenRelativeTransitionHeight >= VehicleModelResolver.CloseScreenRatio ? close
                     : level.screenRelativeTransitionHeight > 0 ? normal : far;
                 Extract(root, target, new HashSet<Renderer>(level.renderers));
             }
