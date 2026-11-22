@@ -353,6 +353,9 @@ agents:
     prebuilt: false
     variants:
       - 0
+      - 250
+      - 500
+      - 750
   2008:
     model: true
     prebuilt: false
@@ -420,6 +423,14 @@ agents:
     prebuilt: false
     variants:
       - 0
+  2019:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
+      - 250
+      - 500
+      - 750
   3001:
     model: true
     prebuilt: false
