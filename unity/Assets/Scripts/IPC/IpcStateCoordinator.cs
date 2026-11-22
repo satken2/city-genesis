@@ -797,16 +797,7 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.PARCEL_SHAPE_EDIT);
         }
 
-        // VisualMode: show plans.
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-        }
+        // IpcViewCoordinator.SyncFromState applies VisualMode (state-specific display presets).
 
         // Initialize ParcelShapeEditManager.
         var shapeEditManager = FindAnyObjectByType<ParcelShapeEditManager>();
@@ -837,16 +828,7 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.EDIT_RESOURCE);
         }
 
-        // VisualMode: show plans (same as parcel shape editing; hide districts).
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-        }
+        // IpcViewCoordinator.SyncFromState applies VisualMode (state-specific display presets).
 
         // Initialize ResourceAreaEditManager in new creation mode.
         var resourceAreaEditManager = FindAnyObjectByType<ResourceAreaEditManager>();
@@ -1015,16 +997,7 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.PROP_PLACEMENT);
         }
 
-        // VisualMode: show plans, hide districts (same as public transport placement).
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-        }
+        // IpcViewCoordinator.SyncFromState applies VisualMode (state-specific display presets).
 
         int propType = 0;
         string placementMode = "instance";
@@ -1266,16 +1239,7 @@ public class IpcStateCoordinator : MonoBehaviour
             InputSystemManager.Instance.SetModePreset(InputModePreset.SET_GRID);
         }
 
-        // VisualMode: normal plan display (retain visible nodes/roads for snapping on terrain clicks).
-        if (VisualModeHandler.Instance != null)
-        {
-            VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualMode.MODE_BOUNDARY);
-            VisualModeHandler.Instance.SetMode(InputObjectType.PATH, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetMode(InputObjectType.BUILDING, VisualMode.MODE_NORMAL);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.PATH, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetFlags(InputObjectType.BUILDING, VisualFlag.SHOW_PLAN);
-            VisualModeHandler.Instance.SetMode(InputObjectType.ZONE, VisualMode.MODE_HIDDEN);
-        }
+        // IpcViewCoordinator.SyncFromState applies VisualMode (state-specific display presets).
 
         // Initialize and start GridSetManager.
         var gridSetManager = FindAnyObjectByType<GridSetManager>();

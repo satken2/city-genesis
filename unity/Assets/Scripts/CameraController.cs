@@ -108,6 +108,7 @@ public partial class CameraController : MonoBehaviour
     private RoadPlanManager roadPlanManagerRef;
     private TransitPlanManager transitPlanManagerRef;
     private GradingAreaEditManager gradingAreaEditManagerRef;
+    private ResourceAreaEditManager resourceAreaEditManagerRef;
 
     // Expose whether fly mode is active to other systems.
     public bool IsFlyMode => isFlyMode;
@@ -1448,7 +1449,7 @@ public partial class CameraController : MonoBehaviour
     }
 
     /// <summary>
-    /// Check whether the mouse is over an edited parcel/earthworks vertex or a road editing handle.
+    /// Check whether the mouse is over an edited parcel/earthworks/resource-area vertex or a road editing handle.
     /// Used to prevent camera dragging from starting on editing handles.
     /// </summary>
     private bool IsMouseOverEditHandle()
@@ -1470,6 +1471,14 @@ public partial class CameraController : MonoBehaviour
         if (gradingAreaEditManagerRef == null) gradingAreaEditManagerRef = FindAnyObjectByType<GradingAreaEditManager>();
         if (gradingAreaEditManagerRef != null && gradingAreaEditManagerRef.IsEditMode
             && gradingAreaEditManagerRef.IsMouseOverVertex(mouseScreen, cam))
+        {
+            return true;
+        }
+
+        // ResourceAreaEditManager vertex hit test for drawing resource areas. IsMouseOverVertex is true only during the Editing phase.
+        if (resourceAreaEditManagerRef == null) resourceAreaEditManagerRef = FindAnyObjectByType<ResourceAreaEditManager>();
+        if (resourceAreaEditManagerRef != null && resourceAreaEditManagerRef.IsEditMode
+            && resourceAreaEditManagerRef.IsMouseOverVertex(mouseScreen, cam))
         {
             return true;
         }

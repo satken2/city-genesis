@@ -12,7 +12,7 @@ The central bank assumes assets and liabilities left by private agents that with
 
 ## 12.3. Money flows across the city boundary
 
-The city is one region sharing a currency with the outside world and accepts externally determined trade prices. Exports bring money in; imports take it out. Tourists' travel funds are also external income.
+The city is a city-state that uses the currency of the outside world and accepts externally determined trade prices. Exports bring money in; imports take it out. Tourists' travel funds are also external income.
 
 The city's total money changes through its trade balance and quest grants. See [product market](09_product-market.md) and [tourism](20_tourism.md).
 

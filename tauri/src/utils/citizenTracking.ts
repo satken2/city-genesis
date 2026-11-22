@@ -17,7 +17,7 @@ export type CitizenVisit = {
   agent_id: number;
   name: string;
   parcel_id: number;
-  /** Daily round trips from home (commute/school: 1; shopping: 1/epoch days per item). */
+  /** Daily round trips from home (commute/school: 1; shopping: the same daily rate per item as the traffic volume). */
   per_day: number;
   product_ids: number[];
   x: number | null;

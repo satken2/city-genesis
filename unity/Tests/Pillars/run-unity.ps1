@@ -21,6 +21,16 @@ foreach ($entry in @('p4/pillar_leg', 'p4/pillar_crossbeam', 'p421/pillar', 'p42
         Copy-Item -LiteralPath "$unityRoot/Assets/Models/Paths/$entry.fbx.meta" -Destination $destination -Force
     }
 }
+# Seed the existing mirrors of the portal-frame components so the generator keeps their GUIDs
+# (a new QA project would otherwise assign new ones, which are copied back to the main project below).
+$mirrorRoot = Join-Path $qaRoot 'Assets/Resources/Models/Paths/p4'
+New-Item -ItemType Directory -Path $mirrorRoot -Force | Out-Null
+foreach ($part in @('pillar_leg', 'pillar_crossbeam')) {
+    foreach ($extension in @('prefab', 'prefab.meta')) {
+        $mirror = "$unityRoot/Assets/Resources/Models/Paths/p4/$part.$extension"
+        if (Test-Path -LiteralPath $mirror) { Copy-Item -LiteralPath $mirror -Destination $mirrorRoot -Force }
+    }
+}
 Set-Content -LiteralPath "$qaRoot/Packages/manifest.json" -Value '{"dependencies":{}}'
 $resultPath = Join-Path $qaRoot 'result.txt'
 Set-Content -LiteralPath $resultPath -Value 'RUNNING'

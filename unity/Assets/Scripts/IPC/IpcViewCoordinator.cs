@@ -356,9 +356,14 @@ public class IpcViewCoordinator : MonoBehaviour
                 break;
 
             case "STATE_REMOVE_OBJECTS":
-                // Bulldoze mode shows plans and hides districts.
-                // Show parcel boundaries to reveal empty parcels for deletion.
-                // Keep props visible because they are deletion targets (unlike construction presets).
+            case "STATE_EDIT_PARCEL_SHAPE":
+            case "STATE_SET_GRID":
+            case "STATE_EDIT_RESOURCE":
+            case "STATE_EDIT_PROP":
+                // Bulldozing and editing on the ground (parcel shapes, grid angle, resource areas, props)
+                // show plans and hide districts.
+                // Show parcel boundaries as positioning references and to reveal empty parcels for deletion.
+                // Do not hide props because they are deletion/placement targets (unlike construction presets).
                 ForceLayer("parcel", "border");
                 ForceLayer("road", "default", null, "plan");
                 ForceLayer("building", "default", null, "plan");

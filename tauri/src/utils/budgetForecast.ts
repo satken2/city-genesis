@@ -30,8 +30,8 @@ export function getCategoryTier(key: string, tiers: Record<string, number>): num
   const cId = Number(key);
   if (cId === 10) return 4; // Savings: cut first (effectively disabled because desired is zero).
   if (cId === 8 || cId === 14) return 3; // Construction and land acquisition
-  if ([3, 4, 5, 7, 11].includes(cId)) return 2; // Education, public safety, fire services, other, transport
-  return 1; // Healthcare, infrastructure, repairs: highest preservation priority
+  if ([3, 4, 5, 7, 9, 11].includes(cId)) return 2; // Education, public safety, fire services, other, repairs, transport
+  return 1; // City hall, healthcare, infrastructure, welfare: highest preservation priority
 }
 
 /**
