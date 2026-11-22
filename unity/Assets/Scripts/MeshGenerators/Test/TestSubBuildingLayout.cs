@@ -53,7 +53,7 @@ public static class TestSubBuildingLayout
     /// minimum-count filling, D'Hondt ties) is random instead of row order; facilities without such rows keep row order.
     /// Wing composition is deterministic; only positions and look order randomize. Second/later wings of one type
     /// prefer adjacency to existing same-type wings (clustering), then positions sharing the most boundaries
-    /// with site edges/existing wings.
+    /// with site edges/existing wings, then the row nearest the front (vacant cells end up at the back).
     /// Derive wing floors by clamping parent floors to definition min_floors–max_floors
     /// (backend _attach_sub_buildings applies the same derivation at delivery).
     ///
@@ -264,9 +264,9 @@ public static class TestSubBuildingLayout
     /// <summary>
     /// Place one wing. False if no location fits.
     /// preferFront=true selects nearest front-edge candidate (ties deterministic by grid coordinates);
-    /// false prefers same-type adjacency (clustering), randomly choosing among candidates sharing most boundaries
-    /// with site edges/existing wings.
-    /// Try grid-aligned and 90° orientations.
+    /// false prefers same-type adjacency (clustering), randomly choosing among the candidates sharing most boundaries
+    /// with site edges/existing wings that lie in the row nearest the front.
+    /// Rectangular wings try grid-aligned and 90° orientations; square wings stay grid-aligned and face the front.
     /// </summary>
     private static bool TryPlace(
         KeyValuePair<int, MasterDataStore.SubBuildingMasterItem> sub, bool preferFront, LayoutState state)
@@ -277,6 +277,10 @@ public static class TestSubBuildingLayout
         var candidates = new List<((int i, int j) anchor, int w, int h, bool rotated)>();
         foreach ((bool rotated, int w, int h) in new[] { (false, cellW, cellH), (true, cellH, cellW) })
         {
+            if (rotated && cellW == cellH)
+            {
+                continue;
+            }
             foreach ((int i, int j) anchor in FindBlockAnchors(grid.Cells, state.Occupied, w, h))
             {
                 candidates.Add((anchor, w, h, rotated));
@@ -312,6 +316,12 @@ public static class TestSubBuildingLayout
                 bestContact = Mathf.Max(bestContact, Contact(candidate, state));
             }
             narrowed = narrowed.FindAll(c => Contact(c, state) == bestContact);
+            int frontRow = int.MaxValue;
+            foreach (var candidate in narrowed)
+            {
+                frontRow = Mathf.Min(frontRow, candidate.anchor.j);
+            }
+            narrowed = narrowed.FindAll(c => c.anchor.j == frontRow);
             chosen = narrowed[Random.Range(0, narrowed.Count)];
         }
 
@@ -489,7 +499,7 @@ public static class TestSubBuildingLayout
     /// Deterministically divide polygons into cell-size squares.
     /// Align grid to longest edge. Like the backend, shift the lattice from the minimum bounding-box corner
     /// in MASHUP_GRID_PHASE_STEP increments up to one cell along U and V, and keep the shift fitting the most cells
-    /// (ties: smaller V shift, then smaller U shift). Keep only fully contained cells; leave edge remainders as gaps.
+    /// (ties: smaller V shift, then the U shift centering the cells across the parcel). Keep only fully contained cells; leave edge remainders as gaps.
     /// </summary>
     private static MashupGrid BuildMashupCells(Vector2[] polygon, float cellSize)
     {
@@ -532,6 +542,8 @@ public static class TestSubBuildingLayout
         int phases = Mathf.Max(1, Mathf.RoundToInt(cellSize / Constants.MASHUP_GRID_PHASE_STEP));
         float step = cellSize / phases;
         grid.Origin = corner;
+        int bestPv = 0;
+        float bestOffCenter = 0f;
         for (int pv = 0; pv < phases; pv++)
         {
             for (int pu = 0; pu < phases; pu++)
@@ -539,10 +551,23 @@ public static class TestSubBuildingLayout
                 Vector2 origin = corner + grid.U * (pu * step) + grid.V * (pv * step);
                 HashSet<(int i, int j)> cells = CollectCells(
                     polygon, grid.U, grid.V, origin, maxU - minU - pu * step, maxV - minV - pv * step, cellSize);
-                if (cells.Count > grid.Cells.Count)
+                if (cells.Count == 0 || cells.Count < grid.Cells.Count)
+                {
+                    continue;
+                }
+                int firstColumn = int.MaxValue, lastColumn = int.MinValue;
+                foreach ((int i, int j) cell in cells)
+                {
+                    firstColumn = Mathf.Min(firstColumn, cell.i);
+                    lastColumn = Mathf.Max(lastColumn, cell.i);
+                }
+                float offCenter = Mathf.Abs(pu * step + (firstColumn + lastColumn + 1) * cellSize * 0.5f - (maxU - minU) * 0.5f);
+                if (cells.Count > grid.Cells.Count || (pv == bestPv && offCenter < bestOffCenter - 1e-4f))
                 {
                     grid.Cells = cells;
                     grid.Origin = origin;
+                    bestPv = pv;
+                    bestOffCenter = offCenter;
                 }
             }
         }
