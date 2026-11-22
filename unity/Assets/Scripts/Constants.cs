@@ -97,6 +97,10 @@ public static class Constants
     public const int MODEL_ROTARY = 11;
     public const int MODEL_PARK = 12;
     public const int MODEL_OPEN_PIT = 13;
+    public const int MODEL_SUBSTATION = 14;
+    public const int MODEL_WATER_STATION = 15;
+    public const int MODEL_SEWAGE_PLANT = 16;
+    public const int MODEL_WASTE_PLANT = 17;
     public const float MASHUP_CELL_SIZE = 12.0f;
     public const float MASHUP_GRID_PHASE_STEP = 0.5f;
     public const float OPEN_PIT_YARD_DEPTH = 40.0f;

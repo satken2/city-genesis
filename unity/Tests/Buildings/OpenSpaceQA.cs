@@ -53,7 +53,7 @@ public static class OpenSpaceQA
     static object Plan(Vector2[] polygon,int model,float seed,Dictionary<string,GameObject> parts,float density=.5f)
         =>layout.GetMethod("Create").Invoke(null,new object[]{polygon,model,seed,density,model==12?Sizes(parts):null});
     static object Build(object plan,Dictionary<string,GameObject> parts,Vector3 center,bool terrain)
-        =>builder.GetMethod("Build").Invoke(null,new object[]{plan,parts,center,terrain,null,null});
+        =>builder.GetMethod("Build").Invoke(null,new object[]{plan,parts,center,terrain,null,null,null});
     [InitializeOnLoadMethod] static void Resume()
     {
         EditorApplication.delayCall+=()=>{if(SessionState.GetBool("OpenSpaceQA.Pending",false)&&EditorApplication.isPlaying){SessionState.SetBool("OpenSpaceQA.Pending",false);Run();}};

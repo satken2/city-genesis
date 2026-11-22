@@ -31,6 +31,14 @@ Parking (`MODEL_PARKING`), station rotaries (`MODEL_ROTARY`), and parks (`MODEL_
 
 Layout depends on the parcel shape relative to its frontage edge and `visual_variant2`, independently of building ID, load order, and draw LOD. Parks connect entrances and plazas with curved paths, and larger sites get more entrances, plazas, and paths. Objects are placed to fit their actual model sizes, and `visual_variant3` changes the tree density. Parking bays, paths, and planting are visual only and do not simulate parking or passage; parks remain traversable across the entire parcel ([districts and parcels](../economics/04_districts-and-parcels.md)). Rotary frontages are intersections of planned paving with frontage edges.
 
+## Utility plants
+
+Substations (`MODEL_SUBSTATION`), water pumping stations (`MODEL_WATER_STATION`), sewage treatment plants (`MODEL_SEWAGE_PLANT`), and waste treatment plants (`MODEL_WASTE_PLANT`) build a placement plan from the parcel shape, as open spaces do. The core does not send the placement of their equipment, and the player cannot edit it.
+
+Every plant opens a gate on the road-facing edge, runs a service road in from the gate along one side of the site, and lines up rows of equipment from the front to the rear. A row repeats its part at actual size as many times as fits, so the amount of equipment follows the parcel size, and an irregular parcel only loses the units that do not fit. Plants differ only in what their rows hold, listed from the front. A shallow parcel keeps the front rows, and a deep one repeats the same sequence behind a cross road. `visual_variant2` decides which side the gate is on.
+
+Equipment uses `site_{name}` models such as `site_office` and `site_transformer`, which can have a close-up `_close` and a distant `_far` with the same origin and footprint. Equipment is combined into the building mesh, while small parts such as pipes and yard lights are drawn from shared models like the trees in a park. The perimeter fence is the site decoration `fence-w`, opened at the gate, where `gate` is placed. Each unit rests at the terrain elevation of its own position, and the distant view places each unit's `_far` in the same layout. Parts missing from the model folder are not placed.
+
 ## Facilities connected to terrain or tracks
 
 ### Ports

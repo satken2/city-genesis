@@ -27,6 +27,7 @@ public static partial class OpenSpaceLayout
         public Vector2 Forward;
         public float Scale = 1f;
         public bool Fitted;        // Placed from the actual model size, so the renderer skips its protrusion recheck.
+        public bool Unit;          // A plant's building or equipment: always combined into the building mesh, with its own distant model.
     }
     public sealed class Plan
     {
@@ -37,6 +38,7 @@ public static partial class OpenSpaceLayout
         public readonly List<Vector2> AccessCells = new List<Vector2>();
         public readonly List<BuildingRoadOpening> Openings = new List<BuildingRoadOpening>();
         public bool HasLoop;
+        public Vector2? Gate;      // Center of the fence opening at a plant's gate. Null for sites without a fence.
     }
     sealed class Grid
     {
@@ -57,8 +59,8 @@ public static partial class OpenSpaceLayout
         }
     }
     /// <summary>
-    /// visualVariant2 seeds the layout. Parks also take visualVariant3 (tree density) and the actual sizes (X width, Z depth) of the parts
-    /// in the model folder; without sizes a park gets its paths only.
+    /// visualVariant2 seeds the layout. Parks also take visualVariant3 (tree density). Parks and plants take the actual sizes (X width, Z depth)
+    /// of the parts in the model folder; without sizes a park gets its paths only and a plant nothing.
     /// </summary>
     public static Plan Create(Vector2[] polygon, int modelType, float visualVariant2, float visualVariant3 = .5f, IReadOnlyDictionary<string, Vector2> partSizes = null)
     {
@@ -66,6 +68,10 @@ public static partial class OpenSpaceLayout
         if (polygon == null || polygon.Length < 3) return plan;
         uint seed = (uint)Mathf.RoundToInt(Mathf.Clamp01(visualVariant2)*1000000f);
         if (modelType == Constants.MODEL_PARK) { Park(plan, seed, visualVariant3, partSizes); return plan; }
+        if (modelType == Constants.MODEL_SUBSTATION) { Substation(plan, seed, partSizes); return plan; }
+        if (modelType == Constants.MODEL_WATER_STATION) { WaterStation(plan, seed, partSizes); return plan; }
+        if (modelType == Constants.MODEL_SEWAGE_PLANT) { SewagePlant(plan, seed, partSizes); return plan; }
+        if (modelType == Constants.MODEL_WASTE_PLANT) { WastePlant(plan, seed, partSizes); return plan; }
         var grid = MakeGrid(polygon);
         if (grid.Entry < 0) return plan;
         if (modelType == Constants.MODEL_PARKING) Parking(plan, grid);

@@ -4,12 +4,14 @@ using UnityEngine;
 
 /// <summary>
 /// Distant (Far) buildings. Draw one distant model per placement unit, stretched to the unit's height (no stacking).
-/// Placement units are wings (BuildingSummary.sub_buildings); buildings without wings use the entire building as one unit.
+/// Placement units are wings (BuildingSummary.sub_buildings) or a plant's units (<see cref="OpenSpaceLayout.Prop.Unit"/>);
+/// buildings without either use the entire building as one unit.
 /// - Whole building: fit `far` to the footprint bounding rectangle aligned to the front edge (vertex 0→1, same as prebuilt) × floors×floor height.
 /// - Wing: draw `mashup-{model_prefix}-far` at its authored XZ size about its origin, as the normal assembly draws the wing's parts
 ///   (wings are authored smaller than their cells and the remainder is the gap between wings), × wing floors×floor height,
 ///   where the normal assembly draws the wing (MashupBuildingMeshBuilder.ResolveDrawnPlacement).
 ///   Wings without distant models stretch a unit cube to the occupied cells (sub-building master width×height cells).
+/// - Plant unit: draw `{part}_far` at its authored size where the plant's plan places the unit. Units without distant models are left out.
 /// Resolve models by scanning exterior model-number folders.
 /// Fit height above the model origin (contact plane), so underground/underwater geometry below origin scales identically.
 /// Keep the model's materials and UVs; triangles sharing a material go into one submesh across wings.
@@ -27,7 +29,20 @@ public static class FarBuildingMeshBuilder
         float floorHeight = BuildingMeshUtils.GetFloorHeight(buildingData);
         var parts = new Parts();
 
-        if (buildingData.sub_buildings != null && buildingData.sub_buildings.Count > 0)
+        int modelType = BuildingMeshBuilder.GetModelType(buildingData);
+        if (OpenSpaceLayout.IsFacilityModel(modelType))
+        {
+            BuildingMeshUtils.ResolveParcelContext(buildingData, out _, out Vector3 center);
+            foreach (OpenSpaceLayout.Prop unit in OpenSpaceBuildingMeshBuilder.FacilityPlan(buildingData, modelType).Props)
+            {
+                GameObject model = unit.Unit ? BuildingMeshUtils.GetPartBySuffixScan(prefix, unit.Part + "_far", variantNumber) : null;
+                if (model == null) continue;
+                float baseY = Utils.GetGroundHeight(new Vector3(center.x + unit.Position.x, 1000f, center.z + unit.Position.y)) - center.y;
+                AddStretched(model, null, 0f, Quaternion.LookRotation(new Vector3(unit.Forward.x, 0f, unit.Forward.y)),
+                    new Vector3(unit.Position.x, baseY, unit.Position.y), parts);
+            }
+        }
+        else if (buildingData.sub_buildings != null && buildingData.sub_buildings.Count > 0)
         {
             // Building GO is placed at center terrain elevation; rest wings on their own terrain-height difference (same as normal assembly).
             Vector2 center = buildingData.centerPointArray != null && buildingData.centerPointArray.Length >= 2
@@ -114,7 +129,7 @@ public static class FarBuildingMeshBuilder
 
     /// <summary>
     /// Stretch the model (or unit cube) in unrotated local space to rect in XZ and height vertically, then rotate/translate into place.
-    /// A null rect keeps the authored XZ about the model origin.
+    /// A null rect keeps the authored XZ about the model origin; a height of 0 keeps the authored height.
     /// </summary>
     private static void AddStretched(GameObject model, Rect? rect, float height, Quaternion rotation, Vector3 offset, Parts parts)
     {
@@ -122,7 +137,7 @@ public static class FarBuildingMeshBuilder
         Mesh source = model != null ? BuildingMeshUtils.CombineModuleMeshes(model, out materials) : null;
         Mesh mesh = source != null ? source : UnitBox;
         Bounds bounds = mesh.bounds;
-        float scaleY = height / Mathf.Max(bounds.max.y, 0.01f);
+        float scaleY = height > 0f ? height / Mathf.Max(bounds.max.y, 0.01f) : 1f;
         int first = parts.vertices.Count;
         foreach (Vector3 v in mesh.vertices)
         {

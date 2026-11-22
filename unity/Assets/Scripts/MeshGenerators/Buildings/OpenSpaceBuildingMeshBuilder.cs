@@ -12,63 +12,83 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
         "site_hedge","site_bin","site_drink"};
     // 番号付きの部品。1から連番である分だけ使う。
     static readonly string[] Series={"site_tree","site_shrub","site_feature","site_play","site_flower"};
-    // 公園の配置計画は描画LODが変わるたびに作り直すと重いので、建物ごとに入力が同じ間は使い回す。
-    static readonly Dictionary<int,(string signature,OpenSpaceLayout.Plan plan)> parkPlans=new Dictionary<int,(string,OpenSpaceLayout.Plan)>();
-    const int ParkPlanCacheSize=256;
-    static OpenSpaceBuildingMeshBuilder()=>AssetPackStore.CityChanging+=parkPlans.Clear;
+    // Plans placed from part sizes (parks, plants) are costly to rebuild on every render-LOD change, so reuse them per building while the inputs match.
+    static readonly Dictionary<int,(string signature,OpenSpaceLayout.Plan plan)> sizedPlans=new Dictionary<int,(string,OpenSpaceLayout.Plan)>();
+    const int SizedPlanCacheSize=256;
+    static OpenSpaceBuildingMeshBuilder()=>AssetPackStore.CityChanging+=sizedPlans.Clear;
     const float SideStep=1.25f; // Maximum subdivision length for terrain-following curb sides (m).
     const float SideFooting=.05f; // Lower side bottoms below ground by this amount to hide slope gaps (m).
     public BuildingMeshResult Generate(BuildingSummary data,bool isDynamic=false)
     {
         BuildingMeshUtils.ResolveParcelContext(data,out _,out Vector3 center);
         var naming=BuildingMeshUtils.ResolveModelNaming(data);
-        var parts=new Dictionary<string,GameObject>();var paths=new Dictionary<string,string>();
-        int modelId=BuildingMeshUtils.ResolveModelId(naming.Prefix,data.visual_variant);
+        int modelType=MasterDataStore.Instance?.GetAgentMaster(data.variant)?.model_type??Constants.MODEL_PARKING;
+        var parts=new Dictionary<string,GameObject>();
+        var paths=CollectParts(naming.Prefix,data.visual_variant,modelType,parts);
+        bool sized=modelType==Constants.MODEL_PARK || OpenSpaceLayout.IsFacilityModel(modelType);
+        var plan=sized?SizedPlan(data,modelType,paths):BuildingRoadAccessIndex.GetOpenSpacePlan(data);
+        // Parks draw their thousands of trees and shrubs by instancing, plants their pipes and lights. Parking lots and rotaries combine everything.
+        return Build(plan,parts,center,true,BuildingMeshUtils.ResolveFloorMaterialFromMaster(data,naming.Prefix),sized?paths:null,naming.Prefix);
+    }
+    /// <summary>Resolve the parts a model type's plan uses from the selected model folder. Returns their resource paths (before the render-LOD suffix).</summary>
+    static Dictionary<string,string> CollectParts(string prefix,float visualVariant,int modelType,Dictionary<string,GameObject> parts)
+    {
+        var paths=new Dictionary<string,string>();
+        int modelId=BuildingMeshUtils.ResolveModelId(prefix,visualVariant);
         bool Collect(string part)
         {
-            int suffix=BuildingMeshUtils.FindPartSuffix(naming.Prefix,part,modelId);
-            var prefab=suffix<0?null:BuildingMeshUtils.GetPartNoPosition(naming.Prefix,part,suffix,true);
+            int suffix=BuildingMeshUtils.FindPartSuffix(prefix,part,modelId);
+            var prefab=suffix<0?null:BuildingMeshUtils.GetPartNoPosition(prefix,part,suffix,true);
             if(prefab==null)return false;
-            parts[part]=prefab;paths[part]=BuildingMeshUtils.PartPath(naming.Prefix,part,suffix);
+            if(parts!=null)parts[part]=prefab;
+            paths[part]=BuildingMeshUtils.PartPath(prefix,part,suffix);
             return true;
+        }
+        if(OpenSpaceLayout.IsFacilityModel(modelType))
+        {
+            foreach(string part in OpenSpaceLayout.FacilityParts)Collect(part);
+            return paths;
         }
         foreach(string part in Parts)Collect(part);
         foreach(string series in Series)for(int n=1;Collect(series+n);n++){}
-        int modelType=MasterDataStore.Instance?.GetAgentMaster(data.variant)?.model_type??Constants.MODEL_PARKING;
-        bool park=modelType==Constants.MODEL_PARK;
-        var plan=park?ParkPlan(data,paths):BuildingRoadAccessIndex.GetOpenSpacePlan(data);
-        // 小物をインスタンシングで描くのは、木や低木が数千本になる公園だけ。駐車場とロータリーは建物のメッシュに結合する。
-        return Build(plan,parts,center,true,BuildingMeshUtils.ResolveFloorMaterialFromMaster(data,naming.Prefix),park?paths:null);
+        return paths;
     }
-    /// <summary>公園の配置計画。小物は部品の実寸から置くので、選んだモデルフォルダの部品の寸法も入力になる。</summary>
-    static OpenSpaceLayout.Plan ParkPlan(BuildingSummary data,Dictionary<string,string> paths)
+    /// <summary>Plan of a plant (<see cref="OpenSpaceLayout.IsFacilityModel"/>), as the detailed mesh places it. For the distant mesh.</summary>
+    public static OpenSpaceLayout.Plan FacilityPlan(BuildingSummary data,int modelType)
+    {
+        return SizedPlan(data,modelType,CollectParts(BuildingMeshUtils.GetGlbPrefix1(data),data.visual_variant,modelType,null));
+    }
+    /// <summary>Plan placed from the actual sizes of the parts in the selected model folder, so those sizes are inputs too.</summary>
+    static OpenSpaceLayout.Plan SizedPlan(BuildingSummary data,int modelType,Dictionary<string,string> paths)
     {
         var key=new System.Text.StringBuilder();
         void Add(float value)=>key.Append(value.ToString("R",System.Globalization.CultureInfo.InvariantCulture)).Append(':');
-        Add(data.visual_variant2);Add(data.visual_variant3);
+        Add(modelType);Add(data.visual_variant2);Add(data.visual_variant3);
         if(data.polygonArray!=null)foreach(var point in data.polygonArray)foreach(float v in point)Add(v);
         foreach(var pair in paths)key.Append(pair.Value).Append(':');
         string signature=key.ToString();
-        if(parkPlans.TryGetValue(data.agent_id,out var cached) && cached.signature==signature)return cached.plan;
+        if(sizedPlans.TryGetValue(data.agent_id,out var cached) && cached.signature==signature)return cached.plan;
         var sizes=new Dictionary<string,Vector2>();
         foreach(var pair in paths)
         {
             var model=InstancedPartRenderer.GetModel(pair.Value);
             if(model?.render==null)continue;
-            // 部品は原点を水平の中心に置いて作るが、ずれたモデルでもはみ出さないよう原点からの最大の張り出しで測る。
+            // Parts are authored with the origin at their horizontal center; measure the farthest reach from the origin so an off-center model still fits.
             Bounds b=model.layout;
             sizes[pair.Key]=new Vector2(2*Mathf.Max(-b.min.x,b.max.x),2*Mathf.Max(-b.min.z,b.max.z));
         }
-        var plan=OpenSpaceLayout.Create(BuildingMeshUtils.GetFootprint(data),Constants.MODEL_PARK,data.visual_variant2,data.visual_variant3,sizes);
-        if(parkPlans.Count>=ParkPlanCacheSize)parkPlans.Clear();
-        parkPlans[data.agent_id]=(signature,plan);
+        var plan=OpenSpaceLayout.Create(BuildingMeshUtils.GetFootprint(data),modelType,data.visual_variant2,data.visual_variant3,sizes);
+        if(sizedPlans.Count>=SizedPlanCacheSize)sizedPlans.Clear();
+        sizedPlans[data.agent_id]=(signature,plan);
         return plan;
     }
     /// <summary>
     /// Validation/exhibits use the same placement and actual FBXs as gameplay. flat is only for terrain-free exhibits.
-    /// paths(部品のリソースパス)を渡すと、表示中の建物(<see cref="InstancedPartRenderer.Sink"/> がある)では小物をメッシュに結合せずインスタンシングへ渡す。
+    /// With paths (part resource paths), shown buildings (<see cref="InstancedPartRenderer.Sink"/> set) hand decorations to instancing instead of combining them;
+    /// a plant's units are always combined. fencePrefix is the model prefix whose fence parts enclose a plan with a gate.
     /// </summary>
-    public static BuildingMeshResult Build(OpenSpaceLayout.Plan plan,Dictionary<string,GameObject> parts,Vector3 center,bool terrain,Material floorOverride=null,Dictionary<string,string> paths=null)
+    public static BuildingMeshResult Build(OpenSpaceLayout.Plan plan,Dictionary<string,GameObject> parts,Vector3 center,bool terrain,Material floorOverride=null,
+        Dictionary<string,string> paths=null,string fencePrefix=null)
     {
         var instances=new List<CombineInstance>();var materials=new List<Material>();var owned=new List<Mesh>();
         var colliders=new List<CombineInstance>();
@@ -120,7 +140,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
             {
                 if(!parts.TryGetValue(prop.Part,out var prefab))continue;
                 Bounds b;Mesh mesh=null;string path=null;
-                if(sink!=null && paths.TryGetValue(prop.Part,out path))
+                if(sink!=null && !prop.Unit && paths.TryGetValue(prop.Part,out path))
                 {
                     var model=InstancedPartRenderer.GetModel(path);
                     if(model?.render==null)continue;
@@ -151,10 +171,18 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
                 var position=new Vector3(prop.Position.x,y+.02f+PropLift(raised,prop.Position),prop.Position.y);
                 var matrix=Matrix4x4.TRS(position,rotation,Vector3.one*prop.Scale);
                 if(mesh==null)sink.Add(new InstancedPartRenderer.Instance {path=path,local=matrix});
-                else Append(mesh,loadedMaterials[prop.Part],matrix);
+                else
+                {
+                    Append(mesh,loadedMaterials[prop.Part],matrix);
+                    if(prop.Unit)BuildingMotionParts.Collect(prefab,prefab.transform,matrix,rotation);
+                }
                 var collider=BuildingMeshBuilder.GenerateColliderMesh(rect,Mathf.Max(.1f,b.max.y*prop.Scale));
                 if(collider!=null){owned.Add(collider);colliders.Add(new CombineInstance {mesh=collider,transform=Matrix4x4.Translate(new Vector3(0,y,0))});}
             }
+            // The fence follows the site edge and opens at the gate, as the shared site decorations place it for other buildings.
+            if(fencePrefix!=null && plan.Gate.HasValue)
+                ModularBodyBuilder.GenerateSiteDecorations(fencePrefix,0,plan.Polygon,null,null,null,center,terrain,instances,materials,owned,
+                    plan.Gate,OpenSpaceLayout.FacilityGateWidth*.5f);
             var result=new Mesh {name="OpenSpace",indexFormat=UnityEngine.Rendering.IndexFormat.UInt32};
             result.CombineMeshes(instances.ToArray(),false,true);result.RecalculateBounds();
             var collision=new Mesh {name="OpenSpaceCollider",indexFormat=UnityEngine.Rendering.IndexFormat.UInt32};

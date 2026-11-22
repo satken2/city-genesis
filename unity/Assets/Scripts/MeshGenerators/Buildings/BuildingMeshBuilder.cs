@@ -192,6 +192,10 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             case Constants.MODEL_PARKING:
             case Constants.MODEL_ROTARY:
             case Constants.MODEL_PARK:
+            case Constants.MODEL_SUBSTATION:
+            case Constants.MODEL_WATER_STATION:
+            case Constants.MODEL_SEWAGE_PLANT:
+            case Constants.MODEL_WASTE_PLANT:
                 using (openSpaceMarker.Auto())
                     result = openSpaceGenerator.Generate(buildingData, isDynamic);
                 break;

@@ -4,7 +4,7 @@ using GeneratedModels;
 
 /// <summary>
 /// Mashup building (MODEL_MASHUP) mesh generator.
-/// Assemble facilities with multiple wings, such as schools (classroom/gym) and substations (office/transformers),
+/// Assemble facilities with multiple wings, such as schools (classroom/gym) and fire stations (main building/garage),
 /// using a placement plan (BuildingSummary.sub_buildings) dividing parcels into square cells (MASHUP_CELL_SIZE).
 /// Wings are authored smaller than the cells they occupy; the remainder is the gap between wings.
 /// The backend resolves cell division and wing allocation; Unity receives only each sub-building's

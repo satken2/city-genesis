@@ -22,9 +22,9 @@ FBX files live at `Assets/Models/Buildings/{prefix}/{number}/{part}.fbx`, with m
 | `tile` / `scatter{n}` / `scatter-single{n}` | Ground tiles and plants, vehicles, or materials scattered over the vacant site (`scatter-single` at most once per building) |
 | `fill{n}` | Fill parts, such as shacks, covering the whole site |
 | `base-prebuilt` / `mid-prebuilt` / `top-prebuilt` | Prebuilt tiers; mashup wings use names such as `mashup-{model_prefix}-base-prebuilt` |
-| `port_*` / `yard_*` / `site_*` | Port, depot, and open-space parts |
+| `port_*` / `yard_*` / `site_*` | Port, depot, open-space, and utility-plant parts |
 | `scaffold-*` / `crane-*` / `demo-*` / `excavator` | Construction and demolition sites |
-| `far` / `mashup-{model_prefix}-far` | Far models for whole buildings or individual wings |
+| `far` / `mashup-{model_prefix}-far` / `site_{name}_far` | Far models for whole buildings, individual wings, or individual utility-plant units |
 | `{part}_close` | Close-up model |
 | `road_access_{type}_{identifier}` | Empty model objects marking road-access frontages |
 | Names starting with `rotor` | Child meshes in a model that spin with the utilization of an operating building (wind turbine blades) |

@@ -96,6 +96,7 @@ LOD制作は**同じ建物を距離に応じて表現する作業**である。�
 | マッシュアップの棟の間に小道・配管を通したい | `lane`(`trail` と同じ原点・向きで、隣り合う棟のセルの境目に敷き詰められる。幅=bbox の Y が交差部の切り欠きに使われる。配置の前提は `MashupLaneLayout.cs` のコメント) |
 | 敷地の空き地に植栽・車両・資材を散らしたい | `scatter1`, `scatter2`, …。犬小屋のように1棟に1個までの物は `scatter-single1`, … (配置の前提は `ScatterLayout.cs` のコメント。既存のプロップ・車両は `genesis-gallery/pipeline/jobs/scatter_parts.py` で写す。植え込み・庭木の葉は [[genesis-prop-parts]] の「樹木・植え込みの葉」に従う。接道側に空き地をまとめるならマスターの `building_shape=setback`) |
 | 敷地の全体を小屋などで埋め尽くしたい(区画の形が変わる建物でも配置が動かない) | `fill1`, `fill2`, …(遠景は各 `fill{n}_far`。配置の前提は `FillLayout.cs` のコメント) |
+| 供給処理施設(変電所・水道ポンプ・下水処理場・ゴミ処理場)の設備・小物 | 設備は `site_{名前}`(接写 `_close`・遠景 `_far` を同じ原点・底面で持てる)、小物は `site_pipe`・`site_light`、門は `gate`、柵は `fence-w1`。原点は底面の中心で、外接箱がそのまま置き場の寸法になる。置かれる部品名と並び方は `OpenSpaceLayout.Facility.cs` のコメント |
 | 切妻/片流れ屋根の妻壁の材質 | `generic-wall` |
 | 畑・庭など地面アセット(MODEL_MODULAR_GROUND) | `tile`(建物本体は一切描かない) |
 
@@ -202,7 +203,7 @@ a200  初等学校     11個  base-w1 base-c1 mid-w1 mid-w2 mid-c1 top-w1 top-c1
 
 | 何をしたか | 更新するマスター項目(タブ: agent_master) |
 |---|---|
-| 新しい建物のパーツ一式を作った | `model_type`(1=FLAT/2=HOUSE/3=GABLE/4=GROUND/5=PREBUILT/6=PORT/7=MASHUP/8=SHED/9=RAIL_YARD/13=OPEN_PIT)。未設定だと意図した組み立て方にならない |
+| 新しい建物のパーツ一式を作った | `model_type`(1=FLAT/2=HOUSE/3=GABLE/4=GROUND/5=PREBUILT/6=PORT/7=MASHUP/8=SHED/9=RAIL_YARD/13=OPEN_PIT/14〜17=供給処理施設)。未設定だと意図した組み立て方にならない |
 | `floor` パーツを作って地面を描きたい | **`draw_floor=yes`**。パーツを置くだけでは地面パネルは描画されない(オプトイン) |
 | 屋根の形を変えた(切妻/片流れ/寄棟にした) | `model_type` を 3 / 8 / 2 へ |
 | 階高に合わせてパーツを作った/階高を変えたい | `height_per_floor`(既定4.0)。パーツの著作高さとずれると隙間・めり込みが出る |
