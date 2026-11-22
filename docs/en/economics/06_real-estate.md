@@ -2,7 +2,7 @@
 
 ## 6.1. Space and occupancy
 
-Households and facilities without their own buildings rent space in shared buildings. Space is classified by uses such as residential, retail, and office; tenants need space suitable for their activity. In multi-tenant buildings, each tenant rents the area it needs. Some buildings, such as detached houses, are occupied entirely by one household or facility.
+Households and facilities without their own buildings rent space in shared buildings. Space is classified by uses such as residential, retail, and office; tenants need space suitable for their activity. In multi-tenant buildings, each tenant rents the area it needs. Some buildings, such as detached houses, are occupied entirely by one household or facility. The home size a household wants depends on its income as well as its members: higher-income households want larger homes. Each building limits the area it can rent to one household, so a household in a building with a small limit ends up cramped and looks for a building that can rent it more space.
 
 Insufficient space of the required kind in a district encourages new [buildings](05_buildings.md).
 
