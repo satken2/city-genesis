@@ -77,13 +77,12 @@ try {
     input.value = value;
     input.dispatchEvent(new window.Event("change", { bubbles: true }));
   });
-  const roadTypes = () => host.querySelectorAll('input[type="checkbox"]');
-  assert.equal(algorithm.value, "arterial");
+  const roadTypes = () => host.querySelectorAll('.city-development__variants input[type="checkbox"]');
+  assert.equal(algorithm.value, "planned_city_1");
   assert.equal(algorithm.querySelectorAll("optgroup").length, 0);
   assert.deepEqual([...algorithm.options].map(option => option.value),
-    ["grid", "terrain_grid", "arterial", "neighborhood", "branching", "downtown_grid", "subdivision",
-      "relaxed_grid", "contour", "organic", "block"]);
-  assert.equal(guide("block_pattern"), null);
+    ["grid_1", "grid_2", "sprawl_1", "sprawl_2", "sprawl_3", "planned_city_1", "split_1"]);
+  assert.equal(guide("block_length"), null);
   assert.equal(roadTypes().length, 2);
   assert.deepEqual([...roadTypes()].map(input => input.checked), [true, true]);
 
@@ -93,41 +92,36 @@ try {
   await paint(50, 50);
   await showPlan();
   const first = requests.at(-1);
-  assert.equal(first.pattern, "arterial");
+  assert.equal(first.pattern, "planned_city_1");
   assert.equal(first.strokes.length, 1);
   assert.deepEqual(first.strokes[0].points[0], [50, -50]);
+  assert.equal(first.create_parcels, true);
   assert.equal(first.parcel_area, 600);
+  assert.equal(first.block_length, undefined);
   assert.ok(!create.disabled);
 
-  await select(algorithm, "contour");
+  // 方式を変えても塗った範囲と地図は残り、確定には取り直したプレビューが要る。分割1だけ街区の長さを送る。
+  await select(algorithm, "split_1");
   assert.equal(host.querySelector("canvas"), canvas);
+  assert.ok(create.disabled);
+  assert.ok(guide("block_length"));
+  await showPlan();
+  assert.deepEqual(requests.at(-1), { ...first, pattern: "split_1", block_length: first.spacing });
+
+  // 「土地区画を作る」を外すと区画の面積の欄が消え、道路だけを計画する。
+  await act(async () => guide("create_parcels").click());
   assert.equal(guide("parcel_area"), null);
   assert.ok(create.disabled);
-  await showPlan();
-  assert.deepEqual(requests.at(-1), {
-    pattern: "contour", path_variants: first.path_variants, spacing: first.spacing, angle_deg: null, strokes: first.strokes,
-  });
   await act(async () => roadTypes()[1].click());
-  assert.ok(create.disabled);
   await paint(300, 300);
   await showPlan();
-  assert.deepEqual(requests.at(-1).path_variants, [212]);
-  assert.equal(requests.at(-1).strokes.length, 2);
-
-  await select(algorithm, "block");
-  assert.ok(create.disabled);
-  assert.equal(roadTypes().length, 1);
-  const blockPattern = guide("block_pattern");
-  assert.deepEqual([...blockPattern.options].map(option => option.value), ["block_grid", "block_strips", "block_perimeter"]);
-  await select(blockPattern, "block_strips");
-  await showPlan();
-  const block = requests.at(-1);
-  assert.equal(block.pattern, "block_strips");
-  assert.equal(block.parcel_size, 20);
-  assert.equal(block.spacing, undefined);
-  assert.equal(block.strokes.length, 2);
+  const roadsOnly = requests.at(-1);
+  assert.equal(roadsOnly.create_parcels, false);
+  assert.equal(roadsOnly.parcel_area, undefined);
+  assert.deepEqual(roadsOnly.path_variants, [212]);
+  assert.equal(roadsOnly.strokes.length, 2);
   await act(async () => create.click());
-  assert.deepEqual(requests.at(-1), block);
+  assert.deepEqual(requests.at(-1), roadsOnly);
   assert.ok(preview.disabled);
 
   await paint(80, 80);
@@ -135,14 +129,17 @@ try {
   await act(async () => clear.click());
   assert.ok(preview.disabled);
 
-  for (const pattern of ["neighborhood", "branching", "downtown_grid", "subdivision"]) {
+  await act(async () => guide("create_parcels").click());
+  for (const pattern of ["grid_1", "grid_2", "sprawl_1", "sprawl_2", "sprawl_3", "planned_city_1"]) {
     await paint(80, 80);
     await select(algorithm, pattern);
     assert.ok(create.disabled);
+    assert.equal(guide("block_length"), null);
     assert.ok(guide("parcel_area"));
     await showPlan();
     const request = requests.at(-1);
     assert.equal(request.pattern, pattern);
+    assert.equal(request.block_length, undefined);
     assert.equal(request.parcel_area, 600);
     assert.ok(request.strokes.length > 0);
     assert.ok(!create.disabled);
@@ -154,4 +151,4 @@ try {
   await act(async () => root.unmount());
   await window.happyDOM.close();
 }
-console.log("PASS: shared brush and preview across city development algorithms and block street styles");
+console.log("PASS: shared brush and preview across city development methods, parcel toggle and split block length");
