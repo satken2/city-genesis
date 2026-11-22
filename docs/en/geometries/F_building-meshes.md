@@ -18,6 +18,7 @@ FBX files live at `Assets/Models/Buildings/{prefix}/{number}/{part}.fbx`, with m
 | `roofprop` / `entrance` / `interior-floor` | Rooftop structures, entrances, and floor slabs |
 | `ceil` / `floor` / `generic-wall` | Material-only sources for roofs, ground panels, and gable walls ([material resolution](R_material-resolution.md)) |
 | `gate` / `trail` | Gate at the site entry and walkway from the front to the entry |
+| `lane` | Lane tiled between adjacent mashup wings, such as footpaths or pipes |
 | `tile` / `scatter{n}` / `scatter-single{n}` | Ground tiles and plants, vehicles, or materials scattered over the vacant site (`scatter-single` at most once per building) |
 | `fill{n}` | Fill parts, such as shacks, covering the whole site |
 | `base-prebuilt` / `mid-prebuilt` / `top-prebuilt` | Prebuilt tiers; mashup wings use names such as `mashup-{model_prefix}-base-prebuilt` |

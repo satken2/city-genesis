@@ -534,19 +534,10 @@ public static class ModularBodyBuilder
             AddSegmentToCombineList(new SegmentMeshData { Mesh = gate, Materials = BuildingMeshUtils.GetModuleMaterials(gateModule) },
                 combineInstances, allMaterials, temporaryMeshes);
         }
-        GameObject trailModule = hasEntry ? BuildingMeshUtils.GetPartNoPosition(prefix, "trail", suffix, true) : null;
-        if (trailModule != null)
+        if (hasEntry)
         {
-            Material[] trailMaterials = BuildingMeshUtils.GetModuleMaterials(trailModule);
-            foreach (var trailSegment in GenerateFenceSegments(entry.Front, entry.Gate, trailModule, trailMaterials, 0f, 0f))
-            {
-                if (!trailSegment.IsValid) continue;
-                if (deformToTerrain)
-                {
-                    DeformMeshToTerrain(trailSegment.Mesh, centerPointWorld);
-                }
-                AddSegmentToCombineList(trailSegment, combineInstances, allMaterials, temporaryMeshes);
-            }
+            AddPartRun(entry.Front, entry.Gate, BuildingMeshUtils.GetPartNoPosition(prefix, "trail", suffix, true),
+                centerPointWorld, deformToTerrain, combineInstances, allMaterials, temporaryMeshes);
         }
 
         // --- Tile objects ---
@@ -1337,6 +1328,33 @@ public static class ModularBodyBuilder
         float startOffset, float endOffset)
     {
         return BuildWallRun(p0, p1, 0f, wallModule, sharedMaterials, NO_Y_SCALE, startOffset, endOffset);
+    }
+
+    /// <summary>
+    /// Tile a ground-level part (trail, lane) from p0 to p1 like fence walls, with its origin on the line, and add it to the combine lists.
+    /// followTerrain makes every vertex follow terrain at its own position. A null module adds nothing.
+    /// </summary>
+    public static void AddPartRun(Vector2 p0, Vector2 p1, GameObject module, Vector3 centerPointWorld, bool followTerrain,
+        List<CombineInstance> combineInstances, List<Material> allMaterials, List<Mesh> temporaryMeshes)
+    {
+        if (module == null) return;
+        Material[] materials = BuildingMeshUtils.GetModuleMaterials(module);
+        foreach (SegmentMeshData segment in GenerateFenceSegments(p0, p1, module, materials, 0f, 0f))
+        {
+            if (!segment.IsValid) continue;
+            if (followTerrain)
+            {
+                DeformMeshToTerrain(segment.Mesh, centerPointWorld);
+            }
+            AddSegmentToCombineList(segment, combineInstances, allMaterials, temporaryMeshes);
+        }
+    }
+
+    /// <summary>Extent across the run (m) of a part tiled by <see cref="AddPartRun"/>. Zero without a mesh.</summary>
+    public static float PartRunWidth(GameObject module)
+    {
+        Mesh mesh = GetWallSourceMesh(module);
+        return mesh != null ? mesh.bounds.size.z : 0f;
     }
 
     /// <summary>

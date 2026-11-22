@@ -18,6 +18,7 @@ FBX は `Assets/Models/Buildings/{prefix}/{番号}/{パーツ名}.fbx` に置き
 | `roofprop` / `entrance` / `interior-floor` | 塔屋・玄関・各階の床 |
 | `ceil` / `floor` / `generic-wall` | 形は使わず、屋根面・地面パネル・妻壁にマテリアルだけを渡す（[R_マテリアルの解決](R_マテリアルの解決.md)） |
 | `gate` / `trail` | 敷地の入口に置く門、正面から入口まで敷く通路 |
+| `lane` | マッシュアップの隣り合う棟の間に敷く通り道（小道・配管など） |
 | `tile` / `scatter{n}` / `scatter-single{n}` | 地面に敷き詰めるタイル、敷地の空き地に散らす植栽・車両・資材（`scatter-single` は1棟に1個まで） |
 | `fill{n}` | 敷地の全体を埋める小屋などの敷き詰めパーツ |
 | `base-prebuilt` / `mid-prebuilt` / `top-prebuilt` | 既成建物の段。マッシュアップの棟は `mashup-{model_prefix}-base-prebuilt` などの名前にする |

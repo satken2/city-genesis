@@ -5,7 +5,7 @@ namespace GeneratedModels
 {
     /// <summary>
     /// Placement data for one sub-building in a mashup building (MODEL_MASHUP).
-    /// The backend has already divided the site into 8m x 8m cells and assigned buildings;
+    /// The backend has already divided the site into square cells (MASHUP_CELL_SIZE) and assigned buildings;
     /// Unity receives only the resulting placement coordinates and has no cell-partitioning logic.
     /// </summary>
     [Serializable]

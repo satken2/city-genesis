@@ -3,14 +3,15 @@ using GeneratedModels;
 using UnityEngine;
 
 /// <summary>
-/// Distant (Far) buildings. Stretch one distant model along XYZ to its placement unit's bounding box (no stacking).
+/// Distant (Far) buildings. Draw one distant model per placement unit, stretched to the unit's height (no stacking).
 /// Placement units are wings (BuildingSummary.sub_buildings); buildings without wings use the entire building as one unit.
 /// - Whole building: fit `far` to the footprint bounding rectangle aligned to the front edge (vertex 0→1, same as prebuilt) × floors×floor height.
-/// - Wing: fit `mashup-{model_prefix}-far` to occupied cells (sub-building master width×height cells) × wing floors×floor height,
-///   drawn where the normal assembly draws the wing (MashupBuildingMeshBuilder.ResolveDrawnPlacement).
-///   Wings without distant models stretch a unit cube to the same box.
-/// Resolve models by scanning exterior model-number folders. Fit model XZ bounds to the outline;
-/// fit height above the model origin (contact plane), so underground/underwater geometry below origin scales identically.
+/// - Wing: draw `mashup-{model_prefix}-far` at its authored XZ size about its origin, as the normal assembly draws the wing's parts
+///   (wings are authored smaller than their cells and the remainder is the gap between wings), × wing floors×floor height,
+///   where the normal assembly draws the wing (MashupBuildingMeshBuilder.ResolveDrawnPlacement).
+///   Wings without distant models stretch a unit cube to the occupied cells (sub-building master width×height cells).
+/// Resolve models by scanning exterior model-number folders.
+/// Fit height above the model origin (contact plane), so underground/underwater geometry below origin scales identically.
 /// Keep the model's materials and UVs; triangles sharing a material go into one submesh across wings.
 /// Unit cubes have a null material, which the caller replaces with the default building material.
 /// </summary>
@@ -46,7 +47,7 @@ public static class FarBuildingMeshBuilder
                 MashupBuildingMeshBuilder.ResolveDrawnPlacement(placement, buildingData.agent_id, out Vector2 offset, out float rotation);
                 float baseY = Utils.GetGroundHeight(new Vector3(center.x + offset.x, 1000f, center.y + offset.y)) - centerY;
                 GameObject model = BuildingMeshUtils.GetPartBySuffixScan(prefix, $"mashup-{placement.model_prefix}-far", variantNumber);
-                AddStretched(model, new Rect(-halfWidth, -halfDepth, halfWidth * 2f, halfDepth * 2f),
+                AddStretched(model, model != null ? (Rect?)null : new Rect(-halfWidth, -halfDepth, halfWidth * 2f, halfDepth * 2f),
                     Mathf.Max(1, placement.floors) * storyHeight, Quaternion.Euler(0f, -rotation + 180f, 0f),
                     new Vector3(offset.x, baseY, offset.y), parts);
             }
@@ -113,20 +114,24 @@ public static class FarBuildingMeshBuilder
 
     /// <summary>
     /// Stretch the model (or unit cube) in unrotated local space to rect in XZ and height vertically, then rotate/translate into place.
+    /// A null rect keeps the authored XZ about the model origin.
     /// </summary>
-    private static void AddStretched(GameObject model, Rect rect, float height, Quaternion rotation, Vector3 offset, Parts parts)
+    private static void AddStretched(GameObject model, Rect? rect, float height, Quaternion rotation, Vector3 offset, Parts parts)
     {
         Material[] materials = null;
         Mesh source = model != null ? BuildingMeshUtils.CombineModuleMeshes(model, out materials) : null;
         Mesh mesh = source != null ? source : UnitBox;
         Bounds bounds = mesh.bounds;
-        float scaleX = rect.width / Mathf.Max(bounds.size.x, 0.01f);
-        float scaleZ = rect.height / Mathf.Max(bounds.size.z, 0.01f);
         float scaleY = height / Mathf.Max(bounds.max.y, 0.01f);
         int first = parts.vertices.Count;
         foreach (Vector3 v in mesh.vertices)
         {
-            var local = new Vector3(rect.xMin + (v.x - bounds.min.x) * scaleX, v.y * scaleY, rect.yMin + (v.z - bounds.min.z) * scaleZ);
+            var local = new Vector3(v.x, v.y * scaleY, v.z);
+            if (rect is Rect fit)
+            {
+                local.x = fit.xMin + (v.x - bounds.min.x) * fit.width / Mathf.Max(bounds.size.x, 0.01f);
+                local.z = fit.yMin + (v.z - bounds.min.z) * fit.height / Mathf.Max(bounds.size.z, 0.01f);
+            }
             parts.vertices.Add(rotation * local + offset);
         }
         Vector2[] uv = mesh.uv;
