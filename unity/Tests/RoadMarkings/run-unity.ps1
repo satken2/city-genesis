@@ -4,14 +4,19 @@ $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 & (Join-Path $PSScriptRoot '../BuildRuntime.ps1')
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 $qaRoot = Join-Path $unityRoot 'Temp/RoadMarkingsQA'
-foreach ($folder in @('Assets/Editor','Assets/Resources/Shaders','Assets/Shaders','Assets/Settings','Assets/Paths','Packages','ProjectSettings')) {
+foreach ($folder in @('Assets/Editor','Assets/Resources/Shaders','Assets/Resources/Textures','Assets/Shaders','Assets/Settings','Assets/Paths','Packages','ProjectSettings')) {
     New-Item -ItemType Directory -Path (Join-Path $qaRoot $folder) -Force | Out-Null
 }
 Copy-Item -LiteralPath "$PSScriptRoot/RoadMarkingsQA.cs" -Destination "$qaRoot/Assets/Editor" -Force
-foreach ($name in @('RoadSurface.shader','RoadMarkingBake.shader','DepthOffsetLit.shader')) {
-    Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/$name" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
+foreach ($name in @('RoadSurface.shader','RoadMarkingBake.shader','DepthOffsetLit.shader','PathTriplanarLit.shader')) {
+    Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/$name", "$unityRoot/Assets/Resources/Shaders/$name.meta" -Destination "$qaRoot/Assets/Resources/Shaders" -Force
 }
-foreach ($name in @('PATH_ASPHALT','PATH_CONCRETE')) {
+foreach ($name in @('path-asphalt-albedo.png','path-asphalt-normal.png','path-concrete-albedo.png','path-concrete-normal.png')) {
+    if (Test-Path -LiteralPath "$unityRoot/Assets/Resources/Textures/$name") {
+        Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Textures/$name", "$unityRoot/Assets/Resources/Textures/$name.meta" -Destination "$qaRoot/Assets/Resources/Textures" -Force
+    }
+}
+foreach ($name in @('PATH_ASPHALT','PATH_ASPHALT.LIGHT','PATH_CONCRETE')) {
     Copy-Item -LiteralPath "$unityRoot/Assets/Resources/$name.mat", "$unityRoot/Assets/Resources/$name.mat.meta" -Destination "$qaRoot/Assets/Resources" -Force
 }
 Copy-Item -LiteralPath "$unityRoot/Assets/Shaders/RoadSurface.hlsl" -Destination "$qaRoot/Assets/Shaders" -Force

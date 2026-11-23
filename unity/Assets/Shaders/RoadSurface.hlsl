@@ -96,12 +96,59 @@ float RoadLines(float2 st)
     return coverage;
 }
 
+// SplineMesh による伸縮や UV0 を持たない交差点メッシュでもアスファルト・コンクリートの
+// 粒度と法線が均一に連続するよう、ワールド空間の三方向(トライプラナー)で投影する。
+half3 RoadTriplanarWeights(half3 normalWS)
+{
+    half3 w = pow(abs(normalWS), 4.0h);
+    return w / max(w.x + w.y + w.z, 1e-4h);
+}
+
+half3 SampleRoadTriplanarAlbedo(float3 posWS, half3 weights)
+{
+    float2 uvX = posWS.zy * _BaseMap_ST.xy + _BaseMap_ST.zw;
+    float2 uvY = posWS.xz * _BaseMap_ST.xy + _BaseMap_ST.zw;
+    float2 uvZ = posWS.xy * _BaseMap_ST.xy + _BaseMap_ST.zw;
+    half3 cX = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uvX).rgb;
+    half3 cY = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uvY).rgb;
+    half3 cZ = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uvZ).rgb;
+    return cX * weights.x + cY * weights.y + cZ * weights.z;
+}
+
+half3 SampleRoadTriplanarNormalWS(float3 posWS, half3 normalWS, half3 weights)
+{
+    float2 uvX = posWS.zy * _BaseMap_ST.xy + _BaseMap_ST.zw;
+    float2 uvY = posWS.xz * _BaseMap_ST.xy + _BaseMap_ST.zw;
+    float2 uvZ = posWS.xy * _BaseMap_ST.xy + _BaseMap_ST.zw;
+
+    half3 nX = UnpackNormalScale(SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, uvX), _BumpScale);
+    half3 nY = UnpackNormalScale(SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, uvY), _BumpScale);
+    half3 nZ = UnpackNormalScale(SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, uvZ), _BumpScale);
+
+    half3 wX = half3(nX.z * normalWS.x, nX.y + normalWS.y, nX.x + normalWS.z);
+    half3 wY = half3(nY.x + normalWS.x, nY.z * normalWS.y, nY.y + normalWS.z);
+    half3 wZ = half3(nZ.x + normalWS.x, nZ.y + normalWS.y, nZ.z * normalWS.z);
+    return normalize(wX * weights.x + wY * weights.y + wZ * weights.z);
+}
+
 half4 RoadFragment(RoadVaryings input) : SV_Target
 {
     UNITY_SETUP_INSTANCE_ID(input);
     UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(input);
-    SurfaceData surface;
-    InitializeStandardLitSurfaceData(input.uv, surface);
+    half3 geomNormalWS = normalize(input.normalWS);
+    half3 weights = RoadTriplanarWeights(geomNormalWS);
+
+    SurfaceData surface = (SurfaceData)0;
+    surface.albedo = SampleRoadTriplanarAlbedo(input.positionWS, weights) * _BaseColor.rgb;
+    surface.alpha = 1.0h;
+    surface.metallic = _Metallic;
+    surface.smoothness = _Smoothness;
+    surface.occlusion = 1.0h;
+    surface.normalTS = half3(0, 0, 1);
+    surface.emission = SampleEmission(input.uv, _EmissionColor.rgb, TEXTURE2D_ARGS(_EmissionMap, sampler_EmissionMap));
+
+    half3 normalWS = SampleRoadTriplanarNormalWS(input.positionWS, geomNormalWS, weights);
+
     float distanceToCamera = distance(input.positionWS, GetCameraPositionWS());
     float fade = 1 - smoothstep(400, 540, distanceToCamera);
     float paint = 0;
@@ -109,10 +156,11 @@ half4 RoadFragment(RoadVaryings input) : SV_Target
         paint = max(RoadLines(input.paint.xy), RoadMask(input.paint.xy)) * fade;
     surface.albedo = lerp(surface.albedo, half3(.78,.78,.72), paint);
     surface.smoothness = lerp(surface.smoothness, .28, paint);
+    normalWS = normalize(lerp(normalWS, geomNormalWS, paint * 0.4h));
+
     InputData data = (InputData)0;
     data.positionWS = input.positionWS;
-    half3 bitangent = input.tangentWS.w * cross(input.normalWS, input.tangentWS.xyz);
-    data.normalWS = NormalizeNormalPerPixel(TransformTangentToWorld(surface.normalTS, half3x3(input.tangentWS.xyz, bitangent, input.normalWS)));
+    data.normalWS = normalWS;
     data.viewDirectionWS = GetWorldSpaceNormalizeViewDir(input.positionWS);
     data.shadowCoord = TransformWorldToShadowCoord(input.positionWS);
     data.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(input.positionCS);
