@@ -68,6 +68,10 @@
   min-height: 32px;
 }
 
+.bc-selection-header:last-child {
+  margin-bottom: 0;
+}
+
 /* Header buttons (shared borderless style for Back and Copy existing building). */
 .bc-header-btn {
   display: inline-flex;

@@ -42,6 +42,12 @@
       "rotateHint": "Orta Sürükleme Döndür"
     },
     "back": "Geri",
+    "group": {
+      "publicService": "Kamu Hizmetleri",
+      "infrastructure": "Altyapı",
+      "industrial": "Sanayi",
+      "other": "Diğer"
+    },
     "category": {
       "1": "Yerleşim",
       "2": "Ticari",

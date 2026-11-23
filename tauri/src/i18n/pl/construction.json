@@ -42,6 +42,12 @@
       "rotateHint": "Obrót oporu środkowego"
     },
     "back": "Z powrotem",
+    "group": {
+      "publicService": "Usługi publiczne",
+      "infrastructure": "Infrastruktura",
+      "industrial": "Przemysł",
+      "other": "Inne"
+    },
     "category": {
       "1": "Osiedle mieszkaniowe",
       "2": "Reklama w telewizji",

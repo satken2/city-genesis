@@ -42,6 +42,12 @@
       "rotateHint": "Arrastar do meio girar"
     },
     "back": "De volta",
+    "group": {
+      "publicService": "Serviços públicos",
+      "infrastructure": "Infraestrutura",
+      "industrial": "Indústria",
+      "other": "Outros"
+    },
     "category": {
       "1": "Residencial",
       "2": "Comercial",

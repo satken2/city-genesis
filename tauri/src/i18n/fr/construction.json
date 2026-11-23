@@ -42,6 +42,12 @@
       "rotateHint": "Glisser bouton central Pivoter"
     },
     "back": "Retour",
+    "group": {
+      "publicService": "Services publics",
+      "infrastructure": "Infrastructures",
+      "industrial": "Industrie",
+      "other": "Autres"
+    },
     "category": {
       "1": "Logement",
       "2": "Commerce",

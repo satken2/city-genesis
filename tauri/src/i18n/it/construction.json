@@ -42,6 +42,12 @@
       "rotateHint": "Ruota centrale"
     },
     "back": "Indietro",
+    "group": {
+      "publicService": "Servizi pubblici",
+      "infrastructure": "Infrastrutture",
+      "industrial": "Industria",
+      "other": "Altro"
+    },
     "category": {
       "1": "Residenziale",
       "2": "Commerciale",

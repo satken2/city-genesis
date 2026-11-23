@@ -42,6 +42,12 @@
       "rotateHint": "中鍵拖曳 旋轉"
     },
     "back": "返回",
+    "group": {
+      "publicService": "公共服務",
+      "infrastructure": "基礎設施",
+      "industrial": "產業設施",
+      "other": "其他"
+    },
     "category": {
       "1": "住宅",
       "2": "商業",

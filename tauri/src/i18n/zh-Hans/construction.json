@@ -42,6 +42,12 @@
       "rotateHint": "中键拖动 旋转"
     },
     "back": "返回",
+    "group": {
+      "publicService": "公共服务",
+      "infrastructure": "基础设施",
+      "industrial": "产业设施",
+      "other": "其他"
+    },
     "category": {
       "1": "住宅",
       "2": "商业",

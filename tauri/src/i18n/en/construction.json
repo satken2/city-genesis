@@ -42,6 +42,12 @@
       "rotateHint": "Middle drag Rotate"
     },
     "back": "Back",
+    "group": {
+      "publicService": "Public Services",
+      "infrastructure": "Infrastructure",
+      "industrial": "Industry",
+      "other": "Other"
+    },
     "category": {
       "1": "Residential",
       "2": "Commercial",

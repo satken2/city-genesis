@@ -9,7 +9,7 @@ import { describeError } from "../../utils/errors";
  * (master bd_category) and building (variant), set floors, and preview its shape.
  *
  * Flow:
- * 1. Select a category tile to show its building cards.
+ * 1. Select a category tile (grouped by section: public service, infrastructure, industrial, other) to show its building cards.
  * 2. Select a building card to replace the list with a summary and construction settings.
  *    The upper-left Back button returns one level at a time: building cards, then category tiles.
  * 3. Send STATE_EDIT_BUILDING to the graphics module via IPC.
@@ -72,7 +72,24 @@ import { BuildingVariantCard } from "./BuildingVariantCard";
 import { ParcelSpecs } from "./ParcelSpecs";
 import { UnaffordableOverlay } from "../common/UnaffordableOverlay";
 import { showNotification } from "../../utils/notification";
-import { BD_CATEGORY_OTHER, PARCEL_LAND, VARIANT_CITY } from "../../constants";
+import {
+  BD_CATEGORY_COMMERCIAL,
+  BD_CATEGORY_EDUCATION,
+  BD_CATEGORY_INDUSTRIAL,
+  BD_CATEGORY_OFFICE,
+  BD_CATEGORY_OTHER,
+  BD_CATEGORY_PLAZA,
+  BD_CATEGORY_PORT,
+  BD_CATEGORY_POWER,
+  BD_CATEGORY_PUBLIC_SERVICE,
+  BD_CATEGORY_RESIDENTIAL,
+  BD_CATEGORY_RESOURCE,
+  BD_CATEGORY_STATION,
+  BD_CATEGORY_TOURISM,
+  BD_CATEGORY_WATER,
+  PARCEL_LAND,
+  VARIANT_CITY,
+} from "../../constants";
 import { isGradingVariant } from "../grading/grading";
 import copyIcon from "../../assets/images/ui/copy.png";
 import turnBackIcon from "../../assets/images/ui/turn-back.png";
@@ -443,9 +460,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     ) as [string, AgentMasterEntry][];
   }, [masterData, scenarioMode, cityHallPlaced, relocateCityHall]);
 
-  /** Categories for category tiles (ID order = display order). Omit categories without any buildable buildings. */
-  const availableCategories = useMemo(
-    () => [...new Set(buildingVariants.map(([, entry]) => categoryOf(entry)))].sort((a, b) => a - b),
+  /** 建設可能な建物が存在するカテゴリだけをセクション別に並べる。空のセクションは省く。 */
+  const categoryGroups = useMemo(
+    () => buildCategoryGroups(buildingVariants.map(([, entry]) => categoryOf(entry))),
     [buildingVariants],
   );
 
@@ -1585,10 +1602,38 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
  * Existing-building edits cannot change categories, so omit category tiles and prevent returning from building cards.
  */}
       {selectedVariant === null && !cityHallOnly && (
-        <div className="bc-section">
-          {editAgentId == null && (
-            <div className="bc-selection-header">
-              {selectedCategory !== null && (
+        selectedCategory === null && editAgentId != null ? (
+          <div className="bc-section">
+            <p className="bc-muted">{t("common.loading")}</p>
+          </div>
+        ) : selectedCategory === null ? (
+          <>
+            <div className="bc-section">
+              <div className="bc-selection-header">
+                <CopyExistingButton />
+              </div>
+            </div>
+            {categoryGroups.map(({ group, categories }) => (
+              <div key={group} className="bc-section">
+                <div className="bc-section-title">{t(`building_construction.group.${group}`)}</div>
+                <div className="bc-tile-grid">
+                  {categories.map((category) => (
+                    <SelectionTile
+                      key={category}
+                      category={category}
+                      icon={resolveBdCategoryIcon(category)}
+                      name={t(`building_construction.category.${category}`)}
+                      onClick={() => setSelectedCategory(category)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ))}
+          </>
+        ) : (
+          <div className="bc-section">
+            {editAgentId == null && (
+              <div className="bc-selection-header">
                 <button
                   className="bc-header-btn bc-back-btn"
                   type="button"
@@ -1598,40 +1643,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                   <img src={turnBackIcon} alt="" className="bc-header-btn-icon" draggable={false} />
                   <span>{t("building_construction.back")}</span>
                 </button>
-              )}
-              {/*
- * Copy existing building: enter Unity's copy-source selection mode and import the selected
- * building's appearance, floors, and footprint.
- */}
-              <button
-                className="bc-header-btn bc-copy-btn"
-                type="button"
-                onClick={() => {
-                  sendPickCopySource().catch((err) => {
-                    console.error("[BuildingConstruction] sendPickCopySource failed:", err);
-                  });
-                }}
-              >
-                <img src={copyIcon} alt="" className="bc-header-btn-icon" draggable={false} />
-                <span>{t("building_construction.copyExisting")}</span>
-              </button>
-            </div>
-          )}
-          {selectedCategory === null && editAgentId != null ? (
-            <p className="bc-muted">{t("common.loading")}</p>
-          ) : selectedCategory === null ? (
-            <div className="bc-tile-grid">
-              {availableCategories.map((category) => (
-                <SelectionTile
-                  key={category}
-                  category={category}
-                  icon={resolveBdCategoryIcon(category)}
-                  name={t(`building_construction.category.${category}`)}
-                  onClick={() => setSelectedCategory(category)}
-                />
-              ))}
-            </div>
-          ) : (
+                <CopyExistingButton />
+              </div>
+            )}
             <div className="bc-variant-card-list">
               {variantsForCategory.map(([idStr, entry]) => {
                 const variantId = Number(idStr);
@@ -1648,8 +1662,8 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                 );
               })}
             </div>
-          )}
-        </div>
+          </div>
+        )
       )}
 
       {/* Selected building summary card. */}
@@ -2139,6 +2153,25 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   );
 }
 
+/** 既存建物をコピーするボタン。Unityのコピー元選択モードへ移行する。 */
+function CopyExistingButton() {
+  const { t } = useTranslation();
+  return (
+    <button
+      className="bc-header-btn bc-copy-btn"
+      type="button"
+      onClick={() => {
+        sendPickCopySource().catch((err) => {
+          console.error("[BuildingConstruction] sendPickCopySource failed:", err);
+        });
+      }}
+    >
+      <img src={copyIcon} alt="" className="bc-header-btn-icon" draggable={false} />
+      <span>{t("building_construction.copyExisting")}</span>
+    </button>
+  );
+}
+
 /** Category (bd_category) selection tile. Leave empty icon space when no image exists. */
 function SelectionTile({ category, icon, name, disabled = false, onClick }: {
   category: number;
@@ -2156,6 +2189,44 @@ function SelectionTile({ category, icon, name, disabled = false, onClick }: {
 }
 
 /* ---- Utilities ---- */
+
+type BuildingCategoryGroup = "publicService" | "infrastructure" | "industrial" | "other";
+
+/** カテゴリ選択画面のセクション定義(表示順・セクション内の並び順)。未割り当てカテゴリはその他へまとめる。 */
+const BUILDING_CATEGORY_GROUP_DEFS: readonly { group: BuildingCategoryGroup; categories: readonly number[] }[] = [
+  {
+    group: "publicService",
+    categories: [BD_CATEGORY_PUBLIC_SERVICE, BD_CATEGORY_EDUCATION, BD_CATEGORY_PLAZA, BD_CATEGORY_TOURISM],
+  },
+  {
+    group: "infrastructure",
+    categories: [BD_CATEGORY_POWER, BD_CATEGORY_WATER, BD_CATEGORY_STATION, BD_CATEGORY_PORT],
+  },
+  {
+    group: "industrial",
+    categories: [BD_CATEGORY_INDUSTRIAL, BD_CATEGORY_RESOURCE],
+  },
+  {
+    group: "other",
+    categories: [BD_CATEGORY_RESIDENTIAL, BD_CATEGORY_COMMERCIAL, BD_CATEGORY_OFFICE, BD_CATEGORY_OTHER],
+  },
+];
+
+/** 利用可能なカテゴリIDを定義済みのセクションへ振り分け、空のセクションを省く。 */
+function buildCategoryGroups(categories: number[]): { group: BuildingCategoryGroup; categories: number[] }[] {
+  const available = new Set(categories);
+  const assigned = new Set(BUILDING_CATEGORY_GROUP_DEFS.flatMap(({ categories: members }) => members));
+  const unassigned = [...available].filter((id) => !assigned.has(id)).sort((a, b) => a - b);
+  return BUILDING_CATEGORY_GROUP_DEFS
+    .map(({ group, categories: members }) => ({
+      group,
+      categories: [
+        ...members.filter((id) => available.has(id)),
+        ...(group === "other" ? unassigned : []),
+      ],
+    }))
+    .filter(({ categories: members }) => members.length > 0);
+}
 
 /** Construction panel categories. Buildings with blank bd_category in master data appear under "Other". */
 function categoryOf(entry: AgentMasterEntry): number {

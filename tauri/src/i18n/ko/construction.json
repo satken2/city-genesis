@@ -42,6 +42,12 @@
       "rotateHint": "가운데 버튼 드래그 회전"
     },
     "back": "뒤로",
+    "group": {
+      "publicService": "공공 서비스",
+      "infrastructure": "인프라 시설",
+      "industrial": "산업 시설",
+      "other": "기타"
+    },
     "category": {
       "1": "주거",
       "2": "상업",

@@ -42,6 +42,12 @@
       "rotateHint": "中ドラッグ 回転"
     },
     "back": "戻る",
+    "group": {
+      "publicService": "公共サービス",
+      "infrastructure": "インフラ施設",
+      "industrial": "産業施設",
+      "other": "その他"
+    },
     "category": {
       "1": "住宅",
       "2": "商業",

@@ -42,6 +42,12 @@
       "rotateHint": "Arrastrar botón central Girar"
     },
     "back": "Volver",
+    "group": {
+      "publicService": "Servicios públicos",
+      "infrastructure": "Infraestructura",
+      "industrial": "Industria",
+      "other": "Otros"
+    },
     "category": {
       "1": "Vivienda",
       "2": "Comercio",

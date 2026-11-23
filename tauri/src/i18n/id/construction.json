@@ -42,6 +42,12 @@
       "rotateHint": "Drag putar tengah"
     },
     "back": "Kembali",
+    "group": {
+      "publicService": "Layanan Publik",
+      "infrastructure": "Infrastruktur",
+      "industrial": "Industri",
+      "other": "Lainnya"
+    },
     "category": {
       "1": "Yg berhubung dgn tempat kediaman",
       "2": "Komersial",

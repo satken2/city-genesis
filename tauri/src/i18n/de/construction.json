@@ -42,6 +42,12 @@
       "rotateHint": "Mittlerer Drag drehen"
     },
     "back": "Zurück",
+    "group": {
+      "publicService": "Öffentliche Dienste",
+      "infrastructure": "Infrastruktur",
+      "industrial": "Industrie",
+      "other": "Sonstiges"
+    },
     "category": {
       "1": "Wohn-",
       "2": "Kommerziell",
