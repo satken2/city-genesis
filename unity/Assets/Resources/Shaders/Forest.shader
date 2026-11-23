@@ -86,12 +86,15 @@ Shader "CityGenesis/Forest"
             FoliageCard(TEXTURE2D_ARGS(_LeafMap,sampler_LeafMap),input.card.xy,input.card.z);
             return half4(normalize(input.normalWS),0);
         }
-        half4 ShadowFragment(Varyings input) : SV_Target { return 0; }
+        half4 ShadowFragment(Varyings input) : SV_Target
+        {
+            FoliageCard(TEXTURE2D_ARGS(_LeafMap,sampler_LeafMap),input.card.xy,input.card.z);
+            return 0;
+        }
         Varyings ShadowVertex(Attributes input, uint id : SV_InstanceID)
         {
             Varyings o = ForestVertex(input,id);
             if (o.positionCS.w == 1 && all(o.positionCS.xyz == 2)) return o;
-            if (o.card.z > .5) { o.positionCS = float4(2,2,2,1); return o; }
             o.positionCS = TransformWorldToHClip(ApplyShadowBias(o.positionWS,o.normalWS,_LightDirection));
             #if UNITY_REVERSED_Z
             o.positionCS.z = min(o.positionCS.z, UNITY_NEAR_CLIP_VALUE * o.positionCS.w);

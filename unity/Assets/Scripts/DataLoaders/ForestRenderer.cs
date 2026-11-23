@@ -6,8 +6,8 @@ using UnityEngine.Rendering;
 /// <summary>Generate area-placed props on the GPU. Retain only areas and patches on the CPU.</summary>
 public sealed class ForestRenderer : IDisposable
 {
-    public static float DetailDistance => 100f * GraphicsConfig.FarDistanceScale; // Distance where trees switch from normal to far models.
-    public const float TransitionWidth = 20f;
+    public static float DetailDistance => 200f * GraphicsConfig.FarDistanceScale; // Distance where trees switch from normal to far models.
+    public const float TransitionWidth = 30f;
     public const int CandidateBudget = 2000000;
     readonly ComputeShader compute;
     readonly Shader shader, foliageShader;

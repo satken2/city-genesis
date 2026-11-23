@@ -5,12 +5,11 @@
 // モデルは樹冠全体へ寄せた法線と、樹冠の奥・下ほど暗い明るさの倍率(頂点色R)を持つ(genesis-gallery の foliage.py が焼く)。
 // 葉群の凹凸・光の回り込み・逆光の透け・1本ごとの色むらは、頂点を増やさず画素の計算で足す。
 // 凹凸と色むらの倍率は平均が1になるようにし、遠景の森の色と近景の木の平均の明るさを揃える。
-// 葉の板(頂点色Aが0の面。塊は1)は、葉の房の抜き画像の A で抜き、RGB を葉の色へ掛ける。板は影を落とさない(影は塊だけ)。
+// 葉の板(頂点色Aが0の面。塊は1)は、葉の房の抜き画像の A で抜き、RGB を葉の色へ掛ける。影も同じ抜き画像で抜く。
 // 板は通常・接写のモデルだけが持つ。小さく映る遠景は抜きの縁がちらつくので、板の無い専用の遠景モデルに任せる。
 
 static const float FoliageClumpSize = .7;    // 葉群の大きさ(m)
-static const float FoliageClumpDepth = .12;  // 葉群の凹凸の深さ(m)
-static const half FoliageClumpShade = .3;    // 葉群の山と谷の明るさの差
+static const half FoliageClumpShade = .26;   // 葉群の山と谷の明るさの差
 static const half FoliageWrap = .5;          // 光が影の側へ回り込む量
 static const half FoliageTranslucency = .35; // 逆光で外側の葉が透ける強さ
 static const half FoliageTint = .16;         // 1本ごとの明るさと色合いのばらつき
@@ -85,15 +84,8 @@ half3 FoliageShade(InputData lighting, half3 albedo, half smoothness, half metal
     float3 p = clumpPosition / FoliageClumpSize + seed * 64;
     float clump = .65 * FoliageNoise(p) + .35 * FoliageNoise(p * 2.3 + 17);
     float3 dpdx = ddx(lighting.positionWS), dpdy = ddy(lighting.positionWS);
-    // 葉群が画面上で数画素まで縮んだら凹凸を消す。微分で作る凹凸はその大きさでちらつく。
+    // 葉群が画面上で数画素まで縮んだら濃淡を消す。画面微分で法線を揺らすと2x2画素の粒状ノイズになるため色濃淡だけを使う。
     float detail = saturate((FoliageClumpSize / max(max(length(dpdx), length(dpdy)), 1e-5) - 3) / 6);
-    float height = FoliageClumpDepth * detail * clump * amount;
-    // 画面微分による凹凸(Mikkelsen 2010)。接線を使わないので法線だけのメッシュでよい。
-    float3 r1 = cross(dpdy, lighting.normalWS), r2 = cross(lighting.normalWS, dpdx);
-    float det = dot(dpdx, r1);
-    float3 bumped = abs(det) * lighting.normalWS - sign(det) * (ddx(height) * r1 + ddy(height) * r2);
-    if (dot(bumped, bumped) > 1e-20) lighting.normalWS = normalize(bumped);
-    lighting.bakedGI = SampleSH(lighting.normalWS);
 
     albedo *= lerp(1, shade * (1 + 2 * FoliageClumpShade * (lerp(.5, clump, detail) - .5)) * (1 + tint * FoliageTint * (seed.x - .5)), amount);
     albedo.r *= 1 + amount * tint * FoliageTint * (seed.y - .5);

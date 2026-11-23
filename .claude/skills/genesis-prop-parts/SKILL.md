@@ -45,13 +45,14 @@ description: City Genesisの地形プロップ3Dモデル(森の木・岩・茂�
 | 201〜204 | 工事車両 | `construction_*` のメッシュを共有する別名 `201`〜`204` | `Props/201.fbx`〜 |
 | 301〜307 | 航空機・船舶 | `ambient_*` のメッシュを共有する別名 `301`〜`307` | `Props/301.fbx`〜。船304〜307は `_close`・`_far` も |
 
-- 種別の一覧は `genesis-core/assets/master.yaml` の `prop_master`(`display_name` のみ)。
+- 種別の一覧は `genesis-core/assets/master.yaml` の `prop_master`(`display_name` と、木の種別だけ `tree: true`)。
+  `tree` の種別は、範囲散布のうち開発されずに残った範囲が住環境の自然に数えられる。木を足すときは忘れずに付ける。
   **`prop_master` はスプレッドシート由来ではなく master.yaml に直書き**されており、生成スクリプトは無い
   (ほかのマスターの取り込みは対象のセクションだけを書き換えるので、このセクションは残る)。
   種別を足すときは `prop_master` に `ID: {display_name: …}` を追記する
   ([[master-data]] Skillの「yamlを直接編集しない」はこのセクションには当たらない。2026-09-08時点)。
-- 木2種は `pipeline/jobs/build_prop_trees.py` で原点に著作する。通常72/292三角形、専用Far14/20三角形（幹なしの八角錐/丸い葉塊）。
-  針葉樹は細身の4段樹冠。広葉樹は4個の葉塊を芯にして、表面に葉の房の板を挿す。両種の再生成は同ジョブを一度実行する。
+- 木2種は `pipeline/jobs/build_prop_trees.py` で原点に著作する。通常220/303三角形、専用Far14/20三角形（幹なしの八角錐/丸い葉塊）。
+  通常モデルは濃い塊ポリゴンを置かず、針葉樹は5段の仮想円錐に沿った針葉の板、広葉樹は主枝3本付きの幹と5個の仮想葉塊に沿った葉の房の板で樹冠を構成する。両種の再生成は同ジョブを一度実行する。
   葉はスムーズ法線と粗さ0.9、共有256×256色画像（Props/Textures）を使う。画像は外部参照でFarも共有し、FBX拡散色は白にする。
 - ヤシの木5・熱帯の低木6は `pipeline/jobs/build_prop_tropical.py` で著作する。
   葉の帯は自動簡略化で崩れるので、ヤシだけ幹付きの専用Farを持つ。寸法・再生成は同じ場所の `tropical.md`。
@@ -149,8 +150,8 @@ description: City Genesisの地形プロップ3Dモデル(森の木・岩・茂�
 - マテリアルはUnityが実行時に複製して instancing を有効化する。**GPUインスタンシング非対応のシェーダーだと描画されない**。
   GraphicsSettings の Instancing Variants は Keep All を維持する(プロジェクト設定側。モデル側の作業ではない)。
 - **一本ごとの GameObject / Collider は生成されない**。クリック判定やコライダー前提の設計はできない。
-- 経済・コスト・資源とは一切接続しない純装飾なので、`agent_master` / `path_master` のような寸法マスターは無い。
-  必要なのは `prop_master` の表示名だけ。
+- コスト・資源とは接続しない装飾なので、`agent_master` / `path_master` のような寸法マスターは無い。
+  必要なのは `prop_master` の表示名と、木なら `tree` だけ。
 
 ## 道路・鉄道を走る車両モデル
 

@@ -63,11 +63,14 @@ Shader "CityGenesis/Foliage"
             FoliageCard(TEXTURE2D_ARGS(_LeafMap,sampler_LeafMap),input.card.xy,input.card.z);
             return half4(normalize(input.normalWS),0);
         }
-        half4 ShadowFragment(Varyings input) : SV_Target { return 0; }
+        half4 ShadowFragment(Varyings input) : SV_Target
+        {
+            FoliageCard(TEXTURE2D_ARGS(_LeafMap,sampler_LeafMap),input.card.xy,input.card.z);
+            return 0;
+        }
         Varyings ShadowVertex(Attributes input)
         {
             Varyings o = FoliageVertex(input);
-            if (o.card.z > .5) { o.positionCS = float4(2,2,2,1); return o; }
             #if _CASTING_PUNCTUAL_LIGHT_SHADOW
             float3 lightDirection = normalize(_LightPosition - o.positionWS);
             #else
