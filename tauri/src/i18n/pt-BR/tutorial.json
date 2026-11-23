@@ -732,6 +732,10 @@
       "tip43": {
         "title": "Um minuto…",
         "description": "O estacionamento na rua em excesso diminui o tráfego e aumenta o risco de acidentes. Construa estacionamentos para dar a esses carros outro lugar para ficar. O “apenas um minuto” de um motorista pode se tornar a tarde de todos os outros."
+      },
+      "tip44": {
+        "title": "Longe da estrada",
+        "description": "É possível construir longe das ruas, mas quanto maior a distância até a via, pior fica o acesso. Fábricas e lojas levam mais tempo para obter suprimentos, e as residências enfrentam deslocamentos mais pesados para o trabalho e as compras. Construa ao longo das ruas ou estenda uma via até bem perto do prédio."
       }
     }
   },

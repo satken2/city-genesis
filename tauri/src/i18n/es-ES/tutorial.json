@@ -732,6 +732,10 @@
       "tip43": {
         "title": "Solo tantito…",
         "description": "Demasiados coches aparcados en la calle reducen la velocidad del tránsito y aumentan el riesgo de accidentes. Construye aparcamientos para liberar las calles. El «solo tantito» de uno se convierte en el «¿para cuándo?» de todos."
+      },
+      "tip44": {
+        "title": "Lejos de la carretera",
+        "description": "Puedes construir lejos de las calles, pero cuanto mayor sea la distancia hasta la vía, peor será el acceso. Las fábricas y tiendas tardan más en abastecerse, y en las viviendas aumentan los desplazamientos al trabajo y a las compras. Construye junto a la calle o lleva una carretera hasta la puerta."
       }
     }
   },

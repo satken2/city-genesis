@@ -732,6 +732,10 @@
       "tip43": {
         "title": "Just a Minute…",
         "description": "Too much on-street parking slows traffic and increases the risk of accidents. Build parking lots to give those cars somewhere else to stay. One driver's “just a minute” can become everyone else's afternoon."
+      },
+      "tip44": {
+        "title": "Stranded Off the Road",
+        "description": "You can build away from roads, but the farther a building sits from the street, the worse its access becomes. Factories and shops take longer to bring in supplies, while homes face heavier commuting and shopping trips. Place buildings along roads, or extend a road right up to them."
       }
     }
   },

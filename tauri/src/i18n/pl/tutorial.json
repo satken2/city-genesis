@@ -732,6 +732,10 @@
       "tip43": {
         "title": "Chwileczkę…",
         "description": "Zbyt duża ilość parkowania na ulicy spowalnia ruch i zwiększa ryzyko wypadków. Zbuduj parkingi, aby dać tym samochodom gdzie indziej. „Jedna minuta” jednego kierowcy może stać się popołudniem wszystkich innych."
+      },
+      "tip44": {
+        "title": "Z dala od drogi",
+        "description": "Budynki można stawiać z dala od dróg, ale im większa odległość do jezdni, tym gorszy dostęp. Fabryki i sklepy dłużej sprowadzają towary, a mieszkańcy domów mają znacznie dalszą drogę do pracy i na zakupy. Stawiaj budynki wzdłuż dróg albo dociągnij drogę aż pod sam budynek."
       }
     }
   },

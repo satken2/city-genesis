@@ -732,6 +732,10 @@
       "tip43": {
         "title": "Juste deux minutes…",
         "description": "Trop de voitures garées dans la rue ralentissent la circulation et augmentent le risque d'accident. Aménagez des parkings pour libérer la chaussée. Les « deux petites minutes » des uns font les longues minutes des autres."
+      },
+      "tip44": {
+        "title": "Isolé loin de la route",
+        "description": "Vous pouvez construire à l'écart des routes, mais plus un bâtiment est éloigné de la voirie, plus son accès est pénalisé. Les usines et commerces mettent plus de temps à s'approvisionner, et les logements subissent des trajets plus longs pour le travail et les courses. Construisez en bord de route ou prolongez une voie jusqu'au bâtiment."
       }
     }
   },

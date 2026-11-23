@@ -732,6 +732,10 @@
       "tip43": {
         "title": "Solo un minuto...",
         "description": "Troppo parcheggio su strada rallenta il traffico e aumenta il rischio di incidenti. Costruisci parcheggi per dare quelle auto da qualche altra parte. Un \"solo un minuto\" di un pilota può diventare il pomeriggio di tutti gli altri."
+      },
+      "tip44": {
+        "title": "Lontano dalla strada",
+        "description": "Puoi costruire anche lontano dalle strade, ma più un edificio dista dalla carreggiata, più l'accesso diventa svantaggioso. Fabbriche e negozi impiegano più tempo a rifornirsi, mentre per le abitazioni aumentano i tempi di pendolarismo e spesa. Costruisci lungo le strade o prolunga una via fin davanti all'edificio."
       }
     }
   },

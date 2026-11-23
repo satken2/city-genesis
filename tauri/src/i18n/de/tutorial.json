@@ -732,6 +732,10 @@
       "tip43": {
         "title": "Nur eine Minute…",
         "description": "Zu viel Parken auf der Straße verlangsamt den Verkehr und erhöht das Unfallrisiko. Bauen Sie Parkplätze, um diese Autos woanders zu bleiben. Die „nur eine Minute“ eines Fahrers kann zum Nachmittag aller anderen werden."
+      },
+      "tip44": {
+        "title": "Abseits der Straße",
+        "description": "Sie können auch abseits von Straßen bauen, doch je weiter ein Gebäude von der Straße entfernt ist, desto ungünstiger wird die Anbindung. Fabriken und Geschäfte brauchen länger für die Warenversorgung, und für Wohnhäuser steigen die Wege für Pendeln und Einkäufe. Bauen Sie entlang von Straßen oder führen Sie eine Straße bis ans Gebäude heran."
       }
     }
   },

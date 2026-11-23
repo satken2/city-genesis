@@ -732,6 +732,10 @@
       "tip43": {
         "title": "Bir dakika…",
         "description": "Çok fazla cadde üzerinde park etmek trafiği yavaşlatır ve kaza riskini artırır. Bu arabaları kalacak başka bir yere vermek için park yerleri inşa edin. Bir sürücünün “sadece bir dakika”sı herkesin öğleden sonrası olabilir."
+      },
+      "tip44": {
+        "title": "Yoldan Çok Uzakta",
+        "description": "Yollardan uzağa da bina yapabilirsiniz, ancak bina yoldan ne kadar uzaksa erişimi o kadar olumsuz etkilenir. Fabrikalar ve dükkanlar malzeme tedarikinde daha fazla zaman kaybeder; konutlarda ise işe gidiş geliş ve alışveriş yükü artar. Binaları yol kenarına yerleştirin ya da yolu binanın hemen yanına kadar uzatın."
       }
     }
   },
