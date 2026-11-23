@@ -193,6 +193,8 @@ Shader "Custom/DepthOffsetSimpleLitFar"
             //--------------------------------------
             // Defines
             #define BUMP_SCALE_NOT_SUPPORTED 1
+            // 粗い起伏は川の谷を表せず水面を隠すので、川の範囲を水面として塗る(TerrainRiverBank.hlsl)
+            #define TERRAIN_RIVER_AS_WATER_SURFACE 1
 
             // -------------------------------------
             // Includes

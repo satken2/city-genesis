@@ -14,6 +14,9 @@
 //
 // マスクは川群の外接矩形だけを覆う。範囲外の地点は uv が [0,1] を外れるので0扱いにする。
 // マスク未生成(_RiverMaskParams.w=0)なら全て0で、既存の見た目に影響しない。
+//
+// 超遠景の陸地は粗い起伏で川の谷を表せず、水面より上に張られて川の水面を隠す。そこで見える
+// 川の範囲は水面であるべきなので、川床の代わりに水面の見た目で塗る(ApplyRiverWaterSurface)。
 // ================================================================
 
 TEXTURE2D(_RiverMask);
@@ -23,6 +26,7 @@ float4 _RiverMaskSize;     // x=幅テクセル数, y=高さテクセル数
 float4 _RiverSandColor;    // 砂地の色
 float4 _RiverBedTint;      // rgb=濡れた川床の乗算色, a=川床のスムースネス
 float  _RiverSandSmoothness;
+float4 _RiverWaterColor;   // rgb=川の水の体色, a=水面のスムースネス(川の水面の材質と同じ値)
 
 /// <summary>川マスクを (bed, sand) としてサンプルする。範囲外・未生成は0。</summary>
 void SampleRiverMask(float3 positionWS, out half bed, out half sand)
@@ -56,6 +60,14 @@ void ApplyRiverBedWet(half bed, inout half3 albedo, inout half smoothness)
 {
     albedo *= lerp((half3)1.0, (half3)_RiverBedTint.rgb, bed);
     smoothness = lerp(smoothness, (half)_RiverBedTint.a, bed);
+}
+
+/// <summary>川の範囲を水面として塗る: 水の体色・水面のスムースネス・水平な法線。ApplyRiverBedWet の代わりに呼ぶ。</summary>
+void ApplyRiverWaterSurface(half bed, inout half3 albedo, inout half smoothness, inout float3 normalWS)
+{
+    albedo = lerp(albedo, (half3)_RiverWaterColor.rgb, bed);
+    smoothness = lerp(smoothness, (half)_RiverWaterColor.a, bed);
+    normalWS = normalize(lerp(normalWS, float3(0.0, 1.0, 0.0), bed));
 }
 
 #endif // TERRAIN_RIVER_BANK_INCLUDED

@@ -59,6 +59,7 @@ public class RiverSurfaceManager : MonoBehaviour
     private static readonly int RiverSandColorId = Shader.PropertyToID("_RiverSandColor");
     private static readonly int RiverBedTintId = Shader.PropertyToID("_RiverBedTint");
     private static readonly int RiverSandSmoothnessId = Shader.PropertyToID("_RiverSandSmoothness");
+    private static readonly int RiverWaterColorId = Shader.PropertyToID("_RiverWaterColor");
     private Texture2D riverMaskTex;
 
     private readonly List<GameObject> riverObjects = new List<GameObject>();
@@ -131,7 +132,7 @@ public class RiverSurfaceManager : MonoBehaviour
         {
             BuildOneRiver(river, mat);
         }
-        BuildRiverMask();
+        BuildRiverMask(mat);
         Debug.Log($"RiverSurfaceManager: 川の水面を{riverObjects.Count}本生成しました。");
     }
 
@@ -152,8 +153,10 @@ public class RiverSurfaceManager : MonoBehaviour
     /// exceeds MASK_MAX_DIM, coarsen texels by integer grid multiples (subsample grid points).
     /// Expand external bank distances in texels from interior texels using four-neighbor breadth-first search;
     /// distance 1 is wet bank (weak R), and sandy-band G equals inner-bank factor (RiverRecord.InnerBankFactorAt) times distance attenuation.
+    /// Also publish the water body color and smoothness of <paramref name="water"/>, with which the ultra-far land paints river areas
+    /// because its coarse relief covers the water surface (TerrainRiverBank.hlsl).
     /// </summary>
-    private void BuildRiverMask()
+    private void BuildRiverMask(Material water)
     {
         ClearRiverMask();
         if (!RiverStore.HasRivers) return;
@@ -270,6 +273,9 @@ public class RiverSurfaceManager : MonoBehaviour
         Shader.SetGlobalColor(RiverSandColorId, sandColor);
         Shader.SetGlobalColor(RiverBedTintId, bedTint);
         Shader.SetGlobalFloat(RiverSandSmoothnessId, sandSmoothness);
+        Color waterColor = water.GetColor("_DeepColor");
+        waterColor.a = water.GetFloat("_Smoothness");
+        Shader.SetGlobalColor(RiverWaterColorId, waterColor);
     }
 
     /// <summary>Disable and destroy river masks (shaders stop reading when _RiverMaskParams.w=0).</summary>

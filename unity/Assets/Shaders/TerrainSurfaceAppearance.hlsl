@@ -325,11 +325,16 @@ half4 CliffTerrainFragmentPBR(InputData inputData, half3 albedo, half metallic, 
     ApplyGroundDetailNormal(inputData.positionWS, cliffGeoNormalWS, inputData.normalWS);
     ApplyGroundRipples(inputData.positionWS, cliffGeoNormalWS, inputData.normalWS);
     // 川岸の砂地はベース色へ、川床は岩ブレンドへ合流させ、岩化後に濡れの暗色を乗せる
-    // (TerrainRiverBank.hlsl。川マスク未生成なら何も変えない)
+    // (TerrainRiverBank.hlsl。川マスク未生成なら何も変えない)。
+    // 川の水面より上に張られる地表(超遠景の陸地)は TERRAIN_RIVER_AS_WATER_SURFACE を定義し、川床の代わりに水面を塗る。
     half riverBed;
     half riverRock = ApplyRiverSand(inputData.positionWS, albedo, smoothness, riverBed);
     ApplyCliffRock(inputData.positionWS, cliffGeoNormalWS, inputData.normalWS, albedo, smoothness, riverRock);
+#ifdef TERRAIN_RIVER_AS_WATER_SURFACE
+    ApplyRiverWaterSurface(riverBed, albedo, smoothness, inputData.normalWS);
+#else
     ApplyRiverBedWet(riverBed, albedo, smoothness);
+#endif
     ApplySeabedShade(inputData.positionWS, albedo);
     float forest = ForestSurfaceWeight(inputData.positionWS, cliffGeoNormalWS) * (1 - riverBed);
     half3 forestLeaf = 0;
