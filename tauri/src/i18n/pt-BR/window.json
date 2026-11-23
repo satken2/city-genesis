@@ -90,6 +90,7 @@
       "pollution": "Poluição do ar",
       "crime": "Crime",
       "sunshine": "Luz solar",
+      "nature": "Natureza",
       "noData": "Heatmap não computado (ainda não é executado)"
     },
     "infra": {
@@ -202,6 +203,7 @@
     "modeParcelAirPollution": "Coloração da poluição do ar",
     "modeParcelCrime": "Coloração do crime",
     "modeParcelSunshine": "Coloração do sol",
+    "modeParcelNature": "Coloração da natureza",
     "modeDistrictBorderIcon": "Borda + ícones",
     "subPedestrian": "Pedestre",
     "subRoad": "Tráfego rodoviário",

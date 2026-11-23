@@ -89,12 +89,12 @@ const AXES = ["wealth", "leisure", "health", "comfort"] as const;
 const VIEW_KEYS: Record<View, string[]> = {
   satisfaction: AXES.map((axis) => `satis_${axis}`),
   leisure: ["leisure_hours", "work_hours", "satis_leisure"],
-  comfort: ["satis_residential", "quiet", "sunlight", "safety"],
+  comfort: ["satis_residential", "quiet", "sunlight", "safety", "nature"],
 };
 
 /**
  * Overall metric for each view. Living environment uses living comfort, matching its stacked
- * composition chart. Household satisfaction includes axes beyond the four Living environment
+ * composition chart. Household satisfaction includes axes beyond the Living environment
  * elements, so placing it alongside their breakdown would misleadingly suggest it is their total.
  */
 const VIEW_TOTAL: Record<View, string> = {
@@ -132,7 +132,7 @@ type CompositionPart = {
  * Composition charts by view. Include only combinations whose stacked height equals the view's overall metric.
  *
  * Satisfaction is a weighted sum of four axes, so multiply historical axis values by weights
- * to obtain contributions. Living environment is "average of four elements × housing fulfillment",
+ * to obtain contributions. Living environment is "average of its elements × housing fulfillment",
  * a product that cannot be decomposed into a sum. The backend therefore records contributions
  * after applying the multiplier (comfort_*), and the UI does no multiplication, avoiding
  * a duplicate implementation of the simulation formula.
@@ -150,6 +150,7 @@ const VIEW_COMPOSITION: Partial<Record<View, CompositionPart[]>> = {
     { id: "quiet", source: "comfort_quiet", series: "quiet" },
     { id: "sunlight", source: "comfort_sunlight", series: "sunlight" },
     { id: "safety", source: "comfort_safety", series: "safety" },
+    { id: "nature", source: "comfort_nature", series: "nature" },
   ],
 };
 
@@ -173,6 +174,7 @@ const SERIES_COLORS: Record<string, string> = {
   quiet: "#38bdf8",
   sunlight: "#10b981",
   safety: "#f87171",
+  nature: "#84cc16",
   satisfaction: "#e2e8f0",
 };
 

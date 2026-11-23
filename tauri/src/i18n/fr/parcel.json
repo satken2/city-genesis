@@ -8,6 +8,7 @@
     "envAirPollution": "Pollution de l'air",
     "envNoise": "Bruit",
     "envCrime": "Délinquance",
+    "envNature": "Nature",
     "envNoData": "Les indicateurs d'environnement sont calculés lors de l'exécution de la simulation. Ils ne le sont pas encore.",
     "restrictions": "Réglementation de construction",
     "zoneName": "Quartier",

@@ -90,6 +90,7 @@
       "pollution": "Загрязнение воздуха",
       "crime": "Преступление",
       "sunshine": "Солнечный свет",
+      "nature": "Природа",
       "noData": "Тепловая карта не вычислена (еще не запущена эпоха)"
     },
     "infra": {
@@ -202,6 +203,7 @@
     "modeParcelAirPollution": "Окраска загрязнения воздуха",
     "modeParcelCrime": "криминальная раскраска",
     "modeParcelSunshine": "окраска солнечного света",
+    "modeParcelNature": "окраска природы",
     "modeDistrictBorderIcon": "Граница + иконки",
     "subPedestrian": "Пешеходный",
     "subRoad": "Дорожное движение",

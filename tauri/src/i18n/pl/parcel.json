@@ -8,6 +8,7 @@
     "envAirPollution": "Zanieczyszczenie powietrza",
     "envNoise": "Hałas",
     "envCrime": "Przestępstwo",
+    "envNature": "Przyroda",
     "envNoData": "Wyniki środowiskowe są obliczane podczas uruchamiania symulacji. Jeszcze nie obliczone.",
     "restrictions": "Przepisy budowlane",
     "zoneName": "Dzielnica",

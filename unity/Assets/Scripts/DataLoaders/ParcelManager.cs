@@ -1362,6 +1362,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             case VisualModeParcel.AIR_POLLUTION: return "/city/pollution";
             case VisualModeParcel.CRIME: return "/city/crime";
             case VisualModeParcel.SUNSHINE: return "/city/sunshine";
+            case VisualModeParcel.NATURE: return "/city/nature";
             default: return null;
         }
     }
@@ -1771,6 +1772,9 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             case VisualModeParcel.SUNSHINE:
                 // UI legend: pale yellow (#fff59d sunlight) to dark blue-gray (#37474f shade)
                 return ResolveEnvironmentColor(mode, parcelId, HexToColor(0xff, 0xf5, 0x9d), HexToColor(0x37, 0x47, 0x4f));
+            case VisualModeParcel.NATURE:
+                // UI legend: pale green (#e8f5e9 no nature nearby) to dark green (#1b5e20 plenty)
+                return ResolveEnvironmentColor(mode, parcelId, HexToColor(0xe8, 0xf5, 0xe9), HexToColor(0x1b, 0x5e, 0x20));
             default:
                 return null;
         }
@@ -1779,8 +1783,9 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// <summary>
     /// Resolve environmental score colors. Do not fill parcels with unavailable scores (null).
     /// Noise, air pollution, and public safety scores are relative values scaled from that epoch's minimum/maximum to 0–1
-    /// (color intensity represents relative severity within the city). Sunlight alone uses
-    /// absolute values fixed at 0–1 (based on time in shadow), so intensity directly represents the absolute level.
+    /// (color intensity represents relative severity within the city). Sunlight and nature use
+    /// absolute values fixed at 0–1 (time in shadow, and the share of surrounding land covered by forests and parks),
+    /// so intensity directly represents the absolute level.
     /// </summary>
     private Color? ResolveEnvironmentColor(int mode, int parcelId, Color low, Color high)
     {

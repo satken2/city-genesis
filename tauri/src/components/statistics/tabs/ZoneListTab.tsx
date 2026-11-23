@@ -49,8 +49,8 @@ type WellbeingZoneStats = {
   zones: { zone_id: number; values: Record<string, number | null> }[];
 };
 
-/** Living comfort first, then its four elements, matching the Living environment tab. */
-const COMFORT_KEYS = ["satis_comfort", "satis_residential", "quiet", "sunlight", "safety"];
+/** Living comfort first, then its elements, matching the Living environment tab. */
+const COMFORT_KEYS = ["satis_comfort", "satis_residential", "quiet", "sunlight", "safety", "nature"];
 
 type ZoneCard = {
   zoneId: number;

@@ -90,6 +90,7 @@
       "pollution": "Contaminación del aire",
       "crime": "Delincuencia",
       "sunshine": "Asoleamiento",
+      "nature": "Naturaleza",
       "noData": "Mapa de calor sin calcular (aún no se ejecuta una época)"
     },
     "infra": {
@@ -202,6 +203,7 @@
     "modeParcelAirPollution": "Color por contaminación",
     "modeParcelCrime": "Color por delincuencia",
     "modeParcelSunshine": "Color por asoleamiento",
+    "modeParcelNature": "Color por naturaleza",
     "modeDistrictBorderIcon": "Bordes + iconos",
     "subPedestrian": "Flujo peatonal",
     "subRoad": "Tránsito vial",

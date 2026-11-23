@@ -207,7 +207,8 @@ function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInf
         };
       // Environmental scores are sampled at parcel centers. Noise, air pollution, and public safety colors
       // are relative values stretched across the epoch's full minimum-to-maximum range (relative severity
-      // within the city). Sunlight alone uses an absolute 0–1 scale based on the fraction of time in shade.
+      // within the city). Sunlight and nature use an absolute 0–1 scale (the fraction of time in shade, and
+      // the share of surrounding land covered by forests and parks).
       case "noise_color":
         return {
           type: "meter",
@@ -239,6 +240,15 @@ function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInf
           meterStartColor: "#fff59d",
           meterEndColor: "#37474f",
           meterLabel: "← 日照の悪さ →",
+        };
+      // Nature is the only score where higher is better, so the legend runs from scarce to plentiful.
+      case "nature_color":
+        return {
+          type: "meter",
+          description: "区画の周辺にある森と公園の多さで色分けします。エポック実行後に反映されます",
+          meterStartColor: "#e8f5e9",
+          meterEndColor: "#1b5e20",
+          meterLabel: "← 自然の豊かさ →",
         };
       case "hidden":
         return { type: "none", description: "区画を非表示にします" };

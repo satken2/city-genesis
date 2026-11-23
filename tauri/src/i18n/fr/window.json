@@ -90,6 +90,7 @@
       "pollution": "Pollution de l'air",
       "crime": "Criminalité",
       "sunshine": "Ensoleillement",
+      "nature": "Nature",
       "noData": "Carte thermique non calculée (aucune époque exécutée)"
     },
     "infra": {
@@ -202,6 +203,7 @@
     "modeParcelAirPollution": "Coloration par pollution de l'air",
     "modeParcelCrime": "Coloration par criminalité",
     "modeParcelSunshine": "Coloration par ensoleillement",
+    "modeParcelNature": "Coloration par nature",
     "modeDistrictBorderIcon": "Contours + icônes",
     "subPedestrian": "Flux piéton",
     "subRoad": "Trafic routier",

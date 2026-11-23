@@ -84,7 +84,7 @@ function buildResourceAreas(resources: ApiResourceArea[], resourceTypes?: Master
 }
 
 /** Display order of heatmap types. */
-const HEATMAP_KINDS: CityMapHeatmapActiveKind[] = ["noise", "pollution", "crime", "sunshine"];
+const HEATMAP_KINDS: CityMapHeatmapActiveKind[] = ["noise", "pollution", "crime", "sunshine", "nature"];
 
 export type CityMapControls = {
   layers: CityMapLayerVisibility;

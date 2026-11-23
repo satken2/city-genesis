@@ -90,6 +90,7 @@
       "pollution": "Polusi udara",
       "crime": "Kejahatan",
       "sunshine": "Sinar matahari",
+      "nature": "Alam",
       "noData": "Heatmap tidak dihitung (belum lama berjalan)"
     },
     "infra": {
@@ -202,6 +203,7 @@
     "modeParcelAirPollution": "pewarnaan polusi udara",
     "modeParcelCrime": "pewarnaan kejahatan",
     "modeParcelSunshine": "Pewarnaan sinar matahari",
+    "modeParcelNature": "Pewarnaan alam",
     "modeDistrictBorderIcon": "Perbatasan + Ikon",
     "subPedestrian": "Pejalan kaki",
     "subRoad": "lalu lintas jalan",

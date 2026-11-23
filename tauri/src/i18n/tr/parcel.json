@@ -8,6 +8,7 @@
     "envAirPollution": "Hava kirliliği",
     "envNoise": "Gürültü",
     "envCrime": "Suç",
+    "envNature": "Doğa",
     "envNoData": "Simülasyon çalıştığında ortam puanları hesaplanır. Henüz hesaplanmadı.",
     "restrictions": "yapı yönetmelikleri",
     "zoneName": "Mahalle",

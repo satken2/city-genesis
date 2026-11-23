@@ -8,6 +8,7 @@
     "envAirPollution": "대기 오염",
     "envNoise": "소음",
     "envCrime": "범죄",
+    "envNature": "자연",
     "envNoData": "환경은 시뮬레이션 실행 시 계산됩니다. 아직 계산되지 않았습니다.",
     "restrictions": "건축 규제",
     "zoneName": "소속 지구",

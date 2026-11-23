@@ -894,6 +894,9 @@ public class IpcViewCoordinator : MonoBehaviour
             case "sunshine_color":
                 VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualModeParcel.SUNSHINE);
                 break;
+            case "nature_color":
+                VisualModeHandler.Instance.SetMode(InputObjectType.PARCEL, VisualModeParcel.NATURE);
+                break;
             case "buildable_color":
                 int filterMode = subMode switch
                 {

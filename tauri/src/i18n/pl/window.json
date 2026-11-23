@@ -90,6 +90,7 @@
       "pollution": "Zanieczyszczenie powietrza",
       "crime": "Przestępstwo",
       "sunshine": "Światło słoneczne",
+      "nature": "Przyroda",
       "noData": "Mapa ciepła nie jest obliczona (jeszcze nie działa epoka)"
     },
     "infra": {
@@ -202,6 +203,7 @@
     "modeParcelAirPollution": "Kolorystyka zanieczyszczenia powietrza",
     "modeParcelCrime": "Kolorowanie przestępczości",
     "modeParcelSunshine": "Kolorystyka światła słonecznego",
+    "modeParcelNature": "Kolorystyka przyrody",
     "modeDistrictBorderIcon": "Granica + ikony",
     "subPedestrian": "Pieszy",
     "subRoad": "Ruch uliczny",

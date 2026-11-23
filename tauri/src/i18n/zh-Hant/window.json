@@ -90,6 +90,7 @@
       "pollution": "空氣污染",
       "crime": "治安",
       "sunshine": "日照",
+      "nature": "自然",
       "noData": "熱力圖尚未計算（尚未執行紀元）"
     },
     "infra": {
@@ -202,6 +203,7 @@
     "modeParcelAirPollution": "空氣污染配色",
     "modeParcelCrime": "治安配色",
     "modeParcelSunshine": "日照配色",
+    "modeParcelNature": "自然配色",
     "modeDistrictBorderIcon": "邊界線+圖示",
     "subPedestrian": "人流",
     "subRoad": "道路交通",

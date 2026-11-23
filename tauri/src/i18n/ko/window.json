@@ -90,6 +90,7 @@
       "pollution": "대기 오염",
       "crime": "치안",
       "sunshine": "일조",
+      "nature": "자연",
       "noData": "히트맵 미계산(에포크 미실행)"
     },
     "infra": {
@@ -202,6 +203,7 @@
     "modeParcelAirPollution": "대기 오염 색상 구분",
     "modeParcelCrime": "치안 색상 구분",
     "modeParcelSunshine": "일조 색상 구분",
+    "modeParcelNature": "자연 색상 구분",
     "modeDistrictBorderIcon": "경계선+아이콘",
     "subPedestrian": "보행 흐름",
     "subRoad": "도로 교통",

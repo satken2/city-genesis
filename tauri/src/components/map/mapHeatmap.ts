@@ -1,5 +1,5 @@
 /** Share colors and LOD selection between environmental overlays and source display. */
-export type CityMapHeatmapKind = "none" | "noise" | "pollution" | "crime" | "sunshine";
+export type CityMapHeatmapKind = "none" | "noise" | "pollution" | "crime" | "sunshine" | "nature";
 export type CityMapHeatmapActiveKind = Exclude<CityMapHeatmapKind, "none">;
 export type CityMapHeatmapMode = "overlay" | "sources";
 export type HeatmapLod = { rows: number; cols: number; spacing: number };
@@ -17,6 +17,7 @@ export const HEATMAP_RAMPS: Record<CityMapHeatmapActiveKind, [number, number, nu
   pollution: [[209, 231, 221], [149, 82, 191], [74, 20, 140]],
   crime: [[255, 205, 210], [229, 87, 87], [183, 28, 28]],
   sunshine: [[255, 245, 157], [144, 164, 174], [55, 71, 79]],
+  nature: [[232, 245, 233], [102, 187, 106], [27, 94, 32]],
 };
 const MAX_OVERLAY_ALPHA = 0.7;
 
@@ -39,7 +40,10 @@ function rgbAt(kind: CityMapHeatmapActiveKind, t: number): number[] {
   return ramp[index].map((v, channel) => Math.round(v + (ramp[index + 1][channel] - v) * fraction));
 }
 
-/** Zero impact is transparent; increase color intensity and opacity in proportion to the fixed adverse-impact score. */
+/**
+ * Zero is transparent; increase color intensity and opacity in proportion to the fixed score.
+ * The score is the adverse impact, except for nature, where it is how much nature is nearby.
+ */
 export function heatmapPixels(values: Uint16Array, kind: CityMapHeatmapActiveKind): Uint8ClampedArray {
   const palette = Array.from({ length: 256 }, (_, i) => [...rgbAt(kind, i / 255), Math.round(i * MAX_OVERLAY_ALPHA)]);
   const pixels = new Uint8ClampedArray(values.length * 4);

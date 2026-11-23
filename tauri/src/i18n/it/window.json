@@ -90,6 +90,7 @@
       "pollution": "Inquinamento atmosferico",
       "crime": "Crimine",
       "sunshine": "Luce del sole",
+      "nature": "Natura",
       "noData": "Heatmap non calcolata (nessuna corsa epoca ancora)"
     },
     "infra": {
@@ -202,6 +203,7 @@
     "modeParcelAirPollution": "Colorazione dell'inquinamento atmosferico",
     "modeParcelCrime": "Colorazione del crimine",
     "modeParcelSunshine": "Colorazione solare",
+    "modeParcelNature": "Colorazione natura",
     "modeDistrictBorderIcon": "Bordo + icone",
     "subPedestrian": "Pedonale",
     "subRoad": "Traffico stradale",

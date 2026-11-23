@@ -8,6 +8,7 @@
     "envAirPollution": "Polusi udara",
     "envNoise": "Kebisingan",
     "envCrime": "Kejahatan",
+    "envNature": "Alam",
     "envNoData": "Skor lingkungan dihitung saat simulasi berjalan. Belum dihitung.",
     "restrictions": "peraturan bangunan",
     "zoneName": "Distrik",

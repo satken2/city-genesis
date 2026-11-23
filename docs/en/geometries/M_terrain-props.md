@@ -1,6 +1,6 @@
 # M. Terrain props
 
-Forests, shrubs, rocks, and street objects are decoration only, unrelated to economic simulation, costs, or natural resources. The core saves placement definitions; Unity determines individual positions, grounding, visibility, and draw LOD.
+Forests, shrubs, rocks, and street objects are decoration, unrelated to costs or natural resources. The economic simulation reads only scattered tree regions: the parts that remain undeveloped count as nature in the living environment ([environment](../economics/13_environment.md)). The core saves placement definitions; Unity determines individual positions, grounding, visibility, and draw LOD.
 
 ## Saved data
 

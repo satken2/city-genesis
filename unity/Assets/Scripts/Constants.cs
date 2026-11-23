@@ -332,6 +332,8 @@ public static class Constants
     public const float POLLUTION_SATURATION_LEVEL = 380.0f;
     public const float ENV_SCORE_DECADES = 2.0f;
     public const float CRIME_SATURATION_LEVEL = 1.0f;
+    public const float NATURE_HEATMAP_MARGIN_SIGMAS = 3.0f;
+    public const float NATURE_BLUR_RESOLUTION_M = 40.0f;
     public const float SANITATION_GRID_METERS = 100.0f;
     public const float FIRE_SPREAD_RADIUS = 30.0f;
     public const float CRIME_SEARCH_RADIUS = 50.0f;

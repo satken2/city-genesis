@@ -8,6 +8,7 @@
     "envAirPollution": "Air Pollution",
     "envNoise": "Noise",
     "envCrime": "Crime",
+    "envNature": "Nature",
     "envNoData": "Environment scores are computed when the simulation runs. Not computed yet.",
     "restrictions": "Building Regulations",
     "zoneName": "District",

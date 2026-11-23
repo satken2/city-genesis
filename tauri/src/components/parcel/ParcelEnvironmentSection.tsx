@@ -1,10 +1,11 @@
 /**
  * Parcel environment section
  *
- * Displays parcel-specific environmental scores (sunlight, air pollution, noise, crime) as meters.
+ * Displays parcel-specific environmental scores (sunlight, air pollution, noise, crime, nature) as meters.
  * GET /api/v1/parcels/{id}/environment returns raw scores before living-environment multiplier
  * composition: each is a [0,1] measure of badness (0=ideal, 1=worst).
- * Sunlight is the proportion of time in shade, so invert it to display sunlight availability.
+ * Sunlight is the proportion of time in shade and nature is the scarcity of forests and parks nearby,
+ * so invert them to display sunlight availability and how much nature is nearby.
  *
  * Scores are calculated together during epochs; cities with no epoch run return null.
  */
@@ -21,6 +22,7 @@ type ParcelEnvironment = {
   air_pollution: number | null;
   noise: number | null;
   crime: number | null;
+  nature: number | null;
 };
 
 type ParcelEnvironmentSectionProps = {
@@ -53,14 +55,15 @@ export function ParcelEnvironmentSection({
     return () => controller.abort();
   }, [apiBaseUrl, parcelId]);
 
-  // All four values are calculated in the same epoch processing, so they are uncalculated together.
+  // All values are calculated in the same epoch processing, so they are uncalculated together.
   // Individual missing values occur for newly generated parcels not yet in the heatmap; handle them identically.
   const hasAnyValue =
     environment != null &&
     (environment.sunshine != null ||
       environment.air_pollution != null ||
       environment.noise != null ||
-      environment.crime != null);
+      environment.crime != null ||
+      environment.nature != null);
 
   return (
     <section className="agent-detail-section">
@@ -94,6 +97,12 @@ export function ParcelEnvironmentSection({
               label={t("parcel.envCrime")}
               value={environment.crime}
               polarity="negative"
+            />
+          )}
+          {environment.nature != null && (
+            <Meter
+              label={t("parcel.envNature")}
+              value={1 - environment.nature}
             />
           )}
         </div>

@@ -12,8 +12,10 @@ The living environment describes how suitable land is for households. A parcel's
 | Air pollution | Exhaust, odors, dust, and other contamination from traffic and facilities |
 | Public safety | Local safety, also related to the likelihood of crime |
 | Sunlight | Exposure affected by shadows from surrounding buildings and crowding within dwellings |
+| Nature | How much forest remains nearby, and how many parks with green space there are |
 
 Noise, air pollution, and public safety effects spread beyond individual parcels. Residential and industrial placement, congestion, and density shape local living conditions.
+Forest is lost when land is developed. Nature counts the parts of scattered tree regions that remain undeveloped, plus parks; individually placed trees are not counted ([terrain props](../geometries/M_terrain-props.md)).
 
 ## 13.3. Sanitation
 
@@ -21,5 +23,5 @@ Insufficient sewage treatment or waste collection worsens sanitation and harms r
 
 ## 13.4. Effects on daily life
 
-Noise, public safety, and sunlight affect comfort; air pollution and sanitation affect health. The living environment influences housing choices, satisfaction, and mortality risk ([scores and achievements](16_scores-and-achievements.md), [households](07_households.md)).
+Noise, public safety, sunlight, and nature affect comfort; air pollution and sanitation affect health. The living environment influences housing choices, satisfaction, and mortality risk ([scores and achievements](16_scores-and-achievements.md), [households](07_households.md)).
 

@@ -31,6 +31,7 @@ public static class VisualModeParcel
     public const int AIR_POLLUTION = 212;   // Air pollution 0..1: pale green-gray -> dark purple.
     public const int CRIME = 213;           // Poor public safety 0..1: pale red -> dark red.
     public const int SUNSHINE = 214;        // Poor sunshine (fraction of time in shadow) 0..1: pale yellow -> dark blue-gray.
+    public const int NATURE = 215;          // Nature nearby (forests and parks) 0..1: pale green -> dark green. Higher is better, unlike the other scores.
 }
 
 public static class VisualModeBuilding

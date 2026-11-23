@@ -8,6 +8,7 @@
     "envAirPollution": "Luftverschmutzung",
     "envNoise": "Lärm",
     "envCrime": "Kriminalität",
+    "envNature": "Natur",
     "envNoData": "Umgebungsbewertungen werden berechnet, wenn die Simulation ausgeführt wird. noch nicht berechnet.",
     "restrictions": "Bauvorschriften",
     "zoneName": "Stadtbezirk",

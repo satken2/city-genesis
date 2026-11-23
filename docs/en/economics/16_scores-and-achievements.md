@@ -9,7 +9,7 @@ Household quality of life (`qol_score`) describes residents' lives along four di
 | Material well-being | Access to clothing, appliances, luxuries, and other goods enriching daily life |
 | Entertainment and leisure | Enjoyment of dining out, entertainment, and free time |
 | Health | Healthy lives supported by nutrition, sanitation, and medical care |
-| Comfort | Home size and quality, quiet, sunlight, and public safety |
+| Comfort | Home size and quality, quiet, sunlight, public safety, and nearby nature |
 
 Satisfaction depends on income, available products and services, and living conditions ([consumption](11_consumption.md), [environment](13_environment.md)). Longer working hours increase labor but reduce leisure and burden health. Both economic output and daily life matter.
 

@@ -90,6 +90,7 @@
       "pollution": "Hava kirliliği",
       "crime": "Suç",
       "sunshine": "Güneş ışığı",
+      "nature": "Doğa",
       "noData": "Isı haritası hesaplanmadı (henüz epoch çalıştırması yok)"
     },
     "infra": {
@@ -202,6 +203,7 @@
     "modeParcelAirPollution": "Hava kirliliği boyama",
     "modeParcelCrime": "suç boyama",
     "modeParcelSunshine": "güneş ışığı boyama",
+    "modeParcelNature": "doğa boyama",
     "modeDistrictBorderIcon": "Sınır + Simgeler",
     "subPedestrian": "Yaya",
     "subRoad": "karayolu trafiği",

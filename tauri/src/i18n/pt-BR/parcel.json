@@ -8,6 +8,7 @@
     "envAirPollution": "Poluição do ar",
     "envNoise": "Ruído",
     "envCrime": "Crime",
+    "envNature": "Natureza",
     "envNoData": "As pontuações do ambiente são calculadas quando a simulação é executada. ainda não foi computado.",
     "restrictions": "Regulamentos de construção",
     "zoneName": "Bairro",

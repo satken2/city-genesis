@@ -90,6 +90,7 @@
       "pollution": "Luftverschmutzung",
       "crime": "Kriminalität",
       "sunshine": "Sonnenlicht",
+      "nature": "Natur",
       "noData": "Heatmap nicht berechnet (noch kein Epochenlauf)"
     },
     "infra": {
@@ -202,6 +203,7 @@
     "modeParcelAirPollution": "Luftverschmutzung Färbung",
     "modeParcelCrime": "Kriminalitätsfärbung",
     "modeParcelSunshine": "Sonnenlicht Färbung",
+    "modeParcelNature": "Natur Färbung",
     "modeDistrictBorderIcon": "Rand + Symbole",
     "subPedestrian": "Fußgänger",
     "subRoad": "Straßenverkehr",

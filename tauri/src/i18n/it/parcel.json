@@ -8,6 +8,7 @@
     "envAirPollution": "Inquinamento atmosferico",
     "envNoise": "Rumore",
     "envCrime": "Crimine",
+    "envNature": "Natura",
     "envNoData": "I punteggi ambientali vengono calcolati quando la simulazione viene eseguita. non ancora calcolato.",
     "restrictions": "Regolamento edilizio",
     "zoneName": "Quartiere",

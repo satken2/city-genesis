@@ -181,6 +181,7 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
       { id: "air_pollution_color", tooltipKey: "display.modeParcelAirPollution", icon: "visual/heatmap.png" },
       { id: "crime_color", tooltipKey: "display.modeParcelCrime", icon: "visual/heatmap.png" },
       { id: "sunshine_color", tooltipKey: "display.modeParcelSunshine", icon: "visual/heatmap.png" },
+      { id: "nature_color", tooltipKey: "display.modeParcelNature", icon: "visual/heatmap.png" },
       {
         id: "buildable_color",
         tooltipKey: "display.modeParcelBuildable",

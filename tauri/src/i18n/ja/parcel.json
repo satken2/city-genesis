@@ -8,6 +8,7 @@
     "envAirPollution": "大気汚染",
     "envNoise": "騒音",
     "envCrime": "犯罪",
+    "envNature": "自然",
     "envNoData": "環境はシミュレーション実行時に計算されます。まだ計算されていません。",
     "restrictions": "建築規制",
     "zoneName": "所属地区",

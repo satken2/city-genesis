@@ -8,6 +8,7 @@
     "envAirPollution": "空氣污染",
     "envNoise": "噪音",
     "envCrime": "犯罪",
+    "envNature": "自然",
     "envNoData": "環境值在執行模擬時計算，目前尚未計算。",
     "restrictions": "建築法規",
     "zoneName": "所屬地區",
