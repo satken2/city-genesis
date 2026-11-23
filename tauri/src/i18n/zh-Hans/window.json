@@ -158,7 +158,10 @@
     "options": "选项",
     "quit": "退出",
     "quitting": "正在退出...",
-    "assetManager": "素材管理器"
+    "assetManager": "素材管理器",
+    "firstLaunchTutorialConfirm": "要开始教程吗？",
+    "firstLaunchTutorialYes": "是",
+    "firstLaunchTutorialNo": "否"
   },
   "display": {
     "layerTerrain": "地形",

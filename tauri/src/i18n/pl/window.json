@@ -158,7 +158,10 @@
     "options": "Opcje",
     "quit": "Porzucić",
     "quitting": "rzucenie...",
-    "assetManager": "Zarządzający aktywami"
+    "assetManager": "Zarządzający aktywami",
+    "firstLaunchTutorialConfirm": "Czy chcesz rozpocząć samouczek?",
+    "firstLaunchTutorialYes": "Tak",
+    "firstLaunchTutorialNo": "Nie"
   },
   "display": {
     "layerTerrain": "Teren",

@@ -158,7 +158,10 @@
     "options": "Optionen",
     "quit": "Verlassen",
     "quitting": "Beenden ...",
-    "assetManager": "Vermögensverwalter"
+    "assetManager": "Vermögensverwalter",
+    "firstLaunchTutorialConfirm": "Möchten Sie das Tutorial starten?",
+    "firstLaunchTutorialYes": "Ja",
+    "firstLaunchTutorialNo": "Nein"
   },
   "display": {
     "layerTerrain": "Terrain",

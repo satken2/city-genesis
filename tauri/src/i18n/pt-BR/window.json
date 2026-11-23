@@ -158,7 +158,10 @@
     "options": "opções",
     "quit": "Deixar",
     "quitting": "Desistindo...",
-    "assetManager": "Gestor de ativos"
+    "assetManager": "Gestor de ativos",
+    "firstLaunchTutorialConfirm": "Deseja iniciar o tutorial?",
+    "firstLaunchTutorialYes": "Sim",
+    "firstLaunchTutorialNo": "Não"
   },
   "display": {
     "layerTerrain": "Terreno",

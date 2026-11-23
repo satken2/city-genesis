@@ -158,7 +158,10 @@
     "options": "seçenekler",
     "quit": "Çıkmak",
     "quitting": "bırakmak...",
-    "assetManager": "varlık yöneticisi"
+    "assetManager": "varlık yöneticisi",
+    "firstLaunchTutorialConfirm": "Eğitimi başlatmak ister misiniz?",
+    "firstLaunchTutorialYes": "Evet",
+    "firstLaunchTutorialNo": "Hayır"
   },
   "display": {
     "layerTerrain": "Arazi",

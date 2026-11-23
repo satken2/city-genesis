@@ -15,6 +15,7 @@ export interface AppSettings {
   citizen_voice_visible: boolean;
   multi_display: boolean;
   popup_monitor_index: number;
+  first_launch_tutorial_prompted: boolean;
 }
 
 const STORAGE_KEY = "city-genesis.settings";
@@ -30,6 +31,7 @@ function defaults(): AppSettings {
     citizen_voice_visible: true,
     multi_display: false,
     popup_monitor_index: 0,
+    first_launch_tutorial_prompted: false,
   };
 }
 
@@ -51,6 +53,7 @@ function normalize(raw: unknown): AppSettings {
     citizen_voice_visible: pick("citizen_voice_visible", (v) => typeof v === "boolean"),
     multi_display: pick("multi_display", (v) => typeof v === "boolean"),
     popup_monitor_index: pick("popup_monitor_index", isNumber),
+    first_launch_tutorial_prompted: pick("first_launch_tutorial_prompted", (v) => typeof v === "boolean"),
   };
 }
 

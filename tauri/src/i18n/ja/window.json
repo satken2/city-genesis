@@ -158,7 +158,10 @@
     "options": "オプション",
     "quit": "終了",
     "quitting": "終了中...",
-    "assetManager": "アセットマネージャー"
+    "assetManager": "アセットマネージャー",
+    "firstLaunchTutorialConfirm": "チュートリアルを開始しますか？",
+    "firstLaunchTutorialYes": "はい",
+    "firstLaunchTutorialNo": "いいえ"
   },
   "display": {
     "layerTerrain": "地形",

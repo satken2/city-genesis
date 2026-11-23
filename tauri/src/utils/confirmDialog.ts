@@ -30,6 +30,8 @@ export type ConfirmDialogRequest = {
   message: string;
   /** Translated confirmation button text. Defaults to OK. */
   confirmLabel?: string;
+  /** 翻訳済みのキャンセル側ボタン文言。未指定なら共通のキャンセルを使う。 */
+  cancelLabel?: string;
   /** "danger" makes the confirmation button red (irreversible or consequential actions). */
   tone?: "default" | "danger";
   /** Show only the confirmation button. */

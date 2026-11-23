@@ -120,7 +120,7 @@ export function ConfirmDialogWindow({ request, onClose }: ConfirmDialogWindowPro
             type="button"
             onClick={() => void answer(false)}
           >
-            {t("common.cancel")}
+            {request.cancelLabel ?? t("common.cancel")}
           </button>
         )}
         <button

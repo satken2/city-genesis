@@ -158,7 +158,10 @@
     "options": "Opzioni",
     "quit": "Smettere",
     "quitting": "smettere...",
-    "assetManager": "Gestore patrimoniale"
+    "assetManager": "Gestore patrimoniale",
+    "firstLaunchTutorialConfirm": "Vuoi iniziare il tutorial?",
+    "firstLaunchTutorialYes": "Sì",
+    "firstLaunchTutorialNo": "No"
   },
   "display": {
     "layerTerrain": "Terreno",

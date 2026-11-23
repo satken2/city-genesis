@@ -158,7 +158,10 @@
     "options": "Options",
     "quit": "Quit",
     "quitting": "Quitting...",
-    "assetManager": "Asset Manager"
+    "assetManager": "Asset Manager",
+    "firstLaunchTutorialConfirm": "Would you like to start the tutorial?",
+    "firstLaunchTutorialYes": "Yes",
+    "firstLaunchTutorialNo": "No"
   },
   "display": {
     "layerTerrain": "Terrain",

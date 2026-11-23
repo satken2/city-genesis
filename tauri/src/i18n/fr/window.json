@@ -158,7 +158,10 @@
     "options": "Options",
     "quit": "Quitter",
     "quitting": "Fermeture...",
-    "assetManager": "Gestionnaire de ressources"
+    "assetManager": "Gestionnaire de ressources",
+    "firstLaunchTutorialConfirm": "Voulez-vous commencer le tutoriel ?",
+    "firstLaunchTutorialYes": "Oui",
+    "firstLaunchTutorialNo": "Non"
   },
   "display": {
     "layerTerrain": "Terrain",

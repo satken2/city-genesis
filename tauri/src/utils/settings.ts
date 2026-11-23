@@ -21,6 +21,8 @@ export type AppSettings = {
   multi_display: boolean;
   /** Popup monitor in multi-display mode. */
   popup_monitor_index: number;
+  /** 初回起動時のチュートリアル開始確認を表示済みか。 */
+  first_launch_tutorial_prompted: boolean;
 };
 
 /**

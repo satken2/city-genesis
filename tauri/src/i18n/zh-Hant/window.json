@@ -158,7 +158,10 @@
     "options": "選項",
     "quit": "結束",
     "quitting": "結束中...",
-    "assetManager": "素材管理器"
+    "assetManager": "素材管理器",
+    "firstLaunchTutorialConfirm": "要開始教學嗎？",
+    "firstLaunchTutorialYes": "是",
+    "firstLaunchTutorialNo": "否"
   },
   "display": {
     "layerTerrain": "地形",

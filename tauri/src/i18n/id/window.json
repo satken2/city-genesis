@@ -158,7 +158,10 @@
     "options": "Pilihan",
     "quit": "Berhenti",
     "quitting": "Berhenti...",
-    "assetManager": "Manajer Aset"
+    "assetManager": "Manajer Aset",
+    "firstLaunchTutorialConfirm": "Apakah Anda ingin memulai tutorial?",
+    "firstLaunchTutorialYes": "Ya",
+    "firstLaunchTutorialNo": "Tidak"
   },
   "display": {
     "layerTerrain": "Medan",

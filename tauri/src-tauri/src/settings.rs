@@ -36,6 +36,8 @@ pub struct AppSettings {
     pub multi_display: bool,
     /// Popup monitor in multi-display mode.
     pub popup_monitor_index: usize,
+    /// 初回起動時のチュートリアル開始確認を表示済みか。既存プレイヤーや2回目以降は再表示しない。
+    pub first_launch_tutorial_prompted: bool,
 }
 
 impl Default for AppSettings {
@@ -54,6 +56,7 @@ impl Default for AppSettings {
             citizen_voice_visible: true,
             multi_display: false,
             popup_monitor_index: 0,
+            first_launch_tutorial_prompted: false,
         }
     }
 }
@@ -173,6 +176,15 @@ mod tests {
         let settings: AppSettings = serde_json::from_str(r#"{"language":"ja"}"#).unwrap();
         assert_eq!(settings.language, "ja");
         assert_eq!(settings.currency_unit, None);
+        assert!(!settings.first_launch_tutorial_prompted);
+    }
+
+    #[test]
+    fn first_launch_tutorial_prompted_survives_serialization() {
+        let settings: AppSettings = serde_json::from_str(r#"{"first_launch_tutorial_prompted":true}"#).unwrap();
+        let saved = serde_json::to_string(&settings).unwrap();
+        let restored: AppSettings = serde_json::from_str(&saved).unwrap();
+        assert!(restored.first_launch_tutorial_prompted);
     }
 
     #[test]

@@ -158,7 +158,10 @@
     "options": "옵션",
     "quit": "종료",
     "quitting": "종료 중...",
-    "assetManager": "에셋 관리자"
+    "assetManager": "에셋 관리자",
+    "firstLaunchTutorialConfirm": "튜토리얼을 시작하시겠습니까?",
+    "firstLaunchTutorialYes": "예",
+    "firstLaunchTutorialNo": "아니요"
   },
   "display": {
     "layerTerrain": "지형",

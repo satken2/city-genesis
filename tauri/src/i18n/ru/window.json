@@ -158,7 +158,10 @@
     "options": "Параметры",
     "quit": "Бросать",
     "quitting": "бросить...",
-    "assetManager": "Управляющий активами"
+    "assetManager": "Управляющий активами",
+    "firstLaunchTutorialConfirm": "Начать обучение?",
+    "firstLaunchTutorialYes": "Да",
+    "firstLaunchTutorialNo": "Нет"
   },
   "display": {
     "layerTerrain": "Местность",

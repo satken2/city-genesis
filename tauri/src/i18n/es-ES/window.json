@@ -158,7 +158,10 @@
     "options": "Opciones",
     "quit": "Salir",
     "quitting": "Saliendo...",
-    "assetManager": "Administrador de recursos"
+    "assetManager": "Administrador de recursos",
+    "firstLaunchTutorialConfirm": "¿Quieres iniciar el tutorial?",
+    "firstLaunchTutorialYes": "Sí",
+    "firstLaunchTutorialNo": "No"
   },
   "display": {
     "layerTerrain": "Terreno",
