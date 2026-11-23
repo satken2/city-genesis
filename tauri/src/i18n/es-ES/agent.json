@@ -132,6 +132,14 @@
       "infraWarning": {
         "title": "Instalación de infraestructura detenida o colapsada",
         "description": "Esta instalación dejó de funcionar o colapsó, lo que afecta el suministro de infraestructura. Revisa su estado y sus conexiones de suministro."
+      },
+      "farFromRoad": {
+        "title": "Lejos de la carretera",
+        "description": "La calle más cercana está a unos {{distance}} m. El acceso para suministros, desplazamientos al trabajo y compras queda muy perjudicado; considera prolongar una calle más cerca de este edificio."
+      },
+      "noRoadAccess": {
+        "title": "Sin acceso por carretera",
+        "description": "Este edificio no tiene ninguna calle a la que conectarse. El acceso para suministros, desplazamientos al trabajo y compras queda muy perjudicado; construye una calle cerca."
       }
     },
     "infra": {

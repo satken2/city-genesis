@@ -132,6 +132,14 @@
       "infraWarning": {
         "title": "Fasilitas infrastruktur berhenti atau runtuh",
         "description": "Fasilitas ini telah berhenti beroperasi atau runtuh, mempengaruhi pasokan infrastruktur. Periksa status dan koneksi pasokannya."
+      },
+      "farFromRoad": {
+        "title": "Jauh dari Jalan",
+        "description": "Jalan terdekat berjarak sekitar {{distance}} m. Akses untuk pengadaan barang, perjalanan kerja, dan belanja sangat dirugikan; pertimbangkan memperpanjang jalan lebih dekat ke bangunan ini."
+      },
+      "noRoadAccess": {
+        "title": "Tidak Ada Akses Jalan",
+        "description": "Bangunan ini tidak memiliki jalan untuk terhubung. Akses untuk pengadaan barang, perjalanan kerja, dan belanja sangat dirugikan; bangunlah jalan di dekatnya."
       }
     },
     "infra": {

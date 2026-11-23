@@ -132,6 +132,14 @@
       "infraWarning": {
         "title": "Infrastructure Facility Stopped or Collapsed",
         "description": "This facility has stopped operating or collapsed, affecting infrastructure supply. Check its status and supply connections."
+      },
+      "farFromRoad": {
+        "title": "Far from Road",
+        "description": "The nearest road is about {{distance}} m away. Access for supplies, commuting, and shopping is heavily penalized; consider extending a road closer to this building."
+      },
+      "noRoadAccess": {
+        "title": "No Road Access",
+        "description": "This building has no road to connect to. Access for supplies, commuting, and shopping is heavily penalized; build a road nearby."
       }
     },
     "infra": {

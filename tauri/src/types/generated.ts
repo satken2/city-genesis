@@ -167,6 +167,12 @@ export type AgentData = {
   remain_amount: Record<string, number>;
   /** ID of the parcel where the agent is located. */
   parcel_id: number;
+  /** Parcel type of the parcel identified by parcel_id (see PARCEL_*). */
+  parcel_type?: number;
+  /** ID of the street the agent's parcel fronts (VALUE_NONE if none). */
+  front_path_id?: number;
+  /** Effective distance in meters from the agent's parcel edge to the edge of its frontage street (0 when adjacent). */
+  front_path_distance?: number;
   /** ID of the district this object belongs to. */
   zone_id: number;
   /** Name of the district identified by zone_id. */
@@ -572,6 +578,8 @@ export type ParcelData = {
   front_path_name?: string;
   /** Side of the frontage street where the parcel lies (PATH_SIDE_LEFT or PATH_SIDE_RIGHT, or -1 for no frontage). The parcel belongs to the district on that side. */
   front_path_side: number;
+  /** Effective distance in meters from the parcel edge to the edge of its frontage street (0 when adjacent). */
+  front_path_distance: number;
   /** List of indices of the parcel edges that face a road. */
   facade_edge_index: any[];
   /** ID of the owner agent, either a private agent or the city government. */

@@ -132,6 +132,14 @@
       "infraWarning": {
         "title": "Altyapı tesisi durduruldu veya çöktü",
         "description": "Bu tesis, altyapı tedarikini etkileyerek çalışmayı durdurdu veya çöktü. Durumunu ve besleme bağlantılarını kontrol edin."
+      },
+      "farFromRoad": {
+        "title": "Yoldan Çok Uzak",
+        "description": "En yakın yol yaklaşık {{distance}} m uzaklıkta. Malzeme tedariki, işe gidiş geliş ve alışveriş erişimi ciddi biçimde olumsuz etkilenir; yolu binaya daha yakın bir noktaya uzatmayı düşünün."
+      },
+      "noRoadAccess": {
+        "title": "Yol Bağlantısı Yok",
+        "description": "Bu binanın bağlanabileceği bir yol yok. Malzeme tedariki, işe gidiş geliş ve alışveriş erişimi ciddi biçimde olumsuz etkilenir; yakınına bir yol inşa edin."
       }
     },
     "infra": {

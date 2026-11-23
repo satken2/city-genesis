@@ -180,6 +180,12 @@ namespace GeneratedModels
         public Dictionary<string, float> remain_amount;
         /// <summary>ID of the parcel where the agent is located.</summary>
         public int parcel_id;
+        /// <summary>Parcel type of the parcel identified by parcel_id (see PARCEL_*).</summary>
+        public int? parcel_type;
+        /// <summary>ID of the street the agent's parcel fronts (VALUE_NONE if none).</summary>
+        public int? front_path_id;
+        /// <summary>Effective distance in meters from the agent's parcel edge to the edge of its frontage street (0 when adjacent).</summary>
+        public float? front_path_distance;
         /// <summary>ID of the district this object belongs to.</summary>
         public int zone_id;
         /// <summary>Name of the district identified by zone_id.</summary>
@@ -593,6 +599,8 @@ namespace GeneratedModels
         public string front_path_name;
         /// <summary>Side of the frontage street where the parcel lies (PATH_SIDE_LEFT or PATH_SIDE_RIGHT, or -1 for no frontage). The parcel belongs to the district on that side.</summary>
         public int front_path_side;
+        /// <summary>Effective distance in meters from the parcel edge to the edge of its frontage street (0 when adjacent).</summary>
+        public float front_path_distance;
         /// <summary>List of indices of the parcel edges that face a road.</summary>
         public List<object> facade_edge_index;
         /// <summary>ID of the owner agent, either a private agent or the city government.</summary>

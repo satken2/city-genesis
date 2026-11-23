@@ -132,6 +132,14 @@
       "infraWarning": {
         "title": "Obiekt infrastrukturalny zatrzymany lub zawalony",
         "description": "Ten obiekt przestał działać lub zawalił się, wpływając na dostawę infrastruktury. Sprawdź jego status i połączenia zasilania."
+      },
+      "farFromRoad": {
+        "title": "Daleko od drogi",
+        "description": "Najbliższa droga znajduje się około {{distance}} m stąd. Dostęp dla dostaw, dojazdów do pracy i zakupów jest znacznie utrudniony; rozważ dociągnięcie drogi bliżej budynku."
+      },
+      "noRoadAccess": {
+        "title": "Brak dostępu do drogi",
+        "description": "Ten budynek nie ma drogi, do której mógłby się podłączyć. Dostęp dla dostaw, dojazdów do pracy i zakupów jest znacznie utrudniony; zbuduj drogę w pobliżu."
       }
     },
     "infra": {

@@ -83,6 +83,12 @@ export type AgentData = {
   construction_progress: number;
   created_date?: number;
   parcel_id?: number;
+  /** Parcel type of the parcel identified by parcel_id (PARCEL_*). */
+  parcel_type?: number;
+  /** ID of the street the agent's parcel fronts (VALUE_NONE if none). */
+  front_path_id?: number;
+  /** Effective distance in meters from the agent's parcel edge to the edge of its frontage street. */
+  front_path_distance?: number;
   /** Whether the containing parcel is under land acquisition negotiation (backend-resolved parcel under_acquisition). */
   under_acquisition?: boolean;
   attraction?: number;
@@ -350,6 +356,7 @@ export type ParcelData = {
   name_resource?: Record<string, string | null>;
   front_path_id: number;
   front_path_name: string | null;
+  front_path_distance?: number;
   facade_edge_index: number[];
   owner_agent_id: number;
   owner_agent_name: string | null;

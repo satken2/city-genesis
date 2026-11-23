@@ -22,7 +22,12 @@ await build({
   loader: { ".css": "empty", ".png": "dataurl", ".svg": "dataurl" },
 });
 const load = name => import(new URL(`${name}.mjs`, directory).href);
-const { buildingWarningMask, fetchSpatialWarnings } = await load("agentAlerts");
+const {
+  buildingWarningMask,
+  evaluateRoadAccessWarning,
+  fetchSpatialWarnings,
+  ROAD_ACCESS_WARNING_DISTANCE_M,
+} = await load("agentAlerts");
 const { AgentAlertsPanel } = await load("AgentAlertsPanel");
 const constants = await load("constants");
 const facility = constants.ALERT_DISPLAY_FACILITY_WARNING;
@@ -120,4 +125,73 @@ assert.equal(new Set([
 assert.equal(render({ alert: 0, warning: 0 }).innerHTML, "");
 assert.equal(render({ alert: sanitation, warning: 0 }).innerHTML, "",
   "alertとwarningのビット領域を混同しない");
-console.log("Agent alerts: API source, target IDs, combined cards, facility causes, distinct icons, cleared warnings OK");
+
+// 道路アクセス警告(接道距離しきい値・接道なし・除外対象)の判定と描画
+const landBuilding = {
+  is_bd: true,
+  variant: 1001,
+  parcel_id: 193,
+  parcel_type: constants.PARCEL_LAND,
+  front_path_id: 12,
+  front_path_distance: 0,
+};
+assert.equal(evaluateRoadAccessWarning(landBuilding), null, "道路沿いの建物には警告しない");
+assert.equal(
+  evaluateRoadAccessWarning({ ...landBuilding, front_path_distance: ROAD_ACCESS_WARNING_DISTANCE_M - 0.1 }),
+  null,
+  "しきい値未満の接道距離では警告しない",
+);
+assert.deepEqual(
+  evaluateRoadAccessWarning({ ...landBuilding, front_path_distance: ROAD_ACCESS_WARNING_DISTANCE_M }),
+  { kind: "farFromRoad", distanceM: ROAD_ACCESS_WARNING_DISTANCE_M },
+  "しきい値以上の接道距離で距離付き警告を返す",
+);
+assert.deepEqual(
+  evaluateRoadAccessWarning({ ...landBuilding, front_path_distance: 24.6 }),
+  { kind: "farFromRoad", distanceM: 25 },
+  "接道距離は表示用に四捨五入したメートル値にする",
+);
+assert.deepEqual(
+  evaluateRoadAccessWarning({ ...landBuilding, front_path_id: -1, front_path_distance: 0 }),
+  { kind: "noRoad" },
+  "接道IDが無い区画は距離0でも接道なし警告を返す",
+);
+assert.equal(
+  evaluateRoadAccessWarning({ ...landBuilding, parcel_type: constants.PARCEL_WATER, front_path_id: -1, front_path_distance: 0 }),
+  null,
+  "海上区画は接道を持たないため対象外",
+);
+assert.equal(
+  evaluateRoadAccessWarning({ ...landBuilding, variant: constants.GRADING_VARIANTS[0], front_path_distance: 50 }),
+  null,
+  "造成工事は対象外",
+);
+assert.equal(
+  evaluateRoadAccessWarning({ ...landBuilding, is_bd: false, front_path_distance: 50 }),
+  null,
+  "建物以外の経済主体は対象外",
+);
+assert.equal(
+  evaluateRoadAccessWarning({ is_bd: true, variant: 1001, parcel_id: 193 }),
+  null,
+  "接道フィールド未提供時は誤警告しない",
+);
+
+const farCard = render({
+  alert: 0,
+  warning: 0,
+  roadAccessWarning: evaluateRoadAccessWarning({ ...landBuilding, front_path_distance: 25 }),
+});
+assert.equal(farCard.querySelectorAll(".agent-detail-alert-card").length, 1);
+assert.equal(farCard.querySelector(".agent-detail-alert-title").textContent, translations.agent.alerts.farFromRoad.title);
+assert.ok(farCard.textContent.includes("25m"));
+
+const noRoadCard = render({
+  alert: 0,
+  warning: 0,
+  roadAccessWarning: evaluateRoadAccessWarning({ ...landBuilding, front_path_id: -1, front_path_distance: 0 }),
+});
+assert.equal(noRoadCard.querySelectorAll(".agent-detail-alert-card").length, 1);
+assert.equal(noRoadCard.querySelector(".agent-detail-alert-title").textContent, translations.agent.alerts.noRoadAccess.title);
+
+console.log("Agent alerts: API source, target IDs, combined cards, facility causes, distinct icons, road access, cleared warnings OK");

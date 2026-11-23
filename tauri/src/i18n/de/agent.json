@@ -132,6 +132,14 @@
       "infraWarning": {
         "title": "Infrastruktureinrichtung gestoppt oder zusammengebrochen",
         "description": "Diese Einrichtung hat den Betrieb eingestellt oder ist zusammengebrochen, was sich auf das Infrastrukturangebot auswirkt. Überprüfen Sie den Status und die Versorgungsverbindungen."
+      },
+      "farFromRoad": {
+        "title": "Weit von der Straße entfernt",
+        "description": "Die nächste Straße ist etwa {{distance}} m entfernt. Die Anbindung für Lieferungen, Pendeln und Einkäufe ist stark beeinträchtigt; ziehen Sie in Betracht, eine Straße näher an das Gebäude heranzuführen."
+      },
+      "noRoadAccess": {
+        "title": "Keine Straßenanbindung",
+        "description": "Dieses Gebäude hat keine Straße, an die es angebunden werden kann. Die Anbindung für Lieferungen, Pendeln und Einkäufe ist stark beeinträchtigt; bauen Sie eine Straße in der Nähe."
       }
     },
     "infra": {

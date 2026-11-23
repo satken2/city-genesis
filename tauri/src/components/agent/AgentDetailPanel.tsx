@@ -38,7 +38,12 @@ import {
   STATUS_DEMOLISHING,
 } from "../../constants";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { buildingWarningMask, fetchSpatialWarnings, type SpatialWarning } from "../../utils/agentAlerts";
+import {
+  buildingWarningMask,
+  evaluateRoadAccessWarning,
+  fetchSpatialWarnings,
+  type SpatialWarning,
+} from "../../utils/agentAlerts";
 import { usePlayMode } from "../../hooks/usePlayMode";
 import { useConstructionBudgetRow } from "../../hooks/useConstructionBudgetRow";
 import { resolveAgentIcon } from "../../utils/agentIcon";
@@ -508,6 +513,7 @@ export function AgentDetailPanel({
       <AgentAlertsPanel
         alert={agentData.alert}
         warning={buildingWarningMask(agentData, spatialWarnings)}
+        roadAccessWarning={evaluateRoadAccessWarning(agentData)}
       />
 
       {/*

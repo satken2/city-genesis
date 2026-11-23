@@ -132,6 +132,14 @@
       "infraWarning": {
         "title": "Infrastructure arrêtée ou effondrée",
         "description": "Cette infrastructure est à l’arrêt ou s’est effondrée, ce qui perturbe l’approvisionnement. Vérifiez son état et ses raccordements."
+      },
+      "farFromRoad": {
+        "title": "Éloigné de la route",
+        "description": "La route la plus proche se trouve à environ {{distance}} m. L'accès pour l'approvisionnement, les trajets domicile-travail et les courses est fortement pénalisé ; envisagez de prolonger une route jusqu'à ce bâtiment."
+      },
+      "noRoadAccess": {
+        "title": "Aucun accès routier",
+        "description": "Ce bâtiment ne dispose d'aucune route à laquelle se raccorder. L'accès pour l'approvisionnement, les trajets domicile-travail et les courses est fortement pénalisé ; construisez une route à proximité."
       }
     },
     "infra": {

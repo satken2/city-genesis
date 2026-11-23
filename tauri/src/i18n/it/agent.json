@@ -132,6 +132,14 @@
       "infraWarning": {
         "title": "struttura infrastrutturale interrotta o crollata",
         "description": "Questa struttura ha smesso di funzionare o è crollato, influendo sulla fornitura di infrastrutture. controllarne lo stato e le connessioni di alimentazione."
+      },
+      "farFromRoad": {
+        "title": "Lontano dalla strada",
+        "description": "La strada più vicina dista circa {{distance}} m. L'accesso per rifornimenti, pendolarismo e spesa è fortemente penalizzato; valuta di prolungare una strada più vicino all'edificio."
+      },
+      "noRoadAccess": {
+        "title": "Nessun accesso stradale",
+        "description": "Questo edificio non ha alcuna strada a cui collegarsi. L'accesso per rifornimenti, pendolarismo e spesa è fortemente penalizzato; costruisci una strada nelle vicinanze."
       }
     },
     "infra": {

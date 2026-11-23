@@ -40,6 +40,8 @@ import infraWarningIcon from "../../assets/images/alerts/electricity.png";
 import capacityTightIcon from "../../assets/images/alerts/capacity-tight.svg";
 import infraDisconnectedIcon from "../../assets/images/alerts/infra-disconnected.svg";
 import nonconformingIcon from "../../assets/images/alerts/nonconforming.svg";
+import roadFarIcon from "../../assets/images/alerts/road-far.svg";
+import type { RoadAccessWarning } from "../../utils/agentAlerts";
 import "./AgentDetailPanel.css";
 
 type AlertCardDef = {
@@ -84,41 +86,65 @@ type AgentAlertsPanelProps = {
   alert: number | undefined | null;
   /** Spatial warnings on the building and its parcel. Independent of display filters in the 3D view. */
   warning?: number | null;
+  /** Warning when a building parcel has no frontage street or sits too far from its frontage street. */
+  roadAccessWarning?: RoadAccessWarning | null;
 };
 
-export function AgentAlertsPanel({ alert, warning }: AgentAlertsPanelProps) {
+type ResolvedAlertCard = {
+  key: string;
+  icon: string;
+  title: string;
+  description: string;
+};
+
+export function AgentAlertsPanel({ alert, warning, roadAccessWarning }: AgentAlertsPanelProps) {
   const { t } = useTranslation();
   const bits = alert ?? 0;
   // 対処につながる原因カードを優先し、原因が不明なときだけ運営不能の総括を残す。
   const warningBits = (bits & FACILITY_CAUSE_ALERTS) !== 0
     ? (warning ?? 0) & ~ALERT_DISPLAY_FACILITY_WARNING
     : warning ?? 0;
-  const activeCards = [
+  const activeCards: ResolvedAlertCard[] = [
     ...ALERT_CARDS.filter((card) => (bits & card.bit) !== 0),
     ...WARNING_CARDS.filter((card) => (warningBits & card.bit) !== 0),
-  ];
+  ].map((card) => ({
+    key: card.key,
+    icon: card.icon,
+    title: t(`agent.alerts.${card.key}.title`),
+    description: t(`agent.alerts.${card.key}.description`),
+  }));
+  if (roadAccessWarning) {
+    if (roadAccessWarning.kind === "noRoad") {
+      activeCards.push({
+        key: "noRoadAccess",
+        icon: roadFarIcon,
+        title: t("agent.alerts.noRoadAccess.title"),
+        description: t("agent.alerts.noRoadAccess.description"),
+      });
+    } else {
+      activeCards.push({
+        key: "farFromRoad",
+        icon: roadFarIcon,
+        title: t("agent.alerts.farFromRoad.title"),
+        description: t("agent.alerts.farFromRoad.description", { distance: roadAccessWarning.distanceM }),
+      });
+    }
+  }
   if (activeCards.length === 0) return null;
 
   return (
     <div className="agent-detail-alerts">
-      {activeCards.map((card) => {
-        const body = (
-          <>
-            <div className="agent-detail-alert-title">
-              <img src={card.icon} alt="" className="agent-detail-alert-icon" />
-              {t(`agent.alerts.${card.key}.title`)}
-            </div>
-            <div className="agent-detail-alert-desc">
-              {t(`agent.alerts.${card.key}.description`)}
-            </div>
-          </>
-        );
-        return (
-          <div className="agent-detail-alert-card" key={card.key}>
-            {body}
+      {activeCards.map((card) => (
+        <div className="agent-detail-alert-card" key={card.key}>
+          <div className="agent-detail-alert-title">
+            <img src={card.icon} alt="" className="agent-detail-alert-icon" />
+            {card.title}
           </div>
-        );
-      })}
+          <div className="agent-detail-alert-desc">
+            {card.description}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

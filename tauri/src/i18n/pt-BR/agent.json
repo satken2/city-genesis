@@ -132,6 +132,14 @@
       "infraWarning": {
         "title": "Instalação de infraestrutura parou ou entrou em colapso",
         "description": "Essa instalação parou de operar ou entrar em colapso, afetando o fornecimento de infraestrutura. Verifique seu status e conexões de suprimentos."
+      },
+      "farFromRoad": {
+        "title": "Longe da rua",
+        "description": "A rua mais próxima fica a cerca de {{distance}} m. O acesso para suprimentos, deslocamento ao trabalho e compras fica muito prejudicado; considere estender uma rua para mais perto deste prédio."
+      },
+      "noRoadAccess": {
+        "title": "Sem acesso por rua",
+        "description": "Este prédio não tem nenhuma rua para se conectar. O acesso para suprimentos, deslocamento ao trabalho e compras fica muito prejudicado; construa uma rua por perto."
       }
     },
     "infra": {
