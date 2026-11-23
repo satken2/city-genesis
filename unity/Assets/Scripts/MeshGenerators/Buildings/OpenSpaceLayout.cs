@@ -39,6 +39,8 @@ public static partial class OpenSpaceLayout
         public readonly List<BuildingRoadOpening> Openings = new List<BuildingRoadOpening>();
         public bool HasLoop;
         public Vector2? Gate;      // Center of the fence opening at a plant's gate. Null for sites without a fence.
+        public Vector2[] Pit;      // Area the backend digs at an open pit or quarry. Null for other sites.
+        public Vector2? PitFloor;  // Where a quarry's floor level is read (the backend cuts down to the ground here). Null where the backend digs as deep as it can.
     }
     sealed class Grid
     {
@@ -72,6 +74,8 @@ public static partial class OpenSpaceLayout
         if (modelType == Constants.MODEL_WATER_STATION) { WaterStation(plan, seed, partSizes); return plan; }
         if (modelType == Constants.MODEL_SEWAGE_PLANT) { SewagePlant(plan, seed, partSizes); return plan; }
         if (modelType == Constants.MODEL_WASTE_PLANT) { WastePlant(plan, seed, partSizes); return plan; }
+        if (modelType == Constants.MODEL_OPEN_PIT) { OpenPit(plan, seed, partSizes); return plan; }
+        if (modelType == Constants.MODEL_QUARRY) { Quarry(plan, seed, partSizes); return plan; }
         var grid = MakeGrid(polygon);
         if (grid.Entry < 0) return plan;
         if (modelType == Constants.MODEL_PARKING) Parking(plan, grid);

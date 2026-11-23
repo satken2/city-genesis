@@ -136,11 +136,11 @@ public class MeshTestController : MonoBehaviour
         // model_type depends only on variant, so resolve before building footprint polygons.
         int modelType = BuildingMeshBuilder.GetModelType(new BuildingSummary { variant = variant });
 
-        // Mashup/open-pit footprints are parcels containing multiple wings, not building bodies;
+        // Mashup/open-pit footprints are parcels containing multiple wings or units, not building bodies;
         // input size alone cannot fit even the largest wing (4×6 cells=32m×48m), causing placement failure.
         // Supply a fixed parcel large enough for primary wings.
-        bool hasSubBuildings = modelType == Constants.MODEL_MASHUP || modelType == Constants.MODEL_OPEN_PIT;
-        if (hasSubBuildings)
+        bool hasSubBuildings = modelType == Constants.MODEL_MASHUP;
+        if (hasSubBuildings || modelType == Constants.MODEL_OPEN_PIT || modelType == Constants.MODEL_QUARRY)
         {
             width = MASHUP_PARCEL_WIDTH;
             height = MASHUP_PARCEL_DEPTH;
@@ -157,7 +157,7 @@ public class MeshTestController : MonoBehaviour
         if (hasSubBuildings)
         {
             buildingData.sub_buildings = TestSubBuildingLayout.Generate(
-                variant, ToVector2Polygon(polygonCoords), floors, modelType == Constants.MODEL_OPEN_PIT);
+                variant, ToVector2Polygon(polygonCoords), floors);
             if (buildingData.sub_buildings == null)
             {
                 Debug.LogWarning($"[MeshTest] variant={variant} は subbuilding_master に棟定義が無いため、サブ建物なしで生成します。");

@@ -97,6 +97,7 @@ LOD制作は**同じ建物を距離に応じて表現する作業**である。�
 | 敷地の空き地に植栽・車両・資材を散らしたい | `scatter1`, `scatter2`, …。犬小屋のように1棟に1個までの物は `scatter-single1`, … (配置の前提は `ScatterLayout.cs` のコメント。既存のプロップ・車両は `genesis-gallery/pipeline/jobs/scatter_parts.py` で写す。植え込み・庭木の葉は [[genesis-prop-parts]] の「樹木・植え込みの葉」に従う。接道側に空き地をまとめるならマスターの `building_shape=setback`) |
 | 敷地の全体を小屋などで埋め尽くしたい(区画の形が変わる建物でも配置が動かない) | `fill1`, `fill2`, …(遠景は各 `fill{n}_far`。配置の前提は `FillLayout.cs` のコメント) |
 | 供給処理施設(変電所・水道ポンプ・下水処理場・ゴミ処理場)の設備・小物 | 設備は `site_{名前}`(接写 `_close`・遠景 `_far` を同じ原点・底面で持てる)、小物は `site_pipe`・`site_light`、門は `gate`、柵は `fence-w1`。原点は底面の中心で、外接箱がそのまま置き場の寸法になる。置かれる部品名と並び方は `OpenSpaceLayout.Facility.cs` のコメント |
+| 露天掘り(金属鉱山)・採石場の設備と、散らす重機・岩・資材 | 遠景 `_far` を持つ設備は、露天掘りが `site_crusher`(破砕プラント)・`site_conveyor`(山の上を通る搬送コンベヤ1スパン)・`site_stockpile1`…(製品の山。番号順に使う)・`site_rom`・`site_office`・`site_workshop`、採石場が `site_plant`(破砕・ふるいのプラント)・`site_office`・`site_pond`・`site_stockpile1`…。向きと位置をばらして散らす部品(遠景なし)は、車両 `site_truck`・`site_loader`・`site_excavator`・`site_drill`・`site_pickup`、岩 `site_rock1`…、ずりの小山 `site_heap1`…、資材 `site_clutter1`…。門 `gate`、柵 `fence-w1`、未舗装の構内道路の材質参照 `site_gravel`。原点・外接箱の扱いは供給処理施設と同じで、車両は車体の前後を X にする。受入口の向き、ふるい塔の位置、搬送コンベヤの長さなど配置が頼る寸法は `OpenSpaceLayout.Facility.cs` の露天掘り・採石場の箇所のコメント |
 | 切妻/片流れ屋根の妻壁の材質 | `generic-wall` |
 | 畑・庭など地面アセット(MODEL_MODULAR_GROUND) | `tile`(建物本体は一切描かない) |
 
@@ -203,7 +204,7 @@ a200  初等学校     11個  base-w1 base-c1 mid-w1 mid-w2 mid-c1 top-w1 top-c1
 
 | 何をしたか | 更新するマスター項目(タブ: agent_master) |
 |---|---|
-| 新しい建物のパーツ一式を作った | `model_type`(1=FLAT/2=HOUSE/3=GABLE/4=GROUND/5=PREBUILT/6=PORT/7=MASHUP/8=SHED/9=RAIL_YARD/13=OPEN_PIT/14〜17=供給処理施設)。未設定だと意図した組み立て方にならない |
+| 新しい建物のパーツ一式を作った | `model_type`(1=FLAT/2=HOUSE/3=GABLE/4=GROUND/5=PREBUILT/6=PORT/7=MASHUP/8=SHED/9=RAIL_YARD/13=OPEN_PIT/14〜17=供給処理施設/18=QUARRY)。未設定だと意図した組み立て方にならない |
 | `floor` パーツを作って地面を描きたい | **`draw_floor=yes`**。パーツを置くだけでは地面パネルは描画されない(オプトイン) |
 | 屋根の形を変えた(切妻/片流れ/寄棟にした) | `model_type` を 3 / 8 / 2 へ |
 | 階高に合わせてパーツを作った/階高を変えたい | `height_per_floor`(既定4.0)。パーツの著作高さとずれると隙間・めり込みが出る |

@@ -101,9 +101,13 @@ public static class Constants
     public const int MODEL_WATER_STATION = 15;
     public const int MODEL_SEWAGE_PLANT = 16;
     public const int MODEL_WASTE_PLANT = 17;
+    public const int MODEL_QUARRY = 18;
     public const float MASHUP_CELL_SIZE = 12.0f;
     public const float MASHUP_GRID_PHASE_STEP = 0.5f;
     public const float OPEN_PIT_YARD_DEPTH = 40.0f;
+    public const float OPEN_PIT_RIM_MARGIN = 10.0f;
+    public const float QUARRY_YARD_DEPTH = 24.0f;
+    public const float QUARRY_RIM_MARGIN = 5.0f;
     public const int FAMILY_SINGLE = 1;
     public const int FAMILY_COUPLE = 2;
     public const int FAMILY_FAMILY = 3;

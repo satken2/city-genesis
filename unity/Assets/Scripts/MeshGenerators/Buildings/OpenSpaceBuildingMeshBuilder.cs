@@ -18,6 +18,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
     const int SizedPlanCacheSize=256;
     static OpenSpaceBuildingMeshBuilder()=>AssetPackStore.CityChanging+=sizedPlans.Clear;
     const float SideStep=1.25f; // Maximum subdivision length for terrain-following curb sides (m).
+    const float ClickTolerance=.25f; // Gap (m) allowed between the terrain and the surface to click on, made in place of the deferred ground panel.
     const float SideFooting=.05f; // Lower side bottoms below ground by this amount to hide slope gaps (m).
     public BuildingMeshResult Generate(BuildingSummary data,bool isDynamic=false)
     {
@@ -28,7 +29,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
         var paths=CollectParts(naming.Prefix,data.visual_variant,modelType,parts);
         bool sized=modelType==Constants.MODEL_PARK || OpenSpaceLayout.IsFacilityModel(modelType);
         var plan=sized?SizedPlan(data,modelType,paths):BuildingRoadAccessIndex.GetOpenSpacePlan(data);
-        // Parks draw their thousands of trees and shrubs by instancing, plants their pipes and lights. Parking lots and rotaries combine everything.
+        // Parks draw their thousands of trees and shrubs by instancing, plants their pipes and lights, open pits the machines in the pit. Parking lots and rotaries combine everything.
         return Build(plan,parts,center,true,BuildingMeshUtils.ResolveFloorMaterialFromMaster(data,naming.Prefix),sized?paths:null,naming.Prefix);
     }
     /// <summary>Resolve the parts a model type's plan uses from the selected model folder. Returns their resource paths (before the render-LOD suffix).</summary>
@@ -48,6 +49,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
         if(OpenSpaceLayout.IsFacilityModel(modelType))
         {
             foreach(string part in OpenSpaceLayout.FacilityParts)Collect(part);
+            foreach(string series in OpenSpaceLayout.FacilitySeries)for(int n=1;Collect(series+n);n++){}
             return paths;
         }
         foreach(string part in Parts)Collect(part);
@@ -87,6 +89,8 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
     /// Validation/exhibits use the same placement and actual FBXs as gameplay. flat is only for terrain-free exhibits.
     /// With paths (part resource paths), shown buildings (<see cref="InstancedPartRenderer.Sink"/> set) hand decorations to instancing instead of combining them;
     /// a plant's units are always combined. fencePrefix is the model prefix whose fence parts enclose a plan with a gate.
+    /// While a shown building is generated (<see cref="BuildingExteriorRenderer.Capture"/> set), the ground (the panel and the surfaces
+    /// flush with it) becomes deferred low-priority work like other buildings' ground panels, and only a coarse surface to click on is made now.
     /// </summary>
     public static BuildingMeshResult Build(OpenSpaceLayout.Plan plan,Dictionary<string,GameObject> parts,Vector3 center,bool terrain,Material floorOverride=null,
         Dictionary<string,string> paths=null,string fencePrefix=null)
@@ -115,21 +119,60 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
         try
         {
             if(plan.Polygon==null || plan.Polygon.Length<3)return null;
-            Mesh floor=terrain?ModularBodyBuilder.GenerateTerrainConformingFloorMesh(plan.Polygon,center):BuildingMeshBuilder.GenerateHorizontalPolygonMesh(plan.Polygon,0f);
-            if(floor!=null)
-            {
-                owned.Add(floor);colliders.Add(new CombineInstance {mesh=floor,transform=Matrix4x4.identity});
-                var mat=floorOverride??Resolve("floor")??BuildingMeshBuilder.GetCommonConcreteMaterial();
-                Append(floor,new[]{mat},Matrix4x4.identity);
-            }
+            // Like other buildings' ground panels: coincident with the terrain at close-up, within GROUND_PANEL_TOLERANCE elsewhere.
+            // Decided here because deferred jobs run with the Normal LOD set.
+            float tolerance=BuildingMeshUtils.CurrentDrawLod==DrawLod.Close?ModularBodyBuilder.GROUND_PANEL_EXACT:ModularBodyBuilder.GROUND_PANEL_TOLERANCE;
+            Material floorMaterial=floorOverride??Resolve("floor")??BuildingMeshBuilder.GetCommonConcreteMaterial();
+            var flush=new List<(OpenSpaceLayout.Surface surface,Material material)>();
             foreach(var surface in plan.Surfaces)
             {
+                if(surface.Side!=null)continue;
+                Material mat=Resolve(surface.Material);
+                if(mat!=null)flush.Add((surface,mat));
+            }
+            // The ground: the panel, and the surfaces flush with it laid on the panel's own triangles. Returns the panel.
+            // As deferred work it is drawn apart from the building's mesh, which skips that mesh's material swap, so it takes the swapped materials itself.
+            Mesh Ground(List<CombineInstance> meshes,List<Material> mats,List<Mesh> temporary,bool apart)
+            {
+                void Add(Mesh mesh,Material mat)
+                {
+                    if(apart)mat=BuildingManager.GetSharedDepthOffsetMaterials(new[]{mat})[0];
+                    temporary.Add(mesh);
+                    for(int s=0;s<mesh.subMeshCount;s++){meshes.Add(new CombineInstance {mesh=mesh,subMeshIndex=s,transform=Matrix4x4.identity});mats.Add(mat);}
+                }
+                Mesh floor=terrain?ModularBodyBuilder.GenerateTerrainConformingFloorMesh(plan.Polygon,center,tolerance):BuildingMeshBuilder.GenerateHorizontalPolygonMesh(plan.Polygon,0f);
+                if(floor==null)return null;
+                Add(floor,floorMaterial);
+                PanelIndex panel=terrain?new PanelIndex(floor):null;
+                foreach(var (surface,mat) in flush)
+                {
+                    Triangulate(surface,out var points,out var triangles);
+                    Mesh mesh=panel!=null?panel.Drape(points,triangles,surface.Lift):TriangleSurfaceMesh(points,triangles,center,terrain,surface.Lift);
+                    if(mesh!=null)Add(mesh,mat);
+                }
+                return floor;
+            }
+            Mesh click;
+            float clickLift=0f;
+            if(terrain && BuildingExteriorRenderer.Capture!=null)
+            {
+                BuildingExteriorRenderer.Capture.Add((meshes,mats,temporary)=>Ground(meshes,mats,temporary,true));
+                click=ModularBodyBuilder.GenerateTerrainConformingFloorMesh(plan.Polygon,center,ClickTolerance);
+                if(click!=null)owned.Add(click);
+                // Raised by the most the coarse surface can dip (twice the tolerance, at its fans), so no part of it lies under the terrain.
+                clickLift=2f*ClickTolerance;
+            }
+            else click=Ground(instances,materials,owned,false);
+            if(click!=null)colliders.Add(new CombineInstance {mesh=click,transform=Matrix4x4.Translate(new Vector3(0,clickLift,0))});
+            // A raised surface meets its sides, which read the terrain, so it is cut by the terrain grid instead of lying on the panel.
+            foreach(var surface in plan.Surfaces)
+            {
+                if(surface.Side==null)continue;
                 Material mat=Resolve(surface.Material);if(mat==null)continue;
                 Triangulate(surface,out var points,out var triangles);
                 Mesh mesh=TriangleSurfaceMesh(points,triangles,center,terrain,surface.Lift);
                 if(mesh==null)continue;
                 owned.Add(mesh);Append(mesh,new[]{mat},Matrix4x4.identity);
-                if(surface.Side==null)continue;
                 Mesh side=SideMesh(surface,center,terrain);
                 if(side==null)continue;
                 owned.Add(side);Append(side,new[]{Resolve(surface.Side)??mat},Matrix4x4.identity);
@@ -137,7 +180,9 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
             var sink=paths!=null?InstancedPartRenderer.Sink:null;
             var raised=new List<OpenSpaceLayout.Surface>();
             foreach(var surface in plan.Surfaces)if(surface.Side!=null)raised.Add(surface);
-            foreach(var prop in plan.Props)
+            var props=plan.Props;
+            if(plan.Pit!=null){props=new List<OpenSpaceLayout.Prop>(plan.Props);AddPitCrews(plan,center,terrain,parts,props);}
+            foreach(var prop in props)
             {
                 if(!parts.TryGetValue(prop.Part,out var prefab))continue;
                 Bounds b;Mesh mesh=null;string path=null;
@@ -185,12 +230,169 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
                 ModularBodyBuilder.GenerateSiteDecorations(fencePrefix,0,plan.Polygon,null,null,null,center,terrain,instances,materials,owned,
                     plan.Gate,OpenSpaceLayout.FacilityGateWidth*.5f);
             var result=new Mesh {name="OpenSpace",indexFormat=UnityEngine.Rendering.IndexFormat.UInt32};
-            result.CombineMeshes(instances.ToArray(),false,true);result.RecalculateBounds();
+            // Nothing is left to draw now when the ground is deferred and the plan places no props.
+            if(instances.Count>0)result.CombineMeshes(instances.ToArray(),false,true);
+            result.RecalculateBounds();
             var collision=new Mesh {name="OpenSpaceCollider",indexFormat=UnityEngine.Rendering.IndexFormat.UInt32};
             collision.CombineMeshes(colliders.ToArray(),true,true);collision.RecalculateBounds();
             return BuildingMeshBuilder.MergeSubMeshes(new BuildingMeshResult(result,materials.ToArray(),collision));
         }
         finally {foreach(var mesh in owned)Object.Destroy(mesh);}
+    }
+    /// <summary>
+    /// The ground panel's triangles, bucketed in plan for laying flat surfaces on them (<see cref="Drape"/>). A surface cut by the
+    /// panel's own triangles stays parallel to the panel whatever tolerance the panel follows the terrain with, and its cost follows
+    /// the panel's triangle count rather than the terrain grid.
+    /// </summary>
+    sealed class PanelIndex
+    {
+        readonly Vector3[] vertices,normals;
+        readonly int[] triangles;
+        readonly List<int>[] buckets;
+        readonly int[] seen;
+        readonly Vector2 origin;
+        readonly float cell;
+        readonly int width,height;
+        int stamp;
+        public PanelIndex(Mesh floor)
+        {
+            vertices=floor.vertices;normals=floor.normals;triangles=floor.triangles;
+            if(normals.Length!=vertices.Length){normals=new Vector3[vertices.Length];for(int i=0;i<normals.Length;i++)normals[i]=Vector3.up;}
+            Bounds b=floor.bounds;
+            int count=triangles.Length/3;
+            // About two triangles per bucket on an even panel.
+            cell=Mathf.Clamp(Mathf.Sqrt(2f*b.size.x*b.size.z/Mathf.Max(1,count)),2f,64f);
+            origin=new Vector2(b.min.x,b.min.z);
+            width=Mathf.Max(1,Mathf.CeilToInt(b.size.x/cell));height=Mathf.Max(1,Mathf.CeilToInt(b.size.z/cell));
+            buckets=new List<int>[width*height];
+            seen=new int[count];
+            for(int t=0;t<count;t++)
+            {
+                Vector3 p0=vertices[triangles[3*t]],p1=vertices[triangles[3*t+1]],p2=vertices[triangles[3*t+2]];
+                Range(Mathf.Min(p0.x,p1.x,p2.x),Mathf.Min(p0.z,p1.z,p2.z),Mathf.Max(p0.x,p1.x,p2.x),Mathf.Max(p0.z,p1.z,p2.z),out int x0,out int z0,out int x1,out int z1);
+                for(int z=z0;z<=z1;z++)for(int x=x0;x<=x1;x++)(buckets[z*width+x]??=new List<int>()).Add(t);
+            }
+        }
+        void Range(float minX,float minZ,float maxX,float maxZ,out int x0,out int z0,out int x1,out int z1)
+        {
+            x0=Mathf.Clamp(Mathf.FloorToInt((minX-origin.x)/cell),0,width-1);x1=Mathf.Clamp(Mathf.FloorToInt((maxX-origin.x)/cell),0,width-1);
+            z0=Mathf.Clamp(Mathf.FloorToInt((minZ-origin.y)/cell),0,height-1);z1=Mathf.Clamp(Mathf.FloorToInt((maxZ-origin.y)/cell),0,height-1);
+        }
+        static float Cross(Vector2 a,Vector2 b,Vector2 c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
+        /// <summary>Keep the part of a convex polygon to the left of a→b.</summary>
+        static void Clip(List<Vector2> polygon,List<Vector2> scratch,Vector2 a,Vector2 b)
+        {
+            scratch.Clear();
+            for(int i=0;i<polygon.Count;i++)
+            {
+                Vector2 p=polygon[i],q=polygon[(i+1)%polygon.Count];
+                float dp=Cross(a,b,p),dq=Cross(a,b,q);
+                if(dp>=0)scratch.Add(p);
+                if((dp>0 && dq<0)||(dp<0 && dq>0))scratch.Add(p+(q-p)*(dp/(dp-dq)));
+            }
+            polygon.Clear();polygon.AddRange(scratch);
+        }
+        /// <summary>
+        /// The surface (triangles counterclockwise in plan) cut by the panel's triangles and lifted by lift above them.
+        /// UVs are local XZ (1m = 1), normals the panel's. Null where the surface misses the panel.
+        /// </summary>
+        public Mesh Drape(List<Vector2> points,List<int> source,float lift)
+        {
+            var outVertices=new List<Vector3>();var outNormals=new List<Vector3>();var outUv=new List<Vector2>();var indices=new List<int>();
+            var polygon=new List<Vector2>(8);var scratch=new List<Vector2>(8);
+            for(int k=0;k+2<source.Count;k+=3)
+            {
+                Vector2 a=points[source[k]],b=points[source[k+1]],c=points[source[k+2]];
+                if(Cross(a,b,c)<0){var swap=b;b=c;c=swap;}
+                Range(Mathf.Min(a.x,b.x,c.x),Mathf.Min(a.y,b.y,c.y),Mathf.Max(a.x,b.x,c.x),Mathf.Max(a.y,b.y,c.y),out int x0,out int z0,out int x1,out int z1);
+                stamp++;
+                for(int z=z0;z<=z1;z++)for(int x=x0;x<=x1;x++)
+                {
+                    var bucket=buckets[z*width+x];if(bucket==null)continue;
+                    foreach(int t in bucket)
+                    {
+                        if(seen[t]==stamp)continue;
+                        seen[t]=stamp;
+                        int i0=triangles[3*t],i1=triangles[3*t+1],i2=triangles[3*t+2];
+                        Vector3 v0=vertices[i0],v1=vertices[i1],v2=vertices[i2];
+                        Vector2 p0=new Vector2(v0.x,v0.z),p1=new Vector2(v1.x,v1.z),p2=new Vector2(v2.x,v2.z);
+                        float area=Cross(p0,p1,p2);
+                        if(Mathf.Abs(area)<1e-9f)continue;
+                        polygon.Clear();polygon.Add(p0);
+                        if(area>0){polygon.Add(p1);polygon.Add(p2);}else{polygon.Add(p2);polygon.Add(p1);}
+                        Clip(polygon,scratch,a,b);Clip(polygon,scratch,b,c);Clip(polygon,scratch,c,a);
+                        if(polygon.Count<3)continue;
+                        int first=outVertices.Count;
+                        foreach(Vector2 q in polygon)
+                        {
+                            float w0=Cross(q,p1,p2)/area,w1=Cross(p0,q,p2)/area,w2=1f-w0-w1;
+                            outVertices.Add(new Vector3(q.x,w0*v0.y+w1*v1.y+w2*v2.y+lift,q.y));
+                            outNormals.Add((w0*normals[i0]+w1*normals[i1]+w2*normals[i2]).normalized);
+                            outUv.Add(q);
+                        }
+                        for(int i=1;i+1<polygon.Count;i++){indices.Add(first);indices.Add(first+i+1);indices.Add(first+i);}
+                    }
+                }
+            }
+            if(indices.Count==0)return null;
+            var mesh=new Mesh {indexFormat=UnityEngine.Rendering.IndexFormat.UInt32};
+            mesh.SetVertices(outVertices);mesh.SetNormals(outNormals);mesh.SetUVs(0,outUv);mesh.SetTriangles(indices,0);
+            mesh.RecalculateBounds();
+            return mesh;
+        }
+    }
+    const int PitSamples=12;        // Ground samples per side of the excavation's bounding rectangle when looking for its working level.
+    const float PitCrewArea=10000f; // Excavation area per excavator and haul truck (m²).
+    const float PitLevelStep=1f;    // Ground heights within this count as the same level (m).
+    const float PitTruckReach=8f;   // From an excavator to the truck it loads (m).
+    const float PitCrewSpacing=60f; // Least distance between crews (m), so the crews of a large excavation spread over the level being cut.
+    /// <summary>
+    /// Excavators and haul trucks at work in an excavation: one crew per PitCrewArea on the level being cut, each with the heap
+    /// it is loading from behind the excavator; a drill rig stands by the first crew. The level being cut is the lowest ground of
+    /// an open pit, where the crews gather toward the middle, and the floor of a quarry (the ground at Plan.PitFloor), where they
+    /// work at the far end from the forecourt, under the face. The crews are placed from the current terrain rather than by the
+    /// plan, so they follow the excavation as it advances. A coarse sample is enough: the level being cut is flat and wide.
+    /// </summary>
+    static void AddPitCrews(OpenSpaceLayout.Plan plan,Vector3 center,bool terrain,Dictionary<string,GameObject> parts,List<OpenSpaceLayout.Prop> props)
+    {
+        if(!parts.ContainsKey("site_excavator") && !parts.ContainsKey("site_truck"))return;
+        Vector2[] pit=plan.Pit;
+        float Ground(Vector2 p)=>terrain?Utils.GetGroundHeight(new Vector3(center.x+p.x,1000,center.z+p.y)):0f;
+        Vector2 min=pit[0],max=pit[0],middle=Vector2.zero;
+        foreach(var p in pit){min=Vector2.Min(min,p);max=Vector2.Max(max,p);middle+=p/pit.Length;}
+        Vector2 step=(max-min)/PitSamples;
+        var spots=new List<(int level,float distance,Vector2 point)>();
+        for(int i=0;i<PitSamples*PitSamples;i++)
+        {
+            var p=min+new Vector2((i%PitSamples+.5f)*step.x,(i/PitSamples+.5f)*step.y);
+            if(!PolygonUtils.Contains(pit,p))continue;
+            spots.Add((Mathf.RoundToInt(Ground(p)/PitLevelStep),plan.PitFloor.HasValue?-(p-plan.PitFloor.Value).sqrMagnitude:(p-middle).sqrMagnitude,p));
+        }
+        if(spots.Count==0)return;
+        int working=plan.PitFloor.HasValue?Mathf.RoundToInt(Ground(plan.PitFloor.Value)/PitLevelStep):int.MinValue;
+        if(!plan.PitFloor.HasValue)foreach(var spot in spots)working=working==int.MinValue?spot.level:Mathf.Min(working,spot.level);
+        spots.Sort((a,b)=>Mathf.Abs(a.level-working)!=Mathf.Abs(b.level-working)?Mathf.Abs(a.level-working).CompareTo(Mathf.Abs(b.level-working)):a.distance.CompareTo(b.distance));
+        int crews=Mathf.Max(1,Mathf.RoundToInt(Mathf.Abs(PolygonUtils.SignedArea(pit))/PitCrewArea));
+        var placed=new List<Vector2>();
+        void Stand(string part,Vector2 position,Vector2 forward)
+        {
+            if(PolygonUtils.Contains(pit,position))props.Add(new OpenSpaceLayout.Prop {Part=part,Position=position,Forward=forward,Fitted=true});
+        }
+        for(int i=0;i<spots.Count && placed.Count<crews;i++)
+        {
+            bool crowded=false;
+            foreach(var other in placed)crowded|=(other-spots[i].point).sqrMagnitude<PitCrewSpacing*PitCrewSpacing;
+            if(crowded)continue;
+            placed.Add(spots[i].point);
+            // The excavator's boom (model +X, to the left of its front) reaches over the truck, which stands across it.
+            float angle=CollapsedBuildingMeshBuilder.Hash01(i,Mathf.RoundToInt(spots[i].point.x),Mathf.RoundToInt(spots[i].point.y),40)*Mathf.PI*2f;
+            var facing=new Vector2(Mathf.Cos(angle),Mathf.Sin(angle));
+            var boom=new Vector2(-facing.y,facing.x);
+            Stand("site_excavator",spots[i].point,facing);
+            Stand("site_truck",spots[i].point+boom*PitTruckReach,boom);
+            Stand("site_heap1",spots[i].point-boom*PitTruckReach,facing);
+            if(placed.Count==1)Stand("site_drill",spots[i].point-facing*PitTruckReach*2f,boom);
+        }
     }
     /// <summary>Decorations rest on the curb-raised top (sidewalk/island) at their placement.</summary>
     static float PropLift(List<OpenSpaceLayout.Surface> raised,Vector2 position)

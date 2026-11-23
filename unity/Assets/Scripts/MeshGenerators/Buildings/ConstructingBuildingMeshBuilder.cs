@@ -35,7 +35,7 @@ using GeneratedModels;
 /// reruns this builder, extending scaffolding/machinery (lowering them during demolition).
 ///
 /// Known simplifications:
-/// - MODEL_MODULAR_GROUND (fields/gardens), open spaces, MODEL_PORT (quays), MODEL_RAIL_YARD (depots), and MODEL_OPEN_PIT (open pits) have site dirt only (no scaffolding/machinery).
+/// - MODEL_MODULAR_GROUND (fields/gardens), open spaces, MODEL_PORT (quays), MODEL_RAIL_YARD (depots), MODEL_OPEN_PIT (open pits), and MODEL_QUARRY (quarries) have site dirt only (no scaffolding/machinery).
 /// - MODEL_PORT sites include coastline, so dirt may be rendered above sea level.
 /// </summary>
 public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
@@ -125,13 +125,14 @@ public class ConstructingBuildingMeshBuilder : IBuildingMeshGenerator
         }
 
         // --- 3. Scaffolding rings and crane ---
-        // Ground assets (fields/gardens), quays, depots, and open pits have no scaffolding/crane (dirt-only site).
+        // Ground assets (fields/gardens), quays, depots, open pits, and quarries have no scaffolding/crane (dirt-only site).
         bool wantsStructures = footprint != null
             && modelType != Constants.MODEL_MODULAR_GROUND
             && !BuildingMeshBuilder.IsOpenSpaceModel(modelType)
             && modelType != Constants.MODEL_PORT
             && modelType != Constants.MODEL_RAIL_YARD
-            && modelType != Constants.MODEL_OPEN_PIT;
+            && modelType != Constants.MODEL_OPEN_PIT
+            && modelType != Constants.MODEL_QUARRY;
 
         if (wantsStructures)
         {

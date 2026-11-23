@@ -14,7 +14,6 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     private static readonly IBuildingMeshGenerator prebuiltGenerator = new PreBuiltBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator portGenerator = new PortBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator mashupGenerator = new MashupBuildingMeshBuilder();
-    private static readonly IBuildingMeshGenerator openPitGenerator = new MashupBuildingMeshBuilder(openPit: true);
     private static readonly IBuildingMeshGenerator railYardGenerator = new RailYardBuildingMeshBuilder();
     private static readonly IBuildingMeshGenerator openSpaceGenerator = new OpenSpaceBuildingMeshBuilder();
     private static readonly ConstructingBuildingMeshBuilder constructingGenerator = new ConstructingBuildingMeshBuilder(ConstructionSiteProfile.Construction);
@@ -27,7 +26,6 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     private static readonly StageMarker prebuiltMarker = new StageMarker("Building.Gen.Prebuilt");
     private static readonly StageMarker portMarker = new StageMarker("Building.Gen.Port");
     private static readonly StageMarker mashupMarker = new StageMarker("Building.Gen.Mashup");
-    private static readonly StageMarker openPitMarker = new StageMarker("Building.Gen.OpenPit");
     private static readonly StageMarker railYardMarker = new StageMarker("Building.Gen.RailYard");
     private static readonly StageMarker openSpaceMarker = new StageMarker("Building.Gen.OpenSpace");
     private static readonly StageMarker constructingMarker = new StageMarker("Building.Gen.Constructing");
@@ -196,6 +194,8 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             case Constants.MODEL_WATER_STATION:
             case Constants.MODEL_SEWAGE_PLANT:
             case Constants.MODEL_WASTE_PLANT:
+            case Constants.MODEL_OPEN_PIT:
+            case Constants.MODEL_QUARRY:
                 using (openSpaceMarker.Auto())
                     result = openSpaceGenerator.Generate(buildingData, isDynamic);
                 break;
@@ -218,10 +218,6 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             case Constants.MODEL_MASHUP:
                 using (mashupMarker.Auto())
                     result = mashupGenerator.Generate(buildingData, isDynamic);
-                break;
-            case Constants.MODEL_OPEN_PIT:
-                using (openPitMarker.Auto())
-                    result = openPitGenerator.Generate(buildingData, isDynamic);
                 break;
             case Constants.MODEL_RAIL_YARD:
                 using (railYardMarker.Auto())

@@ -53,15 +53,24 @@ Rail depots (`MODEL_RAIL_YARD`) converge internal tracks onto a terminal node. `
 
 The terminal is `depot_node_id`, falling back to `infra_node_id`. Electrified depots share it between transport and power networks ([supply and transport](../economics/17_supply-and-transport.md)). Terminal positions or connected tracks can change without advancing the building version; notify and redraw the building for those changes.
 
-### Open pits
+### Open pits and quarries
 
-An open pit (`MODEL_OPEN_PIT`) is terrain; building rendering covers only equipment in the unexcavated frontage yard. Reload changed terrain cells as mining progresses ([LOD](E_lod.md), [supply and transport](../economics/17_supply-and-transport.md)). Equipment arrives as `sub_buildings` and uses mashup assembly.
+Open pits (`MODEL_OPEN_PIT`) and quarries (`MODEL_QUARRY`) dig the terrain itself. The excavated shape is drawn by reloading the terrain cells whose version changes as mining progresses ([LOD](E_lod.md), [supply and transport](../economics/17_supply-and-transport.md)). Building rendering covers the equipment in the unexcavated frontage yard, the heavy machines, rocks, and materials scattered over the site, and the heavy machines working where the digging is. The frontage yard is the strip from the front edge of the footprint, `OPEN_PIT_YARD_DEPTH` deep for an open pit and `QUARRY_YARD_DEPTH` deep for a quarry.
 
-The building center lies in the pit, so center-height parcel extrusion misses the frontage yard, while a flat surface or white box would cover the hole. Selection combines a terrain-following parcel surface and equipment bounding boxes. Ground panels cover the entire parcel, including yard and pit.
+| Method | How it digs | Excavation area |
+| --- | --- | --- |
+| Open pit | Digs downward. On flat land it becomes a stepped pit | A further `OPEN_PIT_RIM_MARGIN` behind the frontage yard, and the same distance from the parcel boundary |
+| Quarry | Cuts the hill at the rear down in steps to the level of the frontage yard. The floor continues level from the frontage yard, and flat land is not dug | Directly behind the frontage yard, `QUARRY_RIM_MARGIN` from the parcel boundary |
+
+Equipment in the frontage yard is laid out from the parcel shape and the actual sizes of the parts, by the same rule as utility plants. The core does not send its placement. An open pit follows the excavated rock from the pit to the gate: a haul road along the rim of the pit, the crushing plant `site_crusher` with its intake facing the pit, the product stockpiles `site_stockpile1`… joined to it by the elevated conveyor `site_conveyor`, a service road for shipping the product, and the office and workshop on the street side. A wide frontage repeats the set of a crushing plant and its stockpiles. A quarry's frontage yard is a single row: the office beside the gate and the crushing and screening plant `site_plant`, with its intake facing the working face, placed along the frontage, with product stockpiles and a settling pond between them.
+
+On the free ground between the equipment, parked heavy machines (`site_truck`, `site_loader`, and others), rocks `site_rock1`…, small spoil heaps `site_heap1`…, and materials `site_clutter1`… are scattered without aligning their headings or positions. Rocks and heaps are also placed along the edges of the site and in the excavation area. Numbered parts are used for as many as are numbered consecutively from 1. These are drawn from shared models like the trees in a park and are not shown in the distant view. The heavy machines working where the digging is (pairs of an excavator and a dump truck) are placed by finding the level being dug in the current terrain (the lowest ground of an open pit, the floor of a quarry), so they move as the digging progresses.
+
+The building center lies in the excavation area, so center-height parcel extrusion misses the frontage yard, while a flat surface or white box would cover the hole. Selection combines a terrain-following parcel surface and equipment bounding boxes. Ground panels cover the entire parcel, including the frontage yard and the excavation area.
 
 ## Construction, demolition, and collapse
 
-Construction and demolition use dirt covering the site, with scaffolds and equipment for the state. Ground assets, open spaces, ports, depots, and open pits use only dirt. Collapse uses a debris heap for every method.
+Construction and demolition use dirt covering the site, with scaffolds and equipment for the state. Ground assets, open spaces, ports, depots, open pits, and quarries use only dirt. Collapse uses a debris heap for every method.
 
 | State | Rendering |
 | --- | --- |

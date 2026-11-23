@@ -32,24 +32,12 @@ using GeneratedModels;
 /// Extrude the parcel polygon to the maximum rendered height for the collider
 /// (so clicking anywhere in the parcel selects the building).
 ///
-/// Open pits (MODEL_OPEN_PIT) use the same assembly; facilities arrive as sub-buildings arranged in the forecourt.
-/// The rear parcel is a hole excavated into terrain by the backend. Avoid closing it with parcel extrusions
-/// (colliders/white boxes); use a terrain-following parcel surface and facility boxes as colliders.
-///
 /// For Far, <see cref="FarBuildingMeshBuilder"/> places wing-specific distant models in the same layout.
 /// </summary>
 public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
 {
     private const float LOOSE_TURN_DEG = 20f;  // Largest free turn of a loose wing either way, on top of the turns that keep its cells.
     private const float LOOSE_SHIFT = 1f;      // Largest shift (m) of a loose wing along each axis.
-
-    private readonly bool openPit;
-
-    /// <param name="openPit">Generate as an open pit (MODEL_OPEN_PIT).</param>
-    public MashupBuildingMeshBuilder(bool openPit = false)
-    {
-        this.openPit = openPit;
-    }
 
     /// <summary>
     /// Generate a mashup building mesh from BuildingSummary.
@@ -79,9 +67,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
 
         // --- Stack sub-buildings ---
         // maxTopY is the highest rendered sub-building top (local Y), used for collider height.
-        // facilityBounds are per-wing bounding boxes for open-pit colliders (building-local coordinates).
         float maxTopY = 0f;
-        var facilityBounds = new List<Bounds>();
         if (buildingData.sub_buildings != null)
         {
             foreach (SubBuildingPlacement placement in buildingData.sub_buildings)
@@ -90,15 +76,10 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
                 {
                     continue;
                 }
-                int firstMesh = temporaryMeshes.Count;
                 float topY = GenerateSubBuilding(
                     placement, buildingData.agent_id, glbPrefix, variantNumber, floorHeight, centerPointWorld,
                     combineInstances, materials, temporaryMeshes);
                 maxTopY = Mathf.Max(maxTopY, topY);
-                if (openPit && TryEncapsulate(temporaryMeshes, firstMesh, out Bounds bounds))
-                {
-                    facilityBounds.Add(bounds);
-                }
             }
         }
 
@@ -129,7 +110,7 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
             AddLanes(buildingData, glbPrefix, centerPointWorld, combineInstances, materials, temporaryMeshes);
         }
 
-        if (combineInstances.Count == 0 && !openPit && !BuildingExteriorRenderer.HasCapturedWork)
+        if (combineInstances.Count == 0 && !BuildingExteriorRenderer.HasCapturedWork)
         {
             // If no sub-buildings are registered and no decoration parts exist, show only a white footprint box to indicate presence.
             CleanupMeshes(temporaryMeshes);
@@ -145,20 +126,11 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
         CleanupMeshes(temporaryMeshes);
 
         // Extrude the whole parcel (or footprint if unavailable) to maximum rendered height for the collider.
-        // Open-pit origins lie at the pit bottom, so extrusion cannot reach the forecourt; use terrain-following surfaces and facility boxes.
         Vector2[] colliderFootprint = sitePolygon;
         float colliderHeight = Mathf.Max(maxTopY, floorHeight);
-        Mesh colliderMesh;
-        if (openPit)
-        {
-            colliderMesh = GenerateOpenPitCollider(colliderFootprint, centerPointWorld, facilityBounds);
-        }
-        else
-        {
-            colliderMesh = (colliderFootprint != null && colliderFootprint.Length >= 3)
-                ? BuildingMeshBuilder.GenerateColliderMesh(colliderFootprint, colliderHeight)
-                : null;
-        }
+        Mesh colliderMesh = (colliderFootprint != null && colliderFootprint.Length >= 3)
+            ? BuildingMeshBuilder.GenerateColliderMesh(colliderFootprint, colliderHeight)
+            : null;
 
         // Submeshes grow with cell count × part count; merge identical materials to limit draw calls.
         return BuildingMeshBuilder.MergeSubMeshes(new BuildingMeshResult(finalMesh, materials.ToArray(), colliderMesh));
@@ -373,69 +345,6 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
         });
         materials.Add(null);
         temporaryMeshes.Add(box);
-    }
-
-    /// <summary>
-    /// Return bounds of temporaryMeshes from firstMesh onward (one wing's parts, already placed).
-    /// </summary>
-    private static bool TryEncapsulate(List<Mesh> meshes, int firstMesh, out Bounds bounds)
-    {
-        bounds = default;
-        bool found = false;
-        for (int i = firstMesh; i < meshes.Count; i++)
-        {
-            if (meshes[i] == null) continue;
-            if (!found)
-            {
-                bounds = meshes[i].bounds;
-                found = true;
-            }
-            else
-            {
-                bounds.Encapsulate(meshes[i].bounds);
-            }
-        }
-        return found;
-    }
-
-    /// <summary>
-    /// Open-pit collider. Combine a parcel-covering terrain-following surface (pickable at pit bottom, benches, and forecourt)
-    /// with facility bounding boxes (pickable from the side).
-    /// </summary>
-    private static Mesh GenerateOpenPitCollider(Vector2[] sitePolygon, Vector3 centerPointWorld, List<Bounds> facilityBounds)
-    {
-        var parts = new List<CombineInstance>();
-        var owned = new List<Mesh>();
-        Mesh ground = ModularBodyBuilder.GenerateTerrainConformingFloorMesh(sitePolygon, centerPointWorld);
-        if (ground != null)
-        {
-            owned.Add(ground);
-            parts.Add(new CombineInstance { mesh = ground, transform = Matrix4x4.identity });
-        }
-        foreach (Bounds b in facilityBounds)
-        {
-            Vector2[] rect =
-            {
-                new Vector2(b.min.x, b.min.z),
-                new Vector2(b.max.x, b.min.z),
-                new Vector2(b.max.x, b.max.z),
-                new Vector2(b.min.x, b.max.z),
-            };
-            Mesh box = BuildingMeshBuilder.GenerateColliderMesh(rect, Mathf.Max(0.1f, b.size.y));
-            if (box == null) continue;
-            owned.Add(box);
-            parts.Add(new CombineInstance { mesh = box, transform = Matrix4x4.Translate(new Vector3(0f, b.min.y, 0f)) });
-        }
-        if (parts.Count == 0)
-        {
-            CleanupMeshes(owned);
-            return null;
-        }
-        var collider = new Mesh { name = "OpenPitCollider", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
-        collider.CombineMeshes(parts.ToArray(), true, true);
-        collider.RecalculateBounds();
-        CleanupMeshes(owned);
-        return collider;
     }
 
     /// <summary>

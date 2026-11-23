@@ -64,8 +64,7 @@ public static class TestSubBuildingLayout
     /// <param name="variant">Building variant.</param>
     /// <param name="parcelPolygon">Polygon treated as parcel (center-origin local XZ).</param>
     /// <param name="parentFloors">Parent floor count (source for per-wing floors).</param>
-    /// <param name="openPit">Open pit (MODEL_OPEN_PIT), placing only in forecourt cells.</param>
-    public static List<SubBuildingPlacement> Generate(int variant, Vector2[] parcelPolygon, int parentFloors, bool openPit = false)
+    public static List<SubBuildingPlacement> Generate(int variant, Vector2[] parcelPolygon, int parentFloors)
     {
         if (MasterDataStore.Instance == null || !MasterDataStore.Instance.IsInitialized)
         {
@@ -85,10 +84,6 @@ public static class TestSubBuildingLayout
         }
 
         MashupGrid grid = BuildMashupCells(parcelPolygon, Constants.MASHUP_CELL_SIZE);
-        if (openPit)
-        {
-            KeepYardCells(grid, parcelPolygon, Constants.MASHUP_CELL_SIZE);
-        }
         if (grid.Cells.Count == 0)
         {
             Debug.LogWarning("[MeshTest] 区画が小さすぎるため、サブ建物を配置できませんでした。");
@@ -479,20 +474,6 @@ public static class TestSubBuildingLayout
         float su = (i + cellW * 0.5f) * Constants.MASHUP_CELL_SIZE;
         float sv = (j + cellH * 0.5f) * Constants.MASHUP_CELL_SIZE;
         return grid.Origin + grid.U * su + grid.V * sv;
-    }
-
-    /// <summary>
-    /// Retain cells entirely within the open-pit forecourt (OPEN_PIT_YARD_DEPTH from front edge).
-    /// Determine inward direction by testing whether a point slightly along V from front-edge midpoint lies inside parcel.
-    /// </summary>
-    private static void KeepYardCells(MashupGrid grid, Vector2[] polygon, float cellSize)
-    {
-        Vector2 middle = (grid.FrontA + grid.FrontB) * 0.5f;
-        Vector2 inward = PolygonUtils.Contains(polygon, middle + grid.V * 0.05f) ? grid.V : -grid.V;
-        float baseDepth = Vector2.Dot(grid.Origin - grid.FrontA, inward);
-        float step = Vector2.Dot(grid.V, inward);
-        grid.Cells.RemoveWhere(c => baseDepth + Mathf.Max(c.j * cellSize * step, (c.j + 1) * cellSize * step)
-            > Constants.OPEN_PIT_YARD_DEPTH + 1e-6f);
     }
 
     /// <summary>
