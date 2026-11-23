@@ -18,7 +18,6 @@
     "build:web:core": "tsc -p tsconfig.web.json && vite build --config vite.web.config.ts --mode core",
     "preview": "vite preview",
     "tauri": "tauri",
-    "mock-parent": "node tools/mock-parent/server.mjs",
     "cleanup-dev": "powershell -ExecutionPolicy Bypass -File tools/cleanup-dev.ps1",
     "test": "node tools/run-tests.mjs",
     "test:scenarios": "node tools/scenarios/run.mjs",

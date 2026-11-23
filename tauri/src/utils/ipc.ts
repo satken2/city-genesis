@@ -1,6 +1,6 @@
 /**
  * IPC utilities for MemoryMappedFile communication with graphics (Unity). Pass through Tauri invoke to Rust's
- * send_window_action, then send through the pipe to Unity. Event names are colon-separated (e.g.
+ * send_window_action, then send through the shared memory to Unity. Event names are colon-separated (e.g.
  * `view:change_view`). Sending function comments and received-event constant comments here define event
  * meanings/payloads. Public docs programs/IPC連携の整理.md define transport, Envelope, and synchronization
  * principles.

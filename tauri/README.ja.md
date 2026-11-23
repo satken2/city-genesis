@@ -14,8 +14,6 @@ npm run tauri dev
 
 Linux の GNOME で X11 を使う場合は `GDK_BACKEND=x11 npm run tauri dev` です。
 
-開発用のモック親プロセスは `npm run mock-parent` で起動します。[http://127.0.0.1:18765](http://127.0.0.1:18765) の Web UI から「Debug Launcher」を開けます。
-
 ブラウザ版は次のコマンドで起動します。
 
 ```powershell

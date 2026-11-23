@@ -3,13 +3,6 @@
  */
 
 /**
- * True in the production UI bundled by `tauri build` (equivalent to the distribution exe); false in `tauri dev`
- * via the Vite development server. Allow development checks of top menu/HUD using only backend APIs even without
- * Unity's Named Pipe.
- */
-export const IS_PACKAGED_PRODUCTION_UI = import.meta.env.PROD;
-
-/**
  * Default fare and target headway (minutes) for new public transport lines. Line types are PATH_TRANSPORT
  * variants in path_master; do not define separate UI type constants.
  */

@@ -57,7 +57,7 @@ const FONT_SIZE_MAX = 32;
 /**
  * Whether GPU acceleration settings are enabled.
  * Until ready, show Coming Soon and disable the whole row.
- * Setting true restores state retrieval, switching, and restart behavior.
+ * Setting true restores only state retrieval: the core has no switching endpoint (PATCH /system/gpu-mode).
  */
 const COMPUTE_SETTING_ENABLED: boolean = false;
 
