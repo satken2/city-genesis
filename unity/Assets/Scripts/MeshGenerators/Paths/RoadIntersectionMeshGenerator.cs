@@ -123,7 +123,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             {
                 // Preserve specialized edges/projection when mixed nodes select dirt/cobblestone as representative material.
                 string surfaceShader = roadMaterial != null ? roadMaterial.shader.name : "";
-                if (surfaceShader != "Custom/PathDirt" && surfaceShader != "Custom/PathPaving")
+                if (surfaceShader != "Custom/PathDirt" && surfaceShader != "Custom/PathPaving" && surfaceShader != "Custom/PathTriplanarLit")
                 {
                     markings = RoadMarkingRules.Intersection(sidewalkConnectors);
                     var coordinates = new List<Vector4>();

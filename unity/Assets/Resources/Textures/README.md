@@ -9,6 +9,8 @@
 | `collapsed-rubble-albedo.png` | 倒壊した建物の瓦礫のアルベド(6m周期) | 自作(手続き生成。非公開の制作ツール `genesis-gallery` の `pipeline/jobs/build_collapsed_rubble_texture.py`) | 自作 |
 | `collapsed-rubble-normal.png` | 倒壊した建物の瓦礫の法線マップ(6m周期、NormalGL) | 同上 | 自作 |
 | `collapsed-sand-albedo.png` / `collapsed-sand-normal.png` | 倒壊した建物の砂の山のアルベドと法線マップ(3m周期、NormalGL) | 同上 | 自作 |
+| `path-ballast-albedo.png` / `path-ballast-normal.png` | 線路バラスト(PATH_ROADBED)のアルベドと法線マップ(2m周期、NormalGL) | 自作(手続き生成。非公開の制作ツール `genesis-gallery` の `pipeline/jobs/build_path_surface_textures.py`) | 自作 |
+| `path-concrete-albedo.png` / `path-concrete-normal.png` | パス共通コンクリート(PATH_CONCRETE)のアルベドと法線マップ(4m周期、NormalGL) | 同上 | 自作 |
 | `path-asphalt-albedo.png` / `path-asphalt-normal.png` | 舗装アスファルト(PATH_ASPHALT)のアルベド濃淡と法線マップ(2m周期、NormalGL) | 自作(手続き生成。非公開の制作ツール `genesis-gallery` の `pipeline/jobs/build_path_surface_textures.py`) | 自作 |
 
 - 崖テクスチャは `TerrainManager.EnsureCliffTextures` が **このファイル名を前提に** `Resources.Load` するため、リネームする場合はコード側も変更すること。
