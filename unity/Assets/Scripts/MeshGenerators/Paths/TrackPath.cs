@@ -700,29 +700,36 @@ public class TrackPath : IPathMeshGenerator
         // platform_wall handles outer walls/fences. Nonplatform sides retain normal walls.
         // LRT platforms exist on both sides; omit both walls in platform intervals (platform fences handle them).
         using (wallsMarker.Auto())
-        if (wallWidth > 0f && elevatedRanges.Count > 0)
         {
-            float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
-            List<TrackCorridorInfo.PercentRange> wallRanges = IntersectRanges(elevatedRanges, LrtPlatformParts.OutsidePercentRanges(spline, lrtPlatformZones));
-            if (platformLeft <= 0f)
+            // Variants with bridge appearances control outer walls per appearance (e.g. p423 omits walls on trusses
+            // and provides concrete walls only under p423/2/wall), so do not fall back to the generic type wall.
+            bool hasAppearances = PathParts.Appearances(pathData.path_variant).Count > 0;
+            string wallFallback = hasAppearances ? null : $"{typeBase}/wall";
+            bool hasWallModel = !hasAppearances || ModelManager.Instance == null || ModelManager.Instance.HasModel($"{variantBase}/wall");
+            if (wallWidth > 0f && elevatedRanges.Count > 0 && hasWallModel)
             {
-                WithWarp(lateral != null ? new PartWarp { Shift = percent => -lateral.OuterShiftAtPercent(percent) } : null, () =>
+                float wallCenterOffset = (width * 0.5f) + (wallWidth * 0.5f);
+                List<TrackCorridorInfo.PercentRange> wallRanges = IntersectRanges(elevatedRanges, LrtPlatformParts.OutsidePercentRanges(spline, lrtPlatformZones));
+                if (platformLeft <= 0f)
                 {
-                    foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: true), wallRanges))
+                    WithWarp(lateral != null ? new PartWarp { Shift = percent => -lateral.OuterShiftAtPercent(percent) } : null, () =>
                     {
-                        RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
-                    }
-                });
-            }
-            if (platformRight <= 0f)
-            {
-                WithWarp(lateral != null ? new PartWarp { Shift = percent => lateral.OuterShiftAtPercent(percent) } : null, () =>
+                        foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: true), wallRanges))
+                        {
+                            RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, -wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, true, wallFallback, clipFrom: range.From, clipTo: range.To);
+                        }
+                    });
+                }
+                if (platformRight <= 0f)
                 {
-                    foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: false), wallRanges))
+                    WithWarp(lateral != null ? new PartWarp { Shift = percent => lateral.OuterShiftAtPercent(percent) } : null, () =>
                     {
-                        RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, $"{typeBase}/wall", clipFrom: range.From, clipTo: range.To);
-                    }
-                });
+                        foreach (var range in IntersectRanges(GetWallPercentRanges(corridor, leftSide: false), wallRanges))
+                        {
+                            RoadPath.CreateSplineMesh(container, spline, $"{variantBase}/wall", wallWidth, wallCenterOffset, RoadPartHeights.WALL_ABOVE_SPLINE, false, wallFallback, clipFrom: range.From, clipTo: range.To);
+                        }
+                    });
+                }
             }
         }
 
@@ -1342,8 +1349,8 @@ public class TrackPath : IPathMeshGenerator
     private static void GeneratePolesAndBeams(GameObject container, SplineComputer spline, float spacing, float width, string variantBase, string typeBase, TrackCorridorInfo corridor = null, float platformLeft = 0f, float platformRight = 0f, List<Vector2> lrtPlatformZones = null, float lrtPoleOffset = 0f, float tunnelClearance = float.PositiveInfinity)
     {
         using var scope = polesMarker.Auto();
-        GameObject polePrefab = LoadPrefab($"{variantBase}/pole", $"{typeBase}/pole");
-        GameObject beamPrefab = LoadPrefab($"{variantBase}/beam", $"{typeBase}/beam");
+        GameObject polePrefab = PathDrawContext.ResolvePrefab($"{variantBase}/pole", $"{typeBase}/pole", out _);
+        GameObject beamPrefab = PathDrawContext.ResolvePrefab($"{variantBase}/beam", $"{typeBase}/beam", out _);
         if (polePrefab == null && beamPrefab == null)
         {
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[TrackPath] pole/beam プレハブなし: 架線柱スキップ");
@@ -1462,10 +1469,12 @@ public class TrackPath : IPathMeshGenerator
             GameObject rightPole = Object.Instantiate(polePrefab, container.transform);
             rightPole.transform.position = basePos + right * rightPoleOffset;
             rightPole.transform.rotation = yawRotation;
+            RoadPath.ApplyRoadMaterials(rightPole);
 
             GameObject leftPole = Object.Instantiate(polePrefab, container.transform);
             leftPole.transform.position = basePos - right * leftPoleOffset;
             leftPole.transform.rotation = yawRotation * Quaternion.Euler(0f, 180f, 0f);
+            RoadPath.ApplyRoadMaterials(leftPole);
         }
 
         if (beamPrefab != null)
@@ -1474,6 +1483,7 @@ public class TrackPath : IPathMeshGenerator
             // For asymmetric joined corridors, place at midpoint between posts.
             beam.transform.position = basePos + right * ((rightPoleOffset - leftPoleOffset) * 0.5f);
             beam.transform.rotation = yawRotation;
+            RoadPath.ApplyRoadMaterials(beam);
 
             MeshFilter mf = beamPrefab.GetComponent<MeshFilter>();
             float meshWidth = (mf != null && mf.sharedMesh != null) ? mf.sharedMesh.bounds.size.x : 0f;

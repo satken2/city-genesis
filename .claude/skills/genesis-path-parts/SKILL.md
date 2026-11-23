@@ -48,8 +48,8 @@ description: City Genesisの道路・線路パーツ3Dモデル(body/line/sidewa
 
 - ロープウェイ602の`station_shell`も`CreateSplineMesh`を通り、`station_shell_close`へ切り替わる。ホーム451/461・462・502と602の接写設備は、非公開の制作ツール`genesis-gallery/pipeline/jobs/build_platform_close.py`が通常モデルから著作する。通常の各ジョブを再実行したら接写ジョブも後に実行する。8m周期・原点・bbox・材質を保持する。再生成・実Unity検証・ミラー同期は同ツールの`pipeline/jobs/platform_close.md`を参照。
 
-- スプラインに沿って敷く `body / line / sidewalk / wall / wall_underground / ceiling_underground / center`、線路の `track / wire / platform / platform_wall` が対象。高架用も `body_elevated_close` / `track_elevated_close` の命名で扱う。
-- 送電線1101/1102の`pillar_cap`は専用生成器がCloseへ切り替える。それ以外の`tree / pillar / pillar_cap / pole / beam`などのInstantiate配置、道路の点設備、ノード内のコネクタ・終端部品は無印を使う。**`_close` を書き出すだけでは切り替わらない。** 対象外パーツの接写対応を求められた場合は `genesis-path-geometry` で読み込み経路を確認し、アセットだけで対応済みとしない。
+- スプラインに沿って敷く `body / line / sidewalk / wall / wall_underground / ceiling_underground / center`、線路の `track / wire / platform / platform_wall` が対象。高架用も `body_elevated_close` / `track_elevated_close` の命名で扱う。鉄道の架線柱・門型梁(`pole / beam`)も `TrackPath.GeneratePolesAndBeams` が `PathDrawContext.ResolvePrefab` 経由で Close へ切り替える。
+- 送電線1101/1102の`pillar_cap`も専用生成器がCloseへ切り替える。それ以外の`tree / pillar / pillar_cap`などのInstantiate配置、道路の点設備、ノード内のコネクタ・終端部品は無印を使う。**`_close` を書き出すだけでは切り替わらない。** 対象外パーツの接写対応を求められた場合は `genesis-path-geometry` で読み込み経路を確認し、アセットだけで対応済みとしない。
 - 対象パーツのClose解決順は、バリアントの `_close` → バリアントの無印 → タイプの `_close` → タイプの無印。共通タイプにCloseを追加しても、専用バリアントの無印が優先される場合がある。
 
 ### 造形・軽量化・検証
@@ -97,7 +97,7 @@ p411 5個  body track wire pole beam                (電化地上線路)
 p413 6個  body track wall wire pole beam           (電化鉄橋。poleはトラス上弦取付)
 p461 8個  body track platform platform_wall platform_panel wire pole beam (電化駅+上屋)
 p463〜465 18〜19個 461と同じ線路・架線・高架の14個(メッシュ共有) + platform platform_wall platform_panel + 接写(463=platform_wall_close、464・465=platform_close platform_wall_close) (貨物PF)
-p421 13個 411の軌道・架線・高欄(共有) + 幅10mの body/body_close・body_elevated・pillar/pillar_cap・11m beam (軌道数2の複線)
+p421 13個 411の軌道・架線・高欄(共有) + 幅10mの body・body_elevated・pillar/pillar_cap・11m beam (軌道数2の複線)
 p423 8個  413の軌道・主構・架線・柱(共有) + 幅10mの床組 body・pillar/pillar_cap (軌道数2の鉄橋)
 p471 18個 461のホーム・軌道・架線(共有) + 421の道床・高架桁 + 駅用門型橋脚・17m beam (軌道数2の相対式の駅)
 p472 17個 461の軌道・架線(共有) + 幅16mの道床・高架桁・橋脚 + 島式の platform/platform_close (軌道数2・center_width 6 の島式の駅)
@@ -247,7 +247,7 @@ LRTの線路は1本のパスで複線(上下線)を表す。222（幅24m・4車�
 - lrt_trackは幅3m、レール中心±0.7175m、踏面Z=0.025m。lrt_wireの中心はZ=5.30m。原点はどちらも路面で、UnityはBODY_ABOVE_SPLINEを加える。
 - lrt_poleは道路中心・路面原点の実寸配置。222/242は中央T字柱、303は両側X=±5.4mの2本柱で、各腕が近い方の軌道（±1.75m）へ出る。bounds中心へ再配置しない。架線系はwire_spacingが正の場合だけ描く。
 - 303のbodyは幅12mの段差のない舗装。石畳|x|<3.25m（軌道敷）・白い境界帯3.25〜3.45m（PATH_CONCRETE）・暖色レンガ3.45〜5.8m・縁5.8〜6.0m。設備列は±5.1m。
-- 431のbody/body_closeは幅7.0mの複線道床で、上面Z=0が全幅±3.5mに届く矩形断面（下端-0.55m）。**TrackPathは地上の道床を全体boundsではなく最上面（最高点から2mm以内の頂点）の幅でマスター幅へ伸縮し、原点をスプライン+0.1mに置く**（`RoadPath.GetBodySurfaceBounds`）。法面や軌道間の盛りで最上面が狭くなると道床が数倍に広がって沈むので、最上面を全幅に届かせて通常・接写とも横倍率1にする。411/461の台形道床は天端3.7m（接写3.33m）が5.0mへ伸びて描かれる。それ以外（track/wire/pole/beam/高架系）は411とメッシュ共有する。
+- 431のbodyは幅7.0mの複線道床で、上面Z=0が全幅±3.5mに届く矩形断面（下端-0.55m）。**TrackPathは地上の道床を全体boundsではなく最上面（最高点から2mm以内の頂点）の幅でマスター幅へ伸縮し、原点をスプライン+0.1mに置く**（`RoadPath.GetBodySurfaceBounds`）。法面や軌道間の盛りで最上面が狭くなると道床が数倍に広がって沈むので、最上面を全幅に届かせて横倍率1にする。411/461の台形道床は天端3.7mが5.0mへ伸びて描かれる。砕石の粒は材質の法線マップが表し、道床は接写を持たない。それ以外（wire/pole/beam/高架系）は411とメッシュ共有する。
 - 新規バリアントはpath_masterだけでなく、transit_masterのLRT走行・停留所リストにも追加する。
 
 ### LRT停留所のホーム
@@ -263,7 +263,7 @@ Unityが停留所の下地パスへ相対式ホーム（各軌道の外側）を
 - 材質は既存のみ（PATH_CONCRETE・PATH_PAVING_STONE・PATH_YELLOW_BLOCK・PATH_METAL・PATH_WOOD・BD_WINDOW・BD_CONCRETE）。外部素材を取り込まない。
 - 柵は外縁から0.075m以内、上屋の背面の柱・板は外縁から0.09m以上内側に置き、上屋を外縁に寄せても柵と重ならないようにする。
 - 非公開の制作ツールにある`genesis-gallery/pipeline/jobs/build_lrt_paths.py`が著作元（ホーム部品・431道床を含む。303の舗装と設備は`build_mall_paths.py`）。exportの`--only`は部分一致なので、変更したものだけを指定する（例 `p222/lrt_platform,p222/lrt_shelter,p303/body,p303/lrt_pole,p431/body,p431/lrt_`）。`p431/body`は`body_elevated`にも一致する。
-- 検証はバリデータ（lrt_track/lrt_wire/lrt_pole/lrt_platform/lrt_platform_end/lrt_shelterの原点・寸法。デッキ上面は材質別bboxで測る。p431のbody/body_closeは最上面が原点高さで全幅7.0mに届くこと）と`unity/Tests/Lrt/run.ps1`。レール位置、直立柱、カーブ、相互接続、FBXとラッパープレハブのGUIDに加え、実FBXとUnity定数の突き合わせ（303/431の舗装・道床の全幅12m/7mと最上面の幅、直線に敷いた通常・接写の描画幅と上面高さ、303の柱の足元±5.4m=`LrtRoadParts.MALL_POLE_OFFSET`と吊り金具±1.75m、ホーム部品の内縁・幅・上面・著作長、スロープの長さと先端の高さ=埋め込み軌道はレール踏面+0.01で車線境界線の破線の上端より高い・431はスプライン基準面）を確認する。
+- 検証はバリデータ（lrt_track/lrt_wire/lrt_pole/lrt_platform/lrt_platform_end/lrt_shelterの原点・寸法。デッキ上面は材質別bboxで測る。p431のbodyは最上面が原点高さで全幅7.0mに届くこと）と`unity/Tests/Lrt/run.ps1`。レール位置、直立柱、カーブ、相互接続、FBXとラッパープレハブのGUIDに加え、実FBXとUnity定数の突き合わせ（303/431の舗装・道床の全幅12m/7mと最上面の幅、直線に敷いた通常・接写の描画幅と上面高さ、303の柱の足元±5.4m=`LrtRoadParts.MALL_POLE_OFFSET`と吊り金具±1.75m、ホーム部品の内縁・幅・上面・著作長、スロープの長さと先端の高さ=埋め込み軌道はレール踏面+0.01で車線境界線の破線の上端より高い・431はスプライン基準面）を確認する。
 
 ## 歩行者モールの点設備
 

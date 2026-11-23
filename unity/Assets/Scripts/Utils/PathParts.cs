@@ -19,6 +19,12 @@ public static class PathParts
         ? ROOT + variant : $"{ROOT}{variant}/{appearance}";
 
     /// <summary>
+    /// Default appearance when creating a new path of the given variant (matches backend Path.property_setup).
+    /// Double-track railway bridge (423) defaults to appearance 1 (Warren truss).
+    /// </summary>
+    public static int DefaultAppearance(int variant) => variant == 423 ? 1 : Constants.PATH_APPEARANCE_STANDARD;
+
+    /// <summary>
     /// Appearance numbers of the variant, ascending, from the unit's model table (Resources cannot be enumerated at runtime).
     /// The pack's table applies when the pack owns the variant's unit.
     /// </summary>

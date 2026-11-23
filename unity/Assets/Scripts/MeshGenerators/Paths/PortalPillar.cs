@@ -91,5 +91,6 @@ public sealed class PortalPillar
         part.transform.position = position;
         part.transform.rotation = rotation;
         part.transform.localScale = scale;
+        RoadPath.ApplyRoadMaterials(part);
     }
 }

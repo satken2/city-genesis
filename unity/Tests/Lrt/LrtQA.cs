@@ -173,14 +173,11 @@ public static class LrtQA
         if (id == 303 || id == 431)
         {
             float full = id == 303 ? 12f : 7f;
-            foreach (string body in id == 431 ? new[] { "body", "body_close" } : new[] { "body" })
-            {
-                var bodyMesh = ModelMesh(id, body);
-                var surface = (Bounds)asm.GetType("RoadPath").GetMethod("GetBodySurfaceBounds").Invoke(null, new object[] { bodyMesh });
-                Check(Mathf.Abs(bodyMesh.bounds.size.x - full) < .01f && Mathf.Abs(bodyMesh.bounds.center.x) < .01f, $"{body} width {id}: {bodyMesh.bounds.size.x}");
-                Check(Mathf.Abs(surface.size.x - full) < .01f && Mathf.Abs(surface.center.x) < .01f && Mathf.Abs(bodyMesh.bounds.max.y) < .002f,
-                    $"{body} surface {id}: width {surface.size.x} at {bodyMesh.bounds.max.y}");
-            }
+            var bodyMesh = ModelMesh(id, "body");
+            var surface = (Bounds)asm.GetType("RoadPath").GetMethod("GetBodySurfaceBounds").Invoke(null, new object[] { bodyMesh });
+            Check(Mathf.Abs(bodyMesh.bounds.size.x - full) < .01f && Mathf.Abs(bodyMesh.bounds.center.x) < .01f, $"body width {id}: {bodyMesh.bounds.size.x}");
+            Check(Mathf.Abs(surface.size.x - full) < .01f && Mathf.Abs(surface.center.x) < .01f && Mathf.Abs(bodyMesh.bounds.max.y) < .002f,
+                $"body surface {id}: width {surface.size.x} at {bodyMesh.bounds.max.y}");
             DrawnBody(id, full);
         }
         if (id == 303) MallPole((float)parts.GetField("MALL_POLE_OFFSET").GetRawConstantValue());

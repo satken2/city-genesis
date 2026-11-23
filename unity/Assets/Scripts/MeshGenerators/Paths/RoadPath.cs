@@ -129,6 +129,31 @@ public class RoadPath : IPathMeshGenerator
         return painted;
     }
 
+    /// <summary>
+    /// Replace renderer materials on an instantiated path part with shared-pool copies
+    /// (resolving Resources named materials and PATH_PAINT overrides).
+    /// </summary>
+    public static void ApplyRoadMaterials(GameObject instance)
+    {
+        if (instance == null) return;
+        Color? paint = PathDrawContext.PaintColor;
+        foreach (var renderer in instance.GetComponentsInChildren<MeshRenderer>())
+        {
+            var materials = renderer.sharedMaterials;
+            bool changed = false;
+            for (int i = 0; i < materials.Length; i++)
+            {
+                Material pooled = GetOrCreatePartMaterial(materials[i], paint);
+                if (pooled != null && pooled != materials[i])
+                {
+                    materials[i] = pooled;
+                    changed = true;
+                }
+            }
+            if (changed) renderer.sharedMaterials = materials;
+        }
+    }
+
     private static Material GetFallbackRoadMaterial()
     {
         // Use URP-compatible assets through the shared pool, preserving shader references in builds.
@@ -639,7 +664,8 @@ public class RoadPath : IPathMeshGenerator
         SealSplineMesh(splineMesh);
 
         if (!singleSpan && !isDashed && (prefabName.EndsWith("/body", StringComparison.Ordinal)
-            || prefabName.EndsWith("/sidewalk", StringComparison.Ordinal) || prefabName.EndsWith("/lrt_track", StringComparison.Ordinal)))
+            || prefabName.EndsWith("/sidewalk", StringComparison.Ordinal) || prefabName.EndsWith("/lrt_track", StringComparison.Ordinal)
+            || prefabName.EndsWith("/wall", StringComparison.Ordinal)))
             using (splineMeshCapsMarker.Auto())
                 RemoveInternalTileCaps(go.GetComponent<MeshFilter>()?.sharedMesh, channel);
 
@@ -2219,6 +2245,7 @@ public class RoadPath : IPathMeshGenerator
             cap.transform.position = sample.position;
             cap.transform.rotation = rotation;
             cap.transform.localScale = capScale;
+            ApplyRoadMaterials(cap);
             placed = true;
         }
         if (needsPillar)
@@ -2227,6 +2254,7 @@ public class RoadPath : IPathMeshGenerator
             pillar.transform.position = pillarPosition;
             pillar.transform.rotation = rotation;
             pillar.transform.localScale = pillarScale;
+            ApplyRoadMaterials(pillar);
             placed = true;
         }
         return placed;

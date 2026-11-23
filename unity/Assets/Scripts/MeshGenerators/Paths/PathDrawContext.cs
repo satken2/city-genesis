@@ -65,7 +65,7 @@ public static class PathDrawContext
 
     public static bool HasDetailRange => !SuppressDetailRange && (DetailFrom > 0.0001 || DetailTo < 0.9999);
 
-    /// <summary>Close-up part suffix (e.g. Models/Paths/p411/body_close).</summary>
+    /// <summary>Close-up part suffix (e.g. Models/Paths/p411/track_close).</summary>
     public const string CLOSE_SUFFIX = "_close";
 
     /// <summary>

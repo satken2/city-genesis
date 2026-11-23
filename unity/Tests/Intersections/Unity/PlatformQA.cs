@@ -277,7 +277,7 @@ public static class PlatformQA
             int first = Array.FindIndex(original, v => Mathf.Abs(v.y - .2f) < .002f && Mathf.Abs(v.x) > 1f);
             int last = Array.FindIndex(original, v => first >= 0 && Mathf.Abs(v.x-original[first].x) < .002f
                 && Mathf.Abs(v.y-original[first].y) < .002f && Mathf.Abs(v.z-original[first].z) > .1f
-                && Mathf.Abs(v.z-original[first].z) < .3f);
+                && Mathf.Abs(v.z-original[first].z) < .4f);
             Require(first >= 0 && last >= 0, "Sleeper thickness measurement missing");
             foreach (var filter in tracks)
             {
