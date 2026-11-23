@@ -16,7 +16,7 @@ export type CitizenSummary = {
   citizen_id: number;
   /** Randomly generated citizen name. */
   name: string;
-  /** Role in the household, such as head of household, spouse, or child. See the shared MEMBER_* constants. */
+  /** Marital status of the citizen: single or married. See the shared MEMBER_* constants. */
   citizen_type: number;
   /** Age in years. */
   age: number;
@@ -29,7 +29,7 @@ export type CitizenData = {
   citizen_id: number;
   /** Randomly generated citizen name. */
   name: string;
-  /** Role in the household, such as head of household, spouse, or child. See the shared MEMBER_* constants. */
+  /** Marital status of the citizen: single or married. See the shared MEMBER_* constants. */
   citizen_type: number;
   /** Age in years. */
   age: number;
@@ -53,8 +53,6 @@ export type CitizenData = {
   school_agent_name?: string;
   /** Maps skill IDs to proficiency levels. Used to determine effective labor and skill levels. */
   skills: Record<string, number>;
-  /** Whether the citizen has completed higher education (0 or 1). */
-  educated: boolean;
   /** ID of the skill the citizen is learning in higher education (VALUE_NONE if the citizen is not enrolled). */
   education_skill: number;
   /** Propensity to commit crime (0.0 to 1.0). Used to determine the probability of a crime occurring. */
@@ -253,7 +251,7 @@ export type AgentData = {
   supply_amount?: number;
   /** ID of the product this facility supplies. */
   supply_product_id?: number;
-  /** Product selling price including tax. */
+  /** Product selling price excluding tax. */
   supply_price?: number;
   /** Quantity produced in the current epoch. */
   supply_production?: number;
@@ -535,7 +533,7 @@ export type ParcelSummary = {
   limit_volume_ratio: number;
   /** Maximum height (m). */
   limit_height: number;
-  /** ID of the building agent using the parcel (0 if vacant). */
+  /** ID of the building agent using the parcel (-1 if vacant). */
   usage_id: number;
   /** Water depth just beyond the quay (m). A port can be built only if the parcel meets or exceeds the port's required depth (berth_depth in agent_master). Returns 0 for non-coastal parcels. */
   water_depth: number;
@@ -554,7 +552,7 @@ export type ParcelData = {
   polygon: any[];
   /** Center point coordinates [x, z]. */
   center_point: any[];
-  /** ID of the building agent using the parcel (0 if vacant). */
+  /** ID of the building agent using the parcel (-1 if vacant). */
   usage_id: number;
   /** ID of the district this object belongs to. */
   zone_id: number;
@@ -617,7 +615,7 @@ export type ZoneData = {
   name: string;
   /** District identifier color (#RRGGBB). */
   color: string;
-  /** Whether the district's shape has yet to be finalized by the player. */
+  /** Unused. Always false. */
   auto_managed: boolean;
   /** District area (m²). */
   area: number;
@@ -674,7 +672,7 @@ export type ResourceData = {
   max_amount: number;
   /** Resource reserve history, newest first. */
   current_amount: number[];
-  /** Rate at which resource reserves recover per epoch. */
+  /** Fraction of the reserve capacity that recovers per day. */
   recovery_rate: number;
 };
 

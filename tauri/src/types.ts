@@ -1019,7 +1019,6 @@ export type PublicServicePrice = {
   unit_cost: number;
   average_price: number;
   supply_capacity: number;
-  max_demand: number;
   demand: number;
   production: number;
 };

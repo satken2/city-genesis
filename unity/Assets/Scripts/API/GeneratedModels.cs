@@ -23,7 +23,7 @@ namespace GeneratedModels
         public int citizen_id;
         /// <summary>Randomly generated citizen name.</summary>
         public string name;
-        /// <summary>Role in the household, such as head of household, spouse, or child. See the shared MEMBER_* constants.</summary>
+        /// <summary>Marital status of the citizen: single or married. See the shared MEMBER_* constants.</summary>
         public int citizen_type;
         /// <summary>Age in years.</summary>
         public int age;
@@ -38,7 +38,7 @@ namespace GeneratedModels
         public int citizen_id;
         /// <summary>Randomly generated citizen name.</summary>
         public string name;
-        /// <summary>Role in the household, such as head of household, spouse, or child. See the shared MEMBER_* constants.</summary>
+        /// <summary>Marital status of the citizen: single or married. See the shared MEMBER_* constants.</summary>
         public int citizen_type;
         /// <summary>Age in years.</summary>
         public int age;
@@ -62,8 +62,6 @@ namespace GeneratedModels
         public string school_agent_name;
         /// <summary>Maps skill IDs to proficiency levels. Used to determine effective labor and skill levels.</summary>
         public Dictionary<string, float> skills;
-        /// <summary>Whether the citizen has completed higher education (0 or 1).</summary>
-        public bool educated;
         /// <summary>ID of the skill the citizen is learning in higher education (VALUE_NONE if the citizen is not enrolled).</summary>
         public int education_skill;
         /// <summary>Propensity to commit crime (0.0 to 1.0). Used to determine the probability of a crime occurring.</summary>
@@ -266,7 +264,7 @@ namespace GeneratedModels
         public float? supply_amount;
         /// <summary>ID of the product this facility supplies.</summary>
         public float? supply_product_id;
-        /// <summary>Product selling price including tax.</summary>
+        /// <summary>Product selling price excluding tax.</summary>
         public float? supply_price;
         /// <summary>Quantity produced in the current epoch.</summary>
         public float? supply_production;
@@ -554,7 +552,7 @@ namespace GeneratedModels
         public float limit_volume_ratio;
         /// <summary>Maximum height (m).</summary>
         public float limit_height;
-        /// <summary>ID of the building agent using the parcel (0 if vacant).</summary>
+        /// <summary>ID of the building agent using the parcel (-1 if vacant).</summary>
         public int usage_id;
         /// <summary>Water depth just beyond the quay (m). A port can be built only if the parcel meets or exceeds the port's required depth (berth_depth in agent_master). Returns 0 for non-coastal parcels.</summary>
         public float water_depth;
@@ -575,7 +573,7 @@ namespace GeneratedModels
         public List<object> polygon;
         /// <summary>Center point coordinates [x, z].</summary>
         public List<object> center_point;
-        /// <summary>ID of the building agent using the parcel (0 if vacant).</summary>
+        /// <summary>ID of the building agent using the parcel (-1 if vacant).</summary>
         public int usage_id;
         /// <summary>ID of the district this object belongs to.</summary>
         public int zone_id;
@@ -640,7 +638,7 @@ namespace GeneratedModels
         public string name;
         /// <summary>District identifier color (#RRGGBB).</summary>
         public string color;
-        /// <summary>Whether the district's shape has yet to be finalized by the player.</summary>
+        /// <summary>Unused. Always false.</summary>
         public bool auto_managed;
         /// <summary>District area (m²).</summary>
         public float area;
@@ -699,7 +697,7 @@ namespace GeneratedModels
         public float max_amount;
         /// <summary>Resource reserve history, newest first.</summary>
         public List<float> current_amount;
-        /// <summary>Rate at which resource reserves recover per epoch.</summary>
+        /// <summary>Fraction of the reserve capacity that recovers per day.</summary>
         public float recovery_rate;
     }
 
