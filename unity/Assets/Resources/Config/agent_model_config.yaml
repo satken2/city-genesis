@@ -456,6 +456,11 @@ agents:
     prebuilt: false
     variants:
       - 0
+  3008:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
 landmark_prefixes:
   - landmark-ancient_ruins
   - landmark-clock_tower

@@ -15,14 +15,19 @@ Copy-Item "$unityRoot/Assets/Editor/ModelPrefabGenerator.cs" "$qaRoot/Assets/Edi
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Resources/Config" -Force | Out-Null
 Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Config/model_weights.json" -Destination "$qaRoot/Assets/Resources/Config" -Force
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Models/Props/Textures","$qaRoot/Assets/Models/Buildings/Textures" -Force | Out-Null
-Copy-Item "$unityRoot/Assets/Models/Props/Textures/PROP_LEAF_GREEN_color.png*" "$qaRoot/Assets/Models/Props/Textures" -Force
+# Tree and shrub FBXs are remapped to the shared leaf materials, which reference their images and the foliage shader by GUID.
+Copy-Item "$unityRoot/Assets/Models/Props/Textures/PROP_LEAF_GREEN_color.png*", "$unityRoot/Assets/Models/Props/Textures/PROP_PINE_GREEN_color.png*" "$qaRoot/Assets/Models/Props/Textures" -Force
+Copy-Item -LiteralPath "$unityRoot/Assets/Models/Materials" -Destination "$qaRoot/Assets/Models" -Recurse -Force
+New-Item -ItemType Directory -Path "$qaRoot/Assets/Resources/Shaders","$qaRoot/Assets/Shaders" -Force | Out-Null
+Copy-Item "$unityRoot/Assets/Resources/Shaders/Foliage.shader*" "$qaRoot/Assets/Resources/Shaders" -Force
+Copy-Item "$unityRoot/Assets/Shaders/Foliage.hlsl*" "$qaRoot/Assets/Shaders" -Force
 # The station-front roundabout canopy advertisements and taxi-rank sign use images shared with the building, and the importer remaps them to shared materials with the same names.
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Models/Buildings/Materials" -Force | Out-Null
 foreach ($name in 'BD_MALL_ADS','BD_SIGN_ATLAS') {
     Copy-Item "$unityRoot/Assets/Models/Buildings/Textures/$name.png*" "$qaRoot/Assets/Models/Buildings/Textures" -Force
     if (Test-Path "$unityRoot/Assets/Models/Buildings/Materials/$name.mat") { Copy-Item "$unityRoot/Assets/Models/Buildings/Materials/$name.mat*" "$qaRoot/Assets/Models/Buildings/Materials" -Force }
 }
-foreach ($id in 3001,3002,3003,3004) {
+foreach ($id in 3001,3002,3003,3004,3008) {
     New-Item -ItemType Directory -Path "$qaRoot/Assets/Models/Buildings/a$id/0" -Force | Out-Null
     Get-ChildItem "$unityRoot/Assets/Models/Buildings/a$id/0" -File | ForEach-Object {
         Copy-Item -LiteralPath $_.FullName -Destination "$qaRoot/Assets/Models/Buildings/a$id/0/$($_.Name)" -Force
@@ -30,13 +35,13 @@ foreach ($id in 3001,3002,3003,3004) {
 }
 Set-Content "$qaRoot/result.txt" 'RUNNING'
 $process = Start-Process -FilePath $UnityExe -ArgumentList @('-batchmode','-projectPath',('"'+$qaRoot+'"'),'-executeMethod','OpenSpaceQA.Run','-sourceRoot',('"'+$unityRoot+'"'),'-logFile',('"'+"$qaRoot/qa.log"+'"')) -WindowStyle Hidden -PassThru
-if (!$process.WaitForExit(240000)) { Stop-Process -Id $process.Id; throw 'Open space QA timed out' }
+if (!$process.WaitForExit(600000)) { Stop-Process -Id $process.Id; throw 'Open space QA timed out' }
 $result = Get-Content "$qaRoot/result.txt" -Raw
 Write-Output $result
 if ($process.ExitCode -ne 0 -or !$result.StartsWith('PASS')) { throw 'Open space QA failed' }
 # Even while the main editor is running, synchronize only the four target mirrors produced by the standard generator.
 # Existing prefabs in the main project may have been fixed by hand, so copy only files that are not present in the main project.
-foreach ($id in 3001,3002,3003,3004) {
+foreach ($id in 3001,3002,3003,3004,3008) {
     foreach ($category in 'Models/Buildings','Resources/Models/Buildings') {
         $source = "$qaRoot/Assets/$category/a$id"
         $destination = "$unityRoot/Assets/$category/a$id"
@@ -49,4 +54,4 @@ foreach ($id in 3001,3002,3003,3004) {
 }
 $layoutDir = Join-Path $unityRoot '../../genesis-gallery/pipeline/layouts'
 New-Item -ItemType Directory -Path $layoutDir -Force | Out-Null
-foreach ($id in 3001,3002,3004) { Copy-Item "$qaRoot/a$id.json" "$layoutDir/a$id.json" -Force }
+foreach ($id in 3001,3002,3004,3008) { Copy-Item "$qaRoot/a$id.json" "$layoutDir/a$id.json" -Force }

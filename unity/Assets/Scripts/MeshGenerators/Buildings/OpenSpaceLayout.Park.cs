@@ -11,6 +11,7 @@ using UnityEngine;
 /// 入口と広場を点として置き、近い点どうしを曲線の園路で結ぶ。点の数は敷地の広さで決まるので、園路の本数も広さに応じて増える。
 /// 木の濃さは density(visual_variant3)、それ以外のゆらぎは seed(visual_variant2)で決まる。
 /// 小物は sizes にある部品だけを実寸で置く。番号付きの部品(site_tree1, 2, …)は1から連番である分だけ使う。
+/// 競技場の材質参照があるモデルフォルダでは、先に競技場を置いてから残りの敷地を公園にする(OpenSpaceLayout.Sports.cs)。
 /// </summary>
 public static partial class OpenSpaceLayout
 {
@@ -192,6 +193,14 @@ public static partial class OpenSpaceLayout
         var f = new Frame { O = (p.Polygon[0] + p.Polygon[1]) * .5f, U = u, V = new Vector2(-u.y, u.x) };
         Geometry site = LocalSite(p, f);
         if (site == null || site.Area < 12) return;
+        // 競技場の輪郭は敷地から抜く。ここから先の園路・広場・木・小物は、すべて残りの敷地に作る。
+        var courts = ParkCourts(site, seed, sizes);
+        if (courts.Count > 0)
+        {
+            var outlines = new List<Geometry>();
+            foreach (var court in courts) outlines.Add(court.Outline);
+            site = Largest(Minus(site, OverlayNGRobust.Union(outlines))) ?? site;
+        }
         double scale = Math.Sqrt(site.Area);
         double halfFront = Vector2.Distance(p.Polygon[0], p.Polygon[1]) * .5;
 
@@ -199,13 +208,15 @@ public static partial class OpenSpaceLayout
         double mainWidth = Math.Max(1.8, Math.Min(4.5, 1.6 + scale * .022));
         var nodes = new List<ParkNode>();
         var edges = new List<ParkEdge>();
+        double laneInset = 0;
         foreach (var setting in new[] { new[] { 1.2, mainWidth }, new[] { .4, Math.Min(mainWidth, 1.6) } })
         {
             nodes.Clear(); edges.Clear();
             mainWidth = setting[1];
             var lane = Largest(site.Buffer(-(setting[0] + mainWidth * .5), Round()));
             if (lane == null || lane.Area < 4) continue;
-            ParkNetwork(site, lane, setting[0] + mainWidth * .5, scale, halfFront, mainWidth, seed, sizes, nodes, edges);
+            laneInset = setting[0] + mainWidth * .5;
+            ParkNetwork(site, lane, laneInset, scale, halfFront, mainWidth, seed, sizes, nodes, edges, CourtEntrances(courts, lane, laneInset));
             if (edges.Count > 0) break;
         }
 
@@ -218,6 +229,11 @@ public static partial class OpenSpaceLayout
             var n = nodes[i];
             if (!n.Gate && n.R > 0) (n.Play ? sandParts : pavedParts).Add(ParkBlob(n, seed, i));
         }
+        // 競技場の出入口から、前の園路が届く点までの舗装。
+        if (edges.Count > 0)
+            foreach (var court in courts)
+                if (court.Anchor != null)
+                    pavedParts.Add(Strip(court.Door.at.X, court.Door.at.Y, court.Door.ns, court.Door.nt, laneInset + .3, Math.Min(CourtGate, mainWidth)));
         Geometry paved = pavedParts.Count > 0 ? OverlayNGRobust.Union(pavedParts) : null;
         Geometry soft = softParts.Count > 0 ? OverlayNGRobust.Union(softParts) : null;
         Geometry sand = sandParts.Count > 0 ? OverlayNGRobust.Union(sandParts) : null;
@@ -247,6 +263,7 @@ public static partial class OpenSpaceLayout
         p.HasLoop = edges.Count >= nodes.Count && nodes.Count > 1;
 
         if (sizes == null || sizes.Count == 0) return;
+        DrawCourts(p, f, courts, sizes);
         var placer = new ParkPlacer { Plan = p, F = f, Sizes = sizes, Site = PreparedGeometryFactory.Prepare(site.Buffer(-.15)),
             Hard = hard != null ? PreparedGeometryFactory.Prepare(hard) : null, HardArea = hard != null ? new IndexedPointInAreaLocator(hard) : null,
             HardEdges = hard != null ? new ParkEdgeIndex(hard, 4) : null, SiteEdges = new ParkEdgeIndex(site, Math.Max(8, scale)), Crowns = new ParkDiscs(6), Objects = new ParkDiscs(4) };
@@ -271,9 +288,12 @@ public static partial class OpenSpaceLayout
         return Nts.CreatePolygon(ring);
     }
 
-    /// <summary>入口と広場を決め、近い点どうしを園路で結ぶ。lane は園路の中心線を通せる範囲で、敷地を laneInset だけ内側へ引いた形。</summary>
+    /// <summary>
+    /// 入口と広場を決め、近い点どうしを園路で結ぶ。lane は園路の中心線を通せる範囲で、敷地を laneInset だけ内側へ引いた形。
+    /// anchors は競技場の出入口の前の点で、園路をそこまで届かせる。
+    /// </summary>
     static void ParkNetwork(Geometry site, Polygon lane, double laneInset, double scale, double halfFront, double mainWidth, uint seed,
-        IReadOnlyDictionary<string, Vector2> sizes, List<ParkNode> nodes, List<ParkEdge> edges)
+        IReadOnlyDictionary<string, Vector2> sizes, List<ParkNode> nodes, List<ParkEdge> edges, List<Coordinate> anchors)
     {
         var env = lane.EnvelopeInternal;
         double h = Math.Max(1.0, Math.Min(6.0, scale / 45));
@@ -406,6 +426,10 @@ public static partial class OpenSpaceLayout
             }
             nodes.Add(node);
         }
+        // 競技場の出入口の前は、園路の幅より少し広いだけの小さな広場にする(半径0の点は行き止まりの園路ごと外される)。
+        if (anchors != null)
+            foreach (var anchor in anchors)
+                nodes.Add(new ParkNode { S = anchor.X, T = anchor.Y, R = mainWidth * .5 + .3, Cell = Nearest(anchor.X, anchor.Y) });
         if (nodes.Count == gates)
         {
             // 広場を置けない細い敷地は、入口から最も遠い所まで園路を1本だけ通す。

@@ -9,7 +9,8 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
 {
     static readonly string[] Parts={"floor","site_asphalt","site_paving","site_grass","site_marking","site_curb","site_yellow","site_tactile","site_gravel","site_sand",
         "site_stop","site_bench","site_tree","site_shelter","site_light","site_clock","site_taxi","site_bollard","site_planter","site_vending",
-        "site_hedge","site_bin","site_drink"};
+        "site_hedge","site_bin","site_drink",
+        "site_diamond","site_track","site_pitch","site_court","site_backstop","site_goal","site_net","site_fence","site_floodlight","site_stand"};
     // 番号付きの部品。1から連番である分だけ使う。
     static readonly string[] Series={"site_tree","site_shrub","site_feature","site_play","site_flower"};
     // Plans placed from part sizes (parks, plants) are costly to rebuild on every render-LOD change, so reuse them per building while the inputs match.

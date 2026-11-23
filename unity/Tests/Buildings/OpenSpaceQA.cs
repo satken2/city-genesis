@@ -166,6 +166,72 @@ public static class OpenSpaceQA
                     UnityEngine.Object.Destroy(mesh);UnityEngine.Object.Destroy(collider);
                 }
             }
+            // The sports park (3008) uses the park layout with courts: each court is laid out only where it fits, largest first, and the rest of the site stays a park.
+            var sports=LoadParts(3008);
+            Vector2[] Box(float w,float h)=>new[]{new Vector2(-w/2,-h/2),new Vector2(w/2,-h/2),new Vector2(w/2,h/2),new Vector2(-w/2,h/2)};
+            var courtSurfaces=new[]{"site_diamond","site_track","site_pitch","site_court"};
+            var sportsCases=new (string name,Vector2[] polygon,string[] courts)[] {
+                ("tennis",Box(60,50),new[]{"site_court"}),
+                ("default",Box(150,100),new[]{"site_diamond","site_pitch"}),
+                ("large",Box(260,200),courtSurfaces),
+                ("trapezoid",new[]{new Vector2(-90,-65),new Vector2(90,-65),new Vector2(60,65),new Vector2(-50,65)},new[]{"site_diamond","site_court"}),
+                ("concave",new[]{new Vector2(-100,-85),new Vector2(100,-85),new Vector2(100,-15),new Vector2(10,-15),new Vector2(10,85),new Vector2(-100,85)},new[]{"site_diamond","site_track","site_pitch"}),
+                ("narrow",Box(30,200),new string[0])};
+            foreach(var item in sportsCases)
+            {
+                object plan=Plan(item.polygon,12,.5f,sports);
+                var snapshot=Export(plan);
+                Require(JsonUtility.ToJson(snapshot)==JsonUtility.ToJson(Export(Plan(item.polygon,12,.5f,sports))),"Non deterministic sports "+item.name);
+                foreach(var s in snapshot.surfaces)Require((bool)layout.GetMethod("ContainsPolygon").Invoke(null,new object[]{item.polygon,s.polygon}),"Sports surface outside "+item.name);
+                foreach(var prop in snapshot.props)Require(ContainsPoint(item.polygon,prop.position),"Sports prop outside "+item.name);
+                string[] Courts(Snapshot s)=>courtSurfaces.Where(n=>s.surfaces.Any(x=>x.material==n)).ToArray();
+                int Count(string part)=>snapshot.props.Count(x=>x.part==part);
+                Require(Courts(snapshot).SequenceEqual(courtSurfaces.Where(n=>item.courts.Contains(n))),"Unexpected courts in "+item.name+": "+string.Join(",",Courts(snapshot)));
+                Require(snapshot.surfaces.Any(x=>x.material=="site_paving"),"Sports park without paths "+item.name);
+                if(item.courts.Length>0)Require(snapshot.surfaces.Any(x=>x.material=="site_marking") && Count("site_floodlight")>=4,"Court without lines or lights "+item.name);
+                Require(!item.courts.Contains("site_diamond") || (Count("site_backstop")==1 && Count("site_fence")>20),"Baseball field furniture "+item.name);
+                Require(!item.courts.Contains("site_track") || Count("site_stand")>=1,"Track stands "+item.name);
+                Require(!item.courts.Contains("site_pitch") || Count("site_goal")==2,"Soccer goals "+item.name);
+                Require(!item.courts.Contains("site_court") || (Count("site_net")==2 && Count("site_fence")>20),"Tennis court furniture "+item.name);
+                // Courts are placed in the local coordinates of the roadside edge, so a rotated and moved site gets the same courts.
+                var rotated=new Vector2[item.polygon.Length];var q=Quaternion.Euler(0,0,37);
+                for(int i=0;i<rotated.Length;i++){var v=q*(Vector3)item.polygon[i];rotated[i]=new Vector2(v.x+100,v.y-55);}
+                var rsnapshot=Export(Plan(rotated,12,.5f,sports));
+                Require(Courts(rsnapshot).SequenceEqual(Courts(snapshot)),"Rotation changes courts "+item.name);
+                foreach(var s in rsnapshot.surfaces)Require((bool)layout.GetMethod("ContainsPolygon").Invoke(null,new object[]{rotated,s.polygon}),"Rotated sports surface outside "+item.name);
+                foreach(var prop in rsnapshot.props)Require(ContainsPoint(rotated,prop.position),"Rotated sports prop outside "+item.name);
+                object result=Build(plan,sports,Vector3.zero,false);
+                Mesh mesh=(Mesh)Field(result,"Mesh"),collider=(Mesh)Field(result,"ColliderMesh");
+                Require(mesh.vertexCount>0 && collider.vertexCount>0,"Empty sports surface/collider");
+                foreach(var v in mesh.vertices)Require(!float.IsNaN(v.x)&&!float.IsInfinity(v.y),"Non finite sports vertex");
+                Require(((Material[])Field(result,"Materials")).All(m=>m!=null),"Missing material in 3008 "+item.name);
+                float extent=0;foreach(var v in item.polygon)extent=Mathf.Max(extent,v.magnitude);
+                Render(mesh,(Material[])Field(result,"Materials"),output+"/3008-"+item.name+".png",extent*.78f,2);
+                if(item.name=="default")
+                {
+                    File.WriteAllText(output+"/a3008.json",JsonUtility.ToJson(snapshot,true));
+                    // Generation time of the sports park against the ordinary park on the same site (plan and mesh separately, after a warm-up run).
+                    var park=LoadParts(3004);
+                    var timings=new System.Text.StringBuilder("variant,plan_ms,build_ms,surfaces,props\n");
+                    foreach(var (variant,set) in new[]{(3004,park),(3008,sports)})
+                    {
+                        double planMs=0,buildMs=0;object timed=null;
+                        for(int run=0;run<4;run++)
+                        {
+                            var watch=System.Diagnostics.Stopwatch.StartNew();
+                            timed=Plan(item.polygon,12,.5f,set);
+                            double planned=watch.Elapsed.TotalMilliseconds;
+                            object built=Build(timed,set,Vector3.zero,false);
+                            if(run>0){planMs+=planned/3;buildMs+=(watch.Elapsed.TotalMilliseconds-planned)/3;}
+                            UnityEngine.Object.Destroy((Mesh)Field(built,"Mesh"));UnityEngine.Object.Destroy((Mesh)Field(built,"ColliderMesh"));
+                        }
+                        timings.Append(variant).Append(',').Append(planMs.ToString("F1")).Append(',').Append(buildMs.ToString("F1")).Append(',')
+                            .Append(((ICollection)Field(timed,"Surfaces")).Count).Append(',').Append(((ICollection)Field(timed,"Props")).Count).Append("\n");
+                    }
+                    File.WriteAllText(output+"/timings.csv",timings.ToString());
+                }
+                UnityEngine.Object.Destroy(mesh);UnityEngine.Object.Destroy(collider);
+            }
             // The paved plaza has only a floor and does not pick up decorations from the existing method for ground surfaces.
             var plaza=LoadParts(3003);Require(plaza.Count==1 && plaza.ContainsKey("floor"),"Plaza has decorations");
             var terrainData=new TerrainData {heightmapResolution=33,size=new Vector3(100,10,100)};
@@ -189,6 +255,14 @@ public static class OpenSpaceQA
                 {float ground=terrain.SampleHeight(new Vector3(v.x,0,v.z));Require(Mathf.Abs(v.y+center.y-ground-.03f)<.003f,"Surface does not follow terrain");}
                 UnityEngine.Object.Destroy(panel);UnityEngine.Object.Destroy(mesh);UnityEngine.Object.Destroy((Mesh)Field(result,"ColliderMesh"));
             }
+            // Court surfaces follow the slope like the other plan surfaces. Keep a sample of the sports park on sloped ground.
+            {
+                object plan=Plan(sportsCases[0].polygon,12,.5f,sports);
+                object result=Build(plan,sports,center,true);
+                var mesh=(Mesh)Field(result,"Mesh");Require(mesh.vertexCount>0,"Sports park on terrain is empty");
+                Render(mesh,(Material[])Field(result,"Materials"),output+"/3008-terrain.png",34,2);
+                UnityEngine.Object.Destroy(mesh);UnityEngine.Object.Destroy((Mesh)Field(result,"ColliderMesh"));
+            }
             UnityEngine.Object.DestroyImmediate(terrainObject);UnityEngine.Object.DestroyImmediate(terrainData);
             File.WriteAllText(output+"/result.txt","PASS checks="+checks);
             EditorApplication.Exit(0);
@@ -208,13 +282,14 @@ public static class OpenSpaceQA
         if(variant==3002 && parts.TryGetValue("site_tree",out var tree))
         {
             var treeMesh=tree.GetComponentInChildren<MeshFilter>().sharedMesh;
-            Require(treeMesh.triangles.Length/3==144,"Tree triangle budget changed");
+            Require(treeMesh.triangles.Length/3==892,"Tree triangle budget changed");
             var foliage=Array.Find(tree.GetComponentInChildren<MeshRenderer>().sharedMaterials,m=>m.name=="PROP_LEAF_GREEN");
             Require(foliage!=null && foliage.mainTexture!=null,"Tree foliage texture missing");
         }
         return parts;
     }
-    static void Render(Mesh mesh,Material[] materials,string file)
+    // size is the half height of the view in meters, and scale multiplies the image resolution (large sites need both to show court lines).
+    static void Render(Mesh mesh,Material[] materials,string file,float size=34,int scale=1)
     {
         var go=new GameObject("Preview");go.AddComponent<MeshFilter>().sharedMesh=mesh;
         var renderer=go.AddComponent<MeshRenderer>();var mats=new Material[materials.Length];
@@ -228,10 +303,11 @@ public static class OpenSpaceQA
         renderer.sharedMaterials=mats;
         var light=new GameObject("Sun").AddComponent<Light>();light.type=LightType.Directional;light.intensity=1.1f;light.transform.rotation=Quaternion.Euler(48,-30,0);
         RenderSettings.ambientLight=new Color(.55f,.55f,.55f);
-        var camera=new GameObject("Camera").AddComponent<Camera>();camera.orthographic=true;camera.orthographicSize=34;camera.backgroundColor=new Color(.19f,.22f,.26f);camera.clearFlags=CameraClearFlags.SolidColor;
-        camera.transform.position=new Vector3(40,65,-65);camera.transform.LookAt(Vector3.zero);
-        var rt=new RenderTexture(1000,800,24);camera.targetTexture=rt;camera.Render();
-        RenderTexture.active=rt;var image=new Texture2D(1000,800,TextureFormat.RGB24,false);image.ReadPixels(new Rect(0,0,1000,800),0,0);image.Apply();File.WriteAllBytes(file,image.EncodeToPNG());RenderTexture.active=null;
+        var camera=new GameObject("Camera").AddComponent<Camera>();camera.orthographic=true;camera.orthographicSize=size;camera.farClipPlane=4000;camera.backgroundColor=new Color(.19f,.22f,.26f);camera.clearFlags=CameraClearFlags.SolidColor;
+        camera.transform.position=new Vector3(40,65,-65)*(size/34);camera.transform.LookAt(Vector3.zero);
+        int width=1000*scale,height=800*scale;
+        var rt=new RenderTexture(width,height,24);camera.targetTexture=rt;camera.Render();
+        RenderTexture.active=rt;var image=new Texture2D(width,height,TextureFormat.RGB24,false);image.ReadPixels(new Rect(0,0,width,height),0,0);image.Apply();File.WriteAllBytes(file,image.EncodeToPNG());RenderTexture.active=null;
         camera.targetTexture=null;
         UnityEngine.Object.DestroyImmediate(image);UnityEngine.Object.DestroyImmediate(rt);UnityEngine.Object.DestroyImmediate(go);UnityEngine.Object.DestroyImmediate(light.gameObject);UnityEngine.Object.DestroyImmediate(camera.gameObject);foreach(var mat in mats)UnityEngine.Object.DestroyImmediate(mat);
     }
