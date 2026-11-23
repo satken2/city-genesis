@@ -28,7 +28,6 @@ public class IpcClient : MonoBehaviour
     public event Action<Newtonsoft.Json.Linq.JToken> OnEditBuildingPlacementCommand;
     public event Action<int> OnEditBuildingUpdateFloors;
     public event Action<int> OnBuildingExploded;
-    public event Action<float, float, float> OnEditBuildingUpdateVisualVariant;
     // Landmark (landmark_master ID) changes. Switches preview part prefixes.
     public event Action<int> OnEditBuildingUpdateLandmark;
     public event Action<EffectRangePayload> OnEditBuildingUpdateEffectRange;
@@ -592,16 +591,6 @@ public class IpcClient : MonoBehaviour
                         int landmark = GetParamInt(payload, "landmark");
                         Debug.Log($"IpcClient: edit_building:update_landmark -> {landmark}");
                         OnEditBuildingUpdateLandmark?.Invoke(landmark);
-                    }
-                    break;
-
-                case "edit_building:update_visual_variant":
-                    {
-                        float vv1 = GetParamFloat(payload, "visual_variant");
-                        float vv2 = GetParamFloat(payload, "visual_variant2");
-                        float vv3 = GetParamFloat(payload, "visual_variant3");
-                        Debug.Log($"IpcClient: edit_building:update_visual_variant -> vv1={vv1}, vv2={vv2}, vv3={vv3}");
-                        OnEditBuildingUpdateVisualVariant?.Invoke(vv1, vv2, vv3);
                     }
                     break;
 

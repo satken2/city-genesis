@@ -301,28 +301,6 @@ export async function sendEditBuildingUpdateLandmark(landmark: number): Promise<
 }
 
 /**
- * `edit_building.update_visual_variant`
- * Change appearance variants (visual_variant1/2/3) during building construction. Unity regenerates the preview
- * with cached footprint polygons, avoiding a backend round trip.
- */
-export async function sendEditBuildingUpdateVisualVariant(
-  visualVariant: number,
-  visualVariant2: number,
-  visualVariant3: number,
-): Promise<void> {
-  await invoke("send_window_action", {
-    windowType: "building_construction",
-    entity: null,
-    action: "edit_building:update_visual_variant",
-    params: {
-      visual_variant: visualVariant,
-      visual_variant2: visualVariant2,
-      visual_variant3: visualVariant3,
-    },
-  });
-}
-
-/**
  * `building_construction:pick_source`
  * Start source-building selection in Unity for copy construction. Unity allows only building clicks
  * (MODE_PICK_BUILDING) and returns `building_construction:copy_source` when selected.

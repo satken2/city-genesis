@@ -39,7 +39,6 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditBuildingUpdateShape += HandleEditBuildingUpdateShape;
             IpcClient.Instance.OnEditBuildingPlacementCommand += HandleEditBuildingPlacementCommand;
             IpcClient.Instance.OnEditBuildingUpdateFloors += HandleEditBuildingUpdateFloors;
-            IpcClient.Instance.OnEditBuildingUpdateVisualVariant += HandleEditBuildingUpdateVisualVariant;
             IpcClient.Instance.OnEditBuildingUpdateLandmark += HandleEditBuildingUpdateLandmark;
             IpcClient.Instance.OnEditBuildingUpdateEffectRange += HandleEditBuildingUpdateEffectRange;
             IpcClient.Instance.OnEditBuildingUpdateDirectParams += HandleEditBuildingUpdateDirectParams;
@@ -80,7 +79,6 @@ public class IpcEventHandler : MonoBehaviour
             IpcClient.Instance.OnEditBuildingUpdateShape -= HandleEditBuildingUpdateShape;
             IpcClient.Instance.OnEditBuildingPlacementCommand -= HandleEditBuildingPlacementCommand;
             IpcClient.Instance.OnEditBuildingUpdateFloors -= HandleEditBuildingUpdateFloors;
-            IpcClient.Instance.OnEditBuildingUpdateVisualVariant -= HandleEditBuildingUpdateVisualVariant;
             IpcClient.Instance.OnEditBuildingUpdateLandmark -= HandleEditBuildingUpdateLandmark;
             IpcClient.Instance.OnEditBuildingUpdateEffectRange -= HandleEditBuildingUpdateEffectRange;
             IpcClient.Instance.OnEditBuildingUpdateDirectParams -= HandleEditBuildingUpdateDirectParams;
@@ -398,19 +396,6 @@ public class IpcEventHandler : MonoBehaviour
         if (bpm != null)
         {
             bpm.SetFloors(floors);
-        }
-    }
-
-    /// <summary>
-    /// edit_building.update_visual_variant → BuildingPlanManager.SetVisualVariant()
-    /// Rebuild Unity 3D preview meshes when UI appearance seed sliders change.
-    /// </summary>
-    private void HandleEditBuildingUpdateVisualVariant(float vv1, float vv2, float vv3)
-    {
-        var bpm = GetBuildingPlanManager();
-        if (bpm != null)
-        {
-            bpm.SetVisualVariant(vv1, vv2, vv3);
         }
     }
 

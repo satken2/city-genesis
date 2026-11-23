@@ -636,20 +636,6 @@ public partial class BuildingPlanManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Sets visual variants (visual_variant1/2/3) and rebuilds the preview mesh.
-    /// Called when the UI appearance seed sliders change. Without refetching from the backend,
-    /// rebuilds the mesh from the cached footprint polygon using the current visual_variant.
-    /// </summary>
-    public void SetVisualVariant(float vv1, float vv2, float vv3)
-    {
-        currentVisualVariant = vv1;
-        currentVisualVariant2 = vv2;
-        currentVisualVariant3 = vv3;
-        Debug.Log($"BuildingPlanManager: 外観バリアントを設定しました: vv1={vv1}, vv2={vv2}, vv3={vv3}");
-        RebuildPreviewFromCache();
-    }
-
-    /// <summary>
     /// Sets the landmark type and rebuilds the preview mesh. Called by landmark selection in scenario authoring mode.
     /// Master data determines landmark site dimensions and floors as well as part prefixes (landmark-{model_prefix}),
     /// so rebuild the direct placement ghost and placement_state using the landmark's actual dimensions.
