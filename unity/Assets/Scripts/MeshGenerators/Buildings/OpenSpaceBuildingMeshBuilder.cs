@@ -61,13 +61,18 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
     {
         return SizedPlan(data,modelType,CollectParts(BuildingMeshUtils.GetGlbPrefix1(data),data.visual_variant,modelType,null));
     }
-    /// <summary>Plan placed from the actual sizes of the parts in the selected model folder, so those sizes are inputs too.</summary>
+    /// <summary>
+    /// Plan placed from the actual sizes of the parts in the selected model folder, so those sizes are inputs too.
+    /// Its site is the footprint, or the parcel for model types whose plan covers it (<see cref="OpenSpaceLayout.CoversParcel"/>).
+    /// </summary>
     static OpenSpaceLayout.Plan SizedPlan(BuildingSummary data,int modelType,Dictionary<string,string> paths)
     {
         var key=new System.Text.StringBuilder();
         void Add(float value)=>key.Append(value.ToString("R",System.Globalization.CultureInfo.InvariantCulture)).Append(':');
         Add(modelType);Add(data.visual_variant2);Add(data.visual_variant3);
-        if(data.polygonArray!=null)foreach(var point in data.polygonArray)foreach(float v in point)Add(v);
+        Vector2[] site=BuildingMeshUtils.GetFootprint(data);
+        if(OpenSpaceLayout.CoversParcel(modelType))site=OpenSpaceLayout.LotFacingRoad(BuildingMeshUtils.ResolveParcelContext(data,out _,out _),site);
+        foreach(Vector2 point in site){Add(point.x);Add(point.y);}
         foreach(var pair in paths)key.Append(pair.Value).Append(':');
         string signature=key.ToString();
         if(sizedPlans.TryGetValue(data.agent_id,out var cached) && cached.signature==signature)return cached.plan;
@@ -80,7 +85,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
             Bounds b=model.layout;
             sizes[pair.Key]=new Vector2(2*Mathf.Max(-b.min.x,b.max.x),2*Mathf.Max(-b.min.z,b.max.z));
         }
-        var plan=OpenSpaceLayout.Create(BuildingMeshUtils.GetFootprint(data),modelType,data.visual_variant2,data.visual_variant3,sizes);
+        var plan=OpenSpaceLayout.Create(site,modelType,data.visual_variant2,data.visual_variant3,sizes);
         if(sizedPlans.Count>=SizedPlanCacheSize)sizedPlans.Clear();
         sizedPlans[data.agent_id]=(signature,plan);
         return plan;
@@ -213,7 +218,8 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
                 }
                 // Recheck actual FBX occupancy to prevent boundary protrusion when models are replaced.
                 if(!prop.Fitted && !OpenSpaceLayout.ContainsPolygon(plan.Polygon,rect))continue;
-                float y=terrain?Utils.GetGroundHeight(new Vector3(center.x+prop.Position.x,1000,center.z+prop.Position.y))-center.y:0f;
+                Vector2 foot=prop.Ground??prop.Position;
+                float y=terrain?Utils.GetGroundHeight(new Vector3(center.x+foot.x,1000,center.z+foot.y))-center.y:0f;
                 var position=new Vector3(prop.Position.x,y+.02f+PropLift(raised,prop.Position),prop.Position.y);
                 var matrix=Matrix4x4.TRS(position,rotation,Vector3.one*prop.Scale);
                 if(mesh==null)sink.Add(new InstancedPartRenderer.Instance {path=path,local=matrix});

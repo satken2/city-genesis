@@ -39,6 +39,14 @@ Every plant opens a gate on the road-facing edge, runs a service road in from th
 
 Equipment uses `site_{name}` models such as `site_office` and `site_transformer`, which can have a close-up `_close` and a distant `_far` with the same origin and footprint. Equipment is combined into the building mesh, while small parts such as pipes and yard lights are drawn from shared models like the trees in a park. The perimeter fence is the site decoration `fence-w`, opened at the gate, where `gate` is placed. Each unit rests at the terrain elevation of its own position, and the distant view places each unit's `_far` in the same layout. Parts missing from the model folder are not placed.
 
+## Gas stations
+
+Gas stations (`MODEL_GAS_STATION`) also build a placement plan from the parcel's shape. The backend does not send the placement, and players cannot edit it. Because the building footprint is smaller than the parcel, the plan uses the whole parcel as its site instead of the footprint, and treats the parcel edge that the footprint's front edge faces as the road-facing edge. When the parcel cannot be resolved, the footprint is used.
+
+The whole site is a concrete forecourt. A planted strip with a curb runs around its edge and opens for driveways on the road-facing edge. The shop `site_store` stands in the rear corner, and the fueling area repeats `site_canopy`, one roof bay with an island and two pumps, edge to edge in both directions between the shop and the road (or beside the shop when fewer fit there), forming one roof. The number of bays is proportional to the site's area, and the roof's edge band `site_fascia` is attached only to edges with no neighboring bay. As the site gets smaller, the plan gives up the parking stalls in front of the shop, then the shop itself, places the office `site_office` instead of the shop, and finally keeps only the fueling area.
+
+Around them stand the price sign `site_sign`, the underground tanks' fill covers `site_fill` and vent pipes `site_vent`, the air station `site_air`, and the dumpster enclosure `site_dumpster`, and parking stalls are drawn in front of the shop, on open ground, and along the site's edges. The items in front of the shop `site_clutter1`…, parked cars `site_car1`…, and the planted strip's shrubs `site_shrub1`… and trees `site_tree1`… are numbered parts, used for as many as are numbered consecutively from 1. Parts are held and drawn as for utility plants: the fueling bays, shop, office, and sign are units with a distant `_far` model, and the rest are small objects drawn with shared models. There is no perimeter fence or gate.
+
 ## Facilities connected to terrain or tracks
 
 ### Ports

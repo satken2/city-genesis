@@ -30,13 +30,15 @@ public static partial class OpenSpaceLayout
         "site_blower", "site_digester", "site_clarifier", "site_basin",
         "site_plant", "site_shed", "site_bunker", "site_scale",
         "site_crusher", "site_conveyor", "site_rom", "site_workshop", "site_pond",
-        "site_excavator", "site_truck", "site_loader", "site_pickup", "site_drill" };
+        "site_excavator", "site_truck", "site_loader", "site_pickup", "site_drill",
+        "site_canopy", "site_fascia", "site_store", "site_sign", "site_fill", "site_vent", "site_air", "site_dumpster", "site_tanker",
+        "site_bollard", "site_stop", "site_pad", "site_joint", "site_paving", "site_curb", "site_grass", "site_marking" };
     /// <summary>Numbered parts the plant plans place: as many as are numbered consecutively from 1.</summary>
-    public static readonly string[] FacilitySeries = { "site_stockpile", "site_rock", "site_heap", "site_clutter" };
+    public static readonly string[] FacilitySeries = { "site_stockpile", "site_rock", "site_heap", "site_clutter", "site_car", "site_shrub", "site_tree" };
 
     public static bool IsFacilityModel(int modelType) => modelType == Constants.MODEL_SUBSTATION
         || modelType == Constants.MODEL_WATER_STATION || modelType == Constants.MODEL_SEWAGE_PLANT || modelType == Constants.MODEL_WASTE_PLANT
-        || modelType == Constants.MODEL_OPEN_PIT || modelType == Constants.MODEL_QUARRY;
+        || modelType == Constants.MODEL_OPEN_PIT || modelType == Constants.MODEL_QUARRY || modelType == Constants.MODEL_GAS_STATION;
 
     /// <summary>Where the front of a building in a <see cref="FacilityYard.ListRow"/> points.</summary>
     enum Face { Street, Spine, Yard }
@@ -51,7 +53,8 @@ public static partial class OpenSpaceLayout
         public bool Roads;              // False on sites too small for service roads; rows then start at the front.
         public string RoadPart = "site_asphalt";  // Material part of the service roads.
         public double Edge, GateS, RingS = double.NaN;
-        IPreparedGeometry field;
+        public Geometry Run;            // Where the clear run behind a claimed rectangle may lie besides the field. Null: the field only.
+        IPreparedGeometry field, run;
         // Rectangles of the placed units and loose props, bucketed in plan so a site littered with rocks stays quick to test.
         readonly Dictionary<long, List<Geometry>> taken = new Dictionary<long, List<Geometry>>();
         const double TakenCell = 16;
@@ -59,8 +62,12 @@ public static partial class OpenSpaceLayout
         double spineEnd, spineBefore;   // How far in the spine road reaches, and its value before the last cross road.
 
         // Rows start exactly on the field's edges, so allow for rounding when testing whether a part lies in it.
-        public void Prepare() => field = PreparedGeometryFactory.Prepare(Field.Buffer(.01));
-        public bool Has(string part) => Sizes.ContainsKey(part);
+        public void Prepare()
+        {
+            field = PreparedGeometryFactory.Prepare(Field.Buffer(.01));
+            run = Run == null ? field : PreparedGeometryFactory.Prepare(Union(Field, Run).Buffer(.01));
+        }
+        public bool Has(string part) => part != null && Sizes.ContainsKey(part);
 
         /// <summary>
         /// Place a part's authored rectangle centered at (s,t), front toward (fs,ft), if it lies in the field clear of other units.
@@ -87,7 +94,29 @@ public static partial class OpenSpaceLayout
             return !Taken(ParkBox(s, t, fs, ft, size.x - .04, size.y - .04));
         }
 
-        void Take(Geometry box)
+        /// <summary>
+        /// Claim a w×d rectangle of bare ground centered at (s,t), d along (fs,ft), if it lies in the field and it and a clear run
+        /// behind it are clear of everything placed. The clear run may also lie in <see cref="Run"/>, and itself stays free.
+        /// Rectangles may touch their neighbors.
+        /// </summary>
+        public bool Claim(double s, double t, double fs, double ft, double w, double d, double clear = 0)
+        {
+            double cs = s - fs * clear * .5, ct = t - ft * clear * .5;
+            var box = ParkBox(s, t, fs, ft, w, d);
+            if (!field.Covers(box) || !run.Covers(ParkBox(cs, ct, fs, ft, w, d + clear)) || Taken(ParkBox(cs, ct, fs, ft, w - .04, d + clear - .04))) return false;
+            Take(box);
+            return true;
+        }
+
+        /// <summary>
+        /// Whether a w×d rectangle of clear run along the site's axes centered at (s,t) lies in the field or <see cref="Run"/>,
+        /// clear of everything placed.
+        /// </summary>
+        public bool Free(double s, double t, double w, double d) =>
+            run.Covers(ParkBox(s, t, 0, 1, w, d)) && !Taken(ParkBox(s, t, 0, 1, w - .04, d - .04));
+
+        /// <summary>Keep an area clear of everything placed after.</summary>
+        public void Take(Geometry box)
         {
             var e = box.EnvelopeInternal;
             for (long z = (long)Math.Floor(e.MinY / TakenCell); z <= (long)Math.Floor(e.MaxY / TakenCell); z++)
@@ -110,11 +139,15 @@ public static partial class OpenSpaceLayout
             return false;
         }
 
-        /// <summary>Place a part without the field and overlap checks (parts that stand on a road or in a gap chosen by the caller).</summary>
-        public void Add(string part, double s, double t, double fs, double ft, bool unit)
+        /// <summary>
+        /// Place a part without the field and overlap checks (parts that stand on a road or in a gap chosen by the caller).
+        /// on is the center of the unit the part is fixed to, whose ground height it takes.
+        /// </summary>
+        public void Add(string part, double s, double t, double fs, double ft, bool unit, (double s, double t)? on = null)
         {
             if (!Has(part) || Plan.Props.Count >= MaxFacilityProps) return;
-            Plan.Props.Add(new Prop { Part = part, Position = F.World(s, t), Forward = F.Dir(fs, ft), Fitted = true, Unit = unit });
+            Plan.Props.Add(new Prop { Part = part, Position = F.World(s, t), Forward = F.Dir(fs, ft), Fitted = true, Unit = unit,
+                Ground = on.HasValue ? F.World(on.Value.s, on.Value.t) : (Vector2?)null });
         }
 
         /// <summary>
@@ -278,16 +311,25 @@ public static partial class OpenSpaceLayout
         }
     }
 
+    /// <summary>Local coordinates of a site: s along the road-facing edge from its midpoint, t inward, mirrored left/right by the seed.</summary>
+    static Frame FacilityFrame(Plan p, uint seed)
+    {
+        Vector2 u = (p.Polygon[1] - p.Polygon[0]).normalized;
+        if (u.sqrMagnitude < .5f) u = Vector2.right;
+        return new Frame { O = (p.Polygon[0] + p.Polygon[1]) * .5f, U = Rand(seed, 1) < .5f ? -u : u, V = new Vector2(-u.y, u.x) };
+    }
+
+    /// <summary>Width of the strip along the site edge that units keep out of (m): wider on larger sites.</summary>
+    static double FacilityEdge(Geometry site) => Math.Max(.6, Math.Min(2.0, Math.Sqrt(site.Area) * .03));
+
     /// <summary>depth limits where units may stand to that far in from the road-facing edge; roads still span the whole site.</summary>
     static FacilityYard OpenYard(Plan p, uint seed, IReadOnlyDictionary<string, Vector2> sizes, bool ring = false, double depth = double.NaN)
     {
         if (sizes == null || sizes.Count == 0) return null;
-        Vector2 u = (p.Polygon[1] - p.Polygon[0]).normalized;
-        if (u.sqrMagnitude < .5f) u = Vector2.right;
-        var f = new Frame { O = (p.Polygon[0] + p.Polygon[1]) * .5f, U = Rand(seed, 1) < .5f ? -u : u, V = new Vector2(-u.y, u.x) };
+        Frame f = FacilityFrame(p, seed);
         Geometry site = LocalSite(p, f);
         if (site == null || site.Area < 12) return null;
-        double edge = Math.Max(.6, Math.Min(2.0, Math.Sqrt(site.Area) * .03));
+        double edge = FacilityEdge(site);
         var inner = Largest(site.Buffer(-edge, new BufferParameters { JoinStyle = JoinStyle.Mitre }));
         if (inner == null) return null;
         var env = inner.EnvelopeInternal;
