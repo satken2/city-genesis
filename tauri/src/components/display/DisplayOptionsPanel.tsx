@@ -68,8 +68,8 @@ type LegendType = "none" | "color" | "meter";
  */
 type LegendInfo = {
   type: LegendType;
-  /** Mode description, displayed at the panel's upper right. */
-  description: string;
+  /** Mode description, displayed at the panel's bottom area when present. */
+  description?: string;
   /** Color legend entries, used when type is "color". */
   items?: { color: string; label: string }[];
   /** Left endpoint color of the meter legend, used when type is "meter". */
@@ -85,10 +85,13 @@ type LegendInfo = {
  * Treat modes without a defined legend as "none" and return placeholder explanatory text.
  */
 function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInfo {
+  if (layerId === "transit") {
+    return { type: "none" };
+  }
+
   if (layerId === "coverage") {
     return {
       type: "color",
-      description: t("display.coverageDescription"),
       items: [
         { color: COVERAGE_IN_RANGE_COLOR, label: t("display.coverageInRange") },
         { color: COVERAGE_OUT_OF_RANGE_COLOR, label: t("display.coverageOutOfRange") },
@@ -270,7 +273,6 @@ function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInf
     district: "地区の枠線と名称・アイコンを表示します。地区ごとの色分けは建物/区画/道路の「地区別色塗り」モードを使います。",
     terrain: "地形の標高や透明度を変更して表示します。",
     alert: "街のアラートを種別ごとに表示/非表示できます。建物・道路のアラートアイコンと、倒壊・焼失した廃墟のアイコンが対象です。",
-    transit: "設置済みの公共交通路線を種別色の帯で表示します。路線種別ごとに表示/非表示を切り替えられます。",
     prop: "プロップの表示/非表示を切り替えます。",
   };
   return {
@@ -414,25 +416,28 @@ function TransitSection({
         <span className="do-alert-card-text">{t("display.transitHighlight")}</span>
         <div className="do-alert-card-toggle" />
       </button>
-      {entries.map((entry) => {
-        const isEnabled = enabled.has(entry.transit_path_id);
-        return (
-          <div
-            key={entry.transit_path_id}
-            className={`do-alert-card ${isEnabled ? "enabled" : ""}`}
-            onClick={() => handleToggle(entry.transit_path_id)}
-          >
-            <img
-              src={resolveTransitIcon(entry.transit_path_id)}
-              alt=""
-              className="do-alert-card-icon"
-              draggable={false}
-            />
-            <span className="do-alert-card-text">{entry.display_name}</span>
-            <div className="do-alert-card-toggle" />
-          </div>
-        );
-      })}
+      <div className="do-mode-row">
+        {entries.map((entry) => {
+          const isEnabled = enabled.has(entry.transit_path_id);
+          return (
+            <button
+              key={entry.transit_path_id}
+              type="button"
+              className={`do-contour-btn ${isEnabled ? "selected" : ""}`}
+              aria-pressed={isEnabled}
+              onClick={() => handleToggle(entry.transit_path_id)}
+            >
+              <img
+                src={resolveTransitIcon(entry.transit_path_id)}
+                alt=""
+                className="do-contour-icon"
+                draggable={false}
+              />
+              <span className="do-contour-label">{entry.display_name}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -467,37 +472,43 @@ function CoverageSection({
   };
 
   return (
-    <div className="do-alert-list">
-      <button
-        type="button"
-        className={`do-alert-card ${selected === null ? "enabled" : ""}`}
-        aria-pressed={selected === null}
-        onClick={() => choose(null)}
-      >
-        <img src={resolveDisplayIcon("visual/invisible.png")} alt="" className="do-alert-card-icon" draggable={false} />
-        <span className="do-alert-card-text">{t("display.coverageNone")}</span>
-        <div className="do-alert-card-toggle" />
-      </button>
-      {products.map((product) => (
+    <div className="do-section">
+      <div className="do-mode-row">
         <button
-          key={product.productId}
           type="button"
-          className={`do-alert-card ${selected === product.productId ? "enabled" : ""}`}
-          aria-pressed={selected === product.productId}
-          onClick={() => choose(product.productId)}
+          className={`do-contour-btn ${selected === null ? "selected" : ""}`}
+          aria-pressed={selected === null}
+          onClick={() => choose(null)}
         >
           <img
-            src={resolveAgentVariantIcon(product.supplierVariants[0])}
+            src={resolveDisplayIcon("visual/invisible.png")}
             alt=""
-            className="do-alert-card-icon"
+            className="do-contour-icon"
             draggable={false}
           />
-          <span className="do-alert-card-text">
-            {masterData?.products[product.productId]?.display_name ?? product.productId}
-          </span>
-          <div className="do-alert-card-toggle" />
+          <span className="do-contour-label">{t("display.coverageNone")}</span>
         </button>
-      ))}
+        {products.map((product) => {
+          const label = String(masterData?.products[product.productId]?.display_name ?? product.productId);
+          return (
+            <button
+              key={product.productId}
+              type="button"
+              className={`do-contour-btn ${selected === product.productId ? "selected" : ""}`}
+              aria-pressed={selected === product.productId}
+              onClick={() => choose(product.productId)}
+            >
+              <img
+                src={resolveAgentVariantIcon(product.supplierVariants[0])}
+                alt=""
+                className="do-contour-icon"
+                draggable={false}
+              />
+              <span className="do-contour-label">{label}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -573,12 +584,10 @@ export function DisplayOptionsPanel({ apiBaseUrl }: DisplayOptionsPanelProps) {
                 />
               )}
             </div>
-            <div className="do-content-bottom">
-              <LegendArea
-                layerId={activeLayer.id}
-                modeId={activeSelection.mode}
-              />
-            </div>
+            <LegendArea
+              layerId={activeLayer.id}
+              modeId={activeSelection.mode}
+            />
           </div>
         )}
       </div>
@@ -634,7 +643,7 @@ function LayerSection({
         </div>
       )}
       {layer.toggles && layer.toggles.length > 0 && (
-        <div className="do-toggle-list">
+        <div className="do-terrain-extra">
           {layer.toggles.map((toggle) => {
             const isEnabled = selection.flags.includes(toggle.id);
             return (
@@ -642,7 +651,7 @@ function LayerSection({
                 key={toggle.id}
                 type="button"
                 aria-pressed={isEnabled}
-                className={`do-alert-card ${isEnabled ? "enabled" : ""}`}
+                className={`do-contour-btn ${isEnabled ? "selected" : ""}`}
                 onClick={() => {
                   playSound(clickSrc);
                   onToggleFlag(layer.id, toggle.id);
@@ -651,11 +660,10 @@ function LayerSection({
                 <img
                   src={resolveDisplayIcon(toggle.icon)}
                   alt=""
-                  className="do-alert-card-icon"
+                  className="do-contour-icon"
                   draggable={false}
                 />
-                <span className="do-alert-card-text">{t(toggle.labelKey)}</span>
-                <div className="do-alert-card-toggle" />
+                <span className="do-contour-label">{t(toggle.labelKey)}</span>
               </button>
             );
           })}
@@ -761,38 +769,48 @@ function LegendArea({
   const { t } = useTranslation();
   const info = getLegendInfo(layerId, modeId, t);
 
+  if (!info.description && info.type === "none") {
+    return null;
+  }
+
   return (
-    <div className="do-legend-root">
-      <div className="do-description">{layerId === "transit" ? t("display.transitHighlightDescription") : info.description}</div>
-      <div className="do-legend-divider" />
-      <div className="do-legend-area">
-        {info.type === "none" && (
-          <span className="do-legend-none">凡例はありません</span>
+    <div className="do-content-bottom">
+      <div className="do-legend-root">
+        {info.description && (
+          <>
+            <div className="do-description">{info.description}</div>
+            <div className="do-legend-divider" />
+          </>
         )}
-        {info.type === "color" && info.items && (
-          <div className="do-legend-color-list">
-            {info.items.map((item) => (
-              <div key={item.label} className="do-legend-color-item">
-                <span
-                  className="do-legend-color-box"
-                  style={{ backgroundColor: item.color }}
-                />
-                <span className="do-legend-color-label">{item.label}</span>
-              </div>
-            ))}
-          </div>
-        )}
-        {info.type === "meter" && (
-          <div className="do-legend-meter">
-            <div
-              className="do-legend-meter-bar"
-              style={{
-                background: `linear-gradient(to right, ${info.meterStartColor}, ${info.meterEndColor})`,
-              }}
-            />
-            <span className="do-legend-meter-label">{info.meterLabel}</span>
-          </div>
-        )}
+        <div className="do-legend-area">
+          {info.type === "none" && (
+            <span className="do-legend-none">凡例はありません</span>
+          )}
+          {info.type === "color" && info.items && (
+            <div className="do-legend-color-list">
+              {info.items.map((item) => (
+                <div key={item.label} className="do-legend-color-item">
+                  <span
+                    className="do-legend-color-box"
+                    style={{ backgroundColor: item.color }}
+                  />
+                  <span className="do-legend-color-label">{item.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+          {info.type === "meter" && (
+            <div className="do-legend-meter">
+              <div
+                className="do-legend-meter-bar"
+                style={{
+                  background: `linear-gradient(to right, ${info.meterStartColor}, ${info.meterEndColor})`,
+                }}
+              />
+              <span className="do-legend-meter-label">{info.meterLabel}</span>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -219,13 +219,14 @@ export const DISPLAY_LAYERS: DisplayLayer[] = [
     ],
   },
   {
-    // Public transport layer. It has a single mode (default); visibility by line type is
-    // managed by DisplayOptionsPanel's TransitSection through subMode (CSV of enabled transit_path_id values).
+    // 公共交通レイヤー。表示/非表示は mode(hidden/default) で切り替え、
+    // 路線種別ごとの表示は DisplayOptionsPanel の TransitSection が subMode(有効な transit_path_id の CSV) で管理する。
     id: "transit",
     titleKey: "display.layerTransit",
     defaultMode: "hidden",
     modes: [
-      { id: "default", tooltipKey: "display.modeTransitDefault", icon: "transport/t_bus.png" },
+      { id: "hidden", tooltipKey: "display.modeHidden", icon: "visual/invisible.png" },
+      { id: "default", tooltipKey: "display.modeTransitDefault", icon: "visual/normal.png" },
     ],
   },
   {
