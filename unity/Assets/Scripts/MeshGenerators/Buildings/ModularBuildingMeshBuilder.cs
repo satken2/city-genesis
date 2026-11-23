@@ -43,8 +43,18 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
 
         Material floorMaterial = BuildingMeshUtils.ResolveFloorMaterialFromMaster(buildingData, prefix);
 
+        // A building whose model folder has the stall parts lays its parcel out as a parking lot, in place of the fence,
+        // the scatter parts, and the bare ground panel.
+        BuildingMeshResult lot = modelType == Constants.MODEL_MODULAR_GROUND || fenceFootprint == null ? null
+            : OpenSpaceBuildingMeshBuilder.BuildLot(buildingData, prefix, centerPointWorld, floorMaterial);
+        if (lot != null)
+        {
+            fenceFootprint = null;
+            floorMaterial = null;
+        }
+
         return GenerateInternal(footprint, floors, prefix, floorHeight, visual_variant, visual_variant2, modelType, buildingShape, fenceFootprint, centerPointWorld, isDynamic,
-            floorMaterial: floorMaterial, fillFringe: BuildingMeshUtils.GetFringe(buildingData));
+            floorMaterial: floorMaterial, fillFringe: BuildingMeshUtils.GetFringe(buildingData), lot: lot);
     }
 
     /// <summary>
@@ -79,7 +89,8 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
         bool isDynamic = false,
         bool generateFoundation = true,
         Material floorMaterial = null,
-        Vector2[] fillFringe = null)
+        Vector2[] fillFringe = null,
+        BuildingMeshResult lot = null)
     {
         bool isGroundModel = modelType == Constants.MODEL_MODULAR_GROUND;
 
@@ -198,6 +209,17 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
             }
         }
 
+        // The parking lot's mesh (OpenSpaceBuildingMeshBuilder.BuildLot) joins the body and is released with the other temporaries.
+        if (lot?.Mesh != null)
+        {
+            // Its submeshes are merged by material, so each one's vertices lie scattered among the others'; repack them so that
+            // recombining by submesh does not copy the vertices in between.
+            Mesh packed = BuildingMeshUtils.CompactSubMeshVertices(lot.Mesh);
+            AppendMeshInstances(packed, lot.Materials, combineInstances, allMaterials);
+            temporaryMeshes.Add(lot.Mesh);
+            if (packed != lot.Mesh) temporaryMeshes.Add(packed);
+        }
+
         // Props handed to GPU instancing count as drawn content, so an empty body does not get the fallback shape.
         if (combineInstances.Count == 0 && !BuildingExteriorRenderer.HasCapturedWork
             && !(InstancedPartRenderer.Sink?.Count > 0))
@@ -241,6 +263,20 @@ public class ModularBuildingMeshBuilder : IBuildingMeshGenerator
             ? fenceFootprint : occupiedFootprint;
         float colliderHeight = isGroundModel ? floorHeight : buildingHeight;
         Mesh colliderMesh = BuildingMeshBuilder.GenerateColliderMesh(colliderFootprint, colliderHeight);
+        // The lot is part of the building to click on.
+        if (lot?.ColliderMesh != null && colliderMesh != null)
+        {
+            var whole = new Mesh { indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
+            whole.CombineMeshes(new[]
+            {
+                new CombineInstance { mesh = colliderMesh, transform = Matrix4x4.identity },
+                new CombineInstance { mesh = lot.ColliderMesh, transform = Matrix4x4.identity },
+            }, true, true);
+            whole.RecalculateBounds();
+            Object.Destroy(colliderMesh);
+            Object.Destroy(lot.ColliderMesh);
+            colliderMesh = whole;
+        }
 
         var result = new BuildingMeshResult(finalMesh, allMaterials.ToArray(), colliderMesh);
         return BuildingMeshBuilder.MergeSubMeshes(result);

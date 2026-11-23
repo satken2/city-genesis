@@ -22,7 +22,7 @@ FBX は `Assets/Models/Buildings/{prefix}/{番号}/{パーツ名}.fbx` に置き
 | `tile` / `scatter{n}` / `scatter-single{n}` | 地面に敷き詰めるタイル、敷地の空き地に散らす植栽・車両・資材（`scatter-single` は1棟に1個まで） |
 | `fill{n}` | 敷地の全体を埋める小屋などの敷き詰めパーツ |
 | `base-prebuilt` / `mid-prebuilt` / `top-prebuilt` | 既成建物の段。マッシュアップの棟は `mashup-{model_prefix}-base-prebuilt` などの名前にする |
-| `port_*` / `yard_*` / `site_*` | 港・車両基地・オープンスペース・供給処理施設・露天掘り・採石場・ガソリンスタンドの部品 |
+| `port_*` / `yard_*` / `site_*` | 港・車両基地・オープンスペース・供給処理施設・露天掘り・採石場・ガソリンスタンド・建物のまわりの駐車場の部品 |
 | `scaffold-*` / `crane-*` / `demo-*` / `excavator` | 工事中・解体中の現場 |
 | `far` / `mashup-{model_prefix}-far` / `site_{名前}_far` | 遠景モデル（建物全体・棟ごと・供給処理施設と露天掘り・採石場・ガソリンスタンドの設備ごと） |
 | `{パーツ名}_close` | 接写用のモデル |

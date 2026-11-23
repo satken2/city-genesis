@@ -15,6 +15,14 @@ Ordinary buildings place wall and corner parts around each floor's footprint. Si
 
 Roofs are generated without shape parts, taking surface material from `ceil` and windowless gable material from `generic-wall`. Roof rise scales with floor height, preventing taller buildings from receiving disproportionately large roofs. `interior-floor`, if present, supplies each floor and doubles as the rooftop for flat roofs. When `building_shape` is `SHAPE_FULL`, footprints filling their parcels ([building geometry](C_building-geometry.md)) render one top-floor layer of walls and corners with roof and rooftop structures.
 
+### Parking lots around buildings
+
+A modular building whose appearance folder has the stall lines' material `site_marking` draws its whole parcel as a parking lot, in place of the fence, the scatter parts, and the ground panel. The placement plan is built and its parts are held as for [gas stations](#gas-stations), treating the parcel edge that the footprint's front edge faces as the road-facing edge.
+
+The whole site is paved. A planted strip with a curb runs around its edge and opens for driveways on the road-facing edge. Parking stalls are drawn in front of the walk along the building's front, in facing rows on open ground, and along the site's edges, each with a drive aisle left clear behind it. On a shallow site, a driveway and the road beyond it serve as the aisle. The items in front of the shop `site_clutter1`… stand on the front walk near the entrance, and the planted strip holds the sign `site_sign`, lights `site_light`, shrubs `site_shrub1`…, and trees `site_tree1`….
+
+Each parked car `site_car1`… is drawn only while the building's operation rate exceeds the rate fixed for its stall. The more a building operates, the more cars stand in its lot, and a paused or vacant building has none.
+
 ## Prebuilt and mashup buildings
 
 Prebuilt buildings (`MODEL_PREBUILT`) suit towers, statues, Ferris wheels, and other shapes unsuitable for wall assembly. They stack `base-prebuilt`, `mid-prebuilt`, and `top-prebuilt`, aligned to the front edge without stretching to fit the parcel. `base` and `top` each represent one floor; `mid` spans the remaining floors. Only existing tiers are stacked, so `top-prebuilt` alone can represent an entire building. These use folder `0` without appearance variants. Landmarks stack similarly in their own folders.

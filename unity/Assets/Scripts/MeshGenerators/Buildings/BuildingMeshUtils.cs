@@ -194,7 +194,7 @@ public static class BuildingMeshUtils
     /// Both match the ordering and duplication without repacking, so the combined result differs only by having no unreferenced vertices.
     /// Copy vertex streams as raw bytes, preserving the source mesh's attribute types and formats.
     /// </summary>
-    private static Mesh CompactSubMeshVertices(Mesh mesh)
+    internal static Mesh CompactSubMeshVertices(Mesh mesh)
     {
         int subMeshCount = mesh.subMeshCount;
         int vertexCount = mesh.vertexCount;

@@ -12,11 +12,15 @@ using UnityEngine.Rendering;
 /// </summary>
 public sealed class InstancedPartRenderer : MonoBehaviour
 {
-    /// <summary>One placed part. path is the part resource path without the LOD suffix; local is relative to the building object.</summary>
+    /// <summary>
+    /// One placed part. path is the part resource path without the LOD suffix; local is relative to the building object.
+    /// use above 0 draws the part only while the owning building's operation rate (0-1) exceeds it (parked cars).
+    /// </summary>
     public struct Instance
     {
         public string path;
         public Matrix4x4 local;
+        public float use;
     }
 
     /// <summary>Shared part model. layout is the placement bounding box, measured as when combining into a building mesh. render is null without meshes.</summary>
@@ -122,6 +126,14 @@ public sealed class InstancedPartRenderer : MonoBehaviour
         }
     }
 
+    /// <summary>Rebuild a registered member's groups before the next draw (its operation rate changed which parts show).</summary>
+    internal static void MarkDirty(InstancedPartMember member)
+    {
+        if (instance == null || member.cells == null) return;
+        foreach (var key in member.cells.Keys)
+            if (instance.groups.TryGetValue(key, out var group)) group.dirty = true;
+    }
+
     /// <summary>Remove a member. Its groups are rebuilt before the next draw, so removed parts do not remain.</summary>
     internal static void Remove(InstancedPartMember member)
     {
@@ -223,7 +235,7 @@ public sealed class InstancedPartRenderer : MonoBehaviour
             foreach (int i in indices)
             {
                 var render = member.models[i]?.render;
-                if (render == null || member.lods[i] == DrawLod.Hidden) continue;
+                if (render == null || member.lods[i] == DrawLod.Hidden || !member.Shows(i)) continue;
                 var key = (render, member.lods[i], member.road);
                 if (!placements.TryGetValue(key, out var list)) placements.Add(key, list = new List<Matrix4x4>());
                 list.Add(member.world[i]);
@@ -299,6 +311,10 @@ public sealed class InstancedPartMember : MonoBehaviour
     private MeshRenderer source;
     private bool registered, wasVisible;
     private Matrix4x4 matrix;
+    /// <summary>Operation rate (0-1) of the owning building. Read only by members holding parts with a use threshold.</summary>
+    private float rate = 1f;
+    private bool rated;
+    private static readonly HashSet<InstancedPartMember> ratedMembers = new HashSet<InstancedPartMember>();
 
     /// <summary>Add parts placed for owner: a building object owning the MeshRenderer, or (road) an object under a path.</summary>
     public static void Add(GameObject owner, List<InstancedPartRenderer.Instance> items, bool road = false)
@@ -311,7 +327,37 @@ public sealed class InstancedPartMember : MonoBehaviour
             member.road = road;
         }
         member.instances.AddRange(items);
+        if (!member.rated && items.Exists(item => item.use > 0f))
+        {
+            member.rated = true;
+            if (member.isActiveAndEnabled) ratedMembers.Add(member);
+            member.ReadRate();
+        }
         member.Reregister();
+    }
+
+    /// <summary>Whether part i shows at the owner's current operation rate.</summary>
+    internal bool Shows(int i) => instances[i].use <= 0f || rate > instances[i].use;
+
+    /// <summary>
+    /// Re-read the operation rate of every enabled building whose parts follow it. Call after the city cache synchronizes with
+    /// the core: the rate changes without a version bump, so the building's record is not regenerated for it.
+    /// </summary>
+    public static void RefreshRates()
+    {
+        foreach (var member in ratedMembers)
+            if (member.ReadRate() && member.registered) InstancedPartRenderer.MarkDirty(member);
+    }
+
+    /// <summary>Read the owner's operation rate from the city cache. Returns whether it changed.</summary>
+    private bool ReadRate()
+    {
+        float next = rate;
+        if (TryGetComponent(out ObjectIdInfo info) && CityDataCache.Instance != null
+            && CityDataCache.Instance.TryGetBuilding(info.id, out var record)) next = BuildingMotion.OperationRate(record);
+        if (next == rate) return false;
+        rate = next;
+        return true;
     }
 
     private bool Visible => isActiveAndEnabled && instances.Count > 0 && (road ? RoadShown : source != null && source.enabled);
@@ -327,10 +373,15 @@ public sealed class InstancedPartMember : MonoBehaviour
         }
     }
 
-    private void OnEnable() => Reregister();
+    private void OnEnable()
+    {
+        if (rated) { ratedMembers.Add(this); ReadRate(); }
+        Reregister();
+    }
 
     private void OnDisable()
     {
+        ratedMembers.Remove(this);
         if (registered) InstancedPartRenderer.Remove(this);
         registered = false;
     }

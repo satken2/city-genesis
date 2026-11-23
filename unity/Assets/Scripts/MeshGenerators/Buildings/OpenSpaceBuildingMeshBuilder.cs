@@ -26,14 +26,30 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
         var naming=BuildingMeshUtils.ResolveModelNaming(data);
         int modelType=MasterDataStore.Instance?.GetAgentMaster(data.variant)?.model_type??Constants.MODEL_PARKING;
         var parts=new Dictionary<string,GameObject>();
-        var paths=CollectParts(naming.Prefix,data.visual_variant,modelType,parts);
+        var paths=CollectParts(naming.Prefix,data.visual_variant,OpenSpaceLayout.IsFacilityModel(modelType),parts);
         bool sized=modelType==Constants.MODEL_PARK || OpenSpaceLayout.IsFacilityModel(modelType);
         var plan=sized?SizedPlan(data,modelType,paths):BuildingRoadAccessIndex.GetOpenSpacePlan(data);
         // Parks draw their thousands of trees and shrubs by instancing, plants their pipes and lights, open pits the machines in the pit. Parking lots and rotaries combine everything.
         return Build(plan,parts,center,true,BuildingMeshUtils.ResolveFloorMaterialFromMaster(data,naming.Prefix),sized?paths:null,naming.Prefix);
     }
-    /// <summary>Resolve the parts a model type's plan uses from the selected model folder. Returns their resource paths (before the render-LOD suffix).</summary>
-    static Dictionary<string,string> CollectParts(string prefix,float visualVariant,int modelType,Dictionary<string,GameObject> parts)
+    /// <summary>
+    /// The parking lot around a modular building whose model folder has the stall lines' material part (site_marking): the ground,
+    /// the lines and planted strip, and the things standing on the lot, for combining with the building's body. Parked cars follow
+    /// the building's operation rate. Null for buildings without the part or without a parcel.
+    /// </summary>
+    public static BuildingMeshResult BuildLot(BuildingSummary data,string prefix,Vector3 center,Material floorMaterial)
+    {
+        if(BuildingMeshUtils.FindPartSuffix(prefix,"site_marking",BuildingMeshUtils.ResolveModelId(prefix,data.visual_variant))<0)return null;
+        if(BuildingMeshUtils.ResolveParcelContext(data,out _,out _)==null)return null;
+        var parts=new Dictionary<string,GameObject>();
+        var paths=CollectParts(prefix,data.visual_variant,true,parts);
+        return Build(SizedPlan(data,Constants.MODEL_MODULAR_FLAT,paths,true),parts,center,true,floorMaterial,paths);
+    }
+    /// <summary>
+    /// Resolve the parts a plan uses from the selected model folder: those of plants and parking lots (facility), or of open spaces.
+    /// Returns their resource paths (before the render-LOD suffix).
+    /// </summary>
+    static Dictionary<string,string> CollectParts(string prefix,float visualVariant,bool facility,Dictionary<string,GameObject> parts)
     {
         var paths=new Dictionary<string,string>();
         int modelId=BuildingMeshUtils.ResolveModelId(prefix,visualVariant);
@@ -46,7 +62,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
             paths[part]=BuildingMeshUtils.PartPath(prefix,part,suffix);
             return true;
         }
-        if(OpenSpaceLayout.IsFacilityModel(modelType))
+        if(facility)
         {
             foreach(string part in OpenSpaceLayout.FacilityParts)Collect(part);
             foreach(string series in OpenSpaceLayout.FacilitySeries)for(int n=1;Collect(series+n);n++){}
@@ -59,20 +75,22 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
     /// <summary>Plan of a plant (<see cref="OpenSpaceLayout.IsFacilityModel"/>), as the detailed mesh places it. For the distant mesh.</summary>
     public static OpenSpaceLayout.Plan FacilityPlan(BuildingSummary data,int modelType)
     {
-        return SizedPlan(data,modelType,CollectParts(BuildingMeshUtils.GetGlbPrefix1(data),data.visual_variant,modelType,null));
+        return SizedPlan(data,modelType,CollectParts(BuildingMeshUtils.GetGlbPrefix1(data),data.visual_variant,true,null));
     }
     /// <summary>
     /// Plan placed from the actual sizes of the parts in the selected model folder, so those sizes are inputs too.
-    /// Its site is the footprint, or the parcel for model types whose plan covers it (<see cref="OpenSpaceLayout.CoversParcel"/>).
+    /// Its site is the footprint, or the parcel for model types whose plan covers it (<see cref="OpenSpaceLayout.CoversParcel"/>)
+    /// and for the parking lot around a building (lot), which the footprint stands on.
     /// </summary>
-    static OpenSpaceLayout.Plan SizedPlan(BuildingSummary data,int modelType,Dictionary<string,string> paths)
+    static OpenSpaceLayout.Plan SizedPlan(BuildingSummary data,int modelType,Dictionary<string,string> paths,bool lot=false)
     {
         var key=new System.Text.StringBuilder();
         void Add(float value)=>key.Append(value.ToString("R",System.Globalization.CultureInfo.InvariantCulture)).Append(':');
-        Add(modelType);Add(data.visual_variant2);Add(data.visual_variant3);
-        Vector2[] site=BuildingMeshUtils.GetFootprint(data);
-        if(OpenSpaceLayout.CoversParcel(modelType))site=OpenSpaceLayout.LotFacingRoad(BuildingMeshUtils.ResolveParcelContext(data,out _,out _),site);
+        Add(modelType);Add(lot?1:0);Add(data.visual_variant2);Add(data.visual_variant3);
+        Vector2[] footprint=BuildingMeshUtils.GetFootprint(data),site=footprint;
+        if(lot || OpenSpaceLayout.CoversParcel(modelType))site=OpenSpaceLayout.LotFacingRoad(BuildingMeshUtils.ResolveParcelContext(data,out _,out _),site);
         foreach(Vector2 point in site){Add(point.x);Add(point.y);}
+        if(lot)foreach(Vector2 point in footprint){Add(point.x);Add(point.y);}
         foreach(var pair in paths)key.Append(pair.Value).Append(':');
         string signature=key.ToString();
         if(sizedPlans.TryGetValue(data.agent_id,out var cached) && cached.signature==signature)return cached.plan;
@@ -85,7 +103,8 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
             Bounds b=model.layout;
             sizes[pair.Key]=new Vector2(2*Mathf.Max(-b.min.x,b.max.x),2*Mathf.Max(-b.min.z,b.max.z));
         }
-        var plan=OpenSpaceLayout.Create(site,modelType,data.visual_variant2,data.visual_variant3,sizes);
+        var plan=lot?OpenSpaceLayout.CreateLot(site,footprint,data.visual_variant2,sizes)
+            :OpenSpaceLayout.Create(site,modelType,data.visual_variant2,data.visual_variant3,sizes);
         if(sizedPlans.Count>=SizedPlanCacheSize)sizedPlans.Clear();
         sizedPlans[data.agent_id]=(signature,plan);
         return plan;
@@ -222,12 +241,14 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
                 float y=terrain?Utils.GetGroundHeight(new Vector3(center.x+foot.x,1000,center.z+foot.y))-center.y:0f;
                 var position=new Vector3(prop.Position.x,y+.02f+PropLift(raised,prop.Position),prop.Position.y);
                 var matrix=Matrix4x4.TRS(position,rotation,Vector3.one*prop.Scale);
-                if(mesh==null)sink.Add(new InstancedPartRenderer.Instance {path=path,local=matrix});
+                if(mesh==null)sink.Add(new InstancedPartRenderer.Instance {path=path,local=matrix,use=prop.Use});
                 else
                 {
                     Append(mesh,loadedMaterials[prop.Part],matrix);
                     if(prop.Unit)BuildingMotionParts.Collect(prefab,prefab.transform,matrix,rotation);
                 }
+                // A car that comes and goes is not part of what a click on the building hits.
+                if(prop.Use>0f)continue;
                 var collider=BuildingMeshBuilder.GenerateColliderMesh(rect,Mathf.Max(.1f,b.max.y*prop.Scale));
                 if(collider!=null){owned.Add(collider);colliders.Add(new CombineInstance {mesh=collider,transform=Matrix4x4.Translate(new Vector3(0,y,0))});}
             }
@@ -413,16 +434,19 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
         }
         return lift;
     }
-    /// <summary>Triangulate surfaces counterclockwise: constrained Delaunay for holes, otherwise ear clipping.</summary>
+    /// <summary>
+    /// Triangulate surfaces counterclockwise: ear clipping, or constrained Delaunay for holes and for rings where ear clipping finds
+    /// no ear (long thin bands whose collinear vertices a parcel's rotation leaves slightly off their line).
+    /// </summary>
     public static void Triangulate(OpenSpaceLayout.Surface surface,out List<Vector2> points,out List<int> triangles)
     {
         points=new List<Vector2>();triangles=new List<int>();
-        if(surface.Holes==null || surface.Holes.Length==0)
+        bool plain=surface.Holes==null || surface.Holes.Length==0;
+        if(plain)
         {
             var outer=Oriented(surface.Polygon,true);
-            points.AddRange(outer);
-            triangles.AddRange(BuildingMeshBuilder.TriangulateOrFan(outer));
-            return;
+            var ears=BuildingMeshBuilder.TriangulateEarClip(outer);
+            if(ears.Count>0){points.AddRange(outer);triangles.AddRange(ears);return;}
         }
         var factory=new GeometryFactory();
         LinearRing Ring(Vector2[] ring)
@@ -432,7 +456,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
             coords[ring.Length]=coords[0].Copy();
             return factory.CreateLinearRing(coords);
         }
-        var holes=new LinearRing[surface.Holes.Length];
+        var holes=new LinearRing[plain?0:surface.Holes.Length];
         for(int i=0;i<holes.Length;i++)holes[i]=Ring(surface.Holes[i]);
         var polygon=factory.CreatePolygon(Ring(surface.Polygon),holes);
         var index=new Dictionary<Vector2,int>();

@@ -29,7 +29,7 @@ Building regulations restrict building types, height, volume ratio, and building
 
 Slopes, road access, and surrounding land uses affect how suitable a location is. Slopes increase construction burdens, while distance from roads increases travel and freight burdens.
 
-The location multiplier (`agent_multiplier`) expresses how suitable a parcel is for an industry or household. Shops depend on foot traffic and clusters of similar businesses, factories on clusters of the same and related industries, extractive facilities on natural resources, and households on the living environment. A location's suitability depends on its use.
+The location multiplier (`agent_multiplier`) expresses how suitable a parcel is for an industry or household. Shops depend on traffic along the fronting road and clusters of similar businesses, factories on clusters of the same and related industries, extractive facilities on natural resources, and households on the living environment. How much a shop gains from that traffic depends on the building it occupies: shops in a building that faces the street draw pedestrians more easily, and shops in a building with a parking lot draw cars. A location's suitability depends on its use.
 
 ## 4.4. Earthworks
 

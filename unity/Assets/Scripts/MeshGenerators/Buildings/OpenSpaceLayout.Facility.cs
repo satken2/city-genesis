@@ -53,10 +53,13 @@ public static partial class OpenSpaceLayout
         public bool Roads;              // False on sites too small for service roads; rows then start at the front.
         public string RoadPart = "site_asphalt";  // Material part of the service roads.
         public double Edge, GateS, RingS = double.NaN;
+        public bool CarsFollowUse;      // Parked cars come and go with the building's operation rate instead of standing always.
         public Geometry Run;            // Where the clear run behind a claimed rectangle may lie besides the field. Null: the field only.
         IPreparedGeometry field, run;
         // Rectangles of the placed units and loose props, bucketed in plan so a site littered with rocks stays quick to test.
         readonly Dictionary<long, List<Geometry>> taken = new Dictionary<long, List<Geometry>>();
+        // Clear runs behind the claimed rectangles, bucketed the same way. Runs may overlap each other, but nothing is claimed in one.
+        readonly Dictionary<long, List<Geometry>> runs = new Dictionary<long, List<Geometry>>();
         const double TakenCell = 16;
         readonly List<double> crossRoads = new List<double>();
         double spineEnd, spineBefore;   // How far in the spine road reaches, and its value before the last cross road.
@@ -95,16 +98,18 @@ public static partial class OpenSpaceLayout
         }
 
         /// <summary>
-        /// Claim a w×d rectangle of bare ground centered at (s,t), d along (fs,ft), if it lies in the field and it and a clear run
-        /// behind it are clear of everything placed. The clear run may also lie in <see cref="Run"/>, and itself stays free.
-        /// Rectangles may touch their neighbors.
+        /// Claim a w×d rectangle of bare ground centered at (s,t), d along (fs,ft), if it lies in the field clear of the runs
+        /// claimed before, and it and a clear run behind it are clear of everything placed. The clear run may also lie in
+        /// <see cref="Run"/>; it stays free for other runs to share. Rectangles may touch their neighbors.
         /// </summary>
         public bool Claim(double s, double t, double fs, double ft, double w, double d, double clear = 0)
         {
             double cs = s - fs * clear * .5, ct = t - ft * clear * .5;
             var box = ParkBox(s, t, fs, ft, w, d);
-            if (!field.Covers(box) || !run.Covers(ParkBox(cs, ct, fs, ft, w, d + clear)) || Taken(ParkBox(cs, ct, fs, ft, w - .04, d + clear - .04))) return false;
+            if (!field.Covers(box) || !run.Covers(ParkBox(cs, ct, fs, ft, w, d + clear)) || Taken(ParkBox(cs, ct, fs, ft, w - .04, d + clear - .04))
+                || Hit(runs, ParkBox(s, t, fs, ft, w - .04, d - .04))) return false;
             Take(box);
+            if (clear > 0) Mark(runs, ParkBox(s - fs * (d + clear) * .5, t - ft * (d + clear) * .5, fs, ft, w, clear));
             return true;
         }
 
@@ -116,24 +121,28 @@ public static partial class OpenSpaceLayout
             run.Covers(ParkBox(s, t, 0, 1, w, d)) && !Taken(ParkBox(s, t, 0, 1, w - .04, d - .04));
 
         /// <summary>Keep an area clear of everything placed after.</summary>
-        public void Take(Geometry box)
+        public void Take(Geometry box) => Mark(taken, box);
+
+        bool Taken(Geometry box) => Hit(taken, box);
+
+        static void Mark(Dictionary<long, List<Geometry>> boxes, Geometry box)
         {
             var e = box.EnvelopeInternal;
             for (long z = (long)Math.Floor(e.MinY / TakenCell); z <= (long)Math.Floor(e.MaxY / TakenCell); z++)
                 for (long x = (long)Math.Floor(e.MinX / TakenCell); x <= (long)Math.Floor(e.MaxX / TakenCell); x++)
                 {
                     long key = z * 1000003 + x;
-                    if (!taken.TryGetValue(key, out var bucket)) taken[key] = bucket = new List<Geometry>();
+                    if (!boxes.TryGetValue(key, out var bucket)) boxes[key] = bucket = new List<Geometry>();
                     bucket.Add(box);
                 }
         }
 
-        bool Taken(Geometry box)
+        static bool Hit(Dictionary<long, List<Geometry>> boxes, Geometry box)
         {
             var e = box.EnvelopeInternal;
             for (long z = (long)Math.Floor(e.MinY / TakenCell); z <= (long)Math.Floor(e.MaxY / TakenCell); z++)
                 for (long x = (long)Math.Floor(e.MinX / TakenCell); x <= (long)Math.Floor(e.MaxX / TakenCell); x++)
-                    if (taken.TryGetValue(z * 1000003 + x, out var bucket))
+                    if (boxes.TryGetValue(z * 1000003 + x, out var bucket))
                         foreach (var other in bucket)
                             if (other.EnvelopeInternal.Intersects(e) && other.Intersects(box)) return true;
             return false;
@@ -148,6 +157,17 @@ public static partial class OpenSpaceLayout
             if (!Has(part) || Plan.Props.Count >= MaxFacilityProps) return;
             Plan.Props.Add(new Prop { Part = part, Position = F.World(s, t), Forward = F.Dir(fs, ft), Fitted = true, Unit = unit,
                 Ground = on.HasValue ? F.World(on.Value.s, on.Value.t) : (Vector2?)null });
+        }
+
+        /// <summary>
+        /// A parked car that stands with the given chance. draw (0-1) decides it, and where cars follow the building's operation
+        /// rate, also how busy the building must be before this one shows: at full operation every drawn car stands.
+        /// </summary>
+        public void Car(string part, double s, double t, double fs, double ft, float chance, float draw)
+        {
+            if (draw >= chance || !Has(part) || Plan.Props.Count >= MaxFacilityProps) return;
+            Add(part, s, t, fs, ft, false);
+            if (CarsFollowUse) Plan.Props[Plan.Props.Count - 1].Use = Mathf.Max(draw / chance, 1e-4f);
         }
 
         /// <summary>

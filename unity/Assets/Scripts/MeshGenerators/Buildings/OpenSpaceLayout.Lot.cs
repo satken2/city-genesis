@@ -6,7 +6,8 @@ using NetTopologySuite.Operation.Buffer;
 using UnityEngine;
 
 /// <summary>
-/// Parking lots laid around what stands on a site, as on the forecourt of a gas station. The whole site is paved. A planted strip with a curb runs around its edge and opens
+/// Parking lots laid around what stands on a site: the forecourt of a gas station, and the parcel of a building whose model folder
+/// has the stall parts (<see cref="CreateLot"/>). The whole site is paved. A planted strip with a curb runs around its edge and opens
 /// for driveways on the road-facing edge. Parking stalls go nose-in to the building front behind a raised walk, in double rows
 /// across open ground, and along the free edges; a stall is two lines, a wheel stop, and now and then a parked car. A stall needs a
 /// drive aisle behind it, which on a shallow lot may be a driveway and the road beyond it. In the planted strip stand the sign at
@@ -25,6 +26,8 @@ public static partial class OpenSpaceLayout
     const double LotDoorReach = 8.0;      // How far either side of the door the things a shop keeps outside stand (m).
     const int LotRowStalls = 4;           // Fewest stalls side by side that make a parking row on open ground.
     const double LotSignDepth = 3.0;      // How far in from the road-facing edge the sign stands (m).
+    const double LotWallGap = .6;         // Clear ground kept between a building's side and rear walls and the stalls (m).
+    const double LotFrontSkew = .35;      // Most a building front may run off the road-facing edge's direction and still take stalls (m over its length).
     const float LotCarAtFront = .55f, LotCarAtEdge = .25f;  // Chance that a car stands in a stall at the building front, elsewhere.
 
     /// <summary>
@@ -50,6 +53,47 @@ public static partial class OpenSpaceLayout
         var lot = new Vector2[parcel.Length];
         for (int i = 0; i < lot.Length; i++) lot[i] = parcel[(first + i) % parcel.Length];
         return lot;
+    }
+
+    /// <summary>
+    /// Plan of the parking lot around a building. lot is the parcel starting with its road-facing edge (<see cref="LotFacingRoad"/>),
+    /// footprint the building's base, whose edge 0→1 is its front. Parked cars come and go with the building's operation rate
+    /// (<see cref="Prop.Use"/>). partSizes are the actual sizes (X width, Z depth) of the parts in the model folder.
+    /// </summary>
+    public static Plan CreateLot(Vector2[] lot, Vector2[] footprint, float visualVariant2, IReadOnlyDictionary<string, Vector2> partSizes)
+    {
+        var plan = new Plan { Polygon = lot };
+        if (lot == null || lot.Length < 3 || footprint == null || footprint.Length < 3) return plan;
+        uint seed = (uint)Mathf.RoundToInt(Mathf.Clamp01(visualVariant2) * 1000000f);
+        Frame f = FacilityFrame(plan, seed);
+        Geometry site = LocalSite(plan, f);
+        if (site == null || site.Area < 12) return plan;
+        double edge = FacilityEdge(site), halfFront = Vector2.Distance(lot[0], lot[1]) * .5;
+        Geometry planter = LotEdge(plan, f, site, edge, halfFront, out Polygon paved, out var driveways);
+        if (paved == null || partSizes == null || partSizes.Count == 0) return plan;
+        // Nothing stands or parks within a car's length of the road in a driveway, but a stall's drive aisle may cross it and reach the road.
+        Geometry mouths = null;
+        foreach (var driveway in driveways)
+        {
+            Geometry mouth = Rect(driveway.EnvelopeInternal.MinX, -LotAisle, driveway.EnvelopeInternal.MaxX, LotStallDepth);
+            mouths = mouths == null ? mouth : Union(mouths, mouth);
+        }
+        var y = new FacilityYard { Plan = plan, F = f, Sizes = partSizes, Site = site, Env = paved.EnvelopeInternal, Edge = edge,
+            Field = mouths == null ? paved : Minus(paved, mouths), Run = mouths, CarsFollowUse = true };
+        y.Prepare();
+        Geometry body = LocalSite(new Plan { Polygon = footprint }, f);
+        if (body == null) return plan;
+        y.Take(body);
+        // Stalls before the front only where it runs along the road-facing edge and looks onto it.
+        Coordinate a = f.Local(footprint[0]), b = f.Local(footprint[1]);
+        double front = (a.Y + b.Y) * .5;
+        if (Math.Abs(a.Y - b.Y) <= LotFrontSkew && front <= body.EnvelopeInternal.MinY + LotFrontSkew)
+            LotFront(y, seed, (a.X + b.X) * .5, Math.Min(a.Y, b.Y), Math.Abs(a.X - b.X));
+        y.Take(body.Buffer(LotWallGap, new BufferParameters { JoinStyle = JoinStyle.Mitre }));
+        LotRows(y, seed);
+        LotEdgeStalls(y, seed, paved);
+        LotPlanting(y, seed, planter, halfFront, body);
+        return plan;
     }
 
     /// <summary>
@@ -92,7 +136,9 @@ public static partial class OpenSpaceLayout
     /// </summary>
     static void LotFront(FacilityYard y, uint seed, double s, double front, double width)
     {
-        if (!y.Claim(s, front - LotWalk * .5, 0, 1, width, LotWalk)) return;
+        // A front reaching into the lot's planted edge keeps its walk on the paved ground.
+        width = Math.Min(width, 2 * Math.Min(s - y.Env.MinX, y.Env.MaxX - s));
+        if (width < LotStallWidth || !y.Claim(s, front - LotWalk * .5, 0, 1, width, LotWalk)) return;
         Emit(y.Plan, y.F, Rect(s - width * .5, front - LotWalk, s + width * .5, front), "site_paving", Curb, "site_curb");
         int slot = 0;
         for (double at = s - width * .5 + 1.2; at <= s + width * .5 - 1.2; at += 2.1, slot += 2)
@@ -119,11 +165,8 @@ public static partial class OpenSpaceLayout
         foreach (int side in new[] { -1, 1 })
             Emit(y.Plan, y.F, Strip(s + side * xs * half - fs * back, t + side * xt * half - ft * back, fs, ft, LotStallDepth, .1), "site_marking", .022f);
         y.Add("site_stop", s + fs * (back - .7), t + ft * (back - .7), -fs, -ft, false);
-        if (Rand(seed, draw) < occupied)
-        {
-            int nose = Rand(seed, draw + 1) < .7f ? 1 : -1;
-            y.Add(LotPick(y, "site_car", seed, draw + 2), s - fs * .25, t - ft * .25, nose * fs, nose * ft, false);
-        }
+        int nose = Rand(seed, draw + 1) < .7f ? 1 : -1;
+        y.Car(LotPick(y, "site_car", seed, draw + 2), s - fs * .25, t - ft * .25, nose * fs, nose * ft, occupied, Rand(seed, draw));
         return true;
     }
 
@@ -168,9 +211,9 @@ public static partial class OpenSpaceLayout
 
     /// <summary>
     /// In the planted strip: the sign near a front corner, broadside to the road's traffic; yard lights; shrubs, and trees where
-    /// the strip is wide enough for a trunk.
+    /// the strip is wide enough for a trunk and the crown stays clear of the building (walls).
     /// </summary>
-    static void LotPlanting(FacilityYard y, uint seed, Geometry planter, double halfFront)
+    static void LotPlanting(FacilityYard y, uint seed, Geometry planter, double halfFront, Geometry walls = null)
     {
         var middle = Largest(y.Site.Buffer(-y.Edge * .5, new BufferParameters { JoinStyle = JoinStyle.Mitre }));
         if (middle == null || planter.IsEmpty) return;
@@ -211,6 +254,7 @@ public static partial class OpenSpaceLayout
             if (part == null || !Clear(d.s, d.t, 1.6)) continue;
             // A shrub wider than the strip would spill over the curb; a tree's crown may.
             if (lot >= .1f && y.Sizes[part].x > y.Edge + .7) continue;
+            if (walls != null && part.StartsWith("site_tree") && walls.Distance(Nts.CreatePoint(new Coordinate(d.s, d.t))) < y.Sizes[part].x * .5) continue;
             double turn = Rand(seed, 802 + draw) * Math.PI * 2;
             y.Add(part, d.s, d.t, Math.Cos(turn), Math.Sin(turn), false);
         }

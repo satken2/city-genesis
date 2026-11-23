@@ -590,6 +590,7 @@ public class CellDataLoader : MonoBehaviour
         TransitDataStore.Instance?.Refresh();
         StartCoroutine(CityInsignia.Refresh());
         BuildingMotion.RefreshAll();
+        InstancedPartMember.RefreshRates();
         if (currentCenterCell.x != int.MinValue && currentCenterCell.y != int.MinValue)
         {
             LodCellSets cellSets = CalculateLodCellSets();

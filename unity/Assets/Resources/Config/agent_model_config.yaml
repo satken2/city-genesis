@@ -80,7 +80,7 @@ agents:
       - 0
   1019:
     model: true
-    prebuilt: true
+    prebuilt: false
     variants:
       - 0
   1021:
@@ -436,6 +436,11 @@ agents:
       - 250
       - 500
       - 750
+  2020:
+    model: true
+    prebuilt: false
+    variants:
+      - 0
   3001:
     model: true
     prebuilt: false

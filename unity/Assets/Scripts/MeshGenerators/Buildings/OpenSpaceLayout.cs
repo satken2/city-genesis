@@ -28,6 +28,7 @@ public static partial class OpenSpaceLayout
         public float Scale = 1f;
         public bool Fitted;        // Placed from the actual model size, so the renderer skips its protrusion recheck.
         public bool Unit;          // A plant's building or equipment: always combined into the building mesh, with its own distant model.
+        public float Use;          // Drawn only while the building's operation rate (0-1) exceeds this. 0 draws always.
         public Vector2? Ground;    // Where the ground height is read for a part fixed to another unit (that unit's position). Null reads it at Position.
     }
     public sealed class Plan

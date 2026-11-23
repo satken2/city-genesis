@@ -85,7 +85,7 @@ public sealed class BuildingMotion : MonoBehaviour
     }
 
     /// <summary>Latest epoch's utilization while active, otherwise 0. For shared buildings (tenant floors) it is the occupancy.</summary>
-    private static float OperationRate(BuildingSummary record)
+    internal static float OperationRate(BuildingSummary record)
     {
         if (record.status != Constants.STATUS_ACTIVE || record.utilization == null || record.utilization.Count == 0) return 0f;
         return Mathf.Clamp01(record.utilization[0]);
