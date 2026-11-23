@@ -251,10 +251,10 @@ const HAIR_STYLES: readonly (Weighted & { draw: HairDraw })[] = [
   { weights: [0.45, 0.35], draw: curlyHair },
   { weights: [0.9, 0.15], draw: sidePart },
   { weights: [0.12, 0.15], draw: afro },
-  { weights: [0.05, 0.9], draw: bob },
-  { weights: [0.12, 1.1], draw: longHair },
-  { weights: [0.03, 0.6], draw: ponytail },
-  { weights: [0.05, 0.45], draw: bun },
+  { weights: [0.003, 0.9], draw: bob },
+  { weights: [0.009, 1.1], draw: longHair },
+  { weights: [0.003, 0.6], draw: ponytail },
+  { weights: [0.003, 0.45], draw: bun },
   { weights: [0.1, 0.4], draw: sideSwept },
 ];
 
