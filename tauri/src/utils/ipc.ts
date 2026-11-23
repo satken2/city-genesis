@@ -30,8 +30,11 @@ export type AssetManagerModels = {
 };
 /** file is a filename within the user folder's cache/asset_thumbnails/, or null if capture failed. */
 export type AssetManagerThumbnail = { request_id: string; row: number; model: number; file: string | null };
+/** file is a filename within the user folder's cache/asset_thumbnails/, or null if preview capture failed. */
+export type AssetManagerPreview = { request_id: string; file: string | null };
 export const IPC_EVENT_ASSET_MANAGER_MODELS = "asset_manager:models";
 export const IPC_EVENT_ASSET_MANAGER_THUMBNAIL = "asset_manager:thumbnail";
+export const IPC_EVENT_ASSET_MANAGER_PREVIEW = "asset_manager:preview";
 /**
  * Asset manager rendering request. Only while no city is open, Unity opens packId, returns row models via
  * `asset_manager:models`, then writes thumbnails individually to the user folder and announces them through
@@ -42,6 +45,45 @@ export async function requestAssetManagerRender(requestId: string, packId: strin
   await invoke("send_window_action", {
     windowType: "asset_manager", entity: null, action: "asset_manager:render",
     params: { request_id: requestId, pack_id: packId, category, rows },
+  });
+}
+/**
+ * Request one interactive building preview frame from Unity. Unity caches the generated building on an isolated
+ * stage so orbit (yaw/pitch in degrees) and zoom changes only move the camera and announce the written file via
+ * `asset_manager:preview`.
+ */
+export async function requestAssetManagerPreview(params: {
+  requestId: string;
+  packId: string;
+  row: number;
+  model: number;
+  yaw: number;
+  pitch: number;
+  zoom: number;
+  width: number;
+  height: number;
+}): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "asset_manager",
+    entity: null,
+    action: "asset_manager:preview",
+    params: {
+      request_id: params.requestId,
+      pack_id: params.packId,
+      row: params.row,
+      model: params.model,
+      yaw: params.yaw,
+      pitch: params.pitch,
+      zoom: params.zoom,
+      width: params.width,
+      height: params.height,
+    },
+  });
+}
+/** Release the cached preview building in Unity when the interactive preview popup closes. */
+export async function closeAssetManagerPreview(): Promise<void> {
+  await invoke("send_window_action", {
+    windowType: "asset_manager", entity: null, action: "asset_manager:preview_close", params: {},
   });
 }
 /** The 3D drive button was pressed. The cockpit holds current-language wording and responds with `openDriveMode` to start. */

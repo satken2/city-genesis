@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
 import { ASSET_PACK_STANDARD, RAIL_VEHICLE_KEYS, ROAD_VEHICLE_KEYS } from "../../constants";
 import { useMasterData } from "../../contexts/MasterDataContext";
 import { FlatTabs } from "../common/FlatTabs";
@@ -15,6 +16,7 @@ import {
   IPC_EVENT_ASSET_MANAGER_THUMBNAIL,
   requestAssetManagerRender,
 } from "../../utils/ipc";
+import { AssetManagerPreviewModal, BuildingPreviewTarget } from "./AssetManagerPreviewModal";
 import "./AssetManagerWindow.css";
 
 /** Player-edited weights: {source (standard or pack ID): {unit: {model number: weight}}}. */
@@ -44,6 +46,7 @@ export function AssetManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const weightsRef = useRef<UserWeights>({});
   const [models, setModels] = useState<AssetManagerModels["rows"] | null>(null);
   const [thumbnails, setThumbnails] = useState<Record<string, string | null>>({});
+  const [preview, setPreview] = useState<BuildingPreviewTarget | null>(null);
   const [error, setError] = useState<string | null>(null);
   const requestRef = useRef("");
 
@@ -53,6 +56,12 @@ export function AssetManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       .then(value => { weightsRef.current = value; setWeights(value); })
       .catch(reason => setError(String(reason)));
   }, [apiBaseUrl]);
+
+  useEffect(() => {
+    const appWindow = getCurrentWindow();
+    const subscription = appWindow.listen("window-context-updated", () => setPreview(null));
+    return () => { void subscription.then(unlisten => unlisten()); };
+  }, []);
 
   useEffect(() => {
     const subscriptions = [
@@ -88,6 +97,7 @@ export function AssetManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   }, [master, category]);
 
   useEffect(() => {
+    setPreview(null);
     if (rows.length === 0) return;
     const requestId = crypto.randomUUID();
     requestRef.current = requestId;
@@ -150,10 +160,20 @@ export function AssetManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                 const standard = model.weight;
                 const current = standard === null || entry.unit === null ? null
                   : weights[entry.source]?.[entry.unit]?.[String(model.id)] ?? standard;
+                const thumbNode = thumbnail
+                  ? <img src={thumbnail} alt={`${row.name} ${model.id}`} draggable={false} />
+                  : <div className="asset-manager__placeholder">{thumbnail === null ? t("assetManager.noImage") : "…"}</div>;
                 return <figure className="asset-manager__model" key={model.id}>
-                  {thumbnail
-                    ? <img src={thumbnail} alt={`${row.name} ${model.id}`} draggable={false} />
-                    : <div className="asset-manager__placeholder">{thumbnail === null ? t("assetManager.noImage") : "…"}</div>}
+                  {category === "buildings"
+                    ? <button
+                        type="button"
+                        className="asset-manager__thumb-btn"
+                        onClick={() => setPreview({ packId, row: row.id, name: row.name, model: model.id, thumbnail })}
+                        aria-label={`${row.name} ${model.id}`}
+                      >
+                        {thumbNode}
+                      </button>
+                    : thumbNode}
                   {current !== null && standard !== null && entry.unit !== null && <label className="asset-manager__weight">w:
                     <input key={`${entry.source}:${entry.unit}:${model.id}:${current}`} type="number" min={0} step={1}
                       defaultValue={current} aria-label={`${row.name} ${model.id} ${t("assetManager.weight")}`}
@@ -171,5 +191,6 @@ export function AssetManagerWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         </div>;
       })}
     </div>
+    {preview && <AssetManagerPreviewModal target={preview} onClose={() => setPreview(null)} />}
   </div>;
 }

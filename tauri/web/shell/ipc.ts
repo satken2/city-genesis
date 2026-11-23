@@ -135,6 +135,7 @@ const BROADCAST_EVENTS = new Set([
   "path:appearances",
   "asset_manager:models",
   "asset_manager:thumbnail",
+  "asset_manager:preview",
 ]);
 
 /** 常駐するコックピットだけが扱うもの。 */

@@ -686,6 +686,10 @@ pub async fn handle_incoming_message(
             // Notification that one thumbnail was written. Read the image by filename with read_asset_thumbnail (do not send images through the MMF).
             let _ = app.emit("asset_manager:thumbnail", envelope.payload);
         }
+        "asset_manager:preview" => {
+            // Notification that one interactive building preview frame was written. Read the image by filename with read_asset_thumbnail.
+            let _ = app.emit("asset_manager:preview", envelope.payload);
+        }
         "system:ping" => {
             send_to_parent(
                 &state,

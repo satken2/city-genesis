@@ -11,6 +11,12 @@
     "noModel": "model yok",
     "noImage": "görüntü yok",
     "weight": "Ağırlık",
-    "applyNote": "Bir oyuna bir sonraki başladığınızda veya yüklediğinizde ağırlık değişiklikleri etkili olur."
+    "applyNote": "Bir oyuna bir sonraki başladığınızda veya yüklediğinizde ağırlık değişiklikleri etkili olur.",
+    "preview": {
+      "hint": "Döndürmek için sürükleyin / Yakınlaştırmak için kaydırın",
+      "zoomIn": "Yakınlaştır",
+      "zoomOut": "Uzaklaştır",
+      "reset": "Sıfırla"
+    }
   }
 }

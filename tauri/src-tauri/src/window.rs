@@ -1253,6 +1253,15 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 "edit_path:cancel_topology_edit".to_string(),
                 json!({}),
             );
+        } else if wt == "asset_manager" {
+            // Release any cached 3D preview building in Unity when the asset manager closes (hidden for reuse).
+            let _ = ipc::send_ui_action(
+                state,
+                wt.clone(),
+                None,
+                "asset_manager:preview_close".to_string(),
+                json!({}),
+            );
         }
     }
 

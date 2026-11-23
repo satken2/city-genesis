@@ -132,6 +132,9 @@ public class IpcClient : MonoBehaviour
     public event Action<string> OnCameraCaptureThumbnail;
     // Asset manager render request. Return per-row models and capture thumbnails as files (AssetManagerRenderer).
     public event Action<AssetManagerRequest> OnAssetManagerRender;
+    // Interactive building preview render/close requests from the Asset Manager popup (AssetManagerRenderer).
+    public event Action<AssetManagerPreviewRequest> OnAssetManagerPreview;
+    public event Action OnAssetManagerPreviewClose;
     // Road access (front_path) arrows, corresponding to parcel detail panel opening/closing.
     public event Action<int> OnParcelShowFrontPath;
     public event Action OnParcelHideFrontPath;
@@ -957,6 +960,25 @@ public class IpcClient : MonoBehaviour
                     });
                     break;
 
+                case "asset_manager:preview":
+                    OnAssetManagerPreview?.Invoke(new AssetManagerPreviewRequest
+                    {
+                        RequestId = GetParamString(payload, "request_id"),
+                        PackId = GetParamString(payload, "pack_id"),
+                        Row = GetParamInt(payload, "row"),
+                        Model = GetParamInt(payload, "model"),
+                        Yaw = GetParamFloat(payload, "yaw"),
+                        Pitch = GetParamFloat(payload, "pitch"),
+                        Zoom = GetParamFloat(payload, "zoom"),
+                        Width = GetParamInt(payload, "width"),
+                        Height = GetParamInt(payload, "height"),
+                    });
+                    break;
+
+                case "asset_manager:preview_close":
+                    OnAssetManagerPreviewClose?.Invoke();
+                    break;
+
                 case "edit_connector:show":
                     {
                         int agentId = GetParamInt(payload, "agent_id");
@@ -1717,6 +1739,18 @@ public class IpcClient : MonoBehaviour
         SendEnvelope("asset_manager:thumbnail", new Dictionary<string, object>
         {
             ["request_id"] = requestId, ["row"] = row, ["model"] = model, ["file"] = file
+        });
+    }
+
+    /// <summary>
+    /// Sends asset_manager:preview after an interactive building preview frame is written. file is the filename under
+    /// the user folder's cache/asset_thumbnails/ (null if capture failed).
+    /// </summary>
+    public void EmitAssetManagerPreview(string requestId, string file)
+    {
+        SendEnvelope("asset_manager:preview", new Dictionary<string, object>
+        {
+            ["request_id"] = requestId, ["file"] = file
         });
     }
 

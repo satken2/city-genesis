@@ -11,6 +11,12 @@
     "noModel": "無模型",
     "noImage": "無圖像",
     "weight": "權重",
-    "applyNote": "權重的變更會在下次開始或讀取遊戲時生效。"
+    "applyNote": "權重的變更會在下次開始或讀取遊戲時生效。",
+    "preview": {
+      "hint": "拖曳旋轉 / 滾輪縮放",
+      "zoomIn": "放大",
+      "zoomOut": "縮小",
+      "reset": "重設"
+    }
   }
 }

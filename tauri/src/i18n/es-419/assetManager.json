@@ -11,6 +11,12 @@
     "noModel": "Sin modelo",
     "noImage": "Sin imagen",
     "weight": "Peso",
-    "applyNote": "Los cambios de peso se aplican la próxima vez que inicies o cargues una partida."
+    "applyNote": "Los cambios de peso se aplican la próxima vez que inicies o cargues una partida.",
+    "preview": {
+      "hint": "Arrastra para rotar / Rueda para hacer zoom",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "reset": "Restablecer"
+    }
   }
 }

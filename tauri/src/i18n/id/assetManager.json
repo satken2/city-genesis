@@ -11,6 +11,12 @@
     "noModel": "Tidak ada model",
     "noImage": "tidak ada gambar",
     "weight": "Berat",
-    "applyNote": "Perubahan berat badan berlaku saat berikutnya Anda memulai atau memuat permainan."
+    "applyNote": "Perubahan berat badan berlaku saat berikutnya Anda memulai atau memuat permainan.",
+    "preview": {
+      "hint": "Seret untuk memutar / Gulir untuk memperbesar",
+      "zoomIn": "Perbesar",
+      "zoomOut": "Perkecil",
+      "reset": "Atur ulang"
+    }
   }
 }

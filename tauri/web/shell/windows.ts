@@ -563,6 +563,8 @@ export function closeWindowByLabel(label: string): void {
   } else if (windowType === "path_detail") {
     sendQuietly(windowType, "world:clear_highlights", { source: "path_detail" });
     sendQuietly(windowType, "edit_path:cancel_topology_edit", {});
+  } else if (windowType === "asset_manager") {
+    sendQuietly(windowType, "asset_manager:preview_close", {});
   }
 
   const toDestroy: string[] = [];

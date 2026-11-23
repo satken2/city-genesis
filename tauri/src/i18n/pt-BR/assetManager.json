@@ -11,6 +11,12 @@
     "noModel": "nenhum modelo",
     "noImage": "nenhuma imagem",
     "weight": "Peso",
-    "applyNote": "As mudanças de peso entram em vigor na próxima vez que você iniciar ou carregar um jogo."
+    "applyNote": "As mudanças de peso entram em vigor na próxima vez que você iniciar ou carregar um jogo.",
+    "preview": {
+      "hint": "Arraste para girar / Roda do mouse para dar zoom",
+      "zoomIn": "Aumentar zoom",
+      "zoomOut": "Diminuir zoom",
+      "reset": "Redefinir"
+    }
   }
 }

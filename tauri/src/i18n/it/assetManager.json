@@ -11,6 +11,12 @@
     "noModel": "Nessun modello",
     "noImage": "Nessuna immagine",
     "weight": "Peso",
-    "applyNote": "Le variazioni di peso hanno effetto al successivo avvio o carico di una partita."
+    "applyNote": "Le variazioni di peso hanno effetto al successivo avvio o carico di una partita.",
+    "preview": {
+      "hint": "Trascina per ruotare / Rotella per ingrandire",
+      "zoomIn": "Ingrandisci",
+      "zoomOut": "Riduci",
+      "reset": "Ripristina"
+    }
   }
 }

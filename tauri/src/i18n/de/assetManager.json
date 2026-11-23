@@ -11,6 +11,12 @@
     "noModel": "Kein Modell",
     "noImage": "Kein Bild",
     "weight": "Gewicht",
-    "applyNote": "Gewichtsänderungen werden beim nächsten Start oder Laden eines Spiels wirksam."
+    "applyNote": "Gewichtsänderungen werden beim nächsten Start oder Laden eines Spiels wirksam.",
+    "preview": {
+      "hint": "Ziehen zum Drehen / Scrollen zum Zoomen",
+      "zoomIn": "Vergrößern",
+      "zoomOut": "Verkleinern",
+      "reset": "Zurücksetzen"
+    }
   }
 }

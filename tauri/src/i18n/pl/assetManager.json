@@ -11,6 +11,12 @@
     "noModel": "Brak modelu",
     "noImage": "Brak obrazka",
     "weight": "Waga",
-    "applyNote": "Zmiany wagi zaczną obowiązywać przy następnym uruchomieniu lub załadowaniu gry."
+    "applyNote": "Zmiany wagi zaczną obowiązywać przy następnym uruchomieniu lub załadowaniu gry.",
+    "preview": {
+      "hint": "Przeciągnij, aby obrócić / Kółko, aby powiększyć",
+      "zoomIn": "Powiększ",
+      "zoomOut": "Pomniejsz",
+      "reset": "Resetuj"
+    }
   }
 }

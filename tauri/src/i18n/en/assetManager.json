@@ -11,6 +11,12 @@
     "noModel": "No model",
     "noImage": "No image",
     "weight": "Weight",
-    "applyNote": "Weight changes take effect the next time you start or load a game."
+    "applyNote": "Weight changes take effect the next time you start or load a game.",
+    "preview": {
+      "hint": "Drag to rotate / Scroll to zoom",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "reset": "Reset"
+    }
   }
 }

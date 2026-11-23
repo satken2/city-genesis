@@ -11,6 +11,12 @@
     "noModel": "Aucun modèle",
     "noImage": "Aucune image",
     "weight": "Poids",
-    "applyNote": "Les poids modifiés s’appliquent au prochain lancement ou chargement d’une partie."
+    "applyNote": "Les poids modifiés s’appliquent au prochain lancement ou chargement d’une partie.",
+    "preview": {
+      "hint": "Glisser pour pivoter / Molette pour zoomer",
+      "zoomIn": "Zoom avant",
+      "zoomOut": "Zoom arrière",
+      "reset": "Réinitialiser"
+    }
   }
 }

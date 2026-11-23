@@ -1,8 +1,9 @@
+using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 
 /// <summary>
-/// Capture the camera view as a PNG for save-data images.
+/// Capture the camera view as an encoded image for save-data and asset manager previews.
 /// Render the camera directly to a texture, rather than capturing the screen, so overlay UI (Canvas / OnGUI) is excluded.
 /// </summary>
 public static class CameraCaptureUtil
@@ -12,6 +13,17 @@ public static class CameraCaptureUtil
     /// Render at twice the dimensions and downsample to avoid detail aliasing from a single reduction.
     /// </summary>
     public static byte[] CapturePng(Camera camera, int width, int height)
+    {
+        return Capture(camera, width, height, texture => texture.EncodeToPNG());
+    }
+
+    /// <summary>Return a width x height JPEG using the same supersampled capture pipeline as <see cref="CapturePng"/>.</summary>
+    public static byte[] CaptureJpg(Camera camera, int width, int height, int quality = 90)
+    {
+        return Capture(camera, width, height, texture => texture.EncodeToJPG(quality));
+    }
+
+    private static byte[] Capture(Camera camera, int width, int height, Func<Texture2D, byte[]> encode)
     {
         RenderTexture large = RenderTexture.GetTemporary(width * 2, height * 2, 24, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
         RenderTexture small = RenderTexture.GetTemporary(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB);
@@ -35,14 +47,14 @@ public static class CameraCaptureUtil
             RenderTexture.active = small;
             texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
             texture.Apply(false);
-            return texture.EncodeToPNG();
+            return encode(texture);
         }
         finally
         {
             RenderTexture.active = previousActive;
             RenderTexture.ReleaseTemporary(large);
             RenderTexture.ReleaseTemporary(small);
-            Object.Destroy(texture);
+            UnityEngine.Object.Destroy(texture);
         }
     }
 }

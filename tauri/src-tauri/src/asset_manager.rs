@@ -61,7 +61,7 @@ fn is_weight_table(value: &Value) -> bool {
     })
 }
 
-/// Return a Unity-generated thumbnail (PNG) as base64. Accept only filenames within the thumbnail folder.
+/// Return a Unity-generated thumbnail or preview image (PNG/JPEG) as base64. Accept only filenames within the thumbnail folder.
 #[tauri::command]
 pub fn read_asset_thumbnail(file: String) -> Result<String, String> {
     if !is_thumbnail_name(&file) {
@@ -76,9 +76,11 @@ pub fn read_asset_thumbnail(file: String) -> Result<String, String> {
 }
 
 fn is_thumbnail_name(file: &str) -> bool {
-    file.strip_suffix(".png").is_some_and(|stem| {
-        !stem.is_empty() && stem.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
-    })
+    file.strip_suffix(".png")
+        .or_else(|| file.strip_suffix(".jpg"))
+        .is_some_and(|stem| {
+            !stem.is_empty() && stem.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+        })
 }
 
 #[cfg(test)]
@@ -99,8 +101,10 @@ mod tests {
     #[test]
     fn thumbnail_name_stays_inside_the_folder() {
         assert!(is_thumbnail_name("buildings_2000_200.png"));
+        assert!(is_thumbnail_name("preview_0.jpg"));
         assert!(!is_thumbnail_name("../asset_weights.json"));
         assert!(!is_thumbnail_name("..\\x.png"));
         assert!(!is_thumbnail_name(".png"));
+        assert!(!is_thumbnail_name(".jpg"));
     }
 }
