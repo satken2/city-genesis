@@ -68,7 +68,7 @@ function isPointCreationMode(mode: CreationMode | null): boolean {
  * aspect ratio (about 87×260m).
  */
 const SIZE_INPUT_PRESETS: Record<string, { width: number; height: number; min: number; max: number; step: number }> = {
-  empty_area: { width: 10, height: 20, min: 1, max: 300, step: 1 },
+  empty_area: { width: 35, height: 35, min: 1, max: 300, step: 1 },
   along_path: { width: 20, height: 20, min: 1, max: 300, step: 1 },
   random: { width: 200, height: 200, min: 1, max: 400, step: 10 },
   block: { width: 200, height: 200, min: 20, max: 400, step: 10 },
@@ -196,7 +196,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
 
   // Exactly one creation mode is always selected; there is no unselected state. Unity is authoritative.
   const [selectedMode, setSelectedMode] = useState<CreationMode>(DEFAULT_CREATION_MODE);
-  const [area, setArea] = useState(100);
+  const [area, setArea] = useState(400);
   const [width, setWidth] = useState(DEFAULT_SIZE_INPUT.width);
   const [height, setHeight] = useState(DEFAULT_SIZE_INPUT.height);
   const [angle, setAngle] = useState(0);
