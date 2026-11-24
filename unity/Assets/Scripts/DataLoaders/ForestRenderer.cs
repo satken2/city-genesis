@@ -132,7 +132,7 @@ public sealed class ForestRenderer : IDisposable
         if (!Supported || !Valid(data.density, budget)) return null;
         var p = new Patch { sourceId = data.prop_scatter_id, type = data.prop_type, seed = data.seed,
             edgeFadeWidth = data.edge_fade_width, rect = rect, model = model, key = key,
-            clearance = Mathf.Max(model.bounds.extents.x, model.bounds.extents.z) * .15f };
+            clearance = model.BaseClearance };
         Grid(rect, data.density, out p.spacing, out p.startX, out p.startZ, out p.gridWidth, out p.gridCount);
         p.count = Count(p.gridCount, budget);
         if (p.count <= 0) return null;

@@ -26,7 +26,9 @@ public sealed class PropRenderModel : IDisposable
     /// Obstacle clearance for area scatter. Reduces canopies overlapping walls/roads when only trunks clear obstacles.
     /// Derived from bounding box half-width assuming the origin is centered in XZ.
     /// </summary>
-    public float Clearance(float scale) => Mathf.Min(8f, Mathf.Max(bounds.extents.x, bounds.extents.z) * 0.15f * scale);
+    public const float ClearanceRatio = 0.8f;
+    public float BaseClearance => Mathf.Max(bounds.extents.x, bounds.extents.z) * ClearanceRatio;
+    public float Clearance(float scale) => Mathf.Min(8f, BaseClearance * scale);
     private readonly List<UnityEngine.Object> owned = new List<UnityEngine.Object>();
     /// <summary>モデルの材質から、描画に使う共有プールの材質を引く。null のときは材質を写して所有する。</summary>
     private Func<Material, Material> pooledMaterial;
