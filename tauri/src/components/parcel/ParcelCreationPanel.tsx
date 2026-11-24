@@ -203,7 +203,7 @@ export function ParcelCreationPanel({ apiBaseUrl }: ParcelCreationPanelProps) {
   const [side, setSide] = useState<"left" | "right">("left");
 
   // For block (whole-block) mode: roadside parcel width/depth.
-  const [lotWidth, setLotWidth] = useState(10);
+  const [lotWidth, setLotWidth] = useState(20);
   const [lotDepth, setLotDepth] = useState(20);
   // Shared by random / split_random / block: parcel width variation (%).
   const [jitterPct, setJitterPct] = useState(25);
