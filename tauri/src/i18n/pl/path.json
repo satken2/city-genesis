@@ -128,6 +128,19 @@
     }
   },
   "path_construction": {
+    "lots": {
+      "title": "Działki przy ulicy tworzone po ukończeniu",
+      "both": "Obie strony",
+      "left": "Lewa strona",
+      "right": "Prawa strona",
+      "split": "Ustaw lewą i prawą stronę osobno",
+      "none": "Bez działek",
+      "preset": "{{name}} ({{area}} m²)",
+      "custom": "{{area}} m²",
+      "area": "Powierzchnia działki",
+      "diagramArea": "{{side}}: {{area}} m²",
+      "diagramNone": "{{side}}: bez działek"
+    },
     "buildMethod": {
       "title": "Metoda układu",
       "single": "Jednoosobowy",

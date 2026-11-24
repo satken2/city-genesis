@@ -71,7 +71,8 @@
       },
       "step9": {
         "title": "przedłużyć drogę",
-        "description": "Teraz zbudujmy dzielnicę mieszkalną, aby powitać nowych mieszkańców. Domy i miejsca pracy nie są przydatne, chyba że drogi je połączą: ludzie nie mogą przychodzić i odchodzić, a towary nie mogą przybyć. Najpierw rozciągnij ulicę Wschód-Zachód na zachód, aby otworzyć drogę do nowej dzielnicy. Naciśnij „Roads, Rail & Infrastructure” na panelu ikon, aby otworzyć panel konstrukcyjny."
+        "description": "Teraz zbudujmy dzielnicę mieszkalną, aby powitać nowych mieszkańców. Domy i miejsca pracy nie są przydatne, chyba że drogi je połączą: ludzie nie mogą przychodzić i odchodzić, a towary nie mogą przybyć. Najpierw rozciągnij ulicę Wschód-Zachód na zachód, aby otworzyć drogę do nowej dzielnicy. Naciśnij „Roads, Rail & Infrastructure” na panelu ikon, aby otworzyć panel konstrukcyjny.",
+        "confirm": "Teren wzdłuż drogi zostaje podzielony na działki, gdy droga zostanie ukończona. W sekcji „Działki przy ulicy tworzone po ukończeniu” w panelu konstrukcyjnym możesz wybrać powierzchnię jednej działki osobno dla lewej i prawej strony drogi. Zdecyduj według budynków, które chcesz przyciągnąć: mniejsze działki pasują do osiedli, większe do fabryk i gospodarstw. Ta droga będzie obsługiwać osiedle mieszkaniowe, więc zostaw ustawienie bez zmian. Potwierdź w panelu konstrukcyjnym, aby zapisać drogę, a następnie naciśnij przycisk „Dalej”."
       },
       "step10": {
         "title": "Ukończ drogę",
@@ -79,9 +80,8 @@
         "description_week": "Droga jest nadal „zaplanowana budowa”. Planowana droga nie może być jeszcze wykorzystana — ludzie i samochody mogą z niej korzystać dopiero po zakończeniu pracy. Naciśnij „Start” w kokpicie 2–3 razy, aby przyspieszyć czas i poczekaj, aż zostanie ukończony. Budowa kosztuje co tydzień, gdy jest w toku."
       },
       "step11": {
-        "title": "Twórz paczki",
-        "description": "Droga jest gotowa. Następnie przygotuj działki, które będą służyć jako place budowy. Budynki mogą stać tylko na paczkach, a działka z widokiem na drogę pozwala ludziom i towarom przychodzić i odchodzić. Naciśnij „Przesyłki” na panelu ikon.",
-        "create": "Upewnij się, że wybrano opcję „Utwórz wzdłuż drogi”, a następnie kliknij drogę, którą rozszerzyłeś w widoku 3D. Gdy czerwone kontury ustawiają się wzdłuż drogi, potwierdź, aby utworzyć przesyłki."
+        "title": "Działki gotowe",
+        "description": "Droga jest ukończona, a wzdłuż niej powstały działki. Budynki mogą stać tylko na działkach, a działka przy drodze pozwala ludziom i towarom przychodzić i odchodzić. Aby dodać działki wzdłuż istniejącej drogi, użyj przycisku „działki gruntowe” w panelu ikon."
       },
       "step12": {
         "title": "Stwórz dzielnicę",

@@ -980,7 +980,7 @@ export function usePathConstruction(
       { method: pathId == null ? "POST" : "PATCH", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(pathId == null
           ? submission
-          : constructionBody.paths[0]) }
+          : submission.paths[0]) }
     );
     if (pathId == null && tutorialState?.active && snapshot()?.runId === tutorialState.runId) {
       await observe({ savedPaths: (response?.paths ?? []).map(p => p.path_id) });

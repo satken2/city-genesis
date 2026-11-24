@@ -71,7 +71,8 @@
       },
       "step9": {
         "title": "yolu uzat",
-        "description": "Şimdi yeni sakinleri ağırlamak için bir yerleşim alanı inşa edelim. Yollar onları birbirine bağlamadıkça evler ve işyerleri hiçbir işe yaramaz: insanlar gelip gidemez ve mallar gelemez. İlk olarak, yeni mahalleye bir yol açmak için kasabanın doğu-batı caddesini batıya doğru genişletin. İnşaat panelini açmak için simge panelinde “Yollar, Demiryolu ve Altyapı” düğmesine basın."
+        "description": "Şimdi yeni sakinleri ağırlamak için bir yerleşim alanı inşa edelim. Yollar onları birbirine bağlamadıkça evler ve işyerleri hiçbir işe yaramaz: insanlar gelip gidemez ve mallar gelemez. İlk olarak, yeni mahalleye bir yol açmak için kasabanın doğu-batı caddesini batıya doğru genişletin. İnşaat panelini açmak için simge panelinde “Yollar, Demiryolu ve Altyapı” düğmesine basın.",
+        "confirm": "Yol boyunca uzanan arazi, yol tamamlandığında parsellere bölünür. İnşaat panelindeki \"Tamamlanınca oluşturulacak yol kenarı parselleri\" bölümünden yolun sol ve sağ tarafı için her parselin alanını seçebilirsiniz. Hangi binaları istediğinize göre karar verin: konut alanları için küçük, fabrikalar ve tarlalar için büyük parseller uygundur. Bu yol bir konut alanına hizmet edecek, bu yüzden ayarı olduğu gibi bırakın. Yolu kaydetmek için inşaat panelinde onaylayın, ardından \"İleri\"ye basın."
       },
       "step10": {
         "title": "yolu tamamla",
@@ -79,9 +80,8 @@
         "description_week": "Yol hala “inşaat planlı”. Planlı bir yol henüz kullanılamaz - insanlar ve arabalar onu ancak iş bittiğinde kullanabilir. Süreyi ilerletmek ve tamamlanmasını beklemek için kokpitte 2-3 kez “Başlat” tuşuna basın. İnşaat devam ederken her hafta inşaat paraya mal oluyor."
       },
       "step11": {
-        "title": "Parseller Oluştur",
-        "description": "Yol hazır. Ardından, şantiye olarak hizmet etmek için paketler hazırlayın. Binalar sadece parseller üzerinde durabilir ve yola bakan bir parsel insanların ve malların gelip gitmesine izin verir. Simge panelinde “Land Parsels” düğmesine basın.",
-        "create": "“Yol Boyunca Oluştur”un seçildiğinden emin olun, ardından 3B görünümde genişlettiğiniz yolu tıklayın. Kırmızı anahatlar yol boyunca sıraya girdiğinde, parselleri oluşturmak için onaylayın."
+        "title": "Parseller oluştu",
+        "description": "Yol tamamlandı ve yol boyunca parseller oluşturuldu. Binalar yalnızca parsellerin üzerinde durabilir ve yola bakan bir parsel insanların ve malların gelip gitmesini sağlar. Var olan bir yol boyunca parsel eklemek için simge panelindeki \"arsa\" düğmesini kullanın."
       },
       "step12": {
         "title": "bir bölge oluştur",

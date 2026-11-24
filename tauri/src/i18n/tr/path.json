@@ -128,6 +128,19 @@
     }
   },
   "path_construction": {
+    "lots": {
+      "title": "Tamamlanınca oluşturulacak yol kenarı parselleri",
+      "both": "İki taraf",
+      "left": "Sol taraf",
+      "right": "Sağ taraf",
+      "split": "Sol ve sağı ayrı ayarla",
+      "none": "Parsel yok",
+      "preset": "{{name}} ({{area}} m²)",
+      "custom": "{{area}} m²",
+      "area": "Parsel alanı",
+      "diagramArea": "{{side}}: {{area}} m²",
+      "diagramNone": "{{side}}: parsel yok"
+    },
     "buildMethod": {
       "title": "düzen yöntemi",
       "single": "Tek",

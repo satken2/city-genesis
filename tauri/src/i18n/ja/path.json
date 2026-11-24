@@ -128,6 +128,19 @@
     }
   },
   "path_construction": {
+    "lots": {
+      "title": "完成時に作る沿道の区画",
+      "both": "両側",
+      "left": "左側",
+      "right": "右側",
+      "split": "左右で分ける",
+      "none": "区画を作らない",
+      "preset": "{{name}}({{area}} ㎡)",
+      "custom": "{{area}} ㎡",
+      "area": "区画の面積",
+      "diagramArea": "{{side}} {{area}} ㎡",
+      "diagramNone": "{{side}} 区画なし"
+    },
     "buildMethod": {
       "title": "敷設方法",
       "single": "単一",

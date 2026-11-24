@@ -71,7 +71,8 @@
       },
       "step9": {
         "title": "Prolonguemos la calle",
-        "description": "Ahora crearemos un barrio residencial para recibir a nuevos habitantes. Las viviendas y los lugares de trabajo no sirven si no hay calles que los conecten: la gente no puede ir y venir y las mercancías no llegan. Primero, prolonga hacia el oeste la calle este-oeste del pueblo para abrir el camino al nuevo barrio. Pulsa «Calles, ferrocarril e infraestructura» en el panel de iconos para abrir el panel de construcción."
+        "description": "Ahora crearemos un barrio residencial para recibir a nuevos habitantes. Las viviendas y los lugares de trabajo no sirven si no hay calles que los conecten: la gente no puede ir y venir y las mercancías no llegan. Primero, prolonga hacia el oeste la calle este-oeste del pueblo para abrir el camino al nuevo barrio. Pulsa «Calles, ferrocarril e infraestructura» en el panel de iconos para abrir el panel de construcción.",
+        "confirm": "El terreno a lo largo de una calle se divide en parcelas cuando la calle se termina. En «Parcelas junto a la calle al terminarla», en el panel de construcción, puedes elegir el tamaño de cada parcela para el lado izquierdo y el derecho. Decide según los edificios que quieras recibir: las parcelas pequeñas sirven para viviendas y las grandes, para fábricas y granjas. Esta calle será residencial, así que déjalo como está. Confirma en el panel de construcción para guardar la carretera y luego pulsa «Siguiente»."
       },
       "step10": {
         "title": "Terminemos la calle",
@@ -79,9 +80,8 @@
         "description_week": "La calle todavía está en «Construcción planificada». Una calle planificada aún no se puede usar: las personas y los coches solo pueden circular cuando termina la obra. Pulsa 2 o 3 veces «Iniciar» en el panel de mando para avanzar el tiempo y espera a que se complete. Mientras dura la obra se paga un coste de construcción cada semana."
       },
       "step11": {
-        "title": "Creemos parcelas",
-        "description": "La calle está lista. Ahora prepara las parcelas que servirán de solares para los edificios. Los edificios solo pueden levantarse sobre parcelas, y una parcela que da a una calle permite la entrada y salida de personas y mercancías. Pulsa «Parcelas» en el panel de iconos.",
-        "create": "Comprueba que esté seleccionada «A lo largo de la calle» y haz clic en la calle que prolongaste en la vista 3D. Cuando aparezcan contornos rojos a lo largo de la calle, confirma para crear las parcelas."
+        "title": "Ya hay parcelas",
+        "description": "La calle está terminada y a lo largo de ella se crearon parcelas. Los edificios solo pueden levantarse sobre parcelas, y una parcela que da a una calle permite la entrada y salida de personas y mercancías. Para añadir parcelas junto a una calle existente, usa «Parcelas» en el panel de iconos."
       },
       "step12": {
         "title": "Creemos un distrito",

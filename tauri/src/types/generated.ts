@@ -484,6 +484,10 @@ export type PathData = {
   house_ends: string;
   /** Station building passage mode (elevated, ground, or underground). */
   passage_mode: string;
+  /** Area (m²) of each land parcel to create along the left side, looking from start to end, when the road is completed. 0 means no parcels. Reset to 0 once the parcels are created. */
+  left_lot_area: number;
+  /** Area (m²) of each land parcel to create along the right side when the road is completed. 0 means no parcels. Reset to 0 once the parcels are created. */
+  right_lot_area: number;
   /** Bench type (0 = none, 1 = standard). Saved for each road. */
   bench_type: number;
   /** Trash bin type (0 = none, 1 = standard). Saved for each road. */

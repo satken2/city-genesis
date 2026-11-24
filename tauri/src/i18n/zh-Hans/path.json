@@ -128,6 +128,19 @@
     }
   },
   "path_construction": {
+    "lots": {
+      "title": "竣工时沿路生成的地块",
+      "both": "两侧",
+      "left": "左侧",
+      "right": "右侧",
+      "split": "左右分别设置",
+      "none": "不生成地块",
+      "preset": "{{name}}（{{area}} ㎡）",
+      "custom": "{{area}} ㎡",
+      "area": "地块面积",
+      "diagramArea": "{{side}} {{area}} ㎡",
+      "diagramNone": "{{side}} 无地块"
+    },
     "buildMethod": {
       "title": "铺设方式",
       "single": "单条",

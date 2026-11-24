@@ -477,3 +477,53 @@
   color: #585b70;
   margin-top: 4px;
 }
+
+/* ---- Roadside lots (PathLotSection) ---- */
+.pc-lot-diagram {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: 8px;
+}
+
+.pc-lot-diagram-road {
+  fill: #4a5566;
+}
+
+.pc-lot-diagram-arrow {
+  stroke: #f6fbff;
+  stroke-width: 2;
+}
+
+.pc-lot-diagram-arrowhead {
+  fill: #f6fbff;
+}
+
+.pc-lot-diagram-lot {
+  fill: rgba(78, 161, 255, 0.22);
+  stroke: #4ea1ff;
+  stroke-width: 1;
+}
+
+.pc-lot-diagram-label {
+  fill: #f6fbff;
+  font-size: 12px;
+  text-anchor: middle;
+  dominant-baseline: central;
+  paint-order: stroke;
+  stroke: #101723;
+  stroke-width: 3px;
+}
+
+.pc-lot-split {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  font-size: 1rem;
+  color: #c5d4e3;
+}
+
+.pc-lot-side + .pc-lot-side {
+  margin-top: 8px;
+}

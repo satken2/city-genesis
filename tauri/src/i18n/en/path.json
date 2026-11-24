@@ -128,6 +128,19 @@
     }
   },
   "path_construction": {
+    "lots": {
+      "title": "Roadside parcels made on completion",
+      "both": "Both sides",
+      "left": "Left side",
+      "right": "Right side",
+      "split": "Set left and right separately",
+      "none": "No parcels",
+      "preset": "{{name}} ({{area}} m²)",
+      "custom": "{{area}} m²",
+      "area": "Parcel area",
+      "diagramArea": "{{side}}: {{area}} m²",
+      "diagramNone": "{{side}}: no parcels"
+    },
     "buildMethod": {
       "title": "Layout method",
       "single": "Single",

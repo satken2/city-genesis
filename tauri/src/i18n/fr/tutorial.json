@@ -71,7 +71,8 @@
       },
       "step9": {
         "title": "Prolongeons la route",
-        "description": "Créons maintenant un quartier résidentiel pour accueillir de nouveaux habitants. Logements et lieux de travail ne servent à rien sans routes pour les relier : les gens ne peuvent pas circuler et les marchandises n’arrivent pas. Prolongez d’abord vers l’ouest la rue est-ouest de la ville pour ouvrir l’accès au nouveau quartier. Appuyez sur « Routes, voies ferrées et infrastructures » dans le panneau d’icônes pour ouvrir le panneau de construction."
+        "description": "Créons maintenant un quartier résidentiel pour accueillir de nouveaux habitants. Logements et lieux de travail ne servent à rien sans routes pour les relier : les gens ne peuvent pas circuler et les marchandises n’arrivent pas. Prolongez d’abord vers l’ouest la rue est-ouest de la ville pour ouvrir l’accès au nouveau quartier. Appuyez sur « Routes, voies ferrées et infrastructures » dans le panneau d’icônes pour ouvrir le panneau de construction.",
+        "confirm": "Le terrain le long d’une route est découpé en parcelles quand la route est achevée. Dans « Parcelles en bordure créées à l'achèvement » du panneau de construction, vous choisissez la taille de chaque parcelle pour les côtés gauche et droit. Décidez selon les bâtiments que vous voulez accueillir : de petites parcelles pour l’habitat, de grandes pour les usines et les fermes. Cette route desservira un quartier résidentiel, laissez donc le réglage tel quel. Confirmez dans le panneau de construction pour enregistrer la route, puis appuyez sur « Suivant »."
       },
       "step10": {
         "title": "Terminons la route",
@@ -79,9 +80,8 @@
         "description_week": "La route est encore au statut « Construction planifiée ». Une route planifiée n’est pas encore utilisable : piétons et voitures ne peuvent l’emprunter qu’une fois les travaux terminés. Appuyez 2 ou 3 fois sur « Démarrer » dans le cockpit pour faire avancer le temps et attendez son achèvement. Pendant les travaux, un coût de construction est prélevé chaque semaine."
       },
       "step11": {
-        "title": "Créons des parcelles",
-        "description": "La route est prête. Préparez maintenant des parcelles qui serviront de terrains à bâtir. Les bâtiments ne peuvent s’élever que sur des parcelles, et une parcelle qui borde une route permet aux personnes et aux marchandises d’entrer et de sortir. Appuyez sur « Parcelles » dans le panneau d’icônes.",
-        "create": "Vérifiez que « Le long de la route » est sélectionné, puis cliquez sur la route prolongée dans la vue 3D. Lorsque des contours rouges s’alignent le long de la route, validez pour créer les parcelles."
+        "title": "Les parcelles sont prêtes",
+        "description": "La route est achevée et des parcelles ont été créées le long de celle-ci. Les bâtiments ne peuvent s’élever que sur des parcelles, et une parcelle qui borde une route permet aux personnes et aux marchandises d’entrer et de sortir. Pour ajouter des parcelles le long d’une route existante, utilisez « Parcelles » dans le panneau d’icônes."
       },
       "step12": {
         "title": "Créons un quartier",

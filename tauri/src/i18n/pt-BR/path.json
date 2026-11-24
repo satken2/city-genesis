@@ -128,6 +128,19 @@
     }
   },
   "path_construction": {
+    "lots": {
+      "title": "Parcelas à beira da rua criadas na conclusão",
+      "both": "Ambos os lados",
+      "left": "Lado esquerdo",
+      "right": "Lado direito",
+      "split": "Definir esquerda e direita separadamente",
+      "none": "Sem parcelas",
+      "preset": "{{name}} ({{area}} m²)",
+      "custom": "{{area}} m²",
+      "area": "Área da parcela",
+      "diagramArea": "{{side}}: {{area}} m²",
+      "diagramNone": "{{side}}: sem parcelas"
+    },
     "buildMethod": {
       "title": "Método de layout",
       "single": "Solteira",

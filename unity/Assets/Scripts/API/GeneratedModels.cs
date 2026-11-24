@@ -501,6 +501,10 @@ namespace GeneratedModels
         public string house_ends;
         /// <summary>Station building passage mode (elevated, ground, or underground).</summary>
         public string passage_mode;
+        /// <summary>Area (m²) of each land parcel to create along the left side, looking from start to end, when the road is completed. 0 means no parcels. Reset to 0 once the parcels are created.</summary>
+        public float left_lot_area;
+        /// <summary>Area (m²) of each land parcel to create along the right side when the road is completed. 0 means no parcels. Reset to 0 once the parcels are created.</summary>
+        public float right_lot_area;
         /// <summary>Bench type (0 = none, 1 = standard). Saved for each road.</summary>
         public int bench_type;
         /// <summary>Trash bin type (0 = none, 1 = standard). Saved for each road.</summary>

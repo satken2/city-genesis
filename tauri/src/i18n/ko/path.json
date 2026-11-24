@@ -128,6 +128,19 @@
     }
   },
   "path_construction": {
+    "lots": {
+      "title": "완성 시 만드는 도로변 구획",
+      "both": "양쪽",
+      "left": "왼쪽",
+      "right": "오른쪽",
+      "split": "좌우를 따로 설정",
+      "none": "구획을 만들지 않음",
+      "preset": "{{name}} ({{area}} ㎡)",
+      "custom": "{{area}} ㎡",
+      "area": "구획 면적",
+      "diagramArea": "{{side}} {{area}} ㎡",
+      "diagramNone": "{{side}} 구획 없음"
+    },
     "buildMethod": {
       "title": "부설 방식",
       "single": "단일",

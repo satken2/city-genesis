@@ -21,6 +21,8 @@ import { describeError } from "../../utils/errors";
  * and station platform sides. Combined double-track variants have neither (station platform positions are variant-defined
  * side/island). Choose station building ends, passage mode, and construction project tags only during new placement
  * (they are either immutable after construction or edited in path details). Set road membership afterward in path/road details.
+ * Streets that allow roadside parcels also take the parcel area for each side, used once when the street is completed.
+ * Existing path editing loads the saved areas so they can still be changed before construction.
  * Unity's controls (Ctrl radial menu and cursor HUD) handle curve/straight and snapping settings, which are absent here.
  * During station building placement, Unity disables snapping to existing roads/tracks (grid snapping remains enabled).
  */
@@ -57,6 +59,7 @@ import { PathAttachedVariantSelect } from "./PathAttachedVariantSelect";
 import { PathBuildSections } from "./PathBuildSections";
 import { PathBuildMethodSection } from "./PathBuildMethodSection";
 import { PathTagSection } from "./PathTagSection";
+import { DEFAULT_LOT_AREA, PathLotSection, type LotAreas } from "./PathLotSection";
 import { TAGS_CHANGED_EVENT } from "../../utils/constructionTags";
 import turnBackIcon from "../../assets/images/ui/turn-back.png";
 import "./PathConstructionPanel.css";
@@ -89,6 +92,13 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
   const selectedVariantData = pathConstruction.selectedVariantData;
   const selectedPathType = selectedVariantData?.type ?? null;
 
+  /* ---- Roadside parcel area per side (0 = none). Retained during continuous placement. ---- */
+  const [lotAreas, setLotAreas] = useState<LotAreas>({ left: DEFAULT_LOT_AREA, right: DEFAULT_LOT_AREA });
+  const [splitLots, setSplitLots] = useState(false);
+  const allowsLots = selectedPathType === PATH_STREET && selectedVariantData?.frontage_allowed === true;
+  const canSplitLots = pathConstruction.buildMethod !== PATH_BUILD_METHOD_GRID;
+  const sentLotAreas = splitLots && canSplitLots ? lotAreas : { left: lotAreas.left, right: lotAreas.left };
+
   /* ---- New placement: return Unity to normal editing state when opened. ---- */
   // Do not enter placement mode until a variant is selected, and do not leave the previous mode (e.g. bulldoze) active.
   useEffect(() => {
@@ -104,11 +114,14 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
     if (editPathId == null || !apiBaseUrl || !masterDataLoaded) return;
     const controller = new AbortController();
 
-    fetchApi<{ path_variant: number }>(`${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${editPathId}`, {
-      signal: controller.signal,
-    })
+    fetchApi<{ path_variant: number; left_lot_area: number; right_lot_area: number }>(
+      `${apiBaseUrl.replace(/\/+$/, "")}/api/v1/paths/${editPathId}`,
+      { signal: controller.signal },
+    )
       .then((data) => {
         if (controller.signal.aborted) return;
+        setLotAreas({ left: data.left_lot_area, right: data.right_lot_area });
+        setSplitLots(data.left_lot_area !== data.right_lot_area);
         pathConstruction.selectVariant(data.path_variant);
       })
       .catch((err: unknown) => {
@@ -213,6 +226,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
     try {
       const createdPathIds = await pathConstruction.confirmPath({
         ...(projectTag ? { tag: projectTag } : {}),
+        ...(allowsLots ? { left_lot_area: sentLotAreas.left, right_lot_area: sentLotAreas.right } : {}),
       });
       if (projectTag && createdPathIds.length > 0) {
         void emit(TAGS_CHANGED_EVENT, { tag: projectTag }).catch(console.error);
@@ -247,7 +261,7 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
       const displayMessage = describeError(err, t);
       void showNotification({ message: displayMessage, durationMs: 8000 });
     }
-  }, [editPathId, onClose, pathConstruction, projectTag, refreshAffordability, t]);
+  }, [editPathId, onClose, pathConstruction, projectTag, allowsLots, sentLotAreas.left, sentLotAreas.right, refreshAffordability, t]);
 
   /**
  * Cancel button handler.
@@ -495,6 +509,16 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
           value={projectTag}
           onChange={setProjectTag}
           disabled={isConfirming}
+        />
+      )}
+
+      {allowsLots && (
+        <PathLotSection
+          value={lotAreas}
+          onChange={setLotAreas}
+          split={splitLots}
+          onSplitChange={setSplitLots}
+          canSplit={canSplitLots}
         />
       )}
 

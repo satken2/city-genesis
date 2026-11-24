@@ -71,7 +71,8 @@
       },
       "step9": {
         "title": "Verlängern Sie die Straße",
-        "description": "Lassen Sie uns nun ein Wohngebiet bauen, um neue Bewohner willkommen zu heißen. Häuser und Arbeitsplätze sind nicht nutzbar, es sei denn, Straßen verbinden sie: Menschen können nicht kommen und gehen, und Waren können nicht ankommen. Verlängern Sie zunächst die Ost-West-Straße der Stadt nach Westen, um einen Weg in die neue Nachbarschaft zu eröffnen. Drücken Sie auf der Symbolleiste auf „Straße, Rail & Infrastructure“, um das Baufeld zu öffnen."
+        "description": "Lassen Sie uns nun ein Wohngebiet bauen, um neue Bewohner willkommen zu heißen. Häuser und Arbeitsplätze sind nicht nutzbar, es sei denn, Straßen verbinden sie: Menschen können nicht kommen und gehen, und Waren können nicht ankommen. Verlängern Sie zunächst die Ost-West-Straße der Stadt nach Westen, um einen Weg in die neue Nachbarschaft zu eröffnen. Drücken Sie auf der Symbolleiste auf „Straße, Rail & Infrastructure“, um das Baufeld zu öffnen.",
+        "confirm": "Das Land entlang einer Straße wird in Grundstücke aufgeteilt, sobald die Straße fertig ist. Unter „Grundstücke an der Straße bei Fertigstellung“ im Baufeld wählen Sie die Größe eines Grundstücks für die linke und rechte Straßenseite. Entscheiden Sie danach, welche Gebäude entstehen sollen: Für Wohngebiete eignen sich kleinere, für Fabriken und Höfe größere Grundstücke. Diese Straße ist für ein Wohngebiet, also lassen Sie die Einstellung, wie sie ist. Bestätigen Sie im Baufeld, um die Straße zu speichern, und drücken Sie dann \"Weiter\"."
       },
       "step10": {
         "title": "Vervollständige die Straße",
@@ -79,9 +80,8 @@
         "description_week": "Die Straße ist noch „Bauplan geplant“. Eine geplante Straße kann noch nicht befahren werden - Menschen und Autos können sie erst benutzen, wenn die Arbeit abgeschlossen ist. Drücken Sie im Cockpit 2–3 Mal auf „Start“, um die Zeit zu verschieben und zu warten, bis sie abgeschlossen ist. Der Bau kostet jede Woche Geld, während es unterwegs ist."
       },
       "step11": {
-        "title": "Pakete erstellen",
-        "description": "Die Straße ist bereit. Als nächstes bereiten Sie Pakete als Baustellen vor. Gebäude können nur auf Paketen stehen, und ein Paket gegenüber einer Straße lässt Menschen und Waren kommen und gehen. Drücken Sie auf dem Symbolfeld auf „Land Parzellen“.",
-        "create": "Vergewissern Sie sich, dass „Längsstraße erstellen“ ausgewählt ist, und klicken Sie dann in der 3D-Ansicht auf die Straße, die Sie verlängert haben. Wenn rote Konturen entlang der Straße ausgerichtet sind, bestätigen Sie die Pakete."
+        "title": "Grundstücke entstanden",
+        "description": "Die Straße ist fertig, und an ihr sind Grundstücke entstanden. Gebäude können nur auf Grundstücken stehen, und ein Grundstück an einer Straße lässt Menschen und Waren kommen und gehen. Um an einer bestehenden Straße Grundstücke hinzuzufügen, verwenden Sie „Landpakete“ im Symbolfeld."
       },
       "step12": {
         "title": "Erstellen Sie einen Bezirk",

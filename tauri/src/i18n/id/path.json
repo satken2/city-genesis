@@ -128,6 +128,19 @@
     }
   },
   "path_construction": {
+    "lots": {
+      "title": "Kavling tepi jalan yang dibuat saat jalan selesai",
+      "both": "Kedua sisi",
+      "left": "Sisi kiri",
+      "right": "Sisi kanan",
+      "split": "Atur kiri dan kanan secara terpisah",
+      "none": "Tanpa kavling",
+      "preset": "{{name}} ({{area}} m²)",
+      "custom": "{{area}} m²",
+      "area": "Luas kavling",
+      "diagramArea": "{{side}}: {{area}} m²",
+      "diagramNone": "{{side}}: tanpa kavling"
+    },
     "buildMethod": {
       "title": "Metode tata letak",
       "single": "Tunggal",

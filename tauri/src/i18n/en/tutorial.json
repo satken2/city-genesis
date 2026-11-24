@@ -71,7 +71,8 @@
       },
       "step9": {
         "title": "Extend the Road",
-        "description": "Now let's build a residential area to welcome new residents. Homes and workplaces are no use unless roads connect them: people can't come and go, and goods can't arrive. First, extend the town’s east–west street to the west to open a way into the new neighborhood. Press “Roads, Rail & Infrastructure” on the icon panel to open the construction panel."
+        "description": "Now let's build a residential area to welcome new residents. Homes and workplaces are no use unless roads connect them: people can't come and go, and goods can't arrive. First, extend the town’s east–west street to the west to open a way into the new neighborhood. Press “Roads, Rail & Infrastructure” on the icon panel to open the construction panel.",
+        "confirm": "The land along a road is divided into parcels when the road is completed. In “Roadside parcels made on completion” in the construction panel, you can choose the size of each parcel for the left and right sides of the road. Decide by the kind of buildings you want: smaller parcels suit housing, while larger ones suit factories and farms. This road is for a residential area, so leave it as it is. Confirm in the construction panel to save the road, then press \"Next\"."
       },
       "step10": {
         "title": "Complete the Road",
@@ -79,9 +80,8 @@
         "description_week": "The road is still “Construction Planned”. A planned road can't be used yet — people and cars can only use it once the work is finished. Press “Start” in the cockpit 2–3 times to advance time and wait for it to be completed. Construction costs money every week while it is underway."
       },
       "step11": {
-        "title": "Create Parcels",
-        "description": "The road is ready. Next, prepare parcels to serve as building sites. Buildings can only stand on parcels, and a parcel facing a road lets people and goods come and go. Press “Land Parcels” on the icon panel.",
-        "create": "Make sure “Create Along Road” is selected, then click the road you extended in the 3D view. When red outlines line up along the road, confirm to create the parcels."
+        "title": "Parcels Created",
+        "description": "The road is complete, and parcels have been created along it. Buildings can only stand on parcels, and a parcel facing a road lets people and goods come and go. To add parcels along an existing road, use “Land Parcels” on the icon panel."
       },
       "step12": {
         "title": "Create a District",

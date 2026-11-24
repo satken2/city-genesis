@@ -128,6 +128,19 @@
     }
   },
   "path_construction": {
+    "lots": {
+      "title": "Lotti lungo la strada creati al completamento",
+      "both": "Entrambi i lati",
+      "left": "Lato sinistro",
+      "right": "Lato destro",
+      "split": "Imposta sinistra e destra separatamente",
+      "none": "Nessun lotto",
+      "preset": "{{name}} ({{area}} m²)",
+      "custom": "{{area}} m²",
+      "area": "Superficie del lotto",
+      "diagramArea": "{{side}}: {{area}} m²",
+      "diagramNone": "{{side}}: nessun lotto"
+    },
     "buildMethod": {
       "title": "Metodo di layout",
       "single": "Singolo",

@@ -1025,7 +1025,7 @@
         },
         {
           "id": "confirm",
-          "textKey": "tutorial.guide.confirmRoad",
+          "textKey": "tutorial.controls.step9.confirm",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1185,50 +1185,12 @@
       "legacyStep": 11,
       "phases": [
         {
-          "id": "open",
+          "id": "perform",
           "textKey": "tutorial.controls.step11.description",
           "ui": {
-            "policy": "strict",
-            "allow": [
-              "hud.land"
-            ],
-            "highlight": [
-              "hud.land"
-            ]
-          },
-          "world": {
-            "mode": "observe",
-            "camera": {
-              "target": [
-                60,
-                0,
-                -190
-              ],
-              "distance": 160,
-              "yaw": 0,
-              "pitch": 50
-            }
-          },
-          "until": {
-            "type": "window",
-            "window": "parcel_creation"
-          }
-        },
-        {
-          "id": "create",
-          "textKey": "tutorial.controls.step11.create",
-          "ui": {
-            "policy": "strict",
-            "allow": [
-              "hud.land",
-              "parcel.mode:along_path",
-              "parcel.clear",
-              "parcel.confirm"
-            ],
-            "highlight": [
-              "parcel.mode:along_path",
-              "parcel.confirm"
-            ]
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
           },
           "world": {
             "mode": "observe",

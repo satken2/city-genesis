@@ -128,6 +128,19 @@
     }
   },
   "path_construction": {
+    "lots": {
+      "title": "Parcelas junto a la calle al terminarla",
+      "both": "Ambos lados",
+      "left": "Lado izquierdo",
+      "right": "Lado derecho",
+      "split": "Definir izquierda y derecha por separado",
+      "none": "Sin parcelas",
+      "preset": "{{name}} ({{area}} ㎡)",
+      "custom": "{{area}} ㎡",
+      "area": "Superficie de parcela",
+      "diagramArea": "{{side}}: {{area}} ㎡",
+      "diagramNone": "{{side}}: sin parcelas"
+    },
     "buildMethod": {
       "title": "Método de trazado",
       "single": "Individual",

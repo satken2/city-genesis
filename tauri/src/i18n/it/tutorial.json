@@ -71,7 +71,8 @@
       },
       "step9": {
         "title": "estendere la strada",
-        "description": "Ora costruiamo una zona residenziale per accogliere nuovi residenti. Case e luoghi di lavoro non servono a meno che le strade non li colleghino: le persone non possono andare e venire e le merci non possono arrivare. Per prima cosa, estendi la strada est-ovest della città a ovest per aprire una strada nel nuovo quartiere. Premi \"Strade, ferrovia e infrastruttura\" sul pannello delle icone per aprire il pannello di costruzione."
+        "description": "Ora costruiamo una zona residenziale per accogliere nuovi residenti. Case e luoghi di lavoro non servono a meno che le strade non li colleghino: le persone non possono andare e venire e le merci non possono arrivare. Per prima cosa, estendi la strada est-ovest della città a ovest per aprire una strada nel nuovo quartiere. Premi \"Strade, ferrovia e infrastruttura\" sul pannello delle icone per aprire il pannello di costruzione.",
+        "confirm": "Il terreno lungo una strada viene diviso in lotti quando la strada è completata. In \"Lotti lungo la strada creati al completamento\" nel pannello di costruzione si sceglie la superficie di ogni lotto per il lato sinistro e quello destro. Decidere in base agli edifici che si vogliono ospitare: lotti piccoli per le abitazioni, lotti grandi per fabbriche e fattorie. Questa strada servirà una zona residenziale, quindi lasciare l'impostazione così com'è. Confermare nel pannello di costruzione per salvare la strada, quindi premere \"Avanti\"."
       },
       "step10": {
         "title": "Completa la strada",
@@ -79,9 +80,8 @@
         "description_week": "La strada è ancora “costruzione pianificata”. Non è ancora possibile utilizzare una strada pianificata: persone e auto possono usarla solo una volta terminato il lavoro. Premere \"Start\" nella cabina di pilotaggio 2-3 volte per anticipare il tempo e attendere il completamento. La costruzione costa denaro ogni settimana mentre è in corso."
       },
       "step11": {
-        "title": "Crea pacchi",
-        "description": "La strada è pronta. Quindi, prepara i pacchi per fungere da cantieri. Gli edifici possono stare solo su pacchi e un pacco che si affaccia su una strada consente a persone e merci di andare e venire. Premere \"Pacchi di terra\" sul pannello delle icone.",
-        "create": "Assicurati che \"Crea lungo la strada\", quindi fai clic sulla strada che hai esteso nella vista 3D. Quando i contorni rossi si allineano lungo la strada, confermare per creare i pacchi."
+        "title": "Lotti creati",
+        "description": "La strada è completata e lungo di essa sono stati creati dei lotti. Gli edifici possono sorgere solo sui lotti, e un lotto che si affaccia su una strada consente a persone e merci di andare e venire. Per aggiungere lotti lungo una strada esistente, usare \"appezzamenti di terreno\" nel pannello delle icone."
       },
       "step12": {
         "title": "creare un distretto",

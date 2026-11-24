@@ -196,8 +196,8 @@ for (const mutate of [
 { const d = structuredClone(DEFINITIONS.controls); d.steps.find(s => s.id === "controls.house")!.phases[0].until = { type: "window", window: "agent_detail", target: "support.housing.building" }; validateDefinition(d); checks++; }
 { const d = structuredClone(DEFINITIONS.controls); d.steps.find(s => s.id === "controls.house")!.phases[0].until = { type: "window", window: "agent_detail", target: "house" }; throws(() => validateDefinition(d), "only core targets may be referenced without a local binding"); }
 {
-  // 基本操作編の区画・建物は、アイコンでパネルを開く段階のあと、パネル内の必要な操作だけを許す段階へ進む。
-  for (const [id, window, panel, allowed] of [["controls.parcels", "parcel_creation", "create", ["parcel.mode:along_path", "parcel.confirm"]],
+  // 基本操作編の建物は、アイコンでパネルを開く段階のあと、パネル内の必要な操作だけを許す段階へ進む。
+  for (const [id, window, panel, allowed] of [
     ["controls.home", "building_construction", "select", ["building.category:1", "building.variant:2001", "building.confirm"]]] as const) {
     const step = DEFINITIONS.controls.steps.find(s => s.id === id)!, shown = fake();
     const phase = async () => step.phases[await findPhase(step, shown)];

@@ -32,6 +32,7 @@ import {
   IPC_EVENT_EDIT_PARCEL_UPDATE_ROTATION,
 } from "../../utils/ipc";
 import { NumberStepper } from "../common/NumberStepper";
+import { SIZE_PRESETS } from "./parcelSizePresets";
 import { showNotification } from "../../utils/notification";
 import { fetchApi, ApiError } from "../../utils/api";
 import "./ParcelCreationPanel.css";
@@ -86,19 +87,7 @@ const DEFAULT_SIZE_INPUT = SIZE_INPUT_PRESETS[DEFAULT_CREATION_MODE];
 const ALONG_PATH_MAX_COUNT = 5;
 
 /**
- * Parcel size presets: typical frontage × depth (m) per use.
- * All modes share presets; PRESET_FIELD chooses which inputs receive them.
- */
-const SIZE_PRESETS = [
-  { nameKey: "parcel_creation.presetSmallHouse", width: 10, depth: 10 },
-  { nameKey: "parcel_creation.presetHouseShop", width: 15, depth: 15 },
-  { nameKey: "parcel_creation.presetMidRise", width: 30, depth: 30 },
-  { nameKey: "parcel_creation.presetHighRise", width: 60, depth: 60 },
-  { nameKey: "parcel_creation.presetLargeFactory", width: 150, depth: 150 },
-];
-
-/**
- * Preset target fields: size=width/depth, lot=frontage/depth (whole block), area=average area.
+ * Preset target fields (all modes share SIZE_PRESETS): size=width/depth, lot=frontage/depth (whole block), area=average area.
  * Random/whole-block width/depth specify search area and are excluded from presets.
  * The aspect ratio slider is available only in size modes.
  */

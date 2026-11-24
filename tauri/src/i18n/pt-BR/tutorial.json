@@ -71,7 +71,8 @@
       },
       "step9": {
         "title": "Estenda a estrada",
-        "description": "Agora vamos construir uma área residencial para receber os novos residentes. Casas e locais de trabalho não servem para nada, a menos que as estradas os conectem: as pessoas não podem ir e vir, e as mercadorias não chegam. Primeiro, estenda a rua leste-oeste da cidade a oeste para abrir um caminho para o novo bairro. Pressione “Roads, Rail & Infrastructure” no painel de ícones para abrir o painel de construção."
+        "description": "Agora vamos construir uma área residencial para receber os novos residentes. Casas e locais de trabalho não servem para nada, a menos que as estradas os conectem: as pessoas não podem ir e vir, e as mercadorias não chegam. Primeiro, estenda a rua leste-oeste da cidade a oeste para abrir um caminho para o novo bairro. Pressione “Roads, Rail & Infrastructure” no painel de ícones para abrir o painel de construção.",
+        "confirm": "O terreno ao longo de uma rua é dividido em parcelas quando a rua fica pronta. Em \"Parcelas à beira da rua criadas na conclusão\", no painel de construção, você escolhe a área de cada parcela para o lado esquerdo e o direito da rua. Decida pelos edifícios que deseja receber: parcelas menores servem para moradias, e maiores, para fábricas e fazendas. Esta rua será residencial, então deixe como está. Confirme no painel de construção para salvar a estrada e pressione \"Avançar\"."
       },
       "step10": {
         "title": "Complete a estrada",
@@ -79,9 +80,8 @@
         "description_week": "A estrada ainda está “planejada para a construção”. Uma estrada planejada ainda não pode ser usada – pessoas e carros só podem usá-la quando o trabalho estiver concluído. Pressione “Iniciar” no cockpit 2 a 3 vezes para avançar o tempo e aguarde a conclusão. A construção custa dinheiro todas as semanas enquanto está em andamento."
       },
       "step11": {
-        "title": "Crie pacotes",
-        "description": "A estrada está pronta. Em seguida, prepare as parcelas para servir como locais de construção. Os edifícios só podem ficar em parcelas, e uma parcela voltada para uma estrada permite que pessoas e bens venham e vão. Pressione “Land Parcels” no painel de ícones.",
-        "create": "Certifique-se de que “Criar ao longo da estrada” está selecionado e, em seguida, clique na estrada que você estendeu na visualização 3D. Quando os contornos vermelhos se alinharem ao longo da estrada, confirme para criar as parcelas."
+        "title": "Parcelas criadas",
+        "description": "A rua está pronta, e parcelas foram criadas ao longo dela. Os edifícios só podem ficar em parcelas, e uma parcela voltada para uma rua permite a entrada e a saída de pessoas e mercadorias. Para adicionar parcelas ao longo de uma rua existente, use \"parcelas da terra\" no painel de ícones."
       },
       "step12": {
         "title": "Crie um distrito",

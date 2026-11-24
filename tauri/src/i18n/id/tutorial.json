@@ -71,7 +71,8 @@
       },
       "step9": {
         "title": "Perpanjang jalan",
-        "description": "Sekarang mari kita bangun kawasan pemukiman untuk menyambut penghuni baru. Rumah dan tempat kerja tidak ada gunanya kecuali jalan menghubungkannya: orang tidak bisa datang dan pergi, dan barang tidak bisa datang. Pertama, perluas jalan timur-barat kota ke barat untuk membuka jalan ke lingkungan baru. Tekan “Jalan, Rel & Infrastruktur” pada panel ikon untuk membuka panel konstruksi."
+        "description": "Sekarang mari kita bangun kawasan pemukiman untuk menyambut penghuni baru. Rumah dan tempat kerja tidak ada gunanya kecuali jalan menghubungkannya: orang tidak bisa datang dan pergi, dan barang tidak bisa datang. Pertama, perluas jalan timur-barat kota ke barat untuk membuka jalan ke lingkungan baru. Tekan “Jalan, Rel & Infrastruktur” pada panel ikon untuk membuka panel konstruksi.",
+        "confirm": "Tanah di sepanjang jalan dibagi menjadi kavling saat jalan selesai dibangun. Di \"Kavling tepi jalan yang dibuat saat jalan selesai\" pada panel konstruksi, Anda bisa memilih luas setiap kavling untuk sisi kiri dan kanan jalan. Tentukan sesuai bangunan yang ingin Anda sambut: kavling kecil cocok untuk permukiman, kavling luas cocok untuk pabrik dan lahan pertanian. Jalan ini untuk permukiman, jadi biarkan seperti apa adanya. Konfirmasi di panel konstruksi untuk menyimpan jalan, lalu tekan \"Next\"."
       },
       "step10": {
         "title": "Selesaikan pembangunan jalan",
@@ -79,9 +80,8 @@
         "description_week": "Jalan tersebut masih “rencana konstruksi”. Jalan yang direncanakan belum dapat digunakan — orang dan mobil hanya dapat menggunakannya setelah pekerjaan selesai. Tekan \"Start\" di kokpit 2-3 kali untuk memajukan waktu dan tunggu sampai selesai. Konstruksi membutuhkan uang setiap minggu saat sedang berlangsung."
       },
       "step11": {
-        "title": "Buat kavling",
-        "description": "Jalan sudah siap. Selanjutnya, siapkan parsel untuk dijadikan lokasi bangunan. Bangunan hanya bisa berdiri di atas parsel, dan sebidang tanah yang menghadap ke jalan memungkinkan orang dan barang datang dan pergi. Tekan \"Paket Tanah\" pada panel ikon.",
-        "create": "Pastikan \"Create Along Road\" dipilih, lalu klik jalan yang Anda perluas dalam tampilan 3D. Saat garis merah berbaris di sepanjang jalan, konfirmasikan untuk membuat paket."
+        "title": "Kavling sudah terbentuk",
+        "description": "Jalan sudah selesai, dan kavling telah dibuat di sepanjang jalan itu. Bangunan hanya bisa berdiri di atas kavling, dan kavling yang menghadap ke jalan memungkinkan orang dan barang datang dan pergi. Untuk menambah kavling di sepanjang jalan yang sudah ada, gunakan \"bidang tanah\" pada panel ikon."
       },
       "step12": {
         "title": "Buat distrik",
