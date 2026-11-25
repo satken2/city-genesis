@@ -1,53 +1,53 @@
 {
   "supply": {
-    "title": "Info Pasokan",
-    "product": "produk pasokan",
-    "amount": "jumlah pasokan",
-    "price": "harga pasokan",
-    "soldAmount": "jumlah yang terjual",
-    "profitRate": "tingkat keuntungan",
-    "utilization": "Pemanfaatan"
+    "title": "Informasi pasokan",
+    "product": "Produk yang dipasok",
+    "amount": "Jumlah pasokan",
+    "price": "Harga pasokan",
+    "soldAmount": "Jumlah terjual",
+    "profitRate": "Margin laba",
+    "utilization": "Tingkat operasi"
   },
   "tourismSupply": {
-    "title": "menjadi tuan rumah wisatawan",
-    "touristCapacity": "Kapasitas wisata",
+    "title": "Penerimaan wisatawan",
+    "touristCapacity": "Daya tampung wisatawan",
     "persons": "{{value}} orang",
     "218": {
-      "price": "biaya masuk",
-      "amount": "Kapasitas Pengunjung (Total)",
-      "soldAmount": "Pengunjung (total)"
+      "price": "Tiket masuk",
+      "amount": "Kuota pengunjung (kumulatif)",
+      "soldAmount": "Pengunjung (kumulatif)"
     },
     "219": {
       "price": "Tarif",
-      "amount": "Kapasitas Penumpang (Total)",
-      "soldAmount": "Penumpang (total)"
+      "amount": "Kuota angkut (kumulatif)",
+      "soldAmount": "Pengguna (kumulatif)"
     }
   },
   "demand": {
-    "product": "Produk",
+    "product": "Barang",
     "demandAmount": "Permintaan",
-    "receivedAmount": "Yg diperoleh",
-    "acquiredAmount": "Inventaris"
+    "receivedAmount": "Diperoleh",
+    "acquiredAmount": "Persediaan"
   },
   "cargo": {
-    "title": "operasi kargo",
-    "description": "Hub ini mengimpor barang dari luar wilayah untuk memasok pasar kota, dan membeli surplus produksi kota untuk mengekspornya keluar dari wilayah tersebut.",
-    "capacity": "Kapasitas throughput",
+    "title": "Informasi bongkar muat",
+    "description": "Pusat ini mengimpor barang dari luar wilayah untuk dipasok ke pasar di dalam kota, serta membeli kelebihan produksi kota untuk diekspor ke luar wilayah.",
+    "capacity": "Kapasitas penanganan",
     "perPeriod": "/bulan",
     "perPeriod_week": "/minggu",
-    "materialCapacity": "batasi berdasarkan materi yang diterima",
-    "areaCapacity": "batasi luas lantai",
-    "importHandled": "Impor Ditangani",
-    "exportHandled": "Ekspor ditangani",
-    "utilization": "Pemanfaatan",
-    "importSectionTitle": "impor",
+    "materialCapacity": "Batas berdasarkan bahan baku",
+    "areaCapacity": "Batas berdasarkan luas",
+    "importHandled": "Volume impor yang ditangani",
+    "exportHandled": "Volume ekspor yang ditangani",
+    "utilization": "Tingkat operasi",
+    "importSectionTitle": "Impor",
     "exportSectionTitle": "Ekspor",
-    "handledImport": "Terjual",
-    "handledExport": "dibeli",
-    "allocation": "dialokasikan",
-    "priceImport": "Harga penjualan",
-    "priceExport": "Harga pembelian",
-    "lost": "Penjualan yang hilang",
-    "noProducts": "Tidak ada produk yang ditangani"
+    "handledImport": "Volume penjualan",
+    "handledExport": "Volume pembelian",
+    "allocation": "Volume alokasi",
+    "priceImport": "Harga jual satuan",
+    "priceExport": "Harga beli satuan",
+    "lost": "Penjualan yang terlewat",
+    "noProducts": "Tidak ada barang yang ditangani"
   }
 }

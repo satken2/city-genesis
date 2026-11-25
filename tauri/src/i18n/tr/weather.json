@@ -1,30 +1,30 @@
 {
   "weather": {
-    "label": "Hava",
-    "choose": "hava durumunu seç",
-    "loading": "Hava durumunu kontrol etmek…",
-    "unknown": "Bilinmeyen",
+    "label": "Hava durumu",
+    "choose": "Hava durumunu seçin",
+    "loading": "Hava durumu kontrol ediliyor…",
+    "unknown": "Bilinmiyor",
     "automatic": "{{weather}} (otomatik)",
-    "failed": "hava değiştiremedi",
+    "failed": "Hava durumu değiştirilemedi",
     "names": {
       "clear": "Açık",
-      "high_clouds": "yüksek bulutlar",
-      "fair": "Adil",
-      "broken_clouds": "Güneşli Aralıklar",
+      "high_clouds": "İnce bulutlu",
+      "fair": "Güneşli",
+      "broken_clouds": "Parçalı bulutlu",
       "overcast": "Kapalı",
-      "rain_clouds": "yağmur bulutları",
+      "rain_clouds": "Yağmur bulutları",
       "fog": "Sis",
-      "drizzle": "Serpiştirmek",
+      "drizzle": "Çisenti",
       "rain": "Yağmur",
-      "heavy_rain": "şiddetli yağmur",
-      "light_snow": "hafif kar",
+      "heavy_rain": "Şiddetli yağmur",
+      "light_snow": "Hafif kar",
       "snow": "Kar",
-      "blizzard": "Kar fırtınası"
+      "blizzard": "Tipi"
     },
-    "epochClimate": "Epoch İklim",
+    "epochClimate": "Dönem iklimi",
     "temperature": "Sıcaklık",
-    "precipitation": "Yağış",
-    "sunlight": "güneş ışığı yoğunluğu",
-    "windSpeed": "Rüzgar hızı"
+    "precipitation": "Yağış miktarı",
+    "sunlight": "Güneş ışığı yoğunluğu",
+    "windSpeed": "Rüzgâr hızı"
   }
 }

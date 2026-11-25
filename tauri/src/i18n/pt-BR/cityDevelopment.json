@@ -1,28 +1,28 @@
 {
   "cityDevelopment": {
     "pattern": "Algoritmo",
-    "roadVariants": "Tipos de estradas",
+    "roadVariants": "Tipos de via",
     "patterns": {
-      "grid_1": "Grade 1",
-      "grid_2": "Grade 2",
-      "sprawl_1": "expansão 1",
-      "sprawl_2": "expansão 2",
-      "sprawl_3": "expansão 3",
+      "grid_1": "Quadriculado 1",
+      "grid_2": "Quadriculado 2",
+      "sprawl_1": "Espraiado 1",
+      "sprawl_2": "Espraiado 2",
+      "sprawl_3": "Espraiado 3",
       "planned_city_1": "Cidade planejada 1",
-      "split_1": "Subdividir 1"
+      "split_1": "Subdivisão 1"
     },
-    "spacing": "espaçamento entre estradas",
-    "blockLength": "Comprimento do bloco",
-    "splitHint": "Inclua blocos inteiros cercados por estradas. As estradas paralelas ao lado comprido de cada bloco são espaçadas por espaçamento entre as estradas e atravessam as estradas pelo comprimento do bloco.",
-    "createParcels": "Crie pacotes",
-    "parcelArea": "área de encomendas",
-    "hint": "Segure Ctrl e arraste para pintar a área a ser desenvolvida. Arraste para panorâmica, role até o zoom.",
-    "clear": "Claro",
-    "preview": "Visualização",
+    "spacing": "Espaçamento entre vias",
+    "blockLength": "Comprimento da quadra",
+    "splitHint": "Inclua na área quadras inteiras cercadas por vias. As vias paralelas ao lado mais longo da quadra são traçadas a cada “Espaçamento entre vias”, e as perpendiculares, a cada “Comprimento da quadra”.",
+    "createParcels": "Criar lotes",
+    "parcelArea": "Área do lote",
+    "hint": "Ctrl + arrastar com o botão esquerdo pinta a área a desenvolver. Arraste com o botão esquerdo para mover o mapa e use a roda do mouse para ampliar ou reduzir.",
+    "clear": "Limpar",
+    "preview": "Pré-visualizar",
     "previewing": "Calculando...",
     "create": "Confirmar",
     "creating": "Criando...",
-    "previewed": "Suaviza levemente o terreno em {{area}} e pode planejar {{roads}} segmentos de estradas e {{parcels}} parcelas ({{rejected}} rejeitado)",
-    "created": "Suavizava o terreno e os segmentos de estradas planejados {{roads}} e os pacotes de {{parcels}} ({{rejected}} rejeitado)"
+    "previewed": "Nivela levemente o terreno na área de {{area}} e pode planejar {{roads}} vias e {{parcels}} lotes ({{rejected}} vias descartadas)",
+    "created": "Terreno nivelado: {{roads}} vias e {{parcels}} lotes planejados ({{rejected}} vias descartadas)"
   }
 }

@@ -3,26 +3,26 @@
     "pattern": "Algorithmus",
     "roadVariants": "Straßentypen",
     "patterns": {
-      "grid_1": "Gitter 1",
-      "grid_2": "Gitter 2",
-      "sprawl_1": "Zersiedeln 1",
-      "sprawl_2": "Zersiedeln 2",
-      "sprawl_3": "Ausbreitung 3",
-      "planned_city_1": "Geplante Stadt 1",
-      "split_1": "Unterteilen 1"
+      "grid_1": "Schachbrett 1",
+      "grid_2": "Schachbrett 2",
+      "sprawl_1": "Zersiedelung 1",
+      "sprawl_2": "Zersiedelung 2",
+      "sprawl_3": "Zersiedelung 3",
+      "planned_city_1": "Planstadt 1",
+      "split_1": "Unterteilung 1"
     },
     "spacing": "Straßenabstand",
     "blockLength": "Blocklänge",
-    "splitHint": "Schließen Sie ganze von Straßen eingeschlossene Blöcke ein. Straßen, die parallel zu der langen Seite jedes Blocks sind, werden durch Straßenabstände beabstandet und Straßen über die Blocklänge kreuzend.",
-    "createParcels": "Pakete erstellen",
-    "parcelArea": "Paketbereich",
-    "hint": "Halten Sie Strg und ziehen Sie, um den Bereich zu malen, um sich zu entwickeln. Zum Schwenken ziehen, zu Zoom scrollen.",
-    "clear": "Klar",
+    "splitHint": "Beziehen Sie ganze, von Straßen umschlossene Blöcke in den Bereich ein. Straßen parallel zur Längsseite eines Blocks werden im Abstand „Straßenabstand“ angelegt, Querstraßen im Abstand „Blocklänge“.",
+    "createParcels": "Grundstücke anlegen",
+    "parcelArea": "Grundstücksfläche",
+    "hint": "Mit Strg + linker Maustaste ziehen, um den zu erschließenden Bereich zu markieren. Mit der linken Maustaste ziehen, um die Karte zu verschieben; Mausrad zum Zoomen.",
+    "clear": "Leeren",
     "preview": "Vorschau",
-    "previewing": "berechnen...",
+    "previewing": "Wird berechnet...",
     "create": "Bestätigen",
-    "creating": "Schaffen...",
-    "previewed": "Glättet das Gelände in {{area}} leicht und kann {{roads}} Straßensegmente und {{parcels}} Pakete ({{rejected}} abgelehnt)",
-    "created": "Glättet das Gelände und geplante {{roads}} Straßensegmente und {{parcels}} Pakete ({{rejected}} abgelehnt)"
+    "creating": "Wird erstellt...",
+    "previewed": "Das Gelände im Bereich {{area}} wird leicht geglättet; es können {{roads}} Straßen und {{parcels}} Grundstücke geplant werden ({{rejected}} verworfen)",
+    "created": "Gelände geglättet und {{roads}} Straßen sowie {{parcels}} Grundstücke geplant ({{rejected}} verworfen)"
   }
 }

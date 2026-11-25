@@ -4,124 +4,124 @@
     "close": "Kapat",
     "items": {
       "FIRST_BUILDING": {
-        "name": "Bir Şehrin İlk Adımları",
-        "description": "İlk binanızı tamamlayın. Şehrinizin hikayesi burada başlıyor."
+        "name": "Şehrin ilk adımı",
+        "description": "İlk binanızı tamamlayın. Şehrin tarihi burada başlıyor."
       },
       "FIRST_OFFSHORE": {
-        "name": "Bir şehir denize gider",
-        "description": "İlk açık deniz rüzgar çiftliğinizi veya açık deniz petrol platformunuzu tamamlayın. Şehrinizin endüstrisi denize açılıyor."
+        "name": "Denize açılan şehir",
+        "description": "İlk açık deniz rüzgâr santralinizi veya açık deniz petrol platformunuzu tamamlayın. Şehrin sanayisi denize açılıyor."
       },
       "RAIL_LINES_1": {
-        "name": "Hepsi gemide!",
+        "name": "Tren kalkıyor!",
         "description": "Bir demiryolu hattı açın"
       },
       "RAIL_LINES_20": {
-        "name": "demiryolu krallığı",
-        "description": "Bir şehirde 20 demiryolu hattı işletmek. Bu rota haritası oldukça manzaralı."
+        "name": "Demiryolu krallığı",
+        "description": "Tek bir şehirde 20 demiryolu hattı işletin. Hat haritası da epey göz alıcı oldu."
       },
       "BUS_LINES_1": {
-        "name": "Otobüs şehre geliyor",
-        "description": "Bir Otobüs Hattı Aç"
+        "name": "Otobüs şehre geldi",
+        "description": "Bir otobüs hattı açın"
       },
       "BUS_LINES_20": {
-        "name": "Otobüsle her yerde",
-        "description": "bir şehirde 20 otobüs hattı işletiyor"
+        "name": "Otobüsle her yere",
+        "description": "Tek bir şehirde 20 otobüs hattı işletin"
       },
       "MONORAIL_LINES_1": {
-        "name": "Şehrin üzerinde işe gidip gelmek",
-        "description": "Bir monoray hattı açın. Biraz daha yüksekten tanıdık sokakları görün."
+        "name": "Gökyüzünden işe gidiş",
+        "description": "Bir monoray hattı açın. Alıştığınız şehri biraz daha yukarıdan görün."
       },
       "MONORAIL_LINES_20": {
-        "name": "gökyüzündeki şehir",
-        "description": "Bir şehirde 20 monoray hattı işletmek"
+        "name": "Gökyüzündeki şehir",
+        "description": "Tek bir şehirde 20 monoray hattı işletin"
       },
       "LRT_LINES_1": {
-        "name": "Tramvaylar şehre geliyor",
-        "description": "Bir LRT Hattı Aç"
+        "name": "Tramvay şehre geldi",
+        "description": "Bir LRT hattı açın"
       },
       "LRT_LINES_20": {
-        "name": "tramvay şehri",
-        "description": "Bir şehirde 20 LRT hattı işletmek"
+        "name": "Tramvaylar şehri",
+        "description": "Tek bir şehirde 20 LRT hattı işletin"
       },
       "POPULATION_10K": {
-        "name": "10.000'e ev sahipliği yapan",
-        "description": "10.000 nüfusa ulaşmak"
+        "name": "10.000 kişinin yurdu",
+        "description": "10.000 nüfusa ulaşın"
       },
       "POPULATION_100K": {
-        "name": "gelişen bir bölgesel şehir",
-        "description": "100.000 nüfusa ulaşmak"
+        "name": "Hareketli bir bölge şehri",
+        "description": "100.000 nüfusa ulaşın"
       },
       "POPULATION_500K": {
-        "name": "Büyük şehirlere katılmak",
-        "description": "500.000 nüfusa ulaşmak"
+        "name": "Büyük şehirler arasında",
+        "description": "500.000 nüfusa ulaşın"
       },
       "POPULATION_1M": {
-        "name": "milyon şehir",
-        "description": "1.000.000 nüfusa ulaşın. Desteklenecek bir milyon canı olan bir metropol."
+        "name": "Milyonluk şehir",
+        "description": "1.000.000 nüfusa ulaşın. Bir milyon farklı hayatı taşıyan bir metropole doğru."
       },
       "FLOORS_5": {
-        "name": "Bir şehir yukarı doğru büyür",
-        "description": "5 veya daha fazla katlı özel bir binanın tamamlanmış olması"
+        "name": "Yukarı doğru büyüyen şehir",
+        "description": "Özel sektöre ait en az 5 katlı bir binanın tamamlanmasını sağlayın"
       },
       "FLOORS_10": {
-        "name": "Yüksek katlı başlangıçlar",
-        "description": "10 veya daha fazla katlı özel bir binanın tamamlanması. Asansörler için çok şükür."
+        "name": "Yüksek katlı şehre ilk adım",
+        "description": "Özel sektöre ait en az 10 katlı bir binanın tamamlanmasını sağlayın. Asansörler iyi ki var."
       },
       "FLOORS_20": {
-        "name": "Bir ufuk çizgisi şekillenir",
-        "description": "20 veya daha fazla katlı özel bir binanın tamamlanmış olması"
+        "name": "Silüet şekilleniyor",
+        "description": "Özel sektöre ait en az 20 katlı bir binanın tamamlanmasını sağlayın"
       },
       "FLOORS_40": {
         "name": "Gökdelen",
-        "description": "40 veya daha fazla katlı özel bir binanın tamamlanması. Şehriniz için yeni bir sembol."
+        "description": "Özel sektöre ait en az 40 katlı bir binanın tamamlanmasını sağlayın. Şehrin yeni simgesi oluyor."
       },
       "INDUSTRY_PHARMACEUTICAL": {
-        "name": "Daha iyi sağlık için endüstri",
-        "description": "Şehrinizde bir ilaç fabrikasının faaliyete geçmesini sağlayın. Buradan başlayarak insanların daha sağlıklı hayatlar yaşamasına yardımcı olun."
+        "name": "Sağlığa destek olan sanayi",
+        "description": "Şehrinizde bir ilaç fabrikasının faaliyete geçmesini sağlayın. İnsanların sağlığını bu şehirden destekleyin."
       },
       "INDUSTRY_SEMICONDUCTOR": {
-        "name": "silikon şehir",
-        "description": "Şehrinizde yarı iletken bir fabrikanın faaliyete geçmesini sağlayın. Küçük cips, büyük bir endüstri."
+        "name": "Silikon şehri",
+        "description": "Şehrinizde bir yarı iletken fabrikasının faaliyete geçmesini sağlayın. Küçük çipler, büyük bir sanayi."
       },
       "INDUSTRY_PRECISION": {
-        "name": "Hassas bir şehir",
-        "description": "Şehrinizde bir hassas enstrüman fabrikasının faaliyete geçmesini sağlayın. Teknik uzmanlık, şehrinizin gücü haline gelir."
+        "name": "Hassas teknolojinin parladığı şehir",
+        "description": "Şehrinizde bir hassas cihaz fabrikasının faaliyete geçmesini sağlayın. Sağlam teknoloji şehrin gücü olur."
       },
       "INDUSTRY_SOFTWARE": {
-        "name": "Yazılım için yeni bir ev",
-        "description": "Şehrinizde iş için açık bir yazılım şirketiniz olsun. Yeni fikirler büyümek için bir yer verin."
+        "name": "Yazılımın yeni yurdu",
+        "description": "Şehrinizde bir yazılım şirketinin faaliyete geçmesini sağlayın. Yeni fikirlerin yeşerdiği bir yer olsun."
       },
       "TOURISTS_1": {
-        "name": "şehrimize hoş geldiniz",
-        "description": "Bir turistin şehrinizde ilk kez kalmasını sağlayın"
+        "name": "Şehrimize hoş geldiniz",
+        "description": "Şehrinizde ilk kez bir turistin konaklamasını sağlayın"
       },
       "TOURISTS_1K": {
-        "name": "Yolculuğa Değer Bir Şehir",
-        "description": "Şehrinizde aynı anda 1000 turist kalıyor"
+        "name": "Gezginlerin tercih ettiği şehir",
+        "description": "Şehrinizde aynı anda 1.000 turistin konaklamasını sağlayın"
       },
       "TOURISTS_10K": {
-        "name": "dünya ziyarete geliyor",
-        "description": "aynı anda şehrinizde kalan 10.000 turist var"
+        "name": "Dünyanın ziyaret ettiği şehir",
+        "description": "Şehrinizde aynı anda 10.000 turistin konaklamasını sağlayın"
       },
       "YEARS_10": {
-        "name": "şehirle on yıl",
-        "description": "Bir şehirde 10 yıl oynayın. İleride çok daha fazla şehir binası var."
+        "name": "Şehirle geçen 10 yıl",
+        "description": "Tek bir şehirde 10 yıl oynayın. Şehir kurmak bundan sonra da sürüyor."
       },
       "YEARS_100": {
-        "name": "asır şehri",
-        "description": "Bir şehirde 100 yıl oynayın. Şehrinizi tam bir yüzyıl boyunca görün."
+        "name": "Yüz yıllık şehir",
+        "description": "Tek bir şehirde 100 yıl oynayın. Şehrin bir asrına tanıklık edin."
       },
       "YEARS_500": {
-        "name": "Tarih yazan bir şehir",
-        "description": "Bir şehirde 500 yıl oynayın. Nesiller geçer ve şehir devam eder."
+        "name": "Tarih yazan şehir",
+        "description": "Tek bir şehirde 500 yıl oynayın. Nesiller geçer, şehir yaşamaya devam eder."
       },
       "YEARS_1000": {
-        "name": "bin yıllık şehir",
-        "description": "Bir şehirde 1000 yıl oynayın. Bin yıllık geçmişi olan bir şehir inşa et."
+        "name": "Bin yıllık şehir",
+        "description": "Tek bir şehirde 1.000 yıl oynayın. Bin yıllık tarihe sahip bir şehir kurun."
       },
       "YEARS_10000": {
-        "name": "ebedi şehir",
-        "description": "Bir şehirde 10.000 yıl oynayın. Bu, görevde tam bir dönem, Belediye Başkanı."
+        "name": "Ebedî şehir",
+        "description": "Tek bir şehirde 10.000 yıl oynayın. Belediye başkanlığı göreviniz de epey uzadı."
       }
     }
   }

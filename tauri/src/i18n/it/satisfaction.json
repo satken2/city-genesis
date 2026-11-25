@@ -1,10 +1,10 @@
 {
   "satisfaction": {
-    "exhausted": "Esausto",
-    "unhappy": "Infelice",
-    "neutral": "Neutro",
-    "happy": "Felice",
-    "delighted": "Ammirato",
+    "exhausted": "Allo stremo",
+    "unhappy": "Insoddisfatto",
+    "neutral": "Nella media",
+    "happy": "Soddisfatto",
+    "delighted": "Entusiasta",
     "zero": "Soddisfazione zero"
   }
 }

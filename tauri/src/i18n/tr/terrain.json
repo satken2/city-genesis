@@ -1,22 +1,22 @@
 {
   "terrain3dPreview": {
-    "waitingForEditor": "Arazi editöründen veri bekleniyor…"
+    "waitingForEditor": "Arazi düzenleyiciden veri bekleniyor…"
   },
   "groundCover": {
-    "label": "yer örtüsü",
-    "hint": "Oyundaki zeminin rengini ve dokusunu ve 2B haritaların renklerini değiştirir. Simülasyonu etkilemez.",
-    "1": "Otlak",
+    "label": "Zemin türü",
+    "hint": "Oyundaki zeminin rengini ve dokusunu, ayrıca 2D haritaların renklerini değiştirir. Simülasyonu etkilemez.",
+    "1": "Çayır",
     "2": "Çöl",
-    "3": "yelken suları",
-    "4": "Sürekli karla kaplı alan",
-    "5": "yarı kurak"
+    "3": "Gür çayır",
+    "4": "Kar alanı",
+    "5": "Yarı kurak"
   },
   "climate": {
     "label": "İklim",
-    "hint": "Aylık sıcaklık, yağış, güneş ışığı ve hava olasılıklarını bir ön ayardan kopyalar. Senaryo oluşturma modunda iklim ayarlarında ayrıntıları düzenleyin."
+    "hint": "Hazır ayardaki aylık sıcaklık, yağış, güneşlenme ve hava durumu oranlarını kopyalar. Ayrıntıları senaryo oluşturma modundaki “İklim ayarları” bölümünde düzenleyebilirsiniz."
   },
   "assetPack": {
-    "label": "varlık paketi",
+    "label": "Varlık paketi",
     "standard": "Standart"
   }
 }

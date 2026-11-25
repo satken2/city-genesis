@@ -1,47 +1,47 @@
 {
   "grading": {
-    "kindLabel": "Typ",
+    "kindLabel": "Rodzaj",
     "kind": {
       "land": "Niwelacja terenu",
-      "shore": "Pozyskiwanie lądu"
+      "shore": "Zasypywanie akwenu"
     },
-    "baseHeight": "Wysokość podstawy",
+    "baseHeight": "Wysokość bazowa",
     "targetHeight": "Wysokość docelowa",
-    "cutVolume": "Objętość wycinana",
-    "fillVolume": "Objętość wypełnienia",
+    "cutVolume": "Objętość wykopów",
+    "fillVolume": "Objętość nasypów",
     "quayLength": "Długość nabrzeża",
-    "quayArea": "Obszar twarzy nabrzeża",
+    "quayArea": "Powierzchnia ściany nabrzeża",
     "unit": {
-      "height": "{{value}} M",
+      "height": "{{value}} m",
       "length": "{{value, number}} m",
       "area": "{{value, number}} m²",
       "volume": "{{value, number}} m³"
     },
-    "heightOffset": "Wysokość (przesunięcie od podstawy)",
-    "seaLevelHeight": "Wysokość (powyżej poziomu morza)",
+    "heightOffset": "Wysokość (różnica względem bazowej)",
+    "seaLevelHeight": "Wysokość (n.p.m.)",
     "baseNote": {
-      "frontage": "0 to nawierzchnia drogi, przed którą stoi ({{value}} m)",
-      "terrain_mean": "0 to aktualna średnia wysokość obszaru ({{value}} m)"
+      "frontage": "0 to wysokość nawierzchni sąsiedniej drogi ({{value}} m)",
+      "terrain_mean": "0 to obecna średnia wysokość obszaru ({{value}} m)"
     },
     "reasons": {
-      "invalid_polygon": "Kształt obszaru jest nieprawidłowy. Narysuj go bez przecinających się krawędzi.",
-      "outside_city": "Teren rozciąga się poza miastem.",
+      "invalid_polygon": "Kształt obszaru jest nieprawidłowy. Narysuj go tak, aby krawędzie się nie przecinały.",
+      "outside_city": "Obszar wychodzi poza granice miasta.",
       "too_large": "Obszar jest zbyt duży (limit: {{limit}} km²).",
-      "on_water": "Obszar całkowicie nad morzem nie może być zagospodarowany. Narysuj tak, aby dotarł do lądu.",
-      "no_land_overlap": "Narysuj obszar tak, aby zachodził na ląd (w przeciwnym razie między brzegiem a obszarem pozostaje pas morza).",
-      "overlaps_parcel": "Obszar zachodzi na istniejącą działkę.",
-      "overlaps_path": "Obszar zachodzi na drogę, tor lub inną ścieżkę.",
-      "overlaps_water": "Obszar dotyka rzeki lub jeziora.",
-      "overlaps_quay_band": "Obszar zachodzi na nabrzeże odzyskanych gruntów.",
-      "invalid_height_offset": "Wysokość jest poza zakresem (do ±{{offsetLimit}} m od podstawy).",
-      "below_sea_level": "Wysokość nie może być ustawiana poniżej poziomu morza.",
-      "too_narrow": "Obszar jest zbyt wąski; Nic nie pozostaje do wypełnienia wewnątrz nabrzeża.",
-      "no_work": "Podłoże jest już na docelowej wysokości, więc praca nie jest potrzebna.",
-      "insufficient_funds": "niewystarczające środki na złożenie tego zamówienia."
+      "on_water": "Nie można przeprowadzić robót ziemnych na obszarze leżącym w całości na morzu. Narysuj go tak, aby obejmował ląd.",
+      "no_land_overlap": "Narysuj obszar tak, aby nachodził na ląd (w przeciwnym razie między brzegiem a obszarem zostanie pas morza).",
+      "overlaps_parcel": "Obszar nakłada się na istniejącą działkę.",
+      "overlaps_path": "Obszar nakłada się na drogę, tor lub inną trasę infrastruktury.",
+      "overlaps_water": "Obszar obejmuje rzekę lub jezioro.",
+      "overlaps_quay_band": "Obszar nakłada się na nabrzeże terenu odzyskanego z morza.",
+      "invalid_height_offset": "Wysokość jest poza zakresem (do ±{{offsetLimit}} m względem wysokości bazowej).",
+      "below_sea_level": "Wysokość nie może być niższa niż poziom morza.",
+      "too_narrow": "Obszar jest zbyt wąski – wewnątrz nabrzeża nie zostaje nic do zasypania.",
+      "no_work": "Teren ma już wysokość docelową, więc roboty nie są potrzebne.",
+      "insufficient_funds": "Nie można złożyć zamówienia z powodu braku środków."
     },
-    "confirm": "Potwierdź",
-    "confirming": "Potwierdzam...",
+    "confirm": "Zatwierdź",
+    "confirming": "Zatwierdzanie...",
     "cancel": "Anuluj",
-    "confirmFailed": "Nie udało się zamówić robót ziemnych."
+    "confirmFailed": "Nie udało się zlecić robót ziemnych."
   }
 }

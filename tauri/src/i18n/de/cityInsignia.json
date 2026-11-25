@@ -1,51 +1,51 @@
 {
   "cityInsignia": {
-    "emblem": "Emblem",
+    "emblem": "Wappen",
     "flag": "Stadtflagge",
     "motif": "Motiv",
-    "fieldColor": "Feldfarbe",
+    "fieldColor": "Grundfarbe",
     "motifColor": "Motivfarbe",
     "pattern": "Muster",
     "accentColor": "Akzentfarbe",
-    "placement": "Emblemposition",
+    "placement": "Position des Wappens",
     "loadImage": "Bild laden",
-    "randomize": "Randomisieren",
-    "apply": "Anwenden",
-    "imageLoadFailed": "Das Bild konnte nicht geladen werden.",
+    "randomize": "Zufällig",
+    "apply": "Übernehmen",
+    "imageLoadFailed": "Das Bild konnte nicht geladen werden",
     "placements": {
-      "center": "Center",
+      "center": "Mitte",
       "canton": "Oben links",
-      "none": "Keiner"
+      "none": "Keine"
     },
     "motifs": {
       "wave": "Welle",
       "mountain": "Berg",
-      "star": "Star",
+      "star": "Stern",
       "tree": "Baum",
       "sun": "Sonne",
       "moon": "Mond",
       "flower": "Blume",
       "leaf": "Blatt",
       "bird": "Vogel",
-      "fish": "Fischen",
+      "fish": "Fisch",
       "anchor": "Anker",
-      "gear": "Gang",
-      "tower": "Schloss",
+      "gear": "Zahnrad",
+      "tower": "Burg",
       "bridge": "Brücke",
       "key": "Schlüssel",
       "crown": "Krone",
       "snowflake": "Schneeflocke",
       "flame": "Flamme",
-      "diamond": "Diamant",
+      "diamond": "Raute",
       "cross": "Kreuz"
     },
     "patterns": {
-      "plain": "Ebene",
-      "bicolor": "Bicolor",
-      "triband": "Triband",
-      "diagonal": "Diagonale",
-      "border": "Rand",
-      "bands": "Bands"
+      "plain": "Einfarbig",
+      "bicolor": "Waagerecht zweigeteilt",
+      "triband": "Senkrecht dreigeteilt",
+      "diagonal": "Diagonal geteilt",
+      "border": "Umrandung",
+      "bands": "Streifen oben und unten"
     }
   }
 }

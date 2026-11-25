@@ -1,15 +1,15 @@
 {
   "climateSettings": {
-    "title": "İklim Ayarları",
-    "name": "iklim adı",
-    "probabilities": "Aylık hava olasılıkları",
-    "probabilityHint": "Renk sınırlarını yatay olarak sürükleyin. Hava durumunu %0 olarak düzenlemek için aşağıdaki alanları kullanın.",
-    "month": "Ay {{month}}",
-    "preset": "İklim Ön Ayarı",
-    "current": "Mevcut Ayarlar",
-    "chartHint": "Göstergede bir seri seçin, ardından aylık noktalarını dikey olarak sürükleyin.",
-    "averageHint": "Sıcaklık, yağış ve güneş ışığı aylık ortalamalardır. Gerçek değerler, her bir çağda bu ortalamalar etrafında değişir.",
-    "apply": "Uygulamak",
-    "chart": "Aylık iklim haritası"
+    "title": "İklim ayarları",
+    "name": "İklim adı",
+    "probabilities": "Aylara göre hava durumu oranları",
+    "probabilityHint": "Renk sınırlarını sola veya sağa sürükleyerek ayarlayın. Aşağıdaki sayı alanlarından %0 olan hava durumlarını da ayarlayabilirsiniz.",
+    "month": "{{month}}. ay",
+    "preset": "İklim ön ayarı",
+    "current": "Mevcut ayarlar",
+    "chartHint": "Göstergeden bir öğe seçin, ardından her ayın noktasını yukarı veya aşağı sürükleyerek ayarlayın.",
+    "averageHint": "Sıcaklık, yağış ve güneşlenme aylık ortalama değerlerdir. Her dönemin gerçek değerleri bu ortalamaların etrafında değişir.",
+    "apply": "Uygula",
+    "chart": "Aylık iklim grafiği"
   }
 }

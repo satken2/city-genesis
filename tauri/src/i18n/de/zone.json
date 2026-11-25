@@ -1,41 +1,41 @@
 {
   "zone": {
-    "titleWithId": "Bezirk #{{id}}",
-    "color": "Distriktfarbe",
-    "colorUpdateFailed": "Fehler beim Aktualisieren der Distriktfarbe",
-    "basicInfo": "Grundlegende Informationen",
-    "area": "Bereich",
+    "titleWithId": "Stadtbezirk #{{id}}",
+    "color": "Farbe des Stadtbezirks",
+    "colorUpdateFailed": "Die Farbe des Stadtbezirks konnte nicht aktualisiert werden",
+    "basicInfo": "Grunddaten",
+    "area": "Fläche",
     "zonePopulation": "Wohnbevölkerung",
     "daytimePopulation": "Tagesbevölkerung",
-    "spaceAmount": "Bodenbelegung",
-    "slotStarvationTitle": "Warteende Mieter können nicht untergebracht werden",
-    "slotStarvationWarning": "\"{{tenant}}\" benötigt mindestens {{required}} m2 Nutzfläche in einem einzigen Gebäude, aber das größte Baugebiet in diesem Bezirk ist {{max}} m2. Stellen Sie ein größeres Paket bereit.",
+    "spaceAmount": "Belegte Geschossfläche",
+    "slotStarvationTitle": "Es gibt Einzugswillige, für die nicht gebaut werden kann",
+    "slotStarvationWarning": "„{{tenant}}“ benötigt für den Einzug mindestens {{required}} m2 Geschossfläche pro Gebäude, auf den Grundstücken in diesem Stadtbezirk sind jedoch höchstens {{max}} m2 möglich. Bitte stellen Sie ein größeres Grundstück bereit.",
     "restrictions": "Bauvorschriften",
-    "restrictionUpdateFailed": "Fehler beim Aktualisieren der Bezirksbestimmungen",
-    "restrictionRequired": "Abdeckungsverhältnis, Volumenverhältnis und Höhe können nicht leer sein",
-    "mergeConfirm": "Füge \"{{source}}\" in \"{{target}}\" zusammen. Der Quellbezirk verschwindet zusammen mit seinen Regulierungseinstellungen.",
-    "mergeAction": "Verschmelzen",
-    "mergeFailed": "Distrikte konnten nicht zusammengeführt werden (Distrikte, die nicht angrenzend sind, können nicht zusammengeführt werden)",
-    "mergeNoRequest": "Kein Distrikt zum Zusammenführen ausgewählt",
+    "restrictionUpdateFailed": "Die Vorschriften des Stadtbezirks konnten nicht aktualisiert werden",
+    "restrictionRequired": "Grundflächenzahl, Geschossflächenzahl und Höhe dürfen nicht leer sein",
+    "mergeConfirm": "„{{source}}“ wird in „{{target}}“ eingegliedert. Der eingegliederte Stadtbezirk wird aufgelöst, und seine Einstellungen für Vorschriften gehen verloren.",
+    "mergeAction": "Zusammenführen",
+    "mergeFailed": "Die Stadtbezirke konnten nicht zusammengeführt werden (nicht benachbarte Stadtbezirke lassen sich nicht zusammenführen)",
+    "mergeNoRequest": "Kein Stadtbezirk zum Zusammenführen ausgewählt",
     "edit": {
-      "toolHeading": "Operation",
-      "toolCreate": "Neues Viertel schaffen",
-      "toolExpand": "Bezirk erweitern",
+      "toolHeading": "Bearbeitung",
+      "toolCreate": "Neuen Stadtbezirk anlegen",
+      "toolExpand": "Bestehenden Stadtbezirk erweitern",
       "toolExpandZone": "{{name}} erweitern",
-      "modeHeading": "Auswahlmethode",
-      "modeBlock": "Ganzer Block",
-      "modeRoad": "Straßenseite",
+      "modeHeading": "Art der Bereichsauswahl",
+      "modeBlock": "Ganze Blöcke",
+      "modeRoad": "Straßenseiten",
       "hint": {
         "create": {
-          "block": "Halten Sie Strg gedrückt und ziehen Sie über von Straßen umgebene Blöcke. Die bemalten Blöcke mit ihren Paketen werden zu einem neuen Bezirk. Zum Schwenken ziehen, zu Zoom scrollen.",
-          "road": "Halten Sie die Strg-Taste gedrückt und ziehen Sie über eine Seite einer Straße (die Hälfte der Straße oder die Parzellen dahinter). Diese Seite der Straße mit ihren Paketen wird zu einem neuen Bezirk. Zum Schwenken ziehen, zu Zoom scrollen."
+          "block": "Halten Sie Strg gedrückt und ziehen Sie über von Straßen umschlossene Blöcke; die markierten Blöcke werden samt ihren Grundstücken zu einem neuen Stadtbezirk. Ziehen verschiebt die Karte, das Mausrad zoomt.",
+          "road": "Halten Sie Strg gedrückt und ziehen Sie über eine Straßenseite (die halbe Fahrbahn oder die angrenzenden Grundstücke); diese Straßenseite wird samt ihren Grundstücken zu einem neuen Stadtbezirk. Ziehen verschiebt die Karte, das Mausrad zoomt."
         },
         "expand": {
-          "block": "Bewegen Sie den Mauszeiger über einen Bezirk, halten Sie dann die Strg-Taste und ziehen Sie über Blöcke, um sie mit ihren Paketen zu diesem Bezirk hinzuzufügen. Zum Schwenken ziehen, zu Zoom scrollen.",
-          "road": "Bewegen Sie den Mauszeiger über einen Bezirk, halten Sie dann die Strg-Taste gedrückt und ziehen Sie über eine Seite einer Straße (die Hälfte der Straße oder die Parzellen dahinter), um diese Seite mit ihren Parzellen zu diesem Bezirk hinzuzufügen. Zum Schwenken ziehen, zu Zoom scrollen."
+          "block": "Zeigen Sie mit der Maus auf einen Stadtbezirk, halten Sie Strg gedrückt und ziehen Sie über Blöcke, um sie samt ihren Grundstücken in diesen Stadtbezirk aufzunehmen. Ziehen verschiebt die Karte, das Mausrad zoomt.",
+          "road": "Zeigen Sie mit der Maus auf einen Stadtbezirk, halten Sie Strg gedrückt und ziehen Sie über eine Straßenseite (die halbe Fahrbahn oder die angrenzenden Grundstücke), um diese Straßenseite samt ihren Grundstücken in diesen Stadtbezirk aufzunehmen. Ziehen verschiebt die Karte, das Mausrad zoomt."
         }
       },
-      "failed": "konnte den Bezirk nicht ändern."
+      "failed": "Der Stadtbezirk konnte nicht geändert werden."
     }
   }
 }

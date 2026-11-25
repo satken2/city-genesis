@@ -1,21 +1,21 @@
 {
   "citizenTracking": {
-    "tabBasic": "Przegląd",
-    "tabActivity": "Czynność",
-    "follow": "Śledź z aparatem",
-    "unfollow": "Przestań podążać",
-    "track": "Dodaj do listy śledzenia",
-    "trackRandom": "Śledź losowego obywatela",
-    "noUntrackedCitizens": "Nie ma dostępnych obywateli nieśledzonych.",
-    "trackRandomError": "nie mógł śledzić obywatela.",
-    "untrack": "Usuń z listy śledzenia",
-    "home": "Rezydencja",
-    "mobility": "Poruszanie się",
+    "tabBasic": "Ogólne",
+    "tabActivity": "Aktywność",
+    "follow": "Śledź kamerą",
+    "unfollow": "Przestań śledzić kamerą",
+    "track": "Dodaj do listy obserwowanych",
+    "trackRandom": "Obserwuj losowego obywatela",
+    "noUntrackedCitizens": "Brak obywateli, których jeszcze nie obserwujesz.",
+    "trackRandomError": "Nie udało się rozpocząć obserwacji obywatela.",
+    "untrack": "Usuń z listy obserwowanych",
+    "home": "Miejsce zamieszkania",
+    "mobility": "Środek transportu",
     "mode": {
       "automobile": "Samochód",
-      "pedestrian": "Spacery i transport publiczny"
+      "pedestrian": "Pieszo i transportem publicznym"
     },
-    "visits": "miejsca docelowe",
+    "visits": "Cele wyjść",
     "visitKind": {
       "home": "Dom",
       "work": "Praca",
@@ -23,29 +23,29 @@
       "shop": "Zakupy"
     },
     "legs": {
-      "walk": "Spacerować",
+      "walk": "Pieszo",
       "drive": "Samochód",
-      "transit": "Tranzyt",
+      "transit": "Transport publiczny",
       "conveyor": "System transportu pasażerów"
     },
     "trip": "W jedną stronę {{minutes}} min · {{route}}",
-    "noRoute": "Brak trasy",
-    "noVisits": "nie ma dokąd pójść.",
+    "noRoute": "Brak trasy przejazdu",
+    "noVisits": "Nie ma dokąd pójść.",
     "status": {
-      "not_ready": "pokazane po uruchomieniu symulacji.",
-      "busy": "niedostępne, gdy symulacja jest uruchomiona.",
-      "no_home": "Czekam na mieszkanie, więc nie ma zarejestrowanej aktywności.",
+      "not_ready": "Pojawi się po uruchomieniu symulacji.",
+      "busy": "Niedostępne podczas symulacji.",
+      "no_home": "Czeka na mieszkanie, więc brak zapisów aktywności.",
       "missing": "Ten obywatel nie mieszka już w mieście.",
-      "error": "Nie udało się załadować."
+      "error": "Nie udało się wczytać."
     },
-    "empty": "Żaden obywatel nie jest śledzony.",
+    "empty": "Nie obserwujesz żadnych obywateli.",
     "pickFailed": {
-      "not_ready": "Uruchom symulację, aby kliknąć samochody i pieszych i zobaczyć, kim są.",
-      "busy": "Obywatele nie mogą być pokazywane, gdy symulacja jest uruchomiona.",
-      "none": "Nie mogłem znaleźć, kto jest w tym samochodzie lub na piechotę.",
+      "not_ready": "Uruchom symulację, aby móc klikać samochody i pieszych i sprawdzać, kim są.",
+      "busy": "Podczas symulacji nie można wyświetlać obywateli.",
+      "none": "Nie znaleziono obywatela odpowiadającego temu samochodowi lub pieszemu.",
       "missing": "Ten obywatel nie mieszka już w mieście.",
       "no_home": "Ten obywatel czeka na mieszkanie.",
-      "error": "Nie mogłem pokazać obywatela."
+      "error": "Nie udało się wyświetlić obywatela."
     }
   }
 }

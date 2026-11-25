@@ -1,14 +1,14 @@
 {
   "employment": {
-    "requiredSkill": "Habilidade exigida",
-    "wage": "Taxa salarial",
-    "quota": "mão de obra necessária",
-    "totalLabor": "Trabalho contratado",
+    "requiredSkill": "Qualificação exigida",
+    "wage": "Salário unitário",
+    "quota": "Mão de obra necessária",
+    "totalLabor": "Mão de obra contratada",
     "employees": "Lista de funcionários",
-    "hired": "Assalariado",
-    "vacant": "Vago",
-    "noQuota": "Não é necessário mão de obra",
+    "hired": "Contratados",
+    "vacant": "Vagas abertas",
+    "noQuota": "Não precisa de mão de obra",
     "noEmployees": "Nenhum funcionário",
-    "statusTitle": "Situação de emprego"
+    "statusTitle": "Situação do emprego"
   }
 }

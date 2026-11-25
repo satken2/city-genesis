@@ -1,41 +1,41 @@
 {
   "zone": {
     "titleWithId": "Distrik #{{id}}",
-    "color": "Warna Kecamatan",
+    "color": "Warna distrik",
     "colorUpdateFailed": "Gagal memperbarui warna distrik",
-    "basicInfo": "Info Dasar",
-    "area": "Daerah",
-    "zonePopulation": "penduduk penduduk",
+    "basicInfo": "Informasi dasar",
+    "area": "Luas",
+    "zonePopulation": "Populasi penghuni",
     "daytimePopulation": "Populasi siang hari",
-    "spaceAmount": "hunian lantai",
-    "slotStarvationTitle": "Penyewa yang menunggu tidak dapat ditempatkan",
-    "slotStarvationWarning": "\"{{tenant}}\" membutuhkan setidaknya {{required}} m2 ruang lantai dalam satu bangunan, tetapi bangunan terbesar di distrik ini adalah {{max}} m2. memberikan paket yang lebih besar.",
-    "restrictions": "peraturan bangunan",
-    "restrictionUpdateFailed": "Gagal memperbarui peraturan kabupaten",
-    "restrictionRequired": "Rasio cakupan, rasio volume dan tinggi tidak boleh kosong",
-    "mergeConfirm": "Gabungkan \"{{source}}\" menjadi \"{{target}}\". Distrik sumber menghilang seiring dengan pengaturan peraturannya.",
-    "mergeAction": "Menggabungkan",
-    "mergeFailed": "Gagal menggabungkan distrik (distrik yang tidak berdekatan tidak dapat digabung)",
-    "mergeNoRequest": "Tidak ada distrik yang dipilih untuk bergabung",
+    "spaceAmount": "Okupansi lantai",
+    "slotStarvationTitle": "Ada calon penghuni yang menunggu, tetapi bangunan untuk mereka tidak dapat dibangun",
+    "slotStarvationWarning": "Untuk menampung “{{tenant}}”, diperlukan lantai minimal {{required}}m2 per bangunan, tetapi luas maksimum yang dapat dibangun di kavling distrik ini adalah {{max}}m2. Siapkan kavling yang lebih besar.",
+    "restrictions": "Peraturan bangunan",
+    "restrictionUpdateFailed": "Gagal memperbarui peraturan distrik",
+    "restrictionRequired": "Koefisien dasar bangunan, koefisien lantai bangunan, dan ketinggian tidak boleh kosong",
+    "mergeConfirm": "“{{source}}” akan digabungkan ke “{{target}}”. Distrik asal akan hilang beserta pengaturan peraturannya.",
+    "mergeAction": "Gabungkan",
+    "mergeFailed": "Gagal menggabungkan distrik (distrik yang tidak bersebelahan tidak dapat digabungkan)",
+    "mergeNoRequest": "Belum ada distrik yang dipilih untuk digabungkan",
     "edit": {
-      "toolHeading": "Operasi",
-      "toolCreate": "membuat distrik baru",
-      "toolExpand": "Perluas Kabupaten",
+      "toolHeading": "Jenis edit",
+      "toolCreate": "Buat distrik baru",
+      "toolExpand": "Perluas distrik yang ada",
       "toolExpandZone": "Perluas {{name}}",
-      "modeHeading": "Metode seleksi",
-      "modeBlock": "seluruh blok",
-      "modeRoad": "sisi jalan",
+      "modeHeading": "Cara menentukan area",
+      "modeBlock": "Per blok",
+      "modeRoad": "Per sisi jalan",
       "hint": {
         "create": {
-          "block": "Tahan Ctrl dan seret blok yang tertutup oleh jalan; Blok yang dicat, dengan bungkusannya, menjadi distrik baru. Seret ke Pan, Gulir ke Zoom.",
-          "road": "Pegang Ctrl dan seret ke satu sisi jalan (setengah jalan raya, atau parsel di sepanjang itu); Sisi jalan itu, dengan parselnya, menjadi distrik baru. Seret ke Pan, Gulir ke Zoom."
+          "block": "Tahan Ctrl sambil menyeret untuk mewarnai blok yang dikelilingi jalan; blok yang diwarnai beserta kavling di dalamnya akan menjadi distrik baru. Seret untuk menggeser peta, gunakan roda mouse untuk memperbesar atau memperkecil.",
+          "road": "Tahan Ctrl sambil menyeret untuk mewarnai satu sisi jalan (separuh badan jalan, atau kavling yang menghadap ke sana); jalan di sisi tersebut beserta kavlingnya akan menjadi distrik baru. Seret untuk menggeser peta, gunakan roda mouse untuk memperbesar atau memperkecil."
         },
         "expand": {
-          "block": "Arahkan kursor ke distrik, lalu tahan Ctrl dan seret blok untuk menambahkannya, dengan paket mereka, ke distrik itu. Seret ke Pan, Gulir ke Zoom.",
-          "road": "Arahkan kursor ke distrik, lalu pegang Ctrl dan seret ke salah satu sisi jalan (setengah jalan raya, atau parsel di sepanjangnya) untuk menambahkan sisi itu, dengan parselnya, ke distrik itu. Seret ke Pan, Gulir ke Zoom."
+          "block": "Arahkan kursor ke distrik, lalu tahan Ctrl sambil menyeret untuk mewarnai blok; blok tersebut beserta kavling di dalamnya akan dimasukkan ke distrik itu. Seret untuk menggeser peta, gunakan roda mouse untuk memperbesar atau memperkecil.",
+          "road": "Arahkan kursor ke distrik, lalu tahan Ctrl sambil menyeret untuk mewarnai satu sisi jalan (separuh badan jalan, atau kavling yang menghadap ke sana); jalan di sisi tersebut beserta kavlingnya akan dimasukkan ke distrik itu. Seret untuk menggeser peta, gunakan roda mouse untuk memperbesar atau memperkecil."
         }
       },
-      "failed": "tidak dapat mengubah kabupaten."
+      "failed": "Distrik tidak dapat diubah."
     }
   }
 }

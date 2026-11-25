@@ -1,30 +1,30 @@
 {
   "weather": {
     "label": "Tempo",
-    "choose": "Escolha o clima",
+    "choose": "Escolher o tempo",
     "loading": "Verificando o tempo…",
     "unknown": "Desconhecido",
-    "automatic": "{{weather}} (auto)",
-    "failed": "Não foi possível mudar o clima",
+    "automatic": "{{weather}} (automático)",
+    "failed": "Não foi possível mudar o tempo",
     "names": {
-      "clear": "Claro",
+      "clear": "Céu limpo",
       "high_clouds": "Nuvens altas",
-      "fair": "Justo",
-      "broken_clouds": "intervalos ensolarados",
-      "overcast": "Escuro",
-      "rain_clouds": "nuvens de chuva",
-      "fog": "Névoa",
+      "fair": "Ensolarado",
+      "broken_clouds": "Sol entre nuvens",
+      "overcast": "Nublado",
+      "rain_clouds": "Nuvens de chuva",
+      "fog": "Neblina",
       "drizzle": "Garoa",
       "rain": "Chuva",
-      "heavy_rain": "Chuva pesada",
-      "light_snow": "neve leve",
+      "heavy_rain": "Chuva forte",
+      "light_snow": "Neve fraca",
       "snow": "Neve",
       "blizzard": "Nevasca"
     },
     "epochClimate": "Clima da época",
     "temperature": "Temperatura",
     "precipitation": "Precipitação",
-    "sunlight": "intensidade da luz solar",
+    "sunlight": "Intensidade da luz solar",
     "windSpeed": "Velocidade do vento"
   }
 }

@@ -1,272 +1,272 @@
 {
   "paramSetup": {
-    "title": "Oyun parametresi kurulumu",
-    "description": "Varsayılan değerler genellikle önerilir. Sadece özelleştirmek istiyorsanız ayarlayın.",
-    "skip": "Atlama",
-    "start": "Oyuna Başla",
-    "apply": "Uygula ve Kapat",
+    "title": "Oyun parametreleri ayarı",
+    "description": "Genellikle varsayılan değerler önerilir. Yalnızca değiştirmek istiyorsanız ayarlayın.",
+    "skip": "Atla",
+    "start": "Oyunu başlat",
+    "apply": "Uygula ve kapat",
     "close": "Kapat",
-    "loading": "Yükleniyor…",
-    "reload": "yeniden doldurmak",
-    "reloadHint": "En son değerleri almak için arka uç başlatma işlemi tamamlandıktan sonra yeniden yükleme.",
+    "loading": "Yükleniyor...",
+    "reload": "Yeniden yükle",
+    "reloadHint": "Arka uç başlatma işlemi tamamlandıktan sonra yeniden yüklerseniz en güncel değerler yansıtılır",
     "fetchError": "Parametreler alınamadı",
     "category": {
-      "population": "nüfus ve göç",
-      "citizen": "vatandaşlık hayatı",
+      "population": "Nüfus ve göç",
+      "citizen": "Vatandaş yaşamı",
       "economy": "Ekonomi",
-      "labor": "Emek ve Ücretler",
+      "labor": "Çalışma ve ücretler",
       "education": "Eğitim",
-      "construction": "İnşaat ve Emlak",
+      "construction": "İnşaat ve gayrimenkul",
       "environment": "Çevre",
-      "traffic": "Trafik",
+      "traffic": "Ulaşım",
       "general": "Genel",
-      "pathfind": "Trafik ve Yönlendirme",
-      "building": "Binalar ve İnşaat",
-      "disaster": "Afetler ve Güvenlik",
-      "slum": "Gecekondu mahallesi",
-      "production": "Üretim ve Envanter",
-      "zone": "İlçeler ve Parseller",
-      "financial": "Maliye"
+      "pathfind": "Ulaşım ve rotalar",
+      "building": "Binalar ve inşaat",
+      "disaster": "Afetler ve kamu güvenliği",
+      "slum": "Gecekondu bölgeleri",
+      "production": "Üretim ve stok",
+      "zone": "Mahalleler ve parseller",
+      "financial": "Finans"
     },
     "param": {
       "CITY_CONDENSATION_FACTOR": {
-        "label": "şehir yoğunlaşması",
-        "desc": "Küçük bir haritanın büyük bir şehrin ekonomik faaliyetini tutabilmesi için evler ve tesisler tarafından kullanılan taban alanını bu değere böler. Bir yol veya bina inşa ettikten sonra onu değiştirmek şehri kırar, bu yüzden herhangi bir şey inşa etmeden önce karar verin."
+        "label": "Şehir yoğunlaştırma katsayısı",
+        "desc": "Küçük bir haritaya büyük bir şehrin ekonomik faaliyetini sığdırmak için konutların ve tesislerin kullandığı kat alanı bu değere bölünür. Tek bir yol veya bina bile yaptıktan sonra değiştirilirse şehir bozulur; bu yüzden hiçbir şey inşa etmeden önce belirleyin."
       },
       "TFR_TARGET": {
-        "label": "Toplam doğurganlık oranı (TFR) hedefi",
-        "desc": "hanehalklarının hedeflediği doğum oranı. Daha yüksek değerler doğumları daha olası kılar."
+        "label": "Toplam doğurganlık hızı (TDH) hedefi",
+        "desc": "Hanelerin hedeflediği doğurganlık hızı. Yükseldikçe çocuk doğması kolaylaşır."
       },
       "MARRIAGE_RATE": {
-        "label": "evlilik oranı",
-        "desc": "Evlenen vatandaşlar için taban olasılık katsayısı. Daha yüksek = daha fazla evlilik."
+        "label": "Evlilik oranı",
+        "desc": "Vatandaşların evlenme temel olasılığının katsayısı. Büyüdükçe evlilik kolaylaşır."
       },
       "MIN_CHILDBEARING_AGE": {
-        "label": "Minimum çocuk doğurma yaşı",
-        "desc": "Doğumların gerçekleşebileceği minimum yaş. Bu yaşın altında doğum yok."
+        "label": "Asgari doğurganlık yaşı",
+        "desc": "Çocuk doğabilecek en düşük yaş. Bu yaşın altında doğum olmaz."
       },
       "MAX_CHILDBEARING_AGE": {
-        "label": "Maksimum çocuk doğurma yaşı",
-        "desc": "doğumların gerçekleşebileceği maksimum yaş. Bu yaşın üzerinde doğum yok."
+        "label": "Azami doğurganlık yaşı",
+        "desc": "Çocuk doğabilecek en yüksek yaş. Bu yaşın üzerinde doğum olmaz."
       },
       "INFLOW_MARRIRD_RATIO": {
-        "label": "Göçmen ev evlilik oranı",
-        "desc": "Gelen bir göçmen hanenin evli bir çift olma olasılığı."
+        "label": "Göçmen hanelerin evli olma oranı",
+        "desc": "Şehre gelen bir göçmen hanenin evli çift olma olasılığı."
       },
       "INFLOW_CHILDREN1_RATIO": {
         "label": "1. çocuk oranı (göçmenler)",
-        "desc": "Bir göçmen hanenin 1 çocukla yumurtlama olasılığı."
+        "desc": "Göçmen hanenin oluşumunda 1 çocuğa sahip olma olasılığı."
       },
       "INFLOW_CHILDREN2_RATIO": {
         "label": "2. çocuk oranı (göçmenler)",
-        "desc": "Göçmen bir hanenin 2 çocuklu yumurtlama olasılığı."
+        "desc": "Göçmen hanenin oluşumunda 2 çocuğa sahip olma olasılığı."
       },
       "INFLOW_CHILDREN3_RATIO": {
         "label": "3. çocuk oranı (göçmenler)",
-        "desc": "Bir göçmen hanesinin 3 çocukla yumurtlama olasılığı."
+        "desc": "Göçmen hanenin oluşumunda 3 çocuğa sahip olma olasılığı."
       },
       "IMMIGRATION_ADULT_AGE_MIN": {
-        "label": "Göçmen Yetişkin Asgari Yaş",
-        "desc": "Göçmen olarak akan yetişkinlerin minimum yaşı."
+        "label": "Göçmen yetişkinlerin asgari yaşı",
+        "desc": "Göçmen olarak gelen yetişkinlerin en düşük yaşı."
       },
       "IMMIGRATION_ADULT_AGE_MAX": {
-        "label": "Göçmen yetişkin maksimum yaş",
-        "desc": "göçmen olarak akan yetişkinlerin maksimum yaşı."
+        "label": "Göçmen yetişkinlerin azami yaşı",
+        "desc": "Göçmen olarak gelen yetişkinlerin en yüksek yaşı."
       },
       "LIFESPAN_FACTOR": {
-        "label": "ömür faktörü",
-        "desc": "Maksimum vatandaş ömrü için çarpan. 1.08 100 yıl, 1.06 150 yıl.",
+        "label": "Ömür katsayısı",
+        "desc": "Vatandaşların azami ömrüne uygulanan katsayı. 1.08 değerinde üst sınır yaklaşık 100 yaş, 1.06 değerinde 150 yaş olur.",
         "graphX": "Yaş",
-        "graphY": "Yıllık ölüm olasılığı (Sağlık 1)"
+        "graphY": "Yıllık ölüm olasılığı (sağlık 1)"
       },
       "SPACE_SINGLE": {
-        "label": "Tek ev yaşam alanı (m²)",
-        "desc": "Tek kişilik bir hane için gereken minimum yaşam alanı."
+        "label": "Tek kişilik hanenin yaşam alanı (m²)",
+        "desc": "Tek kişilik bir hanenin ihtiyaç duyduğu asgari yaşam alanı."
       },
       "ADD_SPACE_MARRIED": {
         "label": "Eş için ek alan (m²)",
-        "desc": "Bir hanenin bir eşi olduğunda ekstra yaşam alanı gereklidir."
+        "desc": "Evli çift hanesinde tek kişiye göre gereken ek yaşam alanı."
       },
       "ADD_SPACE_CHILDREN": {
         "label": "Çocuk başına ek alan (m²)",
-        "desc": "Evde çocuk başına ekstra yaşam alanı."
+        "desc": "Her çocuk için eklenen yaşam alanı."
       },
       "HOUSEHOLD_RENT_INCOME_RATIO": {
-        "label": "Kira-gelir oranı (maks)",
-        "desc": "Kiraya harcanabilecek hane gelirinin maksimum kısmı. 0.3 = %30'a kadar."
+        "label": "Kira / gelir oranı (ödenebilir üst sınır)",
+        "desc": "Hane gelirine göre ödenebilecek azami kira oranı. 0.3 ise gelirin %30'una kadar kiraya ayrılabilir."
       },
       "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
-        "label": "Konut seçiminde seyahat süresi ağırlığı",
-        "desc": "Bir ev seçerken, iş, okul ve alışveriş için gidiş-dönüş her dakikanın ne kadar yoğun olduğu, şehrin ortalama ücretinin katı olarak sayılır. 1 = ücret karşılığında değerlenir. Daha yüksek değerler, işyerlerinin ve dükkanların yakınındaki evleri tercih eder."
+        "label": "Konut seçiminde yolculuk süresinin ağırlığı",
+        "desc": "Konut seçerken işe, okula ve alışverişe gidiş-dönüşte harcanan her 1 dakikanın, şehrin ortalama ücretinin kaç katı bir yük sayılacağı. 1 ise ücretle aynıdır. Büyüdükçe iş yerlerine ve dükkânlara yakın konutlar daha çok tercih edilir."
       },
       "AVERAGE_WAGE": {
-        "label": "Ortalama ücret (temel)",
-        "desc": "Simülasyon başlangıcında referans ortalama ücret."
+        "label": "Ortalama ücret (referans değer)",
+        "desc": "Simülasyon başlangıcındaki referans ortalama ücret."
       },
       "AVERAGE_RENT": {
-        "label": "Ortalama kira (temel)",
-        "desc": "Simülasyon başlangıcında referans ortalama kira (m² başına gün)."
+        "label": "Ortalama kira (referans değer)",
+        "desc": "Simülasyon başlangıcındaki referans ortalama kira (günlük, m² başına)."
       },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
-        "label": "Temettü Servet-Orantılı Payı",
-        "desc": "Her hanenin nakit tasarrufuyla orantılı olarak dağıtılan temettülerin payı. Gerisi tüm haneler arasında eşit olarak bölünmüştür. 0 = hepsi eşit, 1 = hepsi tasarruflarla orantılı olarak."
+        "label": "Temettünün varlıkla orantılı payı",
+        "desc": "Temettülerin, hanelerin nakit varlıklarıyla orantılı olarak dağıtılan payı. Kalanı tüm hanelere eşit dağıtılır. 0 ise tamamı eşit, 1 ise tamamı nakit varlıklarla orantılı dağıtılır."
       },
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Ekipman amortisman oranı",
-        "desc": "Ekipman yatırımından elde edilen sermaye stokunun her bir çağı amortismana tabi tutma oranı."
+        "desc": "Ekipman yatırımından oluşan sermaye stokunun her dönemki amortisman oranı."
       },
       "WORK_HOURS": {
-        "label": "Günlük çalışma saatleri (h)",
+        "label": "Günlük çalışma süresi (sa)",
         "desc": "Bir vatandaşın günde çalıştığı standart saat sayısı."
       },
       "ELEMENTARY_START_AGE": {
-        "label": "İlköğretim yaş başlangıç yaşı",
-        "desc": "çocukların ilköğretim (ilk) eğitime başladığı yaş."
+        "label": "İlköğretime başlama yaşı",
+        "desc": "Çocukların ilköğretime (ilkokula denk) başladığı yaş."
       },
       "ELEMENTARY_END_AGE": {
-        "label": "İlköğretim son yaş",
-        "desc": "İlköğretimin bittiği yaş (lise mezuniyetine eşdeğer)."
+        "label": "İlköğretimin bitiş yaşı",
+        "desc": "İlköğretimin sona erdiği yaş (lise mezuniyetine denk)."
       },
       "UNIVERSITY_END_AGE": {
-        "label": "Üniversite Mezuniyet / Bağımsızlık Çağı",
-        "desc": "Bir vatandaşın yüksek öğrenimi tamamladığı ve bağımsız hale geldiği yaş."
+        "label": "Üniversite mezuniyeti / bağımsızlık yaşı",
+        "desc": "Yükseköğretimi tamamlayıp haneden ayrılarak bağımsız olunan yaş."
       },
       "MIN_WORKING_AGE": {
         "label": "Asgari çalışma yaşı",
-        "desc": "Bu yaşın altındaki vatandaşlar iş arama ve işsizlik istatistiklerinden hariç tutulmuştur."
+        "desc": "Bu yaşın altındaki vatandaşlar iş aramaya ve işsizlik istatistiklerine dahil edilmez."
       },
       "BUILDING_FLOOR_LIMIT": {
-        "label": "Maksimum katlar (zeminler)",
-        "desc": "Özel sektör tarafından otomatik olarak inşa edilen binaların kat sayısında üst sınır."
+        "label": "Azami kat sayısı (kat)",
+        "desc": "Özel sektörün otomatik olarak inşa ettiği binaların kat sayısı üst sınırı."
       },
       "FLOOR_PENALTY_FACTOR": {
-        "label": "Zemin cezası faktörü",
-        "desc": "Yüksek katlı maliyet cezası için katsayı. Daha yüksek = yüksek binalar için daha küçük ceza.",
-        "graphX": "yer",
-        "graphY": "inşaat maliyeti çarpanı"
+        "label": "Kat cezası katsayısı",
+        "desc": "Yüksek bina maliyet cezasının katsayısı. Büyüdükçe yüksek binalara uygulanan ceza küçülür.",
+        "graphX": "Kat sayısı",
+        "graphY": "İnşaat maliyeti çarpanı"
       },
       "DEMOLITION_RATE": {
-        "label": "Yıkım Verimliliği Oranı",
-        "desc": "Yeni inşaata (çarpan) kıyasla ne kadar daha verimli yıkım."
+        "label": "Yıkım verimliliği oranı",
+        "desc": "Yıkımın yeni inşaata göre ne kadar verimli olduğu (çarpan)."
       },
       "COLLAPSE_BASE_RATE": {
-        "label": "baz yıllık oranını daraltmak",
-        "desc": "Dayanıklılık 0,5 olan bir bina için yıllık çökme olasılığı."
+        "label": "Çökme için temel yıllık olasılık",
+        "desc": "Dayanıklılığı 0.5 olan bir binanın bir yıl içinde çökmesinin temel olasılığı."
       },
       "COLLAPSE_SHAPE": {
-        "label": "Weibull şekli parametresini daralt",
-        "desc": "Daha yüksek değerler, çökme olasılığının tasarım ömrüne yakın keskin bir şekilde yükselmesine neden olur."
+        "label": "Çökme olasılığı Weibull şekil parametresi",
+        "desc": "Büyüdükçe kullanım ömrüne yaklaşıldığında çökme olasılığı hızla artar."
       },
       "MAINTENANCE_COST_RATIO": {
-        "label": "Bakım Maliyet Oranı",
-        "desc": "Yeni inşaat maliyetinin bir kısmı olarak bakım maliyeti."
+        "label": "Onarım maliyeti oranı",
+        "desc": "Onarım maliyetinin yeni inşaat maliyetine oranı."
       },
       "UPKEEP_NEGLECT_AGING_FACTOR": {
-        "label": "Bakım olmadan yaşlanan çarpan",
-        "desc": "Bir binanın veya yolun, günlük bakım almadığı zaman, tam bakımla yaşlanmasının bir katı olarak ne kadar hızlı yaşlandığı. Alınmamış bakım payı ile 1'den bu değere doğrusal olarak değişir."
+        "label": "Bakımsızlıkta eskime çarpanı",
+        "desc": "Hiç günlük bakım alamayan bina ve güzergâhların eskime hızı. Bakım alındığındaki hızın katı olarak ifade edilir ve alınamayan bakım payına göre 1 kattan bu değere kadar doğrusal olarak değişir."
       },
       "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Bakım Geçiş Tabanı Yıllık Olasılık",
-        "desc": "Uygun bir binanın bakıma girmesi için yıllık temel olasılık."
+        "label": "Onarıma geçiş için temel yıllık olasılık",
+        "desc": "Onarım gereken bir binanın fiilen onarıma girmesinin temel yıllık olasılığı."
       },
       "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "İlk inşaat borcu (m² başına)",
-        "desc": "Zemin alanının m² başına ilk inşaat borcu (olumsuz rezervler)."
+        "label": "Başlangıç inşaat borcu (m² başına)",
+        "desc": "Binanın toplam kat alanının her m²'si için başlangıç inşaat borcu (negatif nakit varlık)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
-        "label": "Karayolu trafik gürültü katsayısı",
-        "desc": "Ne kadar karayolu trafiği gürültü ısı haritasına katkıda bulunur. daha yüksek = daha yüksek sesli yollar."
+        "label": "Karayolu trafiği gürültü katsayısı",
+        "desc": "Karayolu trafik hacminin gürültü ısı haritasına etkisinin katsayısı. Büyüdükçe yol kenarları daha gürültülü olur."
       },
       "NOISE_PED_TRAFFIC_COEFF": {
-        "label": "Yaya Trafik Gürültü Katsayısı",
-        "desc": "Yaya trafiğinin gürültü ısı haritasına ne kadar katkıda bulunduğu."
+        "label": "Yaya trafiği gürültü katsayısı",
+        "desc": "Yaya trafik hacminin gürültü ısı haritasına etkisinin katsayısı."
       },
       "PED_NOISE_THRESHOLD": {
-        "label": "yaya gürültü eşiği",
-        "desc": "Sadece yaya trafiğinin bu değerin üzerindeki kısmı gürültüye katkıda bulunur."
+        "label": "Yaya gürültüsü eşiği",
+        "desc": "Yaya trafik hacminin yalnızca bu değeri aşan kısmı gürültüye katkıda bulunur."
       },
       "NOISE_ATTENUATION_M": {
-        "label": "Gürültü Azaltma Mesafesi (m)",
-        "desc": "Gürültü, mesafenin karesi ile zayıflar ve ayrıca her bir metrede (bina koruması, hava ve yer emme) 1/e'ye düşer. Daha düşük = kaynağa daha yakın kalır."
+        "label": "Gürültünün sönümlenme mesafesi (m)",
+        "desc": "Gürültü mesafenin karesiyle azalır; ayrıca bu mesafe kadar her ilerleyişte 1/e katına düşer (binaların perdelemesi, hava ve zemin emilimi). Küçüldükçe kaynağın yakınında kalır."
       },
       "POLLUTION_ROAD_TRAFFIC_COEFF": {
-        "label": "Yol Trafik Hava Kirliliği Katsayı",
-        "desc": "Hava kirliliği ısı haritasına ne kadar yol trafiğinin katkıda bulunduğu."
+        "label": "Karayolu trafiği hava kirliliği katsayısı",
+        "desc": "Karayolu trafik hacminin hava kirliliği ısı haritasına etkisinin katsayısı."
       },
       "POLLUTION_ATTENUATION_M": {
-        "label": "Hava kirliliği zayıflama mesafesi (m)",
-        "desc": "Hava kirliliği ve koku, mesafenin karesi ile zayıflar ve ayrıca her bu kadar metrenin üzerinde 1/E'ye düşer (dağılım ve biriktirme). Daha düşük = kaynağa daha yakın kalır."
+        "label": "Hava kirliliğinin sönümlenme mesafesi (m)",
+        "desc": "Hava kirliliği ve kötü koku mesafenin karesiyle azalır; ayrıca bu mesafe kadar her ilerleyişte 1/e katına düşer (yayılma ve çökelme). Küçüldükçe kaynağın yakınında kalır."
       },
       "UNEMPLOYMENT_CRIME_WEIGHT": {
-        "label": "işsizlik suçu ağırlığı",
-        "desc": "işsizlik oranı suç ısı haritasını ne kadar güçlü bir şekilde etkiler. Daha yüksek = işsizlik daha doğrudan daha kötü kamu güvenliğine yol açar."
+        "label": "İşsizliğin suç ağırlığı",
+        "desc": "İşsizlik oranının kamu güvenliği ısı haritasına etkisinin ağırlığı. Büyüdükçe işsizlik kamu güvenliğinin kötüleşmesine daha doğrudan yol açar."
       },
       "CRIME_BLUR_SIGMA_M": {
-        "label": "Suç Yayılma Yarıçapı (M)",
-        "desc": "Suç ısı haritası için Gauss bulanıklık yarıçapı."
+        "label": "Suçun yayılma yarıçapı (m)",
+        "desc": "Kamu güvenliği ısı haritasının Gauss bulanıklaştırma yarıçapı."
       },
       "PEDESTRIAN_SPEED": {
-        "label": "Yaya hızı (km/s)",
-        "desc": "Yol bulma maliyeti hesaplamalarında kullanılan yürüme hızı."
+        "label": "Yaya hızı (km/sa)",
+        "desc": "Yayaların yürüme hızı. Rota arama maliyetinin hesaplanmasında kullanılır."
       },
       "PATH_KASOKU_LENGTH": {
         "label": "Araç hızlanma mesafesi (m)",
-        "desc": "Araçlar için hızlanma mesafesi. Kısa yollarda hız hesaplamasını etkiler."
+        "desc": "Araçların hızlanmak için kullandığı mesafe. Kısa yollardaki hız hesaplamasını etkiler."
       },
       "PATH_ACTIVE_HOURS": {
-        "label": "Günde yol aktif saat (H)",
-        "desc": "Günde saat yol aktif. Trafik hacmini dönüştürmek için kullanılır."
+        "label": "Yolun günlük faaliyet süresi (sa)",
+        "desc": "Yolun günde faaliyette olduğu saat sayısı. Trafik hacminin dönüştürülmesinde kullanılır."
       },
       "ROAD_MANY_TRAFFIC_THRESHOLD": {
-        "label": "Karayolu Trafik Bonusu Doygunluk Eşiği",
-        "desc": "Bu değerin üzerindeki veya üzerindeki karayolu trafiği, perakende mağazalara maksimum trafik bonusu verir."
+        "label": "Karayolu trafiği bonusunun doyum eşiği",
+        "desc": "Karayolu trafik hacmi bu değere ulaştığında veya aştığında perakende dükkânlarına verilen trafik bonusu en yüksek düzeye çıkar."
       },
       "PED_MANY_TRAFFIC_THRESHOLD": {
-        "label": "Yaya Trafik Bonusu Doygunluk Eşiği",
-        "desc": "Bu değerin üzerindeki ya da üzerindeki yaya trafiği, perakende mağazalara maksimum yaya bonusu verir."
+        "label": "Yaya trafiği bonusunun doyum eşiği",
+        "desc": "Yaya trafik hacmi bu değere ulaştığında veya aştığında perakende dükkânlarına verilen yaya bonusu en yüksek düzeye çıkar."
       }
     }
   },
   "newGame": {
-    "loading": "Yükleniyor…",
-    "noScenarios": "senaryo yok",
-    "starting": "Başlangıç...",
-    "startFailed": "başlatılamadı",
-    "confirmTitle": "Oyun ayarlarını onaylayın",
-    "confirmStartTitle": "Oyuna Başla?",
-    "unsavedChangesWarning": "Başlangıç, mevcut oyununuzdaki kaydedilmemiş değişiklikleri atar.",
-    "startSettingsHeading": "Şehir Ayarları",
-    "cityNameLabel": "şehir adı",
-    "insigniaLabel": "Amblem ve Şehir Bayrağı",
-    "languageLabel": "şehir dili",
+    "loading": "Yükleniyor...",
+    "noScenarios": "Kullanılabilir senaryo yok",
+    "starting": "Başlatılıyor...",
+    "startFailed": "Başlatılamadı",
+    "confirmTitle": "Oyun ayarlarını onayla",
+    "confirmStartTitle": "Oyun başlatılsın mı?",
+    "unsavedChangesWarning": "Başlatırsanız mevcut oyundaki kaydedilmemiş değişiklikler kaybolur.",
+    "startSettingsHeading": "Şehir ayarları",
+    "cityNameLabel": "Şehir adı",
+    "insigniaLabel": "Arma ve şehir bayrağı",
+    "languageLabel": "Şehrin dili",
     "languageNote": "*Daha sonra değiştirilemez",
-    "simulationDaysLabel": "Simülasyon Günleri",
+    "simulationDaysLabel": "Simülasyon gün sayısı",
     "simulationDaysNote": "*Daha sonra değiştirilemez",
     "daysOption": "{{days}} gün",
-    "startButton": "Başlangıç",
+    "startButton": "Başlat",
     "backButton": "Geri",
-    "cleared": "temize çıkmış",
+    "cleared": "Tamamlandı",
     "tutorialBadge": "Eğitim",
-    "sectionDebug": "Tamir etmek",
-    "sectionTutorials": "öğretici",
-    "sectionScenarios": "senaryo",
+    "sectionDebug": "Hata ayıklama",
+    "sectionTutorials": "Eğitimler",
+    "sectionScenarios": "Senaryolar",
     "detailPlaceholder": "Soldaki listeden bir senaryo seçin.",
     "detailMapSizeLabel": "Harita boyutu",
-    "detailUnknown": "Bilinmeyen",
-    "detailObjectiveLabel": "amaç",
-    "detailCreditsLabel": "kredi",
-    "detailNoObjective": "hedef yok",
-    "detailNoDescription": "Bu senaryonun açıklaması yoktur.",
-    "tutorialObjective": "Eğitimin her adımını tamamlayın.",
+    "detailUnknown": "Bilinmiyor",
+    "detailObjectiveLabel": "Tamamlama koşulları",
+    "detailCreditsLabel": "Emeği geçenler",
+    "detailNoObjective": "Tamamlama koşulu yok",
+    "detailNoDescription": "Bu senaryo için açıklama girilmemiş.",
+    "tutorialObjective": "Eğitimin tüm adımlarını tamamlayın.",
     "startScenarioButton": "Bu senaryoyu başlat",
-    "tabSelect": "Bir senaryo seçin",
-    "tabBrowse": "Senaryoları Bul",
-    "tabTerrain": "Bir arazi seçin",
-    "relocalizeNote": "Bu senaryo {{from}} içinde yapıldı. {{to}} konumundan başlayarak, {{to}} bölgesindeki bölgeleri, tesisleri, sakinleri, istasyonları ve diğer adları yeniden adlandırın.",
+    "tabSelect": "Senaryo seç",
+    "tabBrowse": "Senaryo bul",
+    "tabTerrain": "Arazi seç",
+    "relocalizeNote": "Bu senaryo {{from}} dilinde oluşturuldu. Oyunu {{to}} dilinde başlatırsanız mahalle, tesis, sakin, istasyon ve diğer adlar {{to}} diline göre yeniden verilir.",
     "developmentNotice": {
-      "heading": "Bu oyun, geliştirmede deneysel bir yapıdır",
-      "subheading": "lütfen oynamadan önce okuyun",
-      "text": "Ekonomik parametreleri ve mantığı hala ayarlanıyor, bu yüzden şehriniz olması gerektiği gibi büyümeyebilir. İşsizlik artabilir ve şehir bile çökebilir, ancak bu asla oyununuzun hatası değildir. Gelecekteki güncellemeler için takipte kalın! Oyunu istek listenize ekleyin ve resmi sürümü dört gözle bekleyin!"
+      "heading": "Bu oyun geliştirme aşamasında olan deneysel bir sürümdür",
+      "subheading": "Lütfen oynamadan önce okuyun",
+      "text": "Ekonomi parametreleri ve mantığı hâlâ ayarlanmakta olduğundan şehriniz olması gerektiği gibi büyümeyebilir. İşsizlik artabilir, hatta şehir çökebilir; ancak bu asla sizin oyun tarzınızın suçu değildir. Gelecek güncellemeleri bekleyin! Oyunu istek listenize ekleyin ve resmî çıkışı bekleyin!"
     }
   }
 }

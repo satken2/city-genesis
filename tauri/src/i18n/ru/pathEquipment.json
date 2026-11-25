@@ -1,18 +1,18 @@
 {
   "pathEquipment": {
-    "title": "дорожное оборудование",
-    "streetlight_type": "уличные фонари",
-    "fence_type": "заборы",
+    "title": "Обустройство дороги",
+    "streetlight_type": "Уличные фонари",
+    "fence_type": "Ограждения",
     "street_tree_type": "Уличные деревья",
-    "utility_mode": "электропроводка",
-    "none": "Никто",
+    "utility_mode": "Прокладка кабелей",
+    "none": "Нет",
     "standard": "Стандарт",
-    "overhead": "Накладные расходы",
-    "underground": "Под землей",
-    "apply": "Применять",
-    "bench_type": "скамейки",
-    "bin_type": "бины",
-    "planter_type": "плантаторы",
+    "overhead": "Воздушная",
+    "underground": "Подземная",
+    "apply": "Применить",
+    "bench_type": "Скамейки",
+    "bin_type": "Урны",
+    "planter_type": "Клумбы",
     "advert_type": "Реклама"
   }
 }

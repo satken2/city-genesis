@@ -2,62 +2,62 @@
   "settings": {
     "title": "Einstellungen",
     "groups": {
-      "general": "General",
-      "display": "Anzeigen",
-      "sound": "Klingen",
+      "general": "Allgemein",
+      "display": "Anzeige",
+      "sound": "Sound",
       "system": "System",
-      "about": "Über",
+      "about": "Info",
       "developer": "Entwicklereinstellungen"
     },
     "swagger": {
       "label": "Swagger (API-Dokumentation)",
-      "description": "Zeigen Sie die verbundene Backend-API in Ihrem Standardbrowser an",
+      "description": "Zeigt die API-Spezifikation des Kernsimulators im Standardbrowser an",
       "action": "Im Browser öffnen"
     },
     "currencyUnit": {
       "label": "Währungseinheit",
-      "description": "die Einheit mit Geldbeträgen angezeigt. Lassen Sie die Anzeigesprache leer."
+      "description": "Die Einheit, die bei Geldbeträgen angezeigt wird. Bleibt das Feld leer, richtet sie sich nach der Anzeigesprache."
     },
     "fontSize": {
       "label": "Schriftgröße",
       "large": "Groß",
-      "medium": "Medium",
+      "medium": "Mittel",
       "small": "Klein",
-      "custom": "Brauch",
+      "custom": "Benutzerdefiniert",
       "preview": "Aktuelle Größe"
     },
     "monitor": {
-      "label": "Anzeigen",
-      "prev": "Vorherige Anzeige",
-      "next": "Nächste Anzeige"
+      "label": "Bildschirm",
+      "prev": "Vorheriger Bildschirm",
+      "next": "Nächster Bildschirm"
     },
     "graphicMonitor": {
-      "label": "3D-Ansichtsanzeige"
+      "label": "Bildschirm für die 3D-Ansicht"
     },
     "multiDisplay": {
-      "label": "Multi-Display-Modus",
-      "description": "Zeigt Fenster auf einer anderen Anzeige als der Spielbildschirm an",
-      "on": "Auf",
-      "off": "Aus"
+      "label": "Mehrbildschirmmodus",
+      "description": "Zeigt die Fenster auf einem anderen Bildschirm an",
+      "on": "Verwenden",
+      "off": "Nicht verwenden"
     },
     "popupMonitor": {
-      "label": "Fensteranzeige"
+      "label": "Bildschirm für Fenster"
     },
     "hintbar": {
       "label": "Hinweisleiste",
       "show": "Anzeigen",
-      "hide": "Verstecken",
-      "description": "Leiste oben auf dem Bildschirm, die Bedienungshinweise anzeigt"
+      "hide": "Ausblenden",
+      "description": "Leiste am oberen Bildschirmrand, die Bedienhinweise anzeigt"
     },
     "citizenVoice": {
-      "label": "Bürgerstimmen",
+      "label": "Stimmen der Bürger",
       "show": "Anzeigen",
-      "hide": "Verstecken",
-      "description": "Karte oben rechts auf dem Bildschirm, die die Bemerkungen der Bewohner wiederum zeigt"
+      "hide": "Ausblenden",
+      "description": "Karte oben rechts auf dem Bildschirm, die nacheinander Äußerungen der Bürger anzeigt"
     },
     "language": {
       "label": "Sprache",
-      "description": "Die Anzeigesprache der Benutzeroberfläche. Dies ist getrennt von der Sprache Ihrer Speicherdaten.",
+      "description": "Anzeigesprache der Benutzeroberfläche. Sie ist unabhängig von der Sprache des Spielstands.",
       "ja": "日本語",
       "en": "English",
       "es-419": "Español (Latinoamérica)",
@@ -76,74 +76,74 @@
       "ar": "العربية"
     },
     "volume": {
-      "label": "Volumen",
-      "master": "Master-Volumen",
-      "bgm": "BGM",
+      "label": "Lautstärke",
+      "master": "Gesamtlautstärke",
+      "bgm": "Musik",
       "sfx": "Soundeffekte"
     },
     "compute": {
       "label": "GPU-Beschleunigung",
-      "comingSoon": "Kommt bald",
+      "comingSoon": "Demnächst verfügbar",
       "cpu": "CPU",
       "gpu": "GPU",
       "statusActive": "GPU aktiv",
       "statusInactive": "CPU aktiv",
-      "restartRequired": "Das Hauptprogramm wird nach dem Ändern dieser Einstellung neu gestartet",
-      "restarting": "Neustart...",
-      "restartFailed": "Neustart fehlgeschlagen",
-      "restartUnavailable": "Einstellungen gespeichert. Änderungen werden beim nächsten Spielbeginn wirksam",
-      "confirmRestart": "Rechnermodus auf {{mode}} umschalten? Das Hauptprogramm wird neu gestartet.",
+      "restartRequired": "Nach einer Änderung wird das Hauptprogramm neu gestartet",
+      "restarting": "Neustart läuft …",
+      "restartFailed": "Der Neustart ist fehlgeschlagen",
+      "restartUnavailable": "Einstellungen gespeichert. Die Änderungen werden beim nächsten Spielstart wirksam",
+      "confirmRestart": "Die Berechnung wird auf {{mode}} umgestellt. Möchten Sie das Hauptprogramm neu starten?",
       "restartAction": "Neu starten"
     },
     "windowReset": {
-      "label": "Fensterposition & Größe",
-      "action": "Rücksetzen"
+      "label": "Fensterposition und -größe",
+      "action": "Zurücksetzen"
     },
     "credits": {
       "label": "Credits",
-      "description": "Zuordnungen für die in diesem Spiel verwendeten Assets und Software",
-      "action": "Aussicht"
+      "description": "Urheberrechtshinweise zu den in diesem Spiel verwendeten Materialien und Programmen",
+      "action": "Anzeigen"
     }
   },
   "saveLoad": {
     "newGame": "Neues Spiel",
-    "overwriteSave": "Speichern überschreiben",
-    "saveAs": "Speichern als",
+    "overwriteSave": "Speichern (überschreiben)",
+    "saveAs": "Speichern unter",
     "load": "Laden",
     "quitGame": "Spiel beenden",
-    "returnToTop": "Zurück zum Top-Menü",
-    "loading": "Lädt…",
-    "shuttingDown": "Herunterfahren ...",
+    "returnToTop": "Zum Hauptmenü zurückkehren",
+    "loading": "Wird geladen …",
+    "shuttingDown": "Wird beendet …",
     "saveFailed": "Speichern fehlgeschlagen",
     "loadFailed": "Laden fehlgeschlagen",
-    "confirmNewGame": "Aktuelle Daten gehen verloren. Ein neues Spiel starten?",
-    "confirmQuitGame": "Bist du sicher, dass du aufhören willst? Ihr aktueller Fortschritt wird nicht automatisch gespeichert.",
-    "confirmReturnToTop": "zum oberen Menü zurückkehren? Ihr aktueller Fortschritt wird nicht automatisch gespeichert.",
+    "confirmNewGame": "Die aktuellen Daten gehen verloren. Möchten Sie ein neues Spiel starten?",
+    "confirmQuitGame": "Möchten Sie das Spiel beenden? Der aktuelle Fortschritt wird nicht automatisch gespeichert.",
+    "confirmReturnToTop": "Möchten Sie zum Hauptmenü zurückkehren? Der aktuelle Fortschritt wird nicht automatisch gespeichert.",
     "confirm": "Ja",
     "cancel": "Nein",
     "saveAsScenario": "Als Szenario speichern",
-    "saveAsNewScenario": "Als ein anderes Szenario speichern",
+    "saveAsNewScenario": "Als neues Szenario speichern",
     "overwriteScenario": "Szenario überschreiben",
     "backToGame": "Zurück zum Spiel",
-    "saveName": "Name speichern",
-    "confirmOverwrite": "Überschreiben Sie das Speichern \"{{name}}\"?",
-    "confirmOverwriteScenario": "Überschreiben Sie das Szenario \"{{name}}\"?"
+    "saveName": "Name des Spielstands",
+    "confirmOverwrite": "Den Spielstand „{{name}}“ überschreiben?",
+    "confirmOverwriteScenario": "Das Szenario „{{name}}“ überschreiben?"
   },
   "saveList": {
-    "noSaves": "Keine Speicherdaten gefunden",
+    "noSaves": "Keine Spielstände vorhanden",
     "currentSave": "Aktuelle Daten",
     "population": "Bevölkerung",
     "inGameDate": "Datum",
-    "savedAt": "Gespeichert bei",
+    "savedAt": "Gespeichert am",
     "loadButton": "Laden",
     "deleteButton": "Löschen",
-    "confirmLoad": "Diese Speicherdaten laden?",
-    "confirmDelete": "Diese Speicherdaten löschen? Dies kann nicht rückgängig gemacht werden.",
-    "loading": "Lädt…",
+    "confirmLoad": "Möchten Sie diesen Spielstand laden?",
+    "confirmDelete": "Möchten Sie diesen Spielstand löschen? Dieser Vorgang kann nicht rückgängig gemacht werden.",
+    "loading": "Wird geladen …",
     "loadFailed": "Laden fehlgeschlagen",
     "deleteFailed": "Löschen fehlgeschlagen",
-    "openFolderButton": "Öffnen Sie den Speicherordner",
+    "openFolderButton": "Speicherordner anzeigen",
     "scenario": "Szenario",
-    "autosaveName": "{{name}} (Auto speichern beim Beenden)"
+    "autosaveName": "{{name}} (automatische Speicherung beim Beenden)"
   }
 }

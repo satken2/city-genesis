@@ -1,27 +1,27 @@
 {
   "building": {
-    "floorConfiguration": "Skład podłogi",
-    "parking": "Parking",
+    "floorConfiguration": "Struktura kondygnacji",
+    "parking": "Parkowanie",
     "type": "Typ budynku",
     "durability": "Trwałość",
-    "floors": "Podłogi",
-    "floorsValue": "{{floors}}F (obszar podłogi {{area, number}}㎡)",
-    "heightLabel": "wysokość: {{value}}m",
-    "baseAreaLabel": "Obszar podstawowy: {{area, number}}㎡",
-    "underMaintenance": "Trwają prace konserwacyjne",
-    "parkingCapacity": "Pojemność parkingowa",
-    "parkingCapacityValue": "{{capacity}} samochody",
-    "parkingDay": "Dzień",
-    "parkingNight": "Nocna pora",
-    "parkingUsage": "{{used}} / {{capacity}} samochody"
+    "floors": "Kondygnacje",
+    "floorsValue": "Kondygnacje: {{floors}} (powierzchnia {{area, number}} ㎡)",
+    "heightLabel": "Wysokość: {{value}} m",
+    "baseAreaLabel": "Powierzchnia zabudowy: {{area, number}} ㎡",
+    "underMaintenance": "W trakcie naprawy",
+    "parkingCapacity": "Liczba miejsc parkingowych",
+    "parkingCapacityValue": "{{capacity}} poj.",
+    "parkingDay": "W dzień",
+    "parkingNight": "W nocy",
+    "parkingUsage": "{{used}} / {{capacity}} poj."
   },
   "building_appearance": {
-    "variantLabel": "wygląd {{index}}",
-    "layoutHint": "Przeciągnij kartę na miejsce, aby umieścić / przeciągnij, aby przesunąć / przesunąć + przeciągnąć, aby obrócić / usunąć klawisz, aby usunąć",
-    "sizeLabel": "{{width}}×{{height}}m",
-    "deleteSelected": "Usunąć wybrane",
-    "apply": "Zastosować",
+    "variantLabel": "Wygląd {{index}}",
+    "layoutHint": "Przeciągnij kartę na teren budowy, aby ją umieścić / przeciągnij, aby przesunąć / Shift+przeciągnij, aby obrócić / klawisz Delete, aby usunąć",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Usuń zaznaczony budynek",
+    "apply": "Zastosuj",
     "saveFailed": "Nie udało się zapisać wyglądu",
-    "noSubbuildings": "Dla tego typu budynku nie zdefiniowano żadnych budynków podrzędnych"
+    "noSubbuildings": "Dla tego typu budynku nie zdefiniowano budynków składowych"
   }
 }

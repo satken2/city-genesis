@@ -3,61 +3,61 @@
     "title": "Pengaturan",
     "groups": {
       "general": "Umum",
-      "display": "Tampilan",
+      "display": "Layar",
       "sound": "Suara",
       "system": "Sistem",
-      "about": "Tentang",
-      "developer": "Pengaturan Pengembang"
+      "about": "Informasi",
+      "developer": "Pengaturan pengembang"
     },
     "swagger": {
       "label": "Swagger (dokumentasi API)",
-      "description": "Lihat API backend yang terhubung di browser default Anda",
-      "action": "Buka di peramban"
+      "description": "Menampilkan spesifikasi API simulator inti di browser default",
+      "action": "Buka di browser"
     },
     "currencyUnit": {
-      "label": "satuan mata uang",
-      "description": "unit yang ditunjukkan dengan jumlah moneter. Biarkan kosong untuk mengikuti bahasa tampilan."
+      "label": "Satuan mata uang",
+      "description": "Satuan yang ditampilkan bersama jumlah uang. Jika dikosongkan, mengikuti bahasa tampilan."
     },
     "fontSize": {
-      "label": "Ukuran huruf",
+      "label": "Ukuran teks",
       "large": "Besar",
       "medium": "Sedang",
       "small": "Kecil",
-      "custom": "Atur sendiri",
+      "custom": "Kustom",
       "preview": "Ukuran saat ini"
     },
     "monitor": {
-      "label": "Tampilan",
-      "prev": "Tampilan sebelumnya",
-      "next": "Tampilan berikutnya"
+      "label": "Monitor",
+      "prev": "Monitor sebelumnya",
+      "next": "Monitor berikutnya"
     },
     "graphicMonitor": {
-      "label": "Tampilan tampilan 3D"
+      "label": "Monitor tampilan 3D"
     },
     "multiDisplay": {
-      "label": "Mode multi-tampilan",
-      "description": "Menampilkan jendela pada tampilan yang berbeda dari layar game",
-      "on": "Pada",
-      "off": "Lepas"
+      "label": "Mode multi-monitor",
+      "description": "Menampilkan berbagai jendela di monitor lain",
+      "on": "Aktif",
+      "off": "Nonaktif"
     },
     "popupMonitor": {
-      "label": "Tampilan jendela"
+      "label": "Monitor jendela"
     },
     "hintbar": {
-      "label": "bilah petunjuk",
-      "show": "Menunjukkan",
-      "hide": "Menyembunyikan",
-      "description": "Bar di bagian atas layar yang menampilkan petunjuk operasi"
+      "label": "Bilah petunjuk",
+      "show": "Tampilkan",
+      "hide": "Sembunyikan",
+      "description": "Bilah di bagian atas layar yang menampilkan petunjuk pengoperasian"
     },
     "citizenVoice": {
       "label": "Suara warga",
-      "show": "Menunjukkan",
-      "hide": "Menyembunyikan",
-      "description": "kartu di kanan atas layar yang menunjukkan komentar warga secara bergantian"
+      "show": "Tampilkan",
+      "hide": "Sembunyikan",
+      "description": "Kartu di kanan atas layar yang menampilkan ucapan warga secara bergiliran"
     },
     "language": {
       "label": "Bahasa",
-      "description": "Bahasa antarmuka. Bahasa nama di kota ditentukan saat permainan dimulai.",
+      "description": "Bahasa tampilan UI. Ini berbeda dengan bahasa data simpanan",
       "ja": "日本語",
       "en": "English",
       "es-419": "Español (Latinoamérica)",
@@ -77,7 +77,7 @@
     },
     "volume": {
       "label": "Volume",
-      "master": "volume master",
+      "master": "Volume utama",
       "bgm": "BGM",
       "sfx": "Efek suara"
     },
@@ -88,62 +88,62 @@
       "gpu": "GPU",
       "statusActive": "GPU aktif",
       "statusInactive": "CPU aktif",
-      "restartRequired": "Program utama akan restart setelah mengubah pengaturan ini",
+      "restartRequired": "Program utama akan dimulai ulang setelah pengaturan diubah",
       "restarting": "Memulai ulang...",
-      "restartFailed": "restart gagal",
-      "restartUnavailable": "Pengaturan disimpan. Perubahan akan berlaku saat permainan dimulai",
-      "confirmRestart": "Ganti mode komputasi ke {{mode}}? Program utama akan dimulai ulang.",
-      "restartAction": "Mengulang kembali"
+      "restartFailed": "Gagal memulai ulang",
+      "restartUnavailable": "Pengaturan telah disimpan. Perubahan akan berlaku saat permainan dijalankan berikutnya",
+      "confirmRestart": "Pemrosesan komputasi akan diubah ke {{mode}}. Mulai ulang program utama?",
+      "restartAction": "Mulai ulang"
     },
     "windowReset": {
-      "label": "Posisi & Ukuran Jendela",
-      "action": "Memasang kembali"
+      "label": "Posisi & ukuran jendela",
+      "action": "Atur ulang"
     },
     "credits": {
       "label": "Kredit",
-      "description": "Atribusi untuk aset dan perangkat lunak yang digunakan dalam game ini",
-      "action": "Melihat"
+      "description": "Atribusi hak atas aset dan perangkat lunak yang digunakan dalam permainan ini",
+      "action": "Lihat"
     }
   },
   "saveLoad": {
     "newGame": "Permainan baru",
-    "overwriteSave": "Timpa data simpanan",
+    "overwriteSave": "Timpa simpanan",
     "saveAs": "Simpan sebagai",
     "load": "Muat",
     "quitGame": "Keluar dari permainan",
-    "returnToTop": "kembali ke menu atas",
-    "loading": "Memuat…",
-    "shuttingDown": "Menutup permainan…",
+    "returnToTop": "Kembali ke menu utama",
+    "loading": "Memuat...",
+    "shuttingDown": "Sedang menutup...",
     "saveFailed": "Gagal menyimpan",
     "loadFailed": "Gagal memuat",
-    "confirmNewGame": "Data saat ini akan hilang. memulai permainan baru?",
-    "confirmQuitGame": "Apakah Anda yakin ingin berhenti? Kemajuan Anda saat ini tidak disimpan secara otomatis.",
-    "confirmReturnToTop": "kembali ke menu atas? Kemajuan Anda saat ini tidak disimpan secara otomatis.",
+    "confirmNewGame": "Data saat ini akan hilang. Mulai permainan baru?",
+    "confirmQuitGame": "Keluar dari permainan? Kemajuan saat ini tidak disimpan secara otomatis.",
+    "confirmReturnToTop": "Kembali ke menu utama? Kemajuan saat ini tidak disimpan secara otomatis.",
     "confirm": "Ya",
     "cancel": "Tidak",
-    "saveAsScenario": "Simpan Sebagai Skenario",
+    "saveAsScenario": "Simpan sebagai skenario",
     "saveAsNewScenario": "Simpan sebagai skenario lain",
-    "overwriteScenario": "menimpa skenario",
+    "overwriteScenario": "Simpan dan timpa",
     "backToGame": "Kembali ke permainan",
-    "saveName": "Simpan Nama",
-    "confirmOverwrite": "menimpa simpanan “{{name}}”?",
-    "confirmOverwriteScenario": "menimpa skenario “{{name}}”?"
+    "saveName": "Nama simpanan",
+    "confirmOverwrite": "Timpa data simpanan “{{name}}”?",
+    "confirmOverwriteScenario": "Timpa skenario “{{name}}”?"
   },
   "saveList": {
-    "noSaves": "Tidak Ada Simpan Data Ditemukan",
-    "currentSave": "data saat ini",
-    "population": "Jumlah penduduk",
+    "noSaves": "Tidak ada data simpanan",
+    "currentSave": "Data saat ini",
+    "population": "Populasi",
     "inGameDate": "Tanggal",
-    "savedAt": "disimpan di",
+    "savedAt": "Waktu penyimpanan",
     "loadButton": "Muat",
     "deleteButton": "Hapus",
-    "confirmLoad": "memuat ini menyimpan data?",
-    "confirmDelete": "hapus ini simpan data? ini tidak dapat diurungkan.",
-    "loading": "Memuat…",
+    "confirmLoad": "Muat data simpanan ini?",
+    "confirmDelete": "Hapus data simpanan ini? Tindakan ini tidak dapat dibatalkan.",
+    "loading": "Memuat...",
     "loadFailed": "Gagal memuat",
-    "deleteFailed": "Hapus gagal",
-    "openFolderButton": "Buka Simpan Folder",
+    "deleteFailed": "Gagal menghapus",
+    "openFolderButton": "Tampilkan lokasi folder",
     "scenario": "Skenario",
-    "autosaveName": "{{name}} (Simpan otomatis saat keluar)"
+    "autosaveName": "{{name}} (simpan otomatis saat keluar)"
   }
 }

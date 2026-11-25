@@ -2,18 +2,18 @@
   "assetManager": {
     "tabs": {
       "buildings": "Gebäude",
-      "paths": "Wege",
+      "paths": "Trassen",
       "vehicles": "Fahrzeuge",
-      "props": "Requisiten"
+      "props": "Dekorationsobjekte"
     },
     "additional": "Zusätzliche Modelle",
-    "loading": "Laden von Modellen aus der 3D-Ansicht…",
+    "loading": "Modelle werden aus der 3D-Ansicht geladen…",
     "noModel": "Kein Modell",
     "noImage": "Kein Bild",
     "weight": "Gewicht",
-    "applyNote": "Gewichtsänderungen werden beim nächsten Start oder Laden eines Spiels wirksam.",
+    "applyNote": "Gewichtsänderungen werden wirksam, wenn Sie das nächste Mal ein Spiel starten oder laden.",
     "preview": {
-      "hint": "Ziehen zum Drehen / Scrollen zum Zoomen",
+      "hint": "Ziehen zum Drehen / Mausrad zum Zoomen",
       "zoomIn": "Vergrößern",
       "zoomOut": "Verkleinern",
       "reset": "Zurücksetzen"

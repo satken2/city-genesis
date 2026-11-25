@@ -1,39 +1,39 @@
 {
   "citizenAction": {
     "name": {
-      "label": "Concedi un nome",
-      "message": "Inserisci il nome che vorresti concedere a {{name}}.",
+      "label": "Conferisci un nome",
+      "message": "Inserisci il nome da conferire a {{name}}.",
       "inputLabel": "Nuovo nome",
-      "confirm": "Dare"
+      "confirm": "Conferisci"
     },
     "reward": {
-      "label": "concedere una ricompensa",
-      "message": "Dai alla famiglia di {{name}} una ricompensa dai fondi della città. Contanti della città: {{available}}",
-      "confirm": "Dare"
+      "label": "Concedi un premio",
+      "message": "Consegna un premio in denaro al nucleo familiare di {{name}}, attingendo ai fondi comunali.\nDisponibilità liquide del Comune: {{available}}",
+      "confirm": "Consegna"
     },
     "expel": {
-      "label": "Augura loro ogni successo fuori città",
-      "message": "espellere {{name}} dalla città?",
-      "confirm": "Espellere",
+      "label": "Augura ogni successo altrove",
+      "message": "Vuoi espellere {{name}} dalla città?",
+      "confirm": "Espelli",
       "results": {
-        "0": "{{name}} ha fatto le valigie e ha lasciato tranquillamente la città. Nessuno è venuto a salutarli.",
-        "1": "{{name}} ha attraversato i limiti della città gridando: \"Non tornerò mai più!\"",
-        "2": "{{name}} è stato cortesemente scortato oltre i limiti della città. Auguriamo loro ogni successo altrove."
+        "0": "{{name}} ha fatto i bagagli e ha lasciato la città in silenzio. Nessuno è venuto a salutare.",
+        "1": "{{name}} ha varcato il confine della città urlando: “Qui non ci torno mai più!”",
+        "2": "Abbiamo accompagnato con ogni riguardo {{name}} oltre i confini comunali. I nostri migliori auguri per il futuro fuori città."
       }
     },
     "donation": {
       "label": "Chiedi una donazione",
-      "message": "Chiedi alla famiglia di {{name}} una donazione alla città. Contanti domestici: {{available}}",
-      "confirm": "Chiedere"
+      "message": "Chiedi al nucleo familiare di {{name}} una donazione alla città.\nDisponibilità liquide del nucleo: {{available}}",
+      "confirm": "Chiedi"
     },
     "relocate": {
-      "label": "Suggerisci una nuova casa",
-      "message": "Evict {{name}} della famiglia dalla loro attuale casa? Cercheranno una nuova casa nella prossima epoca.",
-      "confirm": "Sfrattare",
+      "label": "Proponi una nuova casa",
+      "message": "Vuoi sfrattare il nucleo familiare di {{name}} dalla sua abitazione attuale?\nNella prossima epoca il nucleo cercherà una nuova casa.",
+      "confirm": "Sfratta",
       "results": {
-        "0": "La famiglia di {{name}} è stata buttata fuori di casa. I loro mobili sono accatastati lungo la strada.",
-        "1": "Le serrature sulla casa di {{name}} sono state modificate. La famiglia ha iniziato a cercare un nuovo posto.",
-        "2": "Alla famiglia di {{name}} è stata offerta una nuova casa. Non possono tornare al vecchio."
+        "0": "La famiglia di {{name}} è stata cacciata di casa. I mobili sono ammucchiati sul ciglio della strada.",
+        "1": "Le serrature della casa di {{name}} sono state cambiate. La famiglia ha iniziato a cercare un nuovo alloggio.",
+        "2": "Alla famiglia di {{name}} è stata proposta una nuova casa. In quella vecchia non può più tornare."
       }
     }
   }

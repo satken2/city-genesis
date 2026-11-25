@@ -1,28 +1,28 @@
 {
   "cityDevelopment": {
     "pattern": "Algoritmo",
-    "roadVariants": "Tipi di strade",
+    "roadVariants": "Tipi di strada",
     "patterns": {
       "grid_1": "Griglia 1",
       "grid_2": "Griglia 2",
-      "sprawl_1": "sprawl 1",
-      "sprawl_2": "sprawl 2",
-      "sprawl_3": "sprawl 3",
+      "sprawl_1": "Sprawl 1",
+      "sprawl_2": "Sprawl 2",
+      "sprawl_3": "Sprawl 3",
       "planned_city_1": "Città pianificata 1",
-      "split_1": "Suddividere 1"
+      "split_1": "Suddivisione 1"
     },
-    "spacing": "Spaziatura stradale",
-    "blockLength": "Lunghezza del blocco",
-    "splitHint": "Includere interi blocchi racchiusi da strade. Le strade parallele al lato lungo di ciascun blocco sono distanziate da una spaziatura stradale e attraversano strade per lunghezza di blocco.",
-    "createParcels": "Crea pacchi",
-    "parcelArea": "Area pacchi",
-    "hint": "Tieni premuto Ctrl e trascina per dipingere l'area da sviluppare. Trascina per fare una panoramica, scorri fino a Zoom.",
-    "clear": "Chiaro",
+    "spacing": "Distanza tra le strade",
+    "blockLength": "Lunghezza dell'isolato",
+    "splitHint": "Includi nell'area interi isolati delimitati da strade. Le strade parallele al lato lungo di ogni isolato vengono tracciate a intervalli pari a “Distanza tra le strade”, quelle perpendicolari a intervalli pari a “Lunghezza dell'isolato”.",
+    "createParcels": "Crea lotti",
+    "parcelArea": "Superficie del lotto",
+    "hint": "Tieni premuto Ctrl e trascina con il tasto sinistro per colorare l'area da sviluppare. Trascina con il tasto sinistro per spostare la mappa e usa la rotellina per lo zoom.",
+    "clear": "Cancella",
     "preview": "Anteprima",
-    "previewing": "Calcolo...",
+    "previewing": "Calcolo in corso...",
     "create": "Conferma",
     "creating": "Creazione...",
-    "previewed": "Leviga leggermente il terreno in {{area}} e può pianificare {{roads}} segmenti stradali e {{parcels}} pacchi ({{rejected}} rifiutati)",
-    "created": "Smussato il terreno e pianificato {{roads}} segmenti stradali e {{parcels}} pacchi ({{rejected}} respinti)"
+    "previewed": "Area di {{area}}: il terreno verrà leggermente spianato e si possono pianificare {{roads}} strade e {{parcels}} lotti ({{rejected}} strade scartate)",
+    "created": "Terreno spianato: pianificate {{roads}} strade e {{parcels}} lotti ({{rejected}} strade scartate)"
   }
 }

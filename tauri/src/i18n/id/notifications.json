@@ -1,26 +1,26 @@
 {
   "notifications": {
-    "trayTooltip": "Pemberitahuan Kota",
-    "empty": "Tidak ada masalah yang memerlukan perhatian saat ini",
+    "trayTooltip": "Notifikasi kota",
+    "empty": "Saat ini tidak ada masalah yang perlu ditangani",
     "loadFailed": "Gagal memuat notifikasi",
     "types": {
-      "resource_runway": "Sumber daya \"{{name}}\" diperkirakan akan habis sekitar {{remaining_epochs}} Siklus",
-      "resource_depleted": "Sumber daya \"{{name}}\" telah habis",
-      "facility_inoperative": "Fasilitas publik \"{{name}}\" tidak beroperasi",
-      "facility_inoperative_labor": "Fasilitas publik \"{{name}}\" tidak beroperasi karena kekurangan tenaga kerja",
-      "facility_inoperative_material": "Fasilitas publik \"{{name}}\" tidak beroperasi karena kekurangan material",
-      "facility_inoperative_high_skill": "Fasilitas publik \"{{name}}\" berjalan pada kapasitas yang berkurang karena kekurangan staf yang terampil",
-      "facility_inoperative_budget": "Fasilitas publik \"{{name}}\" berjalan pada kapasitas yang berkurang karena kekurangan anggaran",
-      "education_low_enrollment": "Lembaga Pendidikan \"{{name}}\" kurang dimanfaatkan — hanya sedikit siswa yang terdaftar ({{enrolled}} dari {{max_students}} kursi)",
-      "infra_facility_down": "Fasilitas infrastruktur \"{{name}}\" tidak berfungsi",
-      "infra_disconnected": "Fasilitas {{count}} terputus dari jaringan infrastruktur",
-      "rail_capacity_exceeded": "Frekuensi kereta melebihi kapasitas lintasan pada {{count}} Segmen lintasan",
-      "collapse": "{{count}} Bangunan/jalan telah runtuh",
-      "collapse_with_deaths": "{{count}} Bangunan/jalan telah runtuh, menewaskan {{deaths}} orang",
-      "deaths_traffic": "{{count}} Orang meninggal dalam kecelakaan lalu lintas",
-      "tenant_blocked_by_parcel_size": "Tidak ada bangunan untuk \"{{tenant_name}}\" yang dapat dibangun di distrik \"{{zone_name}}\" (perlu {{required}} m2, buildable {{max_capacity}} m2 terbesar). Paket yang lebih besar diperlukan",
-      "unknown": "Peristiwa kritis telah terjadi",
-      "sanitation": "Sanitasi memburuk untuk rumah tangga {{count}}. memperbaiki limbah dan pengolahan limbah."
+      "resource_runway": "Sumber daya “{{name}}” diperkirakan habis dalam sekitar {{remaining_epochs}} siklus lagi",
+      "resource_depleted": "Sumber daya “{{name}}” telah habis",
+      "facility_inoperative": "Fasilitas umum “{{name}}” tidak dapat beroperasi",
+      "facility_inoperative_labor": "Fasilitas umum “{{name}}” tidak dapat beroperasi karena kekurangan tenaga kerja",
+      "facility_inoperative_material": "Fasilitas umum “{{name}}” tidak dapat beroperasi karena kekurangan bahan baku",
+      "facility_inoperative_high_skill": "Fasilitas umum “{{name}}” mengurangi operasinya karena kekurangan tenaga ahli",
+      "facility_inoperative_budget": "Fasilitas umum “{{name}}” mengurangi operasinya karena kekurangan anggaran",
+      "education_low_enrollment": "Lembaga pendidikan “{{name}}” kekurangan siswa sehingga tingkat pemanfaatannya rendah ({{enrolled}} siswa terdaftar / kapasitas {{max_students}} siswa)",
+      "infra_facility_down": "Fasilitas infrastruktur “{{name}}” berhenti beroperasi",
+      "infra_disconnected": "{{count}} fasilitas tidak terhubung ke jaringan infrastruktur",
+      "rail_capacity_exceeded": "Frekuensi kereta melebihi kapasitas rel di {{count}} rel",
+      "collapse": "{{count}} bangunan/jalan telah runtuh",
+      "collapse_with_deaths": "{{count}} bangunan/jalan runtuh dan {{deaths}} orang tewas",
+      "deaths_traffic": "{{count}} orang tewas akibat kecelakaan lalu lintas",
+      "tenant_blocked_by_parcel_size": "Di distrik “{{zone_name}}”, bangunan yang dapat ditempati “{{tenant_name}}” tidak dapat dibangun (dibutuhkan {{required}} m2, maksimum kavling {{max_capacity}} m2). Diperlukan kavling yang lebih besar",
+      "unknown": "Telah terjadi peristiwa serius",
+      "sanitation": "Kondisi sanitasi {{count}} rumah tangga memburuk. Tingkatkan pengolahan air limbah dan sampah."
     }
   }
 }

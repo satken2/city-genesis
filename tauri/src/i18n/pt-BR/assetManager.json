@@ -1,21 +1,21 @@
 {
   "assetManager": {
     "tabs": {
-      "buildings": "edifícios",
-      "paths": "Caminhos",
+      "buildings": "Edifícios",
+      "paths": "Vias",
       "vehicles": "Veículos",
-      "props": "Adereços"
+      "props": "Objetos decorativos"
     },
     "additional": "Modelos adicionais",
-    "loading": "Carregando modelos a partir da visualização 3D…",
-    "noModel": "nenhum modelo",
-    "noImage": "nenhuma imagem",
+    "loading": "Carregando modelos da visualização 3D…",
+    "noModel": "Sem modelo",
+    "noImage": "Sem imagem",
     "weight": "Peso",
-    "applyNote": "As mudanças de peso entram em vigor na próxima vez que você iniciar ou carregar um jogo.",
+    "applyNote": "As alterações de peso entram em vigor na próxima vez que você iniciar ou carregar um jogo.",
     "preview": {
-      "hint": "Arraste para girar / Roda do mouse para dar zoom",
-      "zoomIn": "Aumentar zoom",
-      "zoomOut": "Diminuir zoom",
+      "hint": "Arraste para girar / Use a roda do mouse para ampliar ou reduzir",
+      "zoomIn": "Ampliar",
+      "zoomOut": "Reduzir",
       "reset": "Redefinir"
     }
   }

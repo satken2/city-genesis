@@ -1,27 +1,27 @@
 {
   "building": {
-    "floorConfiguration": "Bodenzusammensetzung",
+    "floorConfiguration": "Geschossaufteilung",
     "parking": "Parken",
     "type": "Gebäudetyp",
     "durability": "Haltbarkeit",
-    "floors": "Böden",
-    "floorsValue": "{{floors}}F (Bodenfläche {{area, number}}㎡)",
-    "heightLabel": "Höhe: {{value}}M",
-    "baseAreaLabel": "Basisbereich: {{area, number}} ㎡",
-    "underMaintenance": "Wird gewartet",
+    "floors": "Geschosse",
+    "floorsValue": "{{floors}} Geschosse (Geschossfläche {{area, number}} m²)",
+    "heightLabel": "Höhe: {{value}} m",
+    "baseAreaLabel": "Bebaute Fläche: {{area, number}} m²",
+    "underMaintenance": "In Reparatur",
     "parkingCapacity": "Parkkapazität",
-    "parkingCapacityValue": "{{capacity}} Autos",
-    "parkingDay": "Tageszeit",
-    "parkingNight": "Nachtzeit",
-    "parkingUsage": "{{used}} / {{capacity}} Autos"
+    "parkingCapacityValue": "{{capacity}} Stellplätze",
+    "parkingDay": "Tagsüber",
+    "parkingNight": "Nachts",
+    "parkingUsage": "{{used}} / {{capacity}} Stellplätze"
   },
   "building_appearance": {
     "variantLabel": "Aussehen {{index}}",
-    "layoutHint": "Ziehen Sie eine Karte auf die zu platzierende Website / ziehen Sie sie, um sie zu bewegen / Umschalt + Ziehen zum Drehen / Löschen zum Entfernen",
-    "sizeLabel": "{{width}} × {{height}} m",
-    "deleteSelected": "Ausgewählte entfernen",
+    "layoutHint": "Karte zum Platzieren auf das Baugrundstück ziehen / Ziehen zum Verschieben / Umschalt+Ziehen zum Drehen / Entf-Taste zum Entfernen",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Ausgewählten Baukörper entfernen",
     "apply": "Anwenden",
-    "saveFailed": "Fehler beim Speichern des Aussehens",
-    "noSubbuildings": "Für diesen Gebäudetyp sind keine Teilgebäude definiert"
+    "saveFailed": "Das Aussehen konnte nicht gespeichert werden",
+    "noSubbuildings": "Für diesen Gebäudetyp sind keine Nebengebäude definiert"
   }
 }

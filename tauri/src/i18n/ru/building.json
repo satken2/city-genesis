@@ -1,27 +1,27 @@
 {
   "building": {
-    "floorConfiguration": "Состав пола",
-    "parking": "Стоянка",
+    "floorConfiguration": "Состав этажей",
+    "parking": "Парковка",
     "type": "Тип здания",
-    "durability": "Долговечность",
-    "floors": "Полы",
-    "floorsValue": "{{floors}}F (площадка {{area, number}}㎡)",
-    "heightLabel": "Высота: {{value}}м",
-    "baseAreaLabel": "Базовая область: {{area, number}}㎡",
-    "underMaintenance": "На техобслуживании",
-    "parkingCapacity": "Парковочная вместимость",
-    "parkingCapacityValue": "{{capacity}} Автомобили",
-    "parkingDay": "Дневное время",
-    "parkingNight": "Ночь",
-    "parkingUsage": "{{used}} / {{capacity}} Автомобили"
+    "durability": "Прочность",
+    "floors": "Этажей",
+    "floorsValue": "{{floors}} эт. (площадь этажей {{area, number}} м²)",
+    "heightLabel": "Высота: {{value}} м",
+    "baseAreaLabel": "Площадь застройки: {{area, number}} м²",
+    "underMaintenance": "На ремонте",
+    "parkingCapacity": "Вместимость парковки",
+    "parkingCapacityValue": "{{capacity}} маш.",
+    "parkingDay": "Днём",
+    "parkingNight": "Ночью",
+    "parkingUsage": "{{used}} / {{capacity}} маш."
   },
   "building_appearance": {
     "variantLabel": "Внешний вид {{index}}",
-    "layoutHint": "Перетащите карту на сайт, чтобы поместить / Перетащите, чтобы переместить / Сдвиг + перетащите, чтобы повернуть / удалить клавишу, чтобы удалить",
-    "sizeLabel": "{{width}}×{{height}}m",
-    "deleteSelected": "Удалить выбранное",
-    "apply": "Применять",
+    "layoutHint": "Перетащите карточку на площадку, чтобы разместить / перетаскивание — перемещение / Shift+перетаскивание — поворот / Delete — удаление",
+    "sizeLabel": "{{width}}×{{height}} м",
+    "deleteSelected": "Удалить выбранный корпус",
+    "apply": "Применить",
     "saveFailed": "Не удалось сохранить внешний вид",
-    "noSubbuildings": "Для этого типа здания не определены подстройки."
+    "noSubbuildings": "Для этого типа зданий не заданы вспомогательные корпуса"
   }
 }

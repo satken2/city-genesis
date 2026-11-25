@@ -3,61 +3,61 @@
     "title": "Impostazioni",
     "groups": {
       "general": "Generale",
-      "display": "Display",
-      "sound": "Suono",
+      "display": "Schermo",
+      "sound": "Audio",
       "system": "Sistema",
-      "about": "Di",
-      "developer": "Impostazioni dello sviluppatore"
+      "about": "Informazioni",
+      "developer": "Impostazioni sviluppatore"
     },
     "swagger": {
-      "label": "spavalderia (documentazione API)",
-      "description": "Visualizza l'API di backend connessa nel browser predefinito",
+      "label": "Swagger (documentazione API)",
+      "description": "Mostra le specifiche dell'API del simulatore core nel browser predefinito",
       "action": "Apri nel browser"
     },
     "currencyUnit": {
       "label": "Unità di valuta",
-      "description": "l'unità mostrata con importi monetari. Lascia vuoto per seguire la lingua di visualizzazione."
+      "description": "L'unità mostrata accanto agli importi. Se lasci vuoto, segue la lingua di visualizzazione."
     },
     "fontSize": {
-      "label": "Dimensione del font",
-      "large": "Larga",
-      "medium": "Medio",
-      "small": "Piccolo",
-      "custom": "Abitudine",
+      "label": "Dimensione testo",
+      "large": "Grande",
+      "medium": "Media",
+      "small": "Piccola",
+      "custom": "Personalizzata",
       "preview": "Dimensione attuale"
     },
     "monitor": {
-      "label": "Display",
-      "prev": "Display precedente",
-      "next": "Display successivo"
+      "label": "Monitor",
+      "prev": "Monitor precedente",
+      "next": "Monitor successivo"
     },
     "graphicMonitor": {
-      "label": "Visualizzazione della vista 3D"
+      "label": "Monitor della vista 3D"
     },
     "multiDisplay": {
-      "label": "Modalità di visualizzazione multipla",
-      "description": "Mostra le finestre su un display diverso dalla schermata di gioco",
-      "on": "Su",
-      "off": "Via"
+      "label": "Modalità multi-monitor",
+      "description": "Mostra le varie finestre su un altro monitor",
+      "on": "Attiva",
+      "off": "Disattiva"
     },
     "popupMonitor": {
-      "label": "Visualizzazione della finestra"
+      "label": "Monitor delle finestre"
     },
     "hintbar": {
-      "label": "Barra di suggerimento",
-      "show": "Spettacolo",
-      "hide": "Nascondere",
-      "description": "Barra nella parte superiore dello schermo che mostra i suggerimenti per l'operazione"
+      "label": "Barra dei suggerimenti",
+      "show": "Mostra",
+      "hide": "Nascondi",
+      "description": "Barra nella parte superiore dello schermo che mostra suggerimenti sui comandi"
     },
     "citizenVoice": {
       "label": "Voci dei cittadini",
-      "show": "Spettacolo",
-      "hide": "Nascondere",
-      "description": "Carta in alto a destra dello schermo che mostra a turno le osservazioni dei residenti"
+      "show": "Mostra",
+      "hide": "Nascondi",
+      "description": "Scheda in alto a destra dello schermo che mostra a turno i commenti dei cittadini"
     },
     "language": {
       "label": "Lingua",
-      "description": "La lingua di visualizzazione dell'interfaccia utente. Questo è separato dalla lingua dei tuoi dati di salvataggio.",
+      "description": "La lingua dell'interfaccia. È diversa dalla lingua della partita salvata.",
       "ja": "日本語",
       "en": "English",
       "es-419": "Español (Latinoamérica)",
@@ -78,7 +78,7 @@
     "volume": {
       "label": "Volume",
       "master": "Volume principale",
-      "bgm": "BGM",
+      "bgm": "Musica",
       "sfx": "Effetti sonori"
     },
     "compute": {
@@ -86,64 +86,64 @@
       "comingSoon": "Prossimamente",
       "cpu": "CPU",
       "gpu": "GPU",
-      "statusActive": "GPU attivo",
+      "statusActive": "GPU attiva",
       "statusInactive": "CPU attiva",
-      "restartRequired": "Il programma principale si riavvierà dopo aver modificato questa impostazione",
-      "restarting": "Riavvio...",
+      "restartRequired": "Dopo aver cambiato l'impostazione, il programma principale verrà riavviato",
+      "restarting": "Riavvio in corso...",
       "restartFailed": "Riavvio non riuscito",
-      "restartUnavailable": "Impostazioni salvate. Le modifiche entreranno in vigore al successivo avvio del gioco",
-      "confirmRestart": "Cambia la modalità di elaborazione in {{mode}}? Il programma principale si riavvierà.",
-      "restartAction": "Ripartire"
+      "restartUnavailable": "Impostazioni salvate. Le modifiche avranno effetto al prossimo avvio del gioco",
+      "confirmRestart": "La modalità di calcolo passerà a {{mode}}. Vuoi riavviare il programma principale?",
+      "restartAction": "Riavvia"
     },
     "windowReset": {
-      "label": "Posizione e dimensione della finestra",
-      "action": "Reset"
+      "label": "Posizione e dimensioni delle finestre",
+      "action": "Ripristina"
     },
     "credits": {
-      "label": "Titoli di coda",
-      "description": "Attribuzioni per le risorse e il software utilizzati in questo gioco",
-      "action": "Vista"
+      "label": "Riconoscimenti",
+      "description": "Note sui diritti dei materiali e del software usati in questo gioco",
+      "action": "Mostra"
     }
   },
   "saveLoad": {
     "newGame": "Nuova partita",
-    "overwriteSave": "Sovrascrivi Salva",
-    "saveAs": "Salva come",
+    "overwriteSave": "Sovrascrivi salvataggio",
+    "saveAs": "Salva con nome",
     "load": "Carica",
-    "quitGame": "Abbandonare il gioco",
-    "returnToTop": "Torna al menu in alto",
-    "loading": "Caricamento…",
-    "shuttingDown": "Spegnimento...",
-    "saveFailed": "Salvataggio fallito",
-    "loadFailed": "Carico fallito",
-    "confirmNewGame": "i dati attuali andranno persi. iniziare un nuovo gioco?",
-    "confirmQuitGame": "Sei sicuro di voler smettere? I tuoi progressi attuali non vengono salvati automaticamente.",
-    "confirmReturnToTop": "tornare al menu in alto? I tuoi progressi attuali non vengono salvati automaticamente.",
+    "quitGame": "Esci dal gioco",
+    "returnToTop": "Torna al menu principale",
+    "loading": "Caricamento...",
+    "shuttingDown": "Chiusura in corso...",
+    "saveFailed": "Salvataggio non riuscito",
+    "loadFailed": "Caricamento non riuscito",
+    "confirmNewGame": "I dati attuali andranno persi. Vuoi iniziare una nuova partita?",
+    "confirmQuitGame": "Vuoi uscire dal gioco? I progressi attuali non vengono salvati automaticamente.",
+    "confirmReturnToTop": "Vuoi tornare al menu principale? I progressi attuali non vengono salvati automaticamente.",
     "confirm": "Sì",
     "cancel": "No",
     "saveAsScenario": "Salva come scenario",
-    "saveAsNewScenario": "Salva come un altro scenario",
-    "overwriteScenario": "Scenario di sovrascrittura",
+    "saveAsNewScenario": "Salva come nuovo scenario",
+    "overwriteScenario": "Sovrascrivi",
     "backToGame": "Torna al gioco",
-    "saveName": "Salva nome",
-    "confirmOverwrite": "sovrascrivere il salvataggio \"{{name}}\"?",
-    "confirmOverwriteScenario": "sovrascrivere lo scenario \"{{name}}\"?"
+    "saveName": "Nome del salvataggio",
+    "confirmOverwrite": "Vuoi sovrascrivere il salvataggio “{{name}}”?",
+    "confirmOverwriteScenario": "Vuoi sovrascrivere lo scenario “{{name}}”?"
   },
   "saveList": {
-    "noSaves": "Nessun dato di salvataggio trovato",
+    "noSaves": "Nessuna partita salvata",
     "currentSave": "Dati attuali",
     "population": "Popolazione",
     "inGameDate": "Data",
-    "savedAt": "salvato a",
+    "savedAt": "Data di salvataggio",
     "loadButton": "Carica",
     "deleteButton": "Elimina",
-    "confirmLoad": "caricare questi dati di salvataggio?",
-    "confirmDelete": "eliminare questi dati di salvataggio? Questo non può essere annullato.",
-    "loading": "Caricamento…",
-    "loadFailed": "Carico fallito",
-    "deleteFailed": "Elimina non riuscita",
-    "openFolderButton": "Apri la cartella di salvataggio",
+    "confirmLoad": "Caricare questa partita salvata?",
+    "confirmDelete": "Eliminare questa partita salvata? L'operazione non può essere annullata.",
+    "loading": "Caricamento...",
+    "loadFailed": "Caricamento non riuscito",
+    "deleteFailed": "Eliminazione non riuscita",
+    "openFolderButton": "Apri la cartella dei salvataggi",
     "scenario": "Scenario",
-    "autosaveName": "{{name}} (salva automatica all'uscita)"
+    "autosaveName": "{{name}} (salvataggio automatico all'uscita)"
   }
 }

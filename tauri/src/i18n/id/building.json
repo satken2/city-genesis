@@ -1,27 +1,27 @@
 {
   "building": {
-    "floorConfiguration": "Komposisi lantai",
+    "floorConfiguration": "Susunan lantai",
     "parking": "Parkir",
-    "type": "Jenis bangunan",
+    "type": "Tipe bangunan",
     "durability": "Daya tahan",
-    "floors": "lantai",
-    "floorsValue": "{{floors}}F (Area Lantai {{area, number}}㎡)",
+    "floors": "Jumlah lantai",
+    "floorsValue": "{{floors}} lantai (luas lantai {{area, number}}㎡)",
     "heightLabel": "Tinggi: {{value}} m",
-    "baseAreaLabel": "Area dasar: {{area, number}}㎡",
-    "underMaintenance": "Sedang dalam pemeliharaan",
+    "baseAreaLabel": "Luas dasar bangunan: {{area, number}}㎡",
+    "underMaintenance": "Sedang diperbaiki",
     "parkingCapacity": "Kapasitas parkir",
     "parkingCapacityValue": "{{capacity}} mobil",
     "parkingDay": "Siang hari",
-    "parkingNight": "malam hari",
+    "parkingNight": "Malam hari",
     "parkingUsage": "{{used}} / {{capacity}} mobil"
   },
   "building_appearance": {
-    "variantLabel": "Penampilan {{index}}",
-    "layoutHint": "Seret kartu ke situs untuk menempatkan / drag untuk memindahkan / shift + drag untuk memutar / menghapus kunci untuk menghapus",
-    "sizeLabel": "{{width}} × {{height}} m",
-    "deleteSelected": "Hapus yang dipilih",
+    "variantLabel": "Tampilan luar {{index}}",
+    "layoutHint": "Seret kartu ke lahan bangunan untuk menempatkan / Seret untuk memindahkan / Shift+seret untuk memutar / Tombol Delete untuk menghapus",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Hapus gedung yang dipilih",
     "apply": "Terapkan",
-    "saveFailed": "Gagal menyimpan tampilan",
-    "noSubbuildings": "Tidak ada sub-bangunan yang ditentukan untuk jenis bangunan ini"
+    "saveFailed": "Gagal menyimpan tampilan luar",
+    "noSubbuildings": "Tidak ada sub-bangunan yang ditetapkan untuk jenis bangunan ini"
   }
 }

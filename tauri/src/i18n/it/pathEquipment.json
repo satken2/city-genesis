@@ -1,18 +1,18 @@
 {
   "pathEquipment": {
     "title": "Attrezzature stradali",
-    "streetlight_type": "lampioni",
+    "streetlight_type": "Lampioni",
     "fence_type": "Recinzioni",
-    "street_tree_type": "Alberi di strada",
-    "utility_mode": "Cablaggio di utilità",
-    "none": "Nessuna",
+    "street_tree_type": "Alberature stradali",
+    "utility_mode": "Tipo di cablaggio",
+    "none": "Nessuno",
     "standard": "Standard",
-    "overhead": "Alto",
-    "underground": "Sotterraneo",
-    "apply": "Applicare",
+    "overhead": "Aereo",
+    "underground": "Interrato",
+    "apply": "Applica",
     "bench_type": "Panchine",
-    "bin_type": "bidoni",
-    "planter_type": "fioriere",
+    "bin_type": "Cestini",
+    "planter_type": "Aiuole",
     "advert_type": "Pubblicità"
   }
 }

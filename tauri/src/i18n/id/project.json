@@ -1,40 +1,40 @@
 {
   "tag": {
-    "label": "Proyek",
-    "none": "(tidak ada tag)",
+    "label": "Proyek konstruksi",
+    "none": "(Tanpa tag)",
     "createNew": "+ Tag baru…",
-    "newPlaceholder": "Masukkan Nama Tag",
-    "add": "Menambahkan",
+    "newPlaceholder": "Masukkan nama tag",
+    "add": "Tambah",
     "cancel": "Batal",
     "saveFailed": "Gagal menyimpan tag",
-    "showObject": "tampilkan dalam tampilan 3D",
-    "hideObject": "Sembunyikan dalam tampilan 3D"
+    "showObject": "Tampilkan di tampilan 3D",
+    "hideObject": "Sembunyikan di tampilan 3D"
   },
   "constructionProjects": {
     "all": "Semua",
-    "empty": "Belum ada pekerjaan. Pilih tag saat menempatkan dari panel konstruksi, atau tambahkan dari panel detail fasilitas umum atau jalan yang direncanakan atau sedang dibangun, untuk melihat pekerjaan dikelompokkan per proyek.",
+    "empty": "Belum ada pekerjaan konstruksi. Pilih tag saat menempatkan dari panel pembangunan, atau beri tag dari panel detail fasilitas umum atau jalan yang belum dimulai atau sedang dibangun, agar Anda dapat memeriksanya per proyek.",
     "loadFailed": "Gagal memuat proyek konstruksi",
-    "totalCost": "Estimasi biaya",
-    "duration": "Waktu tersisa",
+    "totalCost": "Biaya pembangunan (perkiraan)",
+    "duration": "Durasi pembangunan (sisa)",
     "progress": "Kemajuan",
-    "progressValue": "{{done}} / {{total}} Selesai",
+    "progressValue": "{{done}} / {{total}} selesai",
     "monthsValue": "{{value}} bulan",
-    "stalled": "terhenti",
-    "stalledWarning": "{{count}} Pekerjaan tidak akan berkembang karena kecepatan konstruksi 0 (dikecualikan dari total durasi).",
-    "done": "Kesiap-siagaan",
+    "stalled": "Tidak berjalan",
+    "stalledWarning": "{{count}} pekerjaan tidak akan berjalan karena kecepatan pembangunannya 0 (tidak dihitung dalam total durasi pembangunan).",
+    "done": "Selesai",
     "unnamed": "#{{id}}",
-    "showAll": "Tampilkan semuanya lagi ({{count}})",
-    "showTag": "Tampilkan proyek ini dalam tampilan 3D",
-    "hideTag": "Sembunyikan proyek ini dalam tampilan 3D",
-    "showObject": "tampilkan dalam tampilan 3D",
-    "hideObject": "Sembunyikan dalam tampilan 3D",
-    "deleteTag": "Hapus tag ini",
-    "confirmDeleteTag": "Hapus tag \"{{tag}}\"? Itu akan dihapus dari bangunan dan jalannya (pekerjaan itu sendiri tetap ada).",
+    "showAll": "Kembali tampilkan semua ({{count}})",
+    "showTag": "Tampilkan proyek ini di tampilan 3D",
+    "hideTag": "Sembunyikan proyek ini di tampilan 3D",
+    "showObject": "Tampilkan di tampilan 3D",
+    "hideObject": "Sembunyikan di tampilan 3D",
+    "deleteTag": "Hapus tag",
+    "confirmDeleteTag": "Tag “{{tag}}” akan dihapus. Tag ini akan dilepas dari bangunan dan jalan terkait (pekerjaan konstruksinya sendiri tetap ada). Apakah Anda yakin?",
     "columns": {
-      "name": "Target",
+      "name": "Objek",
       "status": "Status",
-      "cost": "biaya yang tersisa",
-      "remaining": "Waktu tersisa"
+      "cost": "Sisa biaya pembangunan",
+      "remaining": "Sisa durasi pembangunan"
     }
   }
 }

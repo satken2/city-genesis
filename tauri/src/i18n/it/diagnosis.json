@@ -1,149 +1,149 @@
 {
   "diagnosis": {
-    "refresh": "Ri-diagnosticare",
-    "note": "Traccia le cause del problema in base all'ultimo risultato della simulazione. Dopo aver risolto, esegui l'epoca successiva per aggiornare.",
+    "refresh": "Ripeti la diagnosi",
+    "note": "Ripercorre le cause del problema a partire dall'ultimo risultato della simulazione. Dopo aver risolto, esegui l'epoca successiva per aggiornare il risultato.",
     "noProblem": {
-      "title": "Nessun problema riscontrato",
-      "description": "Non c'è niente da segnalare per questo agente in questo momento."
+      "title": "Nessun problema rilevato",
+      "description": "Al momento non ci sono problemi da segnalare per questo agente economico."
     },
     "target": {
       "agent": "Struttura #{{id}}",
-      "path": "Percorso #{{id}}",
-      "node": "Giunzione #{{id}}",
+      "path": "Tracciato #{{id}}",
+      "node": "Punto di collegamento #{{id}}",
       "nodeAt": "Punto ({{x}}, {{z}})"
     },
     "nodes": {
       "agent_not_found": {
-        "title": "Agente non trovato",
+        "title": "Agente economico non trovato",
         "description": ""
       },
       "cycle": {
         "title": "Causa circolare",
-        "description": "Questa struttura è già stata diagnosticata più in alto (dipendenza reciproca)."
+        "description": "Il problema di questa struttura è già in diagnosi a un livello superiore (dipendenza reciproca)."
       },
       "depth_limit": {
-        "title": "ha smesso di scavare più a fondo",
-        "description": "La catena delle cause è troppo lunga. diagnosticare direttamente la struttura."
+        "title": "L'analisi si ferma qui",
+        "description": "La catena delle cause è troppo lunga, quindi l'analisi si ferma qui. Esegui la diagnosi direttamente sulla struttura interessata."
       },
       "no_alert": {
-        "title": "Questa stessa struttura non segnala alcun problema",
-        "description": "Il suo output può essere semplicemente limitato dalla sua dimensione o dall'obiettivo di utilizzo."
+        "title": "La struttura in sé non presenta problemi",
+        "description": "La fornitura insufficiente potrebbe dipendere dalle dimensioni della struttura o dal tasso di utilizzo obiettivo."
       },
       "facility_inactive": {
-        "title": "la struttura non è in funzione",
-        "description": "Non sta producendo perché è in costruzione, in pausa, collassato o in uno stato simile. Controlla i dettagli della struttura."
+        "title": "La struttura non è in funzione",
+        "description": "Non produce perché è in costruzione, ferma, crollata o simili. Controlla i dettagli della struttura."
       },
       "producer_ref": {
-        "title": "Struttura del fornitore",
+        "title": "Struttura fornitrice",
         "description": ""
       },
       "material_shortage": {
-        "title": "non può procurarsi materie prime",
-        "description": "Alcuni materiali necessari non sono arrivati, quindi la produzione non è stata all'altezza del piano."
+        "title": "Impossibile procurarsi le materie prime",
+        "description": "Alcune materie prime necessarie non sono arrivate, quindi la produzione è inferiore al previsto."
       },
       "material_unmet": {
-        "title": "Carenza di {{product_name}}",
-        "description": "Ha ricevuto {{received}} del richiesto {{demand}} ({{ratio}}%)."
+        "title": "Carenza: {{product_name}}",
+        "description": "Ricevuto {{received}} su un fabbisogno di {{demand}} ({{ratio}}%)."
       },
       "material_unmet_unknown": {
-        "title": "Impossibile identificare il materiale mancante",
-        "description": "Questo può accadere subito dopo che la domanda si riduce. Controlla il risultato dell'epoca successiva."
+        "title": "Impossibile individuare la materia prima mancante",
+        "description": "Può succedere, ad esempio, subito dopo un calo della domanda. Controlla il risultato dell'epoca successiva."
       },
       "infra_disconnected": {
-        "title": "non connesso alla rete {{product_name}}",
+        "title": "Non collegato alla rete: {{product_name}}",
         "description": ""
       },
       "infra_no_terminal": {
-        "title": "Nessun terminale di connessione",
-        "description": "Questa funzione non ha un nodo terminale per {{product_name}}."
+        "title": "Nessun punto di allaccio",
+        "description": "Questa struttura non ha un nodo di allaccio per {{product_name}}"
       },
       "infra_terminal_unconnected": {
-        "title": "Nessun percorso raggiunge il terminale di connessione",
+        "title": "Nessun tracciato collegato al punto di allaccio",
         "description": ""
       },
       "infra_link_not_active": {
-        "title": "Il percorso dell'alimentatore non è ancora attivo",
-        "description": "{{count}} Percorsi che raggiungono il terminal sono in costruzione o non sono stati avviati."
+        "title": "Il tracciato di allacciamento non è ancora attivo",
+        "description": "Tracciati collegati al punto di allaccio in costruzione o non ancora avviati: {{count}}"
       },
       "infra_link_incompatible": {
-        "title": "Il percorso dell'alimentatore non può trasportare {{product_name}}",
-        "description": "Il percorso che raggiunge il terminale è di un tipo che non può trasportare questo bene (es. traccia non elettrificata)."
+        "title": "Il tracciato di allacciamento non può trasportare {{product_name}}",
+        "description": "Il tracciato collegato al punto di allaccio è di un tipo che non può trasportare questo bene (es. binario non elettrificato)"
       },
       "infra_no_producer": {
         "title": "Nessun produttore di {{product_name}} in città",
         "description": ""
       },
       "infra_producers_inactive": {
-        "title": "{{product_name}} I produttori non sono operativi",
-        "description": "Nessuno dei produttori {{count}} della città è attivo."
+        "title": "I produttori di {{product_name}} non sono in funzione",
+        "description": "Nessuna delle {{count}} strutture produttrici della città è in funzione"
       },
       "infra_producers_unconnected": {
-        "title": "I produttori non sono collegati alla rete",
-        "description": "{{count}} I produttori sono attivi ma nessuno è connesso alla rete {{product_name}}."
+        "title": "Le strutture produttrici non sono collegate alla rete",
+        "description": "Strutture produttrici in funzione: {{count}}, ma nessuna è collegata alla rete di {{product_name}}"
       },
       "infra_network_split": {
-        "title": "Questa rete non ha produttore",
-        "description": "I produttori {{product_name}} ({{producers}}) si trovano su una rete diversa. Le due reti sono divise o non sono mai state unite."
+        "title": "In questa rete non ci sono strutture produttrici",
+        "description": "Le strutture produttrici di {{product_name}} ({{producers}}) sono collegate a un'altra rete. Le due reti sono interrotte in qualche punto o non sono collegate"
       },
       "infra_link_under_construction": {
-        "title": "Un percorso di collegamento è in costruzione",
-        "description": "{{count}} percorsi che si uniranno a questa rete sono in sospeso."
+        "title": "È in costruzione un tracciato che collega la rete",
+        "description": "Tracciati previsti per collegarsi a questa rete: {{count}}"
       },
       "infra_gap_detected": {
-        "title": "La rete è rotta qui",
-        "description": "Gli endpoint delle due reti sono solo {{distance}} m di distanza."
+        "title": "Qui la rete è interrotta",
+        "description": "Le estremità delle due reti distano solo {{distance}} m"
       },
       "infra_tap_missing": {
-        "title": "non attinto alla rete dei produttori",
+        "title": "Non collegato alla rete delle strutture produttrici",
         "description": ""
       },
       "infra_generation_shortage": {
-        "title": "Non viene prodotto abbastanza {{product_name}}",
-        "description": "Questa rete produce {{supply}} contro una domanda di {{demand}} ({{producers}} Produttore/i)."
+        "title": "Produzione di {{product_name}} insufficiente",
+        "description": "Questa rete produce {{supply}} a fronte di una domanda di {{demand}} (strutture produttrici: {{producers}})"
       },
       "infra_transmission_bottleneck": {
-        "title": "La capacità di rete è saturata",
-        "description": "{{count}} Percorsi funzionano a pieno regime."
+        "title": "Capacità della rete insufficiente",
+        "description": "Tracciati sfruttati al massimo della capacità: {{count}}"
       },
       "infra_unexplained": {
-        "title": "La rete sembra sana",
-        "description": "La produzione e la connettività sono sufficienti, quindi la carenza potrebbe essere stata transitoria. Controlla il risultato dell'epoca successiva."
+        "title": "La rete sembra in buono stato",
+        "description": "Produzione e collegamenti sono sufficienti, quindi la carenza potrebbe essere stata temporanea. Controlla il risultato dell'epoca successiva."
       },
       "market_no_supplier": {
         "title": "Nessun fornitore di {{product_name}} in città",
-        "description": "Non esiste un produttore nazionale attivo e nessuna importazione."
+        "description": "Non ci sono produttori locali attivi e non ci sono importazioni"
       },
       "market_supply_insufficient": {
-        "title": "L'offerta di {{product_name}} non è all'altezza della domanda",
-        "description": "Fornitura {{supply}} contro ordini a livello di città di {{demand}} ({{producers}} Produttore/i), {{hubs}} Hub di importazione)."
+        "title": "L'offerta di {{product_name}} non copre la domanda",
+        "description": "Offerta {{supply}} a fronte di ordini complessivi della città per {{demand}} (produttori: {{producers}}, poli di importazione: {{hubs}})"
       },
       "market_unmatched": {
         "title": "Impossibile procurarsi {{product_name}} sul mercato",
-        "description": "La fornitura in tutta la città {{supply}} copre gli ordini di {{demand}}, ma non ha raggiunto questa struttura. la distanza o il prezzo possono essere la causa."
+        "description": "In tutta la città l'offerta ({{supply}}) copre gli ordini ({{demand}}), ma non è arrivata a questa struttura. La causa potrebbe essere la distanza o il prezzo."
       },
       "service_out_of_range": {
-        "title": "Al di fuori dell'intervallo di servizio per {{product_name}}",
-        "description": "Il sito di questa struttura non rientra nell'intervallo di alcuna struttura che fornisce {{product_name}} ({{producers}} in città)."
+        "title": "Fuori dall'area di servizio di {{product_name}}",
+        "description": "L'area edificabile di questa struttura non rientra nell'area di effetto di nessuna struttura che fornisce {{product_name}} ({{producers}} in città)"
       },
       "high_skill_shortage": {
-        "title": "non può proteggere il personale qualificato",
-        "description": "Non ci sono abbastanza lavoratori ad alta abilità, quindi il piano di produzione è ridotto a ciò che il personale disponibile può gestire. I lavoratori ad alta abilità sono formati nelle università: costruirne uno e assegnare le sue quote di ammissione alle competenze richieste."
+        "title": "Impossibile trovare personale specializzato",
+        "description": "Manca personale altamente qualificato, quindi il piano di produzione è ridotto a quanto il personale disponibile riesce a gestire. Il personale altamente qualificato si forma all'università: costruisci un'università e assegna le quote di ammissione alla competenza richiesta."
       },
       "labor_shortage": {
-        "title": "Non abbastanza dipendenti",
-        "description": "protetto {{total_labor}} del travaglio {{quota}} richiesto."
+        "title": "Dipendenti insufficienti",
+        "description": "Manodopera ottenuta: {{total_labor}} su un fabbisogno di {{quota}}."
       },
       "labor_market_tight": {
-        "title": "Nessun lavoratore rimasto in città",
-        "description": "La disoccupazione è solo {{unemployment_rate}}%, quindi nessuno è disponibile per l'assunzione. Aggiungi alloggi per attirare i residenti."
+        "title": "In città non ci sono più lavoratori disponibili",
+        "description": "Il tasso di disoccupazione è basso ({{unemployment_rate}}%) e non c'è nessuno da assumere. Costruisci più abitazioni per attirare popolazione."
       },
       "labor_unfilled": {
-        "title": "le persone in cerca di lavoro esistono ma non vengono",
-        "description": "La disoccupazione è {{unemployment_rate}}%. Sono probabili lunghi spostamenti, salari bassi o una mancata corrispondenza delle abilità."
+        "title": "Ci sono persone in cerca di lavoro, ma non arrivano",
+        "description": "Il tasso di disoccupazione è del {{unemployment_rate}}%. Le cause possibili sono un pendolarismo troppo lungo, salari bassi o competenze non adatte."
       },
       "budget_capped": {
-        "title": "Il budget è insufficiente",
-        "description": "Il budget allocato è molto al di sotto di quanto richiesto. Rivedi l'allocazione del budget."
+        "title": "Budget insufficiente",
+        "description": "Il budget assegnato è molto inferiore al necessario. Rivedi la ripartizione del budget."
       },
       "construction_shortage": {
         "title": "Impossibile procurarsi {{product_name}}",
@@ -151,51 +151,51 @@
       },
       "line_paused_route_disconnected": {
         "title": "Il percorso tra le fermate è interrotto",
-        "description": "Gli arresti consecutivi nel loop non sono collegati da binari o strade che possono essere percorse nella direzione necessaria. Ricostruisci la sezione rotta o rivedi il percorso. Per tornare indietro sui binari a senso unico, tornare indietro su una stazione su binario che corre in entrambe le direzioni (come un doppio binario posato come un unico percorso), oppure lascia che i treni si spostino sulla pista opposta unendo i binari in un singolo nodo o posando un crossover, e posiziona le fermate di ritorno sulle piattaforme per la direzione opposta."
+        "description": "Due fermate consecutive del giro non sono collegate da binari o strade percorribili nel senso necessario. Ricostruisci il tratto interrotto o rivedi il percorso. Per invertire la marcia su binari a senso unico, fai inversione in una stazione su un binario percorribile in entrambi i sensi (ad esempio un doppio binario posato come un unico tracciato), oppure permetti ai treni di passare al binario opposto riunendo i binari in un unico nodo o posando una comunicazione tra i binari, e colloca le fermate del ritorno sulle banchine del senso opposto."
       },
       "line_paused_no_underlay": {
-        "title": "STOP non ha un percorso sottostante",
-        "description": "La pista o la strada la fermata non esisteva più."
+        "title": "La fermata non ha un tracciato di appoggio",
+        "description": "Il binario o la strada su cui si trovava la fermata non esiste più."
       },
       "line_paused_train_too_long": {
-        "title": "il treno è più lungo della sezione della sua fermata",
-        "description": "Ridurre le auto per treno o estendere la sezione su cui si trova la fermata (una stazione di una stazione o una strada o una sezione di binari)."
+        "title": "Il treno è più lungo della tratta della fermata",
+        "description": "Riduci il numero di carrozze per treno oppure prolunga la tratta in cui si trova la fermata (la banchina della stazione o la tratta di strada o binario)."
       },
       "line_no_vehicle_product": {
-        "title": "Questo tipo di linea non ha un veicolo definito",
+        "title": "Per questo tipo di linea non è definito alcun veicolo",
         "description": ""
       },
       "line_vehicle_shortage": {
-        "title": "non può procurarsi veicoli",
-        "description": "procurato {{received}} delle auto {{required}} richieste."
+        "title": "Impossibile procurarsi i veicoli",
+        "description": "Veicoli ottenuti: {{received}} su {{required}} necessari."
       },
       "line_off_network": {
-        "title": "la linea non è su una rete in esecuzione",
-        "description": "Il percorso sottostante della linea non è collegato a nessuna traccia o strada."
+        "title": "La linea non è sulla rete di circolazione",
+        "description": "Il percorso di appoggio della linea non è collegato a nessun binario o strada."
       },
       "transit_no_depot": {
-        "title": "Nessun deposito {{product_name}} in città",
-        "description": "Costruisci un deposito e collegalo alla rete in esecuzione."
+        "title": "Nessun deposito di {{product_name}} in città",
+        "description": "Costruisci un deposito e collegalo alla rete di circolazione."
       },
       "transit_depots_inactive": {
-        "title": "I depositi non sono operativi",
-        "description": "Nessuno dei depositi {{count}} nella città è attivo."
+        "title": "I depositi non sono in funzione",
+        "description": "Nessuno dei {{count}} depositi della città è in funzione."
       },
       "transit_depots_unconnected": {
-        "title": "I depositi non sono collegati alla rete in esecuzione",
-        "description": "Nessuno dei depositi {{count}} è collegato a Track o Street. Per Rail, posizionare un raccordo dalla linea principale al terminale del deposito."
+        "title": "I depositi non sono collegati alla rete di circolazione",
+        "description": "Nessuno dei {{count}} depositi è collegato a binari o strade. Per la ferrovia, posa un binario di raccordo dalla linea principale al punto di allaccio del deposito."
       },
       "transit_depot_other_network": {
-        "title": "I depositi sono su una rete diversa",
-        "description": "{{count}} I depositi sono collegati a una rete di traccia che non raggiunge questa linea. collegare le reti o costruire un deposito su questo."
+        "title": "I depositi sono su un'altra rete di circolazione",
+        "description": "Depositi collegati a un'altra rete di binari non raggiungibile da questa linea: {{count}}. Collega le reti con dei binari o costruisci un deposito su questa rete."
       },
       "transit_vehicle_insufficient": {
-        "title": "Vengono prodotti insufficienti",
-        "description": "I depositi su questa rete ({{depots}}) forniscono {{supply}} auto contro {{demand}} richieste dalle linee."
+        "title": "Produzione di veicoli insufficiente",
+        "description": "I depositi di questa rete di circolazione ({{depots}}) forniscono {{supply}} veicoli, mentre le linee ne richiedono {{demand}}."
       },
       "transit_unexplained": {
-        "title": "I depositi sembrano sani",
-        "description": "L'offerta e la connettività sono sufficienti, quindi la carenza potrebbe essere stata transitoria. Controlla il risultato dell'epoca successiva."
+        "title": "I depositi sembrano in buono stato",
+        "description": "Fornitura e collegamenti sono sufficienti, quindi la carenza potrebbe essere stata temporanea. Controlla il risultato dell'epoca successiva."
       }
     }
   }

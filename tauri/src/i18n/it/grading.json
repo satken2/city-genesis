@@ -5,43 +5,43 @@
       "land": "Livellamento del terreno",
       "shore": "Colmata"
     },
-    "baseHeight": "Altezza base",
-    "targetHeight": "Altezza obiettivo",
-    "cutVolume": "Taglia il volume",
-    "fillVolume": "volume di riempimento",
-    "quayLength": "Lunghezza banchina",
-    "quayArea": "Area del viso della banchina",
+    "baseHeight": "Quota di riferimento",
+    "targetHeight": "Quota obiettivo",
+    "cutVolume": "Volume di scavo",
+    "fillVolume": "Volume di riporto",
+    "quayLength": "Lunghezza del muro di sponda",
+    "quayArea": "Superficie del muro di sponda",
     "unit": {
       "height": "{{value}} m",
       "length": "{{value, number}} m",
       "area": "{{value, number}} m²",
       "volume": "{{value, number}} m³"
     },
-    "heightOffset": "Altezza (offset dalla base)",
-    "seaLevelHeight": "Altezza (sopra il livello del mare)",
+    "heightOffset": "Altezza (scarto dalla quota di riferimento)",
+    "seaLevelHeight": "Altezza (sul livello del mare)",
     "baseNote": {
-      "frontage": "0 è la superficie della strada che si affaccia ({{value}} m)",
-      "terrain_mean": "0 è l'altezza media attuale dell'area ({{value}} m)"
+      "frontage": "0 corrisponde al piano della strada adiacente ({{value}} m)",
+      "terrain_mean": "0 corrisponde all'altezza media attuale dell'area ({{value}} m)"
     },
     "reasons": {
-      "invalid_polygon": "La forma dell'area non è valida. Disegnalo senza attraversare i bordi.",
-      "outside_city": "La zona si estende fuori città.",
+      "invalid_polygon": "La forma dell'area non è valida. Disegnala senza lati che si incrociano.",
+      "outside_city": "L'area esce dai confini della città.",
       "too_large": "L'area è troppo grande (limite: {{limit}} km²).",
-      "on_water": "Non è possibile sviluppare un'area interamente sopra il mare. Disegnalo in modo che raggiunga la terra.",
-      "no_land_overlap": "Disegna l'area in modo che si sovrapponga al terreno (altrimenti rimane una striscia di mare tra la riva e l'area).",
-      "overlaps_parcel": "L'area si sovrappone a un appezzamento di terreno esistente.",
-      "overlaps_path": "L'area si sovrappone a una strada, a un binario o ad altro percorso.",
+      "on_water": "Non puoi eseguire movimenti terra su un'area interamente sul mare. Disegnala in modo che raggiunga la terraferma.",
+      "no_land_overlap": "Disegna l'area sovrapponendola alla terraferma (altrimenti resta una striscia di mare tra la riva e l'area).",
+      "overlaps_parcel": "L'area si sovrappone a un lotto esistente.",
+      "overlaps_path": "L'area si sovrappone a una strada, un binario o un altro tracciato.",
       "overlaps_water": "L'area tocca un fiume o un lago.",
-      "overlaps_quay_band": "L'area si sovrappone alla banchina di terreno bonificato.",
-      "invalid_height_offset": "L'altezza è fuori portata (fino a ±{{offsetLimit}} m dall'altezza della base).",
-      "below_sea_level": "L'altezza non può essere impostata sotto il livello del mare.",
-      "too_narrow": "L'area è troppo stretta; Niente è rimasto da riempire all'interno della banchina.",
-      "no_work": "Il terreno è già all'altezza del bersaglio, quindi non è necessario alcun lavoro.",
-      "insufficient_funds": "fondi insufficienti per effettuare questo ordine."
+      "overlaps_quay_band": "L'area tocca il muro di sponda di un terreno di colmata.",
+      "invalid_height_offset": "L'altezza indicata è fuori intervallo (massimo ±{{offsetLimit}} m dalla quota di riferimento).",
+      "below_sea_level": "L'altezza non può essere inferiore al livello del mare.",
+      "too_narrow": "L'area è troppo stretta: all'interno del muro di sponda non resta nulla da colmare.",
+      "no_work": "Il terreno è già alla quota obiettivo, quindi non servono lavori.",
+      "insufficient_funds": "Fondi insufficienti: non puoi effettuare l'ordine."
     },
     "confirm": "Conferma",
-    "confirming": "confermando...",
+    "confirming": "Conferma in corso...",
     "cancel": "Annulla",
-    "confirmFailed": "Impossibile ordinare i lavori di sterro."
+    "confirmFailed": "Ordine del movimento terra non riuscito."
   }
 }

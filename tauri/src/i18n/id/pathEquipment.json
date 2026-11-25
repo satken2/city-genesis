@@ -1,18 +1,18 @@
 {
   "pathEquipment": {
-    "title": "Peralatan jalan",
-    "streetlight_type": "lampu jalan",
-    "fence_type": "pagar",
-    "street_tree_type": "pohon jalanan",
-    "utility_mode": "Kabel Utilitas",
+    "title": "Perlengkapan jalan",
+    "streetlight_type": "Lampu jalan",
+    "fence_type": "Pagar",
+    "street_tree_type": "Pohon tepi jalan",
+    "utility_mode": "Sistem kabel",
     "none": "Tidak ada",
     "standard": "Standar",
-    "overhead": "Atas",
-    "underground": "Bawah tanah",
+    "overhead": "Kabel udara",
+    "underground": "Kabel bawah tanah",
     "apply": "Terapkan",
     "bench_type": "Bangku",
-    "bin_type": "tempat sampah",
-    "planter_type": "pekebun",
-    "advert_type": "Pengiklanan"
+    "bin_type": "Tempat sampah",
+    "planter_type": "Tanaman hias",
+    "advert_type": "Iklan"
   }
 }

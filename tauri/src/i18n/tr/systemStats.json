@@ -1,98 +1,98 @@
 {
   "systemStats": {
     "load": {
-      "title": "simülasyon yükü",
-      "heading": "En son dönemin hesaplama süresi ({{days}} gün)",
+      "title": "Simülasyon yükü",
+      "heading": "Son dönemin ({{days}} gün) hesaplama süresi",
       "noData": "Ölçüm verisi yok",
-      "note": "Birkaç dönem arka arkaya çalıştığında, bu sonuncusunu gösterir. Operasyon sayısı, şehrin büyüklüğüne bağlı olarak ana karşılaştırmalardaki kombinasyonların sayısının kaba bir tahminidir.",
-      "colGroup": "İşlemek",
-      "colTime": "Zaman",
-      "colWorkload": "operasyon sayısı",
-      "workloadHint": "Kaba sayıda ana karşılaştırma (dizi elemanları). Arızayı görmek için bir değerin üzerine gelin.",
-      "seconds": "{{value}} s",
-      "ms": "{{value}} MS"
+      "note": "Birden çok dönem art arda çalıştırıldığında son dönemin değeri gösterilir. İşlem sayısı, başlıca karşılaştırmaların kombinasyon sayısının şehrin büyüklüğüne göre tahmin edilmiş yaklaşık değeridir.",
+      "colGroup": "İşlem",
+      "colTime": "Süre",
+      "colWorkload": "İşlem sayısı",
+      "workloadHint": "Başlıca karşılaştırmaların kombinasyon sayısının (dizi eleman sayısı) yaklaşık değeridir. Ayrıntıyı görmek için fareyi değerin üzerine getirin.",
+      "seconds": "{{value}} sn",
+      "ms": "{{value}} ms"
     },
     "group": {
-      "market": "mal piyasası",
-      "realestate": "emlâk piyasası",
+      "market": "Mal piyasası",
+      "realestate": "Emlak piyasası",
       "labor": "İşgücü piyasası",
-      "building_spawn": "yapı yumurtlaması",
-      "agent_spawn": "ajan yumurtlamak",
-      "routing": "vatandaş yol bulma",
-      "transit": "Transit yol bulma",
+      "building_spawn": "Bina oluşumu",
+      "agent_spawn": "Ekonomik aktör oluşumu",
+      "routing": "Vatandaşların rota araması",
+      "transit": "Toplu taşıma rota araması",
       "environment": "Yaşam çevresi",
       "other": "Diğer"
     },
     "workload": {
-      "market": "Alıcılar {{demanders}} × Satıcılar {{suppliers}} (ürün başına çarpılır ve toplanır)",
-      "realestate": "{{movers}} × Konut binaları {{housing}} hareketi düşünen haneler",
-      "labor": "İş arayanlar {{seekers}} × İşverenler {{employers}}",
-      "building_spawn": "Aday Parseller {{parcels}} × Bina Türleri × Kat Sayıları × Zemin Kullanımı",
-      "agent_spawn": "Ürünler × Bölgeler {{zones}} × Bölgeler {{zones}}",
-      "routing": "2 Seyahat Modu × Bölgeler {{zones}} × Bölgeler {{zones}} × 3 Aday Rotalar × Yollar {{paths}}",
-      "transit": "Durdurur {{stops}} × Düğümler {{nodes}}",
-      "environment": "Izgara {{width}} × {{height}} × Güneş Pozisyonları"
+      "market": "Alıcılar {{demanders}} × satıcılar {{suppliers}} (her ürün için çarpılıp toplanır)",
+      "realestate": "Taşınmayı düşünen haneler {{movers}} × konut bulunan binalar {{housing}}",
+      "labor": "İş arayanlar {{seekers}} × işverenler {{employers}}",
+      "building_spawn": "Aday parseller {{parcels}} × bina türleri × kat sayıları × kat kullanımları",
+      "agent_spawn": "Ürünler × mahalleler {{zones}} × mahalleler {{zones}}",
+      "routing": "Ulaşım türü 2 × mahalleler {{zones}} × mahalleler {{zones}} × aday rota 3 × güzergâhlar {{paths}}",
+      "transit": "Duraklar {{stops}} × düğümler {{nodes}}",
+      "environment": "Izgara {{width}} × {{height}} × güneş saatleri"
     },
     "entities": {
-      "colMetric": "Metrik",
-      "colCount": "Saymak",
-      "title": "varlık sayıları",
-      "agents": "acenta",
-      "households": "ev halkı",
-      "businesses": "işyeri",
-      "publicFacilities": "kamu tesisleri",
-      "buildings": "Site",
-      "citizens": "vatandaşlar",
+      "colMetric": "Öğe",
+      "colCount": "Sayı",
+      "title": "Varlık sayıları",
+      "agents": "Ekonomik aktörler",
+      "households": "Haneler",
+      "businesses": "İşletmeler",
+      "publicFacilities": "Kamu tesisleri",
+      "buildings": "Binalar",
+      "citizens": "Vatandaşlar",
       "population": "Nüfus",
-      "zones": "bölgeler",
-      "parcels": "parsel",
-      "paths": "yol",
-      "roads": "Demirleme yeri",
-      "tracks": "Raylar",
-      "infra": "Faydalı Ağlar",
-      "nodes": "düğümler"
+      "zones": "Mahalleler",
+      "parcels": "Parseller",
+      "paths": "Güzergâhlar",
+      "roads": "Yollar",
+      "tracks": "Raylı hatlar",
+      "infra": "Altyapı ağları",
+      "nodes": "Düğümler"
     },
     "approximation": {
-      "title": "Simülasyon Yaklaşımı",
-      "intro": "Büyük şehirler için hesaplamaları basitleştirme seçenekleri planlanmıştır. Bu ayarlar henüz değiştirilemez.",
-      "warning": "Bu değişiklikler oyun dengesini etkileyebilir. Onlar geri alınamaz.",
-      "irreversible": "Yaklaşımın neden olduğu değişiklikler daha sonraki dönemlerde devam eder. Etkinleştirildiğinde, yaklaşım devre dışı bırakılamaz veya azaltılamaz.",
-      "undecided": "TBD",
-      "candidates": "Adaylar Maks.",
-      "epochs": "İncelemeler arasındaki dönemler",
+      "title": "Simülasyon yaklaştırması",
+      "intro": "Büyük şehirler için hesaplamaları basitleştiren ayarlar eklenecek. Şu anda değiştirilemez.",
+      "warning": "Oyun dengesini etkileyebilir. Geri alınamaz",
+      "irreversible": "Yaklaştırmanın yol açtığı değişiklikler sonraki dönemlerde de kalır. Etkinleştirilen yaklaştırma kapatılamaz veya düzeyi düşürülemez.",
+      "undecided": "Belirlenmedi",
+      "candidates": "adaya kadar",
+      "epochs": "dönemde bir",
       "off": "Kapalı",
-      "on": "Üzerinde",
+      "on": "Açık",
       "goods": {
-        "label": "Satın Alın Aday",
-        "description": "Tedarikçileri fiyat ve mesafe ile karşılaştırın."
+        "label": "Ürün satın alma aday sayısı",
+        "description": "Fiyat ve mesafe açısından karşılaştırılan satıcı sayısını sınırlar."
       },
       "jobs": {
-        "label": "aday",
-        "description": "İşverenleri ücretler ve işe gidip gelme koşulları ile karşılaştırın."
+        "label": "İşe girme ve iş değiştirme aday sayısı",
+        "description": "Ücret ve işe gidiş koşulları açısından karşılaştırılan işyeri sayısını sınırlar."
       },
       "housing": {
-        "label": "Konut Adayları",
-        "description": "Kira ve konuma göre evleri sınırlayın."
+        "label": "Taşınılacak yer aday sayısı",
+        "description": "Kira ve konum açısından karşılaştırılan konut sayısını sınırlar."
       },
       "interval": {
-        "label": "rutin karar aralığı",
-        "description": "Alışveriş, iş ve konut seçimlerini daha az sıklıkta gözden geçirin."
+        "label": "Düzenli karar aralığı",
+        "description": "Alışveriş yeri, iş ve konut seçimlerinin gözden geçirilme sıklığını azaltır."
       },
       "aggregation": {
-        "label": "Benzer vatandaşları ve haneleri gruplandırın",
-        "description": "benzer koşullara sahip vatandaşlar veya haneler için toplu olarak bazı kararlar verin."
+        "label": "Benzer vatandaş ve haneleri birlikte hesapla",
+        "description": "Koşulları benzer vatandaş ve hanelerin bazı kararlarını grup olarak ele alır."
       }
     },
     "status": {
-      "title": "sistem durumu",
-      "gpuDisabled": "GPU hızlandırma: devre dışı bırakıldı",
-      "coreSimulator": "Çekirdek Simülatörü",
-      "currentMemory": "Geçerli bellek kullanımı: {{value}}",
-      "peakMemory": "Başlangıçtan bu yana en yüksek bellek kullanımı: {{value}}",
+      "title": "Sistem durumu",
+      "gpuDisabled": "GPU hızlandırma: Devre dışı",
+      "coreSimulator": "Çekirdek simülatör",
+      "currentMemory": "Mevcut bellek kullanımı: {{value}}",
+      "peakMemory": "Başlatmadan bu yana en yüksek bellek kullanımı: {{value}}",
       "graphic": "3D",
-      "currentVram": "Geçerli VRAM kullanımı: {{value}}",
-      "usageTooltip": "Tüm PC {{pc}} / Bu oyun {{game}} / {{total}} yüklü",
-      "legendPc": "bütün bilgisayar",
+      "currentVram": "Mevcut VRAM kullanımı: {{value}}",
+      "usageTooltip": "Tüm bilgisayar {{pc}} / Bu oyun {{game}} / Toplam {{total}}",
+      "legendPc": "Tüm bilgisayar",
       "legendGame": "Bu oyun"
     }
   }

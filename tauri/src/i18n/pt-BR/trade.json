@@ -1,53 +1,53 @@
 {
   "supply": {
     "title": "Informações de fornecimento",
-    "product": "Produto de fornecimento",
-    "amount": "Quantidade de fornecimento",
+    "product": "Produto fornecido",
+    "amount": "Quantidade fornecida",
     "price": "Preço de fornecimento",
     "soldAmount": "Quantidade vendida",
-    "profitRate": "taxa de lucro",
-    "utilization": "Utilização"
+    "profitRate": "Margem de lucro",
+    "utilization": "Taxa de utilização"
   },
   "tourismSupply": {
-    "title": "Hospedando turistas",
-    "touristCapacity": "capacidade turística",
+    "title": "Recepção de turistas",
+    "touristCapacity": "Capacidade de recepção de turistas",
     "persons": "{{value}} pessoas",
     "218": {
-      "price": "Taxa de admissão",
-      "amount": "Capacidade do visitante (total)",
-      "soldAmount": "Visitantes (total)"
+      "price": "Preço do ingresso",
+      "amount": "Capacidade de visitantes (acumulada)",
+      "soldAmount": "Visitantes (acumulado)"
     },
     "219": {
       "price": "Tarifa",
-      "amount": "Capacidade de passageiros (total)",
-      "soldAmount": "Passageiros (total)"
+      "amount": "Capacidade de transporte (acumulada)",
+      "soldAmount": "Passageiros (acumulado)"
     }
   },
   "demand": {
     "product": "Produto",
     "demandAmount": "Demanda",
-    "receivedAmount": "Adquirido",
-    "acquiredAmount": "Inventário"
+    "receivedAmount": "Obtido",
+    "acquiredAmount": "Estoque"
   },
   "cargo": {
-    "title": "Operações de carga",
-    "description": "Este hub importa mercadorias de fora da região para abastecer os mercados da cidade e compra a produção excedente da cidade para exportá-la para fora da região.",
-    "capacity": "Capacidade de rendimento",
+    "title": "Movimentação de carga",
+    "description": "Este polo importa produtos de fora da região para abastecer os mercados da cidade e compra a produção excedente da cidade para exportá-la para fora da região.",
+    "capacity": "Capacidade de movimentação",
     "perPeriod": "/mês",
     "perPeriod_week": "/semana",
-    "materialCapacity": "Limite por materiais recebidos",
-    "areaCapacity": "Limite por área de piso",
-    "importHandled": "Importação manipulada",
-    "exportHandled": "Exportação tratada",
-    "utilization": "Utilização",
-    "importSectionTitle": "importações",
-    "exportSectionTitle": "exportações",
+    "materialCapacity": "Limite pelas matérias-primas",
+    "areaCapacity": "Limite pela área",
+    "importHandled": "Volume importado movimentado",
+    "exportHandled": "Volume exportado movimentado",
+    "utilization": "Taxa de utilização",
+    "importSectionTitle": "Importação",
+    "exportSectionTitle": "Exportação",
     "handledImport": "Vendido",
     "handledExport": "Comprado",
-    "allocation": "alocado",
-    "priceImport": "Preço de venda",
-    "priceExport": "Preço de compra",
+    "allocation": "Alocado",
+    "priceImport": "Preço unitário de venda",
+    "priceExport": "Preço unitário de compra",
     "lost": "Vendas perdidas",
-    "noProducts": "Nenhum produto manuseado"
+    "noProducts": "Nenhum produto movimentado"
   }
 }

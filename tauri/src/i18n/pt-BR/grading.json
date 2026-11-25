@@ -3,45 +3,45 @@
     "kindLabel": "Tipo",
     "kind": {
       "land": "Nivelamento do terreno",
-      "shore": "Aterro para ganho de terreno"
+      "shore": "Aterro"
     },
-    "baseHeight": "Altura da base",
-    "targetHeight": "Altura do alvo",
-    "cutVolume": "Reduza o volume",
-    "fillVolume": "preencha o volume",
+    "baseHeight": "Altura de referência",
+    "targetHeight": "Altura-alvo",
+    "cutVolume": "Volume de corte",
+    "fillVolume": "Volume de aterro",
     "quayLength": "Comprimento do cais",
-    "quayArea": "Área de cara do cais",
+    "quayArea": "Área da face do cais",
     "unit": {
       "height": "{{value}} m",
       "length": "{{value, number}} m",
       "area": "{{value, number}} m²",
       "volume": "{{value, number}} m³"
     },
-    "heightOffset": "Altura (deslocamento da base)",
+    "heightOffset": "Altura (diferença em relação à referência)",
     "seaLevelHeight": "Altura (acima do nível do mar)",
     "baseNote": {
-      "frontage": "0 é a superfície da estrada que enfrenta ({{value}} m)",
+      "frontage": "0 é a altura do pavimento da via adjacente ({{value}} m)",
       "terrain_mean": "0 é a altura média atual da área ({{value}} m)"
     },
     "reasons": {
-      "invalid_polygon": "A forma da área é inválida. Desenhe-o sem cruzar as bordas.",
-      "outside_city": "A área se estende fora da cidade.",
-      "too_large": "A área é muito grande (limite: {{limit}} km²).",
-      "on_water": "Uma área inteiramente sobre o mar não pode ser desenvolvida. Desenhe-o para que ele alcance a terra.",
-      "no_land_overlap": "Desenhe a área de modo que ela sobreponha a terra (caso contrário, uma faixa de mar é deixada entre a costa e a área).",
-      "overlaps_parcel": "A área se sobrepõe a um terreno existente.",
-      "overlaps_path": "A área se sobrepõe a uma estrada, pista ou outro caminho.",
-      "overlaps_water": "A área toca um rio ou lago.",
-      "overlaps_quay_band": "A área se sobrepõe ao cais de terras recuperadas.",
-      "invalid_height_offset": "A altura está fora do alcance (até ±{{offsetLimit}} m da altura da base).",
-      "below_sea_level": "A altura não pode ser definida abaixo do nível do mar.",
-      "too_narrow": "A área é muito estreita; Nada resta para preencher dentro do cais.",
-      "no_work": "O solo já está na altura do alvo, portanto, nenhum trabalho é necessário.",
-      "insufficient_funds": "fundos insuficientes para fazer essa ordem."
+      "invalid_polygon": "A forma da área é inválida. Desenhe-a sem que os lados se cruzem.",
+      "outside_city": "A área ultrapassa os limites da cidade.",
+      "too_large": "A área é grande demais (limite: {{limit}} km²).",
+      "on_water": "Não é possível fazer terraplenagem em uma área só sobre o mar. Desenhe a área de modo que alcance a terra firme.",
+      "no_land_overlap": "Desenhe a área sobrepondo-se à terra firme (caso contrário, fica uma faixa de mar entre a costa e a área).",
+      "overlaps_parcel": "Sobrepõe-se a um lote existente.",
+      "overlaps_path": "Sobrepõe-se a uma via (rua, via férrea etc.).",
+      "overlaps_water": "Alcança um rio ou lago.",
+      "overlaps_quay_band": "Sobrepõe-se ao cais do aterro.",
+      "invalid_height_offset": "A altura indicada está fora do intervalo (até ±{{offsetLimit}} m da altura de referência).",
+      "below_sea_level": "Não é possível ficar abaixo do nível do mar.",
+      "too_narrow": "A área é estreita demais; não sobra parte para aterrar dentro do cais.",
+      "no_work": "O terreno já está na altura-alvo, então não há obra a fazer.",
+      "insufficient_funds": "Recursos insuficientes para fazer o pedido."
     },
     "confirm": "Confirmar",
     "confirming": "Confirmando...",
     "cancel": "Cancelar",
-    "confirmFailed": "Falha ao ordenar o trabalho de terraplenagem."
+    "confirmFailed": "Falha ao encomendar a terraplenagem."
   }
 }

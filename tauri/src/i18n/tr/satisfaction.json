@@ -2,9 +2,9 @@
   "satisfaction": {
     "exhausted": "Bitkin",
     "unhappy": "Mutsuz",
-    "neutral": "Nötr",
-    "happy": "Mutlu",
-    "delighted": "Memnun",
-    "zero": "sıfır memnuniyet"
+    "neutral": "Normal",
+    "happy": "Memnun",
+    "delighted": "Çok memnun",
+    "zero": "Memnuniyet sıfır"
   }
 }

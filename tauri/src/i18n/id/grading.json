@@ -1,46 +1,46 @@
 {
   "grading": {
-    "kindLabel": "Mengetik",
+    "kindLabel": "Jenis",
     "kind": {
       "land": "Perataan lahan",
-      "shore": "Reklamasi lahan"
+      "shore": "Reklamasi"
     },
-    "baseHeight": "tinggi dasar",
-    "targetHeight": "tinggi target",
-    "cutVolume": "Potong volume",
-    "fillVolume": "mengisi volume",
-    "quayLength": "Panjang dermaga",
-    "quayArea": "Area Wajah Quay",
+    "baseHeight": "Ketinggian acuan",
+    "targetHeight": "Ketinggian target",
+    "cutVolume": "Volume galian",
+    "fillVolume": "Volume timbunan",
+    "quayLength": "Panjang dinding dermaga",
+    "quayArea": "Luas dinding dermaga",
     "unit": {
       "height": "{{value}} m",
       "length": "{{value, number}} m",
       "area": "{{value, number}} m²",
       "volume": "{{value, number}} m³"
     },
-    "heightOffset": "Tinggi (diimbangi dari dasar)",
-    "seaLevelHeight": "Tinggi (di atas permukaan laut)",
+    "heightOffset": "Ketinggian (selisih dari acuan)",
+    "seaLevelHeight": "Ketinggian (di atas permukaan laut)",
     "baseNote": {
-      "frontage": "0 adalah permukaan jalan yang dihadapinya ({{value}} m)",
-      "terrain_mean": "0 adalah tinggi rata-rata saat ini dari area ({{value}} m)"
+      "frontage": "0 adalah tinggi permukaan jalan yang berbatasan ({{value}} m)",
+      "terrain_mean": "0 adalah ketinggian rata-rata area saat ini ({{value}} m)"
     },
     "reasons": {
-      "invalid_polygon": "Bentuk area tidak valid. Gambarlah tanpa menyilangkan tepi.",
-      "outside_city": "Daerah itu meluas di luar kota.",
-      "too_large": "Luasnya terlalu besar (batas: {{limit}} km²).",
-      "on_water": "Area yang sepenuhnya di atas laut tidak dapat dikembangkan. Gambarlah sehingga mencapai daratan.",
-      "no_land_overlap": "Gambarlah area tersebut sehingga tumpang tindih dengan daratan (jika tidak, sebidang laut tertinggal di antara pantai dan area tersebut).",
-      "overlaps_parcel": "Area tersebut tumpang tindih dengan bidang tanah yang ada.",
-      "overlaps_path": "Area tumpang tindih jalan, jalur, atau jalur lainnya.",
-      "overlaps_water": "Area tersebut menyentuh sungai atau danau.",
-      "overlaps_quay_band": "Area tersebut tumpang tindih dengan dermaga tanah reklamasi.",
-      "invalid_height_offset": "Tingginya di luar jangkauan (hingga ±{{offsetLimit}} m dari ketinggian dasar).",
-      "below_sea_level": "Ketinggian tidak dapat diatur di bawah permukaan laut.",
-      "too_narrow": "Areanya terlalu sempit; Tidak ada yang tersisa untuk diisi di dalam dermaga.",
-      "no_work": "Tanah sudah berada di ketinggian target, jadi tidak ada pekerjaan yang diperlukan.",
-      "insufficient_funds": "dana tidak mencukupi untuk melakukan pemesanan ini."
+      "invalid_polygon": "Bentuk area tidak valid. Gambar tanpa sisi yang saling bersilangan.",
+      "outside_city": "Area melewati batas kota.",
+      "too_large": "Area terlalu luas (batas {{limit}} km²).",
+      "on_water": "Area yang seluruhnya di atas laut tidak dapat dikerjakan. Gambar area hingga mengenai daratan.",
+      "no_land_overlap": "Gambar area hingga menumpang pada daratan (jika tidak, akan tersisa laut di antara pantai dan area).",
+      "overlaps_parcel": "Bertumpang tindih dengan kavling yang ada.",
+      "overlaps_path": "Bertumpang tindih dengan jalur seperti jalan atau rel.",
+      "overlaps_water": "Mengenai sungai atau danau.",
+      "overlaps_quay_band": "Mengenai dinding dermaga lahan reklamasi.",
+      "invalid_height_offset": "Ketinggian di luar rentang (hingga ±{{offsetLimit}} m dari ketinggian acuan).",
+      "below_sea_level": "Tidak dapat dibuat lebih rendah dari permukaan laut.",
+      "too_narrow": "Area terlalu sempit sehingga tidak ada bagian yang dapat dikerjakan di sisi dalam dinding dermaga.",
+      "no_work": "Permukaan tanah sudah berada di ketinggian target, jadi tidak perlu pekerjaan.",
+      "insufficient_funds": "Dana tidak mencukupi sehingga pesanan tidak dapat dibuat."
     },
     "confirm": "Konfirmasi",
-    "confirming": "Konfirmasi...",
+    "confirming": "Mengonfirmasi...",
     "cancel": "Batal",
     "confirmFailed": "Gagal memesan pekerjaan tanah."
   }

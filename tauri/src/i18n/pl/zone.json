@@ -1,41 +1,41 @@
 {
   "zone": {
     "titleWithId": "Dzielnica #{{id}}",
-    "color": "Kolor okręgu",
-    "colorUpdateFailed": "Nie udało się zaktualizować koloru okręgu",
-    "basicInfo": "Podstawowe informacje",
+    "color": "Kolor dzielnicy",
+    "colorUpdateFailed": "Nie udało się zmienić koloru dzielnicy",
+    "basicInfo": "Informacje podstawowe",
     "area": "Powierzchnia",
-    "zonePopulation": "Populacja mieszkańców",
-    "daytimePopulation": "Populacja w ciągu dnia",
-    "spaceAmount": "Obłożenie podłogi",
-    "slotStarvationTitle": "Nie można zakwaterować oczekujących najemców",
-    "slotStarvationWarning": "\"{{tenant}}\" potrzebuje co najmniej {{required}} m2 powierzchni w jednym budynku, ale największym do zabudowy w tej dzielnicy jest {{max}} m2. Zapewnij większą paczkę.",
+    "zonePopulation": "Liczba mieszkańców",
+    "daytimePopulation": "Ludność w ciągu dnia",
+    "spaceAmount": "Zajęta powierzchnia kondygnacji",
+    "slotStarvationTitle": "Część oczekujących najemców nie znajdzie miejsca, bo nie da się tu budować",
+    "slotStarvationWarning": "„{{tenant}}” potrzebuje do zajęcia lokalu co najmniej {{required}} m2 powierzchni w jednym budynku, ale na działkach tej dzielnicy można zbudować najwyżej {{max}} m2. Przygotuj większą działkę.",
     "restrictions": "Przepisy budowlane",
-    "restrictionUpdateFailed": "Nie udało się zaktualizować przepisów okręgowych",
-    "restrictionRequired": "Współczynnik pokrycia, stosunek objętości i wysokość nie mogą być puste",
-    "mergeConfirm": "Scal \"{{source}}\" w \"{{target}}\". Dzielnica źródłowa znika wraz z ustawieniami regulacji.",
-    "mergeAction": "Łączyć",
-    "mergeFailed": "Nie udało się scalić dzielnic (okręgi, które nie sąsiednie są przylegające, nie mogą być łączone)",
+    "restrictionUpdateFailed": "Nie udało się zmienić przepisów dzielnicy",
+    "restrictionRequired": "Wskaźnik powierzchni zabudowy, wskaźnik intensywności zabudowy i wysokość nie mogą być puste",
+    "mergeConfirm": "Dzielnica „{{source}}” zostanie włączona do dzielnicy „{{target}}”. Włączana dzielnica przestanie istnieć, a jej ustawienia przepisów zostaną utracone.",
+    "mergeAction": "Połącz",
+    "mergeFailed": "Nie udało się połączyć dzielnic (nie można łączyć dzielnic, które ze sobą nie sąsiadują)",
     "mergeNoRequest": "Nie wybrano dzielnicy do połączenia",
     "edit": {
-      "toolHeading": "Działanie",
+      "toolHeading": "Rodzaj edycji",
       "toolCreate": "Utwórz nową dzielnicę",
-      "toolExpand": "Rozwiń Dzielnicę",
-      "toolExpandZone": "Rozwiń {{name}}",
-      "modeHeading": "Metoda wyboru",
-      "modeBlock": "cały blok",
+      "toolExpand": "Rozszerz istniejącą dzielnicę",
+      "toolExpandZone": "Rozszerz dzielnicę: {{name}}",
+      "modeHeading": "Sposób zaznaczania obszaru",
+      "modeBlock": "Całe kwartały",
       "modeRoad": "Strona ulicy",
       "hint": {
         "create": {
-          "block": "Przytrzymaj Ctrl i przeciągnij nad blokami otoczonymi ulicami; Malowane bloki z ich paczkami stają się nową dzielnicą. Przeciągnij do Pana, przewiń do powiększenia.",
-          "road": "Przytrzymaj Ctrl i przeciągnij po jednej stronie ulicy (połowa jezdni lub działki wzdłuż niej); Ta strona ulicy, z jej paczkami, staje się nową dzielnicą. Przeciągnij do Pana, przewiń do powiększenia."
+          "block": "Przytrzymaj Ctrl i przeciągnij po kwartałach otoczonych drogami – zamalowane kwartały wraz z działkami utworzą nową dzielnicę. Przeciągnij, aby przesunąć mapę; kółkiem myszy przybliżasz i oddalasz.",
+          "road": "Przytrzymaj Ctrl i przeciągnij po jednej stronie ulicy (połowie jezdni lub przylegających do niej działkach) – ta strona ulicy wraz z działkami utworzy nową dzielnicę. Przeciągnij, aby przesunąć mapę; kółkiem myszy przybliżasz i oddalasz."
         },
         "expand": {
-          "block": "Najedź kursorem na dzielnicę, a następnie przytrzymaj Ctrl i przeciągnij nad blokami, aby dodać je wraz z ich paczkami do tej dzielnicy. Przeciągnij do Pana, przewiń do powiększenia.",
-          "road": "Najedź kursorem na dzielnicę, a następnie przytrzymaj Ctrl i przeciągnij jedną stronę ulicy (połowa jezdni lub działki wzdłuż niej), aby dodać tę stronę, z jej paczkami, do tej dzielnicy. Przeciągnij do Pana, przewiń do powiększenia."
+          "block": "Najedź kursorem na dzielnicę, a następnie przytrzymaj Ctrl i przeciągnij po kwartałach, aby dołączyć je wraz z działkami do tej dzielnicy. Przeciągnij, aby przesunąć mapę; kółkiem myszy przybliżasz i oddalasz.",
+          "road": "Najedź kursorem na dzielnicę, a następnie przytrzymaj Ctrl i przeciągnij po jednej stronie ulicy (połowie jezdni lub przylegających do niej działkach), aby dołączyć tę stronę ulicy wraz z działkami do tej dzielnicy. Przeciągnij, aby przesunąć mapę; kółkiem myszy przybliżasz i oddalasz."
         }
       },
-      "failed": "Nie można zmienić dzielnicy."
+      "failed": "Nie udało się zmienić dzielnicy."
     }
   }
 }

@@ -3,8 +3,8 @@
     "exhausted": "Erschöpft",
     "unhappy": "Unzufrieden",
     "neutral": "Neutral",
-    "happy": "Glücklich",
-    "delighted": "Erfreut",
-    "zero": "Null Zufriedenheit"
+    "happy": "Zufrieden",
+    "delighted": "Sehr zufrieden",
+    "zero": "Zufriedenheit null"
   }
 }

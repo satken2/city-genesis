@@ -1,30 +1,30 @@
 {
   "weather": {
     "label": "Wetter",
-    "choose": "Wählen Sie Wetter",
-    "loading": "Wetter prüfen…",
+    "choose": "Wetter auswählen",
+    "loading": "Wetter wird abgefragt …",
     "unknown": "Unbekannt",
-    "automatic": "{{weather}} (Auto)",
-    "failed": "Wetter konnte nicht geändert werden",
+    "automatic": "{{weather}} (automatisch)",
+    "failed": "Das Wetter konnte nicht geändert werden",
     "names": {
-      "clear": "Klar",
-      "high_clouds": "Hohe Wolken",
-      "fair": "Messe",
-      "broken_clouds": "Sonnige Intervalle",
+      "clear": "Wolkenlos",
+      "high_clouds": "Schleierwolken",
+      "fair": "Heiter",
+      "broken_clouds": "Aufgelockert bewölkt",
       "overcast": "Bedeckt",
       "rain_clouds": "Regenwolken",
       "fog": "Nebel",
       "drizzle": "Nieselregen",
       "rain": "Regen",
-      "heavy_rain": "Starker Regen",
-      "light_snow": "Leichter Schnee",
+      "heavy_rain": "Starkregen",
+      "light_snow": "Leichter Schneefall",
       "snow": "Schnee",
       "blizzard": "Schneesturm"
     },
-    "epochClimate": "Epochenklima",
+    "epochClimate": "Klima der Epoche",
     "temperature": "Temperatur",
-    "precipitation": "Fällung",
-    "sunlight": "Sonnenlichtintensität",
+    "precipitation": "Niederschlag",
+    "sunlight": "Sonneneinstrahlung",
     "windSpeed": "Windgeschwindigkeit"
   }
 }

@@ -1,41 +1,41 @@
 {
   "zone": {
-    "titleWithId": "Distretto #{{id}}",
-    "color": "Colore del distretto",
-    "colorUpdateFailed": "Impossibile aggiornare il colore del distretto",
+    "titleWithId": "Quartiere #{{id}}",
+    "color": "Colore del quartiere",
+    "colorUpdateFailed": "Aggiornamento del colore del quartiere non riuscito",
     "basicInfo": "Informazioni di base",
-    "area": "Zona",
+    "area": "Superficie",
     "zonePopulation": "Popolazione residente",
     "daytimePopulation": "Popolazione diurna",
-    "spaceAmount": "occupazione del pavimento",
-    "slotStarvationTitle": "Gli inquilini in attesa non possono essere ospitati",
-    "slotStarvationWarning": "\"{{tenant}}\" ha bisogno di almeno {{required}} m2 di superficie in un unico edificio, ma il più grande edificabile in questo distretto è {{max}} m2. fornire un pacco più grande.",
-    "restrictions": "Regolamento edilizio",
-    "restrictionUpdateFailed": "Impossibile aggiornare i regolamenti distrettuali",
-    "restrictionRequired": "Il rapporto di copertura, il rapporto di volume e l'altezza non possono essere vuoti",
-    "mergeConfirm": "Unisci \"{{source}}\" in \"{{target}}\". Il distretto di origine scompare insieme alle impostazioni di regolamentazione.",
-    "mergeAction": "Unire",
-    "mergeFailed": "Impossibile unire i distretti (i distretti non adiacenti non possono essere uniti)",
-    "mergeNoRequest": "Nessun distretto selezionato per unire",
+    "spaceAmount": "Occupazione dei piani",
+    "slotStarvationTitle": "C'è domanda di insediamento in attesa che non trova spazio per costruire",
+    "slotStarvationWarning": "Per insediarsi, “{{tenant}}” ha bisogno di almeno {{required}} m2 di superficie in un singolo edificio, ma il massimo edificabile sui lotti di questo quartiere è {{max}} m2. Predisponi un lotto più grande.",
+    "restrictions": "Norme edilizie",
+    "restrictionUpdateFailed": "Aggiornamento delle norme del quartiere non riuscito",
+    "restrictionRequired": "Rapporto di copertura, indice di edificabilità e altezza non possono essere vuoti",
+    "mergeConfirm": "“{{source}}” verrà unito a “{{target}}”. Il quartiere di origine scomparirà e le sue impostazioni delle norme andranno perse.",
+    "mergeAction": "Unisci",
+    "mergeFailed": "Unione dei quartieri non riuscita (non si possono unire quartieri non adiacenti)",
+    "mergeNoRequest": "Nessun quartiere selezionato da unire",
     "edit": {
-      "toolHeading": "Funzionamento",
-      "toolCreate": "creare un nuovo distretto",
-      "toolExpand": "Espandi Distretto",
-      "toolExpandZone": "Espandi {{name}}",
-      "modeHeading": "Metodo di selezione",
-      "modeBlock": "blocco intero",
-      "modeRoad": "lato strada",
+      "toolHeading": "Operazione",
+      "toolCreate": "Crea nuovo quartiere",
+      "toolExpand": "Espandi quartiere esistente",
+      "toolExpandZone": "Espandi: {{name}}",
+      "modeHeading": "Metodo di selezione dell'area",
+      "modeBlock": "Intero isolato",
+      "modeRoad": "Per lato di strada",
       "hint": {
         "create": {
-          "block": "Tieni premuto Ctrl e trascina su blocchi racchiusi da strade; I blocchi dipinti, con i loro pacchi, diventano un nuovo distretto. Trascina per fare una panoramica, scorri fino a Zoom.",
-          "road": "Tieni premuto Ctrl e trascina su un lato di una strada (metà della carreggiata, o sui pacchi lungo di essa); Quel lato della strada, con i suoi pacchi, diventa un nuovo quartiere. Trascina per fare una panoramica, scorri fino a Zoom."
+          "block": "Tieni premuto Ctrl e trascina per colorare gli isolati delimitati da strade: gli isolati colorati, con i lotti al loro interno, diventano un nuovo quartiere. Trascina per spostare la mappa e usa la rotellina per ingrandire o ridurre.",
+          "road": "Tieni premuto Ctrl e trascina per colorare un lato di una strada (metà della carreggiata o i lotti che vi si affacciano): quel lato della strada, con i suoi lotti, diventa un nuovo quartiere. Trascina per spostare la mappa e usa la rotellina per ingrandire o ridurre."
         },
         "expand": {
-          "block": "Passa il mouse sopra un distretto, quindi tieni Ctrl e trascina su blocchi per aggiungerli, con i loro pacchi, a quel distretto. Trascina per fare una panoramica, scorri fino a Zoom.",
-          "road": "Passa sopra un distretto, quindi tieni Ctrl e trascina su un lato di una strada (metà della carreggiata, o i pacchi lungo di esso) per aggiungere quel lato, con i suoi pacchi, a quel distretto. Trascina per fare una panoramica, scorri fino a Zoom."
+          "block": "Passa il mouse su un quartiere, poi tieni premuto Ctrl e trascina per colorare gli isolati: verranno inclusi in quel quartiere insieme ai lotti al loro interno. Trascina per spostare la mappa e usa la rotellina per ingrandire o ridurre.",
+          "road": "Passa il mouse su un quartiere, poi tieni premuto Ctrl e trascina per colorare un lato di una strada (metà della carreggiata o i lotti che vi si affacciano): quel lato verrà incluso nel quartiere insieme ai suoi lotti. Trascina per spostare la mappa e usa la rotellina per ingrandire o ridurre."
         }
       },
-      "failed": "non poteva cambiare il distretto."
+      "failed": "Impossibile modificare il quartiere."
     }
   }
 }

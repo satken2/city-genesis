@@ -1,51 +1,51 @@
 {
   "citizenTracking": {
-    "tabBasic": "Gambaran ikhtisar",
+    "tabBasic": "Ringkasan",
     "tabActivity": "Aktivitas",
     "follow": "Ikuti dengan kamera",
-    "unfollow": "berhenti mengikuti",
+    "unfollow": "Berhenti mengikuti dengan kamera",
     "track": "Tambahkan ke daftar pelacakan",
-    "trackRandom": "Lacak Warga Negara Acak",
-    "noUntrackedCitizens": "Tidak ada warga yang tidak terlacak yang tersedia.",
-    "trackRandomError": "tidak dapat melacak warga negara.",
+    "trackRandom": "Lacak 1 warga acak",
+    "noUntrackedCitizens": "Tidak ada warga yang belum dilacak.",
+    "trackRandomError": "Gagal melacak warga.",
     "untrack": "Hapus dari daftar pelacakan",
     "home": "Tempat tinggal",
-    "mobility": "Berkeliling",
+    "mobility": "Moda perjalanan",
     "mode": {
       "automobile": "Mobil",
-      "pedestrian": "Jalan kaki dan angkutan umum"
+      "pedestrian": "Jalan kaki & transportasi umum"
     },
-    "visits": "tujuan",
+    "visits": "Tujuan kunjungan",
     "visitKind": {
       "home": "Rumah",
-      "work": "Pekerjaan",
+      "work": "Tempat kerja",
       "school": "Sekolah",
-      "shop": "Perbelanjaan"
+      "shop": "Belanja"
     },
     "legs": {
-      "walk": "Berjalan",
+      "walk": "Jalan kaki",
       "drive": "Mobil",
-      "transit": "Transit",
+      "transit": "Transportasi umum",
       "conveyor": "Sistem angkut penumpang"
     },
-    "trip": "satu arah {{minutes}} min · {{route}}",
-    "noRoute": "tidak ada rute",
-    "noVisits": "tidak punya tempat untuk pergi.",
+    "trip": "Sekali jalan {{minutes}} mnt · {{route}}",
+    "noRoute": "Tidak ada rute perjalanan",
+    "noVisits": "Tidak ada tempat tujuan.",
     "status": {
-      "not_ready": "ditampilkan setelah simulasi berjalan.",
-      "busy": "tidak tersedia saat simulasi sedang berjalan.",
-      "no_home": "Menunggu perumahan, sehingga tidak ada kegiatan yang tercatat.",
-      "missing": "Warga negara ini tidak lagi tinggal di kota.",
-      "error": "tidak dapat memuat."
+      "not_ready": "Akan ditampilkan setelah simulasi dijalankan.",
+      "busy": "Tidak dapat ditampilkan selama simulasi berjalan.",
+      "no_home": "Tidak ada catatan aktivitas karena masih menunggu tempat tinggal.",
+      "missing": "Warga ini sudah tidak berada di kota.",
+      "error": "Gagal memuat."
     },
-    "empty": "Tidak ada warga yang dilacak.",
+    "empty": "Tidak ada warga yang sedang dilacak.",
     "pickFailed": {
-      "not_ready": "Jalankan simulasi untuk mengklik mobil dan pejalan kaki dan lihat siapa mereka.",
-      "busy": "Warga tidak dapat ditampilkan saat simulasi sedang berjalan.",
-      "none": "Tidak dapat menemukan siapa yang ada di mobil ini atau berjalan kaki.",
-      "missing": "Warga negara ini tidak lagi tinggal di kota.",
-      "no_home": "Warga negara ini sedang menunggu perumahan.",
-      "error": "Tidak bisa menunjukkan warga."
+      "not_ready": "Setelah simulasi dijalankan, Anda dapat mengklik mobil atau orang untuk menampilkan warganya.",
+      "busy": "Warga tidak dapat ditampilkan selama simulasi berjalan.",
+      "none": "Warga di mobil atau pejalan kaki ini tidak ditemukan.",
+      "missing": "Warga ini sudah tidak berada di kota.",
+      "no_home": "Warga ini sedang menunggu tempat tinggal.",
+      "error": "Gagal menampilkan warga."
     }
   }
 }

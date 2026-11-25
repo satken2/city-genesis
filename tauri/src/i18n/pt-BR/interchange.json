@@ -1,26 +1,26 @@
 {
   "interchange": {
     "kind": {
-      "ic": "Intercâmbio",
-      "jct": "Junção"
+      "ic": "Trevo",
+      "jct": "Entroncamento"
     },
     "fallbackName": {
-      "ic": "ic #{{id}}",
-      "jct": "jct #{{id}}"
+      "ic": "Trevo #{{id}}",
+      "jct": "Entroncamento #{{id}}"
     },
     "connections": {
-      "from": "De",
-      "to": "Para",
+      "from": "Via de origem",
+      "to": "Via de destino",
       "road": "{{type}} #{{id}}",
-      "none": "Sem pares de estradas conectados.",
+      "none": "Não há pares de vias conectados",
       "direction": {
         "n": "Norte",
         "ne": "Nordeste",
-        "e": "Oriente",
+        "e": "Leste",
         "se": "Sudeste",
         "s": "Sul",
-        "sw": "sudoeste",
-        "w": "Ocidente",
+        "sw": "Sudoeste",
+        "w": "Oeste",
         "nw": "Noroeste"
       },
       "sideZone": "{{direction}} · {{zone}}"

@@ -1,756 +1,756 @@
 {
   "tutorial": {
-    "startButton": "Başlangıç",
+    "startButton": "Başla",
     "controls": {
       "title": "Temel kontroller",
-      "description": "Belediye başkanı olarak hedeflerinizi ve zamanı ilerletmeden önce nasıl plan yapacağınızı öğrenin. Şehrin bilgilerinin ne anlama geldiğini, her düğmenin ne yaptığını ve kameranın nasıl hareket ettirileceğini keşfettikten sonra, yeni bir yerleşim alanı oluşturmak ve ona evler, elektrik ve su sağlamak için bir yolu genişleteceksiniz.",
+      "description": "Belediye başkanı olarak nasıl bir şehir hedeflediğinizi ve önce planlayıp sonra zamanı ilerlettiğiniz oyun tarzını öğrenin. Ekrandaki bilgilerin anlamını, her düğmenin ne işe yaradığını ve kamera kontrollerini inceledikten sonra bir yolu uzatıp yeni bir konut bölgesi kuracak, konutları, elektriği ve suyu sağlayana kadar adım adım ilerleyeceksiniz.",
       "step1": {
-        "title": "Belediye Başkanı Olarak Bir Şehir İnşa Edin",
-        "role": "City Genesis'te, belediye başkanı olarak bir şehir yetiştiriyorsunuz. Yolları ve tesisleri planlarsınız, arazinin nasıl kullanılacağına karar verirsiniz, vergileri belirler ve kamu hizmetlerine para tahsis edersiniz. Göreviniz, sakinleri ve işletmeleri destekleyen koşulları yaratmaktır. Devam etmek için “İleri”ye basın.",
-        "goal": "Sakinlerin rahat ve güvenli bir şekilde yaşayabileceği bir şehir hedefleyin. Ev ve iş, elektrik, su ve sağlık hizmeti sağlayın. Şehri büyütmek de para alıyor. Neyi iyileştireceğine karar verirken hem insanların hayatlarını hem de şehrin mali durumunu göz önünde bulundurun.",
-        "epoch": "Zaman her seferinde bir ay ilerler. Önce bütçeleri ve inşaat planlarını belirleyin, ardından hazır olduğunuzda “Başlat”a basın. sakinlerin ve işletmelerin inşaatı ve faaliyetlerinin ilerlemesi; Bir sonraki planlarınızı yapmadan önce sonuçları gözden geçirin. Tarih, siz başlayana kadar hareketsiz kalır, bu yüzden acele etmeyin.",
-        "epoch_week": "Zaman her seferinde bir hafta ilerler. Önce bütçeleri ve inşaat planlarını belirleyin, ardından hazır olduğunuzda “Başlat”a basın. sakinlerin ve işletmelerin inşaatı ve faaliyetlerinin ilerlemesi; Bir sonraki planlarınızı yapmadan önce sonuçları gözden geçirin. Tarih, siz başlayana kadar hareketsiz kalır, bu yüzden acele etmeyin."
+        "title": "Belediye başkanı olarak şehrinizi kurmaya başlayın",
+        "role": "City Genesis, belediye başkanı olarak bir şehri büyüttüğünüz bir oyundur. Yolların ve tesislerin inşasını planlar; arazinin nasıl kullanılacağına, vergilere ve kamu hizmetlerine ayrılacak bütçeye siz karar verirsiniz. Sakinlerin ve şirketlerin yaşamını ve faaliyetlerini destekleyecek ortamı hazırlamak belediye başkanının görevidir. Açıklamaları okumaya devam etmek için “İleri” düğmesine basın.",
+        "goal": "Hedefiniz, sakinlerin refah içinde ve güvenle yaşayabildiği bir şehir. Konut ve iş olanaklarını artırın; elektrik, su ve sağlık gibi hizmetleri ulaştırın. Şehri büyütmek için paraya da ihtiyaç var. Hem sakinlerin yaşamını hem de şehrin mali durumunu göz önünde tutarak neyi iyileştireceğinizi düşünün.",
+        "epoch": "Bu oyunda zaman birer aylık adımlarla ilerler. Önce bütçeyi ve inşaat planlarını belirleyin, hazır olduğunuzda “Başlat” düğmesine basın. Düğmeye bastığınızda zaman ilerler; inşaatlar ile sakinlerin ve şirketlerin faaliyetleri sürer. Ardından sonuçlara bakarak bir sonraki planınızı düşünürsünüz. “Başlat” düğmesine basana kadar tarih ilerlemez, bu yüzden acele etmeden düşünebilirsiniz.",
+        "epoch_week": "Bu oyunda zaman birer haftalık adımlarla ilerler. Önce bütçeyi ve inşaat planlarını belirleyin, hazır olduğunuzda “Başlat” düğmesine basın. Düğmeye bastığınızda zaman ilerler; inşaatlar ile sakinlerin ve şirketlerin faaliyetleri sürer. Ardından sonuçlara bakarak bir sonraki planınızı düşünürsünüz. “Başlat” düğmesine basana kadar tarih ilerlemez, bu yüzden acele etmeden düşünebilirsiniz."
       },
       "step2": {
-        "title": "şehri kokpitten oku",
-        "tools": "Ekranın altındaki kokpit, şehri kontrol etmenize ve daha sonra ne yapacağınıza karar vermenize yardımcı olur. “Görünüm”, eksiklikleri ve sorunlu alanları bulmaya yardımcı olmak için renkleri kullanır. “Harita”, şehrin karşısındaki yerlerin nerede olduğunu gösterir ve büyüdükçe yolunuzu bulmanıza yardımcı olur.",
-        "tracking": "“Vatandaş Listesi”, sakinleri isimlerine göre bulmanızı sağlar ve tekrar ziyaret etmek istediğiniz sakinleri tutar. Vatandaş ayrıntılarından takip etmek için birini ekleyin, ardından bilgilerine ve işe gidip gelmek için bu düğmeyi kullanın. Şehir çapındaki figürlerin arkasındaki bireysel yaşamları keşfedin.",
-        "bulldozer": "“Bulldozer” boş paketleri kaldırır ve planlanan binaları ve yolları iptal eder. Düğmeye basın, ardından 3B görünümde bir hedefe tıklayın; Moddan çıkmak için tekrar basın. Tamamlanmış bir binayı veya yolu kaldırmak için ayrıntılarını açın ve yıkımı seçin.",
-        "services": "Yıldırım, su damlası ve gemi göstergeleri elektrik, su ve ticaret kapasitenizde ne kadar boşluk kaldığını gösterir. Doldukça talep veya ticaret hacmi kapasiteye yaklaşır. Kamu tesislerini ve ticaret merkezlerini incelemek için üzerlerine tıklayın ve şehri genişletmeden önce daha fazla tesise ihtiyacınız olup olmadığını kontrol edin.",
-        "score": "“Puan”, sakinlerin şehrinizdeki yaşamdan ne kadar memnun olduklarını özetler. daha yüksek daha iyidir. Evler, işler, sağlık hizmetleri ve hoş bir yaşam ortamı, onu iyileştirmeye yardımcı olur. Düşerse, sakinlerin karşılaştığı zorlukları arayın.",
-        "budget": "“Bütçe”, geçen ayın gelirine göre gelecek ayın beklenen giderlerini gösterir. Gösterge sağa döndüğünde, giderler geliri aşar. Tersine, sola sallandığında, ayıracak paranız var. İlerlemeden önce kontrol edin.",
-        "budget_week": "“Bütçe”, geçen haftanın gelirine göre gelecek haftanın beklenen giderlerini gösteriyor. Gösterge sağa döndüğünde, giderler geliri aşar. Tersine, sola sallandığında, ayıracak paranız var. İlerlemeden önce kontrol edin.",
-        "budgetChanges": "Daha fazla inşaat, daha yüksek tesis operasyonu ve daha hızlı inşaat, ihtiyaç duyulan parayı artırır ve bütçe göstergesini yükseltir. Daha düşük çalışma veya daha yavaş inşaat, beklenen maliyetleri azaltabilir. Vergi geliri arttığında, giderler aynı kalsa bile gösterge düşer.",
-        "budgetPlanning": "Düşük ölçü, şehir için uygun paranız olduğu anlamına gelir. Yakında ihtiyaç duyacağınız eksik hizmetlere veya tesislere yatırım yapmayı düşünün.",
-        "date": "Tarih, şehrin zamanının ne kadar ilerlediğini gösteriyor. İnşaat ilerlemesini ve mevsimsel değişiklikleri izlemek için kullanın. “Başlat” ile zaman ilerlediğinizde planlarken ve güncellerken hareketsiz kalır.",
-        "climate": "Sıcaklık, yağış, güneş ışığı ve rüzgar paneli bu ayın ortalama iklimini gösteriyor. Bu koşullar tarımı, rüzgar enerjisini ve güneş enerjisini etkiler. Mahsul veya elektrik üretimi düşükse, iklimi de kontrol edin.",
-        "climate_week": "Sıcaklık, yağış, güneş ışığı ve rüzgar paneli bu haftanın ortalama iklimini gösteriyor. Bu koşullar tarımı, rüzgar enerjisini ve güneş enerjisini etkiler. Mahsul veya elektrik üretimi düşükse, iklimi de kontrol edin.",
-        "climateEffects": "Zayıf güneş ışığı güneş enerjisini azaltır ve zayıf rüzgar rüzgar çıkışını azaltır. Sıcaklık ve yağış da tarımı etkiler. Bu ayın koşullarının her bir tesisin üretim verimliliğini nasıl etkilediğini görmek için iklim paneline tıklayın. Arzda mevsimsel değişiklikler göz önünde bulundurularak tesisler planlayın.",
-        "climateEffects_week": "Zayıf güneş ışığı güneş enerjisini azaltır ve zayıf rüzgar rüzgar çıkışını azaltır. Sıcaklık ve yağış da tarımı etkiler. Bu haftanın koşullarının her bir tesisin üretim verimliliğini nasıl etkilediğini görmek için iklim paneline tıklayın. Arzda mevsimsel değişiklikler göz önünde bulundurularak tesisler planlayın.",
-        "notifications": "\"Bildirimler\" üzerindeki sayı, gözden geçirilmesi gereken uyarıları ve uyarıları sayar. Kırmızı bir sayı ve yanıp sönen düğme, şehir işlevlerinin bozulduğu ve derhal dikkat edilmesi gerektiği anlamına gelir. Sarı sayılar, büyümeye hazırlanmak veya iyileşmesi zaman alan sorunlar gibi uyarıları gösterir. Bunları okumak için düğmeye basın.",
-        "notificationActions": "Bir bildirim bir tesisi veya bölgeyi tanımladığında, onu incelemek için satırını tıklatın. Nedene yanıt verin: Eksik elektrik hatlarını bağlayın veya malzemeden yoksun bir tesis için sarf malzemeleri düzenleyin. Devam eden sorunlarla ilgili bildirimler, nedenleri çözüldüğünde kaybolur. Harekete geçtikten sonra gelecek ayın sonuçlarını kontrol edin."
+        "title": "Kokpitten şehrin durumunu öğrenin",
+        "tools": "Ekranın altındaki kokpit, şehrin durumunu kontrol edip sırada ne yapacağınızı düşündüğünüz yerdir. “Görünüm” ile eksikliklerin veya sorunların olduğu yerleri renklerle ayırt ederek bulabilirsiniz. “Harita” ile şehrin bütününde yerlerin birbirine göre konumunu görebilirsiniz. Şehir büyüdükçe ihtiyacınız olan yerleri bulmanıza yardımcı olur.",
+        "tracking": "“Vatandaş listesi”, sakinleri adlarına göre aramak ya da ilgilendiğiniz sakinlerin yaşamına ve işe gidiş gelişine sonradan tekrar bakmak için kullanılan düğmedir. Vatandaş ayrıntılarında takibe eklediğiniz kişilerin bilgilerini buradan açabilirsiniz. Şehrin genel rakamlarından anlaşılamayan, her bir kişinin yaşamını öğrenmek istediğinizde kullanın.",
+        "bulldozer": "“Buldozer”, boş parselleri silmek veya planlanan binaları ve yolları iptal etmek için kullanılır. Düğmeye bastıktan sonra 3D ekranda hedefe tıklayın; işiniz bitince düğmeye tekrar basarak modu kapatın. Tamamlanmış bir binayı veya yolu kaldırmak istediğinizde ayrıntılarını açıp yıkmayı seçin.",
+        "services": "Şimşek, su damlası ve gemi göstergeleri; elektrik, su ve dış ticaret kapasitelerinde ne kadar pay kaldığını gösterir. Gösterge doldukça talep veya işlem hacmi artmış, kalan pay azalmış demektir. Göstergelere basarak kamu tesislerini ve dış ticaret noktalarını inceleyebilirsiniz. Şehri büyütmeden önce yeni tesislere ihtiyaç olup olmadığını kontrol edin.",
+        "score": "“Puan”, sakinlerin bu şehirdeki yaşamdan ne kadar memnun olduğunu genel olarak gösteren bir değerdir. Ne kadar yüksekse şehir o kadar yaşanabilir demektir. Konut, iş, sağlık hizmetleri ve yaşam çevresini iyileştirmek puanı yükseltir. Puan düştüğünde sakinlerin hangi sıkıntıları yaşadığını araştırın.",
+        "budget": "“Bütçe”, geçen ayın gelirine göre gelecek ayın beklenen giderlerini gösterir. Gösterge sağa kaydığında giderler geliri aşıyor demektir. Gösterge sola kaydığında ise elinizde artan para var demektir. Zamanı ilerletmeden önce kontrol edin.",
+        "budget_week": "“Bütçe”, geçen haftanın gelirine göre gelecek haftanın beklenen giderlerini gösterir. Gösterge sağa kaydığında giderler geliri aşıyor demektir. Gösterge sola kaydığında ise elinizde artan para var demektir. Zamanı ilerletmeden önce kontrol edin.",
+        "budgetChanges": "Yol ve tesis inşaatlarını artırır ya da tesislerin çalışma düzeyini veya inşaat hızını yükseltirseniz gereken para artar ve bütçe göstergesi yükselir. Çalışma düzeyini veya inşaat hızını düşürerek beklenen giderleri azaltabilirsiniz. Vergi gelirleri artarsa aynı giderle bile gösterge düşer.",
+        "budgetPlanning": "Gösterge düşükse şehir için harcayabileceğiniz paranız var demektir. Eksik olan hizmetlere veya ileride gerekecek tesislere yatırım yapmayı düşünün.",
+        "date": "Tarih, şehirdeki zamanın ne kadar ilerlediğini gösterir. İnşaatların ilerleyişini ve mevsimlere göre şehirdeki değişimleri takip etmek için kullanın. Plan yaparken tarih ilerlemez; “Başlat” ile zamanı ilerlettiğinizde güncellenir.",
+        "climate": "Sıcaklık, yağış, güneşlenme ve rüzgâr hızı paneli bu ayın ortalama iklimini gösterir. Bu koşullar tarımın, rüzgâr enerjisinin ve güneş enerjisinin üretim verimini etkiler. Tarım ürünlerinin ya da elektriğin üretimi düşükse iklimi de kontrol edin.",
+        "climate_week": "Sıcaklık, yağış, güneşlenme ve rüzgâr hızı paneli bu haftanın ortalama iklimini gösterir. Bu koşullar tarımın, rüzgâr enerjisinin ve güneş enerjisinin üretim verimini etkiler. Tarım ürünlerinin ya da elektriğin üretimi düşükse iklimi de kontrol edin.",
+        "climateEffects": "Güneşlenme zayıfsa güneş enerjisinin, rüzgâr zayıfsa rüzgâr enerjisinin üretimi düşer. Tarımı sıcaklık ve yağış miktarı da etkiler. İklim paneline basarak bu ayın koşullarının her tesisin üretim verimini nasıl etkilediğini görebilirsiniz. Arzın mevsime göre değiştiğini göz önünde bulundurarak tesislerinizi planlayın.",
+        "climateEffects_week": "Güneşlenme zayıfsa güneş enerjisinin, rüzgâr zayıfsa rüzgâr enerjisinin üretimi düşer. Tarımı sıcaklık ve yağış miktarı da etkiler. İklim paneline basarak bu haftanın koşullarının her tesisin üretim verimini nasıl etkilediğini görebilirsiniz. Arzın mevsime göre değiştiğini göz önünde bulundurarak tesislerinizi planlayın.",
+        "notifications": "“Bildirimler” üzerindeki sayı, şu anda göz atmanız gereken uyarıların sayısıdır. Kırmızı sayı ve yanıp sönme, şehrin işleyişinde aksama olduğunu ve bir an önce ilgilenmeniz gereken sorunları gösterir. Sarı sayı ise büyümeye hazırlık ya da düzelmesi zaman alan sorunlar gibi dikkat edilmesi gereken konuları gösterir. Önce düğmeye basıp içeriğe göz atın.",
+        "notificationActions": "Bildirimde ilgili bir tesis veya mahalle varsa o satıra basarak ayrıntıları inceleyebilirsiniz. Elektrik hattı bağlı değilse bağlayın, tesiste malzeme eksikse tedarik edilebilmesini sağlayın; nedenine göre önlem alın. Süren sorunlara ilişkin bildirimler, nedeni ortadan kalktığında kaybolur. Önlem aldıktan sonra ertesi ayın sonuçlarını kontrol edin."
       },
       "step3": {
-        "title": "Sorunları bulmak için görünümü değiştirin",
-        "open": "Elektrik kesintisi ve trafik sıkışıklığı şehrin görünüşünden anlaşılması zor olabilir. Haritada ihtiyacınız olan bilgileri göstermek için “Görüntüle” seçeneğini kullanın. Paneli açmak için kokpitte “Görünüm”e basın.",
-        "tabs": "Dikey sekmeler, binalar, yollar, parseller veya bölgeler gibi neyi inceleyeceğinizi seçmenize olanak tanır. Ayrıca, örtüşen bilgiler görünümün okunmasını zorlaştırdığında istenmeyen nesneleri de gizleyebilirsiniz. Ekran seçeneklerini keşfetmek için “İleri”ye basın.",
-        "modes": "Her sekmedeki düğmeler, nesneleri hangi bilgilerin renklendirdiğini seçer. Yoğun yolları veya sorunlu binaları bulun ve bunları bir sonraki eyleminiz için ipucu olarak kullanın. Daha fazla incelemek için 3B görünümde bir nesneyi tıklayın. \"İleri\"ye basın."
+        "title": "Görünümü değiştirerek sorunları bulun",
+        "open": "Elektrik eksikliği veya trafik sıkışıklığı, şehrin görünüşünden kolay kolay anlaşılmaz. “Görünüm” ile öğrenmek istediğiniz bilgileri harita üzerinde görünür hâle getirin. Paneli açmak için kokpitteki “Görünüm” düğmesine basın.",
+        "tabs": "Dikey sıralanmış sekmelerle binalar, yollar, parseller ve mahalleler gibi incelemek istediğiniz nesneleri seçebilirsiniz. Bilgiler üst üste binip okunması zorlaştığında gereksiz nesneleri gizleyebilirsiniz. Görünümün nasıl kullanıldığını görmek için “İleri” düğmesine basın.",
+        "modes": "Her sekmedeki düğmelerle nesnelerin hangi bilgiye göre renklendirileceğini seçebilirsiniz. Sıkışık yolları veya sorunlu binaları bulup önlem düşünmek için ipucu olarak kullanın. Ayrıntılı incelemek istediğiniz nesneye 3D ekranda tıklayabilirsiniz. “İleri” düğmesine basın."
       },
       "step4": {
-        "title": "Şehir kurma araçlarınızı keşfedin",
-        "grading": "Yukarıdan aşağıya soldaki düğmeleri inceleyelim. “Dünya İşleri” seviyeleri, denizden arazi inşa etmek veya geri almak için eğimlidir. Daha fazla eve veya işyerine ihtiyacınız olduğunda ancak çok az kullanılabilir araziye sahip olduğunuzda büyüme için alan yaratır.",
-        "road": "“Yollar, Demiryolu ve Altyapı” insanlar, mallar, elektrik ve su için rotalar yaratır. Evleri ve işyerlerini yollarla birleştirin, uzak yerleri demiryoluyla bağlayın ve tesisleri elektrik hatları ve borularla birleştirin. Bu ağlar seyahat, ticaret ve kamu hizmetlerini destekler.",
-        "land": "“Arsa parselleri” binalar için siteler hazırlar. Boş arazi tek başına bir şantiye değildir. Daha fazla ev ve büyük tesisler, onlar için yeterli alana sahip sitelere ihtiyaç duyar.",
-        "landDevelopment": "Parseller, şehir inşaatı ve özel evlerin ve işyerlerinin gelişmesi için alan sağlar. Özel binalar talebe ve ilçe bina kurallarına göre büyür. Daha fazla ev veya iş istediğinizde, yeterli boş paketin mevcut olup olmadığını kontrol edin.",
-        "district": "“Bölge”, şehrin bir yerleşim bölgesi veya bir sanayi bölgesi gibi farklı öncelikleri olan bölümlerini yönetmenizi sağlar. Her ilçe, izin verilen bina türlerini kısıtlayabilir ve tüm mahalleye kalkınma için uygun bir yön verebilir.",
-        "districtRules": "Bölge detayları, hangi tür binalara izin verildiğini seçmenize izin verir. Bunları, fabrikaları bir yerleşim bölgesinden uzak tutmak gibi, yetiştirmek istediğiniz şehir türüne göre kullanın. Nerede desteğe ihtiyaç olduğuna karar vermek için ilçeler arasındaki nüfus ve yaşam koşullarını da karşılaştırabilirsiniz.",
-        "construction": "“İnşaat” şehrin ihtiyaç duyduğu binaları planlar. Evler, işyerleri, hastaneler, okullar ve elektrik santralleri inşa edebilirsiniz. Daha fazla konut ve iş sağlamak veya sağlık, eğitim, elektrik ve diğer hizmetlerdeki boşlukları doldurmak için kullanın.",
-        "transport": "“Toplu ulaşım”, sakinlerin otobüs veya demiryolu ile seyahat etmesine yardımcı olur. Rotaları ve durakları ayarlayabilir, ücretleri ve servis aralıklarını ayarlayabilirsiniz. Evleri işyerleri ve okullarla ilişkilendirmek, işe gidip gelme yükünü azaltmaya yardımcı olur.",
-        "propPlacement": "“Prop Yerleştirme” ağaçları, kayaları ve diğer manzaraları ekler. Sokaklara yeşillik eklemek veya araziyi süslemek için kullanın.",
-        "cityDevelopment": "“Otomatik Şehir Geliştirme”, aynı anda geniş bir alana yolları ve arazi parsellerini planlıyor. Haritada geliştirmek istediğiniz alanı boyayın ve yolları ve parselleri tek seferde hazırlamak için bir sokak düzeni seçin. Sıfırdan yeni bir yerleşim alanı veya kasaba açarken kullanın.",
-        "constructionProjects": "“İnşaat projeleri” planlı ve devam eden çalışmaları tek bir yerde toplar. Hangisinin ilerlemeye çalışacağına karar vermek için ilerlemeyi ve maliyetleri gözden geçirin.",
-        "regulation": "“Yönetmelikler”, hız sınırları, çalışma saatleri, göç ve sosyal güvenlik dahil olmak üzere şehirde yaşamak ve çalışmak için kurallar belirler. Bunları güvenlik, yaşamın ve şehrin büyümesinin tadını çıkarma zamanı ve önceliklerinize uyacak şekilde ayarlayın.",
-        "stat": "“İstatistik”, kararlarınızı değerlendirmenize yardımcı olur. Grafikler nüfus, gelir, işe gidip gelme, ikamet memnuniyeti ve ekonominin ve fiyatların büyüklüğündeki değişiklikleri göstermektedir. Politikaları veya tesisleri değiştirdikten sonra, hayatın iyileşip iyileşmediğini ve neyin hala eksik olduğunu kontrol edin. Bu soldaki düğmeleri tamamlar."
+        "title": "Şehir kurma araçlarını tanıyın",
+        "grading": "Ekranın solundaki düğmeleri yukarıdan aşağıya doğru tanıtalım. “Toprak işleri”, bina yapmaya elverişsiz eğimli arazileri düzleştirmek veya denizi doldurarak kullanılabilir araziyi artırmak için kullanılır. Konut ya da iş yeri artırmak istediğiniz hâlde arazi yetmediğinde şehrin gelişme alanını genişletebilirsiniz.",
+        "road": "“Yol, demiryolu ve altyapı”, insanların, malların, elektriğin ve suyun ulaşacağı güzergâhları oluşturmaya yarayan düğmedir. Yollarla konutları ve iş yerlerini, demiryolu hatlarıyla uzak yerleri birbirine bağlar; elektrik hatları ve su borularıyla tesisleri birbirine bağlarsınız. Sakinlerin ulaşımını, şirketlerin ticaretini ve elektrik ile su arzını desteklemek için kullanılır.",
+        "land": "“Parseller”, binalar için inşaat alanı hazırlamaya yarayan düğmedir. Yalnızca arazinin olması binaların yapılması için yetmez. Konutları artırmak için de büyük tesisleri getirmek için de onlara uygun büyüklükte inşaat alanı gerekir.",
+        "landDevelopment": "Hazırladığınız parseller, belediyenin bina inşa edeceği yer olarak kullanılabildiği gibi özel konutların ve şirketlerin gelişeceği yer de olur. Özel binalar talebe ve mahallenin yapı yönetmeliklerine göre inşa edilir. Konut veya iş yeri artırmak istediğinizde yeterince boş parsel olup olmadığını da kontrol edin.",
+        "district": "“Mahalleler”, şehrin bir bölümünü bir bütün olarak yönetmeye yarayan düğmedir. Konutların ağırlıkta olduğu bölgeler veya fabrikaları toplamak istediğiniz bölgeler gibi, yerlere göre farklı politikalar belirleyebilirsiniz. Her mahallede yapılabilecek bina türlerini sınırlayabildiğiniz için bölgenin bütününe uygun bir yapılaşma politikası belirleyebilirsiniz.",
+        "districtRules": "Mahalle ayrıntılarında yapılabilecek bina türlerini belirleyebilirsiniz. Konut bölgesine fabrikaların karışmasını önlemek gibi, şehrinizi nasıl büyütmek istediğinize göre kullanın. Mahallelerin nüfusunu ve yaşam koşullarını da karşılaştırabildiğiniz için hangi bölgenin desteğe ihtiyacı olduğunu düşünürken ipucu edinirsiniz.",
+        "construction": "“İnşaat”, belediyenin ihtiyaç duyduğu binaları planlamaya yarayan düğmedir. Konut, iş yeri, hastane, okul, enerji santrali gibi binalar inşa edebilirsiniz. Konutları ve istihdamı artırmak ya da sağlık, eğitim, elektrik gibi şehirde eksik olan hizmetleri tamamlamak için kullanılır.",
+        "transport": "“Toplu taşıma”, otobüs ve trenle sakinlerin ulaşımını desteklemeye yarayan düğmedir. Hatları ve durakları belirleyip bilet ücretlerini ve sefer aralıklarını ayarlayabilirsiniz. Konutları iş yerleri ve okullarla bağlayarak işe ve okula gidiş gelişin yükünü azaltmak için kullanılır.",
+        "propPlacement": "“Dekor nesnesi yerleştirme”, ağaç, kaya gibi nesneler yerleştirerek şehrin manzarasını güzelleştirmeye yarayan düğmedir. Sokaklara yeşillik katmak veya araziyi süslemek istediğinizde kullanın.",
+        "cityDevelopment": "“Otomatik şehir geliştirme”, geniş bir alana yolları ve parselleri toplu olarak planlamaya yarayan düğmedir. Haritada geliştirmek istediğiniz alanı boyayıp bir yerleşim düzeni seçtiğinizde yollar ve parseller tek seferde hazırlanır. Yeni bir konut bölgesini veya şehir merkezini sıfırdan açarken kullanın.",
+        "constructionProjects": "“İnşaat projeleri” bölümünde planlanan ve süren inşaat işlerini topluca görebilirsiniz. Hangi işlerin ilerlediğine ve nereye para harcandığına bakarak hangi işleri sürdüreceğinize karar verin.",
+        "regulation": "“Yönetmelikler”, şehirde yaşamanın ve çalışmanın kurallarını belirlediğiniz yerdir. Hız sınırı, çalışma saatleri, göçmen kabulü ve sosyal güvenlik gibi ayarları yapabilirsiniz. Güvenliğe mi, yaşam rahatlığına mı, yoksa şehrin büyümesine mi öncelik vereceğinizi düşünüp duruma göre ayarlayın.",
+        "stat": "“İstatistikler”, şehir kurma çalışmalarınızın sonuçlarını kontrol etmeye yarayan düğmedir. Nüfus, gelir, işe gidiş geliş, sakinlerin memnuniyeti, şehir ekonomisinin büyüklüğü ve fiyatlar gibi göstergelerdeki değişimleri grafiklerle görebilirsiniz. Politikaları veya tesisleri değiştirdikten sonra yaşamın iyileşip iyileşmediğini ve hâlâ neyin eksik olduğunu kontrol edin. Soldaki düğmeler bu kadar."
       },
       "step5": {
-        "title": "Planlarınızı çalıştırın ve sonuçları gözden geçirin",
-        "flow": "Şehri kontrol ettikten ve inşaat ve bütçeleri planladıktan sonra, zamanı ilerletmek için kokpitte “Başlat”ı kullanın. İş ilerler, sakinler çalışır, işletmeler üretir ve finanse eder ve puanlar değişir. Bazı planların etkilerini göstermek için birkaç aya ihtiyacı vardır.",
-        "execute": "İlerleme süresinden sonra, sonuçları ve bildirimleri gözden geçirin. Bir sonraki planlarınızda sorunları ele alın, ardından zamanı tekrar ilerletin. “Plan, ilerleme, gözden geçirme” diyerek şehri büyütün. Burada “Başlat”a basmanıza gerek yok. Kamera kontrollerini öğrenmek için “İleri”ye basın."
+        "title": "Planlarınızı uygulayıp sonuçları inceleyin",
+        "flow": "Şehrin durumunu inceleyip gereken inşaatları ve bütçe dağılımını belirledikten sonra kokpitteki “Başlat” ile zamanı ilerletin. İnşaatlar ilerler, sakinler çalışır, şirketler üretim yapar; şehrin gelir-gider dengesi ve puan değişir. Planlarınızın etkisinin görülmesi birkaç ay sürebilir.",
+        "execute": "Zamanı ilerlettikten sonra sonuçlara ve bildirimlere göz atın. Bir sorun varsa bir sonraki planınızda önlem alın ve zamanı yeniden ilerletin. Şehrinizi “planla → ilerlet → sonuçları incele” döngüsünü tekrarlayarak büyütürsünüz. Burada “Başlat” düğmesine basmanız gerekmez. Kamera kontrollerine geçmek için “İleri” düğmesine basın."
       },
       "step6": {
-        "title": "Kamerayı hareket ettir",
-        "description": "Kamerayı şu şekilde hareket ettirebilirsiniz: Görünümü hareket ettirmek için sol düğmeyle sürükleyin, döndürmek için sağ tuşla sürükleyin, hareket etmek için W/A/S/D (veya ok tuşlarını), döndürmek için Q/E, yüksekliği değiştirmek için R/F ve fare tekerleği yakınlaştırmak için. Serbestçe deneyin, ardından \"İleri\" ye basın."
+        "title": "Kamerayı hareket ettirin",
+        "description": "Kamerayı şu kontrollerle hareket ettirebilirsiniz: sol tuşla sürükleyerek bakış noktasını kaydırın, sağ tuşla sürükleyerek döndürün; W/A/S/D (ok tuşları) ile hareket edin, Q/E ile döndürün, R/F ile yüksekliği değiştirin, fare tekerleğiyle yakınlaştırıp uzaklaştırın. İstediğiniz gibi deneyin, sonra “İleri” düğmesine basın."
       },
       "step7": {
         "title": "Uçuş modu ve sinema modu",
-        "description": "Kameranın iki özel modu vardır. \"Uçuş modu\" Shift+F ile başlar: W/A/S/D ile görüşünüz boyunca hareket edin, fare ile etrafa bakın ve R/F ile yukarı veya aşağı gidin. Bırakmak için ESC'ye basın. \"Sinema Modu\", ekranın sol üst köşesindeki düğmeden başlar ve şehrin etrafında dolaşmanızı sağlar. Fare ile etrafınıza bakın; Yörünge ve hareket arasında geçiş, boşluk duraklamaları, geri dönüşler ve ESC çıkışları arasında geçiş yapar. Ekrandaki paneller, her iki mod da açıkken gizlenir ve ESC'ye bastığınızda geri gelir. Bunları denediğinizde, her iki moddan da çıkın ve \"İleri\"ye basın."
+        "description": "Kameranın iki özel modu var. “Uçuş modu” Shift+F ile başlar; W/A/S/D ile baktığınız yöne ilerler, fareyle etrafa bakar, R/F ile yükselip alçalırsınız. Esc ile çıkabilirsiniz. “Sinema modu” ekranın sol üstündeki düğmeyle başlar ve şehrin çevresinde dolaşarak manzarayı izlemenizi sağlar. Fareyle etrafa bakın; Shift ile çevresinde dönme ve ilerleme arasında geçiş yapın, Space ile duraklatın, Backspace ile geri oynatın, Esc ile çıkın. Her iki modda da ekrandaki paneller gizlenir ve Esc ile çıktığınızda geri gelir. Denemeyi bitirince iki moddan da çıkıp “İleri” düğmesine basın."
       },
       "step8": {
-        "title": "Şehir sınırını görün",
-        "description": "Kamerayı şehrin doğu kenarına taşıdık. Şehir olarak kullanabileceğiniz alan, ayrıntılı arazinin bulunduğu bu dikdörtgendir ve kamera da onu terk edemez. Hepsi ekran ve kontroller için. Ardından, aslında yeni bir yerleşim alanı oluşturalım. \"İleri\"ye basın."
+        "title": "Şehrin sınırına göz atın",
+        "description": "Kamerayı şehrin doğu ucuna taşıdık. Şehir olarak kullanabileceğiniz alan, ayrıntılı arazinin oluşturulduğu bu dikdörtgen alanın içidir. Kamera da bu sınırın dışına çıkamaz. Ekran ve kontrollerle ilgili açıklamalar bu kadar. Şimdi sıra gerçekten yeni bir konut bölgesi kurmakta. “İleri” düğmesine basın."
       },
       "step9": {
-        "title": "yolu uzat",
-        "description": "Şimdi yeni sakinleri ağırlamak için bir yerleşim alanı inşa edelim. Yollar onları birbirine bağlamadıkça evler ve işyerleri hiçbir işe yaramaz: insanlar gelip gidemez ve mallar gelemez. İlk olarak, yeni mahalleye bir yol açmak için kasabanın doğu-batı caddesini batıya doğru genişletin. İnşaat panelini açmak için simge panelinde “Yollar, Demiryolu ve Altyapı” düğmesine basın.",
-        "confirm": "Yol boyunca uzanan arazi, yol tamamlandığında parsellere bölünür. İnşaat panelindeki \"Tamamlanınca oluşturulacak yol kenarı parselleri\" bölümünden yolun sol ve sağ tarafı için her parselin alanını seçebilirsiniz. Hangi binaları istediğinize göre karar verin: konut alanları için küçük, fabrikalar ve tarlalar için büyük parseller uygundur. Bu yol bir konut alanına hizmet edecek, bu yüzden ayarı olduğu gibi bırakın. Yolu kaydetmek için inşaat panelinde onaylayın, ardından \"İleri\"ye basın."
+        "title": "Yolu uzatın",
+        "description": "Şimdi yeni sakinleri karşılayacak bir konut bölgesi kuracağız. Konutlar ve iş yerleri yollarla bağlı değilse insanlar gidip gelemez, mallar da ulaşamaz. Önce kasabanın doğu-batı yönündeki caddesini batıya doğru uzatarak konut bölgesine giden yolu açın. İnşaat panelini açmak için simge panelindeki “Yol, demiryolu ve altyapı” düğmesine basın.",
+        "confirm": "Yol boyundaki arazi, yol tamamlandığında parsellere ayrılır. Bir parselin büyüklüğünü inşaat panelindeki “Tamamlandığında oluşturulacak yol kenarı parselleri” ayarından yolun sağı ve solu için ayrı ayrı seçebilirsiniz. Konut bölgesi için küçük, fabrika veya tarım arazisi için geniş parseller gibi, hangi binaları istediğinize göre karar verin. Bu kez konut bölgesi yapacağımız için ayarı olduğu gibi bırakın. İnşaat panelindeki “Onayla” düğmesine basıp kaydettikten sonra “İleri” düğmesine basın."
       },
       "step10": {
-        "title": "yolu tamamla",
-        "description": "Yol hala “inşaat planlı”. Planlı bir yol henüz kullanılamaz - insanlar ve arabalar onu ancak iş bittiğinde kullanabilir. Süreyi ilerletmek ve tamamlanmasını beklemek için kokpitte 2-3 kez “Başlat” tuşuna basın. İnşaat devam ederken her ay inşaat paraya mal oluyor.",
-        "description_week": "Yol hala “inşaat planlı”. Planlı bir yol henüz kullanılamaz - insanlar ve arabalar onu ancak iş bittiğinde kullanabilir. Süreyi ilerletmek ve tamamlanmasını beklemek için kokpitte 2-3 kez “Başlat” tuşuna basın. İnşaat devam ederken her hafta inşaat paraya mal oluyor."
+        "title": "Yolu tamamlayın",
+        "description": "Yolun durumu hâlâ “İnşaat planlandı”. Yalnızca planlanmış bir yol kullanılamaz; insanlar ve araçlar ancak inşaat bittiğinde geçebilir. Kokpitteki “Başlat” düğmesine 2-3 kez basarak zamanı ilerletin ve yolun tamamlanmasını bekleyin. İnşaat süresince her ay inşaat maliyeti ödenir.",
+        "description_week": "Yolun durumu hâlâ “İnşaat planlandı”. Yalnızca planlanmış bir yol kullanılamaz; insanlar ve araçlar ancak inşaat bittiğinde geçebilir. Kokpitteki “Başlat” düğmesine 2-3 kez basarak zamanı ilerletin ve yolun tamamlanmasını bekleyin. İnşaat süresince her hafta inşaat maliyeti ödenir."
       },
       "step11": {
-        "title": "Parseller oluştu",
-        "description": "Yol tamamlandı ve yol boyunca parseller oluşturuldu. Binalar yalnızca parsellerin üzerinde durabilir ve yola bakan bir parsel insanların ve malların gelip gitmesini sağlar. Var olan bir yol boyunca parsel eklemek için simge panelindeki \"arsa\" düğmesini kullanın."
+        "title": "Parseller oluşturuldu",
+        "description": "Yol tamamlandı ve yol boyunca parseller oluştu. Binalar yalnızca parsellerin üzerine yapılabilir; parseller yola baktığı için insanlar ve mallar girip çıkabilir. Mevcut bir yol boyuna parsel eklemek istediğinizde simge panelindeki “Parseller” düğmesinden oluşturabilirsiniz."
       },
       "step12": {
-        "title": "bir bölge oluştur",
-        "description": "İnşa etmeden önce, bu caddenin ne olması gerektiğine karar verin. Bir plan olmadan, evlerin hemen yanında bir fabrika yükselebilir. Bu tür planlar “bölge” başına yapılır. İlçeler karayoluyla tahsis edilir ve bir parsel karşı karşıya olduğu yolun ilçesine aittir. Bölgeleri Düzenle penceresini açmak için Simge panelinde “Bölge”ye basın: Şu anda tüm kasaba tek bir bölge.",
-        "create": "“Sokak tarafı” fırçasını kullanın. Aracı \"Yeni Bölge Oluştur\" olarak değiştirin, Ctrl'yi basılı tutun ve uzattığınız yol boyunca sürükleyin. Boyadığınız yolun her iki tarafı, onlara bakan parsellerle birlikte yeni bir bölge haline geliyor."
+        "title": "Mahalle oluşturun",
+        "description": "Bina yapmadan önce bu caddeyi nasıl bir yere dönüştüreceğinize karar verin. Bir politika belirlemezseniz konutların hemen yanına fabrika yapılabilir. Yerlere göre politikalar “Mahalle” birimiyle belirlenir. Mahalleler yol yol atanır; parseller baktıkları yolun mahallesine dahil olur. Simge panelindeki “Mahalleler” düğmesine basıp mahalle düzenleme penceresini açtığınızda şu anda tüm kasabanın tek bir mahalle olduğunu görürsünüz.",
+        "create": "Boyama yöntemi olarak “Yol kenarı” seçeneğini seçin. Aracı “Yeni mahalle oluştur” olarak değiştirin ve Ctrl tuşunu basılı tutarak uzattığınız yolun üzerinden geçin. Üzerinden geçtiğiniz yolun iki yakası ve bu yola bakan parseller yeni mahalle olur."
       },
       "step13": {
-        "title": "ilçe oluşturuldu",
-        "description": "Yeni caddeyi şehir merkezinden kendi bölgesi olarak ayırdınız. Nüfus ve ilçe başına fiyatları kontrol edebilir ve orada hangi binaların inşa edilebileceğine karar verebilirsiniz, böylece her alan ona uygun şekilde büyüyebilir. Kontrol ettikten sonra, Bölgeleri Düzenle penceresini kapatın."
+        "title": "Mahalle ayrıldı",
+        "description": "Yeni caddeyi kasaba merkezinden ayrı bir mahalle hâline getirdiniz. Her mahallenin nüfusunu ve fiyatlarını topluca görebilir, yapılabilecek binaları belirleyebilirsiniz; böylece her yere uygun bir şehir kurabilirsiniz. Kontrol ettikten sonra mahalle düzenleme penceresini kapatın."
       },
       "step14": {
-        "title": "Açık Bölge Ayrıntıları",
-        "description": "Yeni bölgeyi bir yerleşim bölgesi yapalım. Ekranın sol alt kısmındaki simgeyle ilçeleri gösterin, ardından ayrıntılarını açmak için oluşturduğunuz bölgenin etiketine tıklayın."
+        "title": "Mahalle ayrıntılarını açın",
+        "description": "Yeni mahalleyi konut bölgesi olarak ayarlayalım. Ekranın sol altındaki simgeyle mahalleleri görüntüleyin, az önce oluşturduğunuz mahallenin etiketine tıklayarak ayrıntılarını açın."
       },
       "step15": {
-        "title": "Konut yap",
-        "description": "Panelin alt kısmına yakın bina yönetmelikleri, bu bölgenin parsellerine hangi binaların inşa edilebileceğini seçer. Burada yaşamak için sakin bir yer istiyoruz, bu yüzden onları devre dışı bırakmak için “apartman” ve “ev” dışındaki her binaya tıklayın."
+        "title": "Konut bölgesi yapın",
+        "description": "Panelin alt kısmındaki yapı yönetmelikleriyle bu mahallenin parsellerine yapılabilecek binaları seçebilirsiniz. Burayı huzurlu bir konut bölgesi yapmak istediğimiz için “Apartman” ve “Müstakil ev” dışındaki tüm binalara tıklayarak devre dışı bırakın."
       },
       "step16": {
-        "title": "Bir parseli kontrol edin",
-        "description": "Bir bölgenin yönetmelikleri, içindeki her parsel için geçerlidir. Ayrıntılarını açmak için sarı işaretli parsele tıklayın."
+        "title": "Bir parseli inceleyin",
+        "description": "Mahallede belirlediğiniz yönetmelikler o mahalledeki tüm parsellere uygulanır. Sarı işaretli parsele tıklayarak parsel ayrıntılarını açın."
       },
       "step17": {
-        "title": "Yönetmelik uygulandı",
-        "description": "Parsel panelinin dibine yakın bir yerde, bölgenin sadece “apartman” ve “ev”e izin veren düzenlemesini görebilirsiniz. Artık bu caddede sadece evler inşa edilebilir. Parselleri tek tek belirlemek yerine, bir bölgenin yönüne karar vermek tüm caddeyi takip eder."
+        "title": "Yönetmelikler uygulandı",
+        "description": "Parsel panelinin alt kısmına bakın: mahallede belirlediğiniz, yalnızca “Apartman” ve “Müstakil ev” binalarına izin veren yönetmelik uygulanmış. Artık bu caddedeki parsellere yalnızca konut yapılabilir. Parselleri tek tek ayarlamanıza gerek yok; mahalle için bir politika belirlediğinizde bütün cadde o politikaya uyar."
       },
       "step18": {
-        "title": "evler inşa etmek",
-        "description": "Şimdi evler sağlayalım. İnsanlar burada yaşamak istediğinde konut normalde özel sektör tarafından otomatik olarak inşa edilir, ancak şehir tarafından inşa edilen toplu konutlar bir kıtlığı hızla telafi eder. Burada halka açık bir apartman inşa edelim. Simge panelinde “İnşaat” düğmesine basın.",
-        "select": "\"Konut\" kategorisinde \"Daire Kompleksi\"ni seçin, site olarak yeni bölgedeki herhangi bir parseli tıklayın ve onaylayın."
+        "title": "Konut inşa edin",
+        "description": "Sıra konut sağlamaya geldi. Konutları normalde, oturmak isteyen insanlar olduğunda özel sektör kendiliğinden inşa eder; ancak belediye konutu inşa ederek konut açığını hemen kapatabilirsiniz. Burada belediyeye ait bir apartman inşa edelim. Simge panelindeki “İnşaat” düğmesine basın.",
+        "select": "“Konut” kategorisinden “Konut sitesi” seçeneğini seçin, yeni mahalledeki parsellerden istediğinize tıklayarak inşaat yeri olarak belirleyin ve “Onayla” düğmesine basın."
       },
       "step19": {
-        "title": "evleri tamamla",
-        "description": "Yollar gibi, binalar da sırf planlı oldukları için yaşanamaz. Bir apartmanın tamamlanması yarım yıldan fazla sürer. Süreyi ilerletmek ve tamamlanmasını beklemek için “Başlat”a basın."
+        "title": "Konutu tamamlayın",
+        "description": "Yollarda olduğu gibi binalarda da yalnızca planlamak yetmez; içinde henüz oturulamaz. Bir apartmanın tamamlanması altı aydan uzun sürer. “Başlat” ile zamanı ilerletip binanın tamamlanmasını bekleyin."
       },
       "step20": {
-        "title": "Elektrik için kontrol edin",
-        "description": "Evler tek başına hayat kurmaz: insanların da elektriğe ve suya ihtiyacı vardır. Bu şehirde henüz elektrik santrali ve su temini yok. Kasaba halkının yaşadığı sarı işaretli apartmanı tıklayın, ayrıntılarını açmak, kiracılardan birini “Bina Bilgileri” sekmesinden seçin, ardından “Tedarik, Talep ve Ticaret” sekmesini açın: Edinilen elektrik miktarının 0 olduğunu onaylayabilirsiniz."
+        "title": "Elektriğin gelip gelmediğini kontrol edin",
+        "description": "Konut olsa bile elektrik ve su gelmezse yaşam sürdürülemez. Bu kasabada henüz ne enerji santrali ne de su şebekesi var. Kasaba halkının yaşadığı, sarı işaretli apartmana tıklayarak ayrıntılarını açın; “Bina bilgileri” sekmesinden bir kiracı seçip “Arz, talep ve ticaret” sekmesini açtığınızda edinilen elektrik miktarının 0 olduğunu görebilirsiniz."
       },
       "step21": {
-        "title": "Bir güneş enerjisi santrali inşa edin",
-        "description": "Elektrik vermek için önce onu üretmek için bir elektrik santraline ihtiyacınız var. Sarı işaretli parsel üzerine bir \"güneş enerjisi santrali\" inşa edin. Normalde tamamlanması zaman alır, ancak bu bir öğretici olduğu için inşaat süresi atlanır."
+        "title": "Güneş enerjisi santrali inşa edin",
+        "description": "Elektrik ulaştırmak için önce elektriği üretecek bir santral gerekir. Sarı işaretli parsele bir “güneş enerjisi santrali” inşa edin. Normalde tamamlanması zaman alır, ancak bu bir eğitim olduğu için inşaat süresi atlanarak santral hemen tamamlanacak."
       },
       "step22": {
-        "title": "Bir Trafo Merkezi İnşa Edin",
-        "description": "Bir elektrik santralinden gelen yüksek voltajlı elektrik, haneler tarafından olduğu gibi kullanılamaz. Bir trafo merkezi, onu güç evlerine dönüştürür ve onu karayoluyla bağlanan çevredeki binalara kullanabilir ve dağıtabilir. Apartmanın yakınında sarı işaretli parsel üzerine bir \"elektrik trafo merkezi\" inşa edin."
+        "title": "Trafo merkezi inşa edin",
+        "description": "Santralin ürettiği yüksek gerilimli elektrik evlerde olduğu gibi kullanılamaz. Bunu evlerde kullanılabilecek elektriğe dönüştürüp yolla bağlı çevredeki binalara dağıtan tesis trafo merkezidir. Apartmanın yakınındaki sarı işaretli parsele bir “Trafo merkezi” inşa edin."
       },
       "step23": {
-        "title": "Bir güç hattı ile bağlantı kurun",
-        "description": "Santral ve trafo merkezi ayrı olsa bile, elektrik için bir yol onları birbirine bağlar. Simge panelinde “Yollar, Demiryolu ve Altyapı”yı açın, “Elektrik” altında “Güç İletim Hattı”nı seçin ve güneş enerjisi santralinin bağlantı terminalinden trafo merkezinin terminaline bir çizgi çizin. Terminaller arasındaki düz bir çizgi bunu tek seferde yapar."
+        "title": "Elektrik hattıyla bağlayın",
+        "description": "Santral ile trafo merkezi birbirinden uzak olsa bile elektriği taşıyacak bir güzergâh olursa bağlanırlar. Simge panelinde “Yol, demiryolu ve altyapı” düğmesine basın, “Elektrik” altından “Yüksek gerilim hattı” seçeneğini seçin ve güneş enerjisi santralinin bağlantı noktasından trafo merkezinin bağlantı noktasına bir hat çekin. Bağlantı noktalarını düz bir çizgiyle birleştirirseniz hattı tek seferde çekebilirsiniz."
       },
       "step24": {
-        "title": "Güç kaynağını onaylayın",
-        "description": "Bağlandıktan sonra, elektriğin gerçekten aktığından emin olun. Zamanı ilerletmek için “Başlat”a basın, ayrıntılarını açmak için trafo merkezini tıklayın ve “Tedarik, Talep ve Ticaret” sekmesinde alınan yüksek voltajlı elektrik miktarının 0 olmadığını kontrol edin. Tesisin başlaması ve gücün gelmesi birkaç ay sürebilir."
+        "title": "Elektrik arzını kontrol edin",
+        "description": "Bağladıktan sonra elektriğin gerçekten akıp akmadığını kontrol edin. “Başlat” ile zamanı ilerletin, trafo merkezine tıklayarak ayrıntılarını açın ve “Arz, talep ve ticaret” sekmesinde alınan yüksek gerilimli elektrik miktarının 0 olmadığını doğrulayın. Santralin çalışmaya başlayıp elektriğin ulaşması birkaç ay sürebilir."
       },
       "step25": {
-        "title": "Güç evlere ulaşır",
-        "description": "Apartmanın ayrıntılarından, ilk başta yaptığınız gibi bir kiracının “Tedarik, Talep ve Ticaret” sekmesini açın ve elde edilen elektriğin artık 0 olmadığını kontrol edin. Hanelere ulaşmak bir veya iki ay daha sürebilir. Bir elektrik santralinde üretin, elektrik hatlarının üzerinden taşıyın, bir trafo merkezinden dağıtın - ancak üçü de elektrik bağlantılı olduğunda elektrik evlerine ulaşır."
+        "title": "Elektrik evlere ulaştı",
+        "description": "Apartmanın ayrıntılarından, ilk kontrol ettiğinizde olduğu gibi bir kiracının “Arz, talep ve ticaret” sekmesini açın ve edinilen elektrik miktarının artık 0 olmadığını doğrulayın. Elektriğin evlere ulaşması için zamanı 1-2 ay daha ilerletmeniz gerekebilir. Santralde üretmek, elektrik hatlarıyla taşımak, trafo merkezinde dağıtmak: elektrik ancak bu üçü birbirine bağlandığında evlere ulaşır."
       },
       "step26": {
-        "title": "Bir su kaynağı bulun",
-        "description": "Sonraki su. Musluk suyu pompalanır ve kasabaya gönderilir. İlk olarak, suyun nereye pompalanabileceğini bulun. Görünüm panelini açmak için kokpitte “Görünüm”e basın.",
-        "show": "Dikey sekmelerden “Doğal Kaynaklar”ı seçin ve “Görünür” konumuna getirin. Su kaynakları haritada açık mavi renkte görünür. Ayrıntılarını açmak için sarı işaretli su kaynağına tıklayın."
+        "title": "Su kaynağı bulun",
+        "description": "Sırada su var. Şebeke suyu, yeraltındaki suyun pompalanıp kasabaya gönderilmesiyle sağlanır. Önce suyun pompalanabileceği yerleri bulalım. Kokpitteki “Görünüm” düğmesine basarak görünüm panelini açın.",
+        "show": "Dikey sıralanmış sekmelerden “Doğal kaynaklar” sekmesini seçin ve “Görünür” olarak değiştirin. Haritada açık maviyle gösterilen yerler su kaynaklarıdır. Sarı işaretli su kaynağına tıklayarak ayrıntılarını açın."
       },
       "step27": {
         "title": "Yeraltı suyu pompası inşa edin",
-        "description": "Bir yeraltı suyu pompası suyu yeraltından çeker, bu nedenle su kaynağının olduğu bir yerde inşa edilmelidir. Ayrıca elektriğe ve çalışanlara da ihtiyacı var, bu yüzden önce iktidarı biz getirdik. Su kaynağının üzerinde sarı işaretli parsel üzerine bir \"yeraltı suyu kuyusu pompası\" oluşturun. Bu bir öğretici olduğu için inşaat süresi atlanır."
+        "description": "Yeraltı suyu pompası yeraltındaki suyu çeken bir tesis olduğundan su kaynağı olan bir yere inşa edilmelidir. Çalışması için elektrik ve çalışan da gerekir; önce elektriği getirmemizin nedeni budur. Su kaynağının üzerindeki sarı işaretli parsele bir “Yeraltı suyu pompa istasyonu” inşa edin. Bu bir eğitim olduğu için inşaat süresi atlanacak."
       },
       "step28": {
-        "title": "Bir su pompası istasyonu inşa edin",
-        "description": "Pompalanan su, olduğu gibi hanelere verilemez. Bir trafo merkezinin elektriği dağıtması gibi, bir su pompalama istasyonu da karayoluyla bağlanan çevredeki binalara su iletir. Apartmanın yakınındaki sarı işaretli parsel üzerine bir \"su pompalama istasyonu\" inşa edin."
+        "title": "Su pompa istasyonu inşa edin",
+        "description": "Pompalanan su evlere olduğu gibi dağıtılamaz. Trafo merkezinin elektriği dağıtması gibi, su pompa istasyonu da yolla bağlı çevredeki binalara su dağıtır. Apartmanın yakınındaki sarı işaretli parsele bir “Su pompa istasyonu” inşa edin."
       },
       "step29": {
-        "title": "Bir boru ile bağlantı kurun",
-        "description": "Suyu yeraltı suyu pompasından pompa istasyonuna taşımak için bir boruya ihtiyacınız var. Simge panelinde “Yollar, Demiryolu ve Altyapı”yı açın, “Su” altında “Su Su Kemeri Borusu”nu seçin ve yeraltı suyu pompasının bağlantı terminalinden pompa istasyonunun terminaline yerleştirin. Yollardan ve elektrik hattından uzak tutmak için doğu tarafında geniş bir sapma yapın."
+        "title": "Su iletim hattıyla bağlayın",
+        "description": "Yeraltı suyu pompasının çektiği suyu su pompa istasyonuna taşıyacak bir boru hattı gerekir. Simge panelinde “Yol, demiryolu ve altyapı” düğmesine basın, “Su” altından “Ana su iletim hattı” seçeneğini seçin ve yeraltı suyu pompasının bağlantı noktasından su pompa istasyonunun bağlantı noktasına boru hattını çekin. Yollar ve elektrik hattıyla çakışmaması için hattı doğu tarafından geniş bir dolambaçla döşeyin."
       },
       "step30": {
-        "title": "Su kaynağını onaylayın",
-        "description": "Süreyi ilerletmek için “Başlat”a basın, ayrıntılarını açmak için su pompası istasyonuna tıklayın ve “Arz, Talep ve Ticaret” sekmesinde, alınan yüksek basınçlı su miktarının 0 olmadığını kontrol edin. İşçilerin yeraltı suyu pompasında toplanması ve suyun varmak."
+        "title": "Su arzını kontrol edin",
+        "description": "“Başlat” ile zamanı ilerletin, su pompa istasyonuna tıklayarak ayrıntılarını açın ve “Arz, talep ve ticaret” sekmesinde alınan yüksek basınçlı su miktarının 0 olmadığını doğrulayın. Yeraltı suyu pompasına çalışanların gelmesi ve suyun ulaşması birkaç ay sürebilir."
       },
       "step31": {
-        "title": "Temel bilgiler yerinde",
-        "description": "Su pompa istasyonuna ulaştı, bu nedenle etrafındaki evler artık musluk suyu kullanabilir. Yolları döşeyin, parseller hazırlayın, her bölgenin yönüne karar verin, evler inşa edin ve elektrik ve su getirin - bu şehir binasının temel akışıdır. Temel Kontroller eğitimini bitirmek için “İleri”ye basın."
+        "title": "Şehir kurmanın temelleri tamam",
+        "description": "Su pompa istasyonuna su ulaştığı için çevredeki evler de artık şebeke suyunu kullanabilir. Yol döşemek, parsel hazırlamak, mahallenin politikasını belirlemek, konut inşa etmek, elektrik ve su ulaştırmak: şehir kurmanın temel akışı budur. “İleri” düğmesine basarak temel kontroller eğitimini tamamlayın."
       }
     },
     "scenario4": {
-      "title": "Demiryolu İnşa Et",
-      "description": "Konut bölgesini ve işyerlerini demiryolu ile birbirine bağlamak istiyoruz, ancak özel binalar ve bir kamu hastanesi rotayı engelliyor. Bu eğitimde, arazi edinimi, kamu tesisi yıkımını, yolların, platformların ve istasyonların üstü yüksekliği, bir depo, eğri ve kalite ayarı, güç bağlantısı ve bir hizmet açmayı öğreneceksiniz.",
+      "title": "Demiryolu inşa edin",
+      "description": "Konut bölgesini ve iş yerlerini demiryoluyla bağlamak istiyoruz, ancak planlanan güzergâhta özel binalar ve bir kamu hastanesi var. Bu eğitimde arazi edinimini ve kamu tesislerinin kaldırılmasını, yolun üzerinden geçen yükseltilmiş hatları, peron, istasyon binası ve depo inşasını, eğri ve eğimlerin ayarlanmasını, elektrik beslemesinden hattın hizmete açılmasına kadar olan süreci öğrenebilirsiniz.",
       "step1": {
-        "title": "yükseltilmiş platformlar döşeyin",
-        "description": "Açık Yollar, Demiryolu ve Altyapı → Demiryolları. Şehrin batı tarafında yüksek standartlı yükseltilmiş yan platformları ve doğu tarafında çift hatlı yan platformları inşa edin. Her iki işaretli uç noktayı 6m'de sol tıklayın, şekli bitirmek için sağ tıklayın, ardından onaylayın.",
-        "open": "Açık Yollar, Demiryolu ve Altyapı → Demiryolları. Şehrin batı tarafında yüksek standartlı yükseltilmiş yan platformları ve doğu tarafında çift hatlı yan platformları inşa edin. Her iki işaretli uç noktayı 6m'de sol tıklayın, şekli bitirmek için sağ tıklayın, ardından onaylayın.",
-        "variant": "Açık Yollar, Demiryolu ve Altyapı → Demiryolları. Şehrin batı tarafında yüksek standartlı yükseltilmiş yan platformları ve doğu tarafında çift hatlı yan platformları inşa edin. Her iki işaretli uç noktayı 6m'de sol tıklayın, şekli bitirmek için sağ tıklayın, ardından onaylayın.",
-        "start": "Açık Yollar, Demiryolu ve Altyapı → Demiryolları. Şehrin batı tarafında yüksek standartlı yükseltilmiş yan platformları ve doğu tarafında çift hatlı yan platformları inşa edin. Her iki işaretli uç noktayı 6m'de sol tıklayın, şekli bitirmek için sağ tıklayın, ardından onaylayın.",
-        "end": "Açık Yollar, Demiryolu ve Altyapı → Demiryolları. Şehrin batı tarafında yüksek standartlı yükseltilmiş yan platformları ve doğu tarafında çift hatlı yan platformları inşa edin. Her iki işaretli uç noktayı 6m'de sol tıklayın, şekli bitirmek için sağ tıklayın, ardından onaylayın.",
-        "confirm": "Açık Yollar, Demiryolu ve Altyapı → Demiryolları. Şehrin batı tarafında yüksek standartlı yükseltilmiş yan platformları ve doğu tarafında çift hatlı yan platformları inşa edin. Her iki işaretli uç noktayı 6m'de sol tıklayın, şekli bitirmek için sağ tıklayın, ardından onaylayın.",
-        "town": "6m'de batı yüksek standartlı yükseltilmiş yan platformları inşa edin. Her iki işaretli uç noktayı sola tıklayın, şekli bitirmek için sağ tıklayın, ardından onaylayın.",
-        "new": "Doğu çift hatlı yan platformları inşa edin. Kartlara geri dönmek için Geri'yi kullanın ve demiryolları altında bu platformu seçin. 6m'de her iki uç noktayı da sol tıklayın, şekli bitirmek için sağ tıklayın, ardından onaylayın. Panel kapalıysa, yolları, demiryolu ve altyapıyı yeniden açın.",
-        "east": "Doğu çift hatlı yan platformları inşa edin. Kartlara geri dönmek için Geri'yi kullanın ve demiryolları altında bu platformu seçin. 6m'de her iki uç noktayı da sol tıklayın, şekli bitirmek için sağ tıklayın, ardından onaylayın. Panel kapalıysa, yolları, demiryolu ve altyapıyı yeniden açın."
+        "title": "Yükseltilmiş peronları yerleştirin",
+        "description": "“Yol, demiryolu ve altyapı” → Demiryolu bölümünden kasabanın batısına “Yükseltilmiş yan peron”, doğusuna “Çift hatlı yan peronlar” inşa edin. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın. İkisinin de yüksekliği 6 m.",
+        "open": "“Yol, demiryolu ve altyapı” → Demiryolu bölümünden kasabanın batısına “Yükseltilmiş yan peron”, doğusuna “Çift hatlı yan peronlar” inşa edin. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın. İkisinin de yüksekliği 6 m.",
+        "variant": "“Yol, demiryolu ve altyapı” → Demiryolu bölümünden kasabanın batısına “Yükseltilmiş yan peron”, doğusuna “Çift hatlı yan peronlar” inşa edin. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın. İkisinin de yüksekliği 6 m.",
+        "start": "“Yol, demiryolu ve altyapı” → Demiryolu bölümünden kasabanın batısına “Yükseltilmiş yan peron”, doğusuna “Çift hatlı yan peronlar” inşa edin. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın. İkisinin de yüksekliği 6 m.",
+        "end": "“Yol, demiryolu ve altyapı” → Demiryolu bölümünden kasabanın batısına “Yükseltilmiş yan peron”, doğusuna “Çift hatlı yan peronlar” inşa edin. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın. İkisinin de yüksekliği 6 m.",
+        "confirm": "“Yol, demiryolu ve altyapı” → Demiryolu bölümünden kasabanın batısına “Yükseltilmiş yan peron”, doğusuna “Çift hatlı yan peronlar” inşa edin. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın. İkisinin de yüksekliği 6 m.",
+        "town": "Batı tarafına “Yükseltilmiş yan peron” döşeyin. 6 m yükseklikte, daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın.",
+        "new": "Şimdi doğu tarafını döşeyin. Paneldeki “Geri” düğmesiyle tür listesine dönün ve Demiryolu altından “Çift hatlı yan peronlar” seçeneğini seçin. 6 m yükseklikte, daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın. Paneli kapattıysanız “Yol, demiryolu ve altyapı” düğmesinden yeniden açabilirsiniz.",
+        "east": "Şimdi doğu tarafını döşeyin. Paneldeki “Geri” düğmesiyle tür listesine dönün ve Demiryolu altından “Çift hatlı yan peronlar” seçeneğini seçin. 6 m yükseklikte, daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın. Paneli kapattıysanız “Yol, demiryolu ve altyapı” düğmesinden yeniden açabilirsiniz."
       },
       "step2": {
-        "title": "İstasyon girişleri inşa et",
-        "description": "Basit istasyon binasını seçin. Her bir işaretçi çiftini, platformu boyunca kısa bir geçişle bağlayın. Girişleri platformun her iki tarafının hemen dışına yerleştirin. İşaretli uç noktalara sol tıklayın, şekli bitirmek için sağ tıklayın, ardından her iki pasajı da onaylayın.",
-        "open": "Basit istasyon binasını seçin. Her bir işaretçi çiftini, platformu boyunca kısa bir geçişle bağlayın. Girişleri platformun her iki tarafının hemen dışına yerleştirin. İşaretli uç noktalara sol tıklayın, şekli bitirmek için sağ tıklayın, ardından her iki pasajı da onaylayın.",
-        "variant": "Basit istasyon binasını seçin. Her bir işaretçi çiftini, platformu boyunca kısa bir geçişle bağlayın. Girişleri platformun her iki tarafının hemen dışına yerleştirin. İşaretli uç noktalara sol tıklayın, şekli bitirmek için sağ tıklayın, ardından her iki pasajı da onaylayın.",
-        "start": "Basit istasyon binasını seçin. Her bir işaretçi çiftini, platformu boyunca kısa bir geçişle bağlayın. Girişleri platformun her iki tarafının hemen dışına yerleştirin. İşaretli uç noktalara sol tıklayın, şekli bitirmek için sağ tıklayın, ardından her iki pasajı da onaylayın.",
-        "end": "Basit istasyon binasını seçin. Her bir işaretçi çiftini, platformu boyunca kısa bir geçişle bağlayın. Girişleri platformun her iki tarafının hemen dışına yerleştirin. İşaretli uç noktalara sol tıklayın, şekli bitirmek için sağ tıklayın, ardından her iki pasajı da onaylayın.",
-        "confirm": "Basit istasyon binasını seçin. Her bir işaretçi çiftini, platformu boyunca kısa bir geçişle bağlayın. Girişleri platformun her iki tarafının hemen dışına yerleştirin. İşaretli uç noktalara sol tıklayın, şekli bitirmek için sağ tıklayın, ardından her iki pasajı da onaylayın.",
-        "town": "Basit istasyon binasını seçin. Her bir işaretçi çiftini, platformu boyunca kısa bir geçişle bağlayın. Girişleri platformun her iki tarafının hemen dışına yerleştirin. İşaretli uç noktalara sol tıklayın, şekli bitirmek için sağ tıklayın, ardından her iki pasajı da onaylayın.",
-        "new": "Basit istasyon binasını seçin. Her bir işaretçi çiftini, platformu boyunca kısa bir geçişle bağlayın. Girişleri platformun her iki tarafının hemen dışına yerleştirin. İşaretli uç noktalara sol tıklayın, şekli bitirmek için sağ tıklayın, ardından her iki pasajı da onaylayın.",
-        "east": "Basit istasyon binasını seçin. Her bir işaretçi çiftini, platformu boyunca kısa bir geçişle bağlayın. Girişleri platformun her iki tarafının hemen dışına yerleştirin. İşaretli uç noktalara sol tıklayın, şekli bitirmek için sağ tıklayın, ardından her iki pasajı da onaylayın."
+        "title": "İstasyon binasını ve girişleri yapın",
+        "description": "“Basit istasyon binası” seçeneğini seçin; batıda ve doğuda ikişer işareti birleştirerek peronu enine kesen kısa birer geçit yapın. Girişler peronun hemen iki yanına yerleştirilir. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın.",
+        "open": "“Basit istasyon binası” seçeneğini seçin; batıda ve doğuda ikişer işareti birleştirerek peronu enine kesen kısa birer geçit yapın. Girişler peronun hemen iki yanına yerleştirilir. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın.",
+        "variant": "“Basit istasyon binası” seçeneğini seçin; batıda ve doğuda ikişer işareti birleştirerek peronu enine kesen kısa birer geçit yapın. Girişler peronun hemen iki yanına yerleştirilir. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın.",
+        "start": "“Basit istasyon binası” seçeneğini seçin; batıda ve doğuda ikişer işareti birleştirerek peronu enine kesen kısa birer geçit yapın. Girişler peronun hemen iki yanına yerleştirilir. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın.",
+        "end": "“Basit istasyon binası” seçeneğini seçin; batıda ve doğuda ikişer işareti birleştirerek peronu enine kesen kısa birer geçit yapın. Girişler peronun hemen iki yanına yerleştirilir. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın.",
+        "confirm": "“Basit istasyon binası” seçeneğini seçin; batıda ve doğuda ikişer işareti birleştirerek peronu enine kesen kısa birer geçit yapın. Girişler peronun hemen iki yanına yerleştirilir. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın.",
+        "town": "“Basit istasyon binası” seçeneğini seçin; batıda ve doğuda ikişer işareti birleştirerek peronu enine kesen kısa birer geçit yapın. Girişler peronun hemen iki yanına yerleştirilir. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın.",
+        "new": "“Basit istasyon binası” seçeneğini seçin; batıda ve doğuda ikişer işareti birleştirerek peronu enine kesen kısa birer geçit yapın. Girişler peronun hemen iki yanına yerleştirilir. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın.",
+        "east": "“Basit istasyon binası” seçeneğini seçin; batıda ve doğuda ikişer işareti birleştirerek peronu enine kesen kısa birer geçit yapın. Girişler peronun hemen iki yanına yerleştirilir. Daireyle işaretli başlangıç ve bitiş noktalarına sol tıklayın; sağ tıklayarak şekli belirleyip onaylayın."
       },
       "step3": {
-        "title": "Satın alma bölümünü planlayın",
-        "description": "Çift demiryolu yolunu seçin. Batı platformunun doğu ucundan ana yolun batı ucuna kadar 6m'de düz bir çizgi çizin. Binalar bu bölümü engelliyor, bu nedenle arazi edinimi gerektiriyor. Planı onaylayın ve İleri'ye basın. Burada inşaat süresi atlanmıyor.",
-        "open": "Çift demiryolu yolunu seçin. Batı platformunun doğu ucundan ana yolun batı ucuna kadar 6m'de düz bir çizgi çizin. Binalar bu bölümü engelliyor, bu nedenle arazi edinimi gerektiriyor. Planı onaylayın ve İleri'ye basın. Burada inşaat süresi atlanmıyor.",
-        "variant": "Çift demiryolu yolunu seçin. Batı platformunun doğu ucundan ana yolun batı ucuna kadar 6m'de düz bir çizgi çizin. Binalar bu bölümü engelliyor, bu nedenle arazi edinimi gerektiriyor. Planı onaylayın ve İleri'ye basın. Burada inşaat süresi atlanmıyor.",
-        "start": "Çift demiryolu yolunu seçin. Batı platformunun doğu ucundan ana yolun batı ucuna kadar 6m'de düz bir çizgi çizin. Binalar bu bölümü engelliyor, bu nedenle arazi edinimi gerektiriyor. Planı onaylayın ve İleri'ye basın. Burada inşaat süresi atlanmıyor.",
-        "end": "Çift demiryolu yolunu seçin. Batı platformunun doğu ucundan ana yolun batı ucuna kadar 6m'de düz bir çizgi çizin. Binalar bu bölümü engelliyor, bu nedenle arazi edinimi gerektiriyor. Planı onaylayın ve İleri'ye basın. Burada inşaat süresi atlanmıyor.",
-        "confirm": "Çift demiryolu yolunu seçin. Batı platformunun doğu ucundan ana yolun batı ucuna kadar 6m'de düz bir çizgi çizin. Binalar bu bölümü engelliyor, bu nedenle arazi edinimi gerektiriyor. Planı onaylayın ve İleri'ye basın. Burada inşaat süresi atlanmıyor.",
-        "town": "Çift demiryolu yolunu seçin. Batı platformunun doğu ucundan ana yolun batı ucuna kadar 6m'de düz bir çizgi çizin. Binalar bu bölümü engelliyor, bu nedenle arazi edinimi gerektiriyor. Planı onaylayın ve İleri'ye basın. Burada inşaat süresi atlanmıyor.",
-        "new": "Çift demiryolu yolunu seçin. Batı platformunun doğu ucundan ana yolun batı ucuna kadar 6m'de düz bir çizgi çizin. Binalar bu bölümü engelliyor, bu nedenle arazi edinimi gerektiriyor. Planı onaylayın ve İleri'ye basın. Burada inşaat süresi atlanmıyor.",
-        "east": "Çift demiryolu yolunu seçin. Batı platformunun doğu ucundan ana yolun batı ucuna kadar 6m'de düz bir çizgi çizin. Binalar bu bölümü engelliyor, bu nedenle arazi edinimi gerektiriyor. Planı onaylayın ve İleri'ye basın. Burada inşaat süresi atlanmıyor."
+        "title": "Arazi edinimi gereken kesimi planlayın",
+        "description": "“Çift hatlı demiryolu” seçeneğini seçin ve batı peronunun doğu ucundan ana caddenin batı ucuna 6 m yükseklikte düz bir hat döşeyin. Hat binaların üzerinden geçtiği için arazi edinimi gerekir. Planı onaylayıp “İleri” düğmesine basın. Bu kesimin inşaat süresi atlanmayacak.",
+        "open": "“Çift hatlı demiryolu” seçeneğini seçin ve batı peronunun doğu ucundan ana caddenin batı ucuna 6 m yükseklikte düz bir hat döşeyin. Hat binaların üzerinden geçtiği için arazi edinimi gerekir. Planı onaylayıp “İleri” düğmesine basın. Bu kesimin inşaat süresi atlanmayacak.",
+        "variant": "“Çift hatlı demiryolu” seçeneğini seçin ve batı peronunun doğu ucundan ana caddenin batı ucuna 6 m yükseklikte düz bir hat döşeyin. Hat binaların üzerinden geçtiği için arazi edinimi gerekir. Planı onaylayıp “İleri” düğmesine basın. Bu kesimin inşaat süresi atlanmayacak.",
+        "start": "“Çift hatlı demiryolu” seçeneğini seçin ve batı peronunun doğu ucundan ana caddenin batı ucuna 6 m yükseklikte düz bir hat döşeyin. Hat binaların üzerinden geçtiği için arazi edinimi gerekir. Planı onaylayıp “İleri” düğmesine basın. Bu kesimin inşaat süresi atlanmayacak.",
+        "end": "“Çift hatlı demiryolu” seçeneğini seçin ve batı peronunun doğu ucundan ana caddenin batı ucuna 6 m yükseklikte düz bir hat döşeyin. Hat binaların üzerinden geçtiği için arazi edinimi gerekir. Planı onaylayıp “İleri” düğmesine basın. Bu kesimin inşaat süresi atlanmayacak.",
+        "confirm": "“Çift hatlı demiryolu” seçeneğini seçin ve batı peronunun doğu ucundan ana caddenin batı ucuna 6 m yükseklikte düz bir hat döşeyin. Hat binaların üzerinden geçtiği için arazi edinimi gerekir. Planı onaylayıp “İleri” düğmesine basın. Bu kesimin inşaat süresi atlanmayacak.",
+        "town": "“Çift hatlı demiryolu” seçeneğini seçin ve batı peronunun doğu ucundan ana caddenin batı ucuna 6 m yükseklikte düz bir hat döşeyin. Hat binaların üzerinden geçtiği için arazi edinimi gerekir. Planı onaylayıp “İleri” düğmesine basın. Bu kesimin inşaat süresi atlanmayacak.",
+        "new": "“Çift hatlı demiryolu” seçeneğini seçin ve batı peronunun doğu ucundan ana caddenin batı ucuna 6 m yükseklikte düz bir hat döşeyin. Hat binaların üzerinden geçtiği için arazi edinimi gerekir. Planı onaylayıp “İleri” düğmesine basın. Bu kesimin inşaat süresi atlanmayacak.",
+        "east": "“Çift hatlı demiryolu” seçeneğini seçin ve batı peronunun doğu ucundan ana caddenin batı ucuna 6 m yükseklikte düz bir hat döşeyin. Hat binaların üzerinden geçtiği için arazi edinimi gerekir. Planı onaylayıp “İleri” düğmesine basın. Bu kesimin inşaat süresi atlanmayacak."
       },
       "step4": {
-        "title": "hastanenin yıkılmasını emretmek",
-        "description": "Özel arsa satın alma görüşmeleri otomatik olarak başlar, ancak şehrin kamu hastanesi otomatik olarak kaldırılmaz ve pist inşaatının başlamasını engeller. Hastaneye tıklayın ve üstteki düğmelerde Bulldoze'a basın. Yıkım planlı olduğunu gösterdikten sonra İleri'ye basın.",
-        "open": "Özel arsa satın alma görüşmeleri otomatik olarak başlar, ancak şehrin kamu hastanesi otomatik olarak kaldırılmaz ve pist inşaatının başlamasını engeller. Hastaneye tıklayın ve üstteki düğmelerde Bulldoze'a basın. Yıkım planlı olduğunu gösterdikten sonra İleri'ye basın.",
-        "variant": "Özel arsa satın alma görüşmeleri otomatik olarak başlar, ancak şehrin kamu hastanesi otomatik olarak kaldırılmaz ve pist inşaatının başlamasını engeller. Hastaneye tıklayın ve üstteki düğmelerde Bulldoze'a basın. Yıkım planlı olduğunu gösterdikten sonra İleri'ye basın.",
-        "start": "Özel arsa satın alma görüşmeleri otomatik olarak başlar, ancak şehrin kamu hastanesi otomatik olarak kaldırılmaz ve pist inşaatının başlamasını engeller. Hastaneye tıklayın ve üstteki düğmelerde Bulldoze'a basın. Yıkım planlı olduğunu gösterdikten sonra İleri'ye basın.",
-        "end": "Özel arsa satın alma görüşmeleri otomatik olarak başlar, ancak şehrin kamu hastanesi otomatik olarak kaldırılmaz ve pist inşaatının başlamasını engeller. Hastaneye tıklayın ve üstteki düğmelerde Bulldoze'a basın. Yıkım planlı olduğunu gösterdikten sonra İleri'ye basın.",
-        "confirm": "Özel arsa satın alma görüşmeleri otomatik olarak başlar, ancak şehrin kamu hastanesi otomatik olarak kaldırılmaz ve pist inşaatının başlamasını engeller. Hastaneye tıklayın ve üstteki düğmelerde Bulldoze'a basın. Yıkım planlı olduğunu gösterdikten sonra İleri'ye basın.",
-        "town": "Özel arsa satın alma görüşmeleri otomatik olarak başlar, ancak şehrin kamu hastanesi otomatik olarak kaldırılmaz ve pist inşaatının başlamasını engeller. Hastaneye tıklayın ve üstteki düğmelerde Bulldoze'a basın. Yıkım planlı olduğunu gösterdikten sonra İleri'ye basın.",
-        "new": "Özel arsa satın alma görüşmeleri otomatik olarak başlar, ancak şehrin kamu hastanesi otomatik olarak kaldırılmaz ve pist inşaatının başlamasını engeller. Hastaneye tıklayın ve üstteki düğmelerde Bulldoze'a basın. Yıkım planlı olduğunu gösterdikten sonra İleri'ye basın.",
-        "east": "Özel arsa satın alma görüşmeleri otomatik olarak başlar, ancak şehrin kamu hastanesi otomatik olarak kaldırılmaz ve pist inşaatının başlamasını engeller. Hastaneye tıklayın ve üstteki düğmelerde Bulldoze'a basın. Yıkım planlı olduğunu gösterdikten sonra İleri'ye basın."
+        "title": "Hastanenin yıkılması için talimat verin",
+        "description": "Özel binaların bulunduğu arsalarda satın alma görüşmeleri kendiliğinden başlar; ancak belediyenin kamu tesisi olan hastane kendiliğinden kaldırılmaz ve hattın inşaatına başlanmasını engelliyor. Hastaneye tıklayın ve üstteki düğmelerden “Yık” düğmesine basın. Durum “Yıkım planlandı” olunca “İleri” düğmesine basın.",
+        "open": "Özel binaların bulunduğu arsalarda satın alma görüşmeleri kendiliğinden başlar; ancak belediyenin kamu tesisi olan hastane kendiliğinden kaldırılmaz ve hattın inşaatına başlanmasını engelliyor. Hastaneye tıklayın ve üstteki düğmelerden “Yık” düğmesine basın. Durum “Yıkım planlandı” olunca “İleri” düğmesine basın.",
+        "variant": "Özel binaların bulunduğu arsalarda satın alma görüşmeleri kendiliğinden başlar; ancak belediyenin kamu tesisi olan hastane kendiliğinden kaldırılmaz ve hattın inşaatına başlanmasını engelliyor. Hastaneye tıklayın ve üstteki düğmelerden “Yık” düğmesine basın. Durum “Yıkım planlandı” olunca “İleri” düğmesine basın.",
+        "start": "Özel binaların bulunduğu arsalarda satın alma görüşmeleri kendiliğinden başlar; ancak belediyenin kamu tesisi olan hastane kendiliğinden kaldırılmaz ve hattın inşaatına başlanmasını engelliyor. Hastaneye tıklayın ve üstteki düğmelerden “Yık” düğmesine basın. Durum “Yıkım planlandı” olunca “İleri” düğmesine basın.",
+        "end": "Özel binaların bulunduğu arsalarda satın alma görüşmeleri kendiliğinden başlar; ancak belediyenin kamu tesisi olan hastane kendiliğinden kaldırılmaz ve hattın inşaatına başlanmasını engelliyor. Hastaneye tıklayın ve üstteki düğmelerden “Yık” düğmesine basın. Durum “Yıkım planlandı” olunca “İleri” düğmesine basın.",
+        "confirm": "Özel binaların bulunduğu arsalarda satın alma görüşmeleri kendiliğinden başlar; ancak belediyenin kamu tesisi olan hastane kendiliğinden kaldırılmaz ve hattın inşaatına başlanmasını engelliyor. Hastaneye tıklayın ve üstteki düğmelerden “Yık” düğmesine basın. Durum “Yıkım planlandı” olunca “İleri” düğmesine basın.",
+        "town": "Özel binaların bulunduğu arsalarda satın alma görüşmeleri kendiliğinden başlar; ancak belediyenin kamu tesisi olan hastane kendiliğinden kaldırılmaz ve hattın inşaatına başlanmasını engelliyor. Hastaneye tıklayın ve üstteki düğmelerden “Yık” düğmesine basın. Durum “Yıkım planlandı” olunca “İleri” düğmesine basın.",
+        "new": "Özel binaların bulunduğu arsalarda satın alma görüşmeleri kendiliğinden başlar; ancak belediyenin kamu tesisi olan hastane kendiliğinden kaldırılmaz ve hattın inşaatına başlanmasını engelliyor. Hastaneye tıklayın ve üstteki düğmelerden “Yık” düğmesine basın. Durum “Yıkım planlandı” olunca “İleri” düğmesine basın.",
+        "east": "Özel binaların bulunduğu arsalarda satın alma görüşmeleri kendiliğinden başlar; ancak belediyenin kamu tesisi olan hastane kendiliğinden kaldırılmaz ve hattın inşaatına başlanmasını engelliyor. Hastaneye tıklayın ve üstteki düğmelerden “Yık” düğmesine basın. Durum “Yıkım planlandı” olunca “İleri” düğmesine basın."
       },
       "step5": {
-        "title": "Satın alma bölümünün bitmesini bekleyin",
-        "description": "Özel arazi edinimi, hastane yıkımı ve inşaatı bitene kadar peşin zaman. Bu birkaç ay sürebilir. Bu bölüm normal inşaat ile tamamlanır.",
-        "open": "Özel arazi edinimi, hastane yıkımı ve inşaatı bitene kadar peşin zaman. Bu birkaç ay sürebilir. Bu bölüm normal inşaat ile tamamlanır.",
-        "variant": "Özel arazi edinimi, hastane yıkımı ve inşaatı bitene kadar peşin zaman. Bu birkaç ay sürebilir. Bu bölüm normal inşaat ile tamamlanır.",
-        "start": "Özel arazi edinimi, hastane yıkımı ve inşaatı bitene kadar peşin zaman. Bu birkaç ay sürebilir. Bu bölüm normal inşaat ile tamamlanır.",
-        "end": "Özel arazi edinimi, hastane yıkımı ve inşaatı bitene kadar peşin zaman. Bu birkaç ay sürebilir. Bu bölüm normal inşaat ile tamamlanır.",
-        "confirm": "Özel arazi edinimi, hastane yıkımı ve inşaatı bitene kadar peşin zaman. Bu birkaç ay sürebilir. Bu bölüm normal inşaat ile tamamlanır.",
-        "town": "Özel arazi edinimi, hastane yıkımı ve inşaatı bitene kadar peşin zaman. Bu birkaç ay sürebilir. Bu bölüm normal inşaat ile tamamlanır.",
-        "new": "Özel arazi edinimi, hastane yıkımı ve inşaatı bitene kadar peşin zaman. Bu birkaç ay sürebilir. Bu bölüm normal inşaat ile tamamlanır.",
-        "east": "Özel arazi edinimi, hastane yıkımı ve inşaatı bitene kadar peşin zaman. Bu birkaç ay sürebilir. Bu bölüm normal inşaat ile tamamlanır."
+        "title": "Arazi edinimi yapılan kesimin tamamlanmasını bekleyin",
+        "description": "Zamanı ilerletin ve özel arsaların edinilmesini, hastanenin kaldırılmasını ve hat inşaatının tamamlanmasını bekleyin. Bu birkaç ay sürer. Bu kesimde inşaat süresi atlanmaz; hattın normal inşaatla tamamlandığını burada görürsünüz.",
+        "open": "Zamanı ilerletin ve özel arsaların edinilmesini, hastanenin kaldırılmasını ve hat inşaatının tamamlanmasını bekleyin. Bu birkaç ay sürer. Bu kesimde inşaat süresi atlanmaz; hattın normal inşaatla tamamlandığını burada görürsünüz.",
+        "variant": "Zamanı ilerletin ve özel arsaların edinilmesini, hastanenin kaldırılmasını ve hat inşaatının tamamlanmasını bekleyin. Bu birkaç ay sürer. Bu kesimde inşaat süresi atlanmaz; hattın normal inşaatla tamamlandığını burada görürsünüz.",
+        "start": "Zamanı ilerletin ve özel arsaların edinilmesini, hastanenin kaldırılmasını ve hat inşaatının tamamlanmasını bekleyin. Bu birkaç ay sürer. Bu kesimde inşaat süresi atlanmaz; hattın normal inşaatla tamamlandığını burada görürsünüz.",
+        "end": "Zamanı ilerletin ve özel arsaların edinilmesini, hastanenin kaldırılmasını ve hat inşaatının tamamlanmasını bekleyin. Bu birkaç ay sürer. Bu kesimde inşaat süresi atlanmaz; hattın normal inşaatla tamamlandığını burada görürsünüz.",
+        "confirm": "Zamanı ilerletin ve özel arsaların edinilmesini, hastanenin kaldırılmasını ve hat inşaatının tamamlanmasını bekleyin. Bu birkaç ay sürer. Bu kesimde inşaat süresi atlanmaz; hattın normal inşaatla tamamlandığını burada görürsünüz.",
+        "town": "Zamanı ilerletin ve özel arsaların edinilmesini, hastanenin kaldırılmasını ve hat inşaatının tamamlanmasını bekleyin. Bu birkaç ay sürer. Bu kesimde inşaat süresi atlanmaz; hattın normal inşaatla tamamlandığını burada görürsünüz.",
+        "new": "Zamanı ilerletin ve özel arsaların edinilmesini, hastanenin kaldırılmasını ve hat inşaatının tamamlanmasını bekleyin. Bu birkaç ay sürer. Bu kesimde inşaat süresi atlanmaz; hattın normal inşaatla tamamlandığını burada görürsünüz.",
+        "east": "Zamanı ilerletin ve özel arsaların edinilmesini, hastanenin kaldırılmasını ve hat inşaatının tamamlanmasını bekleyin. Bu birkaç ay sürer. Bu kesimde inşaat süresi atlanmaz; hattın normal inşaatla tamamlandığını burada görürsünüz."
       },
       "step6": {
-        "title": "Ana yolun doğrudan üzerine parkur döşeyin",
-        "description": "Batıdan doğuya doğru ana yolun merkezinin doğrudan üzerine 6m'de çift demiryolu hattı yerleştirin. Yol koridorunu kullanmak, bitişik özel parseller edinmeyi önler. Yoldan binalara taşınmak, yine de satın alma veya kamu tesisinin yıkılmasını gerektirebilir.",
-        "open": "Batıdan doğuya doğru ana yolun merkezinin doğrudan üzerine 6m'de çift demiryolu hattı yerleştirin. Yol koridorunu kullanmak, bitişik özel parseller edinmeyi önler. Yoldan binalara taşınmak, yine de satın alma veya kamu tesisinin yıkılmasını gerektirebilir.",
-        "variant": "Batıdan doğuya doğru ana yolun merkezinin doğrudan üzerine 6m'de çift demiryolu hattı yerleştirin. Yol koridorunu kullanmak, bitişik özel parseller edinmeyi önler. Yoldan binalara taşınmak, yine de satın alma veya kamu tesisinin yıkılmasını gerektirebilir.",
-        "start": "Batıdan doğuya doğru ana yolun merkezinin doğrudan üzerine 6m'de çift demiryolu hattı yerleştirin. Yol koridorunu kullanmak, bitişik özel parseller edinmeyi önler. Yoldan binalara taşınmak, yine de satın alma veya kamu tesisinin yıkılmasını gerektirebilir.",
-        "end": "Batıdan doğuya doğru ana yolun merkezinin doğrudan üzerine 6m'de çift demiryolu hattı yerleştirin. Yol koridorunu kullanmak, bitişik özel parseller edinmeyi önler. Yoldan binalara taşınmak, yine de satın alma veya kamu tesisinin yıkılmasını gerektirebilir.",
-        "confirm": "Batıdan doğuya doğru ana yolun merkezinin doğrudan üzerine 6m'de çift demiryolu hattı yerleştirin. Yol koridorunu kullanmak, bitişik özel parseller edinmeyi önler. Yoldan binalara taşınmak, yine de satın alma veya kamu tesisinin yıkılmasını gerektirebilir.",
-        "town": "Batıdan doğuya doğru ana yolun merkezinin doğrudan üzerine 6m'de çift demiryolu hattı yerleştirin. Yol koridorunu kullanmak, bitişik özel parseller edinmeyi önler. Yoldan binalara taşınmak, yine de satın alma veya kamu tesisinin yıkılmasını gerektirebilir.",
-        "new": "Batıdan doğuya doğru ana yolun merkezinin doğrudan üzerine 6m'de çift demiryolu hattı yerleştirin. Yol koridorunu kullanmak, bitişik özel parseller edinmeyi önler. Yoldan binalara taşınmak, yine de satın alma veya kamu tesisinin yıkılmasını gerektirebilir.",
-        "east": "Son olarak, Doğu Platformunun batı ucuna, arteriyel yolun doğu ucundan 6 m'de çift demiryolu hattı döşenmiştir. Her iki platform da bağlandıktan sonra, bir sonraki inşaatı tamamlar."
+        "title": "Ana caddenin tam üzerine hat döşeyin",
+        "description": "“Çift hatlı demiryolu” ile ana caddenin batı ucundan doğu ucuna kadar 6 m yükseklikte hat döşeyin. Hattı yolun ortasının üzerinden geçirirseniz yol kenarındaki özel parsellere değmez ve arazi edinimine gerek kalmaz. Hat yoldan sapıp binaların üzerinden geçerse arazi edinimi veya kamu tesislerinin kaldırılması gerekir.",
+        "open": "“Çift hatlı demiryolu” ile ana caddenin batı ucundan doğu ucuna kadar 6 m yükseklikte hat döşeyin. Hattı yolun ortasının üzerinden geçirirseniz yol kenarındaki özel parsellere değmez ve arazi edinimine gerek kalmaz. Hat yoldan sapıp binaların üzerinden geçerse arazi edinimi veya kamu tesislerinin kaldırılması gerekir.",
+        "variant": "“Çift hatlı demiryolu” ile ana caddenin batı ucundan doğu ucuna kadar 6 m yükseklikte hat döşeyin. Hattı yolun ortasının üzerinden geçirirseniz yol kenarındaki özel parsellere değmez ve arazi edinimine gerek kalmaz. Hat yoldan sapıp binaların üzerinden geçerse arazi edinimi veya kamu tesislerinin kaldırılması gerekir.",
+        "start": "“Çift hatlı demiryolu” ile ana caddenin batı ucundan doğu ucuna kadar 6 m yükseklikte hat döşeyin. Hattı yolun ortasının üzerinden geçirirseniz yol kenarındaki özel parsellere değmez ve arazi edinimine gerek kalmaz. Hat yoldan sapıp binaların üzerinden geçerse arazi edinimi veya kamu tesislerinin kaldırılması gerekir.",
+        "end": "“Çift hatlı demiryolu” ile ana caddenin batı ucundan doğu ucuna kadar 6 m yükseklikte hat döşeyin. Hattı yolun ortasının üzerinden geçirirseniz yol kenarındaki özel parsellere değmez ve arazi edinimine gerek kalmaz. Hat yoldan sapıp binaların üzerinden geçerse arazi edinimi veya kamu tesislerinin kaldırılması gerekir.",
+        "confirm": "“Çift hatlı demiryolu” ile ana caddenin batı ucundan doğu ucuna kadar 6 m yükseklikte hat döşeyin. Hattı yolun ortasının üzerinden geçirirseniz yol kenarındaki özel parsellere değmez ve arazi edinimine gerek kalmaz. Hat yoldan sapıp binaların üzerinden geçerse arazi edinimi veya kamu tesislerinin kaldırılması gerekir.",
+        "town": "“Çift hatlı demiryolu” ile ana caddenin batı ucundan doğu ucuna kadar 6 m yükseklikte hat döşeyin. Hattı yolun ortasının üzerinden geçirirseniz yol kenarındaki özel parsellere değmez ve arazi edinimine gerek kalmaz. Hat yoldan sapıp binaların üzerinden geçerse arazi edinimi veya kamu tesislerinin kaldırılması gerekir.",
+        "new": "“Çift hatlı demiryolu” ile ana caddenin batı ucundan doğu ucuna kadar 6 m yükseklikte hat döşeyin. Hattı yolun ortasının üzerinden geçirirseniz yol kenarındaki özel parsellere değmez ve arazi edinimine gerek kalmaz. Hat yoldan sapıp binaların üzerinden geçerse arazi edinimi veya kamu tesislerinin kaldırılması gerekir.",
+        "east": "Son olarak ana caddenin doğu ucundan doğu peronunun batı ucuna 6 m yükseklikte “Çift hatlı demiryolu” döşeyin. İki peron birbirine bağlanınca “İleri” düğmesine basın; inşaat süresi atlanacak."
       },
       "step7": {
-        "title": "Demiryolu Deposunu İnşa Edin",
-        "description": "İnşaat panelinde demiryolu deposunu seçin ve şehrin kuzeyindeki sarı arsa üzerine inşa edin. Depoyu kendiniz yerleştirin. Sonraki inşaat süresini atlar.",
-        "open": "İnşaat panelinde demiryolu deposunu seçin ve şehrin kuzeyindeki sarı arsa üzerine inşa edin. Depoyu kendiniz yerleştirin. Sonraki inşaat süresini atlar.",
-        "variant": "İnşaat panelinde demiryolu deposunu seçin ve şehrin kuzeyindeki sarı arsa üzerine inşa edin. Depoyu kendiniz yerleştirin. Sonraki inşaat süresini atlar.",
-        "start": "İnşaat panelinde demiryolu deposunu seçin ve şehrin kuzeyindeki sarı arsa üzerine inşa edin. Depoyu kendiniz yerleştirin. Sonraki inşaat süresini atlar.",
-        "end": "İnşaat panelinde demiryolu deposunu seçin ve şehrin kuzeyindeki sarı arsa üzerine inşa edin. Depoyu kendiniz yerleştirin. Sonraki inşaat süresini atlar.",
-        "confirm": "İnşaat panelinde demiryolu deposunu seçin ve şehrin kuzeyindeki sarı arsa üzerine inşa edin. Depoyu kendiniz yerleştirin. Sonraki inşaat süresini atlar.",
-        "town": "İnşaat panelinde demiryolu deposunu seçin ve şehrin kuzeyindeki sarı arsa üzerine inşa edin. Depoyu kendiniz yerleştirin. Sonraki inşaat süresini atlar.",
-        "new": "İnşaat panelinde demiryolu deposunu seçin ve şehrin kuzeyindeki sarı arsa üzerine inşa edin. Depoyu kendiniz yerleştirin. Sonraki inşaat süresini atlar.",
-        "east": "İnşaat panelinde demiryolu deposunu seçin ve şehrin kuzeyindeki sarı arsa üzerine inşa edin. Depoyu kendiniz yerleştirin. Sonraki inşaat süresini atlar."
+        "title": "Tren deposunu inşa edin",
+        "description": "İnşaat panelinde “Tren deposu” seçeneğini seçin ve kasabanın kuzeyindeki sarı parsele inşa edin. Bunu da kendiniz yerleştirin. “İleri” düğmesine bastığınızda deponun inşaat süresi atlanır ve depo tamamlanır.",
+        "open": "İnşaat panelinde “Tren deposu” seçeneğini seçin ve kasabanın kuzeyindeki sarı parsele inşa edin. Bunu da kendiniz yerleştirin. “İleri” düğmesine bastığınızda deponun inşaat süresi atlanır ve depo tamamlanır.",
+        "variant": "İnşaat panelinde “Tren deposu” seçeneğini seçin ve kasabanın kuzeyindeki sarı parsele inşa edin. Bunu da kendiniz yerleştirin. “İleri” düğmesine bastığınızda deponun inşaat süresi atlanır ve depo tamamlanır.",
+        "start": "İnşaat panelinde “Tren deposu” seçeneğini seçin ve kasabanın kuzeyindeki sarı parsele inşa edin. Bunu da kendiniz yerleştirin. “İleri” düğmesine bastığınızda deponun inşaat süresi atlanır ve depo tamamlanır.",
+        "end": "İnşaat panelinde “Tren deposu” seçeneğini seçin ve kasabanın kuzeyindeki sarı parsele inşa edin. Bunu da kendiniz yerleştirin. “İleri” düğmesine bastığınızda deponun inşaat süresi atlanır ve depo tamamlanır.",
+        "confirm": "İnşaat panelinde “Tren deposu” seçeneğini seçin ve kasabanın kuzeyindeki sarı parsele inşa edin. Bunu da kendiniz yerleştirin. “İleri” düğmesine bastığınızda deponun inşaat süresi atlanır ve depo tamamlanır.",
+        "town": "İnşaat panelinde “Tren deposu” seçeneğini seçin ve kasabanın kuzeyindeki sarı parsele inşa edin. Bunu da kendiniz yerleştirin. “İleri” düğmesine bastığınızda deponun inşaat süresi atlanır ve depo tamamlanır.",
+        "new": "İnşaat panelinde “Tren deposu” seçeneğini seçin ve kasabanın kuzeyindeki sarı parsele inşa edin. Bunu da kendiniz yerleştirin. “İleri” düğmesine bastığınızda deponun inşaat süresi atlanır ve depo tamamlanır.",
+        "east": "İnşaat panelinde “Tren deposu” seçeneğini seçin ve kasabanın kuzeyindeki sarı parsele inşa edin. Bunu da kendiniz yerleştirin. “İleri” düğmesine bastığınızda deponun inşaat süresi atlanır ve depo tamamlanır."
       },
       "step8": {
-        "title": "Kavisli tırmanma dalını şekillendirin",
-        "description": "Demiryolu yolunu seçin. Deponun doğudaki yer seviyesindeki terminalinden başlayın, kuzeydoğu işaretçisinden doğuya geniş bir döngü yapın ve ana hattın 6m'deki birleşme noktasına bağlanın. Eğrilik ve derece sınırları içinde kalmak için, sarı ara noktaları kılavuz olarak kullanarak pisti yerleştirin. Şekli onaylamak için sağ tıkladıktan sonra, köşeleri ve kontrol tutamaçlarını sürükleyerek ayarlayabilirsiniz.",
-        "open": "Demiryolu yolunu seçin. Deponun doğudaki yer seviyesindeki terminalinden başlayın, kuzeydoğu işaretçisinden doğuya geniş bir döngü yapın ve ana hattın 6m'deki birleşme noktasına bağlanın. Eğrilik ve derece sınırları içinde kalmak için, sarı ara noktaları kılavuz olarak kullanarak pisti yerleştirin. Şekli onaylamak için sağ tıkladıktan sonra, köşeleri ve kontrol tutamaçlarını sürükleyerek ayarlayabilirsiniz.",
-        "variant": "Demiryolu yolunu seçin. Deponun doğudaki yer seviyesindeki terminalinden başlayın, kuzeydoğu işaretçisinden doğuya geniş bir döngü yapın ve ana hattın 6m'deki birleşme noktasına bağlanın. Eğrilik ve derece sınırları içinde kalmak için, sarı ara noktaları kılavuz olarak kullanarak pisti yerleştirin. Şekli onaylamak için sağ tıkladıktan sonra, köşeleri ve kontrol tutamaçlarını sürükleyerek ayarlayabilirsiniz.",
-        "start": "Demiryolu yolunu seçin. Deponun doğudaki yer seviyesindeki terminalinden başlayın, kuzeydoğu işaretçisinden doğuya geniş bir döngü yapın ve ana hattın 6m'deki birleşme noktasına bağlanın. Eğrilik ve derece sınırları içinde kalmak için, sarı ara noktaları kılavuz olarak kullanarak pisti yerleştirin. Şekli onaylamak için sağ tıkladıktan sonra, köşeleri ve kontrol tutamaçlarını sürükleyerek ayarlayabilirsiniz.",
-        "end": "Demiryolu yolunu seçin. Deponun doğudaki yer seviyesindeki terminalinden başlayın, kuzeydoğu işaretçisinden doğuya geniş bir döngü yapın ve ana hattın 6m'deki birleşme noktasına bağlanın. Eğrilik ve derece sınırları içinde kalmak için, sarı ara noktaları kılavuz olarak kullanarak pisti yerleştirin. Şekli onaylamak için sağ tıkladıktan sonra, köşeleri ve kontrol tutamaçlarını sürükleyerek ayarlayabilirsiniz.",
-        "confirm": "Demiryolu yolunu seçin. Deponun doğudaki yer seviyesindeki terminalinden başlayın, kuzeydoğu işaretçisinden doğuya geniş bir döngü yapın ve ana hattın 6m'deki birleşme noktasına bağlanın. Eğrilik ve derece sınırları içinde kalmak için, sarı ara noktaları kılavuz olarak kullanarak pisti yerleştirin. Şekli onaylamak için sağ tıkladıktan sonra, köşeleri ve kontrol tutamaçlarını sürükleyerek ayarlayabilirsiniz.",
-        "town": "Demiryolu yolunu seçin. Deponun doğudaki yer seviyesindeki terminalinden başlayın, kuzeydoğu işaretçisinden doğuya geniş bir döngü yapın ve ana hattın 6m'deki birleşme noktasına bağlanın. Eğrilik ve derece sınırları içinde kalmak için, sarı ara noktaları kılavuz olarak kullanarak pisti yerleştirin. Şekli onaylamak için sağ tıkladıktan sonra, köşeleri ve kontrol tutamaçlarını sürükleyerek ayarlayabilirsiniz.",
-        "new": "Demiryolu yolunu seçin. Deponun doğudaki yer seviyesindeki terminalinden başlayın, kuzeydoğu işaretçisinden doğuya geniş bir döngü yapın ve ana hattın 6m'deki birleşme noktasına bağlanın. Eğrilik ve derece sınırları içinde kalmak için, sarı ara noktaları kılavuz olarak kullanarak pisti yerleştirin. Şekli onaylamak için sağ tıkladıktan sonra, köşeleri ve kontrol tutamaçlarını sürükleyerek ayarlayabilirsiniz.",
-        "east": "Demiryolu yolunu seçin. Deponun doğudaki yer seviyesindeki terminalinden başlayın, kuzeydoğu işaretçisinden doğuya geniş bir döngü yapın ve ana hattın 6m'deki birleşme noktasına bağlanın. Eğrilik ve derece sınırları içinde kalmak için, sarı ara noktaları kılavuz olarak kullanarak pisti yerleştirin. Şekli onaylamak için sağ tıkladıktan sonra, köşeleri ve kontrol tutamaçlarını sürükleyerek ayarlayabilirsiniz."
+        "title": "Eğri ve eğimi ayarlayarak ana hatta bağlayın",
+        "description": "“Demiryolu hattı” ile deponun doğu tarafındaki zemin seviyesindeki bağlantı noktasından başlayıp doğuya doğru geniş bir kavis çizin, kuzeydoğudaki işaretten geçerek ana hattın 6 m yükseklikteki birleşme noktasına bağlayın. Eğrilik ve eğim sınırlarına takılmamak için sarı ara noktaları rehber alarak yerleştirin. Sağ tıklayarak şekli onayladıktan sonra köşe noktalarını ve kontrol noktalarını sürükleyerek şekli ayarlayabilirsiniz.",
+        "open": "“Demiryolu hattı” ile deponun doğu tarafındaki zemin seviyesindeki bağlantı noktasından başlayıp doğuya doğru geniş bir kavis çizin, kuzeydoğudaki işaretten geçerek ana hattın 6 m yükseklikteki birleşme noktasına bağlayın. Eğrilik ve eğim sınırlarına takılmamak için sarı ara noktaları rehber alarak yerleştirin. Sağ tıklayarak şekli onayladıktan sonra köşe noktalarını ve kontrol noktalarını sürükleyerek şekli ayarlayabilirsiniz.",
+        "variant": "“Demiryolu hattı” ile deponun doğu tarafındaki zemin seviyesindeki bağlantı noktasından başlayıp doğuya doğru geniş bir kavis çizin, kuzeydoğudaki işaretten geçerek ana hattın 6 m yükseklikteki birleşme noktasına bağlayın. Eğrilik ve eğim sınırlarına takılmamak için sarı ara noktaları rehber alarak yerleştirin. Sağ tıklayarak şekli onayladıktan sonra köşe noktalarını ve kontrol noktalarını sürükleyerek şekli ayarlayabilirsiniz.",
+        "start": "“Demiryolu hattı” ile deponun doğu tarafındaki zemin seviyesindeki bağlantı noktasından başlayıp doğuya doğru geniş bir kavis çizin, kuzeydoğudaki işaretten geçerek ana hattın 6 m yükseklikteki birleşme noktasına bağlayın. Eğrilik ve eğim sınırlarına takılmamak için sarı ara noktaları rehber alarak yerleştirin. Sağ tıklayarak şekli onayladıktan sonra köşe noktalarını ve kontrol noktalarını sürükleyerek şekli ayarlayabilirsiniz.",
+        "end": "“Demiryolu hattı” ile deponun doğu tarafındaki zemin seviyesindeki bağlantı noktasından başlayıp doğuya doğru geniş bir kavis çizin, kuzeydoğudaki işaretten geçerek ana hattın 6 m yükseklikteki birleşme noktasına bağlayın. Eğrilik ve eğim sınırlarına takılmamak için sarı ara noktaları rehber alarak yerleştirin. Sağ tıklayarak şekli onayladıktan sonra köşe noktalarını ve kontrol noktalarını sürükleyerek şekli ayarlayabilirsiniz.",
+        "confirm": "“Demiryolu hattı” ile deponun doğu tarafındaki zemin seviyesindeki bağlantı noktasından başlayıp doğuya doğru geniş bir yay çizin, kuzeydoğudaki işaretten geçerek ana hattın 6 m yükseklikteki birleşme noktasına bağlayın. Eğrilik ve eğim sınırlarını aşmamak için sarı ara noktaları rehber alarak yerleştirin. Sağ tıklayarak şekli onayladıktan sonra köşe noktalarını ve kontrol noktalarını sürükleyerek şekli ayarlayabilirsiniz.",
+        "town": "“Demiryolu hattı” ile deponun doğu tarafındaki zemin seviyesindeki bağlantı noktasından başlayıp doğuya doğru geniş bir yay çizin, kuzeydoğudaki işaretten geçerek ana hattın 6 m yükseklikteki birleşme noktasına bağlayın. Eğrilik ve eğim sınırlarını aşmamak için sarı ara noktaları rehber alarak yerleştirin. Sağ tıklayarak şekli onayladıktan sonra köşe noktalarını ve kontrol noktalarını sürükleyerek şekli ayarlayabilirsiniz.",
+        "new": "“Demiryolu hattı” ile deponun doğu tarafındaki zemin seviyesindeki bağlantı noktasından başlayıp doğuya doğru geniş bir yay çizin, kuzeydoğudaki işaretten geçerek ana hattın 6 m yükseklikteki birleşme noktasına bağlayın. Eğrilik ve eğim sınırlarını aşmamak için sarı ara noktaları rehber alarak yerleştirin. Sağ tıklayarak şekli onayladıktan sonra köşe noktalarını ve kontrol noktalarını sürükleyerek şekli ayarlayabilirsiniz.",
+        "east": "“Demiryolu hattı” ile deponun doğu tarafındaki zemin seviyesindeki bağlantı noktasından başlayıp doğuya doğru geniş bir yay çizin, kuzeydoğudaki işaretten geçerek ana hattın 6 m yükseklikteki birleşme noktasına bağlayın. Eğrilik ve eğim sınırlarını aşmamak için sarı ara noktaları rehber alarak yerleştirin. Sağ tıklayarak şekli onayladıktan sonra köşe noktalarını ve kontrol noktalarını sürükleyerek şekli ayarlayabilirsiniz."
       },
       "step9": {
-        "title": "Depoyu mevcut tesisten güç alın",
-        "description": "Trenleri çalıştırmak için elektrik santralinden bir elektrik hattı bağlamanız gerekir. Tesisin terminalini deponun ortak doğu terminaline bağlamak için güç hattını kullanın. Hattı onaylayın.",
-        "open": "Trenleri çalıştırmak için elektrik santralinden bir elektrik hattı bağlamanız gerekir. Tesisin terminalini deponun ortak doğu terminaline bağlamak için güç hattını kullanın. Hattı onaylayın.",
-        "variant": "Trenleri çalıştırmak için elektrik santralinden bir elektrik hattı bağlamanız gerekir. Tesisin terminalini deponun ortak doğu terminaline bağlamak için güç hattını kullanın. Hattı onaylayın.",
-        "start": "Trenleri çalıştırmak için elektrik santralinden bir elektrik hattı bağlamanız gerekir. Tesisin terminalini deponun ortak doğu terminaline bağlamak için güç hattını kullanın. Hattı onaylayın.",
-        "end": "Trenleri çalıştırmak için elektrik santralinden bir elektrik hattı bağlamanız gerekir. Tesisin terminalini deponun ortak doğu terminaline bağlamak için güç hattını kullanın. Hattı onaylayın.",
-        "confirm": "Trenleri çalıştırmak için elektrik santralinden bir elektrik hattı bağlamanız gerekir. Tesisin terminalini deponun ortak doğu terminaline bağlamak için güç hattını kullanın. Hattı onaylayın.",
-        "town": "Trenleri çalıştırmak için elektrik santralinden bir elektrik hattı bağlamanız gerekir. Tesisin terminalini deponun ortak doğu terminaline bağlamak için güç hattını kullanın. Hattı onaylayın.",
-        "new": "Trenleri çalıştırmak için elektrik santralinden bir elektrik hattı bağlamanız gerekir. Tesisin terminalini deponun ortak doğu terminaline bağlamak için güç hattını kullanın. Hattı onaylayın.",
-        "east": "Trenleri çalıştırmak için elektrik santralinden bir elektrik hattı bağlamanız gerekir. Tesisin terminalini deponun ortak doğu terminaline bağlamak için güç hattını kullanın. Hattı onaylayın."
+        "title": "Mevcut santralden depoya elektrik iletin",
+        "description": "Trenleri çalıştırmak için santralden bir elektrik hattı bağlamanız gerekir. “Yüksek gerilim hattı” ile santralin bağlantı noktasından deponun doğu tarafındaki ortak bağlantı noktasına bağlayıp onaylayın.",
+        "open": "Trenleri çalıştırmak için santralden bir elektrik hattı bağlamanız gerekir. “Yüksek gerilim hattı” ile santralin bağlantı noktasından deponun doğu tarafındaki ortak bağlantı noktasına bağlayıp onaylayın.",
+        "variant": "Trenleri çalıştırmak için santralden bir elektrik hattı bağlamanız gerekir. “Yüksek gerilim hattı” ile santralin bağlantı noktasından deponun doğu tarafındaki ortak bağlantı noktasına bağlayıp onaylayın.",
+        "start": "Trenleri çalıştırmak için santralden bir elektrik hattı bağlamanız gerekir. “Yüksek gerilim hattı” ile santralin bağlantı noktasından deponun doğu tarafındaki ortak bağlantı noktasına bağlayıp onaylayın.",
+        "end": "Trenleri çalıştırmak için santralden bir elektrik hattı bağlamanız gerekir. “Yüksek gerilim hattı” ile santralin bağlantı noktasından deponun doğu tarafındaki ortak bağlantı noktasına bağlayıp onaylayın.",
+        "confirm": "Trenleri çalıştırmak için santralden bir elektrik hattı bağlamanız gerekir. “Yüksek gerilim hattı” ile santralin bağlantı noktasından deponun doğu tarafındaki ortak bağlantı noktasına bağlayıp onaylayın.",
+        "town": "Trenleri çalıştırmak için santralden bir elektrik hattı bağlamanız gerekir. “Yüksek gerilim hattı” ile santralin bağlantı noktasından deponun doğu tarafındaki ortak bağlantı noktasına bağlayıp onaylayın.",
+        "new": "Trenleri çalıştırmak için santralden bir elektrik hattı bağlamanız gerekir. “Yüksek gerilim hattı” ile santralin bağlantı noktasından deponun doğu tarafındaki ortak bağlantı noktasına bağlayıp onaylayın.",
+        "east": "Trenleri çalıştırmak için santralden bir elektrik hattı bağlamanız gerekir. “Yüksek gerilim hattı” ile santralin bağlantı noktasından deponun doğu tarafındaki ortak bağlantı noktasına bağlayıp onaylayın."
       },
       "step10": {
-        "title": "Demiryolu Hizmetini Açın",
-        "description": "Toplu taşıma → Yeni hattı açın ve orta mesafeli bir demiryolu hattı seçin. Batı ve doğudaki yükseltilmiş platformlara yerleşir, ardından döngüyü kapatmak için ilk durağı tıklayın. Ücreti 0 olarak ayarlayın ve ilerlemeyi 5 dakikaya hedefleyin, ardından onaylayın.",
-        "open": "Toplu taşıma → Yeni hattı açın ve orta mesafeli bir demiryolu hattı seçin. Batı ve doğudaki yükseltilmiş platformlara yerleşir, ardından döngüyü kapatmak için ilk durağı tıklayın. Ücreti 0 olarak ayarlayın ve ilerlemeyi 5 dakikaya hedefleyin, ardından onaylayın.",
-        "variant": "Toplu taşıma → Yeni hattı açın ve orta mesafeli bir demiryolu hattı seçin. Batı ve doğudaki yükseltilmiş platformlara yerleşir, ardından döngüyü kapatmak için ilk durağı tıklayın. Ücreti 0 olarak ayarlayın ve ilerlemeyi 5 dakikaya hedefleyin, ardından onaylayın.",
-        "start": "Toplu taşıma → Yeni hattı açın ve orta mesafeli bir demiryolu hattı seçin. Batı ve doğudaki yükseltilmiş platformlara yerleşir, ardından döngüyü kapatmak için ilk durağı tıklayın. Ücreti 0 olarak ayarlayın ve ilerlemeyi 5 dakikaya hedefleyin, ardından onaylayın.",
-        "end": "Toplu taşıma → Yeni hattı açın ve orta mesafeli bir demiryolu hattı seçin. Batı ve doğudaki yükseltilmiş platformlara yerleşir, ardından döngüyü kapatmak için ilk durağı tıklayın. Ücreti 0 olarak ayarlayın ve ilerlemeyi 5 dakikaya hedefleyin, ardından onaylayın.",
-        "confirm": "Toplu taşıma → Yeni hattı açın ve orta mesafeli bir demiryolu hattı seçin. Batı ve doğudaki yükseltilmiş platformlara yerleşir, ardından döngüyü kapatmak için ilk durağı tıklayın. Ücreti 0 olarak ayarlayın ve ilerlemeyi 5 dakikaya hedefleyin, ardından onaylayın.",
-        "town": "Toplu taşıma → Yeni hattı açın ve orta mesafeli bir demiryolu hattı seçin. Batı ve doğudaki yükseltilmiş platformlara yerleşir, ardından döngüyü kapatmak için ilk durağı tıklayın. Ücreti 0 olarak ayarlayın ve ilerlemeyi 5 dakikaya hedefleyin, ardından onaylayın.",
-        "new": "Toplu taşıma → Yeni hattı açın ve orta mesafeli bir demiryolu hattı seçin. Batı ve doğudaki yükseltilmiş platformlara yerleşir, ardından döngüyü kapatmak için ilk durağı tıklayın. Ücreti 0 olarak ayarlayın ve ilerlemeyi 5 dakikaya hedefleyin, ardından onaylayın.",
-        "east": "Toplu taşıma → Yeni hattı açın ve orta mesafeli bir demiryolu hattı seçin. Batı ve doğudaki yükseltilmiş platformlara yerleşir, ardından döngüyü kapatmak için ilk durağı tıklayın. Ücreti 0 olarak ayarlayın ve ilerlemeyi 5 dakikaya hedefleyin, ardından onaylayın."
+        "title": "Demiryolu hattını hizmete açın",
+        "description": "“Toplu taşıma” → “Yeni hat” adımlarını izleyip “Bölgesel demiryolu hattı” türünü seçin. Batıdaki ve doğudaki yükseltilmiş peronların üzerine duraklar koyun, ardından ilk durağa tıklayarak döngüyü kapatın. Ücreti 0, hedef sefer aralığını 5 dakika olarak ayarlayıp onaylayın.",
+        "open": "“Toplu taşıma” → “Yeni hat” adımlarını izleyip “Bölgesel demiryolu hattı” türünü seçin. Batıdaki ve doğudaki yükseltilmiş peronların üzerine duraklar koyun, ardından ilk durağa tıklayarak döngüyü kapatın. Ücreti 0, hedef sefer aralığını 5 dakika olarak ayarlayıp onaylayın.",
+        "variant": "“Toplu taşıma” → “Yeni hat” adımlarını izleyip “Bölgesel demiryolu hattı” türünü seçin. Batıdaki ve doğudaki yükseltilmiş peronların üzerine duraklar koyun, ardından ilk durağa tıklayarak döngüyü kapatın. Ücreti 0, hedef sefer aralığını 5 dakika olarak ayarlayıp onaylayın.",
+        "start": "“Toplu taşıma” → “Yeni hat” adımlarını izleyip “Bölgesel demiryolu hattı” türünü seçin. Batıdaki ve doğudaki yükseltilmiş peronların üzerine duraklar koyun, ardından ilk durağa tıklayarak döngüyü kapatın. Ücreti 0, hedef sefer aralığını 5 dakika olarak ayarlayıp onaylayın.",
+        "end": "“Toplu taşıma” → “Yeni hat” adımlarını izleyip “Bölgesel demiryolu hattı” türünü seçin. Batıdaki ve doğudaki yükseltilmiş peronların üzerine duraklar koyun, ardından ilk durağa tıklayarak döngüyü kapatın. Ücreti 0, hedef sefer aralığını 5 dakika olarak ayarlayıp onaylayın.",
+        "confirm": "“Toplu taşıma” → “Yeni hat” adımlarını izleyip “Bölgesel demiryolu hattı” türünü seçin. Batıdaki ve doğudaki yükseltilmiş peronların üzerine duraklar koyun, ardından ilk durağa tıklayarak döngüyü kapatın. Ücreti 0, hedef sefer aralığını 5 dakika olarak ayarlayıp onaylayın.",
+        "town": "“Toplu taşıma” → “Yeni hat” adımlarını izleyip “Bölgesel demiryolu hattı” türünü seçin. Batıdaki ve doğudaki yükseltilmiş peronların üzerine duraklar koyun, ardından ilk durağa tıklayarak döngüyü kapatın. Ücreti 0, hedef sefer aralığını 5 dakika olarak ayarlayıp onaylayın.",
+        "new": "“Toplu taşıma” → “Yeni hat” adımlarını izleyip “Bölgesel demiryolu hattı” türünü seçin. Batıdaki ve doğudaki yükseltilmiş peronların üzerine duraklar koyun, ardından ilk durağa tıklayarak döngüyü kapatın. Ücreti 0, hedef sefer aralığını 5 dakika olarak ayarlayıp onaylayın.",
+        "east": "“Toplu taşıma” → “Yeni hat” adımlarını izleyip “Bölgesel demiryolu hattı” türünü seçin. Batıdaki ve doğudaki yükseltilmiş peronların üzerine duraklar koyun, ardından ilk durağa tıklayarak döngüyü kapatın. Ücreti 0, hedef sefer aralığını 5 dakika olarak ayarlayıp onaylayın."
       },
       "step11": {
-        "title": "Araçları ve hizmeti onaylayın",
-        "description": "Toplu taşıma yönetiminde hattın kapasitesini ve çalışma aralığını ilerletin ve kontrol edin. Deponun araç elde etmek için birkaç aya ihtiyacı var. Pozitif kapasite, hizmetin çalıştığını doğrular. Sakinler de yürüyüş rotalarını karşılaştırıyor, bu nedenle bu kısa hatta henüz yolcu olmayabilir.",
-        "open": "Toplu taşıma yönetiminde hattın kapasitesini ve çalışma aralığını ilerletin ve kontrol edin. Deponun araç elde etmek için birkaç aya ihtiyacı var. Pozitif kapasite, hizmetin çalıştığını doğrular. Sakinler de yürüyüş rotalarını karşılaştırıyor, bu nedenle bu kısa hatta henüz yolcu olmayabilir.",
-        "variant": "Toplu taşıma yönetiminde hattın kapasitesini ve çalışma aralığını ilerletin ve kontrol edin. Deponun araç elde etmek için birkaç aya ihtiyacı var. Pozitif kapasite, hizmetin çalıştığını doğrular. Sakinler de yürüyüş rotalarını karşılaştırıyor, bu nedenle bu kısa hatta henüz yolcu olmayabilir.",
-        "start": "Toplu taşıma yönetiminde hattın kapasitesini ve çalışma aralığını ilerletin ve kontrol edin. Deponun araç elde etmek için birkaç aya ihtiyacı var. Pozitif kapasite, hizmetin çalıştığını doğrular. Sakinler de yürüyüş rotalarını karşılaştırıyor, bu nedenle bu kısa hatta henüz yolcu olmayabilir.",
-        "end": "Toplu taşıma yönetiminde hattın kapasitesini ve çalışma aralığını ilerletin ve kontrol edin. Deponun araç elde etmek için birkaç aya ihtiyacı var. Pozitif kapasite, hizmetin çalıştığını doğrular. Sakinler de yürüyüş rotalarını karşılaştırıyor, bu nedenle bu kısa hatta henüz yolcu olmayabilir.",
-        "confirm": "Toplu taşıma yönetiminde hattın kapasitesini ve çalışma aralığını ilerletin ve kontrol edin. Deponun araç elde etmek için birkaç aya ihtiyacı var. Pozitif kapasite, hizmetin çalıştığını doğrular. Sakinler de yürüyüş rotalarını karşılaştırıyor, bu nedenle bu kısa hatta henüz yolcu olmayabilir.",
-        "town": "Toplu taşıma yönetiminde hattın kapasitesini ve çalışma aralığını ilerletin ve kontrol edin. Deponun araç elde etmek için birkaç aya ihtiyacı var. Pozitif kapasite, hizmetin çalıştığını doğrular. Sakinler de yürüyüş rotalarını karşılaştırıyor, bu nedenle bu kısa hatta henüz yolcu olmayabilir.",
-        "new": "Toplu taşıma yönetiminde hattın kapasitesini ve çalışma aralığını ilerletin ve kontrol edin. Deponun araç elde etmek için birkaç aya ihtiyacı var. Pozitif kapasite, hizmetin çalıştığını doğrular. Sakinler de yürüyüş rotalarını karşılaştırıyor, bu nedenle bu kısa hatta henüz yolcu olmayabilir.",
-        "east": "Toplu taşıma yönetiminde hattın kapasitesini ve çalışma aralığını ilerletin ve kontrol edin. Deponun araç elde etmek için birkaç aya ihtiyacı var. Pozitif kapasite, hizmetin çalıştığını doğrular. Sakinler de yürüyüş rotalarını karşılaştırıyor, bu nedenle bu kısa hatta henüz yolcu olmayabilir."
+        "title": "Araç tedarikini ve seferleri kontrol edin",
+        "description": "Zamanı ilerletin ve toplu taşıma yönetim ekranında hattın taşıma kapasitesini ve sefer aralığını kontrol edin. Deponun araç tedarik etmesi birkaç ay sürer. Taşıma kapasitesi oluştuğunda hat hizmete açılmış olur. Sakinler rotalarını yürüyüşü de hesaba katarak seçtiği için, istasyonları birbirine yakın olan bu hatta henüz yolcu olmayabilir.",
+        "open": "Zamanı ilerletin ve toplu taşıma yönetim ekranında hattın taşıma kapasitesini ve sefer aralığını kontrol edin. Deponun araç tedarik etmesi birkaç ay sürer. Taşıma kapasitesi oluştuğunda hat hizmete açılmış olur. Sakinler rotalarını yürüyüşü de hesaba katarak seçtiği için, istasyonları birbirine yakın olan bu hatta henüz yolcu olmayabilir.",
+        "variant": "Zamanı ilerletin ve toplu taşıma yönetim ekranında hattın taşıma kapasitesini ve sefer aralığını kontrol edin. Deponun araç tedarik etmesi birkaç ay sürer. Taşıma kapasitesi oluştuğunda hat hizmete açılmış olur. Sakinler rotalarını yürüyüşü de hesaba katarak seçtiği için, istasyonları birbirine yakın olan bu hatta henüz yolcu olmayabilir.",
+        "start": "Zamanı ilerletin ve toplu taşıma yönetim ekranında hattın taşıma kapasitesini ve sefer aralığını kontrol edin. Deponun araç tedarik etmesi birkaç ay sürer. Taşıma kapasitesi oluştuğunda hat hizmete açılmış olur. Sakinler rotalarını yürüyüşü de hesaba katarak seçtiği için, istasyonları birbirine yakın olan bu hatta henüz yolcu olmayabilir.",
+        "end": "Zamanı ilerletin ve toplu taşıma yönetim ekranında hattın taşıma kapasitesini ve sefer aralığını kontrol edin. Deponun araç tedarik etmesi birkaç ay sürer. Taşıma kapasitesi oluştuğunda hat hizmete açılmış olur. Sakinler rotalarını yürüyüşü de hesaba katarak seçtiği için, istasyonları birbirine yakın olan bu hatta henüz yolcu olmayabilir.",
+        "confirm": "Zamanı ilerletin ve toplu taşıma yönetim ekranında hattın taşıma kapasitesini ve sefer aralığını kontrol edin. Deponun araç tedarik etmesi birkaç ay sürer. Taşıma kapasitesi oluştuğunda hat hizmete açılmış olur. Sakinler rotalarını yürüyüşü de hesaba katarak seçtiği için, istasyonları birbirine yakın olan bu hatta henüz yolcu olmayabilir.",
+        "town": "Zamanı ilerletin ve toplu taşıma yönetim ekranında hattın taşıma kapasitesini ve sefer aralığını kontrol edin. Deponun araç tedarik etmesi birkaç ay sürer. Taşıma kapasitesi oluştuğunda hat hizmete açılmış olur. Sakinler rotalarını yürüyüşü de hesaba katarak seçtiği için, istasyonları birbirine yakın olan bu hatta henüz yolcu olmayabilir.",
+        "new": "Zamanı ilerletin ve toplu taşıma yönetim ekranında hattın taşıma kapasitesini ve sefer aralığını kontrol edin. Deponun araç tedarik etmesi birkaç ay sürer. Taşıma kapasitesi oluştuğunda hat hizmete açılmış olur. Sakinler rotalarını yürüyüşü de hesaba katarak seçtiği için, istasyonları birbirine yakın olan bu hatta henüz yolcu olmayabilir.",
+        "east": "Zamanı ilerletin ve toplu taşıma yönetim ekranında hattın taşıma kapasitesini ve sefer aralığını kontrol edin. Deponun araç tedarik etmesi birkaç ay sürer. Taşıma kapasitesi oluştuğunda hat hizmete açılmış olur. Sakinler rotalarını yürüyüşü de hesaba katarak seçtiği için, istasyonları birbirine yakın olan bu hatta henüz yolcu olmayabilir."
       },
       "step12": {
-        "title": "Demiryolu inşaatını gözden geçir",
-        "description": "Kamera batı istasyonuna taşındı. Platformda duran trenlere bir göz atın. Platformlar, istasyonlar, raylar, bir depo, kavisli şubesi, güç bağlantısı ve bir servis inşa ettiniz. Özel satın alma ve kamu tesisi yıkımını yönettiniz ve yol üzerinde satın almaktan kaçındınız. Gelecekteki demiryolu projelerinde eğri yarıçapı ve dereceli geri bildirim kullanın.",
-        "open": "Kamera batı istasyonuna taşındı. Platformda duran trenlere bir göz atın. Platformlar, istasyonlar, raylar, bir depo, kavisli şubesi, güç bağlantısı ve bir servis inşa ettiniz. Özel satın alma ve kamu tesisi yıkımını yönettiniz ve yol üzerinde satın almaktan kaçındınız. Gelecekteki demiryolu projelerinde eğri yarıçapı ve dereceli geri bildirim kullanın.",
-        "variant": "Kamera batı istasyonuna taşındı. Platformda duran trenlere bir göz atın. Platformlar, istasyonlar, raylar, bir depo, kavisli şubesi, güç bağlantısı ve bir servis inşa ettiniz. Özel satın alma ve kamu tesisi yıkımını yönettiniz ve yol üzerinde satın almaktan kaçındınız. Gelecekteki demiryolu projelerinde eğri yarıçapı ve dereceli geri bildirim kullanın.",
-        "start": "Kamera batı istasyonuna taşındı. Platformda duran trenlere bir göz atın. Platformlar, istasyonlar, raylar, bir depo, kavisli şubesi, güç bağlantısı ve bir servis inşa ettiniz. Özel satın alma ve kamu tesisi yıkımını yönettiniz ve yol üzerinde satın almaktan kaçındınız. Gelecekteki demiryolu projelerinde eğri yarıçapı ve dereceli geri bildirim kullanın.",
-        "end": "Kamera batı istasyonuna taşındı. Platformda duran trenlere bir göz atın. Platformlar, istasyonlar, raylar, bir depo, kavisli şubesi, güç bağlantısı ve bir servis inşa ettiniz. Özel satın alma ve kamu tesisi yıkımını yönettiniz ve yol üzerinde satın almaktan kaçındınız. Gelecekteki demiryolu projelerinde eğri yarıçapı ve dereceli geri bildirim kullanın.",
-        "confirm": "Kamera batı istasyonuna taşındı. Platformda duran trenlere bir göz atın. Platformlar, istasyonlar, raylar, bir depo, kavisli şubesi, güç bağlantısı ve bir servis inşa ettiniz. Özel satın alma ve kamu tesisi yıkımını yönettiniz ve yol üzerinde satın almaktan kaçındınız. Gelecekteki demiryolu projelerinde eğri yarıçapı ve dereceli geri bildirim kullanın.",
-        "town": "Kamera batı istasyonuna taşındı. Platformda duran trenlere bir göz atın. Platformlar, istasyonlar, raylar, bir depo, kavisli şubesi, güç bağlantısı ve bir servis inşa ettiniz. Özel satın alma ve kamu tesisi yıkımını yönettiniz ve yol üzerinde satın almaktan kaçındınız. Gelecekteki demiryolu projelerinde eğri yarıçapı ve dereceli geri bildirim kullanın.",
-        "new": "Kamera batı istasyonuna taşındı. Platformda duran trenlere bir göz atın. Platformlar, istasyonlar, raylar, bir depo, kavisli şubesi, güç bağlantısı ve bir servis inşa ettiniz. Özel satın alma ve kamu tesisi yıkımını yönettiniz ve yol üzerinde satın almaktan kaçındınız. Gelecekteki demiryolu projelerinde eğri yarıçapı ve dereceli geri bildirim kullanın.",
-        "east": "Kamera batı istasyonuna taşındı. Platformda duran trenlere bir göz atın. Platformlar, istasyonlar, raylar, bir depo, kavisli şubesi, güç bağlantısı ve bir servis inşa ettiniz. Özel satın alma ve kamu tesisi yıkımını yönettiniz ve yol üzerinde satın almaktan kaçındınız. Gelecekteki demiryolu projelerinde eğri yarıçapı ve dereceli geri bildirim kullanın."
+        "title": "Demiryolu inşaatını gözden geçirin",
+        "description": "Kamerayı batıdaki istasyona yaklaştırdık. Perona yanaşan trenlere bir göz atın. Peronları, istasyon binasını, ana hattı, depoyu ve bağlantı hattını kurdunuz; elektriği bağlayıp hattın ayarlarını yaptınız. Özel arazilerin edinimini ve bir kamu tesisinin kaldırılmasını deneyimlediniz; yolun hemen üzerinden geçen kesimlerde arazi ediniminden kaçındınız. Kurp yarıçapını ve eğimi kontrol ederek hat geometrisini ayarlama yöntemini diğer demiryolu projelerinizde de kullanın.",
+        "open": "Kamerayı batıdaki istasyona yaklaştırdık. Perona yanaşan trenlere bir göz atın. Peronları, istasyon binasını, ana hattı, depoyu ve bağlantı hattını kurdunuz; elektriği bağlayıp hattın ayarlarını yaptınız. Özel arazilerin edinimini ve bir kamu tesisinin kaldırılmasını deneyimlediniz; yolun hemen üzerinden geçen kesimlerde arazi ediniminden kaçındınız. Kurp yarıçapını ve eğimi kontrol ederek hat geometrisini ayarlama yöntemini diğer demiryolu projelerinizde de kullanın.",
+        "variant": "Kamerayı batıdaki istasyona yaklaştırdık. Perona yanaşan trenlere bir göz atın. Peronları, istasyon binasını, ana hattı, depoyu ve bağlantı hattını kurdunuz; elektriği bağlayıp hattın ayarlarını yaptınız. Özel arazilerin edinimini ve bir kamu tesisinin kaldırılmasını deneyimlediniz; yolun hemen üzerinden geçen kesimlerde arazi ediniminden kaçındınız. Kurp yarıçapını ve eğimi kontrol ederek hat geometrisini ayarlama yöntemini diğer demiryolu projelerinizde de kullanın.",
+        "start": "Kamerayı batıdaki istasyona yaklaştırdık. Perona yanaşan trenlere bir göz atın. Peronları, istasyon binasını, ana hattı, depoyu ve bağlantı hattını kurdunuz; elektriği bağlayıp hattın ayarlarını yaptınız. Özel arazilerin edinimini ve bir kamu tesisinin kaldırılmasını deneyimlediniz; yolun hemen üzerinden geçen kesimlerde arazi ediniminden kaçındınız. Kurp yarıçapını ve eğimi kontrol ederek hat geometrisini ayarlama yöntemini diğer demiryolu projelerinizde de kullanın.",
+        "end": "Kamerayı batıdaki istasyona yaklaştırdık. Perona yanaşan trenlere bir göz atın. Peronları, istasyon binasını, ana hattı, depoyu ve bağlantı hattını kurdunuz; elektriği bağlayıp hattın ayarlarını yaptınız. Özel arazilerin edinimini ve bir kamu tesisinin kaldırılmasını deneyimlediniz; yolun hemen üzerinden geçen kesimlerde arazi ediniminden kaçındınız. Kurp yarıçapını ve eğimi kontrol ederek hat geometrisini ayarlama yöntemini diğer demiryolu projelerinizde de kullanın.",
+        "confirm": "Kamerayı batıdaki istasyona yaklaştırdık. Perona yanaşan trenlere bir göz atın. Peronları, istasyon binasını, ana hattı, depoyu ve bağlantı hattını kurdunuz; elektriği bağlayıp hattın ayarlarını yaptınız. Özel arazilerin edinimini ve bir kamu tesisinin kaldırılmasını deneyimlediniz; yolun hemen üzerinden geçen kesimlerde arazi ediniminden kaçındınız. Kurp yarıçapını ve eğimi kontrol ederek hat geometrisini ayarlama yöntemini diğer demiryolu projelerinizde de kullanın.",
+        "town": "Kamerayı batıdaki istasyona yaklaştırdık. Perona yanaşan trenlere bir göz atın. Peronları, istasyon binasını, ana hattı, depoyu ve bağlantı hattını kurdunuz; elektriği bağlayıp hattın ayarlarını yaptınız. Özel arazilerin edinimini ve bir kamu tesisinin kaldırılmasını deneyimlediniz; yolun hemen üzerinden geçen kesimlerde arazi ediniminden kaçındınız. Kurp yarıçapını ve eğimi kontrol ederek hat geometrisini ayarlama yöntemini diğer demiryolu projelerinizde de kullanın.",
+        "new": "Kamerayı batıdaki istasyona yaklaştırdık. Perona yanaşan trenlere bir göz atın. Peronları, istasyon binasını, ana hattı, depoyu ve bağlantı hattını kurdunuz; elektriği bağlayıp hattın ayarlarını yaptınız. Özel arazilerin edinimini ve bir kamu tesisinin kaldırılmasını deneyimlediniz; yolun hemen üzerinden geçen kesimlerde arazi ediniminden kaçındınız. Kurp yarıçapını ve eğimi kontrol ederek hat geometrisini ayarlama yöntemini diğer demiryolu projelerinizde de kullanın.",
+        "east": "Kamerayı batıdaki istasyona yaklaştırdık. Perona yanaşan trenlere bir göz atın. Peronları, istasyon binasını, ana hattı, depoyu ve bağlantı hattını kurdunuz; elektriği bağlayıp hattın ayarlarını yaptınız. Özel arazilerin edinimini ve bir kamu tesisinin kaldırılmasını deneyimlediniz; yolun hemen üzerinden geçen kesimlerde arazi ediniminden kaçındınız. Kurp yarıçapını ve eğimi kontrol ederek hat geometrisini ayarlama yöntemini diğer demiryolu projelerinizde de kullanın."
       }
     },
     "complete": {
-      "title": "Öğretici tamamlandı",
-      "description": "Tebrikler! öğreticiyi tamamladınız. Kılavuzu kapatmak ve bu şehri özgürce oynamaya devam etmek için \"Finish\" tuşuna basın.",
-      "button": "Bitirmek"
+      "title": "Eğitim tamamlandı",
+      "description": "Tebrikler! Eğitimi tamamladınız. “Bitir” düğmesine bastığınızda rehber kapanır ve bu şehirde serbestçe oynamaya devam edebilirsiniz.",
+      "button": "Bitir"
     },
     "nextButton": "İleri",
-    "checking": "Doğrulama...",
-    "failed": "koşul karşılanmadı. Lütfen tekrar deneyin.",
-    "completed": "Öğretici tamamlandı! aferin.",
+    "checking": "Kontrol ediliyor...",
+    "failed": "Koşul sağlanmadı. Lütfen tekrar deneyin.",
+    "completed": "Eğitim tamamlandı! Emeğinize sağlık.",
     "stepProgress": "Adım {{current}} / {{total}}",
     "guide": {
-      "openRoad": "Yol simgesini kullanarak inşaat panelini açın.",
-      "selectRoad": "Zemin seviyesi iki şeritli caddeyi seçin. Sadece gerekli varyant mevcuttur.",
-      "placeStart": "Yolun başlangıcını yerleştirmek için camgöbeği çemberinin içine sol tıklayın.",
-      "placeEnd": "Yolun ucunu yerleştirmek için sarı dairenin içine sol tıklayın.",
-      "finalizeRoad": "Yol şeklini bitirmek için 3D görünümde sağ tıklayın.",
-      "confirmRoad": "Yolu kaydetmek için inşaat panelinde onaylayın, ardından \"İleri\"ye basın.",
-      "failed": "Kurulum veya iletişim başarısız oldu. yeniden deneyin; Sorun devam ederse, yeni bir şehirde eğitimden çıkın ve başlatın.",
-      "retry": "Yeniden yargılamak",
-      "placementRequired": "Kılavuzda gösterilen varyantı ve konumları kullanın.",
-      "preparing": "Öğretici şehri hazırlamak.",
-      "finishFailed": "öğreticiyi bitiremedi. Lütfen tekrar deneyin."
+      "openRoad": "Yol simgesine basarak inşaat panelini açın.",
+      "selectRoad": "“Caddeler” altındaki zemin seviyesindeki 2 şeritli yolu seçin. Yalnızca izin verilen türler seçilebilir.",
+      "placeStart": "Açık mavi dairenin içine sol tıklayarak yolun başlangıç noktasını yerleştirin.",
+      "placeEnd": "Sarı dairenin içine sol tıklayarak yolun bitiş noktasını yerleştirin.",
+      "finalizeRoad": "3D ekranda sağ tıklayarak yolun şeklini onaylayın.",
+      "confirmRoad": "İnşaat panelindeki “Onayla” düğmesine basarak kaydedin, ardından “İleri” düğmesine basın.",
+      "failed": "Hazırlık veya iletişim başarısız oldu. Yeniden denemek sorunu çözmezse eğitimden çıkın ve eğitimi yeni bir şehirde baştan başlatın.",
+      "retry": "Yeniden dene",
+      "placementRequired": "Rehberde gösterilen tür ve konumlarla yerleştirin.",
+      "preparing": "Eğitimin başlangıç durumu hazırlanıyor.",
+      "finishFailed": "Eğitim sonlandırılamadı. Lütfen tekrar deneyin."
     },
     "trade": {
-      "title": "uluslararası ticarete başlamak",
-      "description": "Yerel bir fabrika denizaşırı müşterilere ulaşmak istiyor. Bu eğitimde, bir liman aracılığıyla gıda ihraç etmeyi ve komşu bir ülkeden yük demiryolu ile mal ithal etmeyi öğreneceksiniz.",
+      "title": "Uluslararası ticaret yapalım",
+      "description": "Yerel bir fabrika ürünlerini yurt dışında satmak istiyor. Bu eğitimde bir limandan gıda ihraç etmeyi ve komşu ülkeye uzanan yük demiryoluyla mal ithal etmeyi öğrenebilirsiniz.",
       "step1": {
-        "description": "Bu adada üretilen gıdaları denizaşırı ülkelere göndermek için bir ihracat terminaline ihtiyaç vardır. Sarı işaretli kıyı parselinde bir \"konteyner terminali\" oluşturun. Bu bir öğretici olduğu için inşaat süresi atlanır.",
-        "title": "Bir konteyner bağlantı noktası oluşturun"
+        "description": "Bu adada üretilen gıdaları ihraç etmek için bir ihracat rıhtımı gerekiyor. Kıyıdaki sarı işaretli parsele “konteyner terminal” inşa edin. Bu bir eğitim olduğu için inşaat süresi atlanır.",
+        "title": "Konteyner limanı kurun"
       },
       "step2": {
-        "description": "Fabrikanın üretiminin ve nakliyesinin başlaması birkaç ay sürer, bu nedenle zamanı ilerletin ve limanın ihracat sonuçlarına bakın. Konteyner terminalinin ayrıntılarını bir kez kapatın ve yeniden açın ve Kargo sekmesinde ithalat ve dışa aktarma sonuçlarını görebilirsiniz.",
-        "title": "Gıda ihracatını onaylayın"
+        "description": "Fabrikanın üretiminin ve taşımacılığın işlemeye başlaması birkaç ay sürer; zamanı ilerletip limanın ihracat sonuçlarına bakalım. Konteyner terminalinin ayrıntı penceresini bir kez kapatıp yeniden açın; yük elleçleme bilgilerinden ithalat ve ihracat sonuçlarını görebilirsiniz.",
+        "title": "Gıda ihracatını kontrol edin"
       },
       "step3": {
-        "description": "Artık gemi ile ithalat ve ihracat yapmak için bir yeriniz var. Ardından, demiryolu ile mal ithal etmek ve ihraç etmek için bir yer inşa edelim. Yol boyunca sarı işaretli parsel üzerine bir \"Uluslararası Yük İstasyonu\" inşa edin. Doğu sınırında, komşu ülkeye giden bir demiryolu ve bir sınır yük istasyonu vardır.",
-        "title": "uluslararası bir nakliye istasyonu inşa etmek"
+        "description": "Böylece gemiyle ithalat ve ihracat yapılacak bir yer kurmuş oldunuz. Sırada demiryoluyla mal ithal edip ihraç edeceğimiz bir yer var. Yol kenarındaki sarı işaretli parsele “Uluslararası Nakliye Deposu” inşa edin. Doğudaki sınırda komşu ülkeye uzanan bir hat ve bir sınır yük istasyonu bulunuyor.",
+        "title": "Uluslararası Nakliye Deposu inşa edin"
       },
       "step4": {
-        "open": "Simge panelinde \"Yollar, Demiryolu ve Altyapı\"yı açın ve \"Demiryolu\" altında \"Konteyner Yük Platformu\"nu seçin.",
-        "place": "Uluslararası yük istasyonunun kuzeyinde, ona paralel bir platform yerleştirin. Başlangıcı yerleştirmek için camgöbeği çemberinin (batı) içine sol tıklayın ve ucu yerleştirmek için sarı dairenin (doğu) içine, ardından şekli bitirmek için 3B görünüme sağ tıklayın. \"Platform tarafı\"nı \"içeride\" olarak değiştirin ve onaylamadan önce platformun istasyon binasının (güney tarafında) olup olmadığını kontrol edin. İşiniz bittiğinde \"İleri\" ye basın.",
-        "title": "İstasyonun yanına bir platform inşa edin"
+        "open": "Simge panelinde “Yol, demiryolu ve altyapı” bölümünü açın ve “Demiryolu” altından “konteyner navlun platformu” seçeneğini seçin.",
+        "place": "Uluslararası Nakliye Deposu'nun kuzeyine, binaya paralel bir platform döşeyin. Başlangıç noktası için açık mavi dairenin (batı), bitiş noktası için sarı dairenin (doğu) içine sol tıklayın, ardından 3D ekranda sağ tıklayarak şekli onaylayın. “Peron tarafı” ayarını “İç” olarak değiştirin ve peronun istasyon binası tarafında (güney tarafında) olduğunu kontrol ettikten sonra onaylayın. Döşemeyi bitirince “İleri” düğmesine basın.",
+        "title": "İstasyonun yanına platform kurun"
       },
       "step5": {
-        "description": "Listeye dönmek için \"Geri\"ye basın, \"Demiryolu yolu\" seçin ve platformun doğu ucundan, şehrin dışındaki sınır yük istasyonundan gelen pistin batı ucuna kadar yol yapın.",
-        "title": "sınıra doğru yol açmak"
+        "description": "“Geri” ile listeye dönüp “Demiryolu hattı” seçeneğini seçin; platformun doğu ucundan, şehir dışındaki sınır yük istasyonundan uzanan hattın batı ucuna kadar hat döşeyin.",
+        "title": "Sınıra kadar hat döşeyin"
       },
       "step6": {
-        "title": "Depo Oluştur",
-        "description": "Pist boyunca sarı işaretli parsel üzerine bir \"ray deposu\" oluşturun. \"İleri\"ye basın ve bu bir öğretici olduğu için inşaat süresi atlanır ve depo tamamlanır."
+        "title": "Depo inşa edin",
+        "description": "Hat boyundaki sarı işaretli parsele “Tren deposu” inşa edin. Bu bir eğitim olduğu için “İleri” düğmesine bastığınızda inşaat süresi atlanır ve depo tamamlanır."
       },
       "step7": {
         "title": "Depoyu ana hatta bağlayın",
-        "description": "Deponun doğu ucundaki bağlantı terminalinden ana hattan bir dış cephe kaplaması yapın. Ana hattı dik açı yerine doğuya doğru sığ bir açıyla birleştirin. İşiniz bittiğinde \"İleri\" ye basın."
+        "description": "Deponun doğu ucundaki bağlantı noktasından ana hatta bir bağlantı hattı döşeyin. Bağlantı hattını ana hatta dik açıyla değil, doğuya doğru küçük bir açıyla birleştirin. Döşemeyi bitirince “İleri” düğmesine basın."
       },
       "step8": {
-        "description": "Simge panelinde \"Yollar, Demiryolu ve Altyapı\"yı açın ve şehrin doğusundaki güneş enerjisi santralinin bağlantı terminalini deponun bağlantı terminaline bağlamak için \"Elektrik\" altındaki \"Güç Hattı\"nı kullanın.",
-        "title": "depoya güç sağlamak"
+        "description": "Simge panelinde “Yol, demiryolu ve altyapı” bölümünü açın ve “Elektrik” altındaki “Yüksek gerilim hattı” ile kasabanın doğusundaki güneş enerjisi santralinin bağlantı noktasını deponun bağlantı noktasına bağlayın.",
+        "title": "Depoya elektrik verin"
       },
       "step9": {
-        "description": "\"Toplu Taşıma\" bölümünde \"+ Yeni Hat\" tuşuna basın ve hat tipi olarak \"Uluslararası Navlun Hattı\"nı seçin. Uluslararası yük istasyonunun ve sınır yük istasyonunun platformlarına yer duraklarını yerleştirin, döngüyü kapatmak için ilk durağı tıklayın ve hattı açın. Trenler tek bir yolda birbirlerini geçemezler, bu nedenle bir trenin gidiş-dönüş yapabilmesi için hedef ilerlemeyi 45 dakikaya ayarlayın.",
-        "title": "Uluslararası Nakliye Hattını Açın"
+        "description": "“Toplu taşıma” bölümünde “Yeni hat” düğmesine basın ve tür olarak “Uluslararası Navlun Hattı” seçeneğini seçin. Uluslararası Nakliye Deposu'nun ve sınır yük istasyonunun platformlarına duraklar koyun, ilk durağa tıklayarak döngüyü kapatın ve hattı hizmete açın. Tek hat üzerinde trenler birbirinin yanından geçemediği için hedef sefer aralığını, bir trenin gidiş-dönüş yapabileceği 45 dakikaya ayarlayın.",
+        "title": "Uluslararası navlun hattını hizmete açın"
       },
       "step10": {
-        "description": "İleri süren ve yük trenlerinin uluslararası yük hattında çalışmaya başladığını onaylayın. Deponun personel kiralaması, malzeme satın alması ve araçları hazırlaması birkaç ay sürer.",
+        "description": "Zamanı ilerletin ve uluslararası navlun hattında yük trenlerinin çalışmaya başladığını kontrol edin. Deponun personel alması, malzeme tedarik etmesi ve araçları hazırlaması birkaç ay sürer.",
         "title": "Yük trenlerini çalıştırın"
       }
     },
     "highway": {
-      "title": "otoyol inşa etmek",
-      "description": "Kasaba büyüdükçe araçlar için başka bir rotaya ihtiyacı var. Bu eğitimde, yerel bir yol üzerinde yükseltilmiş bir otoyol inşa etmeyi ve bir kavşak oluşturmak için bunları rampalara bağlamayı öğreneceksiniz.",
+      "title": "Otoyol yapalım",
+      "description": "Kasabanın büyümesine hazırlık olarak araçlar için yeni bir geçiş yolu gerekiyor. Bu eğitimde normal yolun üzerinden viyadükle geçen bir otoyol yapmayı ve rampalarla bağlayarak otoyol kavşağı oluşturmayı öğrenebilirsiniz.",
       "step1": {
-        "title": "karşıdan karşıya geçmek",
-        "open": "Yükseltilmiş bir otoyol ile merkezi caddeyi geçin. Simge panelinde \"Yollar, Demiryolu ve Altyapı\"yı açın ve \"otoyollar\" altında iki şeritli otoyolu seçin.",
-        "start": "Otoyolun başlangıcını yerleştirmek için camgöbeği çemberinin içine sol tıklayın. Yerden 7 m yükseklikte bir viyadük yakalanır.",
-        "end": "Sonu yerleştirmek için sarı dairenin içine sol tıklayın. Sokağın uzak tarafında aynı 7 m yüksekliğe kadar uzanır.",
-        "confirm": "Otoyolu kaydetmek için inşaat panelinde onaylayın, ardından \"İleri\"ye basın. Bu bir öğretici olduğu için inşaat süresi atlanır ve hemen tamamlanır."
+        "title": "Viyadükle üstten geçin",
+        "open": "Ortadaki normal yolun üzerinden viyadüklü bir otoyolla geçeceğiz. Simge panelinde “Yol, demiryolu ve altyapı” bölümünü açın ve “Otoyollar” altından “2 şeritli otoyol” seçeneğini seçin.",
+        "start": "Açık mavi dairenin içine sol tıklayarak otoyolun başlangıç noktasını yerleştirin. Başlangıç noktası 7 m yükseklikteki viyadük konumuna kendiliğinden yapışır.",
+        "end": "Sarı dairenin içine sol tıklayarak bitiş noktasını yerleştirin. Bitiş noktası, normal yolun karşı tarafında aynı 7 m yükseklikteki konuma yapışır.",
+        "confirm": "İnşaat panelindeki “Onayla” düğmesine basarak kaydedin, ardından “İleri” düğmesine basın. Bu bir eğitim olduğu için inşaat süresi atlanır ve otoyol hemen tamamlanır."
       },
       "step2": {
-        "title": "otoyola isim vermek",
-        "description": "Yolları onlara isim vererek yönetebilirsiniz. İnşa ettiğiniz otoyolun detay penceresinin en üstünde, ait olduğu yol şu anda \"Yok (yolun parçası değil)\", bu yüzden ona istediğiniz herhangi bir isim verin."
+        "title": "Otoyola ad verin",
+        "description": "Yollara ad vererek onları yönetebilirsiniz. Yaptığınız otoyolun ayrıntı penceresinin en üstüne bakın: bağlı olduğu yol şu anda “Yok (isimsiz yol)” olarak görünüyor. Ona dilediğiniz bir ad verin."
       },
       "step3": {
-        "title": "Bir rampa inşa et",
-        "description": "Sokağa bağlanmak için bir rampa inşa edin. Yol tipi olarak \"rampa\"yı seçin ve ekrandaki sarı işaretçinin konumundan otoyola düzgünce kavisli bir rampa bağlayın."
+        "title": "Rampa yapın",
+        "description": "Normal yola bağlanmak için bir rampa yapalım. Yol türü olarak “Rampa” seçeneğini seçin ve ekrandaki sarı işaretin bulunduğu yerden, yumuşak bir kavisle kıvrılan rampayı otoyola bağlayın."
       },
       "step4": {
-        "title": "Değişimi inceleyin",
-        "description": "Rampanın etrafında görüntülenen \"IC1\" i tıklayarak Değişim Detay Panelini açabilirsiniz. Sokak ve otoyolun bağlı olduğunu onaylayın."
+        "title": "Otoyol kavşağını inceleyin",
+        "description": "Rampanın çevresinde görünen “IC1” etiketine tıklayarak otoyol kavşağının ayrıntı panelini açabilirsiniz. Normal yol ile otoyolun birbirine bağlandığını kontrol edin."
       }
     },
     "mining": {
-      "title": "Maden Kaynakları",
-      "description": "Adanın altında değerli kaynaklar yatıyor, ancak onları dışarı çıkarmanın bir yolu yok. Bu eğitimde, cevheri çıkarmak, taşımak ve denizaşırı ihracat yapmak için bir maden, yük demiryolu ve limanın nasıl kurulacağını öğreneceksiniz.",
+      "title": "Kaynak çıkaralım",
+      "description": "Adada değerli kaynaklar yatıyor ama onları dışarı taşımanın bir yolu yok. Bu eğitimde bir maden, yük demiryolu ve liman kurarak cevheri çıkarıp taşımaktan yurt dışına ihraç etmeye kadar tüm süreci öğrenebilirsiniz.",
       "step1": {
-        "description": "Doğal kaynakları etkinleştirin ve güneydoğu cevher yatağının detay panelini açın.",
-        "title": "Cevher damarını inceleyin"
+        "description": "Doğal kaynakları görünür yapın ve güneydoğudaki maden damarının ayrıntı panelini açın.",
+        "title": "Maden damarını inceleyin"
       },
       "step2": {
-        "description": "Güneydoğu cevher damarı üzerindeki sarı arsa üzerine bir mayın inşa edin. Bu bir öğretici olduğundan, inşaat süresi atlanır.",
-        "title": "bir mayın inşa etmek"
+        "description": "Güneydoğudaki maden damarının üzerindeki sarı parsele “Maden” inşa edin. Bu bir eğitim olduğu için inşaat süresi atlanır.",
+        "title": "Maden inşa edin"
       },
       "step3": {
-        "description": "Madenin güneydoğusundaki büyük mevcut arsa üzerine bir cevher yükleme istasyonu inşa edin. Bir cevher yükleme istasyonu, madende çıkarılan cevheri trenlere yüklemenizi sağlar.",
-        "title": "Madenin yanında bir yükleme istasyonu inşa edin"
+        "description": "Madenin güneydoğusundaki büyük mevcut parsele “Cevher yükleme istasyonu” inşa edin. Cevher yükleme istasyonunda, madenden çıkarılan cevher yüklenip trenlere aktarılır.",
+        "title": "Madenin yanına yükleme istasyonu inşa edin"
       },
       "step4": {
-        "description": "Limanın güneyindeki mevcut büyük arsa üzerine bir cevher boşaltma istasyonu inşa edin. Bir cevher boşaltma istasyonu, trenle getirilen cevheri gerçekleştirmenizi sağlar.",
-        "title": "Limanın yakınında bir boşaltma istasyonu inşa edin"
+        "description": "Limanın güneyindeki büyük mevcut parsele “Cevher boşaltma istasyonu” inşa edin. Cevher boşaltma istasyonunda, trenle getirilen cevher boşaltılıp sevk edilir.",
+        "title": "Limanın yakınına boşaltma istasyonu inşa edin"
       },
       "step5": {
-        "description": "Sarı kıyı arsasında toplu bir liman inşa edin.",
-        "title": "Toplu bağlantı noktası oluşturun"
+        "description": "Kıyıdaki sarı parsele “Dökme yük limanı” inşa edin.",
+        "title": "Dökme yük limanı inşa edin"
       },
       "step6": {
-        "open": "Cevher taşımacılığı platformunu seçin ve yükleme istasyonunun güneybatısındaki ve boşaltma istasyonunun güneyindeki her bir işaretçi çiftini bağlayın. Platformlarla tesislerine doğru yüzleşin.",
-        "loading": "Cevher taşımacılığı platformunu seçin ve yükleme istasyonunun güneybatısındaki ve boşaltma istasyonunun güneyindeki her bir işaretçi çiftini bağlayın. Platformlarla tesislerine doğru yüzleşin.",
-        "unloading": "Cevher taşımacılığı platformunu seçin ve yükleme istasyonunun güneybatısındaki ve boşaltma istasyonunun güneyindeki her bir işaretçi çiftini bağlayın. Platformlarla tesislerine doğru yüzleşin.",
-        "title": "İstasyonların yanına platformlar inşa edin"
+        "open": "Demiryolu kategorisinden “cevher navlun platformu” seçeneğini seçin; yükleme istasyonunun güneybatısındaki ve boşaltma istasyonunun güneyindeki ikişer işareti birbirine bağlayın. Her iki platformda da peronu tesis tarafına yönlendirin.",
+        "loading": "Demiryolu kategorisinden “cevher navlun platformu” seçeneğini seçin; yükleme istasyonunun güneybatısındaki ve boşaltma istasyonunun güneyindeki ikişer işareti birbirine bağlayın. Her iki platformda da peronu tesis tarafına yönlendirin.",
+        "unloading": "Demiryolu kategorisinden “cevher navlun platformu” seçeneğini seçin; yükleme istasyonunun güneybatısındaki ve boşaltma istasyonunun güneyindeki ikişer işareti birbirine bağlayın. Her iki platformda da peronu tesis tarafına yönlendirin.",
+        "title": "İstasyonun yanına platform kurun"
       },
       "step7": {
-        "town": "Doğu liman platformu ucundan, yolun orta noktasının güneyinden kuzeybatıdaki dağlık platform ucuna kadar geçen yük rayını döşeyin. Parça henüz bağlı değil, bu yüzden kendiniz yerleştirin. Yolculuk yönünü hizalamak için eğrileri kullanın, Arazi Takibi'ni tırmanma için \"Takip Yok\" olarak ayarlayın ve kırmızı ihlaller kaybolana kadar kaliteyi ve yarıçapı ayarlayın. Ara noktalar ekleyin, böylece her bir açıklık 500m veya daha az olur.",
-        "climb": "Doğu liman platformu ucundan, yolun orta noktasının güneyinden kuzeybatıdaki dağlık platform ucuna kadar geçen yük rayını döşeyin. Parça henüz bağlı değil, bu yüzden kendiniz yerleştirin. Yolculuk yönünü hizalamak için eğrileri kullanın, Arazi Takibi'ni tırmanma için \"Takip Yok\" olarak ayarlayın ve kırmızı ihlaller kaybolana kadar kaliteyi ve yarıçapı ayarlayın. Ara noktalar ekleyin, böylece her bir açıklık 500m veya daha az olur.",
-        "title": "İki istasyonu demiryolu ile bağlayın"
+        "town": "Liman tarafındaki peronun doğu ucundan, yol üzerindeki ara noktanın güneyinden geçerek dağ tarafındaki peronun kuzeybatı ucuna bir yük hattı döşeyin. Hat henüz bağlı olmadığı için kendiniz döşemelisiniz. Eğrilerle gidiş yönünü hizalayın; dağa tırmanan kesimde arazi takibini “Takip etme” olarak ayarlayın ve kırmızıyla gösterilen eğim ve eğrilik ihlalleri kalmayacak şekilde düzenleyin. Ara noktalar ekleyerek her kesimi 500 m veya daha kısa tutun.",
+        "climb": "Liman tarafındaki peronun doğu ucundan, yol üzerindeki ara noktanın güneyinden geçerek dağ tarafındaki peronun kuzeybatı ucuna bir yük hattı döşeyin. Hat henüz bağlı olmadığı için kendiniz döşemelisiniz. Eğrilerle gidiş yönünü hizalayın; dağa tırmanan kesimde arazi takibini “Takip etme” olarak ayarlayın ve kırmızıyla gösterilen eğim ve eğrilik ihlalleri kalmayacak şekilde düzenleyin. Ara noktalar ekleyerek her kesimi 500 m veya daha kısa tutun.",
+        "title": "İki istasyonu hatla birbirine bağlayın"
       },
       "step8": {
-        "title": "Depo Oluştur",
-        "description": "Limanın güneybatısındaki mevcut arsa üzerine bir demiryolu deposu inşa edin. Doğu ucundaki bağlantı terminalinden liman tarafındaki platforma bir iz yönlendirilebilecek şekilde yönlendirin."
+        "title": "Depo inşa edin",
+        "description": "Limanın güneybatısındaki mevcut parsele “Tren deposu” inşa edin. Doğu ucundaki bağlantı noktasından liman tarafındaki perona hat çekilebilecek bir yönde yerleştirin."
       },
       "step9": {
         "title": "Depoyu ana hatta bağlayın",
-        "description": "Deponun doğu terminalini, pürüzsüz bir sığ açılı dalla batı liman platformu ucuna bağlayın."
+        "description": "Deponun doğu ucundaki zemin seviyesindeki bağlantı noktasından liman tarafındaki peronun batı ucuna bir bağlantı hattı döşeyin. Hattı küçük bir açıyla, yumuşak biçimde birleştirin."
       },
       "step10": {
-        "description": "Mevcut güneş enerjisi santrali terminalini bir elektrik hattı ile deponun doğu ortak terminaline bağlayın.",
-        "title": "depoya güç sağlamak"
+        "description": "Mevcut güneş enerjisi santralinin bağlantı noktasından deponun doğu ucundaki ortak bağlantı noktasına bir elektrik hattı çekin.",
+        "title": "Depoya elektrik verin"
       },
       "step11": {
-        "description": "Bir cevher taşıma hattı oluşturun, her iki cevher taşıma platformuna da duraklar yerleştirin ve dönüş döngüsünü kapatmak için ilk durağı tıklayın. Trenler tek bir yolda birbirlerini geçemezler, bu nedenle bir trenin gidiş dönüş yapabilmesi için hedef ilerlemeyi 45 dakikaya ayarlayın, ardından onaylayın.",
-        "title": "Cevher navlun hattını açın"
+        "description": "Toplu taşıma → Yeni hat → Cevher taşıma hattı adımlarını izleyip dağ tarafındaki ve liman tarafındaki cevher yük peronlarına duraklar koyun, ardından ilk durağa tıklayarak döngüyü kapatın. Tek hat üzerinde trenler birbirinin yanından geçemediği için hedef sefer aralığını, bir trenin gidiş-dönüş yapabileceği 45 dakikaya ayarlayıp onaylayın.",
+        "title": "Cevher taşıma hattını hizmete açın"
       },
       "step12": {
-        "description": "Madencilik, yükleme, demiryolu taşımacılığı, boşaltma ve ihracatı almak için önceden zaman ayırın. Araç temin etmek ve ulaşımı sağlamak birkaç ay sürer.",
-        "title": "avans"
+        "description": "Zamanı ilerleterek madenciliği, yüklemeyi, demiryolu taşımacılığını, boşaltmayı ve ihracatı çalıştıralım. Araç tedariki ve taşımacılığın işlemeye başlaması birkaç ay sürer.",
+        "title": "Zamanı ilerletin"
       },
       "step13": {
-        "description": "Kıyıdaki dökme limanın ayrıntılarındaki cevher makbuzlarını ve ihracatını önceden kontrol edin. Madencilik, araç alımı ve nakliyesi birkaç ay sürer.",
-        "title": "Cevher ihracatını onaylayın"
+        "description": "Zamanı ilerletin ve kıyıdaki dökme yük limanının ayrıntılarında cevherin teslim alınmasını ve ihracatını kontrol edin. Araç tedariki, madencilik ve taşımacılık birkaç ay sürer.",
+        "title": "Cevher ihracatını kontrol edin"
       }
     },
     "tourism": {
-      "title": "turizm geliştirmek",
-      "description": "Adanın, kalıntılarına gelen ziyaretçileri karşılamak için bir limana, konaklamaya ve bir otobüs güzergahına ihtiyacı var. Bir otel ve yolcu terminali inşa etmeyi, bir otobüs güzergahı oluşturmayı ve turistlerin gelişlerini, restoran satışlarını ve otobüs kullanımını kontrol etmeyi öğrenin.",
+      "title": "Turizmi geliştirelim",
+      "description": "Adadaki antik kalıntılara gelecek ziyaretçileri karşılayacak bir liman ve konaklama yeri yok; ziyaretçiler için bir otobüs hattı da bulunmuyor. Bu eğitimde bir otel ve yolcu gemisi terminali inşa etmeyi, bir otobüs hattı oluşturmayı ve turistlerin gelişini, restoranların satışlarını ve otobüs kullanımını kontrol etmeyi öğrenebilirsiniz.",
       "step1": {
-        "description": "Antik kalıntıların batısında sarı işaretli arsa üzerine turistik bir otel inşa edin. Bu bir öğretici olduğundan, inşaat süresi atlanır.",
-        "title": "harabelerin yanına bir otel inşa etmek"
+        "description": "Antik kalıntıların batısındaki sarı işaretli parsele “Tatil oteli” inşa edin. Bu bir eğitim olduğu için inşaat süresi atlanır.",
+        "title": "Kalıntıların yanına otel inşa edin"
       },
       "step2": {
-        "description": "Turist almak için bir limana ihtiyaç vardır. İşaretli liman arazisinde bir yolcu terminali inşa edin.",
-        "title": "yolcu terminali inşa etmek"
+        "description": "Turistleri karşılamak için bir liman gerekiyor. Limandaki işaretli parsele “yolcu gemisi terminali” inşa edin.",
+        "title": "Yolcu gemisi terminali inşa edin"
       },
       "step3": {
-        "description": "Turistlerin özel arabaları yok, bu nedenle toplu taşıma sağlanmalıdır. Toplu Taşıma → Yeni Hat'ı açın ve otobüs güzergahını seçin. Bu sırayla sarı işaretleyicilerde yollara yerleştirin: Liman → Konut → Kalıntılar → Konut, ardından döngüyü kapatmak için liman durağına tıklayın. Ücreti 0'a ve hedefi 1 dakikaya ayarlayın, ardından onaylayın.",
-        "title": "Limandan harabelere otobüs güzergahı oluşturun"
+        "description": "Turistlerin kendi arabası olmadığı için toplu taşıma hizmeti sunmanız gerekiyor. “Toplu taşıma” → “Yeni hat” adımlarını izleyip “otobüs hattı” türünü seçin. Sarı işaretli yolların üzerine liman → konutların önü → kalıntıların önü → konutların önü sırasıyla duraklar koyun, son olarak liman durağına tıklayarak döngüyü kapatın. Ücreti 0, hedef sefer aralığını 1 dakika olarak ayarlayıp onaylayın.",
+        "title": "Limanı kalıntılara bağlayan bir otobüs hattı oluşturun"
       },
       "step4": {
-        "description": "Turistleri karşılamak için önceden zaman. Tesisler ve otobüs araç alımlarının başlaması birkaç ay sürer.",
-        "title": "avans"
+        "description": "Zamanı ilerletip turistleri karşılayalım. Tesislerin çalışmaya başlaması ve otobüslerin tedariki birkaç ay sürer.",
+        "title": "Zamanı ilerletin"
       },
       "step5": {
-        "description": "Oluşturduğunuz otobüs güzergahında harabeler ve yolcular tarafından restoranın satışlarını kontrol edin. Turistler geldiğinde, restoran satışları başlangıç seviyesini aştığında ve otobüste yolcular olduğunda bu adımı tamamlayın. Gerekirse daha fazla zaman.",
-        "title": "Restoran satışlarını ve otobüs yolcularını kontrol edin"
+        "description": "Kalıntıların önündeki restoranın satışlarını ve oluşturduğunuz otobüs hattının yolcularını kontrol edin. Turistler geldiyse, restoranın satışları başlangıca göre arttıysa ve otobüs kullanılıyorsa bu adım tamamlanır. Gerekirse zamanı biraz daha ilerletin.",
+        "title": "Satışları ve otobüs yolcularını kontrol edin"
       }
     },
     "intro": {
-      "controls": "Yeni belediye başkanı olarak, sakinlerin iyi yaşayabilecekleri ve kendilerini güvende hissedebilecekleri bir şehir inşa etmeye yardımcı olun. Bu kasabada henüz yeni gelenler için ev yok ve elektrik veya su temini yok. Bu öğretici, belediye başkanı olarak rolünüzü, zamanı nasıl ilerleteceğinizi, şehrin durumunu nasıl okuyacağınızı ve düğmeleri ve kamera kontrollerini öğretir, ardından yol ve parsel hazırlama, bir bölgenin yönünü belirleme, ev inşa etme ve elektrik ve su sağlama konusunda size yol gösterir.",
-      "scenario4": "Konut bölgesini ve işyerlerini demiryolu ile birbirine bağlamak istiyoruz, ancak özel binalar ve bir kamu hastanesi rotayı engelliyor. Bu eğitimde, arazi edinimi, kamu tesisi yıkımını, yolların, platformların ve istasyonların üstü yüksekliği, bir depo, eğri ve kalite ayarı, güç bağlantısı ve bir hizmet açmayı öğreneceksiniz.",
-      "trade": "Yerel bir gıda fabrikası, ürünlerini yurtdışında satmak için yardım istedi. Kasaba ayrıca ihtiyaç duyduğu malları yurt dışından getirmenin bir yolunu da istiyor. Bu eğitimde, bir liman aracılığıyla gıda ihraç etmeyi ve komşu bir ülkeden yük demiryolu ile mal ithal etmeyi öğreneceksiniz.",
-      "highway": "Kasaba büyüdükçe, daha fazla araç içinden insanları ve malları taşıyacak. Kasaba başka bir rota hazır istiyor, bu yüzden trafiğin tamamı yerel yola çıkmayacak. Bu eğitimde, yerel bir yol üzerinde yükseltilmiş bir otoyol inşa etmeyi ve bir kavşak oluşturmak için bunları rampalara bağlamayı öğreneceksiniz.",
-      "mining": "Bu adanın altında değerli kaynaklar yatıyor, ancak onları dağdan limana çekmenin bir yolu yok. Ulaşım olmadan, ada bu zenginliği bir endüstriye dönüştüremez. Bu eğitimde, cevheri çıkarmak, taşımak ve denizaşırı ihracat yapmak için bir maden, yük demiryolu ve limanın nasıl kurulacağını öğreneceksiniz.",
-      "tourism": "Adalılar, eski iç kalıntılarını daha fazla ziyaretçiyle paylaşmak istiyor. Ancak bir yolcu limanı, konaklama ve limandan şehre giden bir otobüs güzergahından yoksundurlar. Bu eğitimde, bir otel ve yolcu terminali inşa etmeyi, bir otobüs güzergahı oluşturmayı ve turist gelenlerini, restoran satışlarını ve otobüs kullanımını kontrol etmeyi öğreneceksiniz.",
-      "heading": "Belediye Başkanı için bir istek",
+      "controls": "Yeni belediye başkanımız olarak sizden, sakinlerin güven içinde yaşayabileceği bir şehir kurmanızı rica ediyoruz. Bu kasabada henüz yeni sakinleri karşılayacak konutlar da, yaşam için vazgeçilmez olan elektrik ve su da yok. Bu eğitimde önce belediye başkanının rolünü, zamanın nasıl ilerletildiğini, şehrin durumunu nasıl okuyacağınızı, düğme ve kamera kontrollerini öğrenecek; ardından yolları ve parselleri hazırlamaktan, mahallenin gelişim yönünü belirleyip konut inşa etmeye ve elektrik ile suyu ulaştırmaya kadar şehir kurmanın akışını öğrenebileceksiniz.",
+      "scenario4": "Konut bölgesini iş yerlerine demiryoluyla bağlamak istiyoruz, ancak planlanan alanda özel binalar ve bir kamu hastanesi bulunuyor. Bu eğitimde arazi edinimini ve kamu tesislerinin kaldırılmasını, yolların üzerinden geçen viyadükleri, peron, istasyon binası ve depo inşasını, eğri ve eğim ayarlarını, elektrik bağlantısından hattın hizmete açılmasına kadar her şeyi öğrenebilirsiniz.",
+      "trade": "Yerel bir gıda fabrikası, ürünlerini yurt dışına da ulaştırmak istediğini söyleyerek bize danıştı. Kasabanın ihtiyaç duyduğu malları yurt dışından getirmek için bir tedarik yolu da kurmak istiyoruz. Bu eğitimde bir limandan gıda ihraç etmeyi ve komşu ülkeye uzanan yük demiryoluyla mal ithal etmeyi öğrenebilirsiniz.",
+      "highway": "Kasaba büyüdükçe insan ve yük taşıyan araçların sayısı da artacak. Kasabadan yalnızca geçip giden araçlar da normal yollara yığılmasın diye şimdiden ayrı bir geçiş yolu hazırlamak istiyoruz. Bu eğitimde normal yolun üzerinden viyadükle geçen bir otoyol yapmayı ve rampalarla bağlayarak otoyol kavşağı oluşturmayı öğrenebilirsiniz.",
+      "mining": "Bu adada değerli kaynaklar yatıyor. Ancak onları dağdan limana taşımanın bir yolu olmadığı için bu kıymetli kaynaklar adanın sanayisine kazandırılamıyor. Bu eğitimde bir maden, yük demiryolu ve liman kurarak cevheri çıkarıp taşımaktan yurt dışına ihraç etmeye kadar tüm süreci öğrenebilirsiniz.",
+      "tourism": "Ada halkı, iç kesimlerdeki antik kalıntıları daha çok insanın görmesini istiyor. Ancak ziyaretçileri karşılayacak bir liman ve konaklama yeri yok; limandan kasabaya giden bir otobüs hattı da henüz bulunmuyor. Bu eğitimde bir otel ve yolcu gemisi terminali inşa etmeyi, bir otobüs hattı oluşturmayı ve turistlerin gelişini, restoranların satışlarını ve otobüs kullanımını kontrol etmeyi öğrenebilirsiniz.",
+      "heading": "Belediye başkanına bir rica",
       "windowTitle": "Eğitim",
-      "marine": "Bu körfez kasabasında henüz liman ve petrol tesisi yok. Bu eğitimde, denizden araziyi geri kazanacak ve bir tanker iskelesi inşa edecek, körfezin ağzını bir asma köprü ile açacak, denizaltı petrol sahasından ham petrol pompalayacak ve ihracat için boru hattıyla gönderecek ve uzak bir adayı feribotla kasabaya bağlayacaksınız."
+      "marine": "Körfeze bakan bu kasabada henüz ne bir liman ne de petrol tesisi var. Bu eğitimde denizi doldurarak bir tanker iskelesi kurmaktan körfez ağzına asma köprü yapmaya, deniz tabanındaki petrol sahasından çıkarılan ham petrolü boru hattıyla taşıyıp ihraç etmeye ve açıktaki adayı kasabaya feribotla bağlamaya kadar tüm süreci öğrenebilirsiniz."
     },
     "marine": {
-      "title": "denizi geliştirmek",
-      "description": "Bu körfez kasabasında henüz liman ve petrol tesisi yok. Bu eğitimde, denizden araziyi geri kazanacak ve bir tanker iskelesi inşa edecek, körfezin ağzını bir asma köprü ile açacak, denizaltı petrol sahasından ham petrol pompalayacak ve ihracat için boru hattıyla gönderecek ve uzak bir adayı feribotla kasabaya bağlayacaksınız.",
+      "title": "Denizi değerlendirelim",
+      "description": "Körfeze bakan bu kasabada henüz ne bir liman ne de petrol tesisi var. Bu eğitimde denizi doldurarak bir tanker iskelesi kurmaktan körfez ağzına asma köprü yapmaya, deniz tabanındaki petrol sahasından çıkarılan ham petrolü boru hattıyla taşıyıp ihraç etmeye ve açıktaki adayı kasabaya feribotla bağlamaya kadar tüm süreci öğrenebilirsiniz.",
       "step1": {
-        "title": "Bir ıslah projesi planlayın",
-        "description": "Bir limanın, büyük gemilerin tesisleri için yanaşabileceği ve inebileceği bir rıhtıma ihtiyacı vardır. Bir liman için arazi oluşturmak için körfezin başındaki denizi geri alın. Earthworks aracını açın, alanı çizmek için dört sarı işaretçiye sol tıklayın ve kapatmak için sağ tıklayın. Tahminin ıslah için olup olmadığını kontrol edin, ardından projeyi onaylayın."
+        "title": "Dolgu çalışmasını planlayalım",
+        "description": "Liman kurmak için büyük gemilerin yanaşabileceği bir rıhtım ve tesislerin inşa edileceği arazi gerekir. Körfezin iç kısmındaki denizi doldurarak limanın kurulacağı araziyi oluşturalım. Toprak işleri simgesine basın, dört sarı işarete sırayla sol tıklayarak alanı çizin ve sağ tıklayarak kapatın. Maliyet tahmininde türün “Dolgu” olarak göründüğünü kontrol edip çalışmayı onaylayın."
       },
       "step2": {
-        "title": "Geri kazanılan araziyi tamamlayın",
-        "description": "En az bir ay ilerlemek için Başlat'ı kullanın, ardından İleri'ye basın. Bu dersin inşaat tedarikçisi olmadığı için, daha sonra kalan ıslah işini atlar. Bittiğinde deniz karaya dönüşür ve deniz kenarı gemilerin yanabileceği bir rıhtım haline gelir."
+        "title": "Dolgu alanını tamamlayalım",
+        "description": "“Başlat” ile zamanı en az bir ay ilerletin, ardından “İleri” düğmesine basın. Bu eğitimde inşaatı yapacak bir müteahhit olmadığı için “İleri” düğmesi dolgu çalışmasının inşaat süresini atlar. Çalışma tamamlandığında deniz olan yer karaya dönüşür ve denize bakan kenarı gemilerin yanaşabileceği bir rıhtım olur."
       },
       "step3": {
-        "title": "Geri kazanılan araziye bir yol inşa edin",
-        "description": "Geri kazanılan arazide bir liman veya petrol terminali yol olmadan işe yaramaz: insanlar işe gelemez ve mallar hareket edemez. Kasaba yolunun sonundan geri kazanılan araziye bir yol inşa edin. Bu derste, onayladığınız anda yol tamamlanır. İnşaat panelini açmak için simge panelinde “Yollar, Demiryolu ve Altyapı” düğmesine basın."
+        "title": "Dolgu alanına yol yapalım",
+        "description": "Dolgu alanına liman veya petrol terminali kursanız bile, yolla bağlı değilse insanlar çalışmaya gelemez, mallar da taşınamaz. Kasabadaki yolun ucundan dolgu alanına kadar bir yol yapın. Bu eğitimde yollar onaylandığı anda tamamlanır. Simge panelindeki “Yol, demiryolu ve altyapı” düğmesine basarak inşaat panelini açın."
       },
       "step4": {
-        "title": "tanker iskelesini inşa et",
-        "description": "Ham petrol taşıyan tankerler büyük gemilerdir, bu nedenle sadece rıhtımın önündeki denizin yeterince derin olduğu bir liman inşa edilebilir. Geri kazanılan arazinin rıhtımı, bir limana uyan derin sulara bakmaktadır. Bina aracını açın, “Ports” kategorisinde “Tanker İskelesi”ni seçin, yerini ayarlamak için rıhtımdaki sarı çemberin içine sol tıklayın ve inşaat panelinde onaylayın. Bir liman inşa edildiğinde, gemilerin gelip gidebilmesi için açık denizdeki okyanus nakliye şeridine otomatik olarak bir bağlantı şeridi çekilir. Bu ders inşaat dönemini atlar."
+        "title": "Tanker iskelesi inşa edelim",
+        "description": "Ham petrol taşıyan tankerler büyük gemiler olduğundan, liman yalnızca rıhtımın önündeki denizin yeterince derin olduğu yerlere kurulabilir. Doldurulan arazinin rıhtımının önündeki deniz derin olduğu için burası limana uygundur. Bina simgesine basın, “Limanlar” kategorisinden “tanker iskelesi” seçeneğini seçin, rıhtımın üzerindeki sarı dairenin içine sol tıklayarak yerini belirleyin ve inşaat panelindeki “Onayla” düğmesine basın. Liman inşa edildiğinde açıktaki büyük gemi deniz yoluna kadar bir bağlantı deniz yolu otomatik olarak çizilir ve gemiler girip çıkabilir. Bu eğitimde inşaat süresi atlanır."
       },
       "step5": {
-        "title": "körfezin ağzını kapatmak",
-        "description": "Otoyol, körfezin ağzının her iki tarafında durur. Ağız 1,6 km genişliğinde, sıra sıra sıralarda sıradan bir köprü için çok geniştir, bu nedenle onu tek bir açıklıkta uzun bir mesafeyi geçebilen bir asma köprü ile bağlayın. Büyük gemiler nakliye şeridinde altından geçer, bu nedenle köprünün temizlenmeleri için yeterince yüksek olması gerekir. Her iki kıyıda da otoyolun uçları zaten bu yükseklikte. Simge panelinde “Yollar, Demiryolu ve Altyapı”yı açın, “otoyollar” altında “4 şeritli asma köprü” seçin ve kuzey ucundan (camgöbeği daire) güney ucuna (sarı daire) çizin. Şekli bitirmek için sağ tıklayın, yapı panelinde onaylayın ve ardından İleri'ye basın."
+        "title": "Körfez ağzına asma köprü kuralım",
+        "description": "Körfezin girişinde otoyol iki kıyıda da kesiliyor. Körfez ağzı tam 1,6 km genişliğinde; sıra sıra ayaklara oturan sıradan bir köprüyle geçilemeyeceği için uzun bir mesafeyi tek açıklıkla geçebilen bir asma köprüyle bağlayalım. Köprünün altından büyük gemilerin deniz yolu geçtiği için köprüyü gemilerin çarpmayacağı bir yükseklikte kurmak gerekir. İki kıyıdaki otoyol uçları bu yüksekliğe göre ayarlanmıştır. Simge panelinde “Yol, demiryolu ve altyapı” bölümünü açın, “Otoyollar” altından “4 şeritli asma köprü” seçeneğini seçin ve kuzey uçtan (açık mavi daire) güney uca (sarı daire) kadar çizin. Sağ tıklayarak şekli onaylayın, inşaat panelindeki “Onayla” düğmesine basın, ardından “İleri” düğmesine basın."
       },
       "step6": {
-        "title": "Denizaltı petrol sahasını bulun",
-        "description": "Ardından, denizin kaynaklarını kullanın. Bir petrol terminali inşa etmeden önce, yakındaki denizin altında bir petrol sahası olup olmadığını kontrol edin. Görünüm panelini açmak için kokpitte “Görünüm”e basın.",
-        "show": "Dikey sekmelerden “Doğal Kaynaklar”ı seçin ve “Görünür” konumuna getirin. Körfezin altına yayılan bir petrol sahası görebilirsiniz. Ayrıntılarını açmak için sarı işaretin yanındaki yağ alanını tıklayın."
+        "title": "Deniz tabanındaki petrol sahasını bulalım",
+        "description": "Sırada denizin kaynaklarından yararlanmak var. Petrol terminalini kurmadan önce yakındaki deniz tabanında petrol sahası olup olmadığını kontrol edelim. Kokpitteki “Görünüm” düğmesine basarak görünüm panelini açın.",
+        "show": "Dikey sıralanmış sekmelerden “Doğal kaynaklar” sekmesini seçin ve “Görünür” olarak değiştirin. Körfezin içinde deniz tabanına yayılmış petrol sahasını görebilirsiniz. Sarı işaretin yakınındaki petrol sahasına tıklayarak ayrıntılarını açın."
       },
       "step7": {
-        "title": "petrol terminalini inşa et",
-        "description": "Denizaltı sahasından pompalanan ham petrol, boru hattı ile kıyıdaki bir petrol terminaline gönderilir ve oradan satılır. Terminal, boru hattının girebileceği rıhtıma bakacak şekilde inşa edilmiştir. Bina aracını açın, “Ports” kategorisinde “Petrol Boru Hattı Terminali”ni seçin, yerini ayarlamak için rıhtımdaki sarı çemberin içine sol tıklayın ve inşaat panelinde onaylayın. Bu ders inşaat dönemini atlar."
+        "title": "Petrol terminalini inşa edelim",
+        "description": "Deniz tabanındaki petrol sahasından çıkarılan ham petrol, boru hattıyla kıyıdaki petrol terminaline gönderilir ve oradan piyasaya sürülür. Petrol terminali, boru hattının bağlanabileceği bir rıhtıma bakacak şekilde inşa edilir. Bina simgesine basın, “Limanlar” kategorisinden “petrol boru hattı terminali” seçeneğini seçin, rıhtımın üzerindeki sarı dairenin içine sol tıklayarak yerini belirleyin ve inşaat panelindeki “Onayla” düğmesine basın. Bu eğitimde inşaat süresi atlanır."
       },
       "step8": {
-        "title": "Petrol platformunu inşa edin",
-        "description": "Ham petrol pompalayan bir petrol platformu, denizde doğrudan petrol sahasının üzerinde durmak zorundadır. Bina aracını açın, “Tarım ve Kaynaklar” kategorisinde “Offshore Petrol Platformu”nu seçin, yerini ayarlamak için denizdeki sarı dairenin içine sol tıklayın ve inşaat panelinde onaylayın. Bu ders inşaat dönemini atlar."
+        "title": "Petrol platformunu inşa edelim",
+        "description": "Ham petrol çıkaran petrol platformunun, petrol sahasının tam üzerindeki denize kurulması gerekir. Bina simgesine basın, “Tarım ve kaynaklar” kategorisinden “açık deniz petrol platformu” seçeneğini seçin, denizin üzerindeki sarı dairenin içine sol tıklayarak yerini belirleyin ve inşaat panelindeki “Onayla” düğmesine basın. Bu eğitimde inşaat süresi atlanır."
       },
       "step9": {
-        "title": "Onları bir boru hattı ile bağlayın",
-        "description": "Platform tarafından pompalanan ham petrolü bir denizaltı boru hattı aracılığıyla petrol terminaline gönderin. Simge panelinde “Yollar, Demiryolu ve Altyapı”yı açın, “Petrol” altında “Alt Deniz Petrol Boru Hattı”nı seçin ve platformun bağlantı terminalinden petrol terminalinin bağlantı terminaline çekin. Onayladıktan sonra, İleri'ye basın ve boru hattı bir kerede tamamlanır."
+        "title": "Boru hattıyla bağlayalım",
+        "description": "Platformda çıkarılan ham petrolü deniz tabanındaki boru hattıyla petrol terminaline gönderelim. Simge panelinde “Yol, demiryolu ve altyapı” bölümünü açın, “Petrol” altından “Denizaltı petrol boru hattı” seçeneğini seçin ve platformun bağlantı noktasından petrol terminalinin bağlantı noktasına kadar bir hat çizin. Onayladıktan sonra “İleri” düğmesine bastığınızda boru hattı hemen tamamlanır."
       },
       "step10": {
-        "title": "ham petrolü ihraç etmek",
-        "description": "Petrol terminali piyasada aldığı ham petrolü satar ve tanker iskelesi onu satın alır ve gemiyle denizaşırı ülkelere ihraç eder. İşçilerin gelmesi ve petrolün satışa başlaması birkaç ay sürer. Birkaç ay ilerlemek için Başlat'ı kullanın, ardından İleri'ye basın. Henüz hiçbir şey ihraç edilmediyse, biraz daha ilerleyin ve tekrar basın."
+        "title": "Ham petrolü ihraç edelim",
+        "description": "Petrol terminali kendisine ulaşan ham petrolü piyasaya satar, tanker iskelesi de onu satın alıp gemiyle yurt dışına ihraç eder. Çalışanların toplanıp ham petrolün satılmaya başlaması birkaç ay sürer. “Başlat” ile zamanı birkaç ay ilerletin, ardından “İleri” düğmesine basın. Henüz ihracat yapılmadıysa zamanı biraz daha ilerletip düğmeye yeniden basın."
       },
       "step11": {
-        "title": "Bir Feribot İskelesi İnşa Edin",
-        "description": "Açık denizin şehre ulaşması için bir yolu yok. Bir feribot açın, böylece sakinleri şehre seyahat edebilir. İlk olarak, kasabanın kıyısında bir feribot iskelesi inşa edin. Simge panelinde “Yollar, Demiryolu ve Altyapı”yı açın, “Su Yolu” altında “Feribot İskelesi”ni seçin ve onu denizden (sarı çember) kıyıdan (cam gözünü çember) çizin. Şekli bitirmek için sağ tıklayın, yapı panelinde onaylayın ve ardından İleri'ye basın."
+        "title": "Feribot iskelesi yapalım",
+        "description": "Açıktaki adadan kasabaya geçmenin bir yolu yok. Adanın sakinleri kasabaya gidip gelebilsin diye bir feribot hattı açalım. Önce kasabanın kıyısına bir feribot iskelesi yapın. Simge panelinde “Yol, demiryolu ve altyapı” bölümünü açın, “Deniz yolu” altından “feribot iskelesi” seçeneğini seçin ve kıyıdan (açık mavi daire) denizin üzerine (sarı daire) doğru çizin. Sağ tıklayarak şekli onaylayın, inşaat panelindeki “Onayla” düğmesine basın, ardından “İleri” düğmesine basın."
       },
       "step12": {
-        "title": "feribot şeridini çiz",
-        "description": "Ardından, feribotun adanın iskelesinden kasabanın iskelesine yelken açacağı şeridi çizin. Bir şerit araziyi geçemez, bu yüzden adanın kuzey tarafına doğru ilerleyin, körfezin ağzındaki asma köprünün altından geçin ve nokta yerleştirmek için yol boyunca sol tıklayarak körfeze girin. “Waterway” altında “Ferry Lane”i seçin, adanın iskelesinin ucunu kasabanın iskelesinin ucuna bağlayın, onaylayın ve ardından İleri'ye basın."
+        "title": "Feribot yolunu çizelim",
+        "description": "Şimdi adanın iskelesinden kasabanın iskelesine kadar geminin izleyeceği deniz yolunu çizin. Deniz yolu karanın üzerinden geçemez; bu yüzden adanın kuzeyinden dolaşıp körfez ağzındaki asma köprünün altından geçerek körfeze girecek şekilde, yol boyunca sol tıklayıp noktalar koyarak çizin. “Deniz yolu” altından “Feribot yolu” seçeneğini seçin, adanın iskelesinin ucundan kasabanın iskelesinin ucuna kadar bağlayıp onaylayın, ardından “İleri” düğmesine basın."
       },
       "step13": {
-        "title": "Feribot hattını aç",
-        "description": "Son olarak, şeritte çalışan feribot hattını oluşturun. Bir feribot hattı oluşturun, adanın iskelesinde ve kasabanın iskelesinde durakları yerleştirin, döngüyü kapatmak için ilk durağı tıklayın ve onaylayın. Hat var olduğunda, bu eğitim tamamlanır. Gemileri gerçekten çalıştırmak için, onları kiralayan bir bakım iskelesine de ihtiyacınız olacak."
+        "title": "Feribot hattını açalım",
+        "description": "Son olarak, deniz yolunda çalışacak feribotun hattını oluşturun. Toplu taşıma → Yeni hat → Feribot hattı adımlarını izleyip adanın iskelesine ve kasabanın iskelesine duraklar koyun, ilk durağa tıklayarak döngüyü kapatın ve onaylayın. Hat oluşturulunca bu eğitim tamamlanır. Gemileri gerçekten çalıştırmak için gemileri kiraya veren bir bakım havuzu da gerekir."
       }
     }
   },
   "tips": {
-    "startGame": "Oyuna Başla",
-    "nowLoading": "Şimdi yükleniyor...",
-    "startError": "Başlatılamıyor. Lütfen tekrar deneyin.",
-    "todaysTips": "Bugünün İpuçları",
+    "startGame": "Oyunu başlat",
+    "nowLoading": "Yükleniyor...",
+    "startError": "Başlatılamadı. Lütfen tekrar deneyin.",
+    "todaysTips": "Günün ipuçları",
     "gotIt": "Kapat",
     "items": {
       "tip1": {
-        "title": "Para şehri döndürür",
-        "description": "İnşaat ve kamu sektörü ücretlerine yapılan şehir harcamaları, alışveriş ve üretimi destekleyen işletmeler ve haneler için gelir haline gelir. Tek başına vergi toplamak ekonomiyi hareket ettirmez. Parayı şehre geri koymak için ihtiyaç duyulan hizmetler ve onarımlar finanse edildi."
+        "title": "Para döner dolaşır",
+        "description": "Belediyenin inşaat harcamaları ve kamu tesislerinin personel giderleri, şirketlerin ve hanelerin gelirine dönüşerek alışverişi ve bir sonraki üretimi destekler. Yalnızca vergi toplamakla ekonomi dönmez. Gerekli hizmetlere ve onarımlara bütçe ayırarak parayı şehre geri döndürün."
       },
       "tip2": {
-        "title": "uzun oyunu oynamak",
-        "description": "Güvensiz bir ortamda büyüyen vatandaşlar, yetişkin olarak suç işlemeye daha büyük bir eğilime sahiptir. Suç işlemeye devam edin ve çocukların büyüdüğü çevreyi iyileştirmeye devam edin. Kötü kamu güvenliğinin köklerini ele almak en az bir nesil gerektirir."
+        "title": "Kamu güvenliği için uzun soluklu mücadele",
+        "description": "Kamu güvenliğinin zayıf olduğu bir ortamda büyüyen vatandaşlarda suça yatkınlık yetişkinlikte de sürer. Polis denetimini ve çocukların büyüdüğü ortamın iyileştirilmesini sürdürün. Kamu güvenliğini kökten iyileştirmek en az bir kuşak sürer."
       },
       "tip3": {
-        "title": "Yol göster!",
-        "description": "İtfaiye ekiplerinin olay yerine yardım etmesi gerekiyor. Bir itfaiye istasyonu mevcut olsa bile, uzun mesafeler veya sıkışık yollar hasarın büyümesini sağlar. İstasyon konumlarını gözden geçirin ve bütçelerinin yanında güzergahlara erişin."
+        "title": "Yolu açın!",
+        "description": "İtfaiye ancak olay yerine ulaşabildiğinde işe yarar. İtfaiye istasyonu olsa bile çok uzaktaysa ya da oraya giden yollar tıkalıysa hasar büyür. Bütçeyle birlikte tesislerin yerleşimini ve olay yerine giden yolları da gözden geçirin."
       },
       "tip5": {
-        "title": "yokuş yukarı gider",
-        "description": "Dik yamaçlarda yollar inşa etmek, düz zeminden daha fazla iş gerektirir. Haritadaki en kısa yol her zaman en ucuzu değildir. Arazi ve inşaat tahminlerini karşılaştırın ve hafif bir sapma düşünün."
+        "title": "Sarp bir yol",
+        "description": "Dik yamaçlardan geçen yolların inşası, düz arazidekilere göre çok daha zahmetlidir. Haritadaki en kısa mesafe her zaman en ucuz rota değildir. Araziyi ve inşaat maliyeti tahminlerini karşılaştırın, biraz dolambaçlı bir seçeneği de değerlendirin."
       },
       "tip6": {
-        "title": "Bazı planlama gerekli",
-        "description": "Daha fazla sakin ve fabrika, daha fazla elektrik ve su talebi anlamına geliyor. Bir eksiklik ortaya çıktıktan sonra inşa etmeye başlayın ve tamamlanmayı bekliyor olacaksınız. Yeni bir bölge geliştirmeden önce yedek tedarik kapasitesini kontrol edin."
+        "title": "Planlı olun",
+        "description": "Nüfus ve fabrikalar arttıkça elektrik ve su talebi de artar. Tesisleri ancak sıkıntı başladıktan sonra yapmaya başlarsanız tamamlanmalarını beklemek zorunda kalırsınız. Yeni bir mahalleyi geliştirmeden önce arzda yeterli pay olup olmadığını da kontrol edin."
       },
       "tip7": {
-        "title": "Acele israf yapar",
-        "description": "Daha yüksek hız sınırları, yolculukları daha hızlı hale getirir, ancak kaza riskini artırır. Keskin eğrilerin de bakıma ihtiyacı vardır. Kazaların sık olduğu durumlarda, yol düzenini ve hız sınırını gözden geçirin."
+        "title": "Acele işe şeytan karışır",
+        "description": "Hız sınırını yükseltmek ulaşımı hızlandırır ama kaza riskini de artırır. Keskin virajlara da dikkat etmek gerekir. Kazaların sık olduğu yerlerde yolun şeklini ve hız sınırını gözden geçirin."
       },
       "tip8": {
-        "title": "geleceğe yatırım yapmak",
-        "description": "Artan bir nüfus tek başına hastanelerde veya gelişmiş fabrikalarda personel sıkıntısını çözmez. Gerekli uzmanları eğitmek için üniversite uzmanlıkları ve kabul kapasitesi ayarlayın ve öğrencilerin mezun olmaları için zaman tanıyın."
+        "title": "Geleceğe yatırım",
+        "description": "Hastanelerdeki ve ileri teknoloji fabrikalarındaki personel açığı yalnızca nüfusu artırarak çözülmez. Gereken alanlarda nitelikli insan gücü yetiştirecek üniversite bölümlerini ve kontenjanları düzenleyin, mezuniyete kadar geçecek süreyi de hesaba katarak plan yapın."
       },
       "tip9": {
-        "title": "dayanacak şekilde inşa edilmiş",
-        "description": "İhmal edilen onarımlar, binaların ve yolların kötüleşmesine ve sonunda çökme riskine girmesine neden olur. Yangınlar ve çökmeler de kamu duyarlılığını kötüleştirir, bu nedenle her şeyi yeni inşaata harcamak risklidir. Onarım ve yangınla mücadele için fonları hazır bulundurun."
+        "title": "Uzun ömürlü olsun",
+        "description": "Onarım ihmal edilirse binalar ve yollar yıpranır ve sonunda çöker. Yangınlar ve çökmeler vatandaşların memnuniyetini de düşürdüğünden bütçeyi yalnızca yeni yapılara harcamak tehlikelidir. Mevcut tesislerin onarımı ve itfaiye için de bütçe ayırın."
       },
       "tip10": {
-        "title": "Küçük bir nefes alma odası",
-        "description": "Yakından paketlenmiş binalar, bir yangının komşularına daha kolay yayılmasını sağlar. Yangın hizmetlerinin yanı sıra binalar arasında boşluk bırakmak şehrin korunmasına yardımcı olur."
+        "title": "Büyük yangın",
+        "description": "Binalar sık yerleştiğinde tek bir binadaki yangın çevreye kolayca yayılır. İtfaiye hizmetlerinin yanı sıra binalar arasında boşluk bırakmak da afetlere karşı korunmaya yardımcı olur."
       },
       "tip11": {
-        "title": "Gömmek saplamak",
-        "description": "Maden ve petrol çıkarma için siteleri seçmeden önce kaynak mevduatlarını kontrol edin. Yedekler, siz onları çıkardıkça düşer. Bir maden kasabasının da mevduatları tükendikten sonra iş ve vergi geliri için bir plana ihtiyacı var."
+        "title": "Kazdıkça kaz",
+        "description": "Madenlerin ve petrol sahalarının yerini kaynakların dağılımına bakarak seçin. Çıkarmaya devam ettikçe kalan miktar azalır. Madenciliğe dayanan bir şehirde, kaynaklar tükendikten sonraki işleri ve vergi gelirlerini de düşünmeniz gerekir."
       },
       "tip12": {
-        "title": "şehrin nakit ineği",
-        "description": "Belediye başkanı kiracılardan kira kazanmak için konut ve ticari binalar inşa edebilir. Boş alan kira getirmez, bu nedenle hangi kullanımların talep edildiğini, yakındaki boş pozisyonları ve inşaattan önceki konumu kontrol edin."
+        "title": "Para ağacı",
+        "description": "Belediye başkanı olarak konut veya ticari bina yaptırırsanız kiracılardan kira geliri elde edebilirsiniz. Boş birimler gelir getirmez; bu yüzden hangi kullanımlara talep olduğunu, çevredeki boş birimleri ve konumu kontrol edin."
       },
       "tip13": {
-        "title": "vergi memuru gelir",
-        "description": "Vergi oranları, iş maliyetlerini ve karlılığı ve şehir gelirini etkiler. Bir sektördeki daha düşük vergiler, büyümesini desteklemenize yardımcı olabilir. Gelir kısaldığında, vergileri genel olarak artırmadan önce her bir endüstrinin durumunu kontrol edin."
+        "title": "Suyunu çıkarın",
+        "description": "Vergi oranları yalnızca belediyenin gelirini değil, şirketlerin yükünü ve kârlılığını da etkiler. Geliştirmek istediğiniz sektörün vergi yükünü hafifletmek gibi, sanayi politikası aracı olarak da kullanılabilir. Vergi geliri yetmediğinde de hepsini birden artırmadan önce her sektörün durumuna bakın."
       },
       "tip14": {
-        "title": "Her zaman bir B planınız olsun",
-        "description": "Kazalar veya afetler elektrik santrallerini veya elektrik hatlarını devre dışı bıraktığında, etkiler elektriğe bağımlı olan fabrikalara ve sakinlere yayılır. Tek bir arızanın tüm şehri durma noktasına getirmemesi için önemli altyapı için yedekleme tesisleri ve teslimat yolları sağlayın."
+        "title": "Yedek plan",
+        "description": "Kaza ya da afet nedeniyle santraller veya elektrik hatları devre dışı kalırsa, etkisi elektrik kullanan fabrikalara ve vatandaşların günlük yaşamına da yayılır. Önemli altyapılarda hem arz eden tesisler hem de iletim yolları için yedek hazırlayın; tek bir noktadaki arıza tüm şehri durdurmasın."
       },
       "tip15": {
-        "title": "Ev aramak için bir yer",
-        "description": "Boş araziyi şehir merkezinde kullanılmadan bırakırsanız, evlerini kaybeden insanlar oraya yerleşebilir ve bu da onu bir gecekondu mahallesi için olası bir yer haline getirebilir. Ödeyebilecekleri evler sağlayın ve gecekondu sakinleri onlara taşındıkça gecekondu küçülür."
+        "title": "Bir yuva arayışı",
+        "description": "Şehir merkezindeki boş arsaları kendi hâline bırakırsanız evini kaybeden insanlar oraya toplanır ve kolayca gecekondu bölgesi oluşur. Kirası karşılanabilir konutlar sağlarsanız sakinler yavaş yavaş oraya taşınır ve gecekondu bölgesi kendiliğinden küçülür."
       },
       "tip16": {
-        "title": "Endüstriyel kümeler",
-        "description": "Benzer endüstrileri ve onların hammadde üreticilerini kümelemek, bir yeri üretim için daha uygun hale getirir. Şehir genelinde fabrikaları dağıtmak yerine ilgili endüstrileri gruplandırmayı düşünün. Barınağın yakınında, yaratabilecekleri gürültü ve hava kirliliğini hatırlayın."
+        "title": "Sanayi kümelenmesi",
+        "description": "Aynı sektördeki işletmeler ya da onların hammaddesini üreten sektörler bir araya toplandığında üretim için avantajlı bir konum oluşur. Fabrikaları şehrin dört bir yanına dağıtmak yerine ilgili sektörleri bir araya getirmeyi düşünün. Ancak konut bölgelerinin yakınında gürültüye ve hava kirliliğine de dikkat etmek gerekir."
       },
       "tip17": {
-        "title": "yükselmek ve öğütmek",
-        "description": "Düzenlemeler panelinde daha uzun çalışma saatleri, aynı işgücünün daha fazla üretimi desteklemesini sağlar. Ancak sağlık ve boş zaman acı çekerek eğlence harcamalarını azaltır. Para kazanmak için çok fazla zaman harcamak için zaman bırakmaz."
+        "title": "24 saat çalışabilir misiniz?",
+        "description": "Yönetmelikler panelinden çalışma saatlerini uzatırsanız aynı sayıda çalışanla daha fazla üretim yapılabilir. Öte yandan sağlık ve boş zaman zarar görür, eğlence harcamaları azalır. Para kazanmaya çok fazla zaman ayrılırsa harcamaya zaman kalmaz."
       },
       "tip18": {
-        "title": "yemek, işe gidip gelmek, uyumak, tekrarlamak",
-        "description": "Uzun yolculuklar boş zamanları ve eğlence için harcamaları keser. Evler ve işler arasındaki mesafeyi ve yol boyunca tıkanıklığı gözden geçirin. Eve sadece uyumak için zamanında gelen sakinler için, canlı alışveriş bölgeniz bir pencereden sadece manzaradır."
+        "title": "İşe gidiş cehennemi",
+        "description": "İşe gidiş-geliş süresi uzadıkça boş zaman azalır, eğlence gibi harcamalar da düşer. Konutlarla iş yerleri arasındaki mesafeyi ve işe giden yollardaki trafik sıkışıklığını gözden geçirin. Eve yalnızca uyumaya dönen vatandaşlar için o canlı çarşı, pencereden geçip giden bir manzaradan ibarettir."
       },
       "tip19": {
-        "title": "Büyümek için oda bırakın",
-        "description": "Daha uzun trenler, ancak hattın istasyonlarındaki platformlara sığarsa çalışabilir. Gelecekteki talebe izin vermek için istasyonlar inşa ederken platform uzunluklarını planlayın. Diğerleri hala çok kısaysa, bir istasyonu uzatmak yardımcı olmaz."
+        "title": "İleri görüşlülük",
+        "description": "Uzun trenler ancak hattaki her istasyonun peronuna sığıyorsa kullanılabilir. Gelecekte artacak yolculara hazırlıklı olmak için peron uzunluğunu istasyonu yaparken düşünün. Tek bir istasyonu uzatsanız bile diğer istasyonlar kısaysa kısıtlama devam eder."
       },
       "tip20": {
-        "title": "onu şehrin altına süpür",
-        "description": "Yeraltı yolları gürültü veya hava kirliliği yaratmaz, bu da onları yerleşim alanlarını korumak için bir seçenek haline getirir. Bazı sorunlar gerçekten şehrin altına süpürülebilir."
+        "title": "Halının altına süpür",
+        "description": "Yeraltına alınan yollar gürültü ve hava kirliliği yaymaz; konut bölgelerinin yaşam çevresini korumak için iyi bir seçenektir. Bazı sorunlar gerçekten de gömülerek çözülebilir."
       },
       "tip21": {
-        "title": "ilerlemenin gölgesinde",
-        "description": "Yüksek binalar kuzeylerine gölge düşürerek yakındaki yaşam koşullarının kötüleşmesini sağladı. Boylarına ve aralıklarına dikkat edin. Dağlar gibi arazi de gölgeler oluşturur. Şehrinizin geleceği parlak olabilir, ancak altındaki zemin zifiri karanlık olabilir."
+        "title": "Binaların gölgesinde",
+        "description": "Yüksek binalar kuzey taraflarına gölge düşürerek komşu binaların yaşam çevresini kötüleştirir. Binaların yüksekliğine ve aralarındaki mesafeye de dikkat edin. Dağlar gibi arazi şekilleri de gölge oluşturur. Şehrinizin geleceği parlak olsa da ayağının altı zifiri karanlık olabilir."
       },
       "tip22": {
-        "title": "Anahtarları bir transit geçiş için takas edin",
-        "description": "Toplu taşıma işyerlerine, okullara ve mağazalara ulaşılmasını kolaylaştırdığında, hanelerin arabasız hayatı seçme olasılığı daha yüksektir. Araba sahipliğindeki tasarruflar diğer harcamalara doğru gidebilir."
+        "title": "Otomobil yerine abonman",
+        "description": "Toplu taşımayla iş yerlerine, okullara ve alışveriş yerlerine ulaşmak kolaylaştığında haneler arabasız bir yaşamı daha kolay seçer. Araba sahibi olmanın masrafından tasarruf edilen para başka harcamalara aktarılabilir."
       },
       "tip23": {
-        "title": "Sonraki durak: kimse",
-        "description": "Otobüsler, yolcu olmasa bile karayolu trafiğini ekler. Çok fazla koşmak tıkanıklığı daha da kötüleştirebilir. Ne kadar hizmetin gerekli olduğuna karar vermek için yolcu sayısını ve yolları kontrol edin."
+        "title": "Havayı taşımak",
+        "description": "Otobüsler hiç yolcu taşımasalar da yoldaki trafiğe eklenir. Sefer sayısını aşırı artırmak, trafik sıkışıklığına karşı aldığınız önlemi ters tepebilir. Yolcu sayısına ve sefer aralığına bakarak gereken sefer sayısını belirleyin."
       },
       "tip24": {
-        "title": "Benler kira ödemez",
-        "description": "Yeterince derin tüneller yukarıdaki araziyi satın almadan geçebilir. Sığ bölümler hala arazi edinimini gerektirir, bu nedenle derinlikleri ve tahminleri kontrol edin. Müzakereler zorlaşırsa, biraz daha derine inmeyi deneyin."
+        "title": "Köstebekler kira ödemez",
+        "description": "Belirli bir derinliğin altındaki tüneller, üstteki araziyi edinmeden geçirilebilir. Sığ kesimlerde arazi edinimi gerektiği için derinliği ve maliyet tahminini kontrol edin. Pazarlık zorlaşırsa daha derine inin."
       },
       "tip25": {
-        "title": "Askıya Alınmış Bir İşe Alım",
-        "description": "Teleferikler, dağların ve dik yamaçların yolları zorlaştırdığı toplu taşıma araçları sağlayabilir. İstasyonlara ve diğer ulaşıma bağlantılara da erişim sağlayın. Yerde seyahat etmek çok fazla sorunsa, vatandaşlarınızı asılı bırakın."
+        "title": "Yol yoksa işe havadan",
+        "description": "Dağlar ve dik yamaçlar yüzünden yol yapmanın zor olduğu yerlerde bile teleferikle toplu taşıma sağlanabilir. İstasyonlara giden yolları ve aktarmaları da düzenleyin. Yerde gitmek zahmetliyse vatandaşlarınızı havada asılı bırakmak da bir seçenek."
       },
       "tip26": {
-        "title": "Mevcut trafik koşulları",
-        "description": "Yedek üretim kapasitesi, elektrik hatları yeterli elektrik taşıyamazsa yardımcı olmaz. Enerji santralleri eklemeden önce, eksiklik ile ilçeye bağlantıları ve iletim kapasitesini kontrol edin. Küçük bir hat, tüm şehrin arzını sınırlandırıyor olabilir."
+        "title": "Elektrik trafiği",
+        "description": "Üretimde fazlalık olsa bile elektrik hatlarının kapasitesi yetmezse elektrik ulaşmaz. Yeni santral kurmadan önce sıkıntı yaşanan mahalleye kadar olan bağlantıları ve iletim kapasitesini kontrol edin. Aradaki tek bir zayıf elektrik hattı tüm şehrin arzını kısıtlıyor olabilir."
       },
       "tip27": {
-        "title": "Burada görülecek bir şey yok",
-        "description": "Bir binayı geliştirme yolunda havaya uçurabilir ve bir kaza olarak bırakabilirsiniz. Yine de halk duyarlılığı kötü bir şekilde acı çekecek. Bir siteyi temizlemeden önce, satın alma ve yıkma maliyetini güçlü bir yaklaşımın etkisine karşı tartın."
+        "title": "Talihsiz bir kaza",
+        "description": "Kalkınmanın önünde duran bir binayı kaza süsü vererek havaya uçurmanız da mümkün. Ancak vatandaşların memnuniyeti ciddi biçimde düşer. Araziyi boşaltmak istediğinizde, satın alıp yıkmanın maliyetini ve zorba yöntemlerin şehirde bırakacağı etkiyi tartın."
       },
       "tip28": {
-        "title": "denize açılmak",
-        "description": "Karada kısa mı? Denizden yeni siteleri geri kazanın. Deniz tabanının altında kaynakların olduğu yerlerde petrol platformları da inşa edilebilir."
+        "title": "Denize açılın",
+        "description": "Kara yetmiyorsa dolguyla yeni arazi oluşturabilirsiniz. Deniz tabanında kaynak bulunan yerlere petrol platformu da kurabilirsiniz."
       },
       "tip29": {
-        "title": "Kırmızı ışık, kırmızı ışık",
-        "description": "Daha fazla sinyal kontrollü kavşak, ışıklarda daha fazla zaman beklemek anlamına gelir. Büyük yollarda çok fazla kaçının. Titizlikle kesişen bir ızgara ile, sakinleriniz yeşili görmeden önce güneş batabilir."
+        "title": "Kırmızı ışık cehennemi",
+        "description": "Işıklı kavşak sayısı arttıkça yolculuklarda ışıkta bekleme süresi birikir. Ana yollarda kavşak sayısını fazla artırmamaya özen gösterin. Yolları titizlikle birbirine kesiştirirseniz bir kez bile yeşil ışık göremeden gün batabilir."
       },
       "tip30": {
-        "title": "Şimdi beni duyabiliyor musun?",
-        "description": "Daha yüksek zemindeki daha uzun radyo kuleleri daha geniş alanları kapsayabilir. Kule ve resepsiyonsuz yerler arasındaki dağları kontrol edin. Daha fazla güç için saf bir coşkuyla bir dağdan sinyal alamazsınız."
+        "title": "Görüş açık",
+        "description": "Verici kuleleri ne kadar yüksek bir yere ve ne kadar yüksek inşa edilirse o kadar geniş bir alanı kapsayabilir. Sinyalin ulaşmadığı yerlerle kule arasında dağ gibi engeller olup olmadığını kontrol edin. Engellenen sinyal, gücü artırma hevesiyle düzelmez."
       },
       "tip31": {
-        "title": "sadece güç ekle",
-        "description": "Bir kıyı tuzdan arındırma tesisi, yakınlarda tatlı su kaynağı olmayan bir şehir sağlayabilir. Yine de çalışması için elektriğe ihtiyacı var. Önce suyu avlarsın, sonra güç için avlanırsın."
+        "title": "Denizin nimeti",
+        "description": "Yakınında su kaynağı olmayan şehirlere bile kıyıdaki deniz suyu arıtma tesisleriyle su sağlanabilir. Ancak bu tesislerin çalışması için elektrik gerekir. Su kaynağı arayışının ardından sıra enerji kaynağı arayışına gelir."
       },
       "tip32": {
-        "title": "Beat'te İşler",
-        "description": "İşsizlik, kamu güvenliğini kötüleştiren bir faktördür. Sakinlerin iş ve polis korumasına ihtiyacı var. İşsizlik yüksekse, boş pozisyonları, işverenlerin ihtiyaç duyduğu becerileri ve sakinlerin bu işlere ulaşıp ulaşamayacağını kontrol edin."
+        "title": "Suçla mücadelenin öbür yolu",
+        "description": "İşsizlik, kamu güvenliğini kötüleştiren etkenlerden biridir. Polisi artırmanın yanı sıra vatandaşların çalışabileceği yerler de gerekir. İşsiz sayısı yüksekse açık iş sayısını, aranan becerileri ve iş yerlerine ulaşılıp ulaşılamadığını da kontrol edin."
       },
       "tip33": {
-        "title": "Bu gelecekteki benim sorunum",
-        "description": "Binalar ve yollar inşaattan sonra onarıma ihtiyaç duyar. Sadece inşa etmeyi göze alabileceğiniz için genişletin ve gelecekteki bütçeler bakımda kaybolabilir. Unutmayın, gelecekteki belediye başkanı da sizsiniz."
+        "title": "Gelecekteki faturalar",
+        "description": "Binalar da yollar da tamamlandıktan sonra onarım masrafı çıkarmaya devam eder. İnşaat maliyetini karşılayabiliyorum diye şehri çok fazla genişletirseniz gelecekteki bütçeniz bakım masraflarıyla dolar. Geleceğin belediye başkanı da sizsiniz."
       },
       "tip34": {
-        "title": "Daha fazla pompa, aynı su",
-        "description": "Su kaynakları zamanla yenilenir, ancak kurtardıklarından daha fazlasının çıkarılması rezervleri azaltır. Talep büyümeden önce diğer kaynakları güvence altına alın. Daha fazla pompa daha fazla su ile gelmez."
+        "title": "Aşırı çekime dikkat",
+        "description": "Su kaynakları zamanla yenilenir; ancak yenilenen miktardan fazlasını çekmeye devam ederseniz kalan miktar azalır. Talep artmadan önce başka su kaynakları da edinin. Pompa sayısını artırmak suyu artırmaz."
       },
       "tip35": {
-        "title": "bu bir özellik",
-        "description": "İnşaat başladığında yollar ve binalar taşınmak kolay değildir. Onaylamadan önce yönlendirmeyi, bağlantıları ve etraflarında kalan araziyi kontrol edin. Yine de, bu yanlışlıkla çarpık yol, yerel karakter olarak üzerinizde büyüyebilir."
+        "title": "Acı bir hata",
+        "description": "Yollar ve binalar, inşaatına başlandıktan sonra kolayca taşınamaz. İnşaatı onaylamadan önce yönü, bağlantıları ve çevrede kalacak araziyi kontrol edin. Yine de yanlışlıkla eğri yapılmış bir yol, alışınca şehrin karakterinin bir parçası olur."
       },
       "tip36": {
-        "title": "Büyük belediye başkanı izliyor",
-        "description": "Takip listenize bir vatandaş eklemek için bir yaya veya arabaya tıklayın. Hayatı sizi ilgilendiren bir asistanı takip etmek için kullanın. Şehir çapında istatistiklerin yanı sıra, bir kişinin günlük hayatı boyunca şehrinizi görebilirsiniz."
+        "title": "Gözetim toplumu",
+        "description": "Bir yayaya veya otomobile tıklayarak o vatandaşı takip listesine ekleyebilirsiniz. Merak ettiğiniz bir sakinin yaşamını izlemek istediğinizde kullanın. Şehrin genel istatistiklerinin yanı sıra şehre tek bir kişinin yaşamından da bakabilirsiniz."
       },
       "tip37": {
-        "title": "Tahmin için bir yedek",
-        "description": "Güneş ve rüzgar çıktısı hava ile değişir. Tek başına iyi hava tedarikini planlamak, koşullar değiştiğinde sizi kısa bırakabilir. Bunları, termal veya nükleer güç gibi hava koşullarına daha az bağımlı olan kaynaklarla birleştirin."
+        "title": "Baz yük santralleri",
+        "description": "Güneş ve rüzgâr enerjisinin üretimi havaya göre değişir. Yalnızca güzel havadaki arzı esas alırsanız hava değiştiğinde elektrik yetmeyebilir. Termik veya nükleer gibi havadan pek etkilenmeyen enerji kaynaklarını da birlikte kullanın."
       },
       "tip38": {
-        "title": "Boyut Önemlidir",
-        "description": "Bazı binalar küçük parsellere sığmaz. Araziyi bölmeden önce planlı bir tesis için gereken alanı kontrol edin. Hepsi küçük parsellerdeyse, büyük bir binaya bol miktarda yedek arazi yardımcı olmaz."
+        "title": "Büyük olan küçüğü de kapsar",
+        "description": "Bazı binalar küçük parsellere inşa edilemez. Yapmak istediğiniz bir tesis varsa araziyi parsellere bölmeden önce gereken alanı kontrol edin. Ne kadar boş arazi olursa olsun, hepsi küçük parsellerden oluşuyorsa büyük binalar sığmaz."
       },
       "tip39": {
-        "title": "bu sana mal olacak",
-        "description": "Kanalizasyon arıtma, atık bertarafı, iletişim ve sağlık hizmetleri varsayılan olarak ücretsiz olabilir. Ücretleri ayarlamak, kullanıcıların işletme maliyetlerinin bir kısmını karşılamasını sağlar. Dostu fiyatlar mı yoksa iddialı fiyat etiketleri mi? Bu belediye başkanının çağrısı."
+        "title": "Bu hizmet ücretlidir",
+        "description": "Atık su arıtma, atık işleme, iletişim ve sağlık gibi kamu hizmetleri varsayılan olarak ücretsiz olabilir. Ücret belirlerseniz işletme maliyetinin bir kısmını kullanıcılar üstlenir. Vatandaş dostu bir fiyat mı, yoksa iddialı bir etiket mi koyacağınız belediye başkanına kalmış."
       },
       "tip40": {
-        "title": "kopyalamak, yapıştırmak, kâr etmek",
-        "description": "Belediye Başkanı olarak mevcut binaların kopyalarını oluşturabilirsiniz. Tip ve zemin sayısını değiştirmeden tutun ve inşaat maliyetlerini azaltmak için orijinaline uyan bir parsel kullanın. Sokak manzarası tekrarlı görünebilir, ancak cüzdanınız manzaranın tadını çıkaracaktır."
+        "title": "Kopyala-yapıştır şehir",
+        "description": "Belediye başkanı olarak bina yaptırırken mevcut bir binayı kopyalayarak inşa edebilirsiniz. Türünü ve kat sayısını değiştirmeden, orijinal binanın sığdığı bir parsele yaparsanız inşaat maliyetini düşürebilirsiniz. Görünüm tekdüze olur ama cebinizi rahatlatan bir sokak dokusu ortaya çıkar."
       },
       "tip41": {
-        "title": "Kiradan Daha Fazlası",
-        "description": "Sakinler, yeni bir ev seçerken kira, iş ve okul işe gidip gelme, alışveriş gezileri, konut kalitesi ve yaşam ortamını karşılaştırır. Gürültü, hava kirliliği, kamu güvenliği ve güneş ışığı her şey önemlidir. Ucuz ama uygunsuz evler daha az çekicidir; Uygun olanlar hala uygun fiyatlı kiraya ve taşınmak için yeterli alana ihtiyaç duyuyor."
+        "title": "Ev seçimi sadece kiraya mı bağlı?",
+        "description": "Sakinler taşınacakları yeri kiraya, işe, okula ve alışverişe gidip gelmenin zahmetine, konutun kalitesine ve yaşam çevresine göre karşılaştırır. Gürültü, hava kirliliği, kamu güvenliği ve güneş alma da önemlidir. Ucuz ama elverişsiz konutlar pek tercih edilmez; elverişli konutlarda da kiranın bütçeye uygun olması ve hanenin sığabileceği kadar alan bulunması gerekir."
       },
       "tip42": {
-        "title": "üzgün olmaktan daha derin",
-        "description": "Konteyner, toplu ve tanker limanları gibi büyük limanlar yeterince derin suya ihtiyaç duyar. Derin su kıyıya yakın olduğu için deniz dibinin dik eğimli olduğu kıyılar limanlara çok uygundur. Açık denizde sığ suya uzanan düz bir kıyıda bile, araziyi daha derin sulara geri kazandırarak bir liman inşa edebilirsiniz."
+        "title": "Karaya oturduktan sonra iş işten geçer",
+        "description": "Konteyner limanı, dökme yük limanı ve tanker limanı gibi büyük limanlar yeterli su derinliği gerektirir. Deniz tabanının dik eğimli olduğu kıyılar derin suya yakındır ve limana uygundur. Sığlığın açıklara kadar uzandığı düz kıyılarda bile, dolguyla karayı derin suya kadar uzatırsanız liman kurabilirsiniz."
       },
       "tip43": {
-        "title": "Bir dakika…",
-        "description": "Çok fazla cadde üzerinde park etmek trafiği yavaşlatır ve kaza riskini artırır. Bu arabaları kalacak başka bir yere vermek için park yerleri inşa edin. Bir sürücünün “sadece bir dakika”sı herkesin öğleden sonrası olabilir."
+        "title": "Bir dakikalığına park ediyorum",
+        "description": "Yol kenarına park eden araçlar arttıkça trafiğin akış hızı düşer, kazalar da daha kolay olur. Otoparklar yaparak yollara taşan araçlara park yeri sağlayın. “Bir dakikalığına park ediyorum” diye başlayan şey bütün şehri durdurabilir."
       },
       "tip44": {
-        "title": "Yoldan Çok Uzakta",
-        "description": "Yollardan uzağa da bina yapabilirsiniz, ancak bina yoldan ne kadar uzaksa erişimi o kadar olumsuz etkilenir. Fabrikalar ve dükkanlar malzeme tedarikinde daha fazla zaman kaybeder; konutlarda ise işe gidiş geliş ve alışveriş yükü artar. Binaları yol kenarına yerleştirin ya da yolu binanın hemen yanına kadar uzatın."
+        "title": "Kara ortasında ada",
+        "description": "Yoldan uzak yerlere de bina yapılabilir; ancak yola olan mesafe arttıkça erişim büyük ölçüde zorlaşır. Fabrikalar ve dükkânlar malzeme tedarikinde zaman kaybeder, konutlarda ise işe gidip gelme ve alışveriş yükü artar. Binaları yol kenarına yapın ya da yolu binaların hemen yanına kadar uzatın."
       }
     }
   },
   "hint": {
-    "buildingConstruction": "Bir bina planlamak için bir paket seçin. Planlamadan tamamlamaya kadar biraz zaman alır.",
-    "parcelCreation": "Radyal menüden bir oluşturma yöntemi seçmek için Ctrl'yi basılı tutun, ardından 3B görünümde bir hedefi tıklayın. Paneldeki boyutu ayarlayın ve onaylayın.",
-    "transitCreation": "Durakları sırayla yerleştirmek için sol tıklayın; Döngüyü kapatmak için ilk durağı tıklayın. Bir segmenti sürükleyin Bir ara nokta eklemek için, taşımak için bir noktayı sürükleyin, silmek için sağ tıklayın. Bir gidiş-dönüş için, dönüş duraklarını da yerleştirin. Yerleştirilmiş bir durağı tekrar tıklayın veya orada tekrar durmak için başka bir durağa bir durak bırakın.",
-    "transitManagement": "Toplu taşıma hatlarının listesi. Ücretleri ve ilerlemeleri ayarlayın veya satırlar oluşturun ve silin. Ücretler, sakinlerin rota seçimini etkiler. Çok yüksek ücretler, yolcu sayısını azaltır ve araba sahipliğini artırır.",
-    "pathConstruction": "Yollar ve demiryolları inşa edin. 3B görünümde araziye tıklayın: köşeleri eklemek için sol tıklayın, şekli onaylamak için sağ tıklayın ve köşeleri yeniden konumlandırmak için sürükleyin. Ayarlar menüsünü açmak için Ctrl'yi basılı tutun (eğri/düz ve yakalama). Dolgu/kesme yüksekliğini değiştirmek için 3/4 tuş kullanın.",
-    "pathConstructionElevated": "Yollar ve demiryolları inşa edin. 3B görünümde araziye tıklayın: köşeleri eklemek için sol tıklayın, şekli onaylamak için sağ tıklayın ve köşeleri yeniden konumlandırmak için sürükleyin. Ayarlar menüsünü açmak için Ctrl'yi basılı tutun (eğri/düz ve yakalama). Yüksekliği değiştirmek için PageUp/PageDown veya 1/2 ve dolgu/kesme yüksekliğini değiştirmek için 3/4 tuş kullanın.",
-    "districtEdit": "Düzenlemeler ve istatistikler için \"bölgeler\" oluşturun, genişletin ve birleştirin. Araçları değiştirmek için Ctrl'yi 3B görünümde basılı tutun. Araç Oluştur: Gösterilen renkte yeni bir bölge oluşturmak için bir yola sol tıklayın (aracı her seçtiğinizde yeni bir renk çizilir). Genişletme aracı: Büyümek için bölgeyi seçmek için sağ tıklayın, ardından yolları içine çekmek için sol tıklayın. Birleştirme aracı: Birleştirilecek bölgeyi seçmek için sağ tıklayın, ardından onay panelini açmak için başka bir bölgeye sol tıklayın. Seçilen bölgenin rengi ve adı, fare imlecinin yanında gösterilir. çıkmak için düğmeye tekrar basın.",
-    "bulldozer": "buldozer modu. Boş parselleri, planlı binaları, planlı yolları ve arazi sahnelerini kaldırmak için sol tıklayın (onaydan sonra dağınık aksesuarlar tüm alan olarak kaldırılır). çıkmak için düğmeye tekrar basın.",
-    "bulldozerInstant": "buldozer modu. Binaları, yolları, boş parselleri ve herhangi bir onay olmadan arazi sahnelerini anında silmek için sol tıklayın. Binalar kiracıları ve sakinleri ile birlikte kaldırılır ve arazi restore edilmez (şehir binası, sınır kontrol noktası ve toplu taşıma bölümleri silinemez; dağınık aksesuarlar onaylandıktan sonra tüm alan olarak kaldırılır). çıkmak için düğmeye tekrar basın.",
-    "cityBudget": "Vergilerden ve ticari faaliyetlerden kazanılan fonların bir sonraki dönem için nasıl tahsis edileceğine karar verin. Hükümet, yol inşaatı veya kamu tesisi operasyonları için malzeme satın aldığında, bunu ancak burada kararlaştırılan bütçe dahilinde yapabilir. Bütçe yetersizse, kamu tesislerinin çalışanları işten çıkarılabilir.",
-    "resourceEdit": "Doğal bir kaynak alanı oluşturun. Bir kaynak türü seçin, ardından araziye tıklayın. Bir tepe noktası eklemek için sol tıklayın, bir köşeyi eklemek için bir kenara tıklayın ve bir köşeyi kaldırmak için sağ tıklayın. Yeniden konumlandırmak için bir köşeyi sürükleyin.",
-    "grading": "Köşeleri yerleştirmek için sol tıklayın, ardından alanı onaylamak için sağ tıklayın."
+    "buildingConstruction": "Bir parsel seçerek bina planlayabilirsiniz. Binanın planlanmasından inşaatın tamamlanmasına kadar bir süre geçer.",
+    "parcelCreation": "Ctrl ile çark menüsünü açıp bir oluşturma yöntemi seçin, ardından 3D görünüme tıklayarak hedefi belirleyin. Paneldeki boyutları ayarlayıp onaylayın.",
+    "transitCreation": "Sol tıklayarak durakları sırayla yerleştirin, ilk durağa tıklayarak döngüyü kapatın. Bir kesimi sürükleyerek ara geçiş noktası ekleyin, bir noktayı sürükleyerek taşıyın, sağ tıklayarak silin. Gidiş-dönüş seferlerde dönüş duraklarını da yerleştirin. Yerleştirdiğiniz bir durağa yeniden tıklarsanız ya da bir durağı başka bir durağın üzerine bırakırsanız araç orada yeniden durur.",
+    "transitManagement": "Toplu taşıma hatlarının listesi. Ücretleri ve sefer aralıklarını ayarlayabilir, yeni hat açabilir veya hatları silebilirsiniz. Ücretler sakinlerin rota seçimini etkiler. Ücret çok yüksek olursa yolcu sayısı düşer ve otomobil sahipliği artar.",
+    "pathConstruction": "Bu modda yol ve hat inşa edebilirsiniz. 3D ekranda araziye tıklayın. Sol tıklayarak köşe noktası ekleyebilir, sağ tıklayarak şekli onaylayabilir, köşe noktalarını sürükleyerek taşıyabilirsiniz. Ctrl tuşunu basılı tutunca ayar menüsü (eğri/düz, yapışma) açılır. 3/4 tuşlarıyla dolgu/yarma yüksekliğini değiştirebilirsiniz.",
+    "pathConstructionElevated": "Bu modda yol ve hat inşa edebilirsiniz. 3D ekranda araziye tıklayın. Sol tıklayarak köşe noktası ekleyebilir, sağ tıklayarak şekli onaylayabilir, köşe noktalarını sürükleyerek taşıyabilirsiniz. Ctrl tuşunu basılı tutunca ayar menüsü (eğri/düz, yapışma) açılır. PageUp/PageDown veya 1/2 tuşlarıyla yüksekliği, 3/4 tuşlarıyla dolgu/yarma yüksekliğini değiştirebilirsiniz.",
+    "districtEdit": "Bu modda “Mahalle” oluşturabilir, genişletebilir ve birleştirebilirsiniz; mahalleler, çeşitli yönetmeliklerin ve istatistiklerin temel birimidir. 3D görünümde Ctrl tuşunu basılı tutarak araçlar arasında geçiş yapın. Oluşturma aracı: Bir yola sol tıklarsanız o renkte yeni bir mahalle oluşturulur (renk, araç her seçildiğinde değişir). Genişletme aracı: Sağ tıklayarak genişletilecek mahalleyi seçin, ardından yollara sol tıklayarak onları o mahalleye katın. Birleştirme aracı: Sağ tıklayarak hedef mahalleyi seçin, ardından birleştirmek istediğiniz mahalleye sol tıkladığınızda onay paneli açılır. Seçili mahallenin rengi ve adı fare imlecinin yanında gösterilir. Düğmeye tekrar basarak moddan çıkabilirsiniz.",
+    "bulldozer": "Buldozer modu. Boş parselleri, planlanan binaları, planlanan yolları ve arazi dekor nesnelerini sol tıklayarak kaldırabilirsiniz (alana yayılmış dekor nesneleri onay alındıktan sonra alanın tamamıyla birlikte silinir). Düğmeye tekrar basarak moddan çıkabilirsiniz.",
+    "bulldozerInstant": "Buldozer modu. Binaları, yolları, boş parselleri ve arazi dekor nesnelerini sol tıklayarak onay istenmeden anında silersiniz. Binalar içindeki kiracı tesisler ve vatandaşlarla birlikte yok olur, arazi ise eski hâline dönmez (belediye binası, sınır kapısı ve toplu taşıma kesimleri silinemez; yalnızca alana yayılmış dekor nesneleri onay alındıktan sonra alanın tamamıyla birlikte silinir). Düğmeye tekrar basarak moddan çıkabilirsiniz.",
+    "cityBudget": "Vergilerden ve işletme faaliyetlerinden elde edilen fonların bir sonraki döneme nasıl dağıtılacağını belirlersiniz. Belediye yönetimi yol inşaatı veya kamu tesislerinin işletilmesi gibi işler için malzeme satın alırken yalnızca burada belirlenen bütçe sınırları içinde alım yapabilir. Ayrıca bütçe yetersiz kalırsa kamu tesislerindeki personel işten çıkarılabilir.",
+    "resourceEdit": "Doğal kaynak alanı oluşturun. Önce kaynak türünü seçin, ardından araziye tıklayın. Sol tıklayarak köşe noktası ekleyebilir, bir kenara tıklayarak araya köşe noktası yerleştirebilir, sağ tıklayarak köşe noktasını silebilirsiniz. Köşe noktalarını sürükleyerek konumlarını değiştirebilirsiniz.",
+    "grading": "Sol tıklayarak köşe noktalarını yerleştirin, sağ tıklayarak alanı onaylayın."
   }
 }

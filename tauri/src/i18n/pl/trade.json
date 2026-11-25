@@ -1,53 +1,53 @@
 {
   "supply": {
-    "title": "Dostarcz informacje",
-    "product": "Dostarcz produkt",
-    "amount": "Kwota dostawy",
-    "price": "Cena dostawy",
-    "soldAmount": "Kwota sprzedana",
-    "profitRate": "stopa zysku",
+    "title": "Informacje o dostawach",
+    "product": "Dostarczany produkt",
+    "amount": "Ilość dostaw",
+    "price": "Cena dostaw",
+    "soldAmount": "Sprzedana ilość",
+    "profitRate": "Marża",
     "utilization": "Wykorzystanie"
   },
   "tourismSupply": {
-    "title": "Hosting turystów",
-    "touristCapacity": "Pojemność turystyczna",
-    "persons": "{{value}} Ludzie",
+    "title": "Przyjmowanie turystów",
+    "touristCapacity": "Maks. liczba turystów",
+    "persons": "{{value}} os.",
     "218": {
       "price": "Opłata za wstęp",
-      "amount": "Pojemność odwiedzających (łącznie)",
+      "amount": "Pula miejsc dla odwiedzających (łącznie)",
       "soldAmount": "Odwiedzający (łącznie)"
     },
     "219": {
-      "price": "Opłata za przejazd",
-      "amount": "Pojemność pasażerów (łącznie)",
+      "price": "Cena biletu",
+      "amount": "Zdolność przewozowa (łącznie)",
       "soldAmount": "Pasażerowie (łącznie)"
     }
   },
   "demand": {
     "product": "Produkt",
-    "demandAmount": "Żądanie",
-    "receivedAmount": "Nabyty",
-    "acquiredAmount": "Inwentarz"
+    "demandAmount": "Popyt",
+    "receivedAmount": "Pozyskano",
+    "acquiredAmount": "Zapas"
   },
   "cargo": {
-    "title": "Operacje ładunkowe",
-    "description": "Ten hub importuje towary spoza regionu, aby zaopatrywać rynki miasta i kupuje nadwyżki produkcji miasta, aby eksportować je z regionu.",
-    "capacity": "Wydajność przepustowości",
-    "perPeriod": "/miesiąc",
-    "perPeriod_week": "/tydzień",
-    "materialCapacity": "Limit według otrzymanych materiałów",
-    "areaCapacity": "Limit według powierzchni podłogi",
-    "importHandled": "Import obsługiwany",
-    "exportHandled": "Obsługiwane eksport",
+    "title": "Przeładunki",
+    "description": "Ten węzeł importuje towary spoza regionu, zaopatrując rynki miasta, a nadwyżki produkcji miasta skupuje i eksportuje poza region.",
+    "capacity": "Zdolność przeładunkowa",
+    "perPeriod": "/mies.",
+    "perPeriod_week": "/tydz.",
+    "materialCapacity": "Limit wynikający z surowców",
+    "areaCapacity": "Limit wynikający z powierzchni",
+    "importHandled": "Obsłużony import",
+    "exportHandled": "Obsłużony eksport",
     "utilization": "Wykorzystanie",
     "importSectionTitle": "Import",
     "exportSectionTitle": "Eksport",
-    "handledImport": "Sprzedał",
-    "handledExport": "Zakupione;",
-    "allocation": "Asygnowany",
+    "handledImport": "Sprzedano",
+    "handledExport": "Skupiono",
+    "allocation": "Przydział",
     "priceImport": "Cena sprzedaży",
-    "priceExport": "Cena zakupu",
+    "priceExport": "Cena skupu",
     "lost": "Utracona sprzedaż",
-    "noProducts": "Żadne produkty nie są obsługiwane"
+    "noProducts": "Brak obsługiwanych produktów"
   }
 }

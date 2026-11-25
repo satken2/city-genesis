@@ -1,26 +1,26 @@
 {
   "notifications": {
     "trayTooltip": "Notificações da cidade",
-    "empty": "sem problemas exigem atenção agora",
-    "loadFailed": "Falha ao carregar notificações",
+    "empty": "No momento, nenhum problema exige atenção",
+    "loadFailed": "Falha ao carregar as notificações",
     "types": {
-      "resource_runway": "Espera-se que o recurso \"{{name}}\" seja esgotado em aproximadamente {{remaining_epochs}} epochs",
-      "resource_depleted": "O recurso \"{{name}}\" foi esgotado",
-      "facility_inoperative": "O recurso público \"{{name}}\" não está operando",
-      "facility_inoperative_labor": "O recurso público \"{{name}}\" não está operando devido a uma escassez de mão de obra",
-      "facility_inoperative_material": "A instalação pública \"{{name}}\" não está operando devido a uma escassez de material",
-      "facility_inoperative_high_skill": "A instalação pública \"{{name}}\" está funcionando com capacidade reduzida devido à falta de equipes qualificadas",
-      "facility_inoperative_budget": "O recurso público \"{{name}}\" está funcionando com capacidade reduzida devido a um déficit orçamentário",
-      "education_low_enrollment": "A instituição educacional \"{{name}}\" está subutilizada — poucos alunos estão matriculados ({{enrolled}} de {{max_students}} assentos)",
-      "infra_facility_down": "O recurso de infraestrutura \"{{name}}\" está fora de serviço",
-      "infra_disconnected": "{{count}} as instalações estão desconectadas da rede de infraestrutura",
-      "rail_capacity_exceeded": "A frequência do trem excede a capacidade da trilha em {{count}} segmento(s) de trilha",
-      "collapse": "{{count}} Edifícios/estradas entraram em colapso",
-      "collapse_with_deaths": "{{count}} Edifícios/estradas entraram em colapso, matando {{deaths}} pessoas",
+      "resource_runway": "O recurso “{{name}}” deve se esgotar em cerca de {{remaining_epochs}} épocas",
+      "resource_depleted": "O recurso “{{name}}” se esgotou",
+      "facility_inoperative": "A instalação pública “{{name}}” não está operando",
+      "facility_inoperative_labor": "A instalação pública “{{name}}” não está operando por falta de mão de obra",
+      "facility_inoperative_material": "A instalação pública “{{name}}” não está operando por falta de matérias-primas",
+      "facility_inoperative_high_skill": "A instalação pública “{{name}}” está operando em escala reduzida por falta de profissionais especializados",
+      "facility_inoperative_budget": "A instalação pública “{{name}}” está operando em escala reduzida por falta de orçamento",
+      "education_low_enrollment": "A instituição de ensino “{{name}}” está subutilizada por falta de alunos ({{enrolled}} matriculados / {{max_students}} vagas)",
+      "infra_facility_down": "A instalação de infraestrutura “{{name}}” está parada",
+      "infra_disconnected": "{{count}} instalações não estão conectadas à rede de infraestrutura",
+      "rail_capacity_exceeded": "Em {{count}} trecho(s) de via férrea, a frequência de trens excede a capacidade da via",
+      "collapse": "{{count}} edifícios/vias desabaram",
+      "collapse_with_deaths": "{{count}} edifícios/vias desabaram, causando {{deaths}} mortes",
       "deaths_traffic": "{{count}} pessoas morreram em acidentes de trânsito",
-      "tenant_blocked_by_parcel_size": "Nenhum edifício para \"{{tenant_name}}\" pode ser construído no distrito \"{{zone_name}}\" (necessidades {{required}} m2, maior edificante {{max_capacity}} m2). Um pacote maior é necessário",
-      "unknown": "Ocorreu um evento crítico",
-      "sanitation": "O saneamento está se deteriorando para as famílias {{count}}. Melhore o tratamento de esgoto e resíduos."
+      "tenant_blocked_by_parcel_size": "No bairro “{{zone_name}}”, não é possível construir um edifício que comporte “{{tenant_name}}” (necessário: {{required}} m2; máximo do lote: {{max_capacity}} m2). É necessário um lote maior",
+      "unknown": "Ocorreu um evento grave",
+      "sanitation": "O saneamento está piorando para {{count}} domicílios. Melhore o tratamento de esgoto e de resíduos."
     }
   }
 }

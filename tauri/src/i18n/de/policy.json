@@ -2,322 +2,322 @@
   "policy": {
     "pending": "Simulation läuft",
     "noData": "Keine Daten",
-    "actionError": "Der Aktionsbildschirm konnte nicht geöffnet werden.",
+    "actionError": "Das Bedienfenster konnte nicht geöffnet werden.",
     "indicators": {
       "unemployment": {
-        "tab": "Die Arbeitslosigkeit",
-        "issue": "Arbeitslosigkeit ist hoch",
-        "clear": "Keine Arbeitslosigkeitsprobleme gefunden",
+        "tab": "Arbeitslosigkeit",
+        "issue": "Die Arbeitslosenquote ist hoch",
+        "clear": "Keine Probleme mit Arbeitslosigkeit festgestellt",
         "evidence": "Arbeitslosenquote {{value}}"
       },
       "income": {
         "tab": "Einkommen",
-        "issue": "Haushaltseinkommen ist niedrig",
-        "clear": "Keine Einkommensprobleme gefunden",
+        "issue": "Die Haushaltseinkommen sind niedrig",
+        "clear": "Keine Probleme mit dem Einkommen festgestellt",
         "evidence": "Durchschnittliches Haushaltseinkommen {{value}}"
       },
       "tourism": {
         "tab": "Tourismus",
-        "issue": "Nur wenige Touristen besuchen",
-        "clear": "Keine touristischen Probleme gefunden",
-        "evidence": "{{value}} Übernachten · Kapazität {{capacity}}"
+        "issue": "Es kommen nur wenige Touristen",
+        "clear": "Keine Probleme mit dem Tourismus festgestellt",
+        "evidence": "Touristen vor Ort: {{value}} · Aufnahmekapazität: {{capacity}}"
       },
       "crime": {
         "tab": "Kriminalität",
-        "issue": "Kriminalität und Streitigkeiten treten auf",
-        "clear": "Keine Kriminalitätsprobleme gefunden",
-        "evidence": "Kriminalitätsschaden {{value}} · {{incidents}} Störungen"
+        "issue": "Es kommt zu Verbrechen und Streitigkeiten",
+        "clear": "Keine Probleme mit Kriminalität festgestellt",
+        "evidence": "Kriminalitätsschäden {{value}} · Streitigkeiten: {{incidents}}"
       },
       "sanitation": {
         "tab": "Hygiene",
-        "issue": "Hygieneprobleme treten auf",
-        "clear": "Keine sanitären Probleme gefunden",
-        "evidence": "Die Sanitärversorgung verschlechtert sich für {{value}} Haushalte"
+        "issue": "Es gibt Hygieneprobleme",
+        "clear": "Keine Hygieneprobleme festgestellt",
+        "evidence": "In {{value}} Haushalten verschlechtert sich die Hygiene"
       },
       "water": {
         "tab": "Wasser",
-        "issue": "Wasser ist knapp",
-        "clear": "Keine Wasserversorgungsprobleme gefunden",
-        "evidence": "Haushalte und Einrichtungen, die {{value}} ihrer Bestellungen erhalten wurden"
+        "issue": "Die Wasserversorgung reicht nicht aus",
+        "clear": "Keine Probleme mit der Wasserversorgung festgestellt",
+        "evidence": "Erfüllungsquote der Bestellungen von Haushalten und Einrichtungen: {{value}}"
       },
       "electricity": {
         "tab": "Strom",
-        "issue": "Strom ist knapp",
-        "clear": "Keine Probleme mit der Stromversorgung gefunden",
-        "evidence": "Haushalte und Einrichtungen, die {{value}} ihrer Bestellungen erhalten wurden"
+        "issue": "Die Stromversorgung reicht nicht aus",
+        "clear": "Keine Probleme mit der Stromversorgung festgestellt",
+        "evidence": "Erfüllungsquote der Bestellungen von Haushalten und Einrichtungen: {{value}}"
       },
       "internet": {
         "tab": "Telekommunikation",
-        "issue": "Telekommunikation ist Mangelware",
-        "clear": "Keine Probleme mit der Telekommunikationsversorgung gefunden",
-        "evidence": "Haushalte und Einrichtungen, die {{value}} ihrer Bestellungen erhalten wurden"
+        "issue": "Die Telekommunikationsversorgung reicht nicht aus",
+        "clear": "Keine Probleme mit der Telekommunikationsversorgung festgestellt",
+        "evidence": "Erfüllungsquote der Bestellungen von Haushalten und Einrichtungen: {{value}}"
       },
       "high_water": {
-        "tab": "Bulk-Wasser",
-        "issue": "Schüttgut ist knapp",
-        "clear": "Keine Probleme mit der Wasserversorgung gefunden",
-        "evidence": "Einrichtungen, die {{value}} ihrer Bestellungen erhalten wurden"
+        "tab": "Hochdruckwasser",
+        "issue": "Die Hochdruckwasserversorgung reicht nicht aus",
+        "clear": "Keine Probleme mit der Hochdruckwasserversorgung festgestellt",
+        "evidence": "Einrichtungen erhielten {{value}} ihrer Bestellungen"
       },
       "high_electricity": {
-        "tab": "Hochspannungsleistung",
-        "issue": "Hochspannungsstrom ist knapp",
-        "clear": "Keine Hochspannungs-Stromversorgungsprobleme gefunden",
-        "evidence": "Einrichtungen, die {{value}} ihrer Bestellungen erhalten wurden"
+        "tab": "Hochspannungsstrom",
+        "issue": "Die Hochspannungsversorgung reicht nicht aus",
+        "clear": "Keine Probleme mit der Hochspannungsversorgung festgestellt",
+        "evidence": "Einrichtungen erhielten {{value}} ihrer Bestellungen"
       },
       "upkeep": {
-        "tab": "Instandhaltung",
-        "issue": "Instandhaltung öffentlicher Gebäude, Straßen und Bahn ist kurz",
-        "clear": "Keine Wartungsprobleme gefunden",
-        "evidence": "{{value}} des benötigten Unterhalts wurde empfangen"
+        "tab": "Unterhalt der Einrichtungen",
+        "issue": "Der Unterhalt öffentlicher Gebäude, Straßen und Gleise reicht nicht aus",
+        "clear": "Keine Probleme mit dem Unterhalt festgestellt",
+        "evidence": "Erhaltener Unterhalt: {{value}} des Bedarfs"
       }
     },
     "nodes": {
       "no_vacancies": {
-        "title": "Aktuelle Stellenquoten sind voll",
-        "evidence": "{{count}} Arbeitssuchende"
+        "title": "Im aktuellen Stellenkontingent sind keine Stellen frei",
+        "evidence": "Arbeitsuchende: {{count}}"
       },
       "unfilled_jobs": {
-        "title": "Stellenangebote und Arbeitslosigkeit koexistieren",
-        "evidence": "{{count}} Arbeitssuchende · {{vacancies}} freie effektive Arbeitseinheiten"
+        "title": "Offene Stellen und Arbeitslosigkeit bestehen nebeneinander",
+        "evidence": "Arbeitsuchende: {{count}} · freie Stellen: {{vacancies}} (effektive Arbeitskraft)"
       },
       "public_budget": {
-        "title": "Öffentliche Einrichtungen werden durch Budgets eingeschränkt",
-        "evidence": "Einrichtungen mit budgetbegrenzten Plänen: {{count}}"
+        "title": "Öffentliche Einrichtungen werden durch ihr Budget eingeschränkt",
+        "evidence": "Einrichtungen mit budgetbedingt gekürzter Planung: {{count}}"
       },
       "education_gap": {
-        "title": "Einige Arbeitssuchende haben keine Grundbildung",
-        "evidence": "Arbeitssuchende ohne Grundbildung: {{count}}"
+        "title": "Einige Arbeitsuchende haben keine abgeschlossene Grundbildung",
+        "evidence": "Arbeitsuchende ohne ausreichende Grundbildung: {{count}}"
       },
       "school_capacity": {
-        "title": "Grundbildungskapazität ist nicht ausreichend",
-        "evidence": "Eingeschrieben: {{enrolled}} · Nicht angemeldet: {{waiting}} / Kapazität: {{capacity}}"
+        "title": "Die Plätze für Grundbildung reichen nicht aus",
+        "evidence": "In Ausbildung: {{enrolled}} · ohne Schulplatz: {{waiting}} / Plätze: {{capacity}}"
       },
       "immigrant_education_gap": {
-        "title": "Einige Arbeitssuchende ohne Grundbildung sind Einwanderer",
-        "evidence": "Arbeitssuchende mit Einwanderern ohne Grundbildung: {{count}}"
+        "title": "Unter den Arbeitsuchenden ohne ausreichende Grundbildung sind Zuwanderer",
+        "evidence": "Betroffene arbeitsuchende Zuwanderer: {{count}}"
       },
       "specialists": {
-        "title": "Fachknappheit verhindert den Betrieb von Einrichtungen",
-        "evidence": "Einrichtungen ohne Spezialisten: {{count}}"
+        "title": "Einige Einrichtungen können wegen Fachkräftemangels nicht arbeiten",
+        "evidence": "Einrichtungen mit Mangel an hochqualifizierten Fachkräften: {{count}}"
       },
       "household_unemployment": {
-        "title": "Einige Haushalte sind arbeitslose Erwachsene",
-        "evidence": "Haushalte mit arbeitslosen Erwachsenen: {{count}}"
+        "title": "Es gibt Haushalte mit erwerbslosen Erwachsenen",
+        "evidence": "Haushalte mit erwerbslosen Erwachsenen: {{count}}"
       },
       "security_response": {
-        "title": "Die Polizei kann keinen Schaden verhindern",
-        "evidence": "Kriminalitätsschaden im letzten Monat: {{count}} Fälle",
-        "evidence_week": "Kriminalitätsschaden in der vergangenen Woche: {{count}} Fälle"
+        "title": "Die Polizei kann nicht alle Schäden verhindern",
+        "evidence": "Kriminalitätsschäden im letzten Monat: {{count}} Fälle",
+        "evidence_week": "Kriminalitätsschäden in der letzten Woche: {{count}} Fälle"
       },
       "no_police": {
-        "title": "Es sind keine Polizeistationen in Betrieb"
+        "title": "Es gibt keine aktive Polizeiwache"
       },
       "police_staff": {
-        "title": "Polizeistationen haben keine Arbeiter",
-        "evidence": "Unterbesetzte Polizeistationen: {{count}}"
+        "title": "Den Polizeiwachen fehlt Personal",
+        "evidence": "Polizeiwachen mit Personalmangel: {{count}}"
       },
       "police_budget": {
-        "title": "Die Polizeibudgets sind zu niedrig",
-        "evidence": "Polizeistationen knapp: {{count}}"
+        "title": "Das Polizeibudget reicht nicht aus",
+        "evidence": "Polizeiwachen mit zu geringem Budget: {{count}}"
       },
       "police_inputs": {
-        "title": "Polizeistationen fehlen Vorräte",
-        "evidence": "Polizeistationen ohne Vorräte: {{count}}"
+        "title": "Den Polizeiwachen fehlt es an Material",
+        "evidence": "Polizeiwachen mit Materialmangel: {{count}}"
       },
       "unemployment_pressure": {
-        "title": "Arbeitslosigkeit trägt zu Sicherheitsproblemen bei",
-        "evidence": "Arbeitslose Erwachsene: {{count}}"
+        "title": "Arbeitslosigkeit verschlechtert die öffentliche Sicherheit",
+        "evidence": "Erwerbslose Erwachsene: {{count}}"
       },
       "citizen_criminality": {
-        "title": "Einige Bürger sind kriminell anfällig",
-        "evidence": "kriminalitätsanfällige Bürger: {{count}}"
+        "title": "Einige Bürger neigen zu Kriminalität",
+        "evidence": "Bürger mit krimineller Neigung: {{count}}"
       },
       "children_in_poverty": {
-        "title": "Kinder wachsen in Haushalten unter den Lebenshaltungskosten auf",
-        "evidence": "Kinder in Haushalten unter den Lebenshaltungskosten: {{count}}"
+        "title": "Kinder wachsen in Haushalten auf, deren Einkommen die Lebenshaltungskosten nicht deckt",
+        "evidence": "Kinder in Haushalten unterhalb der Lebenshaltungskosten: {{count}}"
       },
       "children_in_crime_zones": {
-        "title": "Kinder wachsen in Bezirken mit Kriminalität auf",
-        "evidence": "Kinder in Distrikten mit Kriminalität im letzten Monat: {{count}}",
-        "evidence_week": "Kinder in Distrikten mit Kriminalität in der vergangenen Woche: {{count}}"
+        "title": "Kinder wachsen in Stadtbezirken auf, in denen Verbrechen geschehen",
+        "evidence": "Kinder in Stadtbezirken mit Verbrechen im letzten Monat: {{count}}",
+        "evidence_week": "Kinder in Stadtbezirken mit Verbrechen in der letzten Woche: {{count}}"
       },
       "service_no_facility": {
-        "title": "Keine Einrichtung liefert diesen Service",
-        "title_named": "Keine {{suppliers}} verfügbar"
+        "title": "Es gibt keine versorgende Einrichtung",
+        "title_named": "Nicht vorhanden: {{suppliers}}"
       },
       "service_facility_limited": {
-        "title": "Einige {{kinds}} können nicht funktionieren",
-        "evidence": "Einrichtungen, die nicht funktionieren: {{count}}"
+        "title": "Einrichtungen außer Betrieb: {{kinds}}",
+        "evidence": "Faktisch nicht betriebene Einrichtungen: {{count}}"
       },
       "repair_budget_exhausted": {
-        "title": "Das Wartungsbudget wurde abgelaufen und die Instandhaltungsaufträge wurden gekürzt",
-        "evidence": "Wartungsausgaben {{expense}} / Budget {{budget}}"
+        "title": "Das Instandsetzungsbudget ist aufgebraucht, Unterhaltsbestellungen wurden gekürzt",
+        "evidence": "Instandsetzungsausgaben {{expense}} / Budget {{budget}}"
       },
       "service_out_of_range": {
-        "title": "Haushalte oder Einrichtungen liegen außerhalb des Leistungsbereichs",
-        "evidence": "Außerhalb der Reichweite jeder Einrichtung: {{count}} Haushalte, {{facilities}} Einrichtungen",
-        "title_named": "Haushalte oder Einrichtungen liegen außerhalb des Leistungsspektrums von {{suppliers}}"
+        "title": "Haushalte oder Einrichtungen liegen außerhalb des Versorgungsbereichs",
+        "evidence": "Außerhalb jedes Versorgungsbereichs: {{count}} Haushalte, {{facilities}} Einrichtungen",
+        "title_named": "Haushalte oder Einrichtungen außerhalb des Versorgungsbereichs: {{suppliers}}"
       },
       "facility_material_unmet": {
-        "title": "{{facility}} kann {{product_name}} nicht beschaffen",
-        "evidence": "{{received}} des erforderlichen {{demand}} erhalten"
+        "title": "{{facility}}: {{product_name}} kann nicht beschafft werden",
+        "evidence": "Erhalten: {{received}} von benötigten {{demand}}"
       },
       "facility_labor_shortage": {
-        "title": "{{facility}} fehlt den Arbeitnehmern",
-        "evidence": "Gesicherte {{total_labor}} der {{quota}} effektiven Arbeitseinheiten erforderlich"
+        "title": "{{facility}}: Personalmangel",
+        "evidence": "Gesichert: {{total_labor}} von benötigten {{quota}} (effektive Arbeitskraft)"
       },
       "facility_high_skill_shortage": {
-        "title": "{{facility}} kann keine Spezialisten sichern"
+        "title": "{{facility}}: Fachkräfte können nicht gewonnen werden"
       },
       "facility_budget_capped": {
-        "title": "{{facility}} hat seinen Plan wegen Budgetmangels zurückgefahren"
+        "title": "{{facility}}: Planung wegen Budgetmangels gekürzt"
       },
       "facility_inactive": {
-        "title": "{{facility}} funktioniert nicht"
+        "title": "{{facility}}: nicht in Betrieb"
       },
       "facility_infra_disconnected": {
-        "title": "{{facility}} ist nicht mit dem Netzwerk {{product_name}} verbunden"
+        "title": "{{facility}}: nicht an das Netz für {{product_name}} angeschlossen"
       },
       "slum_sanitation": {
-        "title": "In Slums leben Haushalte",
-        "evidence": "Haushalte, die in Slums leben: {{count}}"
+        "title": "Es gibt Haushalte, die in Elendsvierteln leben",
+        "evidence": "Haushalte in Elendsvierteln: {{count}}"
       },
       "service_shortage": {
-        "title": "Haushalte erhalten nicht genug {{product_name}}",
-        "evidence": "Haushalte erhielten {{percent}}% des Referenzbetrags"
+        "title": "Haushalte erhalten nicht ausreichend {{product_name}}",
+        "evidence": "Haushalte erhielten {{percent}} % der Referenzmenge"
       },
       "tourism_no_attraction": {
-        "title": "Es gibt keine Attraktionen"
+        "title": "Es gibt keine Sehenswürdigkeiten"
       },
       "tourism_no_gateway": {
-        "title": "Es gibt kein Tor für Touristen"
+        "title": "Es gibt keinen Anreisepunkt für Touristen"
       },
       "tourism_no_trade_hub": {
-        "title": "Es gibt kein Handelszentrum, um Reisegeld zu bezahlen"
+        "title": "Es gibt keinen Handelsstützpunkt, der die Reisekosten abwickelt"
       },
       "tourists_without_lodging": {
-        "title": "Einige Touristen können keine Unterkunft finden",
-        "evidence": "Touristen, die auf Unterkunft warten: {{count}}"
+        "title": "Einige Touristen finden keine Unterkunft",
+        "evidence": "Touristen, die auf eine Unterkunft warten: {{count}}"
       },
       "tourism_lodging_costly": {
-        "title": "Die Unterbringung ist im Verhältnis zu den Reisebudgets teuer",
-        "evidence": "Neue touristische Bewerbungen liegen bei {{percent}}% des Normalwerts"
+        "title": "Unterkünfte sind im Verhältnis zum Reisebudget teuer",
+        "evidence": "Neue Touristenanfragen liegen bei {{percent}} % des Normalwerts"
       },
       "tourists_dissatisfied": {
         "title": "Die Zufriedenheit der Touristen ist gering",
-        "evidence": "Neue Anwendungen bei {{percent}}% der Normalen · {{count}} sind unzufrieden"
+        "evidence": "Neue Anfragen bei {{percent}} % des Normalwerts · unzufrieden abgereist: {{count}}"
       },
       "tourism_experience_short": {
-        "title": "Touristen bekommen nicht genug Tourismuserlebnisse",
-        "evidence": "touristische Erfahrungen erhalten: {{percent}}%"
+        "title": "Touristen erhalten nicht genug Tourismuserlebnisse",
+        "evidence": "Erfüllung bei Tourismuserlebnissen: {{percent}} %"
       },
       "tourism_leisure_short": {
-        "title": "Touristen bekommen nicht genug Freizeit",
-        "evidence": "Erhaltene Freizeit: {{percent}}%"
+        "title": "Touristen erhalten nicht genug Unterhaltung und Freizeit",
+        "evidence": "Erfüllung bei Unterhaltung und Freizeit: {{percent}} %"
       }
     },
     "actions": {
       "public_jobs": {
-        "title": "Schaffung von Arbeitsplätzen in öffentlichen Einrichtungen"
+        "title": "Arbeitsplätze in öffentlichen Einrichtungen schaffen"
       },
       "population": {
-        "title": "Bevölkerung reduzieren, indem Bürger ausgewiesen werden"
+        "title": "Bevölkerung durch Ausweisung von Bürgern verringern"
       },
       "budget": {
         "title": "Betriebsbudgets zuweisen"
       },
       "education": {
-        "title": "Baue mehr Schulen"
+        "title": "Mehr Schulen bauen"
       },
       "higher_education": {
-        "title": "Spezialisten durch Hochschulbildung entwickeln"
+        "title": "Fachkräfte durch höhere Bildung ausbilden"
       },
       "welfare": {
-        "title": "Leistungen erhöhen und Einkommensunterstützung"
+        "title": "Zuschüsse und Sozialhilfe erhöhen"
       },
       "employment": {
         "title": "Einstellungsbedingungen in der Beschäftigungsstatistik prüfen"
       },
       "police": {
-        "title": "Polizeistationen bauen"
+        "title": "Polizeiwachen bauen"
       },
       "facilities": {
-        "title": "Überprüfen Sie, wie sich die Einrichtungen entwickeln"
+        "title": "Zustand der Einrichtungen prüfen"
       },
       "immigration_skills": {
-        "title": "Überprüfen Sie die Qualifikationsanforderungen für Einwanderer"
+        "title": "Qualifikationsanforderungen für Zuwanderer überprüfen"
       },
       "immigration_limit": {
-        "title": "Einwanderung einschränken"
+        "title": "Zuwanderung begrenzen"
       },
       "criminality": {
-        "title": "Überprüfen Sie die Tendenz der Bürger zur Kriminalität"
+        "title": "Kriminelle Neigung der Bürger prüfen"
       },
       "service_facility": {
-        "title": "Bauen Sie eine Einrichtung, die sie versorgt",
-        "title_named": "Build {{suppliers}}",
-        "title_tourism_no_attraction": "Bauen Sie eine Touristenattraktion",
-        "title_tourism_no_gateway": "Bauen Sie einen Hafen oder Flughafen"
+        "title": "Versorgende Einrichtung bauen",
+        "title_named": "{{suppliers}} bauen",
+        "title_tourism_no_attraction": "Sehenswürdigkeit bauen",
+        "title_tourism_no_gateway": "Hafen oder Flughafen bauen"
       },
       "parcel": {
-        "title": "Bereiten Sie ein größeres Paket vor"
+        "title": "Größeres Grundstück bereitstellen"
       },
       "transit": {
-        "title": "Überprüfen Sie die Transitfrequenz und die Tracks"
+        "title": "Takt und Gleise des öffentlichen Verkehrs überprüfen"
       },
       "entity_detail": {
         "title": "Details öffnen"
       }
     },
     "selectorTitle": "Was möchten Sie untersuchen?",
-    "eventsTitle": "Was passiert",
-    "causeTitle": "zugrunde liegende Ursache",
-    "adviceTitle": "Vorgeschlagene Aktionen",
-    "needsAttention": "Verbesserungspotenzial",
+    "eventsTitle": "Was geschieht",
+    "causeTitle": "Ursache",
+    "adviceTitle": "Empfohlene Maßnahmen",
+    "needsAttention": "Verbesserungsbedarf",
     "values": {
       "money": "{{value}} / Haushalt / Tag",
       "per_thousand": "{{value}} Fälle pro 1.000 Einwohner (letzter Monat)",
-      "per_thousand_week": "{{value}} Fälle pro 1.000 Einwohner (in der vergangenen Woche)"
+      "per_thousand_week": "{{value}} Fälle pro 1.000 Einwohner (letzte Woche)"
     },
-    "collapse": "Zusammenbruch",
+    "collapse": "Einklappen",
     "investigate": {
-      "crime": "Ursachen von Kriminalität untersuchen",
+      "crime": "Ursachen der Kriminalität untersuchen",
       "unemployment": "Ursachen der Arbeitslosigkeit untersuchen",
-      "income": "Ursachen für niedrige Einkommen untersuchen",
+      "income": "Ursachen des niedrigen Einkommens untersuchen",
       "water": "Ursachen des Wassermangels untersuchen",
       "electricity": "Ursachen des Strommangels untersuchen",
       "internet": "Ursachen des Telekommunikationsmangels untersuchen",
-      "upkeep": "Ursachen des Unterhaltsmangels untersuchen",
-      "high_water": "Ursachen für die Massenwasserknappheit untersuchen",
-      "high_electricity": "Ursachen für den Hochspannungs-Strommangel untersuchen",
-      "facility": "Untersuchen Sie diese Einrichtung"
+      "upkeep": "Ursachen des mangelnden Unterhalts untersuchen",
+      "high_water": "Ursachen des Hochdruckwassermangels untersuchen",
+      "high_electricity": "Ursachen des Hochspannungsmangels untersuchen",
+      "facility": "Ursachen bei dieser Einrichtung untersuchen"
     },
     "facilityFinding": "{{facility}}: {{title}}",
-    "indicatorsTitle": "Indikatoren",
+    "indicatorsTitle": "Kennzahlen",
     "problems": {
-      "resource_runway": "Ressource \"{{name}}\" wird voraussichtlich in etwa {{remaining_epochs}} Epochen erschöpft sein",
-      "resource_depleted": "Ressource \"{{name}}\" wurde erschöpft",
-      "facility_inoperative": "Öffentliche Einrichtung \"{{name}}\" ist nicht in Betrieb",
-      "facility_inoperative_labor": "Öffentliche Einrichtung \"{{name}}\" ist aufgrund eines Arbeitskräftemangels nicht in Betrieb",
-      "facility_inoperative_material": "Öffentliche Einrichtung \"{{name}}\" funktioniert aufgrund eines Materialmangels nicht",
-      "facility_inoperative_high_skill": "Öffentliche Einrichtung \"{{name}}\" läuft aufgrund des Fachkräftemangels mit geringerer Kapazität",
-      "facility_inoperative_budget": "Öffentliche Einrichtung \"{{name}}\" läuft aufgrund eines Budgetmangels mit reduzierter Kapazität",
-      "education_low_enrollment": "Die Bildungseinrichtung \"{{name}}\" ist nicht ausgelastet - nur wenige Studenten sind eingeschrieben ({{enrolled}} von {{max_students}} Sitzen)",
-      "infra_facility_down": "Die Infrastruktureinrichtung \"{{name}}\" ist außer Betrieb",
-      "infra_disconnected": "{{count}} Einrichtungen sind vom Infrastrukturnetzwerk getrennt",
-      "rail_capacity_exceeded": "Die Zugfrequenz überschreitet die Streckenkapazität auf {{count}} Streckensegment(en)",
+      "resource_runway": "Die Ressource „{{name}}“ wird in etwa {{remaining_epochs}} Epochen erschöpft sein",
+      "resource_depleted": "Die Ressource „{{name}}“ ist erschöpft",
+      "facility_inoperative": "Die öffentliche Einrichtung „{{name}}“ kann nicht betrieben werden",
+      "facility_inoperative_labor": "Die öffentliche Einrichtung „{{name}}“ kann wegen Arbeitskräftemangels nicht betrieben werden",
+      "facility_inoperative_material": "Die öffentliche Einrichtung „{{name}}“ kann wegen Rohstoffmangels nicht betrieben werden",
+      "facility_inoperative_high_skill": "Die öffentliche Einrichtung „{{name}}“ hat ihren Betrieb wegen Fachkräftemangels eingeschränkt",
+      "facility_inoperative_budget": "Die öffentliche Einrichtung „{{name}}“ hat ihren Betrieb wegen Budgetmangels eingeschränkt",
+      "education_low_enrollment": "Die Bildungseinrichtung „{{name}}“ ist schwach ausgelastet, weil sich zu wenige Lernende einschreiben (eingeschrieben: {{enrolled}} / Plätze: {{max_students}})",
+      "infra_facility_down": "Die Infrastruktureinrichtung „{{name}}“ ist außer Betrieb",
+      "infra_disconnected": "{{count}} Einrichtungen sind nicht mit dem Infrastrukturnetz verbunden",
+      "rail_capacity_exceeded": "Auf {{count}} Gleisen übersteigt die Zahl der Zugfahrten die Gleiskapazität",
       "collapse": "{{count}} Gebäude/Straßen sind eingestürzt",
-      "collapse_with_deaths": "{{count}} Gebäude / Straßen sind zusammengebrochen und haben {{deaths}} Menschen getötet",
-      "deaths_traffic": "{{count}} Menschen bei Verkehrsunfällen ums Leben",
-      "tenant_blocked_by_parcel_size": "Im Distrikt \"{{zone_name}}\" kann kein Gebäude für \"{{tenant_name}}\" erstellt werden (braucht {{required}} m2, grösste baubare {{max_capacity}} M2)",
-      "unknown": "Ein kritisches Ereignis ist aufgetreten",
-      "sanitation": "Die Sanitärversorgung verschlechtert sich für {{count}} Haushalte"
+      "collapse_with_deaths": "{{count}} Gebäude/Straßen sind eingestürzt, {{deaths}} Menschen kamen ums Leben",
+      "deaths_traffic": "{{count}} Menschen kamen bei Verkehrsunfällen ums Leben",
+      "tenant_blocked_by_parcel_size": "Im Stadtbezirk „{{zone_name}}“ kann kein Gebäude gebaut werden, in das „{{tenant_name}}“ einziehen kann (benötigt: {{required}} m2, größtmöglich auf einem Grundstück: {{max_capacity}} m2)",
+      "unknown": "Ein schwerwiegendes Ereignis ist eingetreten",
+      "sanitation": "In {{count}} Haushalten verschlechtert sich die Hygiene"
     },
-    "facilitiesTitle": "Einrichtungen nicht in Betrieb",
-    "otherProblemsTitle": "Andere Probleme",
+    "facilitiesTitle": "Nicht betriebsfähige Einrichtungen",
+    "otherProblemsTitle": "Weitere Probleme",
     "facility": {
-      "title": "{{facility}} kann nicht funktionieren",
-      "evidence": "Die Produktion beträgt {{percent}}% des Plans"
+      "title": "{{facility}}: nicht betriebsfähig",
+      "evidence": "Produktion bei {{percent}} % des Plans"
     }
   }
 }

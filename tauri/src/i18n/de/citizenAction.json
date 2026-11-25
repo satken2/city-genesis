@@ -1,39 +1,39 @@
 {
   "citizenAction": {
     "name": {
-      "label": "einen Namen geben",
-      "message": "Geben Sie den Namen ein, den Sie auf {{name}} vergeben möchten.",
+      "label": "Namen verleihen",
+      "message": "Geben Sie den Namen ein, den Sie {{name}} verleihen möchten.",
       "inputLabel": "Neuer Name",
       "confirm": "Verleihen"
     },
     "reward": {
-      "label": "eine Belohnung gewähren",
-      "message": "Geben Sie dem Haushalt {{name}} eine Belohnung aus Stadtfonds. Stadtgeld: {{available}}",
-      "confirm": "Gib mal"
+      "label": "Prämie auszahlen",
+      "message": "Dem Haushalt von {{name}} wird aus städtischen Mitteln eine Prämie ausgezahlt.\nLiquide Mittel der Stadt: {{available}}",
+      "confirm": "Auszahlen"
     },
     "expel": {
-      "label": "Wünsche ihnen viel Erfolg außerhalb der Stadt",
-      "message": "{{name}} aus der Stadt vertreiben?",
-      "confirm": "Vertreiben",
+      "label": "Alles Gute für den weiteren Lebensweg wünschen",
+      "message": "Möchten Sie {{name}} aus der Stadt verbannen?",
+      "confirm": "Verbannen",
       "results": {
-        "0": "{{name}} packte und verließ die Stadt leise. Niemand kam, um sie zu sehen.",
-        "1": "{{name}} überquerte die Stadtgrenze und rief: \"Ich komme nie zurück!\"",
-        "2": "{{name}} wurde höflich über die Stadtgrenzen geführt. Wir wünschen ihnen viel Erfolg woanders."
+        "0": "{{name}} hat die Sachen gepackt und still die Stadt verlassen. Niemand kam zum Abschied.",
+        "1": "„Hierher komme ich nie wieder!“, rief {{name}} und überquerte die Stadtgrenze.",
+        "2": "{{name}} wurde höflich bis über die Stadtgrenze geleitet. Wir wünschen für den weiteren Lebensweg alles Gute."
       }
     },
     "donation": {
-      "label": "Bitten Sie um eine Spende",
-      "message": "Bitten Sie den Haushalt von {{name}} um eine Spende an die Stadt. Haushaltsgeld: {{available}}",
-      "confirm": "Fragen"
+      "label": "Um eine Spende bitten",
+      "message": "Den Haushalt von {{name}} um eine Spende an die Stadt bitten.\nLiquide Mittel des Haushalts: {{available}}",
+      "confirm": "Bitten"
     },
     "relocate": {
-      "label": "Schlagen Sie ein neues Zuhause vor",
-      "message": "Der Haushalt von {{name}} aus dem jetzigen Zuhause räumen? Sie werden in der nächsten Epoche ein neues Zuhause suchen.",
-      "confirm": "Zur Räumung zwingen",
+      "label": "Eine neue Bleibe vorschlagen",
+      "message": "Möchten Sie die Wohnung des Haushalts von {{name}} zwangsräumen lassen?\nDer Haushalt sucht in der nächsten Epoche eine neue Bleibe.",
+      "confirm": "Zwangsräumen",
       "results": {
-        "0": "Die Familie von {{name}} wurde aus ihrem Haus geworfen. Ihre Möbel sind an der Straße angehäuft.",
-        "1": "Die Sperren am Haus von {{name}} wurden geändert. Die Familie sucht nach einem neuen Platz.",
-        "2": "{{name}}s Familie wurde ein neues Zuhause angeboten. Sie können nicht zum alten zurückkehren."
+        "0": "Die Familie von {{name}} wurde aus ihrem Zuhause geworfen. Ihre Möbel stapeln sich am Straßenrand.",
+        "1": "Die Schlösser an der Wohnung von {{name}} wurden ausgetauscht. Die Familie hat begonnen, eine neue Bleibe zu suchen.",
+        "2": "Der Familie von {{name}} wurde eine neue Bleibe vorgeschlagen. In ihr altes Zuhause kann sie nicht mehr zurück."
       }
     }
   }

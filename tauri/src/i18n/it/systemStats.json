@@ -1,98 +1,98 @@
 {
   "systemStats": {
     "load": {
-      "title": "Carico di simulazione",
+      "title": "Carico della simulazione",
       "heading": "Tempo di calcolo dell'ultima epoca ({{days}} giorni)",
       "noData": "Nessun dato di misurazione",
-      "note": "Quando più epoche vengono eseguite di seguito, questo mostra l'ultima. Il conteggio delle operazioni è una stima approssimativa del numero di combinazioni nei confronti principali, in base alle dimensioni della città.",
+      "note": "Se esegui più epoche di seguito, il valore è quello dell'ultima. Il numero di operazioni è una stima indicativa del numero di combinazioni dei confronti principali, calcolata in base alle dimensioni della città.",
       "colGroup": "Processo",
-      "colTime": "Volta",
-      "colWorkload": "Conteggio operazioni",
-      "workloadHint": "Numero approssimativo di confronti principali (elementi di array). Passa il mouse sopra un valore per vedere la ripartizione.",
+      "colTime": "Tempo",
+      "colWorkload": "Operazioni",
+      "workloadHint": "Stima del numero di combinazioni dei confronti principali (elementi degli array). Passa il mouse su un valore per vederne la ripartizione.",
       "seconds": "{{value}} s",
       "ms": "{{value}} ms"
     },
     "group": {
-      "market": "Mercato delle merci",
+      "market": "Mercato dei beni",
       "realestate": "Mercato immobiliare",
       "labor": "Mercato del lavoro",
-      "building_spawn": "Spawn dell'edificio",
-      "agent_spawn": "Spawn dell'agente",
-      "routing": "Citizen Pathfinding",
-      "transit": "Pathfinding di transito",
+      "building_spawn": "Generazione di edifici",
+      "agent_spawn": "Generazione di agenti economici",
+      "routing": "Ricerca percorsi dei cittadini",
+      "transit": "Ricerca percorsi del trasporto pubblico",
       "environment": "Ambiente residenziale",
       "other": "Altro"
     },
     "workload": {
-      "market": "Acquirenti {{demanders}} × Venditori {{suppliers}} (moltiplicati per prodotto e sommati)",
-      "realestate": "Famiglie che considerano un trasloco {{movers}} × Edifici residenziali {{housing}}",
-      "labor": "Cercatori di lavoro {{seekers}} × Datori di lavoro {{employers}}",
-      "building_spawn": "Pacchi candidati {{parcels}} × Tipi di edifici × Conteggio piano × Usi del pavimento",
-      "agent_spawn": "Prodotti × Zone {{zones}} × Zone {{zones}}",
-      "routing": "2 modalità di viaggio × zone {{zones}} × zone {{zones}} × 3 percorsi candidati × percorsi {{paths}}",
-      "transit": "Arresta {{stops}} × Nodi {{nodes}}",
-      "environment": "Griglia {{width}} × {{height}} × Posizioni del sole"
+      "market": "Acquirenti {{demanders}} × fornitori {{suppliers}} (moltiplicati per bene e sommati)",
+      "realestate": "Nuclei familiari che valutano un trasloco {{movers}} × edifici con abitazioni {{housing}}",
+      "labor": "Persone in cerca di lavoro {{seekers}} × datori di lavoro {{employers}}",
+      "building_spawn": "Lotti candidati {{parcels}} × tipi di edificio × numero di piani × usi dei piani",
+      "agent_spawn": "Beni × quartieri {{zones}} × quartieri {{zones}}",
+      "routing": "Mezzi di trasporto 2 × quartieri {{zones}} × quartieri {{zones}} × percorsi candidati 3 × tracciati {{paths}}",
+      "transit": "Fermate {{stops}} × nodi {{nodes}}",
+      "environment": "Griglia {{width}} × {{height}} × orari di soleggiamento"
     },
     "entities": {
-      "colMetric": "Metrico",
-      "colCount": "Contare",
-      "title": "Conta dell'entità",
-      "agents": "agenti",
-      "households": "Famiglie",
-      "businesses": "imprese",
+      "colMetric": "Voce",
+      "colCount": "Numero",
+      "title": "Numero di entità",
+      "agents": "Agenti economici",
+      "households": "Nuclei familiari",
+      "businesses": "Imprese",
       "publicFacilities": "Strutture pubbliche",
-      "buildings": "edifici",
-      "citizens": "cittadini",
+      "buildings": "Edifici",
+      "citizens": "Cittadini",
       "population": "Popolazione",
-      "zones": "Zone",
-      "parcels": "pacchi",
-      "paths": "Percorsi",
+      "zones": "Quartieri",
+      "parcels": "Lotti",
+      "paths": "Tracciati",
       "roads": "Strade",
-      "tracks": "Brani",
-      "infra": "Reti di utilità",
-      "nodes": "nodi"
+      "tracks": "Rotaie",
+      "infra": "Reti infrastrutturali",
+      "nodes": "Nodi"
     },
     "approximation": {
       "title": "Approssimazione della simulazione",
-      "intro": "Sono previste opzioni per semplificare i calcoli per le grandi città. Queste impostazioni non possono ancora essere modificate.",
-      "warning": "Queste modifiche possono influire sull'equilibrio del gioco. Non possono essere annullati.",
-      "irreversible": "I cambiamenti causati dall'approssimazione persistono nelle epoche successive. Una volta abilitato, l'approssimazione non può essere disabilitata o ridotta.",
-      "undecided": "TBD",
-      "candidates": "Candidati max.",
-      "epochs": "Epoche tra le recensioni",
-      "off": "Via",
-      "on": "Su",
+      "intro": "È prevista l'aggiunta di impostazioni che semplificano i calcoli per le città molto grandi. Al momento non sono modificabili.",
+      "warning": "Potrebbe influire sul bilanciamento di gioco. Non è possibile tornare indietro",
+      "irreversible": "I cambiamenti causati dall'approssimazione restano anche nelle epoche successive. Un'approssimazione attivata non può essere disattivata né ridotta.",
+      "undecided": "Da definire",
+      "candidates": "candidati max.",
+      "epochs": "epoche di intervallo",
+      "off": "Off",
+      "on": "On",
       "goods": {
-        "label": "acquistare candidati",
-        "description": "Limitare i fornitori rispetto a prezzo e distanza."
+        "label": "Candidati per gli acquisti",
+        "description": "Limita il numero di fornitori confrontati per prezzo e distanza."
       },
       "jobs": {
-        "label": "Candidati al lavoro",
-        "description": "Limitare i datori di lavoro rispetto a salari e condizioni di pendolarismo."
+        "label": "Candidati per assunzioni e cambi di lavoro",
+        "description": "Limita il numero di datori di lavoro confrontati per retribuzione e condizioni di pendolarismo."
       },
       "housing": {
-        "label": "Candidati abitativi",
-        "description": "Limita le case rispetto a affitto e posizione."
+        "label": "Candidati per il trasloco",
+        "description": "Limita il numero di abitazioni confrontate per affitto e posizione."
       },
       "interval": {
-        "label": "Intervallo di decisione di routine",
-        "description": "Rivedi meno spesso le scelte di shopping, lavoro e alloggio."
+        "label": "Intervallo delle decisioni periodiche",
+        "description": "Riduce la frequenza con cui vengono rivisti negozi, lavori e abitazioni."
       },
       "aggregation": {
-        "label": "Raggruppa cittadini e famiglie simili",
-        "description": "prendere alcune decisioni collettivamente per cittadini o famiglie con circostanze simili."
+        "label": "Calcola insieme cittadini e nuclei familiari simili",
+        "description": "Tratta come gruppo alcune decisioni di cittadini o nuclei familiari in condizioni simili."
       }
     },
     "status": {
       "title": "Stato del sistema",
-      "gpuDisabled": "Accelerazione GPU: disabilitata",
-      "coreSimulator": "Simulatore di base",
-      "currentMemory": "Utilizzo della memoria corrente: {{value}}",
-      "peakMemory": "Uso della memoria di picco dall'avvio: {{value}}",
+      "gpuDisabled": "Accelerazione GPU: disattivata",
+      "coreSimulator": "Simulatore core",
+      "currentMemory": "Memoria attualmente in uso: {{value}}",
+      "peakMemory": "Memoria massima usata dall'avvio: {{value}}",
       "graphic": "3D",
-      "currentVram": "Utilizzo attuale della VRAM: {{value}}",
-      "usageTooltip": "Intero PC {{pc}} / Questo gioco {{game}} / installato {{total}}",
-      "legendPc": "PC intero",
+      "currentVram": "VRAM attualmente in uso: {{value}}",
+      "usageTooltip": "Intero PC {{pc}} / Questo gioco {{game}} / Installata {{total}}",
+      "legendPc": "Intero PC",
       "legendGame": "Questo gioco"
     }
   }

@@ -1,12 +1,12 @@
 {
   "citizenList": {
-    "tabSearch": "Szukaj obywateli",
-    "tabTracking": "Lista śledzenia",
-    "name": "Nazwa",
+    "tabSearch": "Wyszukaj obywateli",
+    "tabTracking": "Lista obserwowanych",
+    "name": "Imię",
     "age": "Wiek",
-    "ageSeparator": "w celu",
+    "ageSeparator": "do",
     "search": "Szukaj",
-    "noResults": "Żaden obywatel nie pasuje.",
-    "truncated": "Pokazuje {{shown, number}} z {{total, number}} pasujących obywateli."
+    "noResults": "Brak obywateli spełniających kryteria.",
+    "truncated": "Wyświetlono {{shown, number}} z {{total, number}} pasujących obywateli."
   }
 }

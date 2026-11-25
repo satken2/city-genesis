@@ -1,18 +1,18 @@
 {
   "pathEquipment": {
-    "title": "Yol Ekipmanları",
-    "streetlight_type": "sokak lambaları",
-    "fence_type": "çitler",
-    "street_tree_type": "sokak ağaçları",
-    "utility_mode": "elektrik tesisatı",
-    "none": "Hiçbiri",
+    "title": "Yol donanımı",
+    "streetlight_type": "Sokak lambaları",
+    "fence_type": "Çitler",
+    "street_tree_type": "Sokak ağaçları",
+    "utility_mode": "Kablolama yöntemi",
+    "none": "Yok",
     "standard": "Standart",
-    "overhead": "Havai",
+    "overhead": "Havai hat",
     "underground": "Yeraltı",
-    "apply": "Uygulamak",
-    "bench_type": "Benches",
-    "bin_type": "çöp kovaları",
-    "planter_type": "ekici",
-    "advert_type": "İlan"
+    "apply": "Uygula",
+    "bench_type": "Banklar",
+    "bin_type": "Çöp kutuları",
+    "planter_type": "Çiçeklikler",
+    "advert_type": "Reklam"
   }
 }

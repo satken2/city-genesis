@@ -1,16 +1,16 @@
 {
   "cityInsignia": {
-    "emblem": "Emblema",
-    "flag": "Bandiera della città",
-    "motif": "Motivo",
-    "fieldColor": "colore del campo",
-    "motifColor": "Colore del motivo",
-    "pattern": "Modello",
-    "accentColor": "Colore accento",
-    "placement": "Posizione dell'emblema",
+    "emblem": "Stemma",
+    "flag": "Bandiera cittadina",
+    "motif": "Figura",
+    "fieldColor": "Colore di fondo",
+    "motifColor": "Colore della figura",
+    "pattern": "Motivo di fondo",
+    "accentColor": "Colore d'accento",
+    "placement": "Posizione dello stemma",
     "loadImage": "Carica immagine",
-    "randomize": "Randomizza",
-    "apply": "Applicare",
+    "randomize": "Casuale",
+    "apply": "Applica",
     "imageLoadFailed": "Impossibile caricare l'immagine.",
     "placements": {
       "center": "Centro",
@@ -27,7 +27,7 @@
       "flower": "Fiore",
       "leaf": "Foglia",
       "bird": "Uccello",
-      "fish": "Pescare",
+      "fish": "Pesce",
       "anchor": "Ancora",
       "gear": "Ingranaggio",
       "tower": "Castello",
@@ -36,16 +36,16 @@
       "crown": "Corona",
       "snowflake": "Fiocco di neve",
       "flame": "Fiamma",
-      "diamond": "Diamante",
-      "cross": "Attraversare"
+      "diamond": "Rombo",
+      "cross": "Croce"
     },
     "patterns": {
-      "plain": "Pianura",
-      "bicolor": "bicolore",
-      "triband": "Tribanda",
+      "plain": "Tinta unita",
+      "bicolor": "Bicolore orizzontale",
+      "triband": "Tricolore verticale",
       "diagonal": "Diagonale",
-      "border": "Confine",
-      "bands": "bande"
+      "border": "Bordo",
+      "bands": "Fasce in alto e in basso"
     }
   }
 }

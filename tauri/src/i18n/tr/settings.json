@@ -7,57 +7,57 @@
       "sound": "Ses",
       "system": "Sistem",
       "about": "Hakkında",
-      "developer": "Geliştirici Ayarları"
+      "developer": "Geliştirici ayarları"
     },
     "swagger": {
       "label": "Swagger (API belgeleri)",
-      "description": "Varsayılan tarayıcınızda bağlı arka uç API'sini görüntüleyin",
+      "description": "Çekirdek simülatör API'sinin belirtimini varsayılan tarayıcıda gösterir",
       "action": "Tarayıcıda aç"
     },
     "currencyUnit": {
-      "label": "döviz birimi",
-      "description": "parasal tutarlarla gösterilen birim. Ekran dilini takip etmek için boş bırakın."
+      "label": "Para birimi",
+      "description": "Tutarların yanında gösterilen birimdir. Boş bırakılırsa görüntüleme diline göre belirlenir."
     },
     "fontSize": {
       "label": "Yazı boyutu",
       "large": "Büyük",
       "medium": "Orta",
       "small": "Küçük",
-      "custom": "Gelenek",
-      "preview": "Mevcut Boyut"
+      "custom": "Özel",
+      "preview": "Geçerli boyut"
     },
     "monitor": {
       "label": "Ekran",
-      "prev": "Önceki Ekran",
+      "prev": "Önceki ekran",
       "next": "Sonraki ekran"
     },
     "graphicMonitor": {
-      "label": "3D görünüm ekranı"
+      "label": "3D görünümün ekranı"
     },
     "multiDisplay": {
       "label": "Çoklu ekran modu",
-      "description": "Windows'u oyun ekranından farklı bir ekranda gösterir",
-      "on": "Üzerinde",
+      "description": "Çeşitli pencereleri ayrı bir ekranda gösterir",
+      "on": "Açık",
       "off": "Kapalı"
     },
     "popupMonitor": {
-      "label": "vitrin"
+      "label": "Pencerelerin ekranı"
     },
     "hintbar": {
-      "label": "ipucu çubuğu",
-      "show": "Göstermek",
-      "hide": "Gizlemek",
-      "description": "İşlem ipuçlarını gösteren ekranın üst kısmındaki çubuk"
+      "label": "İpucu çubuğu",
+      "show": "Göster",
+      "hide": "Gizle",
+      "description": "Ekranın üstünde işlem ipuçlarını gösteren çubuktur"
     },
     "citizenVoice": {
-      "label": "Vatandaş Sesleri",
-      "show": "Göstermek",
-      "hide": "Gizlemek",
-      "description": "Ekranın sağ üst köşesinde, sakinlerin sözlerini sırayla gösteren kart"
+      "label": "Vatandaşların sesi",
+      "show": "Göster",
+      "hide": "Gizle",
+      "description": "Ekranın sağ üstünde vatandaşların sözlerini sırayla gösteren karttır"
     },
     "language": {
       "label": "Dil",
-      "description": "kullanıcı arayüzünün görüntüleme dili. Bu, kaydetme verilerinizin dilinden ayrıdır.",
+      "description": "Arayüzün görüntüleme dilidir. Kayıt verisinin dilinden ayrıdır",
       "ja": "日本語",
       "en": "English",
       "es-419": "Español (Latinoamérica)",
@@ -76,74 +76,74 @@
       "ar": "العربية"
     },
     "volume": {
-      "label": "Hacim",
-      "master": "ana hacim",
-      "bgm": "BGM",
+      "label": "Ses düzeyi",
+      "master": "Ana ses düzeyi",
+      "bgm": "Müzik",
       "sfx": "Ses efektleri"
     },
     "compute": {
-      "label": "GPU ivmesi",
-      "comingSoon": "Çok yakında",
+      "label": "GPU hızlandırma",
+      "comingSoon": "Yakında",
       "cpu": "CPU",
       "gpu": "GPU",
-      "statusActive": "GPU Aktif",
-      "statusInactive": "CPU aktif",
-      "restartRequired": "Ana program bu ayarı değiştirdikten sonra yeniden başlayacaktır.",
-      "restarting": "Yeniden başlatma...",
-      "restartFailed": "yeniden başlatma başarısız oldu",
-      "restartUnavailable": "Ayarlar kaydedildi. Değişiklikler, oyun bir sonraki başladığında yürürlüğe girecek",
-      "confirmRestart": "Hesaplama modunu {{mode}} olarak mı değiştiriyorsunuz? Ana program yeniden başlayacaktır.",
-      "restartAction": "yeniden başlamak"
+      "statusActive": "GPU etkin",
+      "statusInactive": "CPU etkin",
+      "restartRequired": "Ayar değiştirildikten sonra ana program yeniden başlatılır",
+      "restarting": "Yeniden başlatılıyor...",
+      "restartFailed": "Yeniden başlatma başarısız oldu",
+      "restartUnavailable": "Ayarlar kaydedildi. Değişiklikler oyunun bir sonraki açılışında geçerli olur",
+      "confirmRestart": "Hesaplama modu değiştirilecek: {{mode}}. Ana programı yeniden başlatmak istiyor musunuz?",
+      "restartAction": "Yeniden başlat"
     },
     "windowReset": {
       "label": "Pencere konumu ve boyutu",
-      "action": "Ayarlamak"
+      "action": "Sıfırla"
     },
     "credits": {
-      "label": "kredi",
-      "description": "Bu oyunda kullanılan varlıklar ve yazılımlar için atıflar",
-      "action": "Görmek"
+      "label": "Emeği geçenler",
+      "description": "Bu oyunda kullanılan materyal ve yazılımların hak bildirimleri",
+      "action": "Görüntüle"
     }
   },
   "saveLoad": {
     "newGame": "Yeni oyun",
-    "overwriteSave": "Kaydet Üzerine Yaz",
+    "overwriteSave": "Üzerine kaydet",
     "saveAs": "Farklı kaydet",
     "load": "Yükle",
-    "quitGame": "oyunu bırak",
-    "returnToTop": "üst menüye dön",
-    "loading": "Yükleniyor…",
-    "shuttingDown": "Kapatmak...",
-    "saveFailed": "Kaydet Başarısız",
+    "quitGame": "Oyundan çık",
+    "returnToTop": "Ana menüye dön",
+    "loading": "Yükleniyor...",
+    "shuttingDown": "Kapatılıyor...",
+    "saveFailed": "Kaydetme başarısız oldu",
     "loadFailed": "Yükleme başarısız oldu",
-    "confirmNewGame": "mevcut veriler kaybolacaktır. Yeni bir oyun başlatmak mı?",
-    "confirmQuitGame": "Bırakmak istediğinden emin misin? Mevcut ilerlemeniz otomatik olarak kaydedilmez.",
-    "confirmReturnToTop": "üst menüye dön? Mevcut ilerlemeniz otomatik olarak kaydedilmez.",
+    "confirmNewGame": "Mevcut veriler kaybolacak. Yeni bir oyun başlatılsın mı?",
+    "confirmQuitGame": "Oyundan çıkmak istiyor musunuz? Mevcut ilerlemeniz otomatik olarak kaydedilmez.",
+    "confirmReturnToTop": "Ana menüye dönmek istiyor musunuz? Mevcut ilerlemeniz otomatik olarak kaydedilmez.",
     "confirm": "Evet",
-    "cancel": "Hiçbir",
-    "saveAsScenario": "senaryo olarak kaydet",
+    "cancel": "Hayır",
+    "saveAsScenario": "Senaryo olarak kaydet",
     "saveAsNewScenario": "Başka bir senaryo olarak kaydet",
-    "overwriteScenario": "Senaryo Üzerine Yaz",
-    "backToGame": "oyuna geri dön",
-    "saveName": "Adı Kaydet",
-    "confirmOverwrite": "“{{name}}” kaydetmenin üzerine yazılsın mı?",
-    "confirmOverwriteScenario": "“{{name}}” senaryosunun üzerine yazılsın mı?"
+    "overwriteScenario": "Üzerine kaydet",
+    "backToGame": "Oyuna dön",
+    "saveName": "Kayıt adı",
+    "confirmOverwrite": "“{{name}}” kaydının üzerine yazılsın mı?",
+    "confirmOverwriteScenario": "“{{name}}” senaryosunun üzerine kaydedilsin mi?"
   },
   "saveList": {
-    "noSaves": "Kaydetme verisi bulunamadı",
-    "currentSave": "Mevcut veriler",
+    "noSaves": "Kayıt yok",
+    "currentSave": "Mevcut veri",
     "population": "Nüfus",
     "inGameDate": "Tarih",
-    "savedAt": "kaydedilmiş",
+    "savedAt": "Kayıt tarihi",
     "loadButton": "Yükle",
     "deleteButton": "Sil",
-    "confirmLoad": "Bu kaydetme verileri yüklensin mi?",
-    "confirmDelete": "Bu kaydetme verileri silinsin mi? Bu geri alınamaz.",
-    "loading": "Yükleniyor…",
+    "confirmLoad": "Bu kayıt yüklensin mi?",
+    "confirmDelete": "Bu kayıt silinsin mi? Bu işlem geri alınamaz.",
+    "loading": "Yükleniyor...",
     "loadFailed": "Yükleme başarısız oldu",
-    "deleteFailed": "Silme Başarısız",
-    "openFolderButton": "Klasörü Kaydet",
+    "deleteFailed": "Silme başarısız oldu",
+    "openFolderButton": "Klasör konumunu göster",
     "scenario": "Senaryo",
-    "autosaveName": "{{name}} (çıkışta otomatik kaydetme)"
+    "autosaveName": "{{name}} (çıkışta otomatik kayıt)"
   }
 }

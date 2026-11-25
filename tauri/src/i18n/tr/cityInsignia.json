@@ -1,26 +1,26 @@
 {
   "cityInsignia": {
-    "emblem": "Amblem",
-    "flag": "şehir bayrağı",
+    "emblem": "Arma",
+    "flag": "Şehir bayrağı",
     "motif": "Motif",
-    "fieldColor": "alan rengi",
-    "motifColor": "motif rengi",
-    "pattern": "Model",
-    "accentColor": "vurgu rengi",
-    "placement": "amblem pozisyonu",
-    "loadImage": "Resim yükle",
-    "randomize": "Rasgele seçmek",
-    "apply": "Uygulamak",
-    "imageLoadFailed": "Görüntü yüklenemedi.",
+    "fieldColor": "Zemin rengi",
+    "motifColor": "Motif rengi",
+    "pattern": "Desen",
+    "accentColor": "Vurgu rengi",
+    "placement": "Armanın konumu",
+    "loadImage": "Görsel yükle",
+    "randomize": "Rastgele",
+    "apply": "Uygula",
+    "imageLoadFailed": "Görsel yüklenemedi",
     "placements": {
-      "center": "Merkez",
+      "center": "Orta",
       "canton": "Sol üst",
-      "none": "Hiçbiri"
+      "none": "Yok"
     },
     "motifs": {
       "wave": "Dalga",
       "mountain": "Dağ",
-      "star": "Star",
+      "star": "Yıldız",
       "tree": "Ağaç",
       "sun": "Güneş",
       "moon": "Ay",
@@ -34,18 +34,18 @@
       "bridge": "Köprü",
       "key": "Anahtar",
       "crown": "Taç",
-      "snowflake": "Kar taneciği",
+      "snowflake": "Kar tanesi",
       "flame": "Alev",
-      "diamond": "Elmas",
-      "cross": "Çapraz"
+      "diamond": "Eşkenar dörtgen",
+      "cross": "Haç"
     },
     "patterns": {
       "plain": "Düz",
-      "bicolor": "iki renkli",
-      "triband": "triband",
-      "diagonal": "Diyagonal",
-      "border": "Sınır",
-      "bands": "çeteler"
+      "bicolor": "Yatay iki renkli",
+      "triband": "Dikey üç bölmeli",
+      "diagonal": "Çapraz bölmeli",
+      "border": "Kenarlık",
+      "bands": "Üst ve alt şeritler"
     }
   }
 }

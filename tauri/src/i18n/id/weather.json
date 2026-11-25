@@ -1,30 +1,30 @@
 {
   "weather": {
     "label": "Cuaca",
-    "choose": "Pilih Cuaca",
+    "choose": "Pilih cuaca",
     "loading": "Memeriksa cuaca…",
-    "unknown": "Yg tak dikenal",
+    "unknown": "Tidak diketahui",
     "automatic": "{{weather}} (otomatis)",
-    "failed": "tidak bisa mengubah cuaca",
+    "failed": "Tidak dapat mengubah cuaca",
     "names": {
-      "clear": "Bersih",
-      "high_clouds": "awan tinggi",
-      "fair": "Adil",
-      "broken_clouds": "Interval cerah",
+      "clear": "Cerah",
+      "high_clouds": "Awan tipis",
+      "fair": "Cerah berawan",
+      "broken_clouds": "Sebagian berawan",
       "overcast": "Mendung",
-      "rain_clouds": "awan hujan",
+      "rain_clouds": "Awan hujan",
       "fog": "Kabut",
       "drizzle": "Gerimis",
       "rain": "Hujan",
       "heavy_rain": "Hujan lebat",
-      "light_snow": "salju ringan",
+      "light_snow": "Salju ringan",
       "snow": "Salju",
       "blizzard": "Badai salju"
     },
-    "epochClimate": "iklim Siklus",
+    "epochClimate": "Iklim yang ditetapkan",
     "temperature": "Suhu",
-    "precipitation": "Pengendapan",
-    "sunlight": "intensitas sinar matahari",
+    "precipitation": "Curah hujan",
+    "sunlight": "Intensitas sinar matahari",
     "windSpeed": "Kecepatan angin"
   }
 }

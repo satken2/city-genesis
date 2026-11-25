@@ -1,22 +1,22 @@
 {
   "terrain3dPreview": {
-    "waitingForEditor": "Warten auf Daten aus dem Gelände-Editor…"
+    "waitingForEditor": "Warte auf Daten aus dem Geländeeditor …"
   },
   "groundCover": {
-    "label": "Bodendecker",
-    "hint": "Ändert die Farbe und Textur des Bodens im Spiel und die Farben von 2D-Karten. Es hat keinen Einfluss auf die Simulation.",
-    "1": "Wiese",
+    "label": "Bodenbedeckung",
+    "hint": "Ändert Farbe und Textur des Bodens im Spiel sowie die Farben der 2D-Ansicht. Hat keinen Einfluss auf die Simulation.",
+    "1": "Grasland",
     "2": "Wüste",
-    "3": "üppige Wiese",
+    "3": "Sattes Grünland",
     "4": "Schneefeld",
-    "5": "halbtrocken"
+    "5": "Trockengebiet"
   },
   "climate": {
     "label": "Klima",
-    "hint": "Kopiert monatliche Temperatur-, Niederschlags-, Sonnenlicht- und Wetterwahrscheinlichkeiten aus einem Preset. Bearbeiten Sie die Details in den Klimaeinstellungen im Szenarioerstellungsmodus."
+    "hint": "Kopiert die monatlichen Werte für Temperatur, Niederschlag, Sonnenschein und Wetteranteile aus der Voreinstellung. Die Details können Sie im Szenarioerstellungsmodus unter „Klimaeinstellungen“ bearbeiten."
   },
   "assetPack": {
-    "label": "Asset Pack",
+    "label": "Asset-Paket",
     "standard": "Standard"
   }
 }

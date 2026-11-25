@@ -1,27 +1,27 @@
 {
   "building": {
-    "floorConfiguration": "Zemin kompozisyonu",
+    "floorConfiguration": "Kat düzeni",
     "parking": "Otopark",
-    "type": "yapı tipi",
+    "type": "Bina türü",
     "durability": "Dayanıklılık",
-    "floors": "yer",
-    "floorsValue": "{{floors}}F (Zemin Alanı {{area, number}}㎡)",
-    "heightLabel": "Yükseklik: {{value}}m",
-    "baseAreaLabel": "Temel alan: {{area, number}}",
-    "underMaintenance": "Bakımda",
-    "parkingCapacity": "park kapasitesi",
-    "parkingCapacityValue": "{{capacity}} arabalar",
+    "floors": "Kat sayısı",
+    "floorsValue": "{{floors}} kat (kat alanı {{area, number}} ㎡)",
+    "heightLabel": "Yükseklik: {{value}} m",
+    "baseAreaLabel": "Taban alanı: {{area, number}} ㎡",
+    "underMaintenance": "Onarımda",
+    "parkingCapacity": "Otopark kapasitesi",
+    "parkingCapacityValue": "{{capacity}} araç",
     "parkingDay": "Gündüz",
-    "parkingNight": "Gece vakti",
-    "parkingUsage": "{{used}} / {{capacity}}"
+    "parkingNight": "Gece",
+    "parkingUsage": "{{used}} / {{capacity}} araç"
   },
   "building_appearance": {
     "variantLabel": "Görünüm {{index}}",
-    "layoutHint": "Bir kartı siteye sürükleyin / taşımak için sürükleyin / Shift + sürükleyin",
-    "sizeLabel": "{{width}}×{{height}}m",
-    "deleteSelected": "Seçili kaldır",
-    "apply": "Uygulamak",
+    "layoutHint": "Yerleştirmek için kartı inşaat alanına sürükleyin / Taşımak için sürükleyin / Döndürmek için Shift+sürükleyin / Silmek için Delete tuşuna basın",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Seçili yapıyı sil",
+    "apply": "Uygula",
     "saveFailed": "Görünüm kaydedilemedi",
-    "noSubbuildings": "Bu bina tipi için herhangi bir alt bina tanımlanmamıştır."
+    "noSubbuildings": "Bu bina türü için tanımlı alt bina yok"
   }
 }

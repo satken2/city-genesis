@@ -1,201 +1,201 @@
 {
   "diagnosis": {
-    "refresh": "mendiagnosis ulang",
-    "note": "Melacak penyebab masalah berdasarkan hasil simulasi terakhir. Setelah memperbaiki, jalankan Siklus berikutnya untuk menyegarkan.",
+    "refresh": "Diagnosis ulang",
+    "note": "Menelusuri penyebab masalah secara berurutan berdasarkan hasil simulasi terakhir. Setelah ditangani, jalankan siklus berikutnya untuk memperbarui hasilnya.",
     "noProblem": {
-      "title": "Tidak ada masalah yang ditemukan",
-      "description": "Tidak ada yang perlu dilaporkan untuk agen ini sekarang."
+      "title": "Tidak ditemukan masalah",
+      "description": "Saat ini tidak ada gangguan yang perlu dilaporkan untuk pelaku ekonomi ini."
     },
     "target": {
       "agent": "Fasilitas #{{id}}",
       "path": "Jalur #{{id}}",
-      "node": "Persimpangan #{{id}}",
-      "nodeAt": "titik ({{x}}, {{z}})"
+      "node": "Simpul #{{id}}",
+      "nodeAt": "Titik ({{x}}, {{z}})"
     },
     "nodes": {
       "agent_not_found": {
-        "title": "Agen tidak ditemukan",
+        "title": "Pelaku ekonomi tidak ditemukan",
         "description": ""
       },
       "cycle": {
-        "title": "penyebab melingkar",
-        "description": "Fasilitas ini sudah didiagnosis lebih lanjut (ketergantungan timbal balik)."
+        "title": "Penyebab melingkar",
+        "description": "Gangguan fasilitas ini sudah didiagnosis di tingkat atas (saling bergantung)."
       },
       "depth_limit": {
-        "title": "Berhenti menggali lebih dalam",
-        "description": "Rantai penyebabnya terlalu panjang. mendiagnosis fasilitas secara langsung."
+        "title": "Tidak ditelusuri lebih dalam",
+        "description": "Rantai penyebab terlalu panjang sehingga dihentikan di sini. Diagnosis fasilitas tersebut secara langsung."
       },
       "no_alert": {
-        "title": "Fasilitas ini sendiri melaporkan tidak ada masalah",
-        "description": "Outputnya mungkin hanya dibatasi oleh ukuran atau target pemanfaatannya."
+        "title": "Fasilitas ini sendiri tidak mengalami gangguan",
+        "description": "Kekurangan pasokan mungkin disebabkan oleh skala fasilitas atau target tingkat operasinya."
       },
       "facility_inactive": {
-        "title": "fasilitas tidak beroperasi",
-        "description": "Itu tidak berproduksi karena sedang dibangun, dijeda, runtuh, atau dalam keadaan serupa. Periksa rincian fasilitas."
+        "title": "Fasilitas tidak beroperasi",
+        "description": "Tidak berproduksi karena sedang dibangun, dihentikan, runtuh, atau sejenisnya. Periksa detail fasilitas."
       },
       "producer_ref": {
-        "title": "Fasilitas Pemasok",
+        "title": "Fasilitas pemasok",
         "description": ""
       },
       "material_shortage": {
-        "title": "tidak dapat memperoleh bahan baku",
-        "description": "Beberapa bahan yang dibutuhkan tidak sampai, sehingga produksi tidak sesuai rencana."
+        "title": "Bahan baku tidak dapat diperoleh",
+        "description": "Sebagian bahan baku yang dibutuhkan tidak tiba, sehingga produksi di bawah rencana."
       },
       "material_unmet": {
         "title": "Kekurangan {{product_name}}",
-        "description": "Menerima {{received}} dari {{demand}} yang dibutuhkan ({{ratio}}%)."
+        "description": "Dari kebutuhan {{demand}}, yang diterima hanya {{received}} ({{ratio}}%)."
       },
       "material_unmet_unknown": {
-        "title": "tidak dapat mengidentifikasi materi yang hilang",
-        "description": "Ini bisa terjadi tepat setelah permintaan menyusut. Periksa hasil Siklus berikutnya."
+        "title": "Bahan baku yang kurang tidak dapat diidentifikasi",
+        "description": "Hal ini dapat terjadi, misalnya, tepat setelah permintaan menyusut. Periksa hasil siklus berikutnya."
       },
       "infra_disconnected": {
         "title": "Tidak terhubung ke jaringan {{product_name}}",
         "description": ""
       },
       "infra_no_terminal": {
-        "title": "Tidak ada terminal koneksi",
-        "description": "Fasilitas ini tidak memiliki node terminal untuk {{product_name}}."
+        "title": "Tidak ada titik sambung",
+        "description": "Fasilitas ini tidak memiliki simpul titik sambung untuk {{product_name}}"
       },
       "infra_terminal_unconnected": {
-        "title": "Tidak ada jalur yang mencapai terminal koneksi",
+        "title": "Tidak ada satu pun jalur yang tersambung ke titik sambung",
         "description": ""
       },
       "infra_link_not_active": {
-        "title": "Jalur pengumpan belum aktif",
-        "description": "{{count}} Jalur yang mencapai terminal sedang dibangun atau belum dimulai."
+        "title": "Jalur pengumpan belum beroperasi",
+        "description": "{{count}} jalur yang tersambung ke titik sambung sedang dibangun atau belum mulai dibangun"
       },
       "infra_link_incompatible": {
-        "title": "Jalur pengumpan tidak dapat membawa {{product_name}}",
-        "description": "Jalur yang mencapai terminal adalah tipe yang tidak dapat membawa barang ini (misalnya jalur non-listrik)."
+        "title": "Jalur pengumpan tidak dapat mengalirkan {{product_name}}",
+        "description": "Jalur yang tersambung ke titik sambung termasuk jenis yang tidak dapat mengangkut barang ini (misalnya rel tanpa elektrifikasi)"
       },
       "infra_no_producer": {
-        "title": "Tidak ada produsen {{product_name}} di kota",
+        "title": "Tidak ada fasilitas produksi {{product_name}} di kota",
         "description": ""
       },
       "infra_producers_inactive": {
-        "title": "{{product_name}} Produsen tidak beroperasi",
-        "description": "Tak satu pun dari produsen {{count}} di kota yang aktif."
+        "title": "Fasilitas produksi {{product_name}} tidak beroperasi",
+        "description": "Tidak satu pun dari {{count}} fasilitas produksi di kota yang beroperasi"
       },
       "infra_producers_unconnected": {
-        "title": "Produsen tidak terhubung ke jaringan",
-        "description": "{{count}} Produsen aktif tetapi tidak ada yang terhubung ke jaringan {{product_name}}."
+        "title": "Fasilitas produksi tidak terhubung ke jaringan",
+        "description": "{{count}} fasilitas produksi beroperasi, tetapi tidak satu pun terhubung ke jaringan {{product_name}}"
       },
       "infra_network_split": {
-        "title": "Jaringan ini tidak memiliki produsen",
-        "description": "Produsen {{product_name}} ({{producers}}) berada di jaringan yang berbeda. Kedua jaringan tersebut rusak atau tidak pernah bergabung."
+        "title": "Jaringan ini tidak memiliki fasilitas produksi",
+        "description": "Fasilitas produksi {{product_name}} ({{producers}} lokasi) terhubung ke jaringan lain. Kedua jaringan terputus di tengah jalan atau memang belum disambungkan"
       },
       "infra_link_under_construction": {
-        "title": "Jalur penghubung sedang dibangun",
-        "description": "Jalur {{count}} yang akan bergabung dengan jaringan ini tertunda."
+        "title": "Jalur penghubung jaringan sedang dibangun",
+        "description": "Ada {{count}} jalur yang direncanakan tersambung ke jaringan ini"
       },
       "infra_gap_detected": {
-        "title": "Jaringannya rusak di sini",
-        "description": "Titik akhir kedua jaringan hanya berjarak {{distance}} m."
+        "title": "Jaringan terputus di sini",
+        "description": "Titik ujung kedua jaringan hanya berjarak {{distance}} m"
       },
       "infra_tap_missing": {
-        "title": "tidak masuk ke jaringan produser",
+        "title": "Tidak tersambung ke jaringan fasilitas produksi",
         "description": ""
       },
       "infra_generation_shortage": {
-        "title": "Tidak cukup {{product_name}} yang dihasilkan",
-        "description": "Jaringan ini menghasilkan {{supply}} terhadap permintaan {{demand}} ({{producers}} produsen)."
+        "title": "Produksi {{product_name}} tidak mencukupi",
+        "description": "Produksi jaringan ini {{supply}}, sedangkan permintaannya {{demand}} ({{producers}} fasilitas produksi)"
       },
       "infra_transmission_bottleneck": {
-        "title": "Kapasitas jaringan jenuh",
-        "description": "Jalur {{count}} berjalan dengan kapasitas penuh."
+        "title": "Kapasitas jaringan tidak mencukupi",
+        "description": "{{count}} jalur digunakan hingga kapasitas penuh"
       },
       "infra_unexplained": {
-        "title": "Jaringan terlihat sehat",
-        "description": "Produksi dan konektivitas sudah cukup, sehingga kekurangannya mungkin bersifat sementara. Periksa hasil Siklus berikutnya."
+        "title": "Kondisi jaringan tampak normal",
+        "description": "Produksi dan sambungan sudah mencukupi, jadi kekurangan ini mungkin hanya sementara. Periksa hasil siklus berikutnya."
       },
       "market_no_supplier": {
         "title": "Tidak ada pemasok {{product_name}} di kota",
-        "description": "Tidak ada produsen dalam negeri aktif dan tidak ada impor."
+        "description": "Tidak ada produsen dalam negeri yang beroperasi dan tidak ada impor"
       },
       "market_supply_insufficient": {
-        "title": "Pasokan {{product_name}} tidak sesuai dengan permintaan",
-        "description": "Pasokan {{supply}} terhadap pesanan di seluruh kota dari {{demand}} ({{producers}} Producer(s), {{hubs}} Impor Hub)."
+        "title": "Pasokan {{product_name}} tidak memenuhi permintaan",
+        "description": "Pasokan {{supply}}, sedangkan pesanan di seluruh kota {{demand}} ({{producers}} produsen, {{hubs}} pusat impor)"
       },
       "market_unmatched": {
-        "title": "Tidak dapat mendapatkan {{product_name}} di pasar",
-        "description": "Pasokan di seluruh kota {{supply}} mencakup pesanan {{demand}}, tetapi tidak mencapai fasilitas ini. jarak atau harga mungkin menjadi penyebabnya."
+        "title": "Tidak dapat memperoleh {{product_name}} di pasar",
+        "description": "Di seluruh kota, pasokan {{supply}} sudah memenuhi pesanan {{demand}}, tetapi tidak sampai ke fasilitas ini. Penyebabnya mungkin jarak atau harga."
       },
       "service_out_of_range": {
-        "title": "Di luar rentang layanan untuk {{product_name}}",
-        "description": "Situs fasilitas ini tidak berada dalam jangkauan fasilitas apa pun yang memasok {{product_name}} ({{producers}} di kota)."
+        "title": "Berada di luar jangkauan layanan {{product_name}}",
+        "description": "Lahan fasilitas ini tidak berada dalam jangkauan efek fasilitas yang memasok {{product_name}} ({{producers}} lokasi)"
       },
       "high_skill_shortage": {
-        "title": "Tidak dapat mengamankan staf yang terampil",
-        "description": "Tidak ada cukup pekerja berketerampilan tinggi, sehingga rencana produksi dikurangi menjadi apa yang dapat ditangani oleh staf yang tersedia. Pekerja berketerampilan tinggi dilatih di universitas: membangun satu dan mengalokasikan kuota penerimaannya untuk keterampilan yang diperlukan."
+        "title": "Tenaga ahli tidak dapat diperoleh",
+        "description": "Tenaga berkeahlian tinggi yang dibutuhkan tidak cukup, sehingga rencana produksi dikurangi sebatas yang dapat ditangani tenaga yang ada. Tenaga berkeahlian tinggi dididik di universitas. Bangun universitas dan alokasikan kuota penerimaannya untuk keahlian yang dibutuhkan."
       },
       "labor_shortage": {
-        "title": "Tidak cukup karyawan",
-        "description": "dijamin {{total_labor}} dari {{quota}} tenaga kerja yang dibutuhkan."
+        "title": "Karyawan tidak mencukupi",
+        "description": "Dari kebutuhan tenaga kerja {{quota}}, yang berhasil diperoleh {{total_labor}}."
       },
       "labor_market_tight": {
-        "title": "Tidak ada pekerja yang tersisa di kota",
-        "description": "Pengangguran hanya {{unemployment_rate}}%, jadi tidak ada yang tersedia untuk disewa. menambah perumahan untuk menarik penduduk."
+        "title": "Tidak ada lagi tenaga kerja tersisa di kota",
+        "description": "Tingkat pengangguran rendah, yaitu {{unemployment_rate}}%, sehingga tidak ada orang yang dapat dipekerjakan. Tambah perumahan untuk menarik penduduk."
       },
       "labor_unfilled": {
-        "title": "pencari kerja ada tetapi tidak datang",
-        "description": "Pengangguran adalah {{unemployment_rate}}%. Perjalanan panjang, upah rendah, atau ketidakcocokan keterampilan mungkin terjadi."
+        "title": "Ada pencari kerja, tetapi mereka tidak datang",
+        "description": "Tingkat pengangguran {{unemployment_rate}}%. Kemungkinan penyebabnya adalah jarak perjalanan kerja yang jauh, upah yang rendah, atau keahlian yang tidak cocok."
       },
       "budget_capped": {
-        "title": "anggaran tidak mencukupi",
-        "description": "Anggaran yang dialokasikan jauh di bawah yang dibutuhkan. Tinjau alokasi anggaran."
+        "title": "Anggaran tidak mencukupi",
+        "description": "Anggaran yang dialokasikan jauh di bawah kebutuhan. Tinjau kembali alokasi anggaran."
       },
       "construction_shortage": {
         "title": "Tidak dapat memperoleh {{product_name}}",
         "description": ""
       },
       "line_paused_route_disconnected": {
-        "title": "Rute antar pemberhentian rusak",
-        "description": "Perhentian berturut-turut dalam lingkaran tidak terhubung oleh lintasan atau jalan yang dapat ditempuh ke arah yang diperlukan. membangun kembali bagian yang rusak atau merevisi rute. Untuk kembali ke trek satu arah, putar kembali di stasiun di jalur yang berjalan dua arah (seperti jalur ganda yang diletakkan sebagai jalur tunggal), atau biarkan kereta bergerak ke jalur yang berlawanan dengan bergabung dengan rel pada satu node atau meletakkan crossover, dan menempatkan pemberhentian kembali di peron untuk arah yang berlawanan."
+        "title": "Rute perjalanan antarhalte terputus",
+        "description": "Halte yang bersebelahan dalam urutan putaran tidak tersambung oleh rel atau jalan yang dapat dilalui ke arah yang diperlukan. Bangun ulang bagian yang terputus atau tinjau kembali rute perjalanannya. Untuk berbalik arah di rel satu arah, berbaliklah di stasiun pada rel yang dapat dilalui dua arah (misalnya rel ganda yang memuat kedua arah dalam satu jalur), atau buat kereta dapat pindah ke rel arah sebaliknya dengan menyatukan rel kedua arah di satu simpul atau memasang wesel penyeberangan, lalu tempatkan halte arah pulang di peron arah sebaliknya."
       },
       "line_paused_no_underlay": {
-        "title": "STOP tidak memiliki jalan yang mendasarinya",
-        "description": "Lintasan atau jalan tempat pemberhentian sudah tidak ada lagi."
+        "title": "Halte tidak memiliki jalur dasar",
+        "description": "Rel atau jalan tempat halte berada sudah tidak ada."
       },
       "line_paused_train_too_long": {
-        "title": "kereta lebih panjang dari bagian pemberhentiannya",
-        "description": "Kurangi mobil per kereta atau perpanjang bagian tempat pemberhentian berada di (platform stasiun, atau bagian jalan atau lintasan)."
+        "title": "Kereta lebih panjang daripada segmen tempat halte berada",
+        "description": "Kurangi jumlah gerbong per kereta, atau perpanjang segmen tempat halte berada (peron stasiun, atau segmen jalan maupun rel)."
       },
       "line_no_vehicle_product": {
-        "title": "Jenis garis ini tidak memiliki kendaraan yang ditentukan",
+        "title": "Belum ada kendaraan yang ditetapkan untuk jenis rute ini",
         "description": ""
       },
       "line_vehicle_shortage": {
-        "title": "tidak dapat membeli kendaraan",
-        "description": "Diperoleh {{received}} dari {{required}} mobil yang dibutuhkan."
+        "title": "Kendaraan tidak dapat diperoleh",
+        "description": "Dari kebutuhan {{required}} unit, yang berhasil diperoleh {{received}} unit."
       },
       "line_off_network": {
-        "title": "baris tidak ada di jaringan yang sedang berjalan",
-        "description": "Rute yang mendasari jalur tidak terkait dengan jalur atau jalan mana pun."
+        "title": "Rute tidak tersambung ke jaringan lintasan",
+        "description": "Lintasan dasar rute ini tidak tersambung ke rel atau jalan mana pun."
       },
       "transit_no_depot": {
-        "title": "Tidak ada depot {{product_name}} di kota",
-        "description": "Bangun depot dan hubungkan ke jaringan yang sedang berjalan."
+        "title": "Tidak ada depo {{product_name}} di kota",
+        "description": "Bangun depo dan sambungkan ke jaringan lintasan."
       },
       "transit_depots_inactive": {
-        "title": "Depot tidak beroperasi",
-        "description": "Tak satu pun dari depot {{count}} di kota yang aktif."
+        "title": "Depo tidak beroperasi",
+        "description": "Tidak satu pun dari {{count}} depo di kota yang beroperasi."
       },
       "transit_depots_unconnected": {
-        "title": "Depot tidak terhubung ke jaringan yang berjalan",
-        "description": "Tak satu pun dari depot {{count}} yang ditautkan ke trek atau jalan. Untuk rel, letakkan dinding dari jalur utama ke terminal depot."
+        "title": "Depo tidak tersambung ke jaringan lintasan",
+        "description": "Tidak satu pun dari {{count}} depo yang tersambung ke rel atau jalan. Untuk kereta api, pasang rel simpang dari jalur utama ke titik sambung depo."
       },
       "transit_depot_other_network": {
-        "title": "Depot berada di jaringan yang berbeda",
-        "description": "{{count}} Depot terhubung ke jaringan track yang tidak mencapai jalur ini. Tautkan jaringan atau buat depot yang satu ini."
+        "title": "Depo berada di jaringan lintasan lain",
+        "description": "{{count}} depo tersambung ke jaringan rel lain yang tidak terhubung dengan rute ini. Hubungkan dengan rel, atau bangun depo di jaringan ini."
       },
       "transit_vehicle_insufficient": {
-        "title": "tidak cukup kendaraan yang diproduksi",
-        "description": "Depot di jaringan ini ({{depots}}) memasok mobil {{supply}} terhadap {{demand}} yang diperlukan oleh baris."
+        "title": "Produksi kendaraan tidak mencukupi",
+        "description": "Depo di jaringan lintasan ini ({{depots}} lokasi) memasok {{supply}} unit, sedangkan kebutuhan rute {{demand}} unit."
       },
       "transit_unexplained": {
-        "title": "Depot terlihat sehat",
-        "description": "Pasokan dan konektivitas sudah cukup, sehingga kekurangannya mungkin bersifat sementara. Periksa hasil Siklus berikutnya."
+        "title": "Kondisi depo tampak normal",
+        "description": "Pasokan dan sambungan sudah mencukupi, jadi kekurangan ini mungkin hanya sementara. Periksa hasil siklus berikutnya."
       }
     }
   }

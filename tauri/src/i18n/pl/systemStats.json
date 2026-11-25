@@ -1,99 +1,99 @@
 {
   "systemStats": {
     "load": {
-      "title": "Obciążenie symulacyjne",
-      "heading": "Czas obliczeń ostatniej epoki ({{days}} dni)",
+      "title": "Obciążenie symulacji",
+      "heading": "Czas obliczeń ostatniej epoki (dni: {{days}})",
       "noData": "Brak danych pomiarowych",
-      "note": "Kiedy kilka epok biegnie z rzędu, pokazuje to ostatnią. Liczba operacji to przybliżone oszacowanie liczby kombinacji w głównych porównaniach, na podstawie wielkości miasta.",
+      "note": "Gdy kilka epok jest wykonywanych po kolei, pokazywane są wartości ostatniej z nich. Liczba operacji to orientacyjne oszacowanie liczby kombinacji w głównych porównaniach na podstawie wielkości miasta.",
       "colGroup": "Proces",
       "colTime": "Czas",
       "colWorkload": "Liczba operacji",
-      "workloadHint": "Szorstka liczba głównych porównań (elementy tablicy). Najedź kursorem na wartość, aby zobaczyć podział.",
-      "seconds": "{{value}} S",
-      "ms": "{{value}} MS"
+      "workloadHint": "Orientacyjna liczba kombinacji w głównych porównaniach (liczba elementów tablic). Najedź kursorem na wartość, aby zobaczyć szczegóły.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
     },
     "group": {
       "market": "Rynek towarów",
       "realestate": "Rynek nieruchomości",
       "labor": "Rynek pracy",
-      "building_spawn": "Budowlanie szwu",
-      "agent_spawn": "Odrodzenie agenta",
-      "routing": "Znalezienie ścieżki obywatelskiej",
-      "transit": "Znalezienie ścieżki tranzytu",
+      "building_spawn": "Powstawanie budynków",
+      "agent_spawn": "Powstawanie podmiotów gospodarczych",
+      "routing": "Wyznaczanie tras przejazdu obywateli",
+      "transit": "Wyznaczanie tras transportu publicznego",
       "environment": "Warunki życia",
-      "other": "Inny"
+      "other": "Inne"
     },
     "workload": {
-      "market": "Kupujący {{demanders}} × Sprzedający {{suppliers}} (pomnożone na produkt i zsumowane)",
-      "realestate": "Gospodarstwa domowe rozważają przeprowadzkę {{movers}} × budynki mieszkalne {{housing}}",
-      "labor": "Osoby poszukujące pracy {{seekers}} × Pracodawcy {{employers}}",
-      "building_spawn": "Paczki kandydujące {{parcels}} × Typy budynków × Liczba pięter × Podłogi",
-      "agent_spawn": "Produkty × Strefy {{zones}} × Strefy {{zones}}",
-      "routing": "2 tryby podróży × strefy {{zones}} × strefy {{zones}} × 3 trasy kandydujące × ścieżki {{paths}}",
-      "transit": "Zatrzymuje {{stops}} × Węzły {{nodes}}",
-      "environment": "Siatka {{width}} × {{height}} × Słońce Pozycje"
+      "market": "Kupujący {{demanders}} × sprzedający {{suppliers}} (mnożone dla każdego produktu i sumowane)",
+      "realestate": "Gospodarstwa domowe rozważające przeprowadzkę {{movers}} × budynki mieszkalne {{housing}}",
+      "labor": "Poszukujący pracy {{seekers}} × pracodawcy {{employers}}",
+      "building_spawn": "Działki kandydujące {{parcels}} × rodzaje budynków × liczby kondygnacji × przeznaczenia kondygnacji",
+      "agent_spawn": "Produkty × dzielnice {{zones}} × dzielnice {{zones}}",
+      "routing": "2 środki transportu × dzielnice {{zones}} × dzielnice {{zones}} × 3 kandydujące trasy przejazdu × trasy infrastruktury {{paths}}",
+      "transit": "Przystanki {{stops}} × węzły {{nodes}}",
+      "environment": "Siatka {{width}} × {{height}} × położenia słońca"
     },
     "entities": {
-      "colMetric": "Metryczny",
-      "colCount": "Liczyć",
-      "title": "Liczy się encji",
-      "agents": "Agenci",
+      "colMetric": "Pozycja",
+      "colCount": "Liczba",
+      "title": "Liczba obiektów symulacji",
+      "agents": "Podmioty gospodarcze",
       "households": "Gospodarstwa domowe",
-      "businesses": "Biznesy",
-      "publicFacilities": "Obiekty użyteczności publicznej",
+      "businesses": "Przedsiębiorstwa",
+      "publicFacilities": "Obiekty publiczne",
       "buildings": "Budynki",
-      "citizens": "obywatele",
-      "population": "Populacja",
-      "zones": "Strefy",
-      "parcels": "Paczki",
-      "paths": "Ścieżki",
+      "citizens": "Obywatele",
+      "population": "Ludność",
+      "zones": "Dzielnice",
+      "parcels": "Działki",
+      "paths": "Trasy infrastruktury",
       "roads": "Drogi",
-      "tracks": "Utwory",
-      "infra": "Sieci komunalne",
+      "tracks": "Torowiska",
+      "infra": "Sieci infrastruktury",
       "nodes": "Węzły"
     },
     "approximation": {
-      "title": "Przybliżenie symulacji",
-      "intro": "Planowane są opcje uproszczenia obliczeń dla dużych miast. Te ustawienia nie mogą być jeszcze zmienione.",
-      "warning": "Te zmiany mogą wpłynąć na równowagę gry. Nie można ich cofnąć.",
-      "irreversible": "Zmiany spowodowane przybliżeniem utrzymują się w późniejszych epokach. Po włączeniu przybliżenia nie można wyłączyć ani zmniejszyć.",
-      "undecided": "TBD",
-      "candidates": "Kandydaci maks.",
-      "epochs": "Epoki między recenzjami",
-      "off": "Poza",
-      "on": "Na",
+      "title": "Przybliżenia symulacji",
+      "intro": "Planowane jest dodanie ustawień upraszczających obliczenia dla dużych miast. Obecnie nie można ich zmieniać.",
+      "warning": "Może to wpłynąć na balans gry. Nie można tego cofnąć",
+      "irreversible": "Zmiany wynikające z przybliżeń pozostają także w kolejnych epokach. Włączonego przybliżenia nie można wyłączyć ani zmniejszyć jego stopnia.",
+      "undecided": "Do ustalenia",
+      "candidates": "kandydatów maks.",
+      "epochs": "epok między przeglądami",
+      "off": "Wył.",
+      "on": "Wł.",
       "goods": {
-        "label": "kupuj kandydatów",
-        "description": "Ogranicz dostawców w porównaniu według ceny i odległości."
+        "label": "Kandydaci przy zakupach",
+        "description": "Ogranicza liczbę dostawców porównywanych pod względem ceny i odległości."
       },
       "jobs": {
-        "label": "Kandydaci do pracy",
-        "description": "Ogranicz pracodawców w porównaniu z wynagrodzeniami i warunkami dojazdów."
+        "label": "Kandydaci przy szukaniu pracy",
+        "description": "Ogranicza liczbę pracodawców porównywanych pod względem płac i warunków dojazdu."
       },
       "housing": {
-        "label": "Kandydaci na mieszkania",
-        "description": "Ogranicz domy w porównaniu z czynszem i lokalizacją."
+        "label": "Kandydaci przy przeprowadzce",
+        "description": "Ogranicza liczbę mieszkań porównywanych pod względem czynszu i lokalizacji."
       },
       "interval": {
-        "label": "Rutynowy interwał decyzji",
-        "description": "Rzadziej przeglądaj zakupy, pracę i wybory mieszkaniowe."
+        "label": "Odstęp między rutynowymi decyzjami",
+        "description": "Wybór miejsc zakupów, pracy i zamieszkania jest weryfikowany rzadziej."
       },
       "aggregation": {
-        "label": "Grupa podobnych obywateli i gospodarstw domowych",
-        "description": "Podejmuj pewne decyzje łącznie dla obywateli lub gospodarstw domowych o podobnych okolicznościach."
+        "label": "Grupuj podobnych obywateli i gospodarstwa domowe",
+        "description": "Część decyzji obywateli i gospodarstw domowych w podobnej sytuacji jest podejmowana zbiorowo."
       }
     },
     "status": {
       "title": "Stan systemu",
-      "gpuDisabled": "Przyspieszenie GPU: wyłączone",
+      "gpuDisabled": "Akceleracja GPU: wyłączona",
       "coreSimulator": "Symulator rdzenia",
-      "currentMemory": "Bieżące wykorzystanie pamięci: {{value}}",
-      "peakMemory": "Szczytowe użycie pamięci od uruchomienia: {{value}}",
+      "currentMemory": "Obecne użycie pamięci: {{value}}",
+      "peakMemory": "Maks. użycie pamięci od uruchomienia: {{value}}",
       "graphic": "3D",
-      "currentVram": "Bieżące użycie VRAM: {{value}}",
-      "usageTooltip": "Cały komputer {{pc}} / ta gra {{game}} / zainstalowany {{total}}",
+      "currentVram": "Obecne użycie VRAM: {{value}}",
+      "usageTooltip": "Cały komputer {{pc}} / ta gra {{game}} / zainstalowano {{total}}",
       "legendPc": "Cały komputer",
-      "legendGame": "ta gra"
+      "legendGame": "Ta gra"
     }
   }
 }

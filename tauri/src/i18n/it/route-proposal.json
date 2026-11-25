@@ -1,14 +1,14 @@
 {
   "route_proposal": {
-    "title": "Suggerisci percorso",
+    "title": "Proposta di percorso",
     "mode": "Modalità altezza",
-    "fixed": "Mantieni le altezze dei waypoint",
-    "adjust": "Regola le altezze intermedie del waypoint",
-    "help": "Disponibile dopo aver terminato la forma. Gli endpoint e le posizioni XZ del waypoint rimangono fisse.",
-    "searching": "Cercando...",
+    "fixed": "Mantieni l'altezza dei punti indicati",
+    "adjust": "Regola l'altezza dei punti intermedi indicati",
+    "help": "Disponibile dopo aver confermato la forma. Le posizioni XZ di inizio, fine e punti indicati restano fisse.",
+    "searching": "Ricerca in corso…",
     "cancel": "Annulla",
-    "undo": "Annulla suggerimento",
-    "notFound": "Non è stato trovato alcun percorso.",
-    "failed": "Suggerimento percorso non riuscito."
+    "undo": "Torna a prima della proposta",
+    "notFound": "Nessun percorso trovato.",
+    "failed": "Proposta di percorso non riuscita."
   }
 }

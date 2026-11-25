@@ -1,47 +1,47 @@
 {
   "grading": {
-    "kindLabel": "Typ",
+    "kindLabel": "Art",
     "kind": {
       "land": "Geländenivellierung",
       "shore": "Landgewinnung"
     },
-    "baseHeight": "Basishöhe",
+    "baseHeight": "Bezugshöhe",
     "targetHeight": "Zielhöhe",
-    "cutVolume": "Volumen schneiden",
-    "fillVolume": "Volumen füllen",
-    "quayLength": "Kailänge",
-    "quayArea": "Kai Gesichtsbereich",
+    "cutVolume": "Abtragsvolumen",
+    "fillVolume": "Auftragsvolumen",
+    "quayLength": "Länge der Kaimauer",
+    "quayArea": "Fläche der Kaimauer",
     "unit": {
       "height": "{{value}} m",
       "length": "{{value, number}} m",
       "area": "{{value, number}} m²",
       "volume": "{{value, number}} m³"
     },
-    "heightOffset": "Höhe (Versatz von der Basis)",
+    "heightOffset": "Höhe (Abweichung von der Bezugshöhe)",
     "seaLevelHeight": "Höhe (über dem Meeresspiegel)",
     "baseNote": {
-      "frontage": "0 ist die Oberfläche der Straße, der sie gegenüberliegt ({{value}} m)",
-      "terrain_mean": "0 ist die aktuelle durchschnittliche Höhe der Fläche ({{value}} m)"
+      "frontage": "0 entspricht der Fahrbahnhöhe der angrenzenden Straße ({{value}} m)",
+      "terrain_mean": "0 entspricht der aktuellen Durchschnittshöhe des Bereichs ({{value}} m)"
     },
     "reasons": {
-      "invalid_polygon": "Die Flächenform ist ungültig. Zeichnen Sie es ohne Kanten zu kreuzen.",
-      "outside_city": "Das Gebiet erstreckt sich außerhalb der Stadt.",
-      "too_large": "Die Fläche ist zu groß (Grenzwert: {{limit}} km²).",
-      "on_water": "Ein Gebiet über dem Meer kann nicht erschlossen werden. Zeichne es so, dass es Land erreicht.",
-      "no_land_overlap": "Zeichnen Sie den Bereich so, dass er das Land überlappt (sonst bleibt ein Streifen Meer zwischen dem Ufer und dem Gebiet).",
-      "overlaps_parcel": "Das Gebiet überlappt ein vorhandenes Grundstück.",
-      "overlaps_path": "Der Bereich überlappt eine Straße, einen Weg oder einen anderen Weg.",
-      "overlaps_water": "Das Gebiet berührt einen Fluss oder See.",
-      "overlaps_quay_band": "Das Gebiet überlappt den Kai des wiedergewonnenen Landes.",
-      "invalid_height_offset": "Die Höhe liegt außerhalb des Bereichs (bis zu ± {{offsetLimit}} m von der Grundhöhe).",
-      "below_sea_level": "Die Höhe kann nicht unter dem Meeresspiegel eingestellt werden.",
-      "too_narrow": "Der Bereich ist zu eng; Im Kai ist nichts mehr zu füllen.",
-      "no_work": "Der Boden befindet sich bereits auf der Zielhöhe, so dass keine Arbeit erforderlich ist.",
-      "insufficient_funds": "Unzureichende Mittel, um diese Bestellung aufzugeben."
+      "invalid_polygon": "Die Form des Bereichs ist ungültig. Zeichnen Sie ihn so, dass sich keine Kanten kreuzen.",
+      "outside_city": "Der Bereich ragt über die Stadtgrenze hinaus.",
+      "too_large": "Der Bereich ist zu groß (Obergrenze {{limit}} km²).",
+      "on_water": "Für einen Bereich, der nur über dem Meer liegt, sind keine Erdarbeiten möglich. Zeichnen Sie ihn so, dass er an Land reicht.",
+      "no_land_overlap": "Zeichnen Sie den Bereich so, dass er das Land überlappt (sonst bleibt zwischen Ufer und Bereich ein Streifen Meer).",
+      "overlaps_parcel": "Der Bereich überschneidet sich mit einem bestehenden Grundstück.",
+      "overlaps_path": "Der Bereich überschneidet sich mit einer Trasse wie einer Straße oder einem Gleis.",
+      "overlaps_water": "Der Bereich berührt einen Fluss oder See.",
+      "overlaps_quay_band": "Der Bereich überschneidet sich mit der Kaimauer von aufgeschüttetem Land.",
+      "invalid_height_offset": "Die Höhenangabe liegt außerhalb des zulässigen Bereichs (bis ±{{offsetLimit}} m von der Bezugshöhe).",
+      "below_sea_level": "Die Höhe kann nicht unter dem Meeresspiegel liegen.",
+      "too_narrow": "Der Bereich ist zu schmal; innerhalb der Kaimauer bleibt nichts zum Aufschütten.",
+      "no_work": "Der Boden hat bereits die Zielhöhe, es sind keine Arbeiten nötig.",
+      "insufficient_funds": "Wegen fehlender Mittel kann der Auftrag nicht erteilt werden."
     },
     "confirm": "Bestätigen",
-    "confirming": "bestätigen...",
+    "confirming": "Wird bestätigt...",
     "cancel": "Abbrechen",
-    "confirmFailed": "Die Erdarbeiten konnten nicht bestellt werden."
+    "confirmFailed": "Die Erdarbeiten konnten nicht in Auftrag gegeben werden."
   }
 }

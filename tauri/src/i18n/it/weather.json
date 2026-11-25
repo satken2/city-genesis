@@ -1,30 +1,30 @@
 {
   "weather": {
-    "label": "Tempo metereologico",
-    "choose": "Scegli il tempo",
-    "loading": "Controllo del tempo...",
+    "label": "Meteo",
+    "choose": "Scegli il meteo",
+    "loading": "Verifica del meteo…",
     "unknown": "Sconosciuto",
-    "automatic": "{{weather}} (auto)",
-    "failed": "Impossibile cambiare il tempo",
+    "automatic": "{{weather}} (automatico)",
+    "failed": "Impossibile cambiare il meteo",
     "names": {
-      "clear": "Chiaro",
+      "clear": "Sereno",
       "high_clouds": "Nubi alte",
-      "fair": "Fiera",
-      "broken_clouds": "intervalli di sole",
-      "overcast": "Nuvoloso",
-      "rain_clouds": "Nuvole di pioggia",
+      "fair": "Bel tempo",
+      "broken_clouds": "Schiarite",
+      "overcast": "Coperto",
+      "rain_clouds": "Nubi di pioggia",
       "fog": "Nebbia",
-      "drizzle": "Pioggerella",
+      "drizzle": "Pioviggine",
       "rain": "Pioggia",
-      "heavy_rain": "Pioggia a dirotto",
+      "heavy_rain": "Pioggia forte",
       "light_snow": "Neve leggera",
       "snow": "Neve",
-      "blizzard": "Tormenta"
+      "blizzard": "Bufera di neve"
     },
-    "epochClimate": "Clima epocale",
+    "epochClimate": "Clima dell'epoca",
     "temperature": "Temperatura",
-    "precipitation": "Precipitazione",
+    "precipitation": "Precipitazioni",
     "sunlight": "Intensità del sole",
-    "windSpeed": "velocità del vento"
+    "windSpeed": "Velocità del vento"
   }
 }

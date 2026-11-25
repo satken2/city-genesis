@@ -1,22 +1,22 @@
 {
   "assetManager": {
     "tabs": {
-      "buildings": "edifici",
-      "paths": "Percorsi",
-      "vehicles": "veicoli",
-      "props": "Puntelli"
+      "buildings": "Edifici",
+      "paths": "Tracciati",
+      "vehicles": "Veicoli",
+      "props": "Elementi decorativi"
     },
     "additional": "Modelli aggiuntivi",
-    "loading": "Caricamento dei modelli dalla vista 3D...",
+    "loading": "Caricamento dei modelli dalla vista 3D…",
     "noModel": "Nessun modello",
     "noImage": "Nessuna immagine",
     "weight": "Peso",
-    "applyNote": "Le variazioni di peso hanno effetto al successivo avvio o carico di una partita.",
+    "applyNote": "Le modifiche ai pesi avranno effetto la prossima volta che inizi o carichi una partita.",
     "preview": {
-      "hint": "Trascina per ruotare / Rotella per ingrandire",
+      "hint": "Trascina per ruotare / Rotellina per lo zoom",
       "zoomIn": "Ingrandisci",
       "zoomOut": "Riduci",
-      "reset": "Ripristina"
+      "reset": "Reimposta"
     }
   }
 }

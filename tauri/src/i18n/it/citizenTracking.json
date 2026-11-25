@@ -1,51 +1,51 @@
 {
   "citizenTracking": {
-    "tabBasic": "Osservazione",
+    "tabBasic": "Generale",
     "tabActivity": "Attività",
-    "follow": "Segui con fotocamera",
-    "unfollow": "Smetti di seguire",
-    "track": "Aggiungi alla lista di tracciamento",
-    "trackRandom": "Tieni traccia di un cittadino a caso",
-    "noUntrackedCitizens": "Non ci sono cittadini non tracciati disponibili.",
-    "trackRandomError": "non poteva rintracciare un cittadino.",
-    "untrack": "Rimuovi dalla lista di monitoraggio",
-    "home": "Residenza",
-    "mobility": "Muoversi",
+    "follow": "Segui con la telecamera",
+    "unfollow": "Smetti di seguire con la telecamera",
+    "track": "Aggiungi alla lista dei seguiti",
+    "trackRandom": "Segui un cittadino a caso",
+    "noUntrackedCitizens": "Non ci sono cittadini che non stai già seguendo.",
+    "trackRandomError": "Impossibile seguire un cittadino.",
+    "untrack": "Rimuovi dalla lista dei seguiti",
+    "home": "Abitazione",
+    "mobility": "Spostamenti",
     "mode": {
-      "automobile": "Auto",
-      "pedestrian": "passeggiate e mezzi pubblici"
+      "automobile": "Automobile",
+      "pedestrian": "A piedi e trasporto pubblico"
     },
     "visits": "Destinazioni",
     "visitKind": {
       "home": "Casa",
       "work": "Lavoro",
       "school": "Scuola",
-      "shop": "Shopping"
+      "shop": "Acquisti"
     },
     "legs": {
-      "walk": "Camminare",
+      "walk": "A piedi",
       "drive": "Auto",
-      "transit": "Transito",
+      "transit": "Trasporto pubblico",
       "conveyor": "Sistema di trasporto persone"
     },
-    "trip": "Solo andata {{minutes}} min · {{route}}",
+    "trip": "Sola andata {{minutes}} min · {{route}}",
     "noRoute": "Nessun percorso",
-    "noVisits": "non ha un posto dove andare.",
+    "noVisits": "Non ha luoghi in cui andare.",
     "status": {
-      "not_ready": "mostrato dopo l'esecuzione della simulazione.",
-      "busy": "non disponibile mentre la simulazione è in esecuzione.",
-      "no_home": "in attesa di alloggio, quindi non c'è attività registrata.",
+      "not_ready": "Visibile dopo l'esecuzione della simulazione.",
+      "busy": "Non disponibile durante la simulazione.",
+      "no_home": "In attesa di un alloggio: nessuna attività registrata.",
       "missing": "Questo cittadino non vive più in città.",
-      "error": "Impossibile caricare."
+      "error": "Impossibile caricare i dati."
     },
-    "empty": "Nessun cittadino viene rintracciato.",
+    "empty": "Non stai seguendo nessun cittadino.",
     "pickFailed": {
-      "not_ready": "Esegui la simulazione per fare clic su auto e pedoni e vedere chi sono.",
-      "busy": "I cittadini non possono essere mostrati mentre la simulazione è in esecuzione.",
-      "none": "Non sono riuscito a trovare chi c'è in questa macchina oa piedi.",
+      "not_ready": "Esegui la simulazione per poter cliccare su auto e pedoni e vedere chi sono.",
+      "busy": "Non è possibile mostrare i cittadini durante la simulazione.",
+      "none": "Non è stato trovato il cittadino di quest'auto o di questo pedone.",
       "missing": "Questo cittadino non vive più in città.",
-      "no_home": "Questo cittadino sta aspettando un alloggio.",
-      "error": "non poteva mostrare il cittadino."
+      "no_home": "Questo cittadino è in attesa di un alloggio.",
+      "error": "Impossibile mostrare il cittadino."
     }
   }
 }

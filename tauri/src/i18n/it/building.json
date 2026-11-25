@@ -1,27 +1,27 @@
 {
   "building": {
-    "floorConfiguration": "Composizione del pavimento",
+    "floorConfiguration": "Composizione dei piani",
     "parking": "Parcheggio",
     "type": "Tipo di edificio",
     "durability": "Durabilità",
     "floors": "Piani",
-    "floorsValue": "{{floors}}F (area del pavimento {{area, number}}㎡)",
-    "heightLabel": "Altezza: {{value}}m",
-    "baseAreaLabel": "Area di base: {{area, number}}㎡",
-    "underMaintenance": "In manutenzione",
-    "parkingCapacity": "Capacità di parcheggio",
-    "parkingCapacityValue": "{{capacity}} auto",
+    "floorsValue": "{{floors}} piani (superficie {{area, number}}㎡)",
+    "heightLabel": "Altezza: {{value}} m",
+    "baseAreaLabel": "Superficie coperta: {{area, number}}㎡",
+    "underMaintenance": "In riparazione",
+    "parkingCapacity": "Capacità del parcheggio",
+    "parkingCapacityValue": "{{capacity}} posti auto",
     "parkingDay": "Giorno",
-    "parkingNight": "Ore notturne",
-    "parkingUsage": "{{used}} / {{capacity}} Auto"
+    "parkingNight": "Notte",
+    "parkingUsage": "{{used}} / {{capacity}} posti auto"
   },
   "building_appearance": {
     "variantLabel": "Aspetto {{index}}",
-    "layoutHint": "Trascina una carta sul sito per posizionare / trascina per spostare / Maiusc + Trascina per ruotare / Cancella il tasto da rimuovere",
-    "sizeLabel": "{{width}}×{{height}}M",
-    "deleteSelected": "Rimuovi selezionato",
-    "apply": "Applicare",
-    "saveFailed": "Impossibile salvare l'aspetto",
-    "noSubbuildings": "Nessun sottoedilizia è definito per questo tipo di edificio"
+    "layoutHint": "Trascina una scheda sull'area edificabile per posizionarla / Trascina per spostare / Maiusc+trascina per ruotare / Tasto Canc per eliminare",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Rimuovi il corpo selezionato",
+    "apply": "Applica",
+    "saveFailed": "Salvataggio dell'aspetto non riuscito",
+    "noSubbuildings": "Per questo tipo di edificio non sono definiti edifici secondari"
   }
 }

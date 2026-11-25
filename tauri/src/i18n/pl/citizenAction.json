@@ -1,39 +1,39 @@
 {
   "citizenAction": {
     "name": {
-      "label": "nadać nazwę",
-      "message": "Wpisz nazwę, którą chcesz nadać {{name}}.",
-      "inputLabel": "Nowa nazwa",
-      "confirm": "Obdarzyć"
+      "label": "Nadaj imię",
+      "message": "Wpisz imię, które chcesz nadać osobie: {{name}}.",
+      "inputLabel": "Nowe imię",
+      "confirm": "Nadaj"
     },
     "reward": {
-      "label": "przyznać nagrodę",
-      "message": "Daj gospodarstwie domowym {{name}} nagrodę z funduszy miejskich. Gotówka miejska: {{available}}",
-      "confirm": "Dać"
+      "label": "Przyznaj nagrodę",
+      "message": "Przekaż gospodarstwu domowemu osoby {{name}} nagrodę z funduszy miasta.\nŚrodki pieniężne miasta: {{available}}",
+      "confirm": "Przekaż"
     },
     "expel": {
-      "label": "Życzę im powodzenia poza miastem",
-      "message": "Wyrzuć {{name}} z miasta?",
-      "confirm": "Usunąć",
+      "label": "Życz powodzenia poza miastem",
+      "message": "Wydalić z miasta osobę {{name}}?",
+      "confirm": "Wydal",
       "results": {
-        "0": "{{name}} spakowane i po cichu opuściły miasto. Nikt ich nie przyszedł, żeby ich odwieść.",
-        "1": "{{name}} przekroczył granice miasta, krzycząc: „Nigdy nie wrócę!”",
-        "2": "{{name}} został uprzejmie eskortowany poza granice miasta. Życzymy im wszystkich sukcesów gdzie indziej."
+        "0": "Osoba {{name}} spakowała się i po cichu opuściła miasto. Nikt jej nie odprowadzał.",
+        "1": "„Moja noga więcej tu nie postanie!” – z tymi słowami {{name}} przekracza granicę miasta.",
+        "2": "Osobę {{name}} uprzejmie odprowadzono za granice miasta. Życzymy jej wielu sukcesów w nowym miejscu."
       }
     },
     "donation": {
       "label": "Poproś o darowiznę",
-      "message": "Zapytaj gospodarstwo domowe {{name}} o darowiznę na rzecz miasta. Gotówka domowa: {{available}}",
-      "confirm": "Zapytać"
+      "message": "Poproś gospodarstwo domowe osoby {{name}} o darowiznę na rzecz miasta.\nŚrodki pieniężne gospodarstwa: {{available}}",
+      "confirm": "Poproś"
     },
     "relocate": {
-      "label": "Zaproponuj nowy dom",
-      "message": "Eksmińcie gospodarstwa domowego {{name}} z obecnego domu? Będą szukać nowego domu w następnej epoce.",
-      "confirm": "Eksmitować",
+      "label": "Zaproponuj nowe mieszkanie",
+      "message": "Eksmitować gospodarstwo domowe osoby {{name}} z obecnego mieszkania?\nW następnej epoce gospodarstwo zacznie szukać nowego mieszkania.",
+      "confirm": "Eksmituj",
       "results": {
-        "0": "Rodzina {{name}} została wyrzucona z domu. Ich meble są ułożone przy drodze.",
-        "1": "Zamki w domu {{name}} zostały zmienione. Rodzina zaczęła szukać nowego miejsca.",
-        "2": "Rodzinie {{name}} zaoferowano nowy dom. Nie mogą wrócić do starego."
+        "0": "Rodzinę osoby {{name}} wyrzucono z domu. Jej meble piętrzą się przy drodze.",
+        "1": "W domu osoby {{name}} wymieniono zamki. Rodzina zaczęła szukać nowego lokum.",
+        "2": "Rodzinie osoby {{name}} zaproponowano nowe mieszkanie. Do starego domu nie ma już powrotu."
       }
     }
   }

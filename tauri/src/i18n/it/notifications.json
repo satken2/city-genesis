@@ -1,26 +1,26 @@
 {
   "notifications": {
     "trayTooltip": "Notifiche della città",
-    "empty": "Nessun problema richiede attenzione in questo momento",
+    "empty": "Al momento non ci sono problemi che richiedono intervento",
     "loadFailed": "Impossibile caricare le notifiche",
     "types": {
-      "resource_runway": "La risorsa \"{{name}}\" dovrebbe essere esaurita in circa {{remaining_epochs}}",
-      "resource_depleted": "La risorsa \"{{name}}\" è stata esaurita",
-      "facility_inoperative": "La struttura pubblica \"{{name}}\" non è in funzione",
-      "facility_inoperative_labor": "La struttura pubblica \"{{name}}\" non funziona a causa di una carenza di manodopera",
-      "facility_inoperative_material": "La funzione pubblica \"{{name}}\" non è operativa a causa di una carenza di materiale",
-      "facility_inoperative_high_skill": "La struttura pubblica \"{{name}}\" è in esecuzione a capacità ridotta a causa della carenza di personale qualificato",
-      "facility_inoperative_budget": "La funzione pubblica \"{{name}}\" è in esecuzione a capacità ridotta a causa di un deficit di budget",
-      "education_low_enrollment": "L'istituto di istruzione \"{{name}}\" è sottoutilizzato: pochi studenti sono iscritti ({{enrolled}} di {{max_students}} posti)",
-      "infra_facility_down": "La funzione infrastrutturale \"{{name}}\" è fuori servizio",
-      "infra_disconnected": "Le strutture di {{count}} vengono disconnesse dalla rete dell'infrastruttura",
-      "rail_capacity_exceeded": "La frequenza del treno supera la capacità del binario sui segmenti di binario {{count}}",
-      "collapse": "{{count}} edifici/strade sono crollati",
-      "collapse_with_deaths": "{{count}} edifici/strade sono crollati, uccidendo {{deaths}} persone",
-      "deaths_traffic": "{{count}} Le persone sono morte in incidenti stradali",
-      "tenant_blocked_by_parcel_size": "Nessun edificio per \"{{tenant_name}}\" può essere costruito nel distretto \"{{zone_name}}\" (necessita di {{required}} m2, il più grande {{max_capacity}} m2 costruibile. È necessario un pacco più grande",
-      "unknown": "Si è verificato un evento critico",
-      "sanitation": "I servizi igienico-sanitari si stanno deteriorando per le famiglie {{count}}. Migliora il trattamento delle acque reflue e dei rifiuti."
+      "resource_runway": "La risorsa “{{name}}” dovrebbe esaurirsi tra circa {{remaining_epochs}} epoche",
+      "resource_depleted": "La risorsa “{{name}}” si è esaurita",
+      "facility_inoperative": "La struttura pubblica “{{name}}” non è operativa",
+      "facility_inoperative_labor": "La struttura pubblica “{{name}}” non è operativa per mancanza di manodopera",
+      "facility_inoperative_material": "La struttura pubblica “{{name}}” non è operativa per mancanza di materie prime",
+      "facility_inoperative_high_skill": "La struttura pubblica “{{name}}” ha ridotto l'attività per mancanza di personale specializzato",
+      "facility_inoperative_budget": "La struttura pubblica “{{name}}” ha ridotto l'attività per fondi insufficienti",
+      "education_low_enrollment": "L'istituto di istruzione “{{name}}” è sottoutilizzato per mancanza di studenti ({{enrolled}} iscritti / {{max_students}} posti)",
+      "infra_facility_down": "L'impianto infrastrutturale “{{name}}” è fuori servizio",
+      "infra_disconnected": "Strutture non collegate alla rete infrastrutturale: {{count}}",
+      "rail_capacity_exceeded": "Binari in cui la frequenza dei treni supera la capacità: {{count}}",
+      "collapse": "Edifici e strade crollati: {{count}}",
+      "collapse_with_deaths": "Edifici e strade crollati: {{count}}, morti: {{deaths}}",
+      "deaths_traffic": "Morti in incidenti stradali: {{count}}",
+      "tenant_blocked_by_parcel_size": "Nel quartiere “{{zone_name}}” non si può costruire un edificio adatto a “{{tenant_name}}” (servono {{required}} m2, massimo del lotto {{max_capacity}} m2). Serve un lotto più grande",
+      "unknown": "Si è verificato un evento grave",
+      "sanitation": "Nuclei familiari con condizioni igieniche in peggioramento: {{count}}. Migliora fognature e smaltimento dei rifiuti."
     }
   }
 }

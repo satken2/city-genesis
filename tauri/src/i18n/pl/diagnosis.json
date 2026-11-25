@@ -1,201 +1,201 @@
 {
   "diagnosis": {
-    "refresh": "Ponowna diagnoza",
-    "note": "Śledzi przyczyny problemu na podstawie ostatniego wyniku symulacji. Po naprawieniu uruchom następną epokę, aby odświeżyć.",
+    "refresh": "Diagnozuj ponownie",
+    "note": "Na podstawie wyników ostatniej symulacji kolejno śledzi przyczyny problemu. Po wprowadzeniu poprawek wykonaj następną epokę, aby odświeżyć wyniki.",
     "noProblem": {
-      "title": "Nie znaleziono żadnych problemów",
-      "description": "W tej chwili nie ma nic do zgłoszenia dla tego agenta."
+      "title": "Nie znaleziono problemów",
+      "description": "Ten podmiot gospodarczy nie ma obecnie żadnych problemów do zgłoszenia."
     },
     "target": {
       "agent": "Obiekt #{{id}}",
-      "path": "Ścieżka #{{id}}",
-      "node": "złącze #{{id}}",
-      "nodeAt": "punkt ({{x}}, {{z}})"
+      "path": "Trasa infrastruktury #{{id}}",
+      "node": "Punkt połączenia #{{id}}",
+      "nodeAt": "Punkt ({{x}}, {{z}})"
     },
     "nodes": {
       "agent_not_found": {
-        "title": "Nie znaleziono agenta",
+        "title": "Nie znaleziono podmiotu gospodarczego",
         "description": ""
       },
       "cycle": {
-        "title": "Okrągła przyczyna",
-        "description": "Ta funkcja jest już diagnozowana dalej (wzajemna zależność)."
+        "title": "Przyczyny tworzą pętlę",
+        "description": "Problem tego obiektu jest już diagnozowany na wyższym poziomie (wzajemna zależność)."
       },
       "depth_limit": {
-        "title": "Przestałem kopać głębiej",
-        "description": "Łańcuch przyczyn jest zbyt długi. Diagnozuj placówkę bezpośrednio."
+        "title": "Dalsza analiza przerwana",
+        "description": "Łańcuch przyczyn jest zbyt długi, więc przerwano analizę w tym miejscu. Zdiagnozuj ten obiekt bezpośrednio."
       },
       "no_alert": {
-        "title": "Ten obiekt sam nie zgłasza problemu",
-        "description": "Jego wydajność może być po prostu ograniczona przez jego wielkość lub cel wykorzystania."
+        "title": "Sam obiekt nie zgłasza problemów",
+        "description": "Niewystarczająca podaż może wynikać z wielkości obiektu lub jego docelowego wykorzystania."
       },
       "facility_inactive": {
         "title": "Obiekt nie działa",
-        "description": "Nie produkuje, ponieważ jest w budowie, wstrzymane, załamane lub w podobnym stanie. Sprawdź szczegóły obiektu."
+        "description": "Obiekt nie produkuje, ponieważ jest w budowie, wstrzymany, zawalony itp. Sprawdź szczegóły obiektu."
       },
       "producer_ref": {
         "title": "Obiekt dostawcy",
         "description": ""
       },
       "material_shortage": {
-        "title": "Nie można pozyskać surowców",
-        "description": "Niektóre wymagane materiały nie dotarły, więc produkcja nie spełniła planu."
+        "title": "Nie udaje się zaopatrzyć w surowce",
+        "description": "Część potrzebnych surowców nie dotarła, więc produkcja nie osiągnęła planu."
       },
       "material_unmet": {
-        "title": "Niedobór {{product_name}}",
-        "description": "Otrzymano {{received}} z wymaganych {{demand}} ({{ratio}}%)."
+        "title": "Niedobór: {{product_name}}",
+        "description": "Z wymaganej ilości {{demand}} otrzymano {{received}} ({{ratio}}%)."
       },
       "material_unmet_unknown": {
-        "title": "Nie udało się zidentyfikować brakującego materiału",
-        "description": "Może się to zdarzyć zaraz po zmniejszeniu popytu. Sprawdź wynik następnej epoki."
+        "title": "Nie udało się ustalić, którego surowca zabrakło",
+        "description": "Może się tak zdarzyć np. tuż po spadku popytu. Sprawdź wyniki następnej epoki."
       },
       "infra_disconnected": {
-        "title": "Niepołączono z siecią {{product_name}}",
+        "title": "Brak podłączenia do sieci: {{product_name}}",
         "description": ""
       },
       "infra_no_terminal": {
-        "title": "Brak terminala przyłączeniowego",
-        "description": "Ta funkcja nie ma węzła końcowego dla {{product_name}}."
+        "title": "Brak przyłącza",
+        "description": "Ten obiekt nie ma węzła przyłącza dla sieci: {{product_name}}."
       },
       "infra_terminal_unconnected": {
-        "title": "Żadna ścieżka nie jest podłączona do terminala przyłączeniowego",
+        "title": "Do przyłącza nie jest podłączona żadna trasa infrastruktury",
         "description": ""
       },
       "infra_link_not_active": {
-        "title": "Ścieżka podajnika nie jest jeszcze aktywna",
-        "description": "{{count}} Ścieżki docierające do terminalu są w trakcie budowy lub nie są uruchomione."
+        "title": "Trasa doprowadzająca jeszcze nie działa",
+        "description": "Trasy podłączone do przyłącza są w budowie lub ich budowa się nie rozpoczęła (liczba: {{count}})."
       },
       "infra_link_incompatible": {
-        "title": "Ścieżka dowozowa nie może przenosić {{product_name}}",
-        "description": "Ścieżka dochodząca do terminala jest typu, który nie może przenosić tego dobra (np. nieelektryfikowany tor)."
+        "title": "Trasa doprowadzająca nie może przesyłać: {{product_name}}",
+        "description": "Trasa podłączona do przyłącza jest rodzaju, który nie może przenosić tego dobra (np. tor niezelektryfikowany)."
       },
       "infra_no_producer": {
-        "title": "Żaden {{product_name}} producent w mieście",
+        "title": "Brak w mieście obiektów produkujących: {{product_name}}",
         "description": ""
       },
       "infra_producers_inactive": {
-        "title": "{{product_name}} producenci nie działają",
-        "description": "Żaden z producentów {{count}} w mieście nie jest aktywny."
+        "title": "Obiekty produkujące nie działają: {{product_name}}",
+        "description": "Żaden z obiektów produkujących w mieście (liczba: {{count}}) nie działa."
       },
       "infra_producers_unconnected": {
-        "title": "Producenci nie są połączeni z siecią",
-        "description": "{{count}} Producenci są aktywni, ale żaden nie jest połączony z siecią {{product_name}}."
+        "title": "Obiekty produkujące nie są podłączone do sieci",
+        "description": "Obiekty produkujące działają (liczba: {{count}}), ale żaden nie jest podłączony do sieci: {{product_name}}."
       },
       "infra_network_split": {
-        "title": "Ta sieć nie ma producenta",
-        "description": "Producenci {{product_name}} ({{producers}}) są w innej sieci. Obie sieci są rozdzielone lub nigdy nie zostały połączone."
+        "title": "W tej sieci nie ma obiektów produkujących",
+        "description": "Obiekty produkujące ({{product_name}}, liczba: {{producers}}) są podłączone do innej sieci. Dwie sieci są gdzieś przerwane lub nigdy nie zostały połączone."
       },
       "infra_link_under_construction": {
-        "title": "Ścieżka łącząca jest w budowie",
-        "description": "{{count}} Ścieżki, które dołączą do tej sieci, są w toku."
+        "title": "Trwa budowa trasy łączącej sieci",
+        "description": "Trasy, które mają zostać podłączone do tej sieci: {{count}}."
       },
       "infra_gap_detected": {
-        "title": "Sieć jest tutaj zepsuta",
-        "description": "Punkty końcowe obu sieci są tylko {{distance}} oddalone od siebie."
+        "title": "W tym miejscu sieć jest przerwana",
+        "description": "Końce dwóch sieci dzieli zaledwie {{distance}} m."
       },
       "infra_tap_missing": {
-        "title": "Nie wykorzystano sieci producentów",
+        "title": "Brak połączenia z siecią obiektów produkujących",
         "description": ""
       },
       "infra_generation_shortage": {
-        "title": "Za mało {{product_name}} jest wyprodukowany",
-        "description": "Sieć ta produkuje {{supply}} przeciwko zapotrzebowaniu {{demand}} (producentów) ({{producers}})."
+        "title": "Niewystarczająca produkcja: {{product_name}}",
+        "description": "Produkcja w tej sieci wynosi {{supply}}, a popyt {{demand}} (obiekty produkujące: {{producers}})."
       },
       "infra_transmission_bottleneck": {
-        "title": "Pojemność sieci jest nasycona",
-        "description": "Ścieżki {{count}} działają z pełną pojemnością."
+        "title": "Brak przepustowości sieci",
+        "description": "Trasy pracujące na pełnej przepustowości: {{count}}."
       },
       "infra_unexplained": {
-        "title": "Sieć wygląda zdrowo",
-        "description": "Produkcja i łączność są wystarczające, więc niedobór mógł być przejściowy. Sprawdź wynik następnej epoki."
+        "title": "Sieć wygląda na sprawną",
+        "description": "Produkcja i połączenia są wystarczające, więc niedobór mógł być chwilowy. Sprawdź wyniki następnej epoki."
       },
       "market_no_supplier": {
-        "title": "Brak dostawcy {{product_name}} w mieście",
-        "description": "Nie ma aktywnego producenta krajowego ani importu."
+        "title": "Brak dostawców w mieście: {{product_name}}",
+        "description": "Brak działających producentów krajowych i brak importu."
       },
       "market_supply_insufficient": {
-        "title": "Podaż {{product_name}} nie spełnia wymagań",
-        "description": "Dostaw {{supply}} w stosunku do ogólnomiejskich zamówień {{demand}} (producent(y) {{hubs}} ({{producers}})"
+        "title": "Podaż nie pokrywa popytu: {{product_name}}",
+        "description": "Podaż {{supply}} wobec zamówień w całym mieście {{demand}} (producenci: {{producers}}, punkty importu: {{hubs}})."
       },
       "market_unmatched": {
-        "title": "Nie udało się pozyskać {{product_name}} na rynku",
-        "description": "Supply w całym mieście {{supply}} pokrywa zamówienia {{demand}}, ale nie dotarła do tego obiektu. Przyczyną może być odległość lub cena."
+        "title": "Nie udało się kupić na rynku: {{product_name}}",
+        "description": "W skali miasta podaż {{supply}} pokrywa zamówienia {{demand}}, ale nie dotarła do tego obiektu. Przyczyną może być odległość lub cena."
       },
       "service_out_of_range": {
-        "title": "poza zakresem usług dla {{product_name}}",
-        "description": "Teren tego obiektu nie znajduje się w zasięgu żadnego obiektu dostarczającego {{product_name}} ({{producers}} w mieście)."
+        "title": "Poza zasięgiem usługi: {{product_name}}",
+        "description": "Teren tego obiektu leży poza zasięgiem działania obiektów świadczących usługę: {{product_name}} (liczba obiektów: {{producers}})."
       },
       "high_skill_shortage": {
-        "title": "Nie można zabezpieczyć wykwalifikowanego personelu",
-        "description": "Nie ma wystarczającej liczby pracowników o wysokich kwalifikacjach, więc plan produkcji jest zredukowany do tego, co może obsłużyć dostępny personel. Pracownicy o wysokich umiejętnościach są szkoleni na uniwersytetach: budują jeden i przydzielają limity przyjęć wymaganym umiejętnościom."
+        "title": "Nie udaje się pozyskać specjalistów",
+        "description": "Brakuje potrzebnych wysoko wykwalifikowanych pracowników, więc plan produkcji ograniczono do poziomu, z którym poradzi sobie obecny personel. Wysoko wykwalifikowane kadry kształcą uniwersytety. Zbuduj uniwersytet i przydziel jego limity przyjęć do potrzebnej umiejętności."
       },
       "labor_shortage": {
-        "title": "Za mało pracowników",
-        "description": "Zabezpieczony {{total_labor}} wymaganej pracy {{quota}} pracy."
+        "title": "Brakuje pracowników",
+        "description": "Z wymaganej siły roboczej {{quota}} pozyskano {{total_labor}}."
       },
       "labor_market_tight": {
-        "title": "W mieście nie ma pracowników",
-        "description": "Bezrobocie to tylko {{unemployment_rate}}%, więc nikt nie może zatrudnić. Dodaj mieszkania, aby przyciągnąć mieszkańców."
+        "title": "W mieście brakuje rąk do pracy",
+        "description": "Stopa bezrobocia wynosi zaledwie {{unemployment_rate}}%, więc nie ma kogo zatrudnić. Zbuduj więcej mieszkań, aby przyciągnąć ludność."
       },
       "labor_unfilled": {
-        "title": "Osoby poszukujące pracy istnieją, ale nie przychodzą",
-        "description": "Bezrobocie wynosi {{unemployment_rate}}%. Prawdopodobne są długie dojazdy, niskie zarobki lub niedopasowanie umiejętności."
+        "title": "Są chętni do pracy, ale się nie zgłaszają",
+        "description": "Stopa bezrobocia wynosi {{unemployment_rate}}%. Możliwe przyczyny to długie dojazdy, niskie płace lub niedopasowanie umiejętności."
       },
       "budget_capped": {
-        "title": "Budżet jest niewystarczający",
-        "description": "Przydzielony budżet jest znacznie poniżej tego, co jest wymagane. Przejrzyj przydział budżetu."
+        "title": "Niewystarczający budżet",
+        "description": "Przydzielony budżet jest znacznie niższy od potrzebnego. Przejrzyj podział budżetu."
       },
       "construction_shortage": {
-        "title": "Nie można uzyskać {{product_name}}",
+        "title": "Brak zaopatrzenia: {{product_name}}",
         "description": ""
       },
       "line_paused_route_disconnected": {
-        "title": "Trasa między przystankami jest zepsuta",
-        "description": "Kolejne przystanki w pętli nie są połączone torem lub ulicą, którą można poruszać w wymaganym kierunku. Odbuduj uszkodzony odcinek lub zrewiduj trasę. Aby zawrócić na tory jednokierunkowe, zawróć na stację na torze, która biegnie w obie strony (np. podwójna ścieżka ułożona jako pojedyncza ścieżka) lub pozwól pociągom poruszać się na przeciwny tor, łącząc tory w jednym węźle lub układając crossover i umieść przystanki powrotne na platformach dla przeciwny kierunek."
+        "title": "Trasa przejazdu między przystankami jest przerwana",
+        "description": "Przystanki sąsiadujące w kolejności kursowania nie są połączone torem ani ulicą przejezdną w wymaganym kierunku. Odbuduj przerwany fragment lub zmień trasę przejazdu. Aby zawrócić na torach jednokierunkowych, zawróć na stacji z torem przejezdnym w obu kierunkach (np. dwutorowym, który jako jedna trasa obejmuje oba kierunki) albo umożliw przejazd na tor przeciwnego kierunku, łącząc tory w jednym węźle lub układając łącznicę między torami, a przystanki w drodze powrotnej umieść przy peronach przeciwnego kierunku."
       },
       "line_paused_no_underlay": {
-        "title": "stop nie ma podstawowej ścieżki",
-        "description": "Tor lub ulica, na której przystanek znajdował się, już nie istnieje."
+        "title": "Pod przystankiem nie ma trasy bazowej",
+        "description": "Tor lub ulica, na której stał przystanek, już nie istnieje."
       },
       "line_paused_train_too_long": {
-        "title": "Pociąg jest dłuższy niż sekcja przystanku",
-        "description": "Zmniejsz wagony na pociąg lub wydłuż odcinek, na którym znajduje się przystanek ( peron stacji lub odcinek uliczny lub torowy)."
+        "title": "Pociąg jest dłuższy niż odcinek z przystankiem",
+        "description": "Zmniejsz liczbę wagonów w pociągu lub wydłuż odcinek z przystankiem (peron stacji albo odcinek drogi lub toru)."
       },
       "line_no_vehicle_product": {
-        "title": "Ten typ linii nie ma zdefiniowanego pojazdu",
+        "title": "Dla tego rodzaju linii nie zdefiniowano pojazdów",
         "description": ""
       },
       "line_vehicle_shortage": {
-        "title": "Nie można kupić pojazdów",
-        "description": "Zakupiono {{received}} wymaganych samochodów {{required}}."
+        "title": "Nie udaje się pozyskać pojazdów",
+        "description": "Pozyskane pojazdy: {{received}} z wymaganych {{required}}."
       },
       "line_off_network": {
-        "title": "linia nie jest w uruchomionej sieci",
-        "description": "Podstawowa trasa linii nie jest powiązana z żadnym torem ani ulicą."
+        "title": "Linia nie jest połączona z siecią torów i ulic",
+        "description": "Trasa bazowa linii nie jest połączona z żadnym torem ani ulicą."
       },
       "transit_no_depot": {
-        "title": "Brak {{product_name}} magazynu w mieście",
-        "description": "Zbuduj magazyn i połącz go z działającą siecią."
+        "title": "Brak zajezdni w mieście: {{product_name}}",
+        "description": "Zbuduj zajezdnię i podłącz ją do sieci torów i ulic."
       },
       "transit_depots_inactive": {
-        "title": "Składy nie działają",
-        "description": "Żaden z magazynów {{count}} w mieście nie jest aktywny."
+        "title": "Zajezdnie nie działają",
+        "description": "Żadna z zajezdni w mieście (liczba: {{count}}) nie działa."
       },
       "transit_depots_unconnected": {
-        "title": "Składy nie są połączone z uruchomioną siecią",
-        "description": "Żaden z magazynów {{count}} nie jest powiązany ze śledzeniem lub ulicą. W przypadku kolei połóż bocznicę od głównej linii do terminalu magazynu."
+        "title": "Zajezdnie nie są podłączone do sieci torów i ulic",
+        "description": "Żadna z zajezdni (liczba: {{count}}) nie jest połączona z torem ani ulicą. W przypadku kolei ułóż bocznicę od linii głównej do przyłącza zajezdni."
       },
       "transit_depot_other_network": {
-        "title": "Magazyny są w innej sieci",
-        "description": "{{count}} Depot(y) są połączone z siecią śledzenia, która nie dociera do tej linii. Połącz sieci lub zbuduj na tym magazynie."
+        "title": "Zajezdnie są w innej sieci",
+        "description": "Zajezdnie (liczba: {{count}}) są podłączone do innej sieci torów, która nie łączy się z tą linią. Połącz sieci torami lub zbuduj zajezdnię w tej sieci."
       },
       "transit_vehicle_insufficient": {
-        "title": "Za mało pojazdów jest produkowanych",
-        "description": "Magazyny w tej sieci ({{depots}}) dostarczają {{supply}} samochodów wbrew {{demand}} wymaganym przez linie."
+        "title": "Niewystarczająca produkcja pojazdów",
+        "description": "Zajezdnie w tej sieci (liczba: {{depots}}) dostarczają pojazdy: {{supply}}, a linie potrzebują: {{demand}}."
       },
       "transit_unexplained": {
-        "title": "Magazyny wyglądają zdrowo",
-        "description": "Dostawa i łączność są wystarczające, więc niedobór mógł być przejściowy. Sprawdź wynik następnej epoki."
+        "title": "Zajezdnie wyglądają na sprawne",
+        "description": "Podaż i połączenia są wystarczające, więc niedobór mógł być chwilowy. Sprawdź wyniki następnej epoki."
       }
     }
   }

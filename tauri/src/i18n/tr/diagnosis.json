@@ -1,201 +1,201 @@
 {
   "diagnosis": {
-    "refresh": "tekrar teşhis koymak",
-    "note": "Son simülasyon sonucuna göre problemin nedenlerini izler. Düzelttikten sonra, yenilemek için bir sonraki çağı çalıştırın.",
+    "refresh": "Yeniden teşhis et",
+    "note": "Son simülasyon sonucuna göre sorunun nedenlerini adım adım izler. Sorunu giderdikten sonra bir sonraki dönemi çalıştırdığınızda sonuç güncellenir.",
     "noProblem": {
       "title": "Sorun bulunamadı",
-      "description": "Şu anda bu temsilci için rapor edilecek bir şey yok."
+      "description": "Şu anda bu ekonomik aktör için bildirilecek bir sorun yok."
     },
     "target": {
       "agent": "Tesis #{{id}}",
-      "path": "yol #{{id}}",
-      "node": "kavşak #{{id}}",
+      "path": "Güzergâh #{{id}}",
+      "node": "Düğüm #{{id}}",
       "nodeAt": "Nokta ({{x}}, {{z}})"
     },
     "nodes": {
       "agent_not_found": {
-        "title": "Temsilci bulunamadı",
+        "title": "Ekonomik aktör bulunamadı",
         "description": ""
       },
       "cycle": {
-        "title": "dairesel neden",
-        "description": "Bu tesis zaten daha ileri teşhis ediliyor (karşılıklı bağımlılık)."
+        "title": "Döngüsel neden",
+        "description": "Bu tesisin sorunu üst kademede zaten teşhis ediliyor (karşılıklı bağımlılık)."
       },
       "depth_limit": {
-        "title": "daha derine inmeyi bıraktı",
-        "description": "Sebep zinciri çok uzun. Tesisi doğrudan teşhis edin."
+        "title": "Daha fazla derine inilmiyor",
+        "description": "Neden zinciri çok uzun olduğundan burada durduruldu. İlgili tesisi doğrudan teşhis edin."
       },
       "no_alert": {
-        "title": "Bu tesisin kendisi sorun olmadığını bildiriyor",
-        "description": "Çıkışı basitçe boyutu veya kullanım hedefi ile sınırlı olabilir."
+        "title": "Bu tesisin kendisinde sorun yok",
+        "description": "Arzın yetersiz olmasının nedeni tesisin ölçeği veya kapasite kullanımı hedefi olabilir."
       },
       "facility_inactive": {
-        "title": "Tesis çalışmıyor",
-        "description": "Yapım aşamasında olduğu, duraklatıldığı, çöktüğü veya benzer bir durumda olduğu için üretmiyor. Tesis ayrıntılarını kontrol edin."
+        "title": "Tesis faaliyette değil",
+        "description": "İnşaat, durdurulma, çökme gibi nedenlerle üretim yapmıyor. Tesisin ayrıntılarını kontrol edin."
       },
       "producer_ref": {
-        "title": "tedarikçi tesisi",
+        "title": "Tedarikçi tesis",
         "description": ""
       },
       "material_shortage": {
-        "title": "hammadde temin edemez",
-        "description": "Bazı gerekli malzemeler gelmedi, bu nedenle üretim planın altında kaldı."
+        "title": "Hammadde tedarik edilemiyor",
+        "description": "Gerekli hammaddelerin bir kısmı ulaşmadığından üretim planın gerisinde kalıyor."
       },
       "material_unmet": {
-        "title": "{{product_name}} kıtlığı",
-        "description": "Gerekli {{demand}}'un ({{ratio}}) {{received}}'unu aldı."
+        "title": "{{product_name}} sıkıntısı",
+        "description": "Gereken miktar {{demand}}, alınabilen {{received}} (%{{ratio}})."
       },
       "material_unmet_unknown": {
-        "title": "Eksik malzeme tanımlanamadı",
-        "description": "Bu, talep küçüldükten hemen sonra gerçekleşebilir. Bir sonraki çağın sonucunu kontrol edin."
+        "title": "Eksik hammadde belirlenemedi",
+        "description": "Bu durum, örneğin talep yeni azaldığında ortaya çıkabilir. Bir sonraki dönemin sonucunu kontrol edin."
       },
       "infra_disconnected": {
         "title": "{{product_name}} ağına bağlı değil",
         "description": ""
       },
       "infra_no_terminal": {
-        "title": "Bağlantı terminali yok",
-        "description": "Bu tesiste {{product_name}} için terminal düğümü yoktur."
+        "title": "Bağlantı noktası yok",
+        "description": "Bu tesiste {{product_name}} için bağlantı noktası düğümü yok"
       },
       "infra_terminal_unconnected": {
-        "title": "Bağlantı terminaline hiçbir yol ulaşamaz",
+        "title": "Bağlantı noktasına hiçbir güzergâh bağlı değil",
         "description": ""
       },
       "infra_link_not_active": {
-        "title": "Besleyici yolu henüz aktif değil",
-        "description": "Terminale ulaşan {{count}} yol(lar) yapım aşamasındadır veya başlamamıştır."
+        "title": "Besleme güzergâhı henüz faaliyette değil",
+        "description": "Bağlantı noktasına ulaşan {{count}} güzergâh inşa ediliyor veya inşaatına henüz başlanmadı"
       },
       "infra_link_incompatible": {
-        "title": "Besleyici yolu {{product_name}} taşıyamaz",
-        "description": "Terminale ulaşan yol, bu malı taşıyamayan bir türdür (örneğin, elektriksiz iz)."
+        "title": "Besleme güzergâhı {{product_name}} taşıyamıyor",
+        "description": "Bağlantı noktasına ulaşan güzergâh bu malı taşıyamayan bir türde (elektriklendirilmemiş hat gibi)"
       },
       "infra_no_producer": {
-        "title": "Şehirde {{product_name}} üreticisi yok",
+        "title": "Şehirde {{product_name}} üreten tesis yok",
         "description": ""
       },
       "infra_producers_inactive": {
-        "title": "{{product_name}} üreticileri çalışmıyor",
-        "description": "Şehirdeki {{count}} üreticisinin hiçbiri aktif değil."
+        "title": "{{product_name}} üretim tesisleri faaliyette değil",
+        "description": "Şehirdeki {{count}} üretim tesisinin hiçbiri faaliyette değil"
       },
       "infra_producers_unconnected": {
-        "title": "Üreticiler ağa bağlı değil",
-        "description": "{{count}} üretici(ler) etkin ancak hiçbiri {{product_name}} ağına bağlı değil."
+        "title": "Üretim tesisleri ağa bağlı değil",
+        "description": "{{count}} üretim tesisi faaliyette, ancak hiçbiri {{product_name}} ağına bağlı değil"
       },
       "infra_network_split": {
-        "title": "Bu ağın üreticisi yok",
-        "description": "{{product_name}} üreticileri ({{producers}}) farklı bir ağda. İki ağ parçalandı veya hiç katılmadı."
+        "title": "Bu ağda üretim tesisi yok",
+        "description": "{{product_name}} üretim tesisleri ({{producers}} adet) başka bir ağa bağlı. İki ağ arada kopuk ya da hiç birbirine bağlanmamış"
       },
       "infra_link_under_construction": {
-        "title": "Bir bağlantı yolu yapım aşamasında",
-        "description": "Bu ağa katılacak {{count}} yol(lar) beklemede."
+        "title": "Ağları birleştirecek bir güzergâh inşa ediliyor",
+        "description": "Bu ağa bağlanması planlanan {{count}} güzergâh var"
       },
       "infra_gap_detected": {
-        "title": "Ağ burada bozuldu",
-        "description": "İki ağın uç noktaları yalnızca {{distance}} m'dir."
+        "title": "Ağ burada kopuk",
+        "description": "İki ağın uç noktaları arasında yalnızca {{distance}} m var"
       },
       "infra_tap_missing": {
-        "title": "üretici ağına girmedi",
+        "title": "Üretim tesislerinin bulunduğu ağa bağlı değil",
         "description": ""
       },
       "infra_generation_shortage": {
-        "title": "Yeterince {{product_name}} üretilmiyor",
-        "description": "Bu ağ, {{demand}} ({{producers}} üretici(ler)) talebine karşı {{supply}} üretir."
+        "title": "{{product_name}} üretimi yetersiz",
+        "description": "Bu ağın üretimi {{supply}}, talebi {{demand}} ({{producers}} üretim tesisi)"
       },
       "infra_transmission_bottleneck": {
-        "title": "Ağ kapasitesi doymuş",
-        "description": "{{count}} yol(lar) tam kapasite çalışıyor."
+        "title": "Ağ kapasitesi yetersiz",
+        "description": "{{count}} güzergâh tam kapasiteyle kullanılıyor"
       },
       "infra_unexplained": {
-        "title": "Ağ sağlıklı görünüyor",
-        "description": "Üretim ve bağlantı yeterlidir, bu nedenle eksiklik geçici olabilir. Bir sonraki çağın sonucunu kontrol edin."
+        "title": "Ağın durumu normal görünüyor",
+        "description": "Üretim ve bağlantı yeterli olduğundan yetersizlik geçici olabilir. Bir sonraki dönemin sonucunu kontrol edin."
       },
       "market_no_supplier": {
         "title": "Şehirde {{product_name}} tedarikçisi yok",
-        "description": "Aktif yerli üretici ve ithalat yoktur."
+        "description": "Yurt içinde faaliyette olan üretici yok ve ithalat da yapılmıyor"
       },
       "market_supply_insufficient": {
-        "title": "{{product_name}} arzı talebin gerisinde kaldı",
-        "description": "Şehir genelinde {{demand}} birim siparişe karşılık {{supply}} birim arz var ({{producers}} üretici, {{hubs}} ithalat merkezi)."
+        "title": "{{product_name}} arzı talebi karşılamıyor",
+        "description": "Arz {{supply}}, şehir genelindeki siparişler {{demand}} ({{producers}} üretici, {{hubs}} ithalat merkezi)"
       },
       "market_unmatched": {
-        "title": "Piyasada {{product_name}} sağlanamadı",
-        "description": "Şehir çapında tedarik {{supply}}, {{demand}} siparişlerini kapsar, ancak bu tesise ulaşmadı. Mesafe veya fiyat neden olabilir."
+        "title": "{{product_name}} piyasadan tedarik edilemedi",
+        "description": "Şehir genelinde arz ({{supply}}) siparişleri ({{demand}}) karşılıyor, ancak bu tesise ulaşmadı. Neden mesafe veya fiyat olabilir."
       },
       "service_out_of_range": {
-        "title": "{{product_name}} için hizmet aralığının dışında",
-        "description": "Bu tesisin sitesi, şehirde {{product_name}} ({{producers}}) sağlayan herhangi bir tesisin menzili içinde değil."
+        "title": "{{product_name}} hizmet alanının dışında",
+        "description": "Bu tesisin inşaat alanı, {{product_name}} sağlayan tesislerin ({{producers}} adet) etki alanı içinde değil"
       },
       "high_skill_shortage": {
-        "title": "kalifiye personeli güvence altına alamaz",
-        "description": "Yeterince yüksek vasıflı işçi yok, bu nedenle üretim planı mevcut personelin kaldırabileceklerine indirgeniyor. Yüksek vasıflı işçiler üniversitelerde eğitilir: bir tane inşa edin ve kabul kotalarını gerekli beceriye tahsis edin."
+        "title": "Uzman personel sağlanamıyor",
+        "description": "Gereken yüksek beceriye sahip personel yetersiz olduğundan üretim planı, mevcut personelin karşılayabileceği düzeye düşürüldü. Yüksek beceriye sahip personel üniversitelerde yetiştirilir. Üniversite kurun ve kontenjanlarını ilgili beceriye ayırın."
       },
       "labor_shortage": {
-        "title": "Yeterli çalışan yok",
-        "description": "Gerekli {{quota}} iş gücünden {{total_labor}} güvence altına alındı."
+        "title": "Çalışan sayısı yetersiz",
+        "description": "Gereken işgücü {{quota}}, sağlanabilen {{total_labor}}."
       },
       "labor_market_tight": {
-        "title": "Şehirde işçi kalmadı",
-        "description": "İşsizlik yalnızca %{{unemployment_rate}}, dolayısıyla işe alınabilecek kimse yok. Sakinleri çekmek için konut ekleyin."
+        "title": "Şehirde çalışacak kimse kalmadı",
+        "description": "İşsizlik oranı %{{unemployment_rate}} gibi düşük bir düzeyde; işe alınabilecek kimse yok. Konut ekleyerek nüfus çekin."
       },
       "labor_unfilled": {
-        "title": "iş arayanlar var ama gelmiyorlar",
-        "description": "İşsizlik % {{unemployment_rate}}. Uzun yolculuklar, düşük ücretler veya beceri uyumsuzluğu muhtemeldir."
+        "title": "İş arayanlar var ama gelmiyor",
+        "description": "İşsizlik oranı %{{unemployment_rate}}. İşe gidiş mesafesinin uzun olması, ücretlerin düşük olması veya becerilerin uyuşmaması gibi nedenler olabilir."
       },
       "budget_capped": {
         "title": "Bütçe yetersiz",
-        "description": "Tahsis edilen bütçe gerekli olanın çok altındadır. Bütçe tahsisini gözden geçirin."
+        "description": "Ayrılan bütçe gereken tutarın çok altında. Bütçe dağılımını gözden geçirin."
       },
       "construction_shortage": {
-        "title": "{{product_name}} sağlanamıyor",
+        "title": "{{product_name}} tedarik edilemiyor",
         "description": ""
       },
       "line_paused_route_disconnected": {
-        "title": "Duraklar arasındaki rota bozuldu",
-        "description": "Döngüdeki ardışık duraklar, gerekli yönde hareket ettirilebilecek ray veya cadde ile bağlantılı değildir. Kırık bölümü yeniden oluşturun veya rotayı revize edin. Tek yönlü raylara geri dönmek için, her iki yoldan da (tek bir yol olarak döşenmiş çift ray gibi) pistteki bir istasyona geri dönün veya trenlerin rayları tek bir düğümde birleştirerek veya bir geçişi döşeyerek karşı yola taşımasına izin verin ve geri dönüş duraklarını platformlara yerleştirin. ters yön."
+        "title": "Duraklar arasındaki rota kopuk",
+        "description": "Tur sırasında art arda gelen duraklar, gereken yönde geçilebilen bir hat veya sokakla birbirine bağlı değil. Kopuk kesimi yeniden inşa edin veya rotayı gözden geçirin. Tek yönlü hatlarda geri dönmek için, iki yönde de kullanılabilen bir hattaki (iki yönü tek güzergâhta taşıyan çift hat gibi) bir istasyonda dönün ya da hatları tek bir düğümde birleştirerek veya makas bağlantısı döşeyerek trenlerin karşı yöndeki hatta geçmesini sağlayın; dönüş duraklarını da karşı yöndeki perona yerleştirin."
       },
       "line_paused_no_underlay": {
-        "title": "durağın altında bir yol yok",
-        "description": "Durmanın olduğu parkur veya sokak artık yok."
+        "title": "Durağın altında güzergâh yok",
+        "description": "Durağın üzerinde bulunduğu hat veya sokak artık yok."
       },
       "line_paused_train_too_long": {
-        "title": "Tren, durağının bölümünden daha uzun",
-        "description": "Tren başına arabaları azaltın veya durağın bulunduğu bölümü genişletin (bir istasyon platformu veya bir sokak veya ray bölümü)."
+        "title": "Tren, durağın bulunduğu kesimden uzun",
+        "description": "Tren başına vagon sayısını azaltın veya durağın bulunduğu kesimi (istasyon peronu ya da yol veya ray kesimi) uzatın."
       },
       "line_no_vehicle_product": {
-        "title": "Bu hat tipinde araç tanımlı değil",
+        "title": "Bu hat türü için tanımlı araç yok",
         "description": ""
       },
       "line_vehicle_shortage": {
-        "title": "Araç tedarik edemez",
-        "description": "Gereken {{required}} vagondan {{received}} adedi tedarik edildi."
+        "title": "Araç tedarik edilemiyor",
+        "description": "Gereken araç {{required}}, tedarik edilen {{received}}."
       },
       "line_off_network": {
-        "title": "hat çalışan bir ağda değil",
-        "description": "Hattın temelindeki rota, herhangi bir parkur veya sokağa bağlı değildir."
+        "title": "Hat bir ulaşım ağı üzerinde değil",
+        "description": "Hattın altındaki rota hiçbir hat veya sokakla bağlantılı değil."
       },
       "transit_no_depot": {
         "title": "Şehirde {{product_name}} deposu yok",
-        "description": "Bir depo oluşturun ve çalışan ağa bağlayın."
+        "description": "Bir depo inşa edip ulaşım ağına bağlayın."
       },
       "transit_depots_inactive": {
-        "title": "Depolar çalışmıyor",
-        "description": "Şehirdeki {{count}} depolarının hiçbiri etkin değil."
+        "title": "Depolar faaliyette değil",
+        "description": "Şehirdeki {{count}} deponun hiçbiri faaliyette değil."
       },
       "transit_depots_unconnected": {
-        "title": "Depolar çalışan ağa bağlı değil",
-        "description": "{{count}} depolarının hiçbiri Track veya Street ile bağlantılı değildir. Ray için, ana hattan depo terminaline bir dış cephe kaplaması yapın."
+        "title": "Depolar ulaşım ağına bağlı değil",
+        "description": "{{count}} deponun hiçbiri bir hatta veya sokağa bağlı değil. Demiryolunda ana hattan deponun bağlantı noktasına bir bağlantı hattı döşeyin."
       },
       "transit_depot_other_network": {
-        "title": "Depolar farklı bir ağda",
-        "description": "{{count}} depo(lar) bu hatta ulaşmayan bir izleme ağına bağlıdır. Ağları bağlayın veya bunun üzerine bir depo oluşturun."
+        "title": "Depolar başka bir ulaşım ağında",
+        "description": "{{count}} depo, bu hatla bağlantısı olmayan başka bir ray ağına bağlı. Ağları raylarla birbirine bağlayın veya bu ağa bir depo inşa edin."
       },
       "transit_vehicle_insufficient": {
-        "title": "Yeterli araç üretilmedi",
-        "description": "Bu ağdaki depolar ({{depots}}) hatların gerektirdiği {{demand}}'a karşı {{supply}} araba tedarik etmektedir."
+        "title": "Araç üretimi yetersiz",
+        "description": "Bu ulaşım ağındaki depoların ({{depots}} adet) arzı {{supply}} araç, hatların ihtiyacı ise {{demand}} araç."
       },
       "transit_unexplained": {
-        "title": "Depolar sağlıklı görünüyor",
-        "description": "Arz ve bağlantı yeterlidir, bu nedenle eksiklik geçici olabilir. Bir sonraki çağın sonucunu kontrol edin."
+        "title": "Depoların durumu normal görünüyor",
+        "description": "Arz ve bağlantı yeterli olduğundan yetersizlik geçici olabilir. Bir sonraki dönemin sonucunu kontrol edin."
       }
     }
   }

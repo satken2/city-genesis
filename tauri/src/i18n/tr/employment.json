@@ -1,14 +1,14 @@
 {
   "employment": {
-    "requiredSkill": "gerekli beceri",
-    "wage": "Ücret oranı",
-    "quota": "gerekli işçi",
-    "totalLabor": "kiralanmış işçi",
-    "employees": "Çalışan Listesi",
-    "hired": "Kiralanmış",
+    "requiredSkill": "Gereken beceri",
+    "wage": "Birim ücret",
+    "quota": "Gereken işgücü",
+    "totalLabor": "İstihdam edilen işgücü",
+    "employees": "Çalışan listesi",
+    "hired": "Dolu",
     "vacant": "Boş",
-    "noQuota": "Emek Gerekmez",
-    "noEmployees": "çalışan yok",
-    "statusTitle": "Çalışma durumu"
+    "noQuota": "İşgücü gerekmiyor",
+    "noEmployees": "Çalışan yok",
+    "statusTitle": "İstihdam durumu"
   }
 }

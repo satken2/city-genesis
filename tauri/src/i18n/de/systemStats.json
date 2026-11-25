@@ -4,11 +4,11 @@
       "title": "Simulationslast",
       "heading": "Rechenzeit der letzten Epoche ({{days}} Tage)",
       "noData": "Keine Messdaten",
-      "note": "Wenn mehrere Epochen hintereinander laufen, wird die letzte angezeigt. Die Betriebszählung ist eine grobe Schätzung der Anzahl der Kombinationen in den Hauptvergleichen basierend auf der Größe der Stadt.",
-      "colGroup": "Verarbeiten",
+      "note": "Werden mehrere Epochen hintereinander ausgeführt, gilt der Wert der letzten Epoche. Die Anzahl der Operationen ist ein grober, aus der Stadtgröße geschätzter Richtwert für die Anzahl der Kombinationen in den wichtigsten Vergleichen.",
+      "colGroup": "Prozess",
       "colTime": "Zeit",
-      "colWorkload": "Operationszählung",
-      "workloadHint": "Grobe Anzahl von Hauptvergleichen (Array-Elemente). Bewegen Sie den Mauszeiger über einen Wert, um die Aufschlüsselung zu sehen.",
+      "colWorkload": "Operationen",
+      "workloadHint": "Richtwert für die Anzahl der Kombinationen in den wichtigsten Vergleichen (Array-Elemente). Bewegen Sie die Maus über einen Wert, um die Aufschlüsselung zu sehen.",
       "seconds": "{{value}} s",
       "ms": "{{value}} ms"
     },
@@ -16,71 +16,71 @@
       "market": "Warenmarkt",
       "realestate": "Immobilienmarkt",
       "labor": "Arbeitsmarkt",
-      "building_spawn": "Gebäude Spawn",
-      "agent_spawn": "Agent Spawn",
-      "routing": "Bürgerpfadfindung",
-      "transit": "Transit-Pfadfindung",
+      "building_spawn": "Gebäudeentstehung",
+      "agent_spawn": "Entstehung von Wirtschaftsakteuren",
+      "routing": "Routensuche der Bürger",
+      "transit": "Routensuche im öffentlichen Verkehr",
       "environment": "Wohnumfeld",
-      "other": "Andere"
+      "other": "Sonstiges"
     },
     "workload": {
-      "market": "Käufer {{demanders}} × Verkäufer {{suppliers}} (pro Produkt multipliziert und summiert)",
-      "realestate": "Haushalte in Betracht ziehen {{movers}} × Wohngebäude {{housing}}",
-      "labor": "Arbeitssuchende {{seekers}} × Arbeitgeber {{employers}}",
-      "building_spawn": "Kandidatenpakete {{parcels}} × Gebäudetypen × Bodenanzahl × Bodenverwendung",
-      "agent_spawn": "Produkte × Zonen {{zones}} × Zonen {{zones}}",
-      "routing": "2 Reisemodi × Zonen {{zones}} × Zonen {{zones}} × 3 Kandidatenrouten × Pfade {{paths}}",
-      "transit": "Stoppt {{stops}} × Knoten {{nodes}}",
-      "environment": "Gitter {{width}} × {{height}} × Sonnenpositionen"
+      "market": "Nachfrager {{demanders}} × Anbieter {{suppliers}} (je Ware multipliziert und summiert)",
+      "realestate": "Umzugswillige Haushalte {{movers}} × Gebäude mit Wohnungen {{housing}}",
+      "labor": "Arbeitsuchende {{seekers}} × Arbeitgeber {{employers}}",
+      "building_spawn": "Kandidatengrundstücke {{parcels}} × Gebäudearten × Geschosszahlen × Geschossnutzungen",
+      "agent_spawn": "Waren × Stadtbezirke {{zones}} × Stadtbezirke {{zones}}",
+      "routing": "2 Verkehrsmittel × Stadtbezirke {{zones}} × Stadtbezirke {{zones}} × 3 Kandidatenrouten × Trassen {{paths}}",
+      "transit": "Haltestellen {{stops}} × Knoten {{nodes}}",
+      "environment": "Raster {{width}} × {{height}} × Sonnenstände"
     },
     "entities": {
-      "colMetric": "Metrisch",
-      "colCount": "Graf",
-      "title": "Entität zählt",
-      "agents": "Agenten",
+      "colMetric": "Kennzahl",
+      "colCount": "Anzahl",
+      "title": "Objektanzahl",
+      "agents": "Wirtschaftsakteure",
       "households": "Haushalte",
-      "businesses": "Unternehmen",
+      "businesses": "Betriebe",
       "publicFacilities": "Öffentliche Einrichtungen",
       "buildings": "Gebäude",
       "citizens": "Bürger",
       "population": "Bevölkerung",
-      "zones": "Zonen",
-      "parcels": "Pakete",
-      "paths": "Wege",
-      "roads": "Reede",
-      "tracks": "Spuren",
-      "infra": "Versorgungsnetze",
+      "zones": "Stadtbezirke",
+      "parcels": "Grundstücke",
+      "paths": "Trassen",
+      "roads": "Straßen",
+      "tracks": "Schienenwege",
+      "infra": "Infrastrukturnetze",
       "nodes": "Knoten"
     },
     "approximation": {
-      "title": "Simulations-Näherung",
-      "intro": "Es sind Optionen zur Vereinfachung von Berechnungen für Großstädte geplant. Diese Einstellungen können noch nicht geändert werden.",
-      "warning": "Diese Änderungen können die Spielbalance beeinträchtigen. Sie können nicht rückgängig gemacht werden.",
-      "irreversible": "Änderungen, die durch die Näherung verursacht werden, bestehen in späteren Epochen. Nach der Aktivierung kann die Annäherung nicht deaktiviert oder reduziert werden.",
-      "undecided": "TBD",
+      "title": "Näherungen in der Simulation",
+      "intro": "Für große Städte sind Einstellungen geplant, die die Berechnung vereinfachen. Derzeit können sie nicht geändert werden.",
+      "warning": "Dies kann die Spielbalance beeinflussen. Es kann nicht rückgängig gemacht werden",
+      "irreversible": "Durch Näherungen entstandene Veränderungen bleiben auch in späteren Epochen bestehen. Aktivierte Näherungen können weder aufgehoben noch abgeschwächt werden.",
+      "undecided": "Noch offen",
       "candidates": "Kandidaten max.",
-      "epochs": "Epochen zwischen den Bewertungen",
+      "epochs": "Epochen pro Überprüfung",
       "off": "Aus",
-      "on": "Auf",
+      "on": "Ein",
       "goods": {
-        "label": "Kandidaten kaufen",
-        "description": "Begrenzen Sie die Lieferanten im Vergleich nach Preis und Entfernung."
+        "label": "Kaufkandidaten für Waren",
+        "description": "Begrenzt die Anzahl der Anbieter, deren Preis und Entfernung verglichen werden."
       },
       "jobs": {
-        "label": "Bewerber",
-        "description": "Begrenzen Sie die Arbeitgeber im Vergleich nach Löhnen und Pendelbedingungen."
+        "label": "Kandidaten bei Stellensuche und -wechsel",
+        "description": "Begrenzt die Anzahl der Arbeitgeber, deren Löhne und Pendelbedingungen verglichen werden."
       },
       "housing": {
-        "label": "Kandidaten für die Unterbringung",
-        "description": "Begrenzen Sie die Häuser im Vergleich nach Miete und Lage."
+        "label": "Kandidaten für Umzüge",
+        "description": "Begrenzt die Anzahl der Wohnungen, deren Miete und Lage verglichen werden."
       },
       "interval": {
-        "label": "Routine-Entscheidungsintervall",
-        "description": "Überprüfen Sie die Auswahl von Einkaufs-, Job- und Wohnimmobilien seltener."
+        "label": "Intervall regelmäßiger Entscheidungen",
+        "description": "Verringert, wie oft Einkaufsorte, Arbeitsplätze und Wohnorte überprüft werden."
       },
       "aggregation": {
-        "label": "Gruppieren Sie ähnliche Bürger und Haushalte",
-        "description": "Treffen Sie einige Entscheidungen gemeinsam für Bürger oder Haushalte mit ähnlichen Umständen."
+        "label": "Ähnliche Bürger und Haushalte gemeinsam berechnen",
+        "description": "Behandelt einen Teil der Entscheidungen von Bürgern oder Haushalten mit ähnlichen Bedingungen als Gruppe."
       }
     },
     "status": {
@@ -88,11 +88,11 @@
       "gpuDisabled": "GPU-Beschleunigung: deaktiviert",
       "coreSimulator": "Kernsimulator",
       "currentMemory": "Aktuelle Speichernutzung: {{value}}",
-      "peakMemory": "Spitzenspeichernutzung seit dem Start: {{value}}",
+      "peakMemory": "Maximale Speichernutzung seit dem Start: {{value}}",
       "graphic": "3D",
       "currentVram": "Aktuelle VRAM-Nutzung: {{value}}",
-      "usageTooltip": "Ganzer PC {{pc}} / dieses Spiel {{game}} / installiert {{total}}",
-      "legendPc": "Ganzer PC",
+      "usageTooltip": "Gesamter PC {{pc}} / Dieses Spiel {{game}} / Verbaut {{total}}",
+      "legendPc": "Gesamter PC",
       "legendGame": "Dieses Spiel"
     }
   }

@@ -5,24 +5,24 @@
     "patterns": {
       "grid_1": "Siatka 1",
       "grid_2": "Siatka 2",
-      "sprawl_1": "Rozciągnięcie 1",
-      "sprawl_2": "Rozciągnięcie 2",
-      "sprawl_3": "Rozciągnięcie 3",
-      "planned_city_1": "Planowane miasto 1",
+      "sprawl_1": "Zabudowa rozproszona 1",
+      "sprawl_2": "Zabudowa rozproszona 2",
+      "sprawl_3": "Zabudowa rozproszona 3",
+      "planned_city_1": "Miasto planowane 1",
       "split_1": "Podział 1"
     },
     "spacing": "Odstęp między drogami",
-    "blockLength": "Długość bloku",
-    "splitHint": "Obejmują całe bloki otoczone drogami. Drogi równoległe do długiego boku każdego bloku są rozmieszczone przez odstępy drogowe i skrzyżowanie dróg według długości bloku.",
-    "createParcels": "Twórz paczki",
+    "blockLength": "Długość kwartału",
+    "splitHint": "Zaznacz obszar obejmujący w całości kwartały otoczone drogami. Drogi równoległe do dłuższego boku kwartału zostaną wytyczone w odstępach ustawionych w polu „Odstęp między drogami”, a drogi prostopadłe – co odległość ustawioną w polu „Długość kwartału”.",
+    "createParcels": "Utwórz działki",
     "parcelArea": "Powierzchnia działki",
-    "hint": "Przytrzymaj Ctrl i przeciągnij, aby pomalować obszar do rozwoju. Przeciągnij do Pana, przewiń do powiększenia.",
-    "clear": "Oczyścić",
-    "preview": "Zapowiedź",
+    "hint": "Przytrzymaj Ctrl i przeciągnij lewym przyciskiem, aby zamalować obszar do zagospodarowania. Przeciągnij lewym przyciskiem, aby przesunąć mapę, a kółkiem myszy przybliżaj i oddalaj.",
+    "clear": "Wyczyść",
+    "preview": "Podgląd",
     "previewing": "Obliczanie...",
-    "create": "Potwierdź",
-    "creating": "Tworząc...",
-    "previewed": "Lekko wygładza teren w {{area}} i może planować {{roads}} odcinki drogowe i {{parcels}} paczki (odrzucono {{rejected}})",
-    "created": "wygładził teren i zaplanował {{roads}} odcinki drogowe i {{parcels}} działki (odrzucono {{rejected}})"
+    "create": "Zatwierdź",
+    "creating": "Tworzenie...",
+    "previewed": "Teren w obszarze {{area}} zostanie lekko wyrównany. Można zaplanować: drogi – {{roads}}, działki – {{parcels}} (odrzucone drogi: {{rejected}})",
+    "created": "Wyrównano teren i zaplanowano: drogi – {{roads}}, działki – {{parcels}} (odrzucone drogi: {{rejected}})"
   }
 }

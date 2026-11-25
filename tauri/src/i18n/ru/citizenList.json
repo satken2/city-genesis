@@ -4,9 +4,9 @@
     "tabTracking": "Список отслеживания",
     "name": "Имя",
     "age": "Возраст",
-    "ageSeparator": "к",
-    "search": "Поиск",
-    "noResults": "Ни один гражданин не совпадает.",
-    "truncated": "Показаны {{shown, number}} из {{total, number}} соответствующих граждан."
+    "ageSeparator": "–",
+    "search": "Найти",
+    "noResults": "Подходящих граждан нет.",
+    "truncated": "Показано {{shown, number}} из {{total, number}} подходящих граждан."
   }
 }

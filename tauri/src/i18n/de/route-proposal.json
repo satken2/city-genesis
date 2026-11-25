@@ -1,14 +1,14 @@
 {
   "route_proposal": {
-    "title": "Route vorschlagen",
+    "title": "Routenvorschlag",
     "mode": "Höhenmodus",
-    "fixed": "Halten Sie Wegpunkthöhen",
-    "adjust": "Passen Sie die Höhen der Zwischenwege an",
-    "help": "Erhältlich nach Beendigung der Form. Endpunkte und Wegpunkt-XZ-Positionen bleiben fest.",
-    "searching": "Suche…",
+    "fixed": "Höhen der Wegpunkte beibehalten",
+    "adjust": "Höhen der Zwischenwegpunkte anpassen",
+    "help": "Verfügbar, nachdem die Form festgelegt wurde. Anfangs- und Endpunkt sowie die XZ-Positionen der Wegpunkte bleiben fest.",
+    "searching": "Suche läuft …",
     "cancel": "Abbrechen",
     "undo": "Vorschlag rückgängig machen",
     "notFound": "Es wurde keine Route gefunden.",
-    "failed": "Routenvorschlag fehlgeschlagen."
+    "failed": "Der Routenvorschlag ist fehlgeschlagen."
   }
 }

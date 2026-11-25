@@ -1,26 +1,26 @@
 {
   "notifications": {
-    "trayTooltip": "Stadtbenachrichtigungen",
-    "empty": "Keine Probleme erfordern jetzt Aufmerksamkeit",
-    "loadFailed": "Benachrichtigungen konnten nicht geladen werden",
+    "trayTooltip": "Meldungen der Stadt",
+    "empty": "Derzeit gibt es keine Probleme, die Aufmerksamkeit erfordern",
+    "loadFailed": "Meldungen konnten nicht geladen werden",
     "types": {
-      "resource_runway": "Ressource \"{{name}}\" wird voraussichtlich in etwa {{remaining_epochs}} Epochen erschöpft sein",
-      "resource_depleted": "Ressource \"{{name}}\" wurde erschöpft",
-      "facility_inoperative": "Öffentliche Einrichtung \"{{name}}\" ist nicht in Betrieb",
-      "facility_inoperative_labor": "Öffentliche Einrichtung \"{{name}}\" ist aufgrund eines Arbeitskräftemangels nicht in Betrieb",
-      "facility_inoperative_material": "Öffentliche Einrichtung \"{{name}}\" funktioniert aufgrund eines Materialmangels nicht",
-      "facility_inoperative_high_skill": "Öffentliche Einrichtung \"{{name}}\" läuft aufgrund des Fachkräftemangels mit geringerer Kapazität",
-      "facility_inoperative_budget": "Öffentliche Einrichtung \"{{name}}\" läuft aufgrund eines Budgetmangels mit reduzierter Kapazität",
-      "education_low_enrollment": "Die Bildungseinrichtung \"{{name}}\" ist nicht ausgelastet - nur wenige Studenten sind eingeschrieben ({{enrolled}} von {{max_students}} Sitzen)",
-      "infra_facility_down": "Die Infrastruktureinrichtung \"{{name}}\" ist außer Betrieb",
-      "infra_disconnected": "{{count}} Einrichtungen sind vom Infrastrukturnetzwerk getrennt",
-      "rail_capacity_exceeded": "Die Zugfrequenz überschreitet die Streckenkapazität auf {{count}} Streckensegment(en)",
-      "collapse": "{{count}} Gebäude/Straßen sind eingestürzt",
-      "collapse_with_deaths": "{{count}} Gebäude / Straßen sind zusammengebrochen und haben {{deaths}} Menschen getötet",
-      "deaths_traffic": "{{count}} Menschen bei Verkehrsunfällen ums Leben",
-      "tenant_blocked_by_parcel_size": "Im Distrikt \"{{zone_name}}\" kann kein Gebäude für \"{{tenant_name}}\" erstellt werden (erfordert {{required}} m2, größte baubare {{max_capacity}} m2). Ein größeres Paket ist erforderlich",
-      "unknown": "Ein kritisches Ereignis ist aufgetreten",
-      "sanitation": "Die Sanitärversorgung verschlechtert sich für {{count}}-Haushalte. Verbesserung der Abwasser- und Abfallbehandlung."
+      "resource_runway": "Die Ressource „{{name}}“ wird voraussichtlich in etwa {{remaining_epochs}} Epochen erschöpft sein",
+      "resource_depleted": "Die Ressource „{{name}}“ ist erschöpft",
+      "facility_inoperative": "Die öffentliche Einrichtung „{{name}}“ kann nicht betrieben werden",
+      "facility_inoperative_labor": "Die öffentliche Einrichtung „{{name}}“ kann wegen Arbeitskräftemangels nicht betrieben werden",
+      "facility_inoperative_material": "Die öffentliche Einrichtung „{{name}}“ kann wegen Rohstoffmangels nicht betrieben werden",
+      "facility_inoperative_high_skill": "Die öffentliche Einrichtung „{{name}}“ hat ihren Betrieb wegen Fachkräftemangels eingeschränkt",
+      "facility_inoperative_budget": "Die öffentliche Einrichtung „{{name}}“ hat ihren Betrieb wegen Budgetmangels eingeschränkt",
+      "education_low_enrollment": "Die Bildungseinrichtung „{{name}}“ ist schwach ausgelastet, weil sich zu wenige Lernende einschreiben (eingeschrieben: {{enrolled}} / Plätze: {{max_students}})",
+      "infra_facility_down": "Die Infrastruktureinrichtung „{{name}}“ ist außer Betrieb",
+      "infra_disconnected": "Einrichtungen ohne Verbindung zum Infrastrukturnetz: {{count}}",
+      "rail_capacity_exceeded": "Gleise, auf denen die Zugzahl die Gleiskapazität übersteigt: {{count}}",
+      "collapse": "Eingestürzte Gebäude/Straßen: {{count}}",
+      "collapse_with_deaths": "Eingestürzte Gebäude/Straßen: {{count}}, Todesopfer: {{deaths}}",
+      "deaths_traffic": "Todesopfer durch Verkehrsunfälle: {{count}}",
+      "tenant_blocked_by_parcel_size": "Im Stadtbezirk „{{zone_name}}“ kann kein Gebäude gebaut werden, in das „{{tenant_name}}“ einziehen kann (benötigt: {{required}} m2, größtmöglich auf einem Grundstück: {{max_capacity}} m2). Ein größeres Grundstück ist erforderlich",
+      "unknown": "Ein schwerwiegendes Ereignis ist eingetreten",
+      "sanitation": "Haushalte mit sich verschlechternder Hygiene: {{count}}. Verbessern Sie die Abwasser- und Abfallentsorgung."
     }
   }
 }

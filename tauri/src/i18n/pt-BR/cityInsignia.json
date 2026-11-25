@@ -1,20 +1,20 @@
 {
   "cityInsignia": {
-    "emblem": "Emblema",
+    "emblem": "Brasão",
     "flag": "Bandeira da cidade",
-    "motif": "Motivo",
-    "fieldColor": "Cor do campo",
-    "motifColor": "Cor do motivo",
-    "pattern": "Padrão",
+    "motif": "Figura",
+    "fieldColor": "Cor de fundo",
+    "motifColor": "Cor da figura",
+    "pattern": "Padrão de fundo",
     "accentColor": "Cor de destaque",
-    "placement": "Posição do emblema",
+    "placement": "Posição do brasão",
     "loadImage": "Carregar imagem",
-    "randomize": "randomizar",
+    "randomize": "Aleatório",
     "apply": "Aplicar",
     "imageLoadFailed": "Não foi possível carregar a imagem.",
     "placements": {
       "center": "Centro",
-      "canton": "superior esquerdo",
+      "canton": "Canto superior esquerdo",
       "none": "Nenhum"
     },
     "motifs": {
@@ -36,16 +36,16 @@
       "crown": "Coroa",
       "snowflake": "Floco de neve",
       "flame": "Chama",
-      "diamond": "Diamante",
+      "diamond": "Losango",
       "cross": "Cruz"
     },
     "patterns": {
-      "plain": "Avião",
-      "bicolor": "bicolor",
-      "triband": "Tribanda",
-      "diagonal": "Diagonal",
-      "border": "Fronteira",
-      "bands": "Bandas"
+      "plain": "Liso",
+      "bicolor": "Duas faixas horizontais",
+      "triband": "Três faixas verticais",
+      "diagonal": "Divisão diagonal",
+      "border": "Borda",
+      "bands": "Faixas superior e inferior"
     }
   }
 }

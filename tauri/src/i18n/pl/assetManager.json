@@ -2,20 +2,20 @@
   "assetManager": {
     "tabs": {
       "buildings": "Budynki",
-      "paths": "Ścieżki",
+      "paths": "Trasy infrastruktury",
       "vehicles": "Pojazdy",
-      "props": "rekwizyty"
+      "props": "Obiekty dekoracyjne"
     },
     "additional": "Dodatkowe modele",
-    "loading": "Ładowanie modeli z widoku 3D…",
+    "loading": "Wczytywanie modeli z widoku 3D…",
     "noModel": "Brak modelu",
-    "noImage": "Brak obrazka",
+    "noImage": "Brak obrazu",
     "weight": "Waga",
-    "applyNote": "Zmiany wagi zaczną obowiązywać przy następnym uruchomieniu lub załadowaniu gry.",
+    "applyNote": "Zmiany wag zostaną zastosowane przy następnym rozpoczęciu lub wczytaniu gry.",
     "preview": {
-      "hint": "Przeciągnij, aby obrócić / Kółko, aby powiększyć",
-      "zoomIn": "Powiększ",
-      "zoomOut": "Pomniejsz",
+      "hint": "Przeciągnij, aby obrócić / kółko myszy, aby przybliżyć lub oddalić",
+      "zoomIn": "Przybliż",
+      "zoomOut": "Oddal",
       "reset": "Resetuj"
     }
   }

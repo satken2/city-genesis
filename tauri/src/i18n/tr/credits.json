@@ -1,15 +1,15 @@
 {
   "credits": {
-    "lead": "Bu oyun aşağıda listelenen varlıkları kullanır. Yazar adları, kaynaklar, lisans adları ve bir lisansın gerektirdiği herhangi bir ilişkilendirme metni kelimesi kelimesine çoğaltılır.",
-    "empty": "giriş yok.",
-    "requiredText": "Gerekli İlişkilendirme",
+    "lead": "Bu oyun aşağıdaki materyalleri kullanmaktadır. Yazar adları, kaynak adları, lisans adları ve lisans koşullarının gerektirdiği atıf metinleri orijinal hâliyle verilmiştir.",
+    "empty": "Gösterilecek öğe yok.",
+    "requiredText": "Gerekli atıf",
     "categories": {
       "bgm": "Müzik",
       "sfx": "Ses efektleri",
-      "image": "Görüntüler ve Simgeler",
-      "font": "yazı tipleri",
-      "model": "3B Modeller",
-      "texture": "dokuma"
+      "image": "Görseller ve simgeler",
+      "font": "Yazı tipleri",
+      "model": "3D modeller",
+      "texture": "Dokular"
     }
   }
 }

@@ -2,62 +2,62 @@
   "settings": {
     "title": "Ustawienia",
     "groups": {
-      "general": "Generał",
-      "display": "Pokaz",
+      "general": "Ogólne",
+      "display": "Ekran",
       "sound": "Dźwięk",
       "system": "System",
-      "about": "O",
-      "developer": "Ustawienia programisty"
+      "about": "Informacje",
+      "developer": "Ustawienia deweloperskie"
     },
     "swagger": {
       "label": "Swagger (dokumentacja API)",
-      "description": "Wyświetl podłączonego interfejsu API zaplecza w domyślnej przeglądarce",
+      "description": "Wyświetla specyfikację API symulatora rdzenia w domyślnej przeglądarce",
       "action": "Otwórz w przeglądarce"
     },
     "currencyUnit": {
       "label": "Jednostka waluty",
-      "description": "Jednostka pokazana z kwotami pieniężnymi. Pozostaw puste, aby podążać za językiem wyświetlania."
+      "description": "Jednostka wyświetlana przy kwotach. Pozostaw puste, aby dopasować ją do języka interfejsu."
     },
     "fontSize": {
-      "label": "Rozmiar czcionki",
-      "large": "Wielki",
-      "medium": "Medium",
+      "label": "Rozmiar tekstu",
+      "large": "Duży",
+      "medium": "Średni",
       "small": "Mały",
-      "custom": "Zwyczaj",
-      "preview": "aktualny rozmiar"
+      "custom": "Własny",
+      "preview": "Obecny rozmiar"
     },
     "monitor": {
-      "label": "Pokaz",
-      "prev": "Poprzedni wyświetlacz",
-      "next": "Następny wyświetlacz"
+      "label": "Monitor",
+      "prev": "Poprzedni monitor",
+      "next": "Następny monitor"
     },
     "graphicMonitor": {
-      "label": "Wyświetlacz widoku 3D"
+      "label": "Monitor widoku 3D"
     },
     "multiDisplay": {
-      "label": "Tryb wielu wyświetlania",
-      "description": "Pokazuje okna na innym ekranie niż ekran gry",
-      "on": "Na",
-      "off": "Poza"
+      "label": "Tryb wielu monitorów",
+      "description": "Wyświetla okna na innym monitorze niż ekran gry",
+      "on": "Włączony",
+      "off": "Wyłączony"
     },
     "popupMonitor": {
-      "label": "Wystawa w oknie"
+      "label": "Monitor okien"
     },
     "hintbar": {
-      "label": "Pasek podpowiedzi",
-      "show": "Pokazać",
-      "hide": "Ukryć",
-      "description": "Pasek u góry ekranu, który pokazuje wskazówki dotyczące obsługi"
+      "label": "Pasek wskazówek",
+      "show": "Pokazuj",
+      "hide": "Nie pokazuj",
+      "description": "Pasek u góry ekranu z podpowiedziami dotyczącymi sterowania"
     },
     "citizenVoice": {
       "label": "Głosy obywateli",
-      "show": "Pokazać",
-      "hide": "Ukryć",
-      "description": "Karta w prawym górnym rogu ekranu, która pokazuje kolejno uwagi mieszkańców"
+      "show": "Pokazuj",
+      "hide": "Nie pokazuj",
+      "description": "Karta w prawym górnym rogu ekranu, na której kolejno pojawiają się wypowiedzi mieszkańców"
     },
     "language": {
       "label": "Język",
-      "description": "Język wyświetlania interfejsu użytkownika. Jest to oddzielone od języka Twoich danych zapisanych.",
+      "description": "Język interfejsu. Jest niezależny od języka zapisu gry.",
       "ja": "日本語",
       "en": "English",
       "es-419": "Español (Latinoamérica)",
@@ -76,74 +76,74 @@
       "ar": "العربية"
     },
     "volume": {
-      "label": "Tom",
-      "master": "Głośność mistrzowska",
-      "bgm": "BGM",
+      "label": "Głośność",
+      "master": "Głośność główna",
+      "bgm": "Muzyka",
       "sfx": "Efekty dźwiękowe"
     },
     "compute": {
-      "label": "Przyspieszenie GPU",
+      "label": "Akceleracja GPU",
       "comingSoon": "Wkrótce",
       "cpu": "CPU",
       "gpu": "GPU",
-      "statusActive": "Aktywny GPU",
-      "statusInactive": "CPU aktywny",
-      "restartRequired": "Program główny uruchomi się ponownie po zmianie tego ustawienia",
-      "restarting": "Restart...",
-      "restartFailed": "Ponowne uruchomienie nie powiodło się",
-      "restartUnavailable": "Zapisane ustawienia. Zmiany zaczną obowiązywać przy następnym uruchomieniu gry",
-      "confirmRestart": "Przełącz tryb obliczeniowy na {{mode}}? Główny program zostanie zrestartowany.",
+      "statusActive": "GPU aktywne",
+      "statusInactive": "CPU aktywne",
+      "restartRequired": "Po zmianie ustawienia program główny zostanie uruchomiony ponownie",
+      "restarting": "Ponowne uruchamianie...",
+      "restartFailed": "Nie udało się ponownie uruchomić",
+      "restartUnavailable": "Zapisano ustawienia. Zmiany zaczną obowiązywać przy następnym uruchomieniu gry",
+      "confirmRestart": "Zmienić tryb obliczeń na {{mode}}? Program główny zostanie uruchomiony ponownie.",
       "restartAction": "Uruchom ponownie"
     },
     "windowReset": {
-      "label": "Pozycja i rozmiar okna",
-      "action": "Nastawić"
+      "label": "Położenie i rozmiar okien",
+      "action": "Resetuj"
     },
     "credits": {
-      "label": "kredyty",
-      "description": "Atrybucje dla zasobów i oprogramowania użyte w tej grze",
-      "action": "Widok"
+      "label": "Twórcy i licencje",
+      "description": "Informacje o prawach do materiałów i oprogramowania użytych w grze",
+      "action": "Pokaż"
     }
   },
   "saveLoad": {
     "newGame": "Nowa gra",
-    "overwriteSave": "Nadpisz Zapisz",
+    "overwriteSave": "Zapisz (nadpisz)",
     "saveAs": "Zapisz jako",
     "load": "Wczytaj",
-    "quitGame": "Zakończyć grę",
-    "returnToTop": "Wróć do górnego menu",
-    "loading": "Wczytywanie…",
+    "quitGame": "Zakończ grę",
+    "returnToTop": "Wróć do menu głównego",
+    "loading": "Wczytywanie...",
     "shuttingDown": "Zamykanie...",
-    "saveFailed": "Saving failed",
-    "loadFailed": "Nie udało się załadować",
-    "confirmNewGame": "Bieżące dane zostaną utracone. Rozpocząć nową grę?",
-    "confirmQuitGame": "Czy na pewno chcesz rzucić? Twój aktualny postęp nie jest zapisywany automatycznie.",
-    "confirmReturnToTop": "Wrócić do górnego menu? Twój aktualny postęp nie jest zapisywany automatycznie.",
+    "saveFailed": "Nie udało się zapisać",
+    "loadFailed": "Nie udało się wczytać",
+    "confirmNewGame": "Obecne dane zostaną utracone. Rozpocząć nową grę?",
+    "confirmQuitGame": "Zakończyć grę? Obecny postęp nie jest zapisywany automatycznie.",
+    "confirmReturnToTop": "Wrócić do menu głównego? Obecny postęp nie jest zapisywany automatycznie.",
     "confirm": "Tak",
     "cancel": "Nie",
     "saveAsScenario": "Zapisz jako scenariusz",
     "saveAsNewScenario": "Zapisz jako inny scenariusz",
-    "overwriteScenario": "Scenariusz zastępowania",
-    "backToGame": "Powrót do gry",
-    "saveName": "Zapisz nazwę",
-    "confirmOverwrite": "Zapisz zapis „{{name}}”?",
-    "confirmOverwriteScenario": "Zastąp scenariusz „{{name}}”?"
+    "overwriteScenario": "Nadpisz scenariusz",
+    "backToGame": "Wróć do gry",
+    "saveName": "Nazwa zapisu",
+    "confirmOverwrite": "Nadpisać zapis gry „{{name}}”?",
+    "confirmOverwriteScenario": "Nadpisać scenariusz „{{name}}”?"
   },
   "saveList": {
-    "noSaves": "Nie znaleziono zapisu danych",
-    "currentSave": "Aktualne dane",
-    "population": "Populacja",
+    "noSaves": "Brak zapisów gry",
+    "currentSave": "Bieżące dane",
+    "population": "Ludność",
     "inGameDate": "Data",
-    "savedAt": "Zapisane w",
+    "savedAt": "Data zapisu",
     "loadButton": "Wczytaj",
     "deleteButton": "Usuń",
-    "confirmLoad": "Załadować te dane zapisu?",
-    "confirmDelete": "Usunąć te zapisy danych? Tego nie da się cofnąć.",
-    "loading": "Wczytywanie…",
-    "loadFailed": "Nie udało się załadować",
-    "deleteFailed": "Delete failed",
-    "openFolderButton": "Otwórz folder Zapisz",
+    "confirmLoad": "Wczytać ten zapis gry?",
+    "confirmDelete": "Usunąć ten zapis gry? Tej operacji nie można cofnąć.",
+    "loading": "Wczytywanie...",
+    "loadFailed": "Nie udało się wczytać",
+    "deleteFailed": "Nie udało się usunąć",
+    "openFolderButton": "Pokaż folder z zapisami",
     "scenario": "Scenariusz",
-    "autosaveName": "{{name}} (automatyczne zapisywanie przy wyjściu)"
+    "autosaveName": "{{name}} (autozapis przy wyjściu)"
   }
 }

@@ -1,16 +1,16 @@
 {
   "interchange": {
     "kind": {
-      "ic": "Scambiare",
-      "jct": "Giunzione"
+      "ic": "Svincolo",
+      "jct": "Interconnessione"
     },
     "fallbackName": {
-      "ic": "IC #{{id}}",
-      "jct": "JCT #{{id}}"
+      "ic": "Svincolo #{{id}}",
+      "jct": "Interconnessione #{{id}}"
     },
     "connections": {
-      "from": "Da",
-      "to": "A",
+      "from": "Strada di provenienza",
+      "to": "Strada di destinazione",
       "road": "{{type}} #{{id}}",
       "none": "Nessuna coppia di strade collegate.",
       "direction": {
@@ -19,9 +19,9 @@
         "e": "Est",
         "se": "Sud-est",
         "s": "Sud",
-        "sw": "sud-ovest",
+        "sw": "Sud-ovest",
         "w": "Ovest",
-        "nw": "Nordovest"
+        "nw": "Nord-ovest"
       },
       "sideZone": "{{direction}} · {{zone}}"
     }

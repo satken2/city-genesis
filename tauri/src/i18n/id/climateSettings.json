@@ -1,15 +1,15 @@
 {
   "climateSettings": {
-    "title": "Pengaturan Iklim",
-    "name": "Nama Iklim",
-    "probabilities": "Probabilitas cuaca bulanan",
-    "probabilityHint": "Seret batas warna secara horizontal. Gunakan bidang di bawah ini untuk mengedit cuaca di 0% juga.",
-    "month": "bulan {{month}}",
-    "preset": "Preset Iklim",
+    "title": "Pengaturan iklim",
+    "name": "Nama iklim",
+    "probabilities": "Proporsi cuaca per bulan",
+    "probabilityHint": "Seret batas warna ke kiri atau kanan untuk menyesuaikan. Cuaca dengan 0% juga dapat diatur di kolom angka di bawah.",
+    "month": "Bulan {{month}}",
+    "preset": "Preset iklim",
     "current": "Pengaturan saat ini",
-    "chartHint": "Pilih seri dalam legenda, lalu seret poin bulanannya secara vertikal.",
-    "averageHint": "Suhu, curah hujan dan sinar matahari adalah rata-rata bulanan. Nilai aktual bervariasi setiap Siklus di sekitar rata-rata ini.",
+    "chartHint": "Pilih item pada legenda, lalu seret titik tiap bulan ke atas atau ke bawah untuk menyesuaikan.",
+    "averageHint": "Suhu, curah hujan, dan sinar matahari adalah nilai rata-rata bulanan. Nilai sebenarnya pada setiap siklus berfluktuasi di sekitar rata-rata ini.",
     "apply": "Terapkan",
-    "chart": "Bagan Iklim Bulanan"
+    "chart": "Grafik suhu dan curah hujan bulanan"
   }
 }

@@ -1,41 +1,41 @@
 {
   "zone": {
-    "titleWithId": "Bölge #{{id}}",
-    "color": "ilçe rengi",
-    "colorUpdateFailed": "Bölge rengi güncellenemedi",
-    "basicInfo": "Temel Bilgi",
+    "titleWithId": "Mahalle #{{id}}",
+    "color": "Mahalle rengi",
+    "colorUpdateFailed": "Mahalle rengi güncellenemedi",
+    "basicInfo": "Genel bilgiler",
     "area": "Alan",
     "zonePopulation": "Yerleşik nüfus",
-    "daytimePopulation": "gündüz nüfus",
-    "spaceAmount": "kat doluluk",
-    "slotStarvationTitle": "Bekleyen kiracılar barındırılamaz",
-    "slotStarvationWarning": "\"{{tenant}}\", tek bir binada en az {{required}} m2 alana ihtiyaç duyar, ancak bu bölgedeki en büyük inşa edilebilir en büyük olanı {{max}} m2'dir. Daha büyük bir parsel sağlayın.",
-    "restrictions": "yapı yönetmelikleri",
-    "restrictionUpdateFailed": "Bölge düzenlemeleri güncellenemedi",
-    "restrictionRequired": "Kapsama oranı, hacim oranı ve yükseklik boş olamaz",
-    "mergeConfirm": "\"{{source}}\" ile \"{{target}}\" ile birleştirin. Kaynak bölge, düzenleme ayarlarıyla birlikte ortadan kalkar.",
-    "mergeAction": "Birleşmek",
-    "mergeFailed": "Bölgeler birleştirilemedi (bitişik olmayan ilçeler birleştirilemez)",
-    "mergeNoRequest": "Birleştirmek için seçilmiş hiçbir bölge",
+    "daytimePopulation": "Gündüz nüfusu",
+    "spaceAmount": "Kat kullanım miktarı",
+    "slotStarvationTitle": "İnşa edilemediği için karşılanamayan yerleşim talebi var",
+    "slotStarvationWarning": "“{{tenant}}” adlı kiracının yerleşebilmesi için bina başına en az {{required}} m2 kat alanı gerekir; ancak bu mahallenin parsellerinde inşa edilebilecek en büyük alan {{max}} m2. Daha büyük bir parsel hazırlayın.",
+    "restrictions": "Yapı yönetmelikleri",
+    "restrictionUpdateFailed": "Mahalle yönetmelikleri güncellenemedi",
+    "restrictionRequired": "Taban alanı katsayısı, emsal ve yükseklik boş bırakılamaz",
+    "mergeConfirm": "“{{source}}” mahallesi “{{target}}” mahallesine katılacak. Kaynak mahalle ortadan kalkar ve yönetmelik ayarları da kaybolur.",
+    "mergeAction": "Birleştir",
+    "mergeFailed": "Mahalleler birleştirilemedi (bitişik olmayan mahalleler birleştirilemez)",
+    "mergeNoRequest": "Birleştirilecek mahalle seçilmedi",
     "edit": {
-      "toolHeading": "İşlem",
-      "toolCreate": "yeni bölge oluştur",
-      "toolExpand": "Bölgeyi Genişlet",
-      "toolExpandZone": "{{name}} alanı genişletin",
-      "modeHeading": "Seçim Yöntemi",
-      "modeBlock": "tüm blok",
-      "modeRoad": "sokak tarafı",
+      "toolHeading": "Düzenleme işlemi",
+      "toolCreate": "Yeni mahalle oluştur",
+      "toolExpand": "Mevcut mahalleyi genişlet",
+      "toolExpandZone": "Genişlet: {{name}}",
+      "modeHeading": "Alan belirleme yöntemi",
+      "modeBlock": "Bütün blok",
+      "modeRoad": "Yol kenarı",
       "hint": {
         "create": {
-          "block": "Ctrl'yi basılı tutun ve sokaklarla çevrili blokların üzerine sürükleyin; Boyalı bloklar, parselleriyle yeni bir bölge haline geliyor. Pan'a sürükleyin, Yakınlaştır'a kaydırın.",
-          "road": "Ctrl'yi tutun ve bir sokağın bir tarafına sürükleyin (yolun yarısı veya etrafındaki parseller); Caddenin o tarafı, kolileriyle yeni bir bölge haline geliyor. Pan'a sürükleyin, Yakınlaştır'a kaydırın."
+          "block": "Ctrl tuşunu basılı tutup sürükleyerek yollarla çevrili blokları boyayın; boyanan bloklar içindeki parsellerle birlikte yeni bir mahalle olur. Sürükleyerek haritayı kaydırın, tekerlekle yakınlaştırıp uzaklaştırın.",
+          "road": "Ctrl tuşunu basılı tutup sürükleyerek bir yolun bir tarafını (yol yüzeyinin yarısını veya ona bakan parselleri) boyayın; yolun o tarafı parsellerle birlikte yeni bir mahalle olur. Sürükleyerek haritayı kaydırın, tekerlekle yakınlaştırıp uzaklaştırın."
         },
         "expand": {
-          "block": "Bir bölgenin üzerine gelin, ardından Ctrl'yi tutun ve blokları parselleriyle o bölgeye eklemek için blokları sürükleyin. Pan'a sürükleyin, Yakınlaştır'a kaydırın.",
-          "road": "Bir bölgenin üzerine gelin, ardından Ctrl'yi tutun ve bir sokağın bir tarafına (yolun yarısı veya üzerindeki parseller) o tarafı, parselleriyle birlikte o bölgeye eklemek için sürükleyin. Pan'a sürükleyin, Yakınlaştır'a kaydırın."
+          "block": "Fareyle bir mahallenin üzerine gelip Ctrl tuşunu basılı tutarak sürükleyin ve blokları boyayın; bloklar içindeki parsellerle birlikte o mahalleye katılır. Sürükleyerek haritayı kaydırın, tekerlekle yakınlaştırıp uzaklaştırın.",
+          "road": "Fareyle bir mahallenin üzerine gelip Ctrl tuşunu basılı tutarak sürükleyin ve bir yolun bir tarafını (yol yüzeyinin yarısını veya ona bakan parselleri) boyayın; yolun o tarafı parsellerle birlikte o mahalleye katılır. Sürükleyerek haritayı kaydırın, tekerlekle yakınlaştırıp uzaklaştırın."
         }
       },
-      "failed": "ilçe değiştiremedi."
+      "failed": "Mahalle değiştirilemedi."
     }
   }
 }

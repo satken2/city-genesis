@@ -1,27 +1,27 @@
 {
   "building": {
-    "floorConfiguration": "Composição do piso",
+    "floorConfiguration": "Composição dos andares",
     "parking": "Estacionamento",
-    "type": "Tipo de construção",
+    "type": "Tipo de edifício",
     "durability": "Durabilidade",
-    "floors": "Pisos",
-    "floorsValue": "{{floors}}F (área {{area, number}}㎡)",
-    "heightLabel": "altura: {{value}}m",
-    "baseAreaLabel": "Área da base: {{area, number}}㎡",
-    "underMaintenance": "Em manutenção",
+    "floors": "Andares",
+    "floorsValue": "{{floors}} andares (área de piso {{area, number}} ㎡)",
+    "heightLabel": "Altura: {{value}} m",
+    "baseAreaLabel": "Área de projeção: {{area, number}} ㎡",
+    "underMaintenance": "Em reparo",
     "parkingCapacity": "Capacidade de estacionamento",
-    "parkingCapacityValue": "{{capacity}} carros",
-    "parkingDay": "Dia",
-    "parkingNight": "Noite",
-    "parkingUsage": "{{used}} / {{capacity}} carros"
+    "parkingCapacityValue": "{{capacity}} vagas",
+    "parkingDay": "Diurno",
+    "parkingNight": "Noturno",
+    "parkingUsage": "{{used}} / {{capacity}} vagas"
   },
   "building_appearance": {
     "variantLabel": "Aparência {{index}}",
-    "layoutHint": "Arraste um cartão para o local para colocar / arraste para mover / Shift + Drag para girar / excluir a tecla para remover",
-    "sizeLabel": "{{width}}×{{height}}M",
-    "deleteSelected": "Remover selecionado",
+    "layoutHint": "Arraste um cartão até o terreno para posicionar / arraste para mover / Shift+arrastar para girar / tecla Delete para remover",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Remover o bloco selecionado",
     "apply": "Aplicar",
     "saveFailed": "Falha ao salvar a aparência",
-    "noSubbuildings": "Nenhum sub-building é definido para este tipo de construção"
+    "noSubbuildings": "Nenhum sub-edifício está definido para este tipo de edifício"
   }
 }

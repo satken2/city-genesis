@@ -1,39 +1,39 @@
 {
   "citizenAction": {
     "name": {
-      "label": "isim vermek",
-      "message": "{{name}} üzerine vermek istediğiniz adı girin.",
-      "inputLabel": "Yeni İsim",
-      "confirm": "Vermek"
+      "label": "İsim ver",
+      "message": "{{name}} için vermek istediğiniz ismi girin.",
+      "inputLabel": "Yeni isim",
+      "confirm": "Ver"
     },
     "reward": {
-      "label": "ödül vermek",
-      "message": "{{name}}'un hanesine şehir fonlarından bir ödül verin. Şehir Nakit: {{available}}",
-      "confirm": "Vermek"
+      "label": "Ödül parası ver",
+      "message": "Belediye fonlarından {{name}} adlı vatandaşın hanesine ödül parası verilir.\nBelediyenin nakit varlıkları: {{available}}",
+      "confirm": "Ver"
     },
     "expel": {
-      "label": "Onlara şehir dışında başarılar dilerim",
-      "message": "{{name}} şehirden kovmak mı?",
-      "confirm": "Çıkarmak",
+      "label": "Şehir dışındaki hayatında başarılar dile",
+      "message": "{{name}} adlı vatandaş şehirden sürgün edilsin mi?",
+      "confirm": "Sürgün et",
       "results": {
-        "0": "{{name}} toplandı ve sessizce şehirden ayrıldı. Kimse onları görmeye gelmedi.",
-        "1": "{{name}}, \"Asla geri dönmeyeceğim!\" diye bağırarak şehir sınırlarını aştı.",
-        "2": "{{name}}, şehir sınırlarını aşan nazikçe eşlik etti. Onlara başka yerlerde başarılar diliyoruz."
+        "0": "{{name}} eşyalarını toplayıp sessizce şehirden ayrıldı. Uğurlamaya gelen kimse olmadı.",
+        "1": "{{name}}, “Bir daha buraya adımımı atarsam ne olayım!” diyerek şehir sınırını geçip gitti.",
+        "2": "{{name}} şehir sınırının dışına kadar nezaketle uğurlandı. Şehir dışındaki hayatında başarılar dileriz."
       }
     },
     "donation": {
-      "label": "bağış istemek",
-      "message": "Şehre bağış için {{name}}'un hanesinden isteyin. Hanehalkı Nakit: {{available}}",
-      "confirm": "Sormak"
+      "label": "Bağış iste",
+      "message": "{{name}} adlı vatandaşın hanesinden şehre bağış yapması rica edilir.\nHanenin nakit varlıkları: {{available}}",
+      "confirm": "Rica et"
     },
     "relocate": {
       "label": "Yeni bir ev öner",
-      "message": "{{name}} hanesini mevcut evlerinden tahliye ediyor mu? Bir sonraki çağda yeni bir ev arayacaklar.",
-      "confirm": "Tahliye ettirmek",
+      "message": "{{name}} adlı vatandaşın hanesi şu anki evinden tahliye edilsin mi?\nHane bir sonraki dönemde yeni bir ev arayacak.",
+      "confirm": "Tahliye et",
       "results": {
-        "0": "{{name}} ailesinin evlerinden atıldı. Mobilyaları yoldan yığılmış.",
-        "1": "{{name}} evindeki kilitler değiştirildi. Aile yeni bir yer aramaya başladı.",
-        "2": "{{name}} ailesine yeni bir ev teklif edildi. Eskisine geri dönemezler."
+        "0": "{{name}} ve ailesi evlerinden atıldı. Eşyaları yol kenarına yığılmış durumda.",
+        "1": "{{name}} adlı vatandaşın evinin kilitleri değiştirildi. Aile yeni bir ev aramaya başladı.",
+        "2": "{{name}} ve ailesine yeni bir ev önerildi. Artık eski evlerine dönemezler."
       }
     }
   }

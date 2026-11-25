@@ -1,14 +1,14 @@
 {
   "employment": {
-    "requiredSkill": "Erforderliche Fähigkeit",
+    "requiredSkill": "Erforderliche Qualifikation",
     "wage": "Lohnsatz",
-    "quota": "erforderliche Arbeit",
-    "totalLabor": "Leiharbeit",
-    "employees": "Mitarbeiterliste",
-    "hired": "Gemietet",
-    "vacant": "Vakant",
-    "noQuota": "Keine Arbeit erforderlich",
-    "noEmployees": "Keine Mitarbeiter",
-    "statusTitle": "Beschäftigungsstatus"
+    "quota": "Benötigte Arbeitskräfte",
+    "totalLabor": "Eingestellte Arbeitskräfte",
+    "employees": "Beschäftigtenliste",
+    "hired": "Besetzt",
+    "vacant": "Unbesetzt",
+    "noQuota": "Keine Arbeitskräfte benötigt",
+    "noEmployees": "Keine Beschäftigten",
+    "statusTitle": "Beschäftigungslage"
   }
 }

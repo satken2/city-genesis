@@ -2,14 +2,14 @@
   "climateSettings": {
     "title": "Impostazioni climatiche",
     "name": "Nome del clima",
-    "probabilities": "Probabilità meteorologiche mensili",
-    "probabilityHint": "Trascina i confini del colore orizzontalmente. Utilizza i campi sottostanti per modificare anche il meteo allo 0%.",
-    "month": "mese {{month}}",
+    "probabilities": "Frequenza mensile dei tipi di tempo",
+    "probabilityHint": "Trascina a destra o a sinistra i confini tra i colori per regolarli. Nei campi numerici qui sotto puoi impostare anche i tipi di tempo allo 0%.",
+    "month": "Mese {{month}}",
     "preset": "Preset climatico",
     "current": "Impostazioni attuali",
-    "chartHint": "Seleziona una serie nella legenda, quindi trascina i suoi punti mensili verticalmente.",
-    "averageHint": "Temperatura, precipitazioni e luce solare sono medie mensili. I valori effettivi variano ogni epoca intorno a queste medie.",
-    "apply": "Applicare",
-    "chart": "Grafico mensile del clima"
+    "chartHint": "Seleziona una voce nella legenda e trascina in alto o in basso i punti di ogni mese per regolarli.",
+    "averageHint": "Temperatura, precipitazioni e soleggiamento sono medie mensili. I valori effettivi di ogni epoca variano attorno a queste medie.",
+    "apply": "Applica",
+    "chart": "Diagramma termopluviometrico mensile"
   }
 }

@@ -1,98 +1,98 @@
 {
   "systemStats": {
     "load": {
-      "title": "beban simulasi",
-      "heading": "Waktu komputasi Siklus terakhir ({{days}} hari)",
+      "title": "Beban simulasi",
+      "heading": "Waktu komputasi siklus terakhir ({{days}} hari)",
       "noData": "Tidak ada data pengukuran",
-      "note": "Ketika beberapa Siklus berjalan berturut-turut, ini menunjukkan yang terakhir. Hitungan operasi adalah perkiraan kasar jumlah kombinasi dalam perbandingan utama, berdasarkan ukuran kota.",
+      "note": "Jika beberapa siklus dijalankan berturut-turut, nilai yang ditampilkan adalah siklus terakhir. Jumlah proses adalah perkiraan kasar jumlah kombinasi perbandingan utama berdasarkan skala kota.",
       "colGroup": "Proses",
       "colTime": "Waktu",
-      "colWorkload": "Hitungan Operasi",
-      "workloadHint": "Jumlah kasar perbandingan utama (elemen array). Arahkan kursor ke nilai untuk melihat kerusakan.",
-      "seconds": "{{value}} s",
+      "colWorkload": "Jumlah proses",
+      "workloadHint": "Perkiraan jumlah kombinasi perbandingan utama (jumlah elemen array). Arahkan kursor ke nilai untuk melihat rinciannya.",
+      "seconds": "{{value}} detik",
       "ms": "{{value}} ms"
     },
     "group": {
-      "market": "pasar barang",
-      "realestate": "Pasar Real Estat",
-      "labor": "pasar tenaga kerja",
-      "building_spawn": "bibit bangunan",
-      "agent_spawn": "bibit agen",
-      "routing": "Pencarian Jalan Warga",
-      "transit": "Pencarian Jalan Transit",
+      "market": "Pasar barang",
+      "realestate": "Pasar properti",
+      "labor": "Pasar tenaga kerja",
+      "building_spawn": "Kemunculan bangunan",
+      "agent_spawn": "Kemunculan pelaku ekonomi",
+      "routing": "Pencarian rute perjalanan warga",
+      "transit": "Pencarian rute transportasi umum",
       "environment": "Lingkungan tempat tinggal",
       "other": "Lainnya"
     },
     "workload": {
-      "market": "Pembeli {{demanders}} × Penjual {{suppliers}} (dikalikan per produk dan dijumlahkan)",
-      "realestate": "Rumah Tangga Mempertimbangkan Pindah {{movers}} × Bangunan Tempat Tinggal {{housing}}",
-      "labor": "Pencari Kerja {{seekers}} × Majikan {{employers}}",
-      "building_spawn": "Paket Kandidat {{parcels}} × Jenis Bangunan × Jumlah Lantai × Penggunaan Lantai",
-      "agent_spawn": "Produk × Zona {{zones}} × Zona {{zones}}",
-      "routing": "2 mode perjalanan × zona {{zones}} × zona {{zones}} × 3 kandidat rute × jalur {{paths}}",
-      "transit": "Berhenti {{stops}} × node {{nodes}}",
-      "environment": "Grid {{width}} × {{height}} × posisi matahari"
+      "market": "Pembeli {{demanders}} × penjual {{suppliers}} (dikalikan per barang lalu dijumlahkan)",
+      "realestate": "Rumah tangga yang mempertimbangkan pindah {{movers}} × bangunan berhunian {{housing}}",
+      "labor": "Pencari kerja {{seekers}} × pemberi kerja {{employers}}",
+      "building_spawn": "Kavling kandidat {{parcels}} × jenis bangunan × jumlah lantai × penggunaan lantai",
+      "agent_spawn": "Barang × distrik {{zones}} × distrik {{zones}}",
+      "routing": "Moda transportasi 2 × distrik {{zones}} × distrik {{zones}} × kandidat rute 3 × jalur {{paths}}",
+      "transit": "Halte {{stops}} × node {{nodes}}",
+      "environment": "Grid {{width}} × {{height}} × waktu penyinaran matahari"
     },
     "entities": {
-      "colMetric": "Metrik",
-      "colCount": "Menghitung",
-      "title": "Hitungan entitas",
-      "agents": "Agen",
-      "households": "Tepung kasar",
-      "businesses": "bisnis",
-      "publicFacilities": "fasilitas umum",
-      "buildings": "bangunan",
+      "colMetric": "Item",
+      "colCount": "Jumlah",
+      "title": "Jumlah entitas",
+      "agents": "Pelaku ekonomi",
+      "households": "Rumah tangga",
+      "businesses": "Tempat usaha",
+      "publicFacilities": "Fasilitas umum",
+      "buildings": "Bangunan",
       "citizens": "Warga",
-      "population": "Jumlah penduduk",
-      "zones": "zona",
-      "parcels": "paket",
-      "paths": "jalan",
-      "roads": "jalan",
-      "tracks": "Trek",
-      "infra": "Jaringan Utilitas",
+      "population": "Populasi",
+      "zones": "Distrik",
+      "parcels": "Kavling",
+      "paths": "Jalur",
+      "roads": "Jalan",
+      "tracks": "Lintasan",
+      "infra": "Jaringan infrastruktur",
       "nodes": "Node"
     },
     "approximation": {
-      "title": "Perkiraan simulasi",
-      "intro": "Pilihan untuk menyederhanakan perhitungan untuk kota-kota besar direncanakan. Pengaturan ini belum dapat diubah.",
-      "warning": "Perubahan ini dapat mempengaruhi keseimbangan permainan. Mereka tidak dapat diurungkan.",
-      "irreversible": "Perubahan yang disebabkan oleh pendekatan bertahan di Siklus selanjutnya. Setelah diaktifkan, perkiraan tidak dapat dinonaktifkan atau dikurangi.",
-      "undecided": "TBD",
-      "candidates": "Kandidat Max.",
-      "epochs": "Siklus di antara ulasan",
-      "off": "Lepas",
-      "on": "Pada",
+      "title": "Aproksimasi simulasi",
+      "intro": "Pengaturan untuk menyederhanakan perhitungan bagi kota berskala besar akan ditambahkan. Saat ini belum dapat diubah.",
+      "warning": "Dapat memengaruhi keseimbangan permainan. Tidak dapat dikembalikan",
+      "irreversible": "Perubahan akibat aproksimasi akan tetap ada di siklus-siklus berikutnya. Aproksimasi yang telah diaktifkan tidak dapat dinonaktifkan atau diturunkan tingkatnya.",
+      "undecided": "Belum ditentukan",
+      "candidates": "kandidat maks.",
+      "epochs": "siklus sekali",
+      "off": "Mati",
+      "on": "Nyala",
       "goods": {
-        "label": "membeli kandidat",
-        "description": "Batasi pemasok dibandingkan dengan harga dan jarak."
+        "label": "Jumlah kandidat pembelian barang",
+        "description": "Membatasi jumlah tempat pembelian yang dibandingkan berdasarkan harga dan jarak."
       },
       "jobs": {
-        "label": "Kandidat pekerjaan",
-        "description": "membatasi majikan dibandingkan dengan upah dan kondisi perjalanan."
+        "label": "Jumlah kandidat pekerjaan",
+        "description": "Membatasi jumlah tempat kerja yang dibandingkan berdasarkan upah dan kondisi perjalanan kerja."
       },
       "housing": {
-        "label": "Kandidat Perumahan",
-        "description": "Batasi rumah dibandingkan dengan sewa dan lokasi."
+        "label": "Jumlah kandidat tempat tinggal baru",
+        "description": "Membatasi jumlah tempat tinggal yang dibandingkan berdasarkan sewa dan lokasi."
       },
       "interval": {
-        "label": "Interval keputusan rutin",
-        "description": "Tinjau pilihan belanja, pekerjaan, dan perumahan lebih jarang."
+        "label": "Interval keputusan berkala",
+        "description": "Menurunkan frekuensi peninjauan tempat belanja, pekerjaan, dan tempat tinggal."
       },
       "aggregation": {
-        "label": "kelompok warga dan rumah tangga yang sama",
-        "description": "membuat beberapa keputusan secara kolektif untuk warga negara atau rumah tangga dengan keadaan serupa."
+        "label": "Hitung warga dan rumah tangga serupa secara berkelompok",
+        "description": "Sebagian keputusan warga atau rumah tangga dengan kondisi serupa diperlakukan sebagai satu kelompok."
       }
     },
     "status": {
       "title": "Status sistem",
-      "gpuDisabled": "Akselerasi GPU: Dinonaktifkan",
-      "coreSimulator": "Mesin simulasi",
+      "gpuDisabled": "Akselerasi GPU: nonaktif",
+      "coreSimulator": "Simulator inti",
       "currentMemory": "Penggunaan memori saat ini: {{value}}",
-      "peakMemory": "Penggunaan memori puncak sejak startup: {{value}}",
+      "peakMemory": "Penggunaan memori maksimum sejak dijalankan: {{value}}",
       "graphic": "3D",
       "currentVram": "Penggunaan VRAM saat ini: {{value}}",
-      "usageTooltip": "seluruh pc {{pc}} / game ini {{game}} / diinstal {{total}}",
-      "legendPc": "seluruh PC",
+      "usageTooltip": "Seluruh PC {{pc}} / Permainan ini {{game}} / Terpasang {{total}}",
+      "legendPc": "Seluruh PC",
       "legendGame": "Permainan ini"
     }
   }

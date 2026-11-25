@@ -1,18 +1,18 @@
 {
   "interchange": {
     "kind": {
-      "ic": "Tukar-menukar",
-      "jct": "Persimpangan jalan"
+      "ic": "Interchange",
+      "jct": "Junction"
     },
     "fallbackName": {
       "ic": "IC #{{id}}",
       "jct": "JCT #{{id}}"
     },
     "connections": {
-      "from": "Dari",
-      "to": "Untuk",
+      "from": "Jalan asal",
+      "to": "Jalan tujuan",
       "road": "{{type}} #{{id}}",
-      "none": "Tidak ada pasangan jalan yang terhubung.",
+      "none": "Tidak ada pasangan jalan yang tersambung",
       "direction": {
         "n": "Utara",
         "ne": "Timur laut",

@@ -1,27 +1,27 @@
 {
   "interchange": {
     "kind": {
-      "ic": "Austausch",
-      "jct": "Kreuzung"
+      "ic": "Anschlussstelle",
+      "jct": "Autobahnkreuz"
     },
     "fallbackName": {
-      "ic": "ic #{{id}}",
-      "jct": "jct #{{id}}"
+      "ic": "AS #{{id}}",
+      "jct": "AK #{{id}}"
     },
     "connections": {
       "from": "Von",
-      "to": "Zu",
+      "to": "Nach",
       "road": "{{type}} #{{id}}",
       "none": "Keine verbundenen Straßenpaare.",
       "direction": {
-        "n": "Nördlich",
-        "ne": "Nordost-",
-        "e": "Morgenland",
-        "se": "Südost-",
-        "s": "Mittag",
+        "n": "Norden",
+        "ne": "Nordosten",
+        "e": "Osten",
+        "se": "Südosten",
+        "s": "Süden",
         "sw": "Südwesten",
-        "w": "Abend",
-        "nw": "Nordwest"
+        "w": "Westen",
+        "nw": "Nordwesten"
       },
       "sideZone": "{{direction}} · {{zone}}"
     }

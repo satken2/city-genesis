@@ -1,30 +1,30 @@
 {
   "weather": {
     "label": "Погода",
-    "choose": "Выберите погоду",
+    "choose": "Выбрать погоду",
     "loading": "Проверка погоды…",
-    "unknown": "Неизвестное",
-    "automatic": "{{weather}} (Авто)",
+    "unknown": "Неизвестно",
+    "automatic": "{{weather}} (авто)",
     "failed": "Не удалось изменить погоду",
     "names": {
       "clear": "Ясно",
-      "high_clouds": "Высокие облака",
-      "fair": "Ярмарка",
-      "broken_clouds": "Солнечные интервалы",
-      "overcast": "Пасмурная погода",
-      "rain_clouds": "Дождевые облака",
+      "high_clouds": "Перистые облака",
+      "fair": "Малооблачно",
+      "broken_clouds": "Переменная облачность",
+      "overcast": "Пасмурно",
+      "rain_clouds": "Дождевые тучи",
       "fog": "Туман",
-      "drizzle": "Моросить",
+      "drizzle": "Морось",
       "rain": "Дождь",
       "heavy_rain": "Ливень",
-      "light_snow": "Легкий снег",
+      "light_snow": "Небольшой снег",
       "snow": "Снег",
-      "blizzard": "Снежная буря"
+      "blizzard": "Метель"
     },
-    "epochClimate": "Эпохический климат",
+    "epochClimate": "Климат эпохи",
     "temperature": "Температура",
-    "precipitation": "Осаждение",
-    "sunlight": "интенсивность солнечного света",
+    "precipitation": "Осадки",
+    "sunlight": "Интенсивность солнечного света",
     "windSpeed": "Скорость ветра"
   }
 }

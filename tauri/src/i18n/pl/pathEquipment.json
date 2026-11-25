@@ -1,18 +1,18 @@
 {
   "pathEquipment": {
-    "title": "Wyposażenie drogowe",
-    "streetlight_type": "latarnie uliczne",
+    "title": "Wyposażenie drogi",
+    "streetlight_type": "Latarnie",
     "fence_type": "Ogrodzenia",
-    "street_tree_type": "Drzewa ulic",
-    "utility_mode": "Okablowanie narzędziowe",
-    "none": "Żaden",
-    "standard": "Standard",
-    "overhead": "Nad głową",
-    "underground": "Podziemny",
-    "apply": "Zastosować",
+    "street_tree_type": "Drzewa przyuliczne",
+    "utility_mode": "Prowadzenie przewodów",
+    "none": "Brak",
+    "standard": "Standardowe",
+    "overhead": "Napowietrzne",
+    "underground": "Podziemne",
+    "apply": "Zastosuj",
     "bench_type": "Ławki",
-    "bin_type": "kosze",
-    "planter_type": "Plantatorzy",
-    "advert_type": "Reklama"
+    "bin_type": "Kosze na śmieci",
+    "planter_type": "Nasadzenia",
+    "advert_type": "Reklamy"
   }
 }

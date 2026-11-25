@@ -1,26 +1,26 @@
 {
   "notifications": {
-    "trayTooltip": "Powiadomienia o mieście",
-    "empty": "Żadne problemy nie wymagają teraz uwagi",
-    "loadFailed": "Nie udało się załadować powiadomień",
+    "trayTooltip": "Powiadomienia miasta",
+    "empty": "Obecnie nie ma problemów wymagających uwagi",
+    "loadFailed": "Nie udało się pobrać powiadomień",
     "types": {
-      "resource_runway": "Oczekuje się, że zasób „{{name}}” zostanie wyczerpany w epokach około {{remaining_epochs}}",
-      "resource_depleted": "Zasób „{{name}}” został wyczerpany",
-      "facility_inoperative": "Obiekt publiczny „{{name}}” nie działa",
-      "facility_inoperative_labor": "Obiekt publiczny „{{name}}” nie działa z powodu niedoboru siły roboczej",
-      "facility_inoperative_material": "Obiekt publiczny „{{name}}” nie działa z powodu niedoboru materiału",
-      "facility_inoperative_high_skill": "Obiekt publiczny „{{name}}” działa ze zmniejszoną wydajnością z powodu braku wykwalifikowanych pracowników",
-      "facility_inoperative_budget": "Obiekt publiczny „{{name}}” działa ze zmniejszoną wydajnością z powodu niedoboru budżetu",
-      "education_low_enrollment": "Instytucja edukacyjna „{{name}}” jest niedostatecznie wykorzystana — niewielu studentów jest zapisanych ({{enrolled}} z {{max_students}} miejsc)",
-      "infra_facility_down": "Obiekt infrastrukturalny „{{name}}” nie działa z eksploatacji",
-      "infra_disconnected": "Obiekty {{count}} są odłączone od sieci infrastruktury",
-      "rail_capacity_exceeded": "Częstotliwość pociągu przekracza przepustowość toru na segmentach {{count}}",
-      "collapse": "{{count}} budynki/drogi zawaliły się",
-      "collapse_with_deaths": "{{count}} zawaliły się budynki/drogi, zabijając {{deaths}} osób",
-      "deaths_traffic": "{{count}} Ludzie zginęli w wypadkach drogowych",
-      "tenant_blocked_by_parcel_size": "W dystrykcie „{{zone_name}}” nie można zbudować żadnego budynku dla „{{tenant_name}}” (wymaga {{required}} m2, największy do zabudowy {{max_capacity}} m2). Większa paczka jest wymagana",
-      "unknown": "Wystąpiło krytyczne zdarzenie",
-      "sanitation": "Warunki sanitarne pogarszają się w przypadku gospodarstw domowych {{count}}. usprawnić oczyszczanie ścieków i odpady."
+      "resource_runway": "Zasób „{{name}}” prawdopodobnie wkrótce się wyczerpie (pozostało epok: ok. {{remaining_epochs}})",
+      "resource_depleted": "Zasób „{{name}}” wyczerpał się",
+      "facility_inoperative": "Obiekt publiczny „{{name}}” nie może działać",
+      "facility_inoperative_labor": "Obiekt publiczny „{{name}}” nie może działać z powodu braku siły roboczej",
+      "facility_inoperative_material": "Obiekt publiczny „{{name}}” nie może działać z powodu braku surowców",
+      "facility_inoperative_high_skill": "Obiekt publiczny „{{name}}” ogranicza działalność z powodu braku wykwalifikowanej kadry",
+      "facility_inoperative_budget": "Obiekt publiczny „{{name}}” ogranicza działalność z powodu braku środków w budżecie",
+      "education_low_enrollment": "Placówka edukacyjna „{{name}}” jest słabo wykorzystana, bo brakuje chętnych do nauki (zapisanych: {{enrolled}} / miejsc: {{max_students}})",
+      "infra_facility_down": "Obiekt infrastruktury „{{name}}” nie działa",
+      "infra_disconnected": "Obiekty niepodłączone do sieci infrastruktury: {{count}}",
+      "rail_capacity_exceeded": "Odcinki torów, na których liczba kursów przekracza przepustowość: {{count}}",
+      "collapse": "Zawalone budynki i drogi: {{count}}",
+      "collapse_with_deaths": "Zawalone budynki i drogi: {{count}}, ofiary śmiertelne: {{deaths}}",
+      "deaths_traffic": "Ofiary śmiertelne wypadków drogowych: {{count}}",
+      "tenant_blocked_by_parcel_size": "W dzielnicy „{{zone_name}}” nie można zbudować budynku dla najemcy „{{tenant_name}}” (potrzeba {{required}} m2, maksimum na działce: {{max_capacity}} m2). Potrzebna jest większa działka",
+      "unknown": "Wystąpiło poważne zdarzenie",
+      "sanitation": "Pogarszają się warunki sanitarne gospodarstw domowych (liczba: {{count}}). Popraw oczyszczanie ścieków i utylizację odpadów."
     }
   }
 }

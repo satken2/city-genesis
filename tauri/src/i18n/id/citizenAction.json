@@ -1,39 +1,39 @@
 {
   "citizenAction": {
     "name": {
-      "label": "memberikan nama",
-      "message": "Masukkan nama yang ingin Anda berikan pada {{name}}.",
+      "label": "Beri nama",
+      "message": "Masukkan nama yang akan diberikan kepada {{name}}.",
       "inputLabel": "Nama baru",
-      "confirm": "Memberikan"
+      "confirm": "Berikan"
     },
     "reward": {
-      "label": "memberikan hadiah",
-      "message": "Berikan penghargaan dari kas kota kepada rumah tangga {{name}}.\nKas kota: {{available}}",
-      "confirm": "Memberikan"
+      "label": "Beri uang penghargaan",
+      "message": "Berikan uang penghargaan dari dana kota kepada rumah tangga {{name}}.\nKas kota: {{available}}",
+      "confirm": "Berikan"
     },
     "expel": {
-      "label": "Semoga mereka sukses di luar kota",
-      "message": "Keluarkan {{name}} dari kota?",
-      "confirm": "Mengeluarkan",
+      "label": "Doakan suksesnya di luar kota",
+      "message": "Usir {{name}} dari kota?",
+      "confirm": "Usir",
       "results": {
-        "0": "{{name}} berkemas dan diam-diam meninggalkan kota. Tidak ada yang datang untuk melihat mereka pergi.",
-        "1": "{{name}} melewati batas kota sambil berteriak, \"Aku tidak akan pernah kembali!\"",
-        "2": "{{name}} telah dikawal dengan sopan melewati batas kota. Kami berharap mereka sukses di tempat lain."
+        "0": "{{name}} mengemasi barang-barangnya dan diam-diam meninggalkan kota. Tidak ada seorang pun yang mengantar kepergiannya.",
+        "1": "{{name}} berteriak, “Mana sudi aku datang lagi!”, lalu pergi melintasi batas kota.",
+        "2": "{{name}} telah diantar dengan hormat hingga melewati batas kota. Kami mendoakan kesuksesannya di luar kota."
       }
     },
     "donation": {
-      "label": "Minta donasi",
-      "message": "Minta sumbangan untuk kota dari rumah tangga {{name}}.\nKas rumah tangga: {{available}}",
-      "confirm": "Meminta"
+      "label": "Mohon sumbangan",
+      "message": "Minta rumah tangga {{name}} untuk menyumbang kepada kota.\nKas rumah tangga: {{available}}",
+      "confirm": "Minta"
     },
     "relocate": {
-      "label": "Sarankan rumah baru",
-      "message": "menggusur rumah tangga {{name}} dari rumah mereka saat ini? Mereka akan mencari rumah baru di Siklus berikutnya.",
-      "confirm": "Mengusir",
+      "label": "Tawarkan tempat tinggal baru",
+      "message": "Gusur rumah tangga {{name}} dari tempat tinggalnya saat ini?\nRumah tangga ini akan mencari tempat tinggal baru pada siklus berikutnya.",
+      "confirm": "Gusur",
       "results": {
-        "0": "Keluarga {{name}} telah diusir dari rumah mereka. Perabotan mereka ditumpuk di pinggir jalan.",
-        "1": "Kunci di rumah {{name}} telah diubah. Keluarga sudah mulai mencari tempat baru.",
-        "2": "Keluarga {{name}} telah ditawari rumah baru. Mereka tidak bisa kembali ke yang lama."
+        "0": "Keluarga {{name}} telah diusir dari rumahnya. Perabotan mereka ditumpuk di pinggir jalan.",
+        "1": "Kunci rumah {{name}} telah diganti. Keluarga itu mulai mencari tempat tinggal baru.",
+        "2": "Keluarga {{name}} telah ditawari tempat tinggal baru. Mereka tidak bisa kembali ke rumah lama."
       }
     }
   }

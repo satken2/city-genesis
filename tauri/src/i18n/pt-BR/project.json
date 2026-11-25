@@ -1,9 +1,9 @@
 {
   "tag": {
-    "label": "Projeto",
-    "none": "(sem etiqueta)",
+    "label": "Projeto de construção",
+    "none": "(Sem tag)",
     "createNew": "+ Nova tag…",
-    "newPlaceholder": "Insira um nome de tag",
+    "newPlaceholder": "Digite o nome da tag",
     "add": "Adicionar",
     "cancel": "Cancelar",
     "saveFailed": "Falha ao salvar a tag",
@@ -11,30 +11,30 @@
     "hideObject": "Ocultar na visualização 3D"
   },
   "constructionProjects": {
-    "all": "Todas",
-    "empty": "Nenhuma obra ainda. Escolha uma tag ao posicionar a partir de um painel de construção ou adicione uma no painel de detalhes de uma instalação pública ou estrada planejada ou em construção para ver as obras agrupadas por projeto.",
-    "loadFailed": "Falha ao carregar projetos de construção",
-    "totalCost": "Custo estimado",
-    "duration": "tempo restante",
+    "all": "Todos",
+    "empty": "Não há obras. Escolha uma tag ao posicionar algo no painel de construção, ou adicione uma no painel de detalhes de uma instalação pública ou via que ainda não começou ou está em construção, para ver as obras agrupadas por projeto.",
+    "loadFailed": "Falha ao carregar os projetos de construção",
+    "totalCost": "Custo de construção (estimado)",
+    "duration": "Prazo de construção (restante)",
     "progress": "Progresso",
-    "progressValue": "{{done}} / {{total}} concluída",
+    "progressValue": "{{done}} / {{total}} concluídas",
     "monthsValue": "{{value}} meses",
-    "stalled": "parado",
-    "stalledWarning": "{{count}} O(s) trabalho(s) não progredirá porque a velocidade de construção é 0 (excluída do total da duração).",
-    "done": "Feito",
+    "stalled": "Sem progresso",
+    "stalledWarning": "{{count}} obra(s) não avançam porque a velocidade de construção é 0 (excluídas do total do prazo).",
+    "done": "Concluído",
     "unnamed": "#{{id}}",
-    "showAll": "Mostre tudo novamente ({{count}})",
+    "showAll": "Mostrar tudo novamente ({{count}})",
     "showTag": "Mostrar este projeto na visualização 3D",
     "hideTag": "Ocultar este projeto na visualização 3D",
     "showObject": "Mostrar na visualização 3D",
     "hideObject": "Ocultar na visualização 3D",
-    "deleteTag": "Exclua esta tag",
-    "confirmDeleteTag": "Exclua a tag \"{{tag}}\"? Ele será removido de seus prédios e estradas (as obras permanecem).",
+    "deleteTag": "Excluir a tag",
+    "confirmDeleteTag": "A tag “{{tag}}” será excluída e removida dos edifícios e vias que a usam (as obras em si não serão apagadas). Deseja continuar?",
     "columns": {
-      "name": "Alvo",
-      "status": "Estado",
-      "cost": "custo restante",
-      "remaining": "tempo restante"
+      "name": "Item",
+      "status": "Situação",
+      "cost": "Custo restante",
+      "remaining": "Prazo restante"
     }
   }
 }

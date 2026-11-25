@@ -1,176 +1,176 @@
 {
   "policy": {
-    "pending": "simulasi berjalan",
-    "noData": "Tidak ada data",
+    "pending": "Simulasi sedang berjalan",
+    "noData": "Belum ada data",
     "actionError": "Tidak dapat membuka layar tindakan.",
     "indicators": {
       "unemployment": {
-        "tab": "Pengangguran",
-        "issue": "Pengangguran tinggi",
+        "tab": "Tingkat pengangguran",
+        "issue": "Tingkat pengangguran tinggi",
         "clear": "Tidak ditemukan masalah pengangguran",
         "evidence": "Tingkat pengangguran {{value}}"
       },
       "income": {
         "tab": "Pendapatan",
         "issue": "Pendapatan rumah tangga rendah",
-        "clear": "Tidak ada masalah pendapatan yang ditemukan",
+        "clear": "Tidak ditemukan masalah pendapatan",
         "evidence": "Rata-rata pendapatan rumah tangga {{value}}"
       },
       "tourism": {
         "tab": "Pariwisata",
-        "issue": "Beberapa turis yang berkunjung",
+        "issue": "Wisatawan sedikit",
         "clear": "Tidak ditemukan masalah pariwisata",
-        "evidence": "{{value}} Wisatawan Menginap · Kapasitas {{capacity}}"
+        "evidence": "Wisatawan menginap {{value}} orang · daya tampung {{capacity}} orang"
       },
       "crime": {
         "tab": "Kejahatan",
-        "issue": "Kejahatan dan sengketa terjadi",
-        "clear": "Tidak ada masalah kejahatan yang ditemukan",
-        "evidence": "Kerusakan Kejahatan {{value}} · {{incidents}} Insiden masalah"
+        "issue": "Terjadi kejahatan dan keributan",
+        "clear": "Tidak ditemukan masalah kejahatan",
+        "evidence": "Kasus kejahatan {{value}} · keributan {{incidents}} kejadian"
       },
       "sanitation": {
-        "tab": "Kebersihan",
-        "issue": "Masalah sanitasi sedang terjadi",
+        "tab": "Sanitasi",
+        "issue": "Terjadi masalah sanitasi",
         "clear": "Tidak ditemukan masalah sanitasi",
-        "evidence": "Sanitasi memburuk untuk rumah tangga {{value}}"
+        "evidence": "Sanitasi memburuk di {{value}} rumah tangga"
       },
       "water": {
-        "tab": "Air",
-        "issue": "Air kekurangan pasokan",
-        "clear": "Tidak ada masalah pasokan air yang ditemukan",
-        "evidence": "Rumah tangga dan fasilitas menerima {{value}} dari pesanan mereka"
+        "tab": "Air bersih",
+        "issue": "Pasokan air bersih kurang",
+        "clear": "Tidak ditemukan masalah pasokan air bersih",
+        "evidence": "Tingkat penerimaan atas pesanan rumah tangga dan fasilitas: {{value}}"
       },
       "electricity": {
         "tab": "Listrik",
-        "issue": "Listrik kekurangan pasokan",
-        "clear": "Tidak ada masalah pasokan listrik yang ditemukan",
-        "evidence": "Rumah tangga dan fasilitas menerima {{value}} dari pesanan mereka"
+        "issue": "Pasokan listrik kurang",
+        "clear": "Tidak ditemukan masalah pasokan listrik",
+        "evidence": "Tingkat penerimaan atas pesanan rumah tangga dan fasilitas: {{value}}"
       },
       "internet": {
         "tab": "Telekomunikasi",
-        "issue": "Telekomunikasi kekurangan pasokan",
-        "clear": "Tidak ada masalah pasokan telekomunikasi yang ditemukan",
-        "evidence": "Rumah tangga dan fasilitas menerima {{value}} dari pesanan mereka"
+        "issue": "Pasokan telekomunikasi kurang",
+        "clear": "Tidak ditemukan masalah pasokan telekomunikasi",
+        "evidence": "Tingkat penerimaan atas pesanan rumah tangga dan fasilitas: {{value}}"
       },
       "high_water": {
-        "tab": "air curah",
-        "issue": "Air curah kekurangan pasokan",
-        "clear": "Pasokan air baku berjalan baik",
-        "evidence": "Fasilitas yang diterima {{value}} dari pesanan mereka"
+        "tab": "Air bertekanan tinggi",
+        "issue": "Pasokan air bertekanan tinggi kurang",
+        "clear": "Tidak ditemukan masalah pasokan air bertekanan tinggi",
+        "evidence": "Fasilitas menerima {{value}} dari pesanannya"
       },
       "high_electricity": {
-        "tab": "Daya tegangan tinggi",
-        "issue": "Daya tegangan tinggi kekurangan pasokan",
-        "clear": "Tidak ada masalah catu daya tegangan tinggi yang ditemukan",
-        "evidence": "Fasilitas yang diterima {{value}} dari pesanan mereka"
+        "tab": "Listrik tegangan tinggi",
+        "issue": "Pasokan listrik tegangan tinggi kurang",
+        "clear": "Tidak ditemukan masalah pasokan listrik tegangan tinggi",
+        "evidence": "Fasilitas menerima {{value}} dari pesanannya"
       },
       "upkeep": {
-        "tab": "Pemeliharaan",
-        "issue": "Pemeliharaan bangunan umum, jalan dan rel",
-        "clear": "Tidak ada masalah pemeliharaan yang ditemukan",
-        "evidence": "{{value}} dari pemeliharaan yang dibutuhkan telah diterima"
+        "tab": "Pemeliharaan fasilitas",
+        "issue": "Pemeliharaan bangunan umum, jalan, dan rel kurang",
+        "clear": "Tidak ditemukan masalah pemeliharaan",
+        "evidence": "Pemeliharaan yang diterima: {{value}} dari kebutuhan"
       }
     },
     "nodes": {
       "no_vacancies": {
-        "title": "Kuota pekerjaan saat ini sudah penuh",
-        "evidence": "{{count}} Pencari Kerja"
+        "title": "Kuota lapangan kerja saat ini sudah penuh",
+        "evidence": "Pencari kerja {{count}} orang"
       },
       "unfilled_jobs": {
-        "title": "Kekosongan dan pengangguran hidup berdampingan",
-        "evidence": "{{count}} Pencari Kerja · {{vacancies}} Unit tenaga kerja efektif yang kosong"
+        "title": "Lowongan dan pengangguran terjadi bersamaan",
+        "evidence": "Pencari kerja {{count}} orang · lowongan {{vacancies}} (tenaga kerja efektif)"
       },
       "public_budget": {
         "title": "Fasilitas umum dibatasi oleh anggaran",
-        "evidence": "Fasilitas dengan paket terbatas anggaran: {{count}}"
+        "evidence": "Fasilitas yang rencananya dikurangi karena anggaran operasional: {{count}}"
       },
       "education_gap": {
-        "title": "Beberapa pencari kerja tidak memiliki pendidikan dasar",
-        "evidence": "Pencari kerja yang tidak memiliki pendidikan dasar: {{count}}"
+        "title": "Ada pencari kerja yang belum menyelesaikan pendidikan dasar",
+        "evidence": "Pencari kerja yang kurang pendidikan dasar: {{count}} orang"
       },
       "school_capacity": {
-        "title": "Kapasitas pendidikan dasar tidak mencukupi",
-        "evidence": "Terdaftar: {{enrolled}} · Tidak terdaftar: {{waiting}} / Kapasitas: {{capacity}}"
+        "title": "Daya tampung pendidikan dasar kurang",
+        "evidence": "Bersekolah {{enrolled}} orang · belum bersekolah {{waiting}} orang / daya tampung {{capacity}} orang"
       },
       "immigrant_education_gap": {
-        "title": "Beberapa pencari kerja yang tidak memiliki pendidikan dasar adalah imigran",
-        "evidence": "Pencari kerja imigran yang tidak memiliki pendidikan dasar: {{count}}"
+        "title": "Sebagian pencari kerja yang kurang pendidikan dasar adalah pendatang",
+        "evidence": "Pencari kerja pendatang yang termasuk: {{count}} orang"
       },
       "specialists": {
-        "title": "Kekurangan spesialis mencegah fasilitas beroperasi",
-        "evidence": "Fasilitas yang tidak memiliki spesialis: {{count}}"
+        "title": "Ada fasilitas yang tidak dapat beroperasi karena kekurangan tenaga ahli",
+        "evidence": "Fasilitas yang kekurangan tenaga ahli: {{count}}"
       },
       "household_unemployment": {
-        "title": "Beberapa rumah tangga termasuk orang dewasa yang menganggur",
-        "evidence": "Rumah tangga dengan orang dewasa yang menganggur: {{count}}"
+        "title": "Ada rumah tangga dengan anggota dewasa yang tidak bekerja",
+        "evidence": "Rumah tangga dengan anggota dewasa yang tidak bekerja: {{count}}"
       },
       "security_response": {
-        "title": "Polisi tidak dapat mencegah semua bahaya",
-        "evidence": "Kerusakan kejahatan dalam sebulan terakhir: {{count}} Kasus",
-        "evidence_week": "Kerusakan kejahatan dalam seminggu terakhir: {{count}} kasus"
+        "title": "Polisi tidak mampu mencegah semua kerugian",
+        "evidence": "Kasus kejahatan dalam sebulan terakhir: {{count}}",
+        "evidence_week": "Kasus kejahatan dalam seminggu terakhir: {{count}}"
       },
       "no_police": {
         "title": "Tidak ada kantor polisi yang beroperasi"
       },
       "police_staff": {
-        "title": "Kantor polisi kekurangan pekerja",
-        "evidence": "Kantor polisi yang kekurangan staf: {{count}}"
+        "title": "Kantor polisi kekurangan personel",
+        "evidence": "Kantor polisi yang kekurangan personel: {{count}}"
       },
       "police_budget": {
-        "title": "Anggaran polisi terlalu rendah",
-        "evidence": "Kantor polisi kekurangan dana: {{count}}"
+        "title": "Anggaran polisi tidak cukup",
+        "evidence": "Kantor polisi yang kekurangan anggaran: {{count}}"
       },
       "police_inputs": {
-        "title": "Kantor polisi kekurangan persediaan",
-        "evidence": "Kantor polisi kekurangan persediaan: {{count}}"
+        "title": "Kantor polisi kekurangan perlengkapan",
+        "evidence": "Kantor polisi yang kekurangan perlengkapan: {{count}}"
       },
       "unemployment_pressure": {
-        "title": "Pengangguran berkontribusi pada masalah keamanan",
-        "evidence": "Orang dewasa yang menganggur: {{count}}"
+        "title": "Pengangguran menjadi penyebab memburuknya keamanan umum",
+        "evidence": "Orang dewasa yang tidak bekerja: {{count}} orang"
       },
       "citizen_criminality": {
-        "title": "Beberapa warga rentan terhadap kejahatan",
-        "evidence": "Warga negara yang rentan terhadap kejahatan: {{count}}"
+        "title": "Ada warga yang cenderung melakukan kejahatan",
+        "evidence": "Warga yang cenderung melakukan kejahatan: {{count}} orang"
       },
       "children_in_poverty": {
-        "title": "Anak-anak tumbuh dalam rumah tangga di bawah biaya hidup",
-        "evidence": "Anak-anak di rumah tangga di bawah biaya hidup: {{count}}"
+        "title": "Anak-anak tumbuh di rumah tangga yang tidak mampu memenuhi biaya hidup",
+        "evidence": "Anak-anak di rumah tangga yang tidak mampu memenuhi biaya hidup: {{count}} orang"
       },
       "children_in_crime_zones": {
-        "title": "Anak-anak tumbuh di distrik dengan kejahatan",
-        "evidence": "Anak-anak di distrik dengan kejahatan dalam sebulan terakhir: {{count}}",
-        "evidence_week": "Anak-anak di distrik dengan kejahatan dalam seminggu terakhir: {{count}}"
+        "title": "Anak-anak tumbuh di distrik yang mengalami kejahatan",
+        "evidence": "Anak-anak di distrik yang mengalami kejahatan dalam sebulan terakhir: {{count}} orang",
+        "evidence_week": "Anak-anak di distrik yang mengalami kejahatan dalam seminggu terakhir: {{count}} orang"
       },
       "service_no_facility": {
-        "title": "Tidak ada fasilitas yang menyediakan layanan ini",
-        "title_named": "Tidak ada {{suppliers}} yang tersedia"
+        "title": "Tidak ada fasilitas pemasok",
+        "title_named": "Tidak ada {{suppliers}}"
       },
       "service_facility_limited": {
-        "title": "Beberapa {{kinds}} tidak dapat beroperasi",
-        "evidence": "Fasilitas tidak beroperasi secara efektif: {{count}}"
+        "title": "Ada {{kinds}} yang tidak dapat beroperasi",
+        "evidence": "Fasilitas yang secara efektif tidak beroperasi: {{count}}"
       },
       "repair_budget_exhausted": {
-        "title": "Anggaran pemeliharaan habis dan pesanan pemeliharaan dipotong",
-        "evidence": "Pengeluaran Pemeliharaan {{expense}} / Anggaran {{budget}}"
+        "title": "Anggaran perbaikan habis dan pesanan pemeliharaan dipangkas",
+        "evidence": "Pengeluaran perbaikan {{expense}} / anggaran {{budget}}"
       },
       "service_out_of_range": {
-        "title": "Rumah tangga atau fasilitas berada di luar jangkauan layanan",
-        "evidence": "Di luar setiap fasilitas: {{count}} Rumah Tangga, {{facilities}} Fasilitas",
-        "title_named": "Rumah tangga atau fasilitas berada di luar jangkauan layanan {{suppliers}}"
+        "title": "Ada rumah tangga dan fasilitas di luar jangkauan pasokan",
+        "evidence": "Di luar jangkauan semua fasilitas: {{count}} rumah tangga, {{facilities}} fasilitas",
+        "title_named": "Ada rumah tangga dan fasilitas di luar jangkauan pasokan {{suppliers}}"
       },
       "facility_material_unmet": {
         "title": "{{facility}} tidak dapat memperoleh {{product_name}}",
-        "evidence": "Menerima {{received}} dari {{demand}} yang dibutuhkan"
+        "evidence": "Diterima {{received}} dari kebutuhan {{demand}}"
       },
       "facility_labor_shortage": {
-        "title": "{{facility}} tidak memiliki pekerja",
-        "evidence": "Diperlukan {{total_labor}} dari {{quota}} unit kerja efektif yang diperlukan"
+        "title": "{{facility}} kekurangan tenaga kerja",
+        "evidence": "Tenaga kerja yang didapat {{total_labor}} dari kebutuhan {{quota}} (tenaga kerja efektif)"
       },
       "facility_high_skill_shortage": {
-        "title": "{{facility}} Tidak dapat mengamankan spesialis"
+        "title": "{{facility}} tidak dapat memperoleh tenaga ahli"
       },
       "facility_budget_capped": {
-        "title": "{{facility}} telah mengurangi rencananya karena anggaran"
+        "title": "{{facility}} mengurangi rencananya karena kekurangan anggaran"
       },
       "facility_inactive": {
         "title": "{{facility}} tidak beroperasi"
@@ -179,145 +179,145 @@
         "title": "{{facility}} tidak terhubung ke jaringan {{product_name}}"
       },
       "slum_sanitation": {
-        "title": "Ada rumah tangga yang tinggal di daerah kumuh",
-        "evidence": "Rumah tangga yang tinggal di daerah kumuh: {{count}}"
+        "title": "Ada rumah tangga yang tinggal di permukiman kumuh",
+        "evidence": "Rumah tangga yang tinggal di permukiman kumuh: {{count}}"
       },
       "service_shortage": {
         "title": "Rumah tangga tidak menerima cukup {{product_name}}",
-        "evidence": "Rumah tangga menerima {{percent}}% dari jumlah referensi"
+        "evidence": "Rumah tangga menerima {{percent}}% dari jumlah acuan"
       },
       "tourism_no_attraction": {
-        "title": "Tidak ada atraksi"
+        "title": "Tidak ada objek wisata"
       },
       "tourism_no_gateway": {
-        "title": "Tidak ada pintu gerbang bagi wisatawan untuk datang"
+        "title": "Tidak ada gerbang kedatangan wisatawan"
       },
       "tourism_no_trade_hub": {
-        "title": "tidak ada pusat perdagangan untuk membayar dana perjalanan"
+        "title": "Tidak ada pusat ekspor-impor yang membayar biaya perjalanan"
       },
       "tourists_without_lodging": {
-        "title": "Beberapa turis tidak dapat menemukan penginapan",
-        "evidence": "Wisatawan menunggu penginapan: {{count}}"
+        "title": "Ada wisatawan yang tidak menemukan penginapan",
+        "evidence": "Wisatawan yang menunggu penginapan: {{count}} orang"
       },
       "tourism_lodging_costly": {
-        "title": "Penginapan lebih mahal dibandingkan dengan anggaran perjalanan",
-        "evidence": "Aplikasi turis baru berada di {{percent}}% dari normal"
+        "title": "Biaya penginapan mahal dibandingkan biaya perjalanan",
+        "evidence": "Pendaftaran wisatawan baru hanya {{percent}}% dari biasanya"
       },
       "tourists_dissatisfied": {
         "title": "Kepuasan wisatawan rendah",
-        "evidence": "Aplikasi baru di {{percent}}% dari normal · {{count}} pulang dengan tidak puas"
+        "evidence": "Pendaftaran wisatawan baru hanya {{percent}}% dari biasanya · {{count}} orang pulang karena tidak puas"
       },
       "tourism_experience_short": {
-        "title": "Wisatawan kurang mendapatkan pengalaman wisata",
-        "evidence": "Pengalaman pariwisata yang diterima: {{percent}}%"
+        "title": "Wisatawan tidak cukup mendapatkan pengalaman wisata",
+        "evidence": "Pemenuhan pengalaman wisata {{percent}}%"
       },
       "tourism_leisure_short": {
-        "title": "Turis tidak mendapatkan cukup waktu luang",
-        "evidence": "Kenyamanan diterima: {{percent}}%"
+        "title": "Wisatawan tidak cukup mendapatkan hiburan dan rekreasi",
+        "evidence": "Pemenuhan hiburan dan rekreasi {{percent}}%"
       }
     },
     "actions": {
       "public_jobs": {
-        "title": "Menciptakan pekerjaan di fasilitas umum"
+        "title": "Ciptakan lapangan kerja di fasilitas umum"
       },
       "population": {
-        "title": "mengurangi populasi dengan mengusir warga"
+        "title": "Kurangi penduduk dengan mengusir warga"
       },
       "budget": {
-        "title": "Mengalokasikan anggaran operasional"
+        "title": "Alokasikan anggaran operasional"
       },
       "education": {
-        "title": "Membangun lebih banyak sekolah"
+        "title": "Tambah sekolah"
       },
       "higher_education": {
-        "title": "mengembangkan spesialis melalui pendidikan tinggi"
+        "title": "Kembangkan tenaga ahli melalui pendidikan tinggi"
       },
       "welfare": {
-        "title": "Meningkatkan manfaat dan dukungan pendapatan"
+        "title": "Tingkatkan tunjangan dan bantuan biaya hidup"
       },
       "employment": {
-        "title": "Memeriksa kondisi perekrutan dalam statistik pekerjaan"
+        "title": "Periksa syarat perekrutan di statistik ketenagakerjaan"
       },
       "police": {
-        "title": "Membangun kantor polisi"
+        "title": "Bangun kantor polisi"
       },
       "facilities": {
-        "title": "Periksa bagaimana kinerja fasilitas"
+        "title": "Periksa kondisi fasilitas"
       },
       "immigration_skills": {
-        "title": "Tinjau persyaratan keterampilan untuk imigran"
+        "title": "Tinjau ulang syarat keahlian pendatang"
       },
       "immigration_limit": {
-        "title": "Batasi Imigrasi"
+        "title": "Batasi penerimaan pendatang"
       },
       "criminality": {
-        "title": "Periksa kecenderungan warga terhadap kejahatan"
+        "title": "Periksa kecenderungan kejahatan warga"
       },
       "service_facility": {
-        "title": "membangun fasilitas yang memasoknya",
+        "title": "Bangun fasilitas pemasok",
         "title_named": "Bangun {{suppliers}}",
-        "title_tourism_no_attraction": "membangun objek wisata",
-        "title_tourism_no_gateway": "membangun pelabuhan atau bandara"
+        "title_tourism_no_attraction": "Bangun objek wisata",
+        "title_tourism_no_gateway": "Bangun pelabuhan atau bandara"
       },
       "parcel": {
-        "title": "Siapkan paket yang lebih besar"
+        "title": "Siapkan kavling yang lebih besar"
       },
       "transit": {
-        "title": "Tinjau frekuensi dan trek transit"
+        "title": "Tinjau ulang frekuensi dan rel transportasi umum"
       },
       "entity_detail": {
-        "title": "Detail terbuka"
+        "title": "Buka detail"
       }
     },
     "selectorTitle": "Apa yang ingin Anda selidiki?",
-    "eventsTitle": "Apa yang terjadi",
-    "causeTitle": "penyebab yang mendasarinya",
-    "adviceTitle": "Tindakan yang disarankan",
-    "needsAttention": "Ruang untuk perbaikan",
+    "eventsTitle": "Yang sedang terjadi",
+    "causeTitle": "Penyebabnya",
+    "adviceTitle": "Saran tindakan",
+    "needsAttention": "Masih bisa ditingkatkan",
     "values": {
       "money": "{{value}} / rumah tangga / hari",
-      "per_thousand": "{{value}} Kasus per 1.000 penduduk (bulan lalu)",
-      "per_thousand_week": "{{value}} Kasus per 1.000 penduduk (seminggu terakhir)"
+      "per_thousand": "{{value}} kasus per 1.000 orang (sebulan terakhir)",
+      "per_thousand_week": "{{value}} kasus per 1.000 orang (seminggu terakhir)"
     },
-    "collapse": "Jatuh",
+    "collapse": "Ciutkan",
     "investigate": {
-      "crime": "menyelidiki penyebab kejahatan",
+      "crime": "Selidiki penyebab kejahatan",
       "unemployment": "Selidiki penyebab pengangguran",
-      "income": "Selidiki penyebab rendahnya pendapatan",
-      "water": "Selidiki penyebab kekurangan air",
-      "electricity": "Selidiki penyebab kelangkaan listrik",
-      "internet": "Selidiki penyebab kelangkaan telekomunikasi",
-      "upkeep": "Selidiki penyebab kelangkaan pemeliharaan",
-      "high_water": "Selidiki penyebab kekurangan air curah",
-      "high_electricity": "Selidiki penyebab kekurangan daya tegangan tinggi",
-      "facility": "Selidiki fasilitas ini"
+      "income": "Selidiki penyebab masalah pendapatan",
+      "water": "Selidiki penyebab kekurangan air bersih",
+      "electricity": "Selidiki penyebab kekurangan listrik",
+      "internet": "Selidiki penyebab kekurangan telekomunikasi",
+      "upkeep": "Selidiki penyebab kurangnya pemeliharaan fasilitas",
+      "high_water": "Selidiki penyebab kekurangan air bertekanan tinggi",
+      "high_electricity": "Selidiki penyebab kekurangan listrik tegangan tinggi",
+      "facility": "Selidiki penyebab pada fasilitas ini"
     },
     "facilityFinding": "{{facility}}: {{title}}",
     "indicatorsTitle": "Indikator",
     "problems": {
-      "resource_runway": "Sumber daya \"{{name}}\" diperkirakan akan habis sekitar {{remaining_epochs}} Siklus",
-      "resource_depleted": "Sumber daya \"{{name}}\" telah habis",
-      "facility_inoperative": "Fasilitas publik \"{{name}}\" tidak beroperasi",
-      "facility_inoperative_labor": "Fasilitas publik \"{{name}}\" tidak beroperasi karena kekurangan tenaga kerja",
-      "facility_inoperative_material": "Fasilitas publik \"{{name}}\" tidak beroperasi karena kekurangan material",
-      "facility_inoperative_high_skill": "Fasilitas publik \"{{name}}\" berjalan pada kapasitas yang berkurang karena kekurangan staf yang terampil",
-      "facility_inoperative_budget": "Fasilitas publik \"{{name}}\" berjalan pada kapasitas yang berkurang karena kekurangan anggaran",
-      "education_low_enrollment": "Lembaga Pendidikan \"{{name}}\" kurang dimanfaatkan — hanya sedikit siswa yang terdaftar ({{enrolled}} dari {{max_students}} kursi)",
-      "infra_facility_down": "Fasilitas infrastruktur \"{{name}}\" tidak berfungsi",
-      "infra_disconnected": "Fasilitas {{count}} terputus dari jaringan infrastruktur",
-      "rail_capacity_exceeded": "Frekuensi kereta melebihi kapasitas lintasan pada {{count}} Segmen lintasan",
-      "collapse": "{{count}} Bangunan/jalan telah runtuh",
-      "collapse_with_deaths": "{{count}} Bangunan/jalan telah runtuh, menewaskan {{deaths}} orang",
-      "deaths_traffic": "{{count}} Orang meninggal dalam kecelakaan lalu lintas",
-      "tenant_blocked_by_parcel_size": "Tidak ada bangunan untuk \"{{tenant_name}}\" yang dapat dibangun di distrik \"{{zone_name}}\" (perlu {{required}} m2, buildable {{max_capacity}} m2 terbesar yang dapat dibangun)",
-      "unknown": "Peristiwa kritis telah terjadi",
-      "sanitation": "Sanitasi memburuk untuk rumah tangga {{count}}"
+      "resource_runway": "Sumber daya “{{name}}” akan habis dalam sekitar {{remaining_epochs}} siklus lagi",
+      "resource_depleted": "Sumber daya “{{name}}” sudah habis",
+      "facility_inoperative": "Fasilitas umum “{{name}}” tidak dapat beroperasi",
+      "facility_inoperative_labor": "Fasilitas umum “{{name}}” tidak dapat beroperasi karena kekurangan tenaga kerja",
+      "facility_inoperative_material": "Fasilitas umum “{{name}}” tidak dapat beroperasi karena kekurangan bahan baku",
+      "facility_inoperative_high_skill": "Fasilitas umum “{{name}}” mengurangi operasinya karena kekurangan tenaga ahli",
+      "facility_inoperative_budget": "Fasilitas umum “{{name}}” mengurangi operasinya karena kekurangan anggaran",
+      "education_low_enrollment": "Lembaga pendidikan “{{name}}” kekurangan siswa sehingga tingkat pemanfaatannya rendah ({{enrolled}} siswa terdaftar / kapasitas {{max_students}} siswa)",
+      "infra_facility_down": "Fasilitas infrastruktur “{{name}}” berhenti beroperasi",
+      "infra_disconnected": "{{count}} fasilitas tidak terhubung ke jaringan infrastruktur",
+      "rail_capacity_exceeded": "Frekuensi kereta melebihi kapasitas lintasan di {{count}} rel",
+      "collapse": "{{count}} bangunan/jalan telah runtuh",
+      "collapse_with_deaths": "{{count}} bangunan/jalan runtuh dan {{deaths}} orang meninggal",
+      "deaths_traffic": "{{count}} orang meninggal akibat kecelakaan lalu lintas",
+      "tenant_blocked_by_parcel_size": "Di distrik “{{zone_name}}”, bangunan yang dapat ditempati “{{tenant_name}}” tidak dapat dibangun (dibutuhkan {{required}} m2, maksimum kavling {{max_capacity}} m2)",
+      "unknown": "Terjadi peristiwa serius",
+      "sanitation": "Kondisi sanitasi {{count}} rumah tangga memburuk"
     },
-    "facilitiesTitle": "Fasilitas tidak beroperasi",
-    "otherProblemsTitle": "masalah lainnya",
+    "facilitiesTitle": "Fasilitas yang tidak dapat beroperasi",
+    "otherProblemsTitle": "Masalah lainnya",
     "facility": {
       "title": "{{facility}} tidak dapat beroperasi",
-      "evidence": "Produksi adalah {{percent}}% dari paket"
+      "evidence": "Produksi {{percent}}% dari rencana"
     }
   }
 }

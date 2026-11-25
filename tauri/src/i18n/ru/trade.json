@@ -1,53 +1,53 @@
 {
   "supply": {
-    "title": "Информация о поставках",
-    "product": "поставка продукта",
-    "amount": "Сумма предложения",
-    "price": "Цена предложения",
-    "soldAmount": "Проданная сумма",
-    "profitRate": "норма прибыли",
-    "utilization": "Использование"
+    "title": "Сведения о поставках",
+    "product": "Поставляемый товар",
+    "amount": "Объём поставок",
+    "price": "Цена поставки",
+    "soldAmount": "Продано",
+    "profitRate": "Рентабельность",
+    "utilization": "Загрузка"
   },
   "tourismSupply": {
-    "title": "Прием туристов",
-    "touristCapacity": "Туристическая емкость",
-    "persons": "{{value}} людей",
+    "title": "Приём туристов",
+    "touristCapacity": "Вместимость для туристов",
+    "persons": "{{value}} чел.",
     "218": {
       "price": "Входная плата",
-      "amount": "Вместимость посетителей (всего)",
+      "amount": "Вместимость для посетителей (всего)",
       "soldAmount": "Посетители (всего)"
     },
     "219": {
-      "price": "Плата за проезд",
-      "amount": "Пассажирская вместимость (всего)",
+      "price": "Тариф",
+      "amount": "Пассажировместимость (всего)",
       "soldAmount": "Пассажиры (всего)"
     }
   },
   "demand": {
-    "product": "Продукт",
-    "demandAmount": "Требовать",
-    "receivedAmount": "Приобретенный",
-    "acquiredAmount": "Инвентарь"
+    "product": "Товар",
+    "demandAmount": "Спрос",
+    "receivedAmount": "Получено",
+    "acquiredAmount": "Запас"
   },
   "cargo": {
     "title": "Грузовые операции",
-    "description": "Этот центр импортирует товары из-за пределов региона для поставки городских рынков и покупает избыточную продукцию города для экспорта его из региона.",
-    "capacity": "пропускная способность",
-    "perPeriod": "/месяц",
-    "perPeriod_week": "/неделя",
-    "materialCapacity": "Ограничение по полученным материалам",
-    "areaCapacity": "Ограничение по площади",
-    "importHandled": "Импорт обработан",
-    "exportHandled": "Экспорт обработан",
-    "utilization": "Использование",
-    "importSectionTitle": "Импортные товары",
-    "exportSectionTitle": "экспорт",
+    "description": "Этот узел импортирует товары из-за пределов региона и поставляет их на рынки города, а также скупает излишки продукции города и экспортирует их за пределы региона.",
+    "capacity": "Пропускная способность",
+    "perPeriod": "/мес.",
+    "perPeriod_week": "/нед.",
+    "materialCapacity": "Предел по сырью",
+    "areaCapacity": "Предел по площади",
+    "importHandled": "Обработано импорта",
+    "exportHandled": "Обработано экспорта",
+    "utilization": "Загрузка",
+    "importSectionTitle": "Импорт",
+    "exportSectionTitle": "Экспорт",
     "handledImport": "Продано",
-    "handledExport": "Покупной",
-    "allocation": "выделено",
+    "handledExport": "Закуплено",
+    "allocation": "Выделено",
     "priceImport": "Цена продажи",
-    "priceExport": "Цена покупки",
-    "lost": "Потерянные продажи",
-    "noProducts": "Никакие продукты не обрабатываются"
+    "priceExport": "Цена закупки",
+    "lost": "Упущенные продажи",
+    "noProducts": "Нет товаров"
   }
 }

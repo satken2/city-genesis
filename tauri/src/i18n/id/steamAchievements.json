@@ -1,127 +1,127 @@
 {
   "steamAchievements": {
-    "next": "Lanjut",
+    "next": "Berikutnya",
     "close": "Tutup",
     "items": {
       "FIRST_BUILDING": {
-        "name": "Langkah Pertama Kota",
-        "description": "Selesaikan bangunan pertama Anda. Kisah kota Anda dimulai di sini."
+        "name": "Langkah pertama membangun kota",
+        "description": "Selesaikan bangunan pertama. Dari sinilah sejarah kota dimulai."
       },
       "FIRST_OFFSHORE": {
-        "name": "Sebuah kota membawa ke laut",
-        "description": "Lengkapi ladang angin lepas pantai pertama atau anjungan minyak lepas pantai. Industri kota Anda menuju ke laut."
+        "name": "Kota yang meluas ke laut",
+        "description": "Selesaikan pembangkit listrik tenaga angin lepas pantai atau anjungan minyak lepas pantai pertama. Industri kota kini merambah ke laut."
       },
       "RAIL_LINES_1": {
-        "name": "Semua naik!",
-        "description": "Buka jalur rel"
+        "name": "Berangkat!",
+        "description": "Buka rute kereta api"
       },
       "RAIL_LINES_20": {
-        "name": "Kerajaan Kereta Api",
-        "description": "mengoperasikan 20 jalur kereta api di satu kota. Peta rute itu cukup menarik."
+        "name": "Kerajaan kereta api",
+        "description": "Operasikan 20 rute kereta api dalam satu kota. Peta rutenya pun makin enak dipandang."
       },
       "BUS_LINES_1": {
-        "name": "Bus datang ke kota",
-        "description": "Buka jalur bus"
+        "name": "Bus mulai melintas",
+        "description": "Buka rute bus"
       },
       "BUS_LINES_20": {
-        "name": "Di mana-mana dengan bus",
-        "description": "mengoperasikan 20 jalur bus di satu kota"
+        "name": "Naik bus ke mana saja",
+        "description": "Operasikan 20 rute bus dalam satu kota"
       },
       "MONORAIL_LINES_1": {
-        "name": "Perjalanan di atas kota",
-        "description": "Buka jalur monorel. Lihat jalan-jalan yang sudah dikenal dari sedikit lebih tinggi."
+        "name": "Komuter di atas kota",
+        "description": "Buka rute monorel. Lihat kota yang biasa Anda kenal dari sudut pandang yang sedikit lebih tinggi."
       },
       "MONORAIL_LINES_20": {
-        "name": "kota di langit",
-        "description": "mengoperasikan 20 jalur monorel di satu kota"
+        "name": "Kota di angkasa",
+        "description": "Operasikan 20 rute monorel dalam satu kota"
       },
       "LRT_LINES_1": {
-        "name": "Trem datang ke kota",
-        "description": "Buka saluran LRT"
+        "name": "Trem hadir di kota",
+        "description": "Buka rute LRT"
       },
       "LRT_LINES_20": {
-        "name": "Kota Trem",
-        "description": "mengoperasikan 20 jalur LRT di satu kota"
+        "name": "Kota trem",
+        "description": "Operasikan 20 rute LRT dalam satu kota"
       },
       "POPULATION_10K": {
-        "name": "rumah bagi 10.000",
-        "description": "mencapai populasi 10.000"
+        "name": "Kampung halaman 10.000 jiwa",
+        "description": "Capai populasi 10.000 jiwa"
       },
       "POPULATION_100K": {
-        "name": "kota regional yang berkembang pesat",
-        "description": "mencapai populasi 100.000"
+        "name": "Kota daerah yang ramai",
+        "description": "Capai populasi 100.000 jiwa"
       },
       "POPULATION_500K": {
-        "name": "Bergabung dengan kota-kota besar",
-        "description": "Mencapai populasi 500.000"
+        "name": "Bergabung dengan kota besar",
+        "description": "Capai populasi 500.000 jiwa"
       },
       "POPULATION_1M": {
-        "name": "jutaan kota",
-        "description": "Mencapai populasi 1.000.000 orang. Sebuah kota metropolitan dengan sejuta nyawa untuk mendukung."
+        "name": "Kota sejuta jiwa",
+        "description": "Capai populasi 1.000.000 jiwa. Jadilah kota besar yang menopang sejuta kehidupan."
       },
       "FLOORS_5": {
-        "name": "Sebuah kota tumbuh ke atas",
-        "description": "memiliki bangunan pribadi dengan 5 lantai atau lebih selesai"
+        "name": "Kota yang tumbuh ke atas",
+        "description": "Bangunan swasta setinggi 5 lantai atau lebih selesai dibangun"
       },
       "FLOORS_10": {
-        "name": "awal yang tinggi",
-        "description": "memiliki bangunan pribadi dengan 10 lantai atau lebih yang telah selesai. Syukurlah untuk lift."
+        "name": "Awal kota bertingkat tinggi",
+        "description": "Bangunan swasta setinggi 10 lantai atau lebih selesai dibangun. Untunglah ada lift."
       },
       "FLOORS_20": {
-        "name": "Sebuah cakrawala terbentuk",
-        "description": "memiliki bangunan pribadi dengan 20 lantai atau lebih selesai"
+        "name": "Deretan gedung pencakar langit",
+        "description": "Bangunan swasta setinggi 20 lantai atau lebih selesai dibangun"
       },
       "FLOORS_40": {
         "name": "Pencakar langit",
-        "description": "memiliki bangunan pribadi dengan lantai 40 atau lebih yang telah selesai. simbol baru untuk kota Anda."
+        "description": "Bangunan swasta setinggi 40 lantai atau lebih selesai dibangun. Simbol baru bagi kota."
       },
       "INDUSTRY_PHARMACEUTICAL": {
-        "name": "industri untuk kesehatan yang lebih baik",
-        "description": "Mintalah pabrik farmasi mulai beroperasi di kota Anda. Bantu orang menjalani kehidupan yang lebih sehat, mulai dari sini."
+        "name": "Industri penopang kesehatan",
+        "description": "Pabrik farmasi mulai beroperasi di kota. Dukung kesehatan banyak orang dari kota ini."
       },
       "INDUSTRY_SEMICONDUCTOR": {
-        "name": "Kota Silikon",
-        "description": "Mintalah pabrik semikonduktor mulai beroperasi di kota Anda. Keripik kecil, industri besar."
+        "name": "Kota silikon",
+        "description": "Pabrik semikonduktor mulai beroperasi di kota. Cip kecil, industri besar."
       },
       "INDUSTRY_PRECISION": {
-        "name": "kota presisi",
-        "description": "Mintalah pabrik Instrumen Presisi mulai beroperasi di kota Anda. Keahlian teknis menjadi kekuatan kota Anda."
+        "name": "Kota teknologi presisi",
+        "description": "Pabrik instrumen presisi mulai beroperasi di kota. Teknologi yang andal menjadi kekuatan kota."
       },
       "INDUSTRY_SOFTWARE": {
-        "name": "rumah baru untuk perangkat lunak",
-        "description": "Memiliki perusahaan perangkat lunak yang terbuka untuk bisnis di kota Anda. Berikan ide-ide baru tempat untuk tumbuh."
+        "name": "Rumah baru bagi perangkat lunak",
+        "description": "Perusahaan perangkat lunak mulai beroperasi di kota. Jadikan kota tempat tumbuhnya ide-ide baru."
       },
       "TOURISTS_1": {
         "name": "Selamat datang di kota kami",
-        "description": "Memiliki turis menginap di kota Anda untuk pertama kalinya"
+        "description": "Wisatawan menginap di kota untuk pertama kalinya"
       },
       "TOURISTS_1K": {
-        "name": "Sebuah kota yang layak untuk perjalanan",
-        "description": "memiliki 1.000 turis yang tinggal di kota Anda sekaligus"
+        "name": "Kota tujuan wisata",
+        "description": "1.000 wisatawan menginap di kota secara bersamaan"
       },
       "TOURISTS_10K": {
-        "name": "Dunia datang berkunjung",
-        "description": "memiliki 10.000 turis yang tinggal di kota Anda sekaligus"
+        "name": "Kota yang dikunjungi dunia",
+        "description": "10.000 wisatawan menginap di kota secara bersamaan"
       },
       "YEARS_10": {
-        "name": "Sepuluh tahun bersama kota",
-        "description": "bermain selama 10 tahun di satu kota. Ada lebih banyak bangunan kota di depan."
+        "name": "10 tahun bersama kota",
+        "description": "Bermainlah selama 10 tahun di satu kota. Pembangunan kota masih akan terus berlanjut."
       },
       "YEARS_100": {
-        "name": "Kota Abad",
-        "description": "Bermain selama 100 tahun di satu kota. Lihat kota Anda selama satu abad penuh."
+        "name": "Kota seabad",
+        "description": "Bermainlah selama 100 tahun di satu kota. Saksikan satu abad perjalanan kota."
       },
       "YEARS_500": {
-        "name": "Sebuah kota membuat sejarah",
-        "description": "Bermain selama 500 tahun di satu kota. Generasi berlalu, dan kota terus berjalan."
+        "name": "Kota yang mengukir sejarah",
+        "description": "Bermainlah selama 500 tahun di satu kota. Generasi berganti, kota terus berdiri."
       },
       "YEARS_1000": {
-        "name": "kota milenial",
-        "description": "Bermain selama 1.000 tahun di satu kota. Bangun kota dengan sejarah seribu tahun."
+        "name": "Kota seribu tahun",
+        "description": "Bermainlah selama 1.000 tahun di satu kota. Bangun kota dengan sejarah seribu tahun."
       },
       "YEARS_10000": {
-        "name": "kota abadi",
-        "description": "Bermain selama 10.000 tahun di satu kota. Itu cukup masa jabatan, walikota."
+        "name": "Kota abadi",
+        "description": "Bermainlah selama 10.000 tahun di satu kota. Masa jabatan Anda sebagai wali kota sudah sangat panjang."
       }
     }
   }

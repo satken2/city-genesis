@@ -1,15 +1,15 @@
 {
   "credits": {
-    "lead": "Game ini menggunakan aset yang tercantum di bawah ini. Nama penulis, sumber, nama lisensi, dan teks atribusi apa pun yang diperlukan oleh lisensi direproduksi kata demi kata.",
+    "lead": "Permainan ini menggunakan aset-aset berikut. Nama pembuat, nama sumber distribusi, nama lisensi, dan teks atribusi yang diwajibkan oleh ketentuan dicantumkan sesuai aslinya.",
     "empty": "Tidak ada entri.",
-    "requiredText": "atribusi yang diperlukan",
+    "requiredText": "Atribusi yang diwajibkan",
     "categories": {
-      "bgm": "Musik",
+      "bgm": "Musik latar",
       "sfx": "Efek suara",
-      "image": "Gambar & Ikon",
-      "font": "font",
+      "image": "Gambar & ikon",
+      "font": "Font",
       "model": "Model 3D",
-      "texture": "tekstur"
+      "texture": "Tekstur"
     }
   }
 }

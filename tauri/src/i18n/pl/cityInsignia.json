@@ -1,51 +1,51 @@
 {
   "cityInsignia": {
-    "emblem": "Godło",
+    "emblem": "Herb",
     "flag": "Flaga miasta",
     "motif": "Motyw",
-    "fieldColor": "Kolor pola",
+    "fieldColor": "Kolor tła",
     "motifColor": "Kolor motywu",
-    "pattern": "Wzorzec",
+    "pattern": "Wzór tła",
     "accentColor": "Kolor akcentu",
-    "placement": "Pozycja emblematu",
-    "loadImage": "Załaduj obraz",
-    "randomize": "Randomize",
-    "apply": "Zastosować",
-    "imageLoadFailed": "Nie udało się załadować obrazu.",
+    "placement": "Położenie herbu",
+    "loadImage": "Wczytaj obraz",
+    "randomize": "Losuj",
+    "apply": "Zastosuj",
+    "imageLoadFailed": "Nie udało się wczytać obrazu",
     "placements": {
-      "center": "Centrum",
-      "canton": "U góry z lewej",
-      "none": "Żaden"
+      "center": "Środek",
+      "canton": "Lewy górny róg",
+      "none": "Brak"
     },
     "motifs": {
       "wave": "Fala",
       "mountain": "Góra",
       "star": "Gwiazda",
       "tree": "Drzewo",
-      "sun": "Słoneczny",
+      "sun": "Słońce",
       "moon": "Księżyc",
       "flower": "Kwiat",
       "leaf": "Liść",
       "bird": "Ptak",
       "fish": "Ryba",
       "anchor": "Kotwica",
-      "gear": "Bieg",
+      "gear": "Koło zębate",
       "tower": "Zamek",
       "bridge": "Most",
-      "key": "Klawisz",
+      "key": "Klucz",
       "crown": "Korona",
       "snowflake": "Płatek śniegu",
       "flame": "Płomień",
-      "diamond": "Diament",
-      "cross": "Przejść przez"
+      "diamond": "Romb",
+      "cross": "Krzyż"
     },
     "patterns": {
-      "plain": "Równina",
-      "bicolor": "Dwubarwny",
-      "triband": "Triband",
-      "diagonal": "Przekątna",
-      "border": "Granica",
-      "bands": "Kołnierz sutanny i togi"
+      "plain": "Jednolite",
+      "bicolor": "Dwa pasy poziome",
+      "triband": "Trzy pasy pionowe",
+      "diagonal": "Podział ukośny",
+      "border": "Obramowanie",
+      "bands": "Pasy u góry i u dołu"
     }
   }
 }

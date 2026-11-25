@@ -1,23 +1,23 @@
 {
   "interchange": {
     "kind": {
-      "ic": "Wymieniać",
-      "jct": "Węzeł"
+      "ic": "Węzeł zjazdowy",
+      "jct": "Węzeł autostradowy"
     },
     "fallbackName": {
-      "ic": "IC #{{id}}",
-      "jct": "JCT #{{id}}"
+      "ic": "Węzeł zjazdowy #{{id}}",
+      "jct": "Węzeł autostradowy #{{id}}"
     },
     "connections": {
-      "from": "Z",
-      "to": "W celu",
+      "from": "Z drogi",
+      "to": "Na drogę",
       "road": "{{type}} #{{id}}",
-      "none": "Brak połączonych par drogowych.",
+      "none": "Brak połączonych par dróg",
       "direction": {
         "n": "Północ",
         "ne": "Północny wschód",
         "e": "Wschód",
-        "se": "południowo-wschodni",
+        "se": "Południowy wschód",
         "s": "Południe",
         "sw": "Południowy zachód",
         "w": "Zachód",

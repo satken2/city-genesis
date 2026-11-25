@@ -1,15 +1,15 @@
 {
   "credits": {
-    "lead": "Ta gra wykorzystuje zasoby wymienione poniżej. Nazwy autorów, źródła, nazwy licencji i wszelkie teksty atrybucji wymagane przez licencję są reprodukowane dosłownie.",
-    "empty": "Brak wpisów.",
-    "requiredText": "Wymagane przypisanie",
+    "lead": "Ta gra wykorzystuje wymienione poniżej materiały. Nazwiska autorów, nazwy źródeł, nazwy licencji i wymagane przez licencje teksty oznaczenia autorstwa zamieszczono w oryginalnym brzmieniu.",
+    "empty": "Brak pozycji.",
+    "requiredText": "Wymagane oznaczenie autorstwa",
     "categories": {
       "bgm": "Muzyka",
       "sfx": "Efekty dźwiękowe",
       "image": "Obrazy i ikony",
-      "font": "czcionki",
+      "font": "Czcionki",
       "model": "Modele 3D",
-      "texture": "tekstury"
+      "texture": "Tekstury"
     }
   }
 }

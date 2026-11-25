@@ -1,9 +1,9 @@
 {
   "climateEffects": {
-    "currentClimate": "Iklim rata-rata bulan ini",
-    "currentClimate_week": "Iklim rata-rata minggu ini",
-    "title": "Efisiensi produksi fasilitas oleh iklim",
+    "currentClimate": "Rata-rata iklim bulan ini",
+    "currentClimate_week": "Rata-rata iklim minggu ini",
+    "title": "Efisiensi produksi fasilitas menurut iklim",
     "facility": "Fasilitas",
-    "factor": "efisiensi produksi"
+    "factor": "Efisiensi produksi"
   }
 }

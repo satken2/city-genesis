@@ -1,212 +1,212 @@
 {
   "agent": {
-    "back": "Z powrotem",
+    "back": "Wstecz",
     "editAppearance": "Zmień wygląd",
     "relocateCityHall": "Przenieś ratusz",
     "publicFacility": "Obiekt publiczny",
-    "underAcquisition": "Negocjowanie pozyskiwania gruntów",
+    "underAcquisition": "Trwają negocjacje wykupu",
     "publicFacilityPanel": {
-      "title": "Obiekt publiczny"
+      "title": "Obiekt publiczny/komunalny"
     },
-    "abandon": "Porzucić",
-    "abandonHint": "Zrezygnuj z utrzymania i pozwól mu się rozpadnąć bez napraw",
+    "abandon": "Porzuć",
+    "abandonHint": "Zaprzestań utrzymania – obiekt będzie niszczał bez napraw",
     "statusSince": {
-      "founded": "Założony",
-      "householdFormed": "utworzone gospodarstwo domowe",
-      "arrived": "Przybył",
-      "opened": "Otwierany",
-      "schoolOpened": "Otwierany",
-      "completed": "Ukończono",
-      "operatingSince": "aktywny od",
-      "resumed": "wznowiono",
-      "paused": "wstrzymane",
-      "suspended": "Zawieszona",
-      "schoolClosed": "Zawieszona",
-      "constructionStarted": "Rozpoczęła się budowa",
-      "demolitionScheduled": "Zaplanowano rozbiórkę",
-      "demolitionStarted": "Rozpoczęła się rozbiórka",
-      "demolished": "rozebrany",
-      "collapsed": "zawalił się",
-      "burnedDown": "Spalony",
-      "default": "Status od"
+      "founded": "Data założenia",
+      "householdFormed": "Data utworzenia gospodarstwa",
+      "arrived": "Data przybycia",
+      "opened": "Data otwarcia",
+      "schoolOpened": "Data otwarcia szkoły",
+      "completed": "Data ukończenia",
+      "operatingSince": "Data uruchomienia",
+      "resumed": "Data wznowienia",
+      "paused": "Data zatrzymania",
+      "suspended": "Data zawieszenia działalności",
+      "schoolClosed": "Data zawieszenia zajęć",
+      "constructionStarted": "Data rozpoczęcia budowy",
+      "demolitionScheduled": "Data decyzji o rozbiórce",
+      "demolitionStarted": "Data rozpoczęcia rozbiórki",
+      "demolished": "Data zakończenia rozbiórki",
+      "collapsed": "Data zawalenia",
+      "burnedDown": "Data spłonięcia",
+      "default": "Data zmiany statusu"
     },
-    "reserves": "rezerwy",
-    "revenues": "Dochód",
+    "reserves": "Środki pieniężne",
+    "revenues": "Przychody",
     "expenses": "Wydatki",
     "zone": "Dzielnica",
     "building": "Budynek",
-    "rent": "Wynajem",
-    "floorOccupancy": "Obłożenie podłogi",
-    "tenants": "najemcy",
-    "guests": "goście",
-    "tabBasicInfo": "Podstawowe informacje",
-    "utilizationTarget": "Wykorzystanie celu",
+    "rent": "Czynsz",
+    "floorOccupancy": "Zajmowana powierzchnia",
+    "tenants": "Najemcy",
+    "guests": "Goście",
+    "tabBasicInfo": "Informacje podstawowe",
+    "utilizationTarget": "Docelowe wykorzystanie",
     "currentUtilization": "Bieżące wykorzystanie",
-    "constructionSpeed": "Prędkość budowy",
-    "constructionCostPerEpoch": "Koszt budowy / epoka",
+    "constructionSpeed": "Tempo budowy",
+    "constructionCostPerEpoch": "Koszt budowy na epokę",
     "remainingConstruction": "Pozostały czas budowy",
-    "remainingEpochs": "~{{n}} Epoki",
+    "remainingEpochs": "ok. {{n}} epok",
     "tabBuildingInfo": "Informacje o budynku",
-    "tabCargoInfo": "Ładunek",
+    "tabCargoInfo": "Przeładunek",
     "tabTradeInfo": "Podaż, popyt i handel",
     "tabTourismInfo": "Turystyka",
     "tabEmploymentInfo": "Zatrudnienie",
     "action": {
-      "purchase": "Zakup",
+      "purchase": "Wykup",
       "bulldoze": "Wyburz",
-      "cancelBulldoze": "Anuluj rozbiórkę",
-      "pause": "Pauza",
-      "resume": "Wznawianie",
+      "cancelBulldoze": "Anuluj wyburzenie",
+      "pause": "Wstrzymaj",
+      "resume": "Wznów",
       "delete": "Usuń",
-      "repair": "Naprawa",
-      "rebuild": "Odbudować",
-      "edit": "Edytować",
+      "repair": "Napraw",
+      "rebuild": "Odbuduj",
+      "edit": "Edytuj",
       "startConstruction": "Rozpocznij budowę",
-      "stopConstruction": "Zawieszenie budowy",
+      "stopConstruction": "Wstrzymaj budowę",
       "cancelAbandon": "Anuluj porzucenie",
-      "explode": "Wysadzić w powietrze",
-      "explodeConfirm": "wysadzić ten budynek i zorganizować go jako wypadek? Budynek zawala się natychmiast i wszyscy mieszkający lub pracujący w środku giną. Nastroje społeczne będą bardzo ucierpieć, a tego nie można cofnąć.",
-      "explodeTitle": "Budynek wysadzony w powietrze",
-      "explodeConfirmAction": "Wysadzić w powietrze"
+      "explode": "Wysadź",
+      "explodeConfirm": "Wysadzić ten budynek i upozorować wypadek?\nBudynek natychmiast się zawali, a wszyscy mieszkańcy i pracownicy w środku zginą. Nastroje społeczne znacznie się pogorszą, a tej operacji nie można cofnąć.",
+      "explodeTitle": "Wysadzenie budynku",
+      "explodeConfirmAction": "Wysadź"
     },
-    "pendingWarning": "Ten budynek jest zaplanowany. Proszę o polecenie rozpoczęcia budowy.",
+    "pendingWarning": "Ten budynek jest dopiero planowany. Wydaj polecenie rozpoczęcia budowy.",
     "alerts": {
       "diagnoseHint": "Kliknij, aby zdiagnozować przyczynę",
       "title": "Alerty",
       "constructionShortage": {
-        "title": "Brak usług budowlanych",
-        "description": "Budżet budowlany jest niewystarczający, co powoduje opóźnienia w budowie."
+        "title": "Niedobór usług budowlanych",
+        "description": "Budżet na budowę jest niewystarczający, dlatego prace się opóźniają."
       },
       "onFire": {
-        "title": "Incydent ognia!",
+        "title": "Pożar!",
         "description": "W budynku wybuchł pożar."
       },
       "accidentalFire": {
-        "title": "Przypadkowy pożar (niewielki)",
-        "description": "Doszło do przypadkowego drobnego pożaru, ale był mały."
+        "title": "Zaprószenie ognia (niewielki pożar)",
+        "description": "W budynku doszło do zaprószenia ognia, ale udało się je szybko opanować."
       },
       "infraDisconnected": {
-        "title": "Niepodłączony do sieci infrastrukturalnej",
-        "description": "Do terminalu tego obiektu nie jest podłączona żadna ścieżka infrastrukturalna. Nie może wysyłać ani odbierać materiałów eksploatacyjnych, dopóki nie zostanie podłączony do sieci."
+        "title": "Brak podłączenia do sieci infrastruktury",
+        "description": "Do przyłącza tego obiektu nie jest podłączona żadna trasa infrastruktury. Dopóki obiekt nie zostanie podłączony do sieci, nie może dostarczać ani odbierać dostaw."
       },
       "capacityTight": {
-        "title": "blisko pojemności",
-        "description": "Ten obiekt obsługuje 90% lub więcej jego pojemności. Ledwo może zaspokoić więcej popytu."
+        "title": "Na granicy możliwości",
+        "description": "Obiekt pracuje na poziomie co najmniej 90% swoich możliwości. Praktycznie nie jest w stanie zaspokoić większego popytu."
       },
       "nonconforming": {
-        "title": "nie spełnia przepisów",
-        "description": "Budynek ten nie spełnia przepisów działki. Nie zostanie naprawiony i zostanie zburzony, gdy się zepsuje."
+        "title": "Niezgodny z przepisami budowlanymi",
+        "description": "Budynek nie spełnia przepisów budowlanych swojej działki. Nie będzie naprawiany i zostanie rozebrany, gdy się zużyje."
       },
       "crime": {
-        "title": "doszło do przestępstwa",
-        "description": "W tym budynku doszło do przestępstwa."
+        "title": "Przestępstwo",
+        "description": "W tym budynku popełniono przestępstwo."
       },
       "crimeSign": {
         "title": "Oznaki przestępczości",
-        "description": "W tym budynku zaobserwowano oznaki przestępczości. Uważaj na pogorszenie bezpieczeństwa publicznego."
+        "description": "W tym budynku zauważono oznaki przestępczości. Uważaj na pogarszające się bezpieczeństwo publiczne."
       },
       "laborShortage": {
         "title": "Niedobór siły roboczej",
-        "description": "Za mało pracowników jest zatrudnionych, więc produkcja i usługi nie spełniają planu."
+        "description": "Brakuje pracowników, więc produkcja i świadczenie usług nie osiągają planu."
       },
       "materialShortage": {
-        "title": "Niedobór materiałów",
-        "description": "Zaopatrzenie w surowce jest niewystarczające, więc produkcja i usługi nie spełniają planu."
+        "title": "Niedobór surowców",
+        "description": "Zaopatrzenie w surowce jest niewystarczające, więc produkcja i świadczenie usług nie osiągają planu."
       },
       "highSkillShortage": {
-        "title": "Brak wykwalifikowanych pracowników",
-        "description": "Nie ma wystarczającej liczby wysoko wykwalifikowanych pracowników, więc wydajność jest zmniejszona do tego, co może obsłużyć dostępny personel."
+        "title": "Niedobór specjalistów",
+        "description": "Brakuje potrzebnych wysoko wykwalifikowanych pracowników, więc produkcja została ograniczona do poziomu, z którym poradzi sobie obecny personel."
       },
       "budgetCapped": {
         "title": "Niedobór budżetu",
-        "description": "Przydzielony budżet jest znacznie poniżej wymaganej kwoty, więc operacje zostały zmniejszone. Przejrzyj przydział budżetu."
+        "description": "Przydzielony budżet jest znacznie niższy od potrzebnego, więc działalność została ograniczona. Przejrzyj podział budżetu."
       },
       "facilityWarning": {
-        "title": "Obiekt publiczny nieczynny",
-        "description": "Ten obiekt zapewnia znacznie mniej usług niż planowano. Sprawdź jego robociznę i zaopatrzenie materiałowe."
+        "title": "Obiekt publiczny nie może działać",
+        "description": "Ten obiekt świadczy znacznie mniej usług, niż zakłada cel. Sprawdź zaopatrzenie w siłę roboczą i surowce."
       },
       "sanitationWarning": {
-        "title": "pogarszająca się higiena",
-        "description": "Sanitacja na działce tego budynku poważnie się pogorszyła, wpływając na gospodarstwa domowe. Poprawić zaopatrzenie w ścieki i utylizację odpadów."
+        "title": "Pogorszenie warunków sanitarnych",
+        "description": "Warunki sanitarne na terenie tego budynku poważnie się pogorszyły, co odbija się na mieszkających tu gospodarstwach domowych. Popraw dostawy usług oczyszczania ścieków i utylizacji odpadów."
       },
       "infraWarning": {
-        "title": "Obiekt infrastrukturalny zatrzymany lub zawalony",
-        "description": "Ten obiekt przestał działać lub zawalił się, wpływając na dostawę infrastruktury. Sprawdź jego status i połączenia zasilania."
+        "title": "Zatrzymanie lub zawalenie obiektu infrastruktury",
+        "description": "Zatrzymanie lub zawalenie tego obiektu zakłóca dostawy infrastruktury. Sprawdź stan obiektu i trasy dostaw."
       },
       "farFromRoad": {
         "title": "Daleko od drogi",
-        "description": "Najbliższa droga znajduje się około {{distance}} m stąd. Dostęp dla dostaw, dojazdów do pracy i zakupów jest znacznie utrudniony; rozważ dociągnięcie drogi bliżej budynku."
+        "description": "Najbliższa droga jest oddalona o ok. {{distance}} m. Znacznie utrudnia to zaopatrzenie oraz dojazdy do pracy i na zakupy, więc rozważ doprowadzenie drogi bliżej budynku."
       },
       "noRoadAccess": {
-        "title": "Brak dostępu do drogi",
-        "description": "Ten budynek nie ma drogi, do której mógłby się podłączyć. Dostęp dla dostaw, dojazdów do pracy i zakupów jest znacznie utrudniony; zbuduj drogę w pobliżu."
+        "title": "Brak drogi do podłączenia",
+        "description": "Ten budynek nie ma drogi, do której mógłby się podłączyć. Znacznie utrudnia to zaopatrzenie oraz dojazdy do pracy i na zakupy, więc zbuduj drogę w pobliżu."
       }
     },
     "infra": {
-      "title": "Połączenie infrastruktury",
-      "connected": "Połączony",
-      "disconnected": "Niepowiązany",
-      "received": "Odebrane"
+      "title": "Podłączenie do infrastruktury",
+      "connected": "Podłączono",
+      "disconnected": "Niepodłączone",
+      "received": "Ilość odebrana"
     },
     "tabConstructionInfo": "Budowa",
     "tabEducationInfo": "Edukacja",
     "education": {
-      "totalStudents": "Zarejestrowani studenci",
-      "totalCapacity": "Całkowita pojemność",
-      "statusTitle": "Rekrutacja",
-      "enrolled": "zapisany",
-      "vacant": "Otwarte miejsca",
-      "noCapacity": "Brak pojemności",
-      "countLabel": "Liczyć",
-      "enrollmentBySkill": "Rejestracja według umiejętności",
-      "settingsTitle": "Kwoty wstępu",
-      "settingsHint": "Ustaw wagę przydziału dla każdej umiejętności. Całkowita pojemność jest podzielona proporcjonalnie do wag.",
+      "totalStudents": "Liczba zapisanych uczniów",
+      "totalCapacity": "Łączna liczba miejsc",
+      "statusTitle": "Stan zapisów",
+      "enrolled": "Zapisani",
+      "vacant": "Wolne miejsca",
+      "noCapacity": "Brak miejsc",
+      "countLabel": "Liczba osób",
+      "enrollmentBySkill": "Zapisy według umiejętności",
+      "settingsTitle": "Limity przyjęć",
+      "settingsHint": "Ustaw wagę przydziału dla każdej umiejętności. Łączna liczba miejsc zostanie rozdzielona proporcjonalnie do wag.",
       "skillHeader": "Umiejętność",
       "weightHeader": "Waga",
-      "previewHeader": "Pojemność",
+      "previewHeader": "Miejsca",
       "save": "Zapisz",
-      "saving": "Oszczędzam...",
+      "saving": "Zapisywanie...",
       "saveFailed": "Nie udało się zapisać",
-      "sumMustBePositive": "Suma kwot musi wynosić co najmniej 1",
-      "invalidWeight": "Wagi muszą być liczbami całkowitymi 0 lub więcej",
+      "sumMustBePositive": "Suma limitów musi wynosić co najmniej 1",
+      "invalidWeight": "Wagi muszą być liczbami całkowitymi nie mniejszymi niż 0",
       "studentsList": "Lista uczniów",
-      "noStudents": "Brak studentów",
+      "noStudents": "Brak uczniów",
       "showMore": "Pokaż więcej ({{count}})"
     }
   },
   "agentList": {
     "filterType": "Typ",
     "filterVariant": "Wariant",
-    "filterZone": "Strefa",
+    "filterZone": "Dzielnica",
     "allVariants": "Wszystkie warianty",
-    "allZones": "wszystkie strefy",
-    "resultCount": "{{count}} Wyniki",
+    "allZones": "Wszystkie dzielnice",
+    "resultCount": "Wyniki: {{count}}",
     "capped": "(z {{total}} łącznie)",
-    "loading": "Wczytywanie…",
-    "noResults": "Brak pasujących agentów",
+    "loading": "Wczytywanie...",
+    "noResults": "Brak pasujących podmiotów gospodarczych",
     "colStatus": "Status",
     "colVariant": "Wariant",
     "colName": "Nazwa",
     "colProduct": "Produkt",
     "colPrice": "Cena",
     "colProduction": "Produkcja",
-    "colStock": "Akcje",
-    "colSold": "Sprzedał",
-    "colWage": "stawka płac",
+    "colStock": "Zapasy",
+    "colSold": "Sprzedano",
+    "colWage": "Stawka płacy",
     "colEmployment": "Zatrudnienie",
     "colUtilization": "Wykorzystanie",
     "colBdType": "Typ budynku",
     "colDurability": "Trwałość",
-    "colRent": "Wynajem",
-    "colFloors": "Podłogi",
-    "colFloorArea": "Powierzchnia piętra",
-    "colOccupancy": "Okupacja",
-    "colFamilyType": "Typ rodziny",
+    "colRent": "Czynsz",
+    "colFloors": "Kondygnacje",
+    "colFloorArea": "Powierzchnia",
+    "colOccupancy": "Obłożenie",
+    "colFamilyType": "Typ gospodarstwa",
     "colDiscretionaryIncome": "Dochód rozporządzalny",
-    "colSatisNutrition": "Odżywianie",
-    "colSatisHealthcare": "Healthcare",
-    "colSatisLeisure": "Wolny czas",
-    "colSatisResidential": "Osiedle mieszkaniowe",
+    "colSatisNutrition": "Wyżywienie",
+    "colSatisHealthcare": "Opieka zdrowotna",
+    "colSatisLeisure": "Rozrywka i wypoczynek",
+    "colSatisResidential": "Mieszkanie",
     "colAutomobile": "Samochód"
   }
 }

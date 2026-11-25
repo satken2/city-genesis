@@ -1,19 +1,19 @@
 {
   "assetManager": {
     "tabs": {
-      "buildings": "Site",
-      "paths": "yol",
-      "vehicles": "araçlar",
-      "props": "Destekler"
+      "buildings": "Binalar",
+      "paths": "Güzergâhlar",
+      "vehicles": "Araçlar",
+      "props": "Dekor nesneleri"
     },
     "additional": "Ek modeller",
-    "loading": "3D görünümden modeller yükleniyor…",
-    "noModel": "model yok",
-    "noImage": "görüntü yok",
+    "loading": "Modeller 3D ekrandan yükleniyor…",
+    "noModel": "Model yok",
+    "noImage": "Görsel yok",
     "weight": "Ağırlık",
-    "applyNote": "Bir oyuna bir sonraki başladığınızda veya yüklediğinizde ağırlık değişiklikleri etkili olur.",
+    "applyNote": "Ağırlık değişiklikleri, oyunu bir sonraki başlatışınızda veya yüklemenizde geçerli olur.",
     "preview": {
-      "hint": "Döndürmek için sürükleyin / Yakınlaştırmak için kaydırın",
+      "hint": "Döndürmek için sürükleyin / Yakınlaştırmak için tekerleği çevirin",
       "zoomIn": "Yakınlaştır",
       "zoomOut": "Uzaklaştır",
       "reset": "Sıfırla"

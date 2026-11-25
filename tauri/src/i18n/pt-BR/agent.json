@@ -1,190 +1,190 @@
 {
   "agent": {
-    "back": "De volta",
+    "back": "Voltar",
     "editAppearance": "Alterar aparência",
-    "relocateCityHall": "Mude a prefeitura",
+    "relocateCityHall": "Transferir a Prefeitura",
     "publicFacility": "Instalação pública",
-    "underAcquisition": "Negociando a aquisição de terras",
+    "underAcquisition": "Em negociação de aquisição",
     "publicFacilityPanel": {
-      "title": "Instalação pública"
+      "title": "Instalação pública/municipal"
     },
-    "abandon": "Abandono",
-    "abandonHint": "Desista da manutenção e deixe-o decair sem reparos",
+    "abandon": "Abandonar",
+    "abandonHint": "Deixa de manter o edifício: sem reparos, ele se deteriora com o tempo",
     "statusSince": {
-      "founded": "Fundado",
-      "householdFormed": "Casa formada",
-      "arrived": "Chegou",
-      "opened": "Aberto",
-      "schoolOpened": "Aberto",
-      "completed": "Concluído",
-      "operatingSince": "Ativo desde",
-      "resumed": "retomado",
-      "paused": "pausado",
-      "suspended": "Suspensa",
-      "schoolClosed": "Suspensa",
-      "constructionStarted": "A construção começou",
-      "demolitionScheduled": "Demolição agendada",
-      "demolitionStarted": "Começou a demolição",
-      "demolished": "demolido",
-      "collapsed": "Ruiu",
-      "burnedDown": "Queimado",
-      "default": "Status desde"
+      "founded": "Data de fundação",
+      "householdFormed": "Data de formação do domicílio",
+      "arrived": "Data de chegada",
+      "opened": "Data de inauguração",
+      "schoolOpened": "Data de abertura da escola",
+      "completed": "Data de conclusão",
+      "operatingSince": "Em operação desde",
+      "resumed": "Data de retomada",
+      "paused": "Data de pausa",
+      "suspended": "Data de suspensão das atividades",
+      "schoolClosed": "Data de suspensão das aulas",
+      "constructionStarted": "Data de início da obra",
+      "demolitionScheduled": "Data da decisão de demolição",
+      "demolitionStarted": "Data de início da demolição",
+      "demolished": "Data de conclusão da demolição",
+      "collapsed": "Data do desabamento",
+      "burnedDown": "Data do incêndio",
+      "default": "Data da mudança de status"
     },
-    "reserves": "Reservas",
-    "revenues": "Receita",
+    "reserves": "Caixa disponível",
+    "revenues": "Receitas",
     "expenses": "Despesas",
     "zone": "Bairro",
-    "building": "Prédio",
-    "rent": "Arrendar",
-    "floorOccupancy": "ocupação do piso",
-    "tenants": "inquilinos",
-    "guests": "convidados",
+    "building": "Edifício",
+    "rent": "Aluguel",
+    "floorOccupancy": "Área de andar ocupada",
+    "tenants": "Inquilinos",
+    "guests": "Hóspedes",
     "tabBasicInfo": "Informações básicas",
-    "utilizationTarget": "Utilização do alvo",
+    "utilizationTarget": "Meta de utilização",
     "currentUtilization": "Utilização atual",
     "constructionSpeed": "Velocidade de construção",
-    "constructionCostPerEpoch": "Custo de construção / época",
-    "remainingConstruction": "tempo de construção restante",
+    "constructionCostPerEpoch": "Custo de construção por época",
+    "remainingConstruction": "Tempo de construção restante",
     "remainingEpochs": "~{{n}} épocas",
-    "tabBuildingInfo": "Informações do edifício",
-    "tabCargoInfo": "Carga",
+    "tabBuildingInfo": "Edifício",
+    "tabCargoInfo": "Carga e descarga",
     "tabTradeInfo": "Oferta, demanda e comércio",
     "tabTourismInfo": "Turismo",
     "tabEmploymentInfo": "Emprego",
     "action": {
-      "purchase": "Comprar",
+      "purchase": "Adquirir",
       "bulldoze": "Demolir",
-      "cancelBulldoze": "Cancele a demolição",
-      "pause": "Pausa",
+      "cancelBulldoze": "Cancelar demolição",
+      "pause": "Pausar",
       "resume": "Retomar",
       "delete": "Excluir",
       "repair": "Reparar",
       "rebuild": "Reconstruir",
       "edit": "Editar",
       "startConstruction": "Iniciar obra",
-      "stopConstruction": "suspender a construção",
+      "stopConstruction": "Suspender obra",
       "cancelAbandon": "Cancelar abandono",
       "explode": "Explodir",
-      "explodeConfirm": "Explodir este prédio e encená-lo como um acidente? O prédio desmorona de uma vez e todos os que vivem ou trabalham dentro são mortos. O sentimento público sofrerá muito, e isso não pode ser desfeito.",
-      "explodeTitle": "Explodir o edifício",
+      "explodeConfirm": "Explodir este edifício e fazer parecer um acidente?\nO edifício desaba na hora, e os moradores e funcionários que estiverem dentro morrem. O sentimento dos cidadãos vai piorar muito, e esta ação não pode ser desfeita.",
+      "explodeTitle": "Explodir edifício",
       "explodeConfirmAction": "Explodir"
     },
-    "pendingWarning": "Este edifício está planejado. Por favor, comande para iniciar a construção.",
+    "pendingWarning": "Este edifício está planejado. Dê a ordem para iniciar a obra.",
     "alerts": {
       "diagnoseHint": "Clique para diagnosticar a causa",
       "title": "Alertas",
       "constructionShortage": {
-        "title": "Falta de serviço de construção",
-        "description": "O orçamento da construção é insuficiente, causando atrasos na construção."
+        "title": "Falta de serviços de construção",
+        "description": "A obra está atrasada por falta de orçamento de construção."
       },
       "onFire": {
-        "title": "Incidente de incêndio!",
-        "description": "Um incêndio começou no prédio."
+        "title": "Incêndio!",
+        "description": "Há um incêndio no edifício."
       },
       "accidentalFire": {
-        "title": "Incêndio acidental (menor)",
-        "description": "Ocorreu um pequeno incêndio acidental, mas foi mantido pequeno."
+        "title": "Incêndio acidental (pequeno)",
+        "description": "Houve um incêndio acidental no edifício, mas ele foi contido a tempo."
       },
       "infraDisconnected": {
-        "title": "Não conectado à rede de infraestrutura",
-        "description": "Nenhum caminho de infraestrutura está conectado ao terminal desta instalação. Ele não pode enviar ou receber suprimentos até que esteja conectado à rede."
+        "title": "Sem conexão com a rede de infraestrutura",
+        "description": "Nenhuma via de infraestrutura está conectada ao ponto de conexão desta instalação. Ela não pode fornecer nem receber nada até ser conectada à rede."
       },
       "capacityTight": {
-        "title": "Perto da capacidade",
-        "description": "Esta instalação está lidando com 90% ou mais de sua capacidade. Quase não aguenta mais demanda."
+        "title": "Capacidade no limite",
+        "description": "O volume atendido chegou a 90% ou mais da capacidade desta instalação. Ela quase não consegue atender a mais demanda."
       },
       "nonconforming": {
-        "title": "Não atende aos regulamentos",
-        "description": "Este edifício não atende aos regulamentos de sua parcela. Ele não será reparado e será demolido assim que se deteriorar."
+        "title": "Não atende às normas de construção",
+        "description": "O edifício não atende às normas de construção do lote. Não será reparado e será demolido quando se deteriorar."
       },
       "crime": {
-        "title": "crime ocorreu",
-        "description": "Um crime ocorreu neste prédio."
+        "title": "Ocorrência de crime",
+        "description": "Ocorreu um crime neste edifício."
       },
       "crimeSign": {
         "title": "Sinais de crime",
-        "description": "Sinais de crime foram observados neste prédio. Cuidado para piorar a segurança pública."
+        "description": "Foram observados sinais de crime neste edifício. Fique atento à piora da segurança pública."
       },
       "laborShortage": {
-        "title": "escassez de mão de obra",
-        "description": "Não são empregados trabalhadores suficientes, então a produção e os serviços estão aquém do plano."
+        "title": "Falta de mão de obra",
+        "description": "Faltam funcionários, e a produção e a prestação de serviços estão abaixo do planejado."
       },
       "materialShortage": {
-        "title": "Escassez de material",
-        "description": "A aquisição de matérias-primas é insuficiente, portanto, a produção e os serviços estão aquém do plano."
+        "title": "Falta de matérias-primas",
+        "description": "A obtenção de matérias-primas é insuficiente, e a produção e a prestação de serviços estão abaixo do planejado."
       },
       "highSkillShortage": {
-        "title": "Falta de pessoal qualificado",
-        "description": "Não há funcionários altamente qualificados suficientes, portanto, a produção é reduzida ao que a equipe disponível pode lidar."
+        "title": "Falta de profissionais especializados",
+        "description": "Faltam profissionais de alta qualificação, por isso a produção foi reduzida ao que a equipe disponível consegue atender."
       },
       "budgetCapped": {
-        "title": "déficit orçamentário",
-        "description": "O orçamento alocado está muito abaixo do valor necessário, portanto, as operações foram reduzidas. Revise a alocação do orçamento."
+        "title": "Orçamento insuficiente",
+        "description": "O orçamento destinado está muito abaixo do necessário, e as operações foram reduzidas. Revise a distribuição do orçamento."
       },
       "facilityWarning": {
-        "title": "Instalações públicas inoperantes",
-        "description": "Esta instalação está fornecendo muito menos serviço do que o planejado. Verifique sua mão-de-obra e aquisição de materiais."
+        "title": "Instalação pública inoperante",
+        "description": "Esta instalação está fornecendo muito menos serviço do que a meta. Verifique a obtenção de mão de obra e de matérias-primas."
       },
       "sanitationWarning": {
-        "title": "piorando o saneamento",
-        "description": "O saneamento na parcela deste edifício se deteriorou severamente, afetando as famílias residentes. Melhorar o suprimento de esgoto e tratamento de resíduos."
+        "title": "Piora do saneamento",
+        "description": "O saneamento no terreno deste edifício piorou gravemente e está afetando os domicílios que moram nele. Melhore o fornecimento de tratamento de esgoto e de resíduos."
       },
       "infraWarning": {
-        "title": "Instalação de infraestrutura parou ou entrou em colapso",
-        "description": "Essa instalação parou de operar ou entrar em colapso, afetando o fornecimento de infraestrutura. Verifique seu status e conexões de suprimentos."
+        "title": "Instalação de infraestrutura parada ou desabada",
+        "description": "A parada ou o desabamento desta instalação está afetando o fornecimento de infraestrutura. Verifique o estado da instalação e a rota de fornecimento."
       },
       "farFromRoad": {
-        "title": "Longe da rua",
-        "description": "A rua mais próxima fica a cerca de {{distance}} m. O acesso para suprimentos, deslocamento ao trabalho e compras fica muito prejudicado; considere estender uma rua para mais perto deste prédio."
+        "title": "Longe da via",
+        "description": "A via mais próxima fica a cerca de {{distance}} m. O acesso para obter suprimentos, ir ao trabalho e fazer compras fica muito prejudicado; considere estender uma via até perto daqui."
       },
       "noRoadAccess": {
-        "title": "Sem acesso por rua",
-        "description": "Este prédio não tem nenhuma rua para se conectar. O acesso para suprimentos, deslocamento ao trabalho e compras fica muito prejudicado; construa uma rua por perto."
+        "title": "Nenhuma via para conectar",
+        "description": "Não há via à qual este edifício possa se conectar. O acesso para obter suprimentos, ir ao trabalho e fazer compras fica muito prejudicado; construa uma via por perto."
       }
     },
     "infra": {
       "title": "Conexão de infraestrutura",
       "connected": "Conectado",
-      "disconnected": "Desligado",
-      "received": "Recebido"
+      "disconnected": "Sem conexão",
+      "received": "Quantidade recebida"
     },
-    "tabConstructionInfo": "Construção",
+    "tabConstructionInfo": "Obra",
     "tabEducationInfo": "Educação",
     "education": {
       "totalStudents": "Alunos matriculados",
-      "totalCapacity": "capacidade total",
-      "statusTitle": "Inscrição",
-      "enrolled": "Inscrito",
-      "vacant": "Assentos abertos",
-      "noCapacity": "Sem capacidade",
-      "countLabel": "Contagem",
-      "enrollmentBySkill": "Inscrição por habilidade",
-      "settingsTitle": "Cotas de admissão",
-      "settingsHint": "Defina o peso de alocação para cada habilidade. A capacidade total é dividida em proporção aos pesos.",
+      "totalCapacity": "Capacidade total",
+      "statusTitle": "Matrículas",
+      "enrolled": "Matriculados",
+      "vacant": "Vagas livres",
+      "noCapacity": "Sem vagas",
+      "countLabel": "Pessoas",
+      "enrollmentBySkill": "Matrículas por qualificação",
+      "settingsTitle": "Configuração de vagas",
+      "settingsHint": "Defina o peso de distribuição de cada qualificação. A capacidade total é dividida proporcionalmente aos pesos.",
       "skillHeader": "Qualificação",
       "weightHeader": "Peso",
-      "previewHeader": "Capacidade",
+      "previewHeader": "Vagas",
       "save": "Salvar",
       "saving": "Salvando...",
       "saveFailed": "Falha ao salvar",
-      "sumMustBePositive": "O total das cotas deve ser de pelo menos 1",
-      "invalidWeight": "Os pesos devem ser inteiros de 0 ou mais",
+      "sumMustBePositive": "O total de vagas deve ser 1 ou mais",
+      "invalidWeight": "Os pesos devem ser números inteiros iguais ou maiores que 0",
       "studentsList": "Lista de alunos",
-      "noStudents": "nenhum aluno",
-      "showMore": "Mostrar mais ({{count}})"
+      "noStudents": "Nenhum aluno",
+      "showMore": "Mostrar mais ({{count}} pessoas)"
     }
   },
   "agentList": {
     "filterType": "Tipo",
     "filterVariant": "Variante",
-    "filterZone": "Zona",
+    "filterZone": "Bairro",
     "allVariants": "Todas as variantes",
-    "allZones": "todas as zonas",
+    "allZones": "Todos os bairros",
     "resultCount": "{{count}} resultados",
-    "capped": "(de {{total}} total)",
-    "loading": "Carregando…",
-    "noResults": "Nenhum agente correspondente",
-    "colStatus": "Estado",
+    "capped": "(de {{total}} no total)",
+    "loading": "Carregando...",
+    "noResults": "Nenhum agente econômico encontrado",
+    "colStatus": "Status",
     "colVariant": "Variante",
     "colName": "Nome",
     "colProduct": "Produto",
@@ -192,21 +192,21 @@
     "colProduction": "Produção",
     "colStock": "Estoque",
     "colSold": "Vendido",
-    "colWage": "Taxa salarial",
+    "colWage": "Salário unitário",
     "colEmployment": "Emprego",
     "colUtilization": "Utilização",
-    "colBdType": "Tipo de construção",
+    "colBdType": "Tipo de edifício",
     "colDurability": "Durabilidade",
-    "colRent": "Arrendar",
-    "colFloors": "Pisos",
-    "colFloorArea": "Área do piso",
+    "colRent": "Aluguel",
+    "colFloors": "Andares",
+    "colFloorArea": "Área de piso",
     "colOccupancy": "Ocupação",
-    "colFamilyType": "Tipo de família",
+    "colFamilyType": "Tipo de domicílio",
     "colDiscretionaryIncome": "Renda disponível",
     "colSatisNutrition": "Nutrição",
     "colSatisHealthcare": "Saúde",
     "colSatisLeisure": "Lazer",
-    "colSatisResidential": "Residencial",
-    "colAutomobile": "Carro"
+    "colSatisResidential": "Moradia",
+    "colAutomobile": "Carro próprio"
   }
 }

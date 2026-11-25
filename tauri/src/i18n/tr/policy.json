@@ -1,323 +1,323 @@
 {
   "policy": {
-    "pending": "Simülasyon Koşu",
+    "pending": "Simülasyon sürüyor",
     "noData": "Veri yok",
-    "actionError": "Eylem ekranı açılamadı.",
+    "actionError": "İşlem ekranı açılamadı.",
     "indicators": {
       "unemployment": {
         "tab": "İşsizlik",
-        "issue": "İşsizlik yüksek",
-        "clear": "İşsizlik sorunu bulunamadı",
-        "evidence": "işsizlik oranı {{value}}"
+        "issue": "İşsizlik oranı yüksek",
+        "clear": "İşsizlik sorunu bulunmadı",
+        "evidence": "İşsizlik oranı {{value}}"
       },
       "income": {
         "tab": "Gelir",
-        "issue": "Hane geliri düşük",
-        "clear": "Gelir sorunu bulunamadı",
+        "issue": "Hane gelirleri düşük",
+        "clear": "Gelir sorunu bulunmadı",
         "evidence": "Ortalama hane geliri {{value}}"
       },
       "tourism": {
         "tab": "Turizm",
-        "issue": "Çok az turist ziyaret ediyor",
-        "clear": "Turizm sorunu bulunamadı",
-        "evidence": "{{value}} Kalan Turistler · Kapasite {{capacity}}"
+        "issue": "Turist sayısı az",
+        "clear": "Turizm sorunu bulunmadı",
+        "evidence": "Konaklayan turist: {{value}} kişi · Kapasite: {{capacity}} kişi"
       },
       "crime": {
         "tab": "Suç",
-        "issue": "Suç ve anlaşmazlıklar meydana geliyor",
-        "clear": "Suç sorunu bulunamadı",
-        "evidence": "Suç Hasarı {{value}} · {{incidents}} Sorun Olayları"
+        "issue": "Suç ve kavgalar yaşanıyor",
+        "clear": "Suç sorunu bulunmadı",
+        "evidence": "Suç zararı {{value}} · Kavga: {{incidents}} olay"
       },
       "sanitation": {
-        "tab": "Sanitasyon",
-        "issue": "Sanitasyon sorunları yaşanıyor",
-        "clear": "Sanitasyon sorunu bulunamadı",
-        "evidence": "{{value}} hane için sanitasyon kötüleşiyor"
+        "tab": "Hijyen",
+        "issue": "Hijyen sorunları yaşanıyor",
+        "clear": "Hijyen sorunu bulunmadı",
+        "evidence": "{{value}} hanede hijyen kötüleşiyor"
       },
       "water": {
         "tab": "Su",
-        "issue": "Su yetersiz tedarik",
-        "clear": "Su temini sorunu bulunamadı",
-        "evidence": "Haneler ve tesisler siparişlerinden {{value}} aldı"
+        "issue": "Su arzı yetersiz",
+        "clear": "Su arzı sorunu bulunmadı",
+        "evidence": "Hane ve tesislerin siparişlerine karşı teslim oranı: {{value}}"
       },
       "electricity": {
         "tab": "Elektrik",
-        "issue": "Elektrik yetersiz",
-        "clear": "Elektrik kaynağı sorunu bulunamadı",
-        "evidence": "Haneler ve tesisler siparişlerinden {{value}} aldı"
+        "issue": "Elektrik arzı yetersiz",
+        "clear": "Elektrik arzı sorunu bulunmadı",
+        "evidence": "Hane ve tesislerin siparişlerine karşı teslim oranı: {{value}}"
       },
       "internet": {
-        "tab": "telekom",
-        "issue": "Telekomünikasyon yetersiz",
-        "clear": "Telekomünikasyon tedarik sorunu bulunamadı",
-        "evidence": "Haneler ve tesisler siparişlerinden {{value}} aldı"
+        "tab": "İletişim",
+        "issue": "İletişim arzı yetersiz",
+        "clear": "İletişim arzı sorunu bulunmadı",
+        "evidence": "Hane ve tesislerin siparişlerine karşı teslim oranı: {{value}}"
       },
       "high_water": {
-        "tab": "dökme su",
-        "issue": "Toplu su yetersiz",
-        "clear": "Toplu su temini sorunu bulunamadı",
-        "evidence": "Tesisler siparişlerinden {{value}} aldı"
+        "tab": "Yüksek basınçlı su",
+        "issue": "Yüksek basınçlı su arzı yetersiz",
+        "clear": "Yüksek basınçlı su arzı sorunu bulunmadı",
+        "evidence": "Tesislerin teslim aldığı miktar: siparişlerin {{value}} kadarı"
       },
       "high_electricity": {
-        "tab": "yüksek gerilim gücü",
-        "issue": "Yüksek voltajlı güç yetersiz",
-        "clear": "Yüksek voltajlı güç kaynağı sorunu bulunamadı",
-        "evidence": "Tesisler siparişlerinden {{value}} aldı"
+        "tab": "Yüksek gerilim elektrik",
+        "issue": "Yüksek gerilim elektrik arzı yetersiz",
+        "clear": "Yüksek gerilim elektrik arzı sorunu bulunmadı",
+        "evidence": "Tesislerin teslim aldığı miktar: siparişlerin {{value}} kadarı"
       },
       "upkeep": {
-        "tab": "Bakım",
-        "issue": "Kamu binalarının, yolların ve demiryollarının bakımı kısa",
-        "clear": "Bakım sorunu bulunamadı",
-        "evidence": "Gerekli bakımın {{value}} alındı"
+        "tab": "Tesis bakımı",
+        "issue": "Kamu binaları ile yol ve hatların bakımı yetersiz",
+        "clear": "Bakım sorunu bulunmadı",
+        "evidence": "Alınan bakım: gereken miktarın {{value}} kadarı"
       }
     },
     "nodes": {
       "no_vacancies": {
-        "title": "Mevcut iş kotaları dolu",
-        "evidence": "{{count}} iş arayanlar"
+        "title": "Mevcut istihdam kotasında boş yer yok",
+        "evidence": "İş arayan: {{count}} kişi"
       },
       "unfilled_jobs": {
-        "title": "Boşluklar ve işsizlik bir arada",
-        "evidence": "{{count}} İş Arayanlar · {{vacancies}} Boş Etkili İş Birimleri"
+        "title": "Açık işler ile işsizlik bir arada görülüyor",
+        "evidence": "İş arayan: {{count}} kişi · Boş kontenjan: {{vacancies}} (efektif işgücü)"
       },
       "public_budget": {
-        "title": "Kamu tesisleri bütçeler tarafından kısıtlanıyor",
-        "evidence": "Bütçe sınırlı planlı tesisler: {{count}}"
+        "title": "Kamu tesisleri bütçe nedeniyle küçülüyor",
+        "evidence": "İşletme bütçesi nedeniyle planı küçültülen tesisler: {{count}}"
       },
       "education_gap": {
-        "title": "Bazı iş arayanlar temel eğitimden yoksundur",
-        "evidence": "Temel eğitimden yoksun iş arayanlar: {{count}}"
+        "title": "Temel eğitimini tamamlamamış iş arayanlar var",
+        "evidence": "Temel eğitimi eksik iş arayanlar: {{count}} kişi"
       },
       "school_capacity": {
-        "title": "Temel eğitim kapasitesi yetersiz",
-        "evidence": "Kayıtlı: {{enrolled}} · Kayıtlı Değil: {{waiting}} / Kapasite: {{capacity}}"
+        "title": "Temel eğitim kontenjanı yetersiz",
+        "evidence": "Okula giden: {{enrolled}} kişi · Okula gidemeyen: {{waiting}} kişi / Kontenjan: {{capacity}} kişi"
       },
       "immigrant_education_gap": {
-        "title": "Temel eğitimden yoksun bazı iş arayanlar göçmen",
-        "evidence": "Temel eğitimden yoksun göçmen iş arayanlar: {{count}}"
+        "title": "Temel eğitimi eksik iş arayanlar arasında göçmenler var",
+        "evidence": "Bu durumdaki göçmen iş arayanlar: {{count}} kişi"
       },
       "specialists": {
-        "title": "Uzman eksiklikleri tesislerin çalışmasını engeller",
-        "evidence": "Uzman olmayan tesisler: {{count}}"
+        "title": "Uzman personel eksikliği nedeniyle çalışamayan tesisler var",
+        "evidence": "Nitelikli personeli eksik tesisler: {{count}}"
       },
       "household_unemployment": {
-        "title": "Bazı haneler işsiz yetişkinler içerir",
-        "evidence": "İşsiz yetişkinleri olan haneler: {{count}}"
+        "title": "İşsiz yetişkini olan haneler var",
+        "evidence": "İşsiz yetişkin bulunan haneler: {{count}}"
       },
       "security_response": {
-        "title": "Polis tüm zararları önleyemez",
-        "evidence": "Geçtiğimiz aydaki suç hasarı: {{count}} vakası",
-        "evidence_week": "Geçen haftaki suç hasarı: {{count}} vakası"
+        "title": "Polis zararları tam olarak önleyemiyor",
+        "evidence": "Son 1 aydaki suç zararı: {{count}} olay",
+        "evidence_week": "Son 1 haftadaki suç zararı: {{count}} olay"
       },
       "no_police": {
-        "title": "Hiçbir polis karakolu çalışmıyor"
+        "title": "Faaliyette olan karakol yok"
       },
       "police_staff": {
-        "title": "Polis karakollarında işçi yok",
-        "evidence": "Yetersiz çalışan polis karakolları: {{count}}"
+        "title": "Karakollarda personel eksik",
+        "evidence": "Personeli eksik karakollar: {{count}}"
       },
       "police_budget": {
-        "title": "Polis bütçesi çok düşük",
-        "evidence": "Finansman yetersiz polis karakolları: {{count}}"
+        "title": "Polis bütçesi yetersiz",
+        "evidence": "Bütçesi yetersiz karakollar: {{count}}"
       },
       "police_inputs": {
-        "title": "Polis karakollarında malzeme yok",
-        "evidence": "Malzemesiz polis karakolları: {{count}}"
+        "title": "Karakolların malzemesi yetersiz",
+        "evidence": "Malzemesi yetersiz karakollar: {{count}}"
       },
       "unemployment_pressure": {
-        "title": "İşsizlik güvenlik sorunlarına katkıda bulunuyor",
-        "evidence": "İşsiz yetişkinler: {{count}}"
+        "title": "İşsizlik kamu güvenliğinin kötüleşmesine yol açıyor",
+        "evidence": "İşsiz yetişkinler: {{count}} kişi"
       },
       "citizen_criminality": {
-        "title": "Bazı vatandaşlar suça eğilimlidir",
-        "evidence": "Suça yatkın vatandaşlar: {{count}}"
+        "title": "Suça eğilimli vatandaşlar var",
+        "evidence": "Suça eğilimli vatandaşlar: {{count}} kişi"
       },
       "children_in_poverty": {
-        "title": "Çocuklar yaşam maliyetinin altındaki hanelerde büyüyor",
-        "evidence": "Yaşam maliyetinin altındaki hanelerdeki çocuklar: {{count}}"
+        "title": "Geçim masrafını karşılayamayan hanelerde çocuklar büyüyor",
+        "evidence": "Geçim masrafını karşılayamayan hanelerdeki çocuklar: {{count}} kişi"
       },
       "children_in_crime_zones": {
-        "title": "Suçlu ilçelerde çocuklar büyüyor",
-        "evidence": "Geçen ay suç işleyen ilçelerde çocuklar: {{count}}",
-        "evidence_week": "Geçen hafta suç işleyen ilçelerde çocuklar: {{count}}"
+        "title": "Suç yaşanan mahallelerde çocuklar büyüyor",
+        "evidence": "Son 1 ayda suç yaşanan mahallelerdeki çocuklar: {{count}} kişi",
+        "evidence_week": "Son 1 haftada suç yaşanan mahallelerdeki çocuklar: {{count}} kişi"
       },
       "service_no_facility": {
-        "title": "Hiçbir tesis bu hizmeti sağlamaz",
-        "title_named": "{{suppliers}} yok"
+        "title": "Hizmeti sağlayan tesis yok",
+        "title_named": "Mevcut değil: {{suppliers}}"
       },
       "service_facility_limited": {
-        "title": "Bazı {{kinds}} çalışamaz",
-        "evidence": "Tesisler etkin bir şekilde çalışmıyor: {{count}}"
+        "title": "Çalışamayan tesisler var: {{kinds}}",
+        "evidence": "Fiilen işletilemeyen tesisler: {{count}}"
       },
       "repair_budget_exhausted": {
-        "title": "Bakım bütçesi tükendi ve bakım siparişleri kesildi",
-        "evidence": "Bakım Harcamaları {{expense}} / Bütçe {{budget}}"
+        "title": "Onarım bütçesi tükendi ve bakım siparişleri kısıldı",
+        "evidence": "Onarım harcaması {{expense}} / Bütçe {{budget}}"
       },
       "service_out_of_range": {
-        "title": "haneler veya tesisler hizmet aralığının dışında",
-        "evidence": "Her tesisin menzili dışında: {{count}} hane, {{facilities}} tesis",
-        "title_named": "haneler veya tesisler {{suppliers}} hizmet aralığının dışındadır"
+        "title": "Hizmet alanı dışında kalan hane ve tesisler var",
+        "evidence": "Hiçbir tesisin alanına girmeyen: {{count}} hane · {{facilities}} tesis",
+        "title_named": "Hizmet alanı dışında kalan hane ve tesisler var: {{suppliers}}"
       },
       "facility_material_unmet": {
-        "title": "{{facility}}, {{product_name}} sağlayamıyor",
-        "evidence": "Gerekli {{demand}}'un {{received}}'u alındı"
+        "title": "{{facility}}: {{product_name}} tedarik edilemiyor",
+        "evidence": "Gereken: {{demand}} · Teslim alınan: {{received}}"
       },
       "facility_labor_shortage": {
-        "title": "{{facility}} çalışan sıkıntısı",
-        "evidence": "{{quota}} etkin işçilik biriminin {{total_labor}}"
+        "title": "{{facility}}: işgücü yetersiz",
+        "evidence": "Gereken işgücü: {{quota}} · Sağlanan: {{total_labor}} (efektif işgücü)"
       },
       "facility_high_skill_shortage": {
-        "title": "{{facility}} uzmanları güvence altına alamaz"
+        "title": "{{facility}}: uzman personel sağlanamıyor"
       },
       "facility_budget_capped": {
-        "title": "{{facility}} bütçe eksikliği nedeniyle planını küçülttü"
+        "title": "{{facility}}: bütçe yetersizliği nedeniyle plan küçültülüyor"
       },
       "facility_inactive": {
-        "title": "{{facility}} çalışmıyor"
+        "title": "{{facility}}: çalışmıyor"
       },
       "facility_infra_disconnected": {
-        "title": "{{facility}}, {{product_name}} ağına bağlı değil"
+        "title": "{{facility}}: {{product_name}} ağına bağlı değil"
       },
       "slum_sanitation": {
-        "title": "Gecekondularda yaşayan haneler var",
-        "evidence": "Gecekondularda yaşayan haneler: {{count}}"
+        "title": "Gecekondu bölgesinde yaşayan haneler var",
+        "evidence": "Gecekondu bölgesinde yaşayan haneler: {{count}}"
       },
       "service_shortage": {
-        "title": "Haneler yeterince {{product_name}} almıyor",
-        "evidence": "Haneler, referans tutarının %{{percent}}"
+        "title": "Haneler yeterli hizmet alamıyor: {{product_name}}",
+        "evidence": "Hanelere ulaşan miktar: referans miktara göre %{{percent}}"
       },
       "tourism_no_attraction": {
-        "title": "ilgi çekici yerler yok"
+        "title": "Turistik mekân yok"
       },
       "tourism_no_gateway": {
-        "title": "Turistlerin gelmesi için bir kapı yok"
+        "title": "Turistlerin geleceği bir giriş kapısı yok"
       },
       "tourism_no_trade_hub": {
-        "title": "seyahat fonlarını ödeyecek ticaret merkezi yok"
+        "title": "Seyahat masraflarını ödeyecek bir dış ticaret merkezi yok"
       },
       "tourists_without_lodging": {
-        "title": "Bazı turistler konaklama bulamıyor",
-        "evidence": "Konaklamayı bekleyen turistler: {{count}}"
+        "title": "Konaklama yeri bulamayan turistler var",
+        "evidence": "Konaklama yeri bekleyen turistler: {{count}} kişi"
       },
       "tourism_lodging_costly": {
-        "title": "Konaklama, seyahat bütçelerine göre pahalıdır",
-        "evidence": "Yeni turistik uygulamalar normalin % {{percent}} seviyesinde"
+        "title": "Konaklama ücretleri seyahat bütçesine göre yüksek",
+        "evidence": "Yeni turist başvuruları normalin %{{percent}} düzeyinde"
       },
       "tourists_dissatisfied": {
         "title": "Turist memnuniyeti düşük",
-        "evidence": "{{percent}}'da Yeni Başvurular Normalin% {{count}}'a Memnun Kalmadı"
+        "evidence": "Yeni turist başvuruları normalin %{{percent}} düzeyinde · Memnun kalmadan dönen: {{count}} kişi"
       },
       "tourism_experience_short": {
-        "title": "Turistler yeterince turizm deneyimi almıyor",
-        "evidence": "Alınan Turizm Deneyimleri: %{{percent}}"
+        "title": "Turistler yeterli turizm deneyimi alamıyor",
+        "evidence": "Turizm deneyiminin karşılanma oranı: %{{percent}}"
       },
       "tourism_leisure_short": {
-        "title": "Turistler yeterince boş zaman almıyor",
-        "evidence": "Alınan boş zaman: {{percent}}%"
+        "title": "Turistlerin eğlence ve boş zaman ihtiyacı karşılanmıyor",
+        "evidence": "Eğlence ve boş zamanın karşılanma oranı: %{{percent}}"
       }
     },
     "actions": {
       "public_jobs": {
-        "title": "kamu tesislerinde iş yaratmak"
+        "title": "Kamu tesislerinde istihdam yaratın"
       },
       "population": {
-        "title": "Vatandaşları sınır dışı ederek nüfusu azaltmak"
+        "title": "Vatandaşları sürgün ederek nüfusu azaltın"
       },
       "budget": {
-        "title": "İşletme bütçelerini tahsis edin"
+        "title": "İşletme bütçelerini dağıtın"
       },
       "education": {
-        "title": "Daha fazla okul inşa et"
+        "title": "Daha fazla okul yapın"
       },
       "higher_education": {
-        "title": "Yüksek öğrenim yoluyla uzmanlar geliştirin"
+        "title": "Yükseköğretimle uzman personel yetiştirin"
       },
       "welfare": {
-        "title": "Faydaları ve gelir desteğini artırın"
+        "title": "Yardımları ve geçim desteğini artırın"
       },
       "employment": {
-        "title": "İstihdam istatistiklerinde işe alım koşullarını inceleyin"
+        "title": "İstihdam istatistiklerinden işe alım koşullarını inceleyin"
       },
       "police": {
-        "title": "polis karakolları inşa etmek"
+        "title": "Karakol yapın"
       },
       "facilities": {
-        "title": "Tesislerin nasıl olduğunu kontrol edin"
+        "title": "Tesislerin durumunu kontrol edin"
       },
       "immigration_skills": {
-        "title": "Göçmenler için beceri gereksinimlerini gözden geçirin"
+        "title": "Göçmenlere yönelik beceri şartlarını gözden geçirin"
       },
       "immigration_limit": {
-        "title": "göçü sınırlamak"
+        "title": "Göçmen kabulünü sınırlayın"
       },
       "criminality": {
-        "title": "Vatandaşların suça yönelik eğilimlerini kontrol edin"
+        "title": "Vatandaşların suça eğilimini kontrol edin"
       },
       "service_facility": {
-        "title": "onu sağlayan bir tesis inşa etmek",
-        "title_named": "{{suppliers}} oluşturun",
-        "title_tourism_no_attraction": "turistik bir cazibe inşa etmek",
-        "title_tourism_no_gateway": "Bir liman veya havaalanı inşa edin"
+        "title": "Hizmeti sağlayacak bir tesis yapın",
+        "title_named": "Tesis yapın: {{suppliers}}",
+        "title_tourism_no_attraction": "Turistik mekân yapın",
+        "title_tourism_no_gateway": "Liman veya havalimanı yapın"
       },
       "parcel": {
-        "title": "Daha büyük bir paket hazırlayın"
+        "title": "Daha büyük bir parsel hazırlayın"
       },
       "transit": {
-        "title": "Transit sıklığını ve izlerini gözden geçirin"
+        "title": "Toplu taşımanın sefer sayısını ve hatlarını gözden geçirin"
       },
       "entity_detail": {
         "title": "Ayrıntıları aç"
       }
     },
-    "selectorTitle": "Neyi araştırmak istersin?",
-    "eventsTitle": "Ne oluyor",
-    "causeTitle": "temel neden",
-    "adviceTitle": "Önerilen eylemler",
-    "needsAttention": "iyileştirme odası",
+    "selectorTitle": "Neyi incelemek istersiniz?",
+    "eventsTitle": "Neler oluyor",
+    "causeTitle": "Nedeni",
+    "adviceTitle": "Önerilen önlemler",
+    "needsAttention": "İyileştirmeye açık",
     "values": {
       "money": "{{value}} / hane / gün",
-      "per_thousand": "1.000 kişi başına {{value}} vaka (geçen ay)",
-      "per_thousand_week": "1.000 kişi başına {{value}} vaka (geçen hafta)"
+      "per_thousand": "1.000 kişi başına {{value}} olay (son 1 ay)",
+      "per_thousand_week": "1.000 kişi başına {{value}} olay (son 1 hafta)"
     },
-    "collapse": "Çöküş",
+    "collapse": "Daralt",
     "investigate": {
-      "crime": "Suçun nedenlerini araştırın",
-      "unemployment": "İşsizliğin nedenlerini araştırın",
-      "income": "Düşük gelirli nedenleri araştırın",
-      "water": "Su kıtlığının nedenlerini araştırın",
-      "electricity": "Elektrik kesintisinin nedenlerini araştırın",
-      "internet": "Telekomünikasyon kıtlığının nedenlerini araştırın",
-      "upkeep": "Bakım eksikliğinin nedenlerini araştırın",
-      "high_water": "Toplu su kıtlığının nedenlerini araştırın",
-      "high_electricity": "Yüksek voltajlı güç kesintisinin nedenlerini araştırın",
-      "facility": "bu tesisi araştırın"
+      "crime": "Suç zararının nedenlerini incele",
+      "unemployment": "İşsizliğin nedenlerini incele",
+      "income": "Düşük gelirin nedenlerini incele",
+      "water": "Su sıkıntısının nedenlerini incele",
+      "electricity": "Elektrik sıkıntısının nedenlerini incele",
+      "internet": "İletişim sıkıntısının nedenlerini incele",
+      "upkeep": "Tesis bakımı eksikliğinin nedenlerini incele",
+      "high_water": "Yüksek basınçlı su sıkıntısının nedenlerini incele",
+      "high_electricity": "Yüksek gerilim elektrik sıkıntısının nedenlerini incele",
+      "facility": "Bu tesisi incele"
     },
     "facilityFinding": "{{facility}}: {{title}}",
-    "indicatorsTitle": "gösterge",
+    "indicatorsTitle": "Göstergeler",
     "problems": {
-      "resource_runway": "\"{{name}}\" kaynağının {{remaining_epochs}} çağında tükenmesi bekleniyor",
-      "resource_depleted": "\"{{name}}\" kaynağı tükendi",
-      "facility_inoperative": "\"{{name}}\" genel tesisi çalışmıyor",
-      "facility_inoperative_labor": "\"{{name}}\" kamu tesisi, işgücü sıkıntısı nedeniyle çalışmıyor",
-      "facility_inoperative_material": "\"{{name}}\" genel tesisi, malzeme sıkıntısı nedeniyle çalışmıyor",
-      "facility_inoperative_high_skill": "\"{{name}}\" kamu tesisi, kalifiye personel eksikliği nedeniyle kapasite azaltılmış durumda çalışıyor",
-      "facility_inoperative_budget": "\"{{name}}\" genel tesisi, bütçe açığı nedeniyle kapasite azaltılmış durumda çalışıyor",
-      "education_low_enrollment": "Eğitim kurumu \"{{name}}\" yetersiz kullanılıyor - çok az öğrenci kayıtlı ({{enrolled}}, {{max_students}} koltuk)",
-      "infra_facility_down": "Altyapı tesisi \"{{name}}\" hizmet dışı",
-      "infra_disconnected": "{{count}} tesislerinin altyapı ağından bağlantısı kesildi",
-      "rail_capacity_exceeded": "Tren sıklığı, {{count}} parça segmentinde iz kapasitesini aşıyor",
-      "collapse": "{{count}} binalar/yollar çöktü",
-      "collapse_with_deaths": "{{count}} binalar/yollar çöktü ve {{deaths}} kişi öldü",
-      "deaths_traffic": "{{count}} kişi trafik kazalarında öldü",
-      "tenant_blocked_by_parcel_size": "\"{{tenant_name}}\" için hiçbir bina inşa edilemez \"{{zone_name}}\" ({{required}} m2, en büyük inşa edilebilir {{max_capacity}} m2)",
-      "unknown": "Kritik bir olay meydana geldi",
-      "sanitation": "{{count}} hane için sanitasyon kötüleşiyor"
+      "resource_runway": "“{{name}}” kaynağı yaklaşık {{remaining_epochs}} dönem sonra tükenecek",
+      "resource_depleted": "“{{name}}” kaynağı tükendi",
+      "facility_inoperative": "“{{name}}” adlı kamu tesisi faaliyet gösteremiyor",
+      "facility_inoperative_labor": "“{{name}}” adlı kamu tesisi iş gücü yetersizliği nedeniyle faaliyet gösteremiyor",
+      "facility_inoperative_material": "“{{name}}” adlı kamu tesisi hammadde yetersizliği nedeniyle faaliyet gösteremiyor",
+      "facility_inoperative_high_skill": "“{{name}}” adlı kamu tesisi uzman personel eksikliği nedeniyle faaliyetlerini kısıtlıyor",
+      "facility_inoperative_budget": "“{{name}}” adlı kamu tesisi bütçe yetersizliği nedeniyle faaliyetlerini kısıtlıyor",
+      "education_low_enrollment": "“{{name}}” adlı eğitim kurumu yeterli öğrenci bulamadığı için düşük kapasiteyle çalışıyor (kayıtlı {{enrolled}} kişi / kontenjan {{max_students}} kişi)",
+      "infra_facility_down": "“{{name}}” adlı altyapı tesisi çalışmıyor",
+      "infra_disconnected": "{{count}} tesis altyapı ağına bağlı değil",
+      "rail_capacity_exceeded": "{{count}} hatta tren sefer sayısı hat kapasitesini aşıyor",
+      "collapse": "{{count}} bina/yol çöktü",
+      "collapse_with_deaths": "{{count}} bina/yol çöktü, {{deaths}} kişi hayatını kaybetti",
+      "deaths_traffic": "Trafik kazalarında {{count}} kişi hayatını kaybetti",
+      "tenant_blocked_by_parcel_size": "“{{zone_name}}” mahallesinde “{{tenant_name}}” için uygun bir bina inşa edilemiyor (gerekli {{required}} m2, parsellerde en fazla {{max_capacity}} m2)",
+      "unknown": "Ciddi bir olay meydana geldi",
+      "sanitation": "{{count}} hanenin hijyen koşulları kötüleşiyor"
     },
-    "facilitiesTitle": "Faaliyetleri olmayan tesisler",
-    "otherProblemsTitle": "Diğer Sorunlar",
+    "facilitiesTitle": "Çalışamayan tesisler",
+    "otherProblemsTitle": "Diğer sorunlar",
     "facility": {
-      "title": "{{facility}} çalışamıyor",
-      "evidence": "Üretim, planın % {{percent}}"
+      "title": "{{facility}}: çalışamıyor",
+      "evidence": "Üretim planın %{{percent}} düzeyinde"
     }
   }
 }

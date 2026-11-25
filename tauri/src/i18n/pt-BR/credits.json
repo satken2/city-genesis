@@ -1,15 +1,15 @@
 {
   "credits": {
-    "lead": "Este jogo usa os ativos listados abaixo. Os nomes dos autores, fontes, nomes de licenças e qualquer texto de atribuição exigido por uma licença são reproduzidos literalmente.",
-    "empty": "Sem entradas.",
+    "lead": "Este jogo usa os recursos listados abaixo. Os nomes dos autores, das fontes e das licenças, assim como os textos de atribuição exigidos pelos termos, são reproduzidos na forma original.",
+    "empty": "Nenhum item.",
     "requiredText": "Atribuição exigida",
     "categories": {
       "bgm": "Música",
-      "sfx": "efeitos sonoros",
+      "sfx": "Efeitos sonoros",
       "image": "Imagens e ícones",
       "font": "Fontes",
       "model": "Modelos 3D",
-      "texture": "texturas"
+      "texture": "Texturas"
     }
   }
 }

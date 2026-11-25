@@ -1,28 +1,28 @@
 {
   "cityDevelopment": {
-    "pattern": "algoritma",
+    "pattern": "Algoritma",
     "roadVariants": "Jenis jalan",
     "patterns": {
       "grid_1": "Kisi 1",
       "grid_2": "Kisi 2",
-      "sprawl_1": "Pengembangan menyebar 1",
-      "sprawl_2": "Pengembangan menyebar 2",
-      "sprawl_3": "Pengembangan menyebar 3",
-      "planned_city_1": "Kota yang Direncanakan 1",
-      "split_1": "Bagi 1"
+      "sprawl_1": "Gaya sprawl 1",
+      "sprawl_2": "Gaya sprawl 2",
+      "sprawl_3": "Gaya sprawl 3",
+      "planned_city_1": "Kota terencana 1",
+      "split_1": "Pembagian 1"
     },
-    "spacing": "jarak jalan",
-    "blockLength": "panjang blok",
-    "splitHint": "Sertakan seluruh blok yang tertutup oleh jalan raya. Jalan sejajar dengan sisi panjang masing-masing blok berjarak dengan jarak jalan, dan melintasi jalan dengan panjang blok.",
+    "spacing": "Jarak antarjalan",
+    "blockLength": "Panjang blok",
+    "splitHint": "Masukkan seluruh blok yang dikelilingi jalan ke dalam area. Jalan yang sejajar dengan sisi panjang blok dibuat setiap “Jarak antarjalan”, dan jalan yang tegak lurus dengannya dibuat setiap “Panjang blok”.",
     "createParcels": "Buat kavling",
-    "parcelArea": "daerah parsel",
-    "hint": "Tahan Ctrl dan seret untuk mengecat area untuk berkembang. Seret ke Pan, Gulir ke Zoom.",
-    "clear": "Bersih",
-    "preview": "Peninjauan",
-    "previewing": "menghitung...",
+    "parcelArea": "Luas kavling",
+    "hint": "Tahan Ctrl + seret kiri untuk mewarnai area yang akan dikembangkan. Seret kiri untuk menggeser peta, dan gulir untuk memperbesar atau memperkecil.",
+    "clear": "Bersihkan",
+    "preview": "Pratinjau",
+    "previewing": "Menghitung...",
     "create": "Konfirmasi",
-    "creating": "Menciptakan...",
-    "previewed": "Menghaluskan medan di {{area}} dan dapat merencanakan {{roads}} segmen jalan dan {{parcels}} paket ({{rejected}} ditolak)",
-    "created": "Menghaluskan medan dan merencanakan {{roads}} ruas jalan dan {{parcels}} bidang ({{rejected}} ditolak)"
+    "creating": "Membuat...",
+    "previewed": "Medan di area {{area}} akan sedikit diratakan, dan {{roads}} ruas jalan serta {{parcels}} kavling dapat direncanakan ({{rejected}} ruas ditolak)",
+    "created": "Medan telah diratakan, dan {{roads}} ruas jalan serta {{parcels}} kavling telah direncanakan ({{rejected}} ruas ditolak)"
   }
 }

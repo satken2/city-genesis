@@ -1,53 +1,53 @@
 {
   "citizen": {
-    "ageValue": "{{age}} Jahre alt",
+    "ageValue": "{{age}} Jahre",
     "male": "Männlich",
     "female": "Weiblich",
-    "single": "Single",
+    "single": "Ledig",
     "married": "Verheiratet",
     "household": "Haushalt",
     "employer": "Arbeitgeber",
     "unemployed": "Arbeitslos",
     "school": "Schule",
-    "notEnrolled": "Nicht eingeschrieben",
-    "major": "Major",
-    "higherEducation": "Höhere Bildung",
-    "graduated": "Fertiggestellt",
+    "notEnrolled": "Kein Schulbesuch",
+    "major": "Fachrichtung",
+    "higherEducation": "Hochschulbildung",
+    "graduated": "Abgeschlossen",
     "notGraduated": "Nicht abgeschlossen",
-    "skills": "Fähigkeiten",
-    "criminality": "Tendenz zur Kriminalität",
+    "skills": "Qualifikationen",
+    "criminality": "Kriminelle Neigung",
     "commuteTime": "Pendelzeit",
     "automobile": "Auto",
-    "automobileOwned": "besessen",
-    "automobileNone": "Keiner",
-    "householdStatus": "Haushaltsstatus"
+    "automobileOwned": "Vorhanden",
+    "automobileNone": "Keines",
+    "householdStatus": "Lage des Haushalts"
   },
   "household": {
-    "title": "Haushalt",
-    "familyType": "Familientyp",
-    "familySingle": "Single",
+    "title": "Haushaltsinfo",
+    "familyType": "Haushaltstyp",
+    "familySingle": "Alleinstehend",
     "familyCouple": "Paar",
     "familyFamily": "Familie",
-    "familySenior": "Senior",
-    "hasAutomobile": "hat Auto",
-    "noAutomobile": "Kein Auto",
+    "familySenior": "Senioren",
+    "hasAutomobile": "Mit Auto",
+    "noAutomobile": "Ohne Auto",
     "discretionaryIncome": "Verfügbares Einkommen",
     "livingStandard": "Lebensstandard",
     "livingStandardLevel": {
-      "0": "Mittellos",
-      "1": "Schlecht",
-      "2": "Mittelklasse",
+      "0": "Bitterarm",
+      "1": "Arm",
+      "2": "Mittelschicht",
       "3": "Wohlhabend"
     },
     "satisNutrition": "Ernährung",
-    "satisHealthcare": "Gesundheitswesen",
-    "satisLeisure": "Freizeit",
+    "satisHealthcare": "Gesundheit",
+    "satisLeisure": "Unterhaltung und Freizeit",
     "satisTourism": "Tourismus",
     "tourist": "Touristen",
-    "partySize": "Partygröße",
-    "members": "Mitglieder"
+    "partySize": "Gruppengröße",
+    "members": "Haushaltsmitglieder"
   },
   "education": {
-    "people": "Menschen"
+    "people": "Personen"
   }
 }

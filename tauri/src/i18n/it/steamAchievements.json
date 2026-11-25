@@ -4,124 +4,124 @@
     "close": "Chiudi",
     "items": {
       "FIRST_BUILDING": {
-        "name": "I primi passi di una città",
-        "description": "Completa il tuo primo edificio. La storia della tua città inizia qui."
+        "name": "Il primo passo della città",
+        "description": "Completa il tuo primo edificio. Da qui inizia la storia della città."
       },
       "FIRST_OFFSHORE": {
-        "name": "Una città prende il mare",
-        "description": "Completa il tuo primo parco eolico offshore o piattaforma petrolifera offshore. L'industria della tua città si dirige verso il mare."
+        "name": "Una città che si estende sul mare",
+        "description": "Completa il tuo primo parco eolico offshore o la tua prima piattaforma petrolifera offshore. L'industria della città prende il largo."
       },
       "RAIL_LINES_1": {
-        "name": "Tutto a bordo!",
-        "description": "Apri una linea ferroviaria"
+        "name": "In carrozza!",
+        "description": "Inaugura una linea ferroviaria"
       },
       "RAIL_LINES_20": {
-        "name": "Regno ferroviario",
-        "description": "Gestisci 20 linee ferroviarie in una città. Quella mappa del percorso è piuttosto uno spettacolo."
+        "name": "Regno delle ferrovie",
+        "description": "Gestisci 20 linee ferroviarie in una sola città. Anche la mappa delle linee diventa uno spettacolo."
       },
       "BUS_LINES_1": {
-        "name": "L'autobus arriva in città",
-        "description": "Apri una linea di autobus"
+        "name": "Da oggi passa l'autobus",
+        "description": "Inaugura una linea di autobus"
       },
       "BUS_LINES_20": {
-        "name": "Ovunque in autobus",
-        "description": "Gestisci 20 linee di autobus in una città"
+        "name": "In autobus ovunque",
+        "description": "Gestisci 20 linee di autobus in una sola città"
       },
       "MONORAIL_LINES_1": {
-        "name": "pendolarismo sopra la città",
-        "description": "Aprire una linea della monorotaia. Guarda le strade familiari da un po' più in alto."
+        "name": "Pendolari sopra la città",
+        "description": "Inaugura una linea di monorotaia. La solita città, vista da un po' più in alto."
       },
       "MONORAIL_LINES_20": {
-        "name": "Città nel cielo",
-        "description": "Gestisci 20 linee di monorotaia in una città"
+        "name": "Città sospesa nel cielo",
+        "description": "Gestisci 20 linee di monorotaia in una sola città"
       },
       "LRT_LINES_1": {
-        "name": "I tram arrivano in città",
-        "description": "Apri una linea LRT"
+        "name": "Il tram arriva in città",
+        "description": "Inaugura una linea LRT"
       },
       "LRT_LINES_20": {
-        "name": "Città dei tram",
-        "description": "Gestisci 20 linee LRT in una città"
+        "name": "Capitale del tram",
+        "description": "Gestisci 20 linee LRT in una sola città"
       },
       "POPULATION_10K": {
-        "name": "casa a 10.000",
-        "description": "raggiungere una popolazione di 10.000 abitanti"
+        "name": "Casa per 10.000 persone",
+        "description": "Raggiungi 10.000 abitanti"
       },
       "POPULATION_100K": {
-        "name": "Una fiorente città regionale",
-        "description": "raggiungere una popolazione di 100.000 abitanti"
+        "name": "Un vivace centro regionale",
+        "description": "Raggiungi 100.000 abitanti"
       },
       "POPULATION_500K": {
-        "name": "unendoti alle grandi città",
-        "description": "raggiungere una popolazione di 500.000 abitanti"
+        "name": "Tra le grandi città",
+        "description": "Raggiungi 500.000 abitanti"
       },
       "POPULATION_1M": {
-        "name": "milioni di città",
-        "description": "raggiungere una popolazione di 1.000.000 di abitanti. Una metropoli con un milione di vite da sostenere."
+        "name": "Città milionaria",
+        "description": "Raggiungi 1.000.000 di abitanti. Una metropoli che sostiene un milione di vite."
       },
       "FLOORS_5": {
-        "name": "Una città cresce verso l'alto",
-        "description": "avere un edificio privato di 5 o più piani completato"
+        "name": "Una città che cresce verso l'alto",
+        "description": "Fai sorgere un edificio privato di almeno 5 piani"
       },
       "FLOORS_10": {
-        "name": "Alti inizi",
-        "description": "Avere un edificio privato di 10 o più piani completati. Grazie al cielo per gli ascensori."
+        "name": "Primi passi verso i grattacieli",
+        "description": "Fai sorgere un edificio privato di almeno 10 piani. Per fortuna ci sono gli ascensori."
       },
       "FLOORS_20": {
-        "name": "prende forma uno skyline",
-        "description": "avere un edificio privato di 20 o più piani completato"
+        "name": "Prende forma lo skyline",
+        "description": "Fai sorgere un edificio privato di almeno 20 piani"
       },
       "FLOORS_40": {
         "name": "Grattacielo",
-        "description": "Avere un edificio privato di 40 o più piani completati. un nuovo simbolo per la tua città."
+        "description": "Fai sorgere un edificio privato di almeno 40 piani. Un nuovo simbolo per la città."
       },
       "INDUSTRY_PHARMACEUTICAL": {
-        "name": "Industria per una salute migliore",
-        "description": "Fai in modo che una fabbrica farmaceutica inizi a operare nella tua città. aiutare le persone a vivere una vita più sana, iniziando da qui."
+        "name": "Un'industria per la salute",
+        "description": "Fai entrare in attività una fabbrica farmaceutica in città. Sostieni la salute delle persone, a partire da qui."
       },
       "INDUSTRY_SEMICONDUCTOR": {
         "name": "Città del silicio",
-        "description": "Fai in modo che una fabbrica di semiconduttori inizi a funzionare nella tua città. Piccoli chip, un'industria importante."
+        "description": "Fai entrare in attività una fabbrica di semiconduttori in città. Piccoli chip, grande industria."
       },
       "INDUSTRY_PRECISION": {
-        "name": "Una città di precisione",
-        "description": "Fai in modo che una fabbrica di strumenti di precisione inizi a funzionare nella tua città. L'esperienza tecnica diventa un punto di forza della tua città."
+        "name": "La città della precisione",
+        "description": "Fai entrare in attività una fabbrica di strumenti di precisione in città. Una tecnica solida diventa la forza della città."
       },
       "INDUSTRY_SOFTWARE": {
         "name": "Una nuova casa per il software",
-        "description": "Avere una società di software aperta per affari nella tua città. Dai alle nuove idee un posto dove crescere."
+        "description": "Fai aprire un'azienda di software in città. Un luogo dove crescono nuove idee."
       },
       "TOURISTS_1": {
-        "name": "Benvenuto nella nostra città",
-        "description": "Fai un soggiorno turistico nella tua città per la prima volta"
+        "name": "Benvenuti nella nostra città",
+        "description": "Ospita per la prima volta un turista in città"
       },
       "TOURISTS_1K": {
-        "name": "Una città che vale il viaggio",
-        "description": "Avere 1.000 turisti che soggiornano nella tua città contemporaneamente"
+        "name": "Una meta scelta dai viaggiatori",
+        "description": "Ospita contemporaneamente 1.000 turisti in città"
       },
       "TOURISTS_10K": {
-        "name": "Il mondo viene in visita",
-        "description": "Avere 10.000 turisti che soggiornano nella tua città contemporaneamente"
+        "name": "Il mondo viene a trovarci",
+        "description": "Ospita contemporaneamente 10.000 turisti in città"
       },
       "YEARS_10": {
-        "name": "Dieci anni con la città",
-        "description": "Gioca per 10 anni in una città. C'è molto più costruzione di città davanti."
+        "name": "Dieci anni insieme alla città",
+        "description": "Gioca per 10 anni nella stessa città. La costruzione della città continua."
       },
       "YEARS_100": {
-        "name": "Città del secolo",
-        "description": "Gioca per 100 anni in una città. Guarda la tua città per un intero secolo."
+        "name": "Città centenaria",
+        "description": "Gioca per 100 anni nella stessa città. Accompagna la tua città per un intero secolo."
       },
       "YEARS_500": {
         "name": "Una città che fa la storia",
-        "description": "Gioca per 500 anni in una città. Le generazioni passano e la città continua."
+        "description": "Gioca per 500 anni nella stessa città. Le generazioni passano, la città resta."
       },
       "YEARS_1000": {
         "name": "Città millenaria",
-        "description": "Gioca per 1.000 anni in una città. Costruisci una città con mille anni di storia."
+        "description": "Gioca per 1.000 anni nella stessa città. Costruisci una città con mille anni di storia."
       },
       "YEARS_10000": {
         "name": "Città eterna",
-        "description": "Gioca per 10.000 anni in una città. È un bel mandato, sindaco."
+        "description": "Gioca per 10.000 anni nella stessa città. Un mandato davvero lungo, signor Sindaco."
       }
     }
   }

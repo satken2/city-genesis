@@ -1,14 +1,14 @@
 {
   "route_proposal": {
-    "title": "yol önermek",
+    "title": "Rota önerisi",
     "mode": "Yükseklik modu",
-    "fixed": "Ara Nokta Yüksekliklerini Tut",
-    "adjust": "Ara yol noktası yüksekliklerini ayarlayın",
-    "help": "Şekli bitirdikten sonra kullanılabilir. Uç noktalar ve yol noktası XZ konumları sabit kalır.",
-    "searching": "Arama…",
+    "fixed": "Belirlenen noktaların yüksekliğini sabitle",
+    "adjust": "Ara noktaların yüksekliğini ayarla",
+    "help": "Şekil onaylandıktan sonra önerilebilir. Başlangıç, bitiş ve belirlenen noktaların XZ konumları sabit kalır.",
+    "searching": "Aranıyor…",
     "cancel": "İptal",
-    "undo": "öneriyi geri almak",
-    "notFound": "güzergah bulunamadı.",
+    "undo": "Öneriden önceki hâline dön",
+    "notFound": "Rota bulunamadı.",
     "failed": "Rota önerisi başarısız oldu."
   }
 }

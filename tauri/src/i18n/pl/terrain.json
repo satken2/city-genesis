@@ -1,22 +1,22 @@
 {
   "terrain3dPreview": {
-    "waitingForEditor": "Czekam na dane z edytora terenu…"
+    "waitingForEditor": "Oczekiwanie na dane z edytora terenu…"
   },
   "groundCover": {
-    "label": "okładka gruntowa",
-    "hint": "Zmienia kolor i teksturę ziemi w grze oraz kolory map 2D. Nie ma to wpływu na symulację.",
+    "label": "Rodzaj podłoża",
+    "hint": "Zmienia kolor i fakturę podłoża w grze oraz kolorystykę map 2D. Nie wpływa na symulację.",
     "1": "Łąka",
     "2": "Pustynia",
-    "3": "bujna łąka",
-    "4": "Pole śniegu",
-    "5": "półsusz"
+    "3": "Bujna łąka",
+    "4": "Pole śnieżne",
+    "5": "Teren półsuchy"
   },
   "climate": {
     "label": "Klimat",
-    "hint": "Kopiuje miesięczną temperaturę, opady, światło słoneczne i prawdopodobieństwa pogody z zaprogramowanego ustawienia. Edytuj szczegóły w ustawieniach klimatycznych w trybie tworzenia scenariuszy."
+    "hint": "Kopiuje z szablonu miesięczne temperatury, opady, nasłonecznienie i udziały poszczególnych typów pogody. Szczegóły możesz edytować w oknie „Ustawienia klimatu” w trybie tworzenia scenariusza."
   },
   "assetPack": {
-    "label": "Pakiet aktywów",
-    "standard": "Standard"
+    "label": "Pakiet zasobów",
+    "standard": "Standardowy"
   }
 }

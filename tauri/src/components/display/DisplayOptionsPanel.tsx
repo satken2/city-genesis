@@ -76,7 +76,11 @@ type LegendInfo = {
   meterStartColor?: string;
   /** Right endpoint color of the meter legend, used when type is "meter". */
   meterEndColor?: string;
-  /** Meter legend label, used when type is "meter". */
+  /**
+   * Meter legend label, used when type is "meter".
+   * The bar is not mirrored in right-to-left languages, so their translations order the arrows and end values
+   * to match the bar's left and right ends.
+   */
   meterLabel?: string;
 };
 
@@ -104,39 +108,38 @@ function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInf
       case "traffic_color":
         return {
           type: "meter",
-          description: "道路や線路の交通量で色分けします",
+          description: t("display.descRoadTraffic"),
           meterStartColor: "#ffffff",
           meterEndColor: "#ff4444",
-          meterLabel: "← 交通量 →",
+          meterLabel: t("display.meterTraffic"),
         };
       case "speed_color":
         return {
           type: "meter",
-          description:
-            "道路や線路の通過速度(制限速度に加え、カーブ・勾配を含めて形状から決まる速度。交差点での減速・停止は含まない)で色分けします。0km/hが赤、100km/h以上が緑です",
+          description: t("display.descRoadSpeed"),
           meterStartColor: "#ff0000",
           meterEndColor: "#00ff00",
-          meterLabel: "0 ← 通過速度 → 100km/h",
+          meterLabel: t("display.meterSpeed"),
         };
       case "durability_color":
         return {
           type: "meter",
-          description: "道路や線路の耐久度で色分けします",
+          description: t("display.descRoadDurability"),
           meterStartColor: "#ff4444",
           meterEndColor: "#ffffff",
-          meterLabel: "← 耐久度 →",
+          meterLabel: t("display.meterDurability"),
         };
       case "zone_color":
         return {
           type: "none",
-          description: "道路が所属する地区で色分けします",
+          description: t("display.descRoadZone"),
         };
       case "hidden":
-        return { type: "none", description: "道路を非表示にします" };
+        return { type: "none", description: t("display.descRoadHidden") };
       default:
         return {
           type: "none",
-          description: "道路を通常表示します。計画中の道路の表示は下のスイッチで切り替えます",
+          description: t("display.descRoadDefault"),
         };
     }
   }
@@ -146,32 +149,31 @@ function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInf
       case "floor_color":
         return {
           type: "color",
-          description: "指定したフロアを持つ建物を色付けします",
+          description: t("display.descBuildingFloor"),
           items: [
-            { color: "#4caf50", label: "住居" },
-            { color: "#2196f3", label: "商業" },
-            { color: "#fbc02d", label: "工場" },
-            { color: "#9c27b0", label: "オフィス" },
-            { color: "#9e9e9e", label: "その他" },
+            { color: "#4caf50", label: t("display.subSpaceResidence") },
+            { color: "#2196f3", label: t("display.subSpaceRetail") },
+            { color: "#fbc02d", label: t("display.subSpaceFactory") },
+            { color: "#9c27b0", label: t("display.subSpaceOffice") },
+            { color: "#9e9e9e", label: t("display.subSpaceOther") },
           ],
         };
       case "durability_color":
         return {
           type: "meter",
-          description: "建物の耐久度で色分けします",
+          description: t("display.descBuildingDurability"),
           meterStartColor: "#ff4444",
           meterEndColor: "#ffffff",
-          meterLabel: "← 耐久度 →",
+          meterLabel: t("display.meterDurability"),
         };
       case "zone_color":
-        return { type: "none", description: "建物が所属する地区で色分けします" };
+        return { type: "none", description: t("display.descBuildingZone") };
       case "hidden":
-        return { type: "none", description: "建物を非表示にします" };
+        return { type: "none", description: t("display.descBuildingHidden") };
       default:
         return {
           type: "none",
-          description:
-            "建物を通常表示します。計画中の建物の表示と公共施設のハイライト(敷地を黄色い光で示します)は下のスイッチで切り替えます",
+          description: t("display.descBuildingDefault"),
         };
     }
   }
@@ -181,28 +183,28 @@ function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInf
       case "land_price_color":
         return {
           type: "meter",
-          description: "地価で色分けします",
+          description: t("display.descParcelLandPrice"),
           meterStartColor: "#ffffff",
           meterEndColor: "#4caf50",
-          meterLabel: "← 地価 →",
+          meterLabel: t("display.meterLandPrice"),
         };
       case "zone_color":
-        return { type: "none", description: "区画が所属する地区で色分けします" };
+        return { type: "none", description: t("display.descParcelZone") };
       case "buildable_color":
         return {
           type: "color",
-          description: "区画に建築可能な建物で色分けします",
+          description: t("display.descParcelBuildable"),
           items: [
-            { color: "#a5d6a7", label: "一戸建て" },
-            { color: "#2e7d32", label: "集合住宅" },
-            { color: "#2196f3", label: "商業施設" },
-            { color: "#fbc02d", label: "工場" },
-            { color: "#9c27b0", label: "オフィス" },
-            { color: "#795548", label: "農地" },
-            { color: "#ff9800", label: "鉱山" },
-            { color: "#00bcd4", label: "港" },
-            { color: "#9e9e9e", label: "その他" },
-            { color: "#f44336", label: "公共施設" },
+            { color: "#a5d6a7", label: t("display.subBdHouse") },
+            { color: "#2e7d32", label: t("display.subBdApartment") },
+            { color: "#2196f3", label: t("display.subBdRetail") },
+            { color: "#fbc02d", label: t("display.subBdFactory") },
+            { color: "#9c27b0", label: t("display.subBdOffice") },
+            { color: "#795548", label: t("display.subBdFarm") },
+            { color: "#ff9800", label: t("display.subBdMine") },
+            { color: "#00bcd4", label: t("display.subBdPort") },
+            { color: "#9e9e9e", label: t("display.subBdOther") },
+            { color: "#f44336", label: t("display.subBdPublic") },
           ],
         };
       // Environmental scores are sampled at parcel centers. Noise, air pollution, and public safety colors
@@ -212,50 +214,50 @@ function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInf
       case "noise_color":
         return {
           type: "meter",
-          description: "区画の騒音の悪さで色分けします。エポック実行後に反映されます",
+          description: t("display.descParcelNoise"),
           meterStartColor: "#fde68a",
           meterEndColor: "#e65100",
-          meterLabel: "← 騒音 →",
+          meterLabel: t("display.meterNoise"),
         };
       case "air_pollution_color":
         return {
           type: "meter",
-          description: "区画の大気汚染の悪さで色分けします。エポック実行後に反映されます",
+          description: t("display.descParcelAirPollution"),
           meterStartColor: "#d1e7dd",
           meterEndColor: "#4a148c",
-          meterLabel: "← 大気汚染 →",
+          meterLabel: t("display.meterAirPollution"),
         };
       case "crime_color":
         return {
           type: "meter",
-          description: "区画の治安の悪さで色分けします。エポック実行後に反映されます",
+          description: t("display.descParcelCrime"),
           meterStartColor: "#ffcdd2",
           meterEndColor: "#b71c1c",
-          meterLabel: "← 治安の悪さ →",
+          meterLabel: t("display.meterCrime"),
         };
       case "sunshine_color":
         return {
           type: "meter",
-          description: "区画の日当たりの悪さ(周辺の建物の影になっている時間の割合)で色分けします。エポック実行後に反映されます",
+          description: t("display.descParcelSunshine"),
           meterStartColor: "#fff59d",
           meterEndColor: "#37474f",
-          meterLabel: "← 日照の悪さ →",
+          meterLabel: t("display.meterSunshine"),
         };
       // Nature is the only score where higher is better, so the legend runs from scarce to plentiful.
       case "nature_color":
         return {
           type: "meter",
-          description: "区画の周辺にある森と公園の多さで色分けします。エポック実行後に反映されます",
+          description: t("display.descParcelNature"),
           meterStartColor: "#e8f5e9",
           meterEndColor: "#1b5e20",
-          meterLabel: "← 自然の豊かさ →",
+          meterLabel: t("display.meterNature"),
         };
       case "hidden":
-        return { type: "none", description: "区画を非表示にします" };
+        return { type: "none", description: t("display.descParcelHidden") };
       case "border":
-        return { type: "none", description: "区画の境界線を表示します" };
+        return { type: "none", description: t("display.descParcelBorder") };
       default:
-        return { type: "none", description: "区画を通常表示します" };
+        return { type: "none", description: t("display.descParcelDefault") };
     }
   }
   if (layerId === "resource") {
@@ -263,31 +265,31 @@ function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInf
       case "visible":
         return {
           type: "color",
-          description: "天然資源の分布を表示します",
+          description: t("display.descResourceVisible"),
           items: [
-            { color: "#262626", label: "油田" },
-            { color: "#e6991a", label: "鉱脈" },
-            { color: "#9c27b0", label: "レアメタル" },
-            { color: "#2e7d32", label: "森林" },
-            { color: "#0099e6", label: "水源" },
+            { color: "#262626", label: t("display.resourceOil") },
+            { color: "#e6991a", label: t("display.resourceOre") },
+            { color: "#9c27b0", label: t("display.resourceRareMetal") },
+            { color: "#2e7d32", label: t("display.resourceForest") },
+            { color: "#0099e6", label: t("display.resourceWater") },
           ],
         };
       case "hidden":
       default:
-        return { type: "none", description: "天然資源の表示を非表示にします" };
+        return { type: "none", description: t("display.descResourceHidden") };
     }
   }
 
   // All other layers have no legend and placeholder explanatory text.
   const dummyDescriptions: Record<string, string> = {
-    district: "地区の枠線と名称・アイコンを表示します。地区ごとの色分けは建物/区画/道路の「地区別色塗り」モードを使います。",
-    terrain: "地形の標高や透明度を変更して表示します。",
-    alert: "街のアラートを種別ごとに表示/非表示できます。建物・道路のアラートアイコンと、倒壊・焼失した廃墟のアイコンが対象です。",
-    prop: "プロップの表示/非表示を切り替えます。",
+    district: t("display.descDistrict", { mode: t("display.modeBuildingZone") }),
+    terrain: t("display.descTerrain"),
+    alert: t("display.descAlert"),
+    prop: t("display.descProp"),
   };
   return {
     type: "none",
-    description: dummyDescriptions[layerId] ?? "表示設定を変更します。",
+    description: dummyDescriptions[layerId] ?? t("display.descOther"),
   };
 }
 
@@ -794,7 +796,7 @@ function LegendArea({
         )}
         <div className="do-legend-area">
           {info.type === "none" && (
-            <span className="do-legend-none">凡例はありません</span>
+            <span className="do-legend-none">{t("display.legendNone")}</span>
           )}
           {info.type === "color" && info.items && (
             <div className="do-legend-color-list">

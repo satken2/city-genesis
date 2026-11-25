@@ -1,10 +1,10 @@
 {
   "tag": {
-    "label": "Proje",
-    "none": "(etiket yok)",
+    "label": "İnşaat projesi",
+    "none": "(Etiket yok)",
     "createNew": "+ Yeni etiket…",
-    "newPlaceholder": "Etiket Adı Girin",
-    "add": "Eklemek",
+    "newPlaceholder": "Etiket adını girin",
+    "add": "Ekle",
     "cancel": "İptal",
     "saveFailed": "Etiket kaydedilemedi",
     "showObject": "3D görünümde göster",
@@ -12,29 +12,29 @@
   },
   "constructionProjects": {
     "all": "Tümü",
-    "empty": "Henüz iş yok. İşleri projelere göre gruplanmış görmek için bir inşaat panelinden yerleştirirken bir etiket seçin veya planlanan ya da yapımı süren bir kamu tesisinin veya yolun ayrıntı panelinden etiket ekleyin.",
+    "empty": "Henüz iş yok. İnşaat panelinden yerleştirirken bir etiket seçerseniz veya inşaatı başlamamış ya da sürmekte olan kamu tesislerinin ve yolların ayrıntı panelinden etiket eklerseniz, işleri projelere göre gruplayarak görebilirsiniz.",
     "loadFailed": "İnşaat projeleri yüklenemedi",
-    "totalCost": "tahmini maliyet",
-    "duration": "Kalan Zaman",
+    "totalCost": "İnşaat maliyeti (tahmini)",
+    "duration": "İnşaat süresi (kalan)",
     "progress": "İlerleme",
-    "progressValue": "{{done}} / {{total}} Bitti",
+    "progressValue": "{{done}} / {{total}} tamamlandı",
     "monthsValue": "{{value}} ay",
-    "stalled": "durmuş",
-    "stalledWarning": "{{count}} çalışma hızı 0 olduğu için (toplam süre hariç) çalışma ilerleyemez.",
-    "done": "Yapılmış",
+    "stalled": "İlerlemiyor",
+    "stalledWarning": "{{count}} iş, inşaat hızı 0 olduğu için ilerlemiyor (süre toplamına dahil edilmedi).",
+    "done": "Tamamlandı",
     "unnamed": "#{{id}}",
-    "showAll": "Her şeyi tekrar göster ({{count}})",
+    "showAll": "Tümünü yeniden göster ({{count}})",
     "showTag": "Bu projeyi 3D görünümde göster",
     "hideTag": "Bu projeyi 3D görünümde gizle",
     "showObject": "3D görünümde göster",
     "hideObject": "3D görünümde gizle",
-    "deleteTag": "Bu etiketi sil",
-    "confirmDeleteTag": "\"{{tag}}\" etiketi silinsin mi? Binalarından ve yollarından kaldırılacak (işlerin kendisi kalır).",
+    "deleteTag": "Etiketi sil",
+    "confirmDeleteTag": "“{{tag}}” etiketi silinecek. Etiket, ilgili binalardan ve yollardan kaldırılır (inşaat işlerinin kendisi silinmez). Emin misiniz?",
     "columns": {
-      "name": "Hedef",
+      "name": "Nesne",
       "status": "Durum",
-      "cost": "Maliyet Kaldı",
-      "remaining": "Kalan Zaman"
+      "cost": "Kalan maliyet",
+      "remaining": "Kalan süre"
     }
   }
 }

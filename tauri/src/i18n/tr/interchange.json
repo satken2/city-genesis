@@ -2,25 +2,25 @@
   "interchange": {
     "kind": {
       "ic": "Kavşak",
-      "jct": "Kavşak"
+      "jct": "Otoyol kavşağı"
     },
     "fallbackName": {
-      "ic": "ic #{{id}}",
-      "jct": "jct #{{id}}"
+      "ic": "Kavşak #{{id}}",
+      "jct": "Otoyol kavşağı #{{id}}"
     },
     "connections": {
-      "from": "İtibaren",
-      "to": "-E",
+      "from": "Gelinen yol",
+      "to": "Gidilen yol",
       "road": "{{type}} #{{id}}",
-      "none": "Bağlantılı yol çiftleri yok.",
+      "none": "Bağlı yol çifti yok",
       "direction": {
-        "n": "Kuzeyinde",
+        "n": "Kuzey",
         "ne": "Kuzeydoğu",
         "e": "Doğu",
         "se": "Güneydoğu",
         "s": "Güney",
         "sw": "Güneybatı",
-        "w": "Batısında",
+        "w": "Batı",
         "nw": "Kuzeybatı"
       },
       "sideZone": "{{direction}} · {{zone}}"

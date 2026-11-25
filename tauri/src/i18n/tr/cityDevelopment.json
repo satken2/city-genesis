@@ -1,28 +1,28 @@
 {
   "cityDevelopment": {
-    "pattern": "Arap rakamları sistemi",
-    "roadVariants": "Yol Türleri",
+    "pattern": "Algoritma",
+    "roadVariants": "Yol türleri",
     "patterns": {
       "grid_1": "Izgara 1",
       "grid_2": "Izgara 2",
-      "sprawl_1": "yayılma 1",
-      "sprawl_2": "yayılma 2",
-      "sprawl_3": "yayılma 3",
-      "planned_city_1": "Planlanan Şehir 1",
-      "split_1": "alt bölüm 1"
+      "sprawl_1": "Dağınık yayılma 1",
+      "sprawl_2": "Dağınık yayılma 2",
+      "sprawl_3": "Dağınık yayılma 3",
+      "planned_city_1": "Planlı şehir 1",
+      "split_1": "Bölme 1"
     },
-    "spacing": "yol aralığı",
-    "blockLength": "blok uzunluğu",
-    "splitHint": "Yollarla çevrili tüm blokları içerir. Her bloğun uzun kenarına paralel yollar, yol aralığına ve yolları blok uzunluğundan geçerek aralıklıdır.",
-    "createParcels": "Parseller Oluştur",
-    "parcelArea": "parsel",
-    "hint": "Geliştirilecek alanı boyamak için Ctrl'yi basılı tutun ve sürükleyin. Pan'a sürükleyin, Yakınlaştır'a kaydırın.",
-    "clear": "Açık",
-    "preview": "Gala öncesi özel gösterim",
-    "previewing": "Hesaplama...",
+    "spacing": "Yol aralığı",
+    "blockLength": "Yapı adası uzunluğu",
+    "splitHint": "Yollarla çevrili yapı adalarının tamamını alana dahil edin. Yapı adasının uzun kenarına paralel yollar “Yol aralığı” kadar, ona dik yollar ise “Yapı adası uzunluğu” kadar aralıklarla çizilir.",
+    "createParcels": "Parsel oluştur",
+    "parcelArea": "Parsel alanı",
+    "hint": "Geliştirilecek alanı boyamak için Ctrl tuşunu basılı tutup sol tuşla sürükleyin. Haritayı kaydırmak için sol tuşla sürükleyin, yakınlaştırıp uzaklaştırmak için tekerleği çevirin.",
+    "clear": "Temizle",
+    "preview": "Önizleme",
+    "previewing": "Hesaplanıyor...",
     "create": "Onayla",
-    "creating": "yaratmak...",
-    "previewed": "{{area}} alanındaki araziyi hafifçe yumuşatır ve {{roads}} yol segmentlerini ve {{parcels}} parsellerini ({{rejected}} reddedildi) planlayabilir",
-    "created": "Araziyi düzeltti ve {{roads}} yol segmentlerini ve {{parcels}} parsellerini ({{rejected}} reddedildi)"
+    "creating": "Oluşturuluyor...",
+    "previewed": "Alan: {{area}}. Arazi hafifçe düzleştirilerek {{roads}} yol ve {{parcels}} parsel planlanabilir ({{rejected}} yol reddedildi)",
+    "created": "Arazi düzleştirildi; {{roads}} yol ve {{parcels}} parsel planlandı ({{rejected}} yol reddedildi)"
   }
 }

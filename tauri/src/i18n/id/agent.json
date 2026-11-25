@@ -1,212 +1,212 @@
 {
   "agent": {
     "back": "Kembali",
-    "editAppearance": "mengubah penampilan",
-    "relocateCityHall": "Pindah Balai Kota",
+    "editAppearance": "Ubah tampilan luar",
+    "relocateCityHall": "Pindahkan balai kota",
     "publicFacility": "Fasilitas umum",
-    "underAcquisition": "Negosiasi pembebasan lahan",
+    "underAcquisition": "Sedang negosiasi pengadaan lahan",
     "publicFacilityPanel": {
-      "title": "Fasilitas umum"
+      "title": "Fasilitas umum/milik kota"
     },
-    "abandon": "Meninggalkan",
-    "abandonHint": "menyerah pemeliharaan dan biarkan membusuk tanpa perbaikan",
+    "abandon": "Telantarkan",
+    "abandonHint": "Hentikan pemeliharaan dan biarkan menua tanpa perbaikan",
     "statusSince": {
-      "founded": "Didirikan di",
-      "householdFormed": "rumah tangga terbentuk",
-      "arrived": "tiba",
-      "opened": "dibuka",
-      "schoolOpened": "dibuka",
-      "completed": "Selesai",
-      "operatingSince": "aktif sejak",
-      "resumed": "dilanjutkan",
-      "paused": "berhenti",
-      "suspended": "Layanan dihentikan sementara",
-      "schoolClosed": "Layanan dihentikan sementara",
-      "constructionStarted": "Konstruksi dimulai",
-      "demolitionScheduled": "Pembongkaran dijadwalkan",
-      "demolitionStarted": "Pembongkaran dimulai",
-      "demolished": "Tandas",
-      "collapsed": "Runtuh",
-      "burnedDown": "Terbakar",
-      "default": "status sejak"
+      "founded": "Tanggal pendirian",
+      "householdFormed": "Tanggal pembentukan rumah tangga",
+      "arrived": "Tanggal kedatangan",
+      "opened": "Tanggal dibuka",
+      "schoolOpened": "Tanggal sekolah dibuka",
+      "completed": "Tanggal selesai",
+      "operatingSince": "Tanggal mulai beroperasi",
+      "resumed": "Tanggal dilanjutkan",
+      "paused": "Tanggal dihentikan",
+      "suspended": "Tanggal mulai tutup sementara",
+      "schoolClosed": "Tanggal sekolah ditutup sementara",
+      "constructionStarted": "Tanggal mulai pembangunan",
+      "demolitionScheduled": "Tanggal keputusan pembongkaran",
+      "demolitionStarted": "Tanggal mulai pembongkaran",
+      "demolished": "Tanggal pembongkaran selesai",
+      "collapsed": "Tanggal runtuh",
+      "burnedDown": "Tanggal terbakar",
+      "default": "Tanggal perubahan status"
     },
-    "reserves": "Pasukan cadangan",
+    "reserves": "Kas",
     "revenues": "Pendapatan",
-    "expenses": "Perbelanjaan",
+    "expenses": "Pengeluaran",
     "zone": "Distrik",
-    "building": "Bangunan",
-    "rent": "Menyewa",
-    "floorOccupancy": "hunian lantai",
-    "tenants": "penyewa",
-    "guests": "tamu",
-    "tabBasicInfo": "Info Dasar",
-    "utilizationTarget": "pemanfaatan target",
-    "currentUtilization": "pemanfaatan saat ini",
-    "constructionSpeed": "kecepatan konstruksi",
-    "constructionCostPerEpoch": "Biaya Konstruksi / Siklus",
-    "remainingConstruction": "Sisa waktu konstruksi",
-    "remainingEpochs": "~{{n}} Siklus",
+    "building": "Bangunan yang ditempati",
+    "rent": "Sewa",
+    "floorOccupancy": "Luas lantai yang ditempati",
+    "tenants": "Penyewa",
+    "guests": "Tamu menginap",
+    "tabBasicInfo": "Info dasar",
+    "utilizationTarget": "Target tingkat operasi",
+    "currentUtilization": "Tingkat operasi saat ini",
+    "constructionSpeed": "Kecepatan pembangunan",
+    "constructionCostPerEpoch": "Biaya pembangunan per siklus",
+    "remainingConstruction": "Sisa durasi pembangunan",
+    "remainingEpochs": "Sekitar {{n}} siklus",
     "tabBuildingInfo": "Info bangunan",
-    "tabCargoInfo": "Muatan",
-    "tabTradeInfo": "Pasokan, Permintaan & Perdagangan",
+    "tabCargoInfo": "Bongkar muat",
+    "tabTradeInfo": "Pasar & transaksi",
     "tabTourismInfo": "Pariwisata",
-    "tabEmploymentInfo": "Pekerjaan",
+    "tabEmploymentInfo": "Ketenagakerjaan",
     "action": {
-      "purchase": "Membeli",
+      "purchase": "Beli",
       "bulldoze": "Bongkar",
-      "cancelBulldoze": "Batalkan pembongkaran",
-      "pause": "Berhenti sebentar",
+      "cancelBulldoze": "Batalkan bongkar",
+      "pause": "Jeda",
       "resume": "Lanjutkan",
       "delete": "Hapus",
-      "repair": "Perbaikan",
-      "rebuild": "Membangun kembali",
-      "edit": "Memimpin redaksi",
+      "repair": "Perbaiki",
+      "rebuild": "Bangun ulang",
+      "edit": "Edit",
       "startConstruction": "Mulai pembangunan",
-      "stopConstruction": "Menangguhkan Konstruksi",
-      "cancelAbandon": "Batalkan pengabaian",
-      "explode": "meledak",
-      "explodeConfirm": "Meledakkan bangunan ini dan mementaskannya sebagai kecelakaan? Bangunan itu runtuh sekaligus dan semua orang yang tinggal atau bekerja di dalamnya terbunuh. Sentimen publik akan sangat menderita, dan ini tidak dapat dibatalkan.",
-      "explodeTitle": "Meledakkan bangunan",
-      "explodeConfirmAction": "meledak"
+      "stopConstruction": "Tunda",
+      "cancelAbandon": "Batalkan penelantaran",
+      "explode": "Ledakkan",
+      "explodeConfirm": "Ledakkan bangunan ini dan buat seolah-olah kecelakaan?\nBangunan akan langsung runtuh, dan penduduk serta karyawan di dalamnya akan tewas. Sentimen warga akan memburuk drastis, dan tindakan ini tidak dapat dibatalkan.",
+      "explodeTitle": "Ledakkan bangunan",
+      "explodeConfirmAction": "Ledakkan"
     },
-    "pendingWarning": "Bangunan ini direncanakan. Silakan perintah untuk memulai konstruksi.",
+    "pendingWarning": "Bangunan ini masih direncanakan. Perintahkan mulai pembangunan.",
     "alerts": {
       "diagnoseHint": "Klik untuk mendiagnosis penyebabnya",
       "title": "Peringatan",
       "constructionShortage": {
-        "title": "Kekurangan jasa konstruksi",
-        "description": "Anggaran konstruksi tidak mencukupi, sehingga menyebabkan keterlambatan konstruksi."
+        "title": "Kekurangan layanan konstruksi",
+        "description": "Anggaran pembangunan tidak mencukupi sehingga pekerjaan konstruksi tertunda."
       },
       "onFire": {
-        "title": "Insiden kebakaran!",
-        "description": "Kebakaran terjadi di dalam gedung."
+        "title": "Kebakaran!",
+        "description": "Terjadi kebakaran di bangunan ini."
       },
       "accidentalFire": {
-        "title": "Kebakaran yang tidak disengaja (kecil)",
-        "description": "Kebakaran kecil yang tidak disengaja terjadi tetapi tetap kecil."
+        "title": "Kebakaran kecil",
+        "description": "Terjadi kebakaran karena kelalaian di bangunan ini, tetapi berhasil dikendalikan dalam skala kecil."
       },
       "infraDisconnected": {
         "title": "Tidak terhubung ke jaringan infrastruktur",
-        "description": "Tidak ada jalur infrastruktur yang terhubung ke terminal fasilitas ini. Itu tidak dapat mengirim atau menerima persediaan sampai terhubung ke jaringan."
+        "description": "Belum ada jalur infrastruktur yang tersambung ke titik sambung fasilitas ini. Fasilitas ini tidak dapat memasok atau menerima pasokan sampai tersambung ke jaringan."
       },
       "capacityTight": {
-        "title": "Kapasitas dekat",
-        "description": "Fasilitas ini menangani 90% atau lebih dari kapasitasnya. Hampir tidak dapat memenuhi permintaan lagi."
+        "title": "Kapasitas hampir penuh",
+        "description": "Volume yang ditangani telah mencapai 90% atau lebih dari kapasitas fasilitas ini. Fasilitas ini hampir tidak dapat melayani permintaan tambahan."
       },
       "nonconforming": {
-        "title": "tidak memenuhi peraturan",
-        "description": "Bangunan ini tidak memenuhi peraturan paketnya. Itu tidak akan diperbaiki dan akan dihancurkan setelah memburuk."
+        "title": "Tidak sesuai peraturan bangunan",
+        "description": "Bangunan ini tidak sesuai dengan peraturan bangunan kavlingnya. Bangunan tidak akan diperbaiki dan akan dibongkar setelah rusak."
       },
       "crime": {
-        "title": "Kejahatan terjadi",
-        "description": "Kejahatan telah terjadi di gedung ini."
+        "title": "Terjadi kejahatan",
+        "description": "Telah terjadi kejahatan di bangunan ini."
       },
       "crimeSign": {
         "title": "Tanda-tanda kejahatan",
-        "description": "Tanda-tanda kejahatan telah diamati di gedung ini. Waspadai keselamatan publik yang semakin memburuk."
+        "description": "Tanda-tanda kejahatan terdeteksi di bangunan ini. Waspadai memburuknya keamanan umum."
       },
       "laborShortage": {
         "title": "Kekurangan tenaga kerja",
-        "description": "Tidak cukup pekerja yang dipekerjakan, sehingga produksi dan jasa tidak sesuai dengan rencana."
+        "description": "Jumlah karyawan tidak mencukupi sehingga produksi dan layanan berada di bawah rencana."
       },
       "materialShortage": {
-        "title": "Kekurangan bahan",
-        "description": "Pengadaan bahan baku tidak mencukupi, sehingga produksi dan jasa tidak sesuai dengan rencana."
+        "title": "Kekurangan bahan baku",
+        "description": "Pengadaan bahan baku tidak mencukupi sehingga produksi dan layanan berada di bawah rencana."
       },
       "highSkillShortage": {
-        "title": "Kekurangan staf yang terampil",
-        "description": "Tidak ada cukup staf yang sangat terampil, sehingga output dikurangi menjadi apa yang dapat ditangani oleh staf yang tersedia."
+        "title": "Kekurangan tenaga ahli",
+        "description": "Tenaga berkeahlian tinggi yang dibutuhkan tidak cukup, sehingga produksi dikurangi sebatas yang dapat ditangani tenaga yang ada."
       },
       "budgetCapped": {
         "title": "Kekurangan anggaran",
-        "description": "Anggaran yang dialokasikan jauh di bawah jumlah yang diperlukan, sehingga operasi telah diperkecil. Tinjau alokasi anggaran."
+        "description": "Anggaran yang dialokasikan jauh di bawah kebutuhan sehingga operasi dikurangi. Tinjau kembali alokasi anggaran."
       },
       "facilityWarning": {
-        "title": "Fasilitas umum tidak beroperasi",
-        "description": "Fasilitas ini memberikan layanan yang jauh lebih sedikit dari yang direncanakan. Periksa pengadaan tenaga kerja dan bahannya."
+        "title": "Fasilitas umum tidak dapat beroperasi",
+        "description": "Pasokan layanan fasilitas ini jauh di bawah target. Periksa pengadaan tenaga kerja dan bahan bakunya."
       },
       "sanitationWarning": {
-        "title": "Sanitasi yang memburuk",
-        "description": "Sanitasi pada bidang bangunan ini telah sangat memburuk, mempengaruhi rumah tangga penduduk. Meningkatkan pasokan limbah dan limbah."
+        "title": "Sanitasi memburuk",
+        "description": "Kondisi sanitasi di lahan bangunan ini memburuk parah dan memengaruhi rumah tangga penghuninya. Tingkatkan pasokan pengolahan air limbah dan sampah."
       },
       "infraWarning": {
         "title": "Fasilitas infrastruktur berhenti atau runtuh",
-        "description": "Fasilitas ini telah berhenti beroperasi atau runtuh, mempengaruhi pasokan infrastruktur. Periksa status dan koneksi pasokannya."
+        "description": "Fasilitas ini berhenti atau runtuh sehingga pasokan infrastruktur terganggu. Periksa kondisi fasilitas dan rute pasokannya."
       },
       "farFromRoad": {
-        "title": "Jauh dari Jalan",
-        "description": "Jalan terdekat berjarak sekitar {{distance}} m. Akses untuk pengadaan barang, perjalanan kerja, dan belanja sangat dirugikan; pertimbangkan memperpanjang jalan lebih dekat ke bangunan ini."
+        "title": "Jauh dari jalan",
+        "description": "Jalan terdekat berjarak sekitar {{distance}} m. Akses untuk pengadaan barang, perjalanan kerja, dan belanja sangat dirugikan, jadi pertimbangkan untuk memperpanjang jalan hingga ke dekat bangunan ini."
       },
       "noRoadAccess": {
-        "title": "Tidak Ada Akses Jalan",
-        "description": "Bangunan ini tidak memiliki jalan untuk terhubung. Akses untuk pengadaan barang, perjalanan kerja, dan belanja sangat dirugikan; bangunlah jalan di dekatnya."
+        "title": "Tidak ada jalan yang dapat disambungkan",
+        "description": "Tidak ada jalan yang dapat disambungkan ke bangunan ini. Akses untuk pengadaan barang, perjalanan kerja, dan belanja sangat dirugikan, jadi bangunlah jalan di dekatnya."
       }
     },
     "infra": {
-      "title": "Koneksi Infrastruktur",
-      "connected": "Bersambung",
-      "disconnected": "Yg dicopot",
-      "received": "Diterima"
+      "title": "Sambungan infrastruktur",
+      "connected": "Tersambung",
+      "disconnected": "Tidak terhubung",
+      "received": "Jumlah diterima"
     },
-    "tabConstructionInfo": "Pembangunan",
+    "tabConstructionInfo": "Konstruksi",
     "tabEducationInfo": "Pendidikan",
     "education": {
-      "totalStudents": "siswa yang terdaftar",
-      "totalCapacity": "kapasitas total",
-      "statusTitle": "Pendaftaran",
+      "totalStudents": "Jumlah siswa terdaftar",
+      "totalCapacity": "Total kapasitas",
+      "statusTitle": "Status pendaftaran",
       "enrolled": "Terdaftar",
-      "vacant": "kursi terbuka",
-      "noCapacity": "tidak ada kapasitas",
-      "countLabel": "Menghitung",
-      "enrollmentBySkill": "Pendaftaran dengan Keterampilan",
-      "settingsTitle": "Kuota Penerimaan",
-      "settingsHint": "Atur bobot alokasi untuk setiap keterampilan. Total kapasitas dibagi secara proporsional dengan bobot.",
+      "vacant": "Kursi kosong",
+      "noCapacity": "Tanpa kapasitas",
+      "countLabel": "Jumlah orang",
+      "enrollmentBySkill": "Pendaftaran per keahlian",
+      "settingsTitle": "Pengaturan kuota penerimaan",
+      "settingsHint": "Atur bobot alokasi untuk setiap keahlian. Total kapasitas dibagi sesuai bobot.",
       "skillHeader": "Keahlian",
-      "weightHeader": "Berat",
+      "weightHeader": "Bobot",
       "previewHeader": "Kapasitas",
       "save": "Simpan",
-      "saving": "Menyimpan…",
+      "saving": "Menyimpan...",
       "saveFailed": "Gagal menyimpan",
-      "sumMustBePositive": "Jumlah kuota harus minimal 1",
-      "invalidWeight": "Bobot harus bilangan bulat 0 atau lebih",
-      "studentsList": "Daftar Mahasiswa",
+      "sumMustBePositive": "Total kuota harus 1 atau lebih",
+      "invalidWeight": "Masukkan bobot berupa bilangan bulat 0 atau lebih",
+      "studentsList": "Daftar siswa",
       "noStudents": "Tidak ada siswa",
-      "showMore": "tampilkan lebih banyak ({{count}})"
+      "showMore": "Tampilkan lebih banyak ({{count}} orang)"
     }
   },
   "agentList": {
-    "filterType": "Mengetik",
+    "filterType": "Tipe",
     "filterVariant": "Varian",
-    "filterZone": "Daerah",
+    "filterZone": "Distrik",
     "allVariants": "Semua varian",
-    "allZones": "semua zona",
-    "resultCount": "{{count}} Hasil",
-    "capped": "(dari {{total}} total)",
-    "loading": "Memuat…",
-    "noResults": "Tidak ada agen yang cocok",
+    "allZones": "Semua distrik",
+    "resultCount": "{{count}} hasil",
+    "capped": "(dari total {{total}})",
+    "loading": "Memuat...",
+    "noResults": "Tidak ada pelaku ekonomi yang cocok",
     "colStatus": "Status",
     "colVariant": "Varian",
     "colName": "Nama",
     "colProduct": "Produk",
     "colPrice": "Harga",
     "colProduction": "Produksi",
-    "colStock": "Persediaan",
+    "colStock": "Stok",
     "colSold": "Terjual",
-    "colWage": "Upah rata-rata",
-    "colEmployment": "Pekerjaan",
-    "colUtilization": "Pemanfaatan",
-    "colBdType": "Jenis bangunan",
+    "colWage": "Tarif upah",
+    "colEmployment": "Pekerja",
+    "colUtilization": "Tingkat operasi",
+    "colBdType": "Tipe bangunan",
     "colDurability": "Daya tahan",
-    "colRent": "Menyewa",
-    "colFloors": "lantai",
-    "colFloorArea": "luas lantai",
-    "colOccupancy": "Pemilikan",
-    "colFamilyType": "Tipe Keluarga",
-    "colDiscretionaryIncome": "pendapatan yang dapat dibelanjakan",
-    "colSatisNutrition": "Makanan",
+    "colRent": "Sewa",
+    "colFloors": "Jumlah lantai",
+    "colFloorArea": "Luas lantai",
+    "colOccupancy": "Tingkat hunian",
+    "colFamilyType": "Tipe rumah tangga",
+    "colDiscretionaryIncome": "Pendapatan disposabel",
+    "colSatisNutrition": "Gizi",
     "colSatisHealthcare": "Kesehatan",
-    "colSatisLeisure": "Waktu luang",
-    "colSatisResidential": "Yg berhubung dgn tempat kediaman",
-    "colAutomobile": "Mobil"
+    "colSatisLeisure": "Hiburan & rekreasi",
+    "colSatisResidential": "Hunian",
+    "colAutomobile": "Mobil pribadi"
   }
 }
