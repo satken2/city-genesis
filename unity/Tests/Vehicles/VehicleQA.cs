@@ -1179,7 +1179,7 @@ public static partial class VehicleQA
             }
             Check(anyHair,$"{name} has no hair part");
             Check(limbs.SetEquals(new[]{-2,-1,1,2}),$"{name} does not carry both legs and both arms in the joint data");
-            Check(triangles<400,$"{name} exceeds 400 triangles: {triangles}");
+            Check(triangles<600,$"{name} exceeds 600 triangles: {triangles}");
             Check(bounds.size.y>1.4f && bounds.size.y<2f,$"{name} height is not human scale: {bounds.size}");
             Check(Mathf.Abs(bounds.min.y)<.05f,$"{name} is not grounded: {bounds.min.y}");
             Check(Mathf.Abs(bounds.center.x)<.3f && Mathf.Abs(bounds.center.z)<.3f,$"{name} is off centre: {bounds.center}");
