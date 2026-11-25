@@ -1,6 +1,8 @@
 {
   "mapNavigation": {
     "title": "Explorar la ciudad",
+    "openSidebar": "Abrir barra lateral",
+    "closeSidebar": "Cerrar barra lateral",
     "back": "Volver",
     "search": "Buscar un lugar",
     "origin": "Buscar origen",

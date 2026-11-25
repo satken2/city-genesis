@@ -1,6 +1,8 @@
 {
   "mapNavigation": {
     "title": "Şehri keşfet",
+    "openSidebar": "Kenar çubuğunu aç",
+    "closeSidebar": "Kenar çubuğunu kapat",
     "back": "Geri",
     "search": "Yer ara",
     "origin": "Başlangıç noktası ara",

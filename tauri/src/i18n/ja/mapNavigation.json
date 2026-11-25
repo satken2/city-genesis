@@ -1,6 +1,8 @@
 {
   "mapNavigation": {
     "title": "街を探索",
+    "openSidebar": "サイドバーを開く",
+    "closeSidebar": "サイドバーを閉じる",
     "back": "戻る",
     "search": "場所を検索",
     "origin": "出発地を検索",

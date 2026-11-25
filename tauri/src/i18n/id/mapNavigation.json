@@ -1,6 +1,8 @@
 {
   "mapNavigation": {
     "title": "Jelajahi kota",
+    "openSidebar": "Buka bilah samping",
+    "closeSidebar": "Tutup bilah samping",
     "back": "Kembali",
     "search": "Cari tempat",
     "origin": "Cari titik keberangkatan",

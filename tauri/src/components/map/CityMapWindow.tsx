@@ -6,8 +6,8 @@
  *
  * Overlay the 3D view camera's position and direction as a marker (see "Camera marker" below).
  *
- * The left sidebar has two tabs. Search and directions show batch route calculation results read-only; pins mark places
- * on the map and in 3D. Map clicks go to the selected tab.
+ * The left sidebar is collapsible and has two tabs. Search and directions show batch route calculation results read-only;
+ * pins mark places on the map and in 3D. Map clicks go to the selected tab.
  */
 
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
@@ -64,6 +64,7 @@ export function CityMapWindow({ apiBaseUrl, initialInfraProductId }: { apiBaseUr
   const navigation = useMapNavigation(apiBaseUrl, mapRef);
   const pins = useMapPins();
   const [tab, setTab] = useState<SidebarTab>("search");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [camera, setCamera] = useState<CameraMarker | null>(null);
 
   /**
@@ -163,8 +164,8 @@ export function CityMapWindow({ apiBaseUrl, initialInfraProductId }: { apiBaseUr
   ];
   return (
     <div className="city-map-window">
-      {/* Keep both panels mounted so switching tabs keeps search input and results. */}
-      <aside className="map-nav" aria-label={t("mapNavigation.title")}>
+      {/* タブ切替やサイドバー開閉時に入力内容と検索結果を保つため、非表示時もアンマウントしない。 */}
+      <aside id="city-map-sidebar" className="map-nav" aria-label={t("mapNavigation.title")} hidden={!sidebarOpen}>
         <FlatTabs tabs={sidebarTabs} active={tab} onChange={setTab} idPrefix="city-map-sidebar" />
         {sidebarTabs.map(({ id, content }) => (
           <div key={id} className="map-nav__panel" role="tabpanel" id={`city-map-sidebar-panel-${id}`}
@@ -200,6 +201,30 @@ export function CityMapWindow({ apiBaseUrl, initialInfraProductId }: { apiBaseUr
           focusPathIds={navigation.roadFocus?.pathIds ?? null}
           focusColor={navigation.roadFocus?.color ?? null}
         />
+        <button
+          type="button"
+          className="city-map-window__sidebar-toggle"
+          aria-expanded={sidebarOpen}
+          aria-controls="city-map-sidebar"
+          aria-label={t(sidebarOpen ? "mapNavigation.closeSidebar" : "mapNavigation.openSidebar")}
+          title={t(sidebarOpen ? "mapNavigation.closeSidebar" : "mapNavigation.openSidebar")}
+          onClick={() => setSidebarOpen((open) => !open)}
+        >
+          <svg
+            className="rtl-mirror"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d={sidebarOpen ? "M15 6L9 12L15 18" : "M9 6L15 12L9 18"} />
+          </svg>
+        </button>
         {controls.legend}
         {/* Status overlay (cursor world coordinates and zoom). */}
         <div className="city-map-window__status">

@@ -1,6 +1,8 @@
 {
   "mapNavigation": {
     "title": "Stadt erkunden",
+    "openSidebar": "Seitenleiste öffnen",
+    "closeSidebar": "Seitenleiste schließen",
     "back": "Zurück",
     "search": "Ort suchen",
     "origin": "Startpunkt suchen",

@@ -1,6 +1,8 @@
 {
   "mapNavigation": {
     "title": "Explore the city",
+    "openSidebar": "Open sidebar",
+    "closeSidebar": "Close sidebar",
     "back": "Back",
     "search": "Search for a place",
     "origin": "Search for a starting point",

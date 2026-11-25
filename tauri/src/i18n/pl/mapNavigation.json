@@ -1,6 +1,8 @@
 {
   "mapNavigation": {
     "title": "Odkrywaj miasto",
+    "openSidebar": "Otwórz pasek boczny",
+    "closeSidebar": "Zamknij pasek boczny",
     "back": "Wstecz",
     "search": "Szukaj miejsca",
     "origin": "Szukaj punktu startowego",

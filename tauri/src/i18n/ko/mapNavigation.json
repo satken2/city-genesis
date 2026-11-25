@@ -1,6 +1,8 @@
 {
   "mapNavigation": {
     "title": "도시 둘러보기",
+    "openSidebar": "사이드바 열기",
+    "closeSidebar": "사이드바 닫기",
     "back": "뒤로",
     "search": "장소 검색",
     "origin": "출발지 검색",

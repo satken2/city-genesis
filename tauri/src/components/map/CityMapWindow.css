@@ -177,6 +177,37 @@
   min-height: 0;
 }
 
+/* サイドバー開閉用のハンドル。地図領域の開始端中央に密着させ、開閉どちらの状態でも同じ位置から操作できる。 */
+.city-map-window__sidebar-toggle {
+  position: absolute;
+  inset-inline-start: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--flat-surface);
+  color: var(--flat-text-label);
+  box-shadow: var(--flat-shadow-sm);
+  cursor: pointer;
+}
+
+.city-map-window__sidebar-toggle:hover {
+  background: var(--flat-raised-hover);
+  color: var(--flat-text);
+}
+
+.city-map-window__sidebar-toggle:focus-visible {
+  outline: 2px solid var(--flat-accent);
+  outline-offset: -2px;
+}
+
 /* Cursor coordinate and zoom overlay. */
 .city-map-window__status {
   position: absolute;

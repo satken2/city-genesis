@@ -1,6 +1,8 @@
 {
   "mapNavigation": {
     "title": "探索城市",
+    "openSidebar": "開啟側邊欄",
+    "closeSidebar": "關閉側邊欄",
     "back": "返回",
     "search": "搜尋地點",
     "origin": "搜尋出發地",
