@@ -42,11 +42,12 @@
 /* Indicate heading levels with a solid block at the left, matching settings. */
 .credits-group-title {
   margin: 0;
-  padding: 2px 0 2px 10px;
+  padding-block: 2px;
+  padding-inline: 10px 0;
   font-size: 1.3rem;
   font-weight: 600;
   color: var(--flat-text);
-  box-shadow: inset 4px 0 0 var(--flat-accent);
+  box-shadow: inset calc(4px * var(--inline-sign)) 0 0 var(--flat-accent);
 }
 
 .credits-card {
@@ -86,7 +87,7 @@
   border-radius: 0;
   background: none;
   font-family: inherit;
-  text-align: left;
+  text-align: start;
   color: var(--flat-accent);
   cursor: pointer;
 }
@@ -96,7 +97,7 @@
 }
 
 .credits-license {
-  margin-left: auto;
+  margin-inline-start: auto;
   padding: 2px 6px;
   background-color: var(--flat-sunken);
   color: var(--flat-text-body);

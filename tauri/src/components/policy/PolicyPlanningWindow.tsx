@@ -211,7 +211,7 @@ function PolicyDiagram({ root, rows, onCollapseEnd }: { root: DiagramRoot; rows:
                   {row.buttons.map(button => <button type="button" key={button.key} disabled={button.disabled}
                     data-guide={button.guide} aria-expanded={button.expanded} onClick={button.onClick}>
                     {button.icon && <img src={button.icon} alt="" className="policy-advice-icon" draggable={false} />}
-                    <span className="policy-action-label">{button.label}</span><span className="policy-action-arrow" aria-hidden="true" />
+                    <span className="policy-action-label">{button.label}</span><span className="policy-action-arrow rtl-mirror" aria-hidden="true" />
                   </button>)}
                 </div>
               </footer>}

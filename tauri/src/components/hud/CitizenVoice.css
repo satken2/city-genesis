@@ -8,7 +8,7 @@
 .citizen-voice {
   position: relative;
   width: 30rem;
-  margin-left: auto;
+  margin-inline-start: auto;
   padding: 0.6rem;
   overflow: hidden;
 }
@@ -150,11 +150,11 @@
 }
 
 .citizen-voice-nav--previous {
-  left: 2px;
+  inset-inline-start: 2px;
 }
 
 .citizen-voice-nav--next {
-  right: 2px;
+  inset-inline-end: 2px;
 }
 
 .citizen-voice-nav:hover {

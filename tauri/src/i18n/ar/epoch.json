@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "التاريخ الحالي",
+    "afterDate": "التاريخ بعد التنفيذ",
+    "epochCount": "عدد الحقب",
+    "message": "هل تريد إنهاء عمل هذا الدور وتقديم الوقت؟",
+    "yes": "نعم",
+    "no": "لا",
+    "executing": "جارٍ تشغيل المحاكاة...",
+    "errorSteamLimit": "تعذّر التحقق من مصادقة Steam، لذا لا يمكن تنفيذ المزيد من الحقب. (من دون مصادقة يمكنك اللعب حتى يبلغ عدد السكان {{limit}})",
+    "errorAlreadyRunning": "هناك حقبة أخرى قيد التنفيذ. أعد المحاولة بعد انتهائها.",
+    "errorFailed": "فشل تنفيذ الحقبة: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "(الحقب المنفذة: {{count}})",
+    "sectionConstruction": "حالة البناء",
+    "kindPath": "طريق",
+    "kindBuilding": "منشأة",
+    "kindProject": "مشروع",
+    "noItems": "لا شيء",
+    "progressFormat": "{{before}}% ← {{after}}%",
+    "completed": "اكتمل",
+    "sectionStatistics": "الإحصاءات",
+    "sectionScore": "الدرجة",
+    "scoreGain": "النقاط المكتسبة",
+    "scoreLoss": "النقاط المخصومة",
+    "questState": {
+      "completed": "منجزة",
+      "active": "قيد التقدم",
+      "locked": "مقفلة",
+      "failed": "فاشلة"
+    },
+    "trendHint": "الاتجاه خلال آخر {{count}} من الحقب: {{trend}}",
+    "trend": {
+      "up": "اتجاه صاعد",
+      "flat": "مستقر",
+      "down": "اتجاه هابط",
+      "none": "السجل غير كافٍ"
+    },
+    "statPopulation": "عدد السكان",
+    "statTourists": "السياح",
+    "statGdp": "الناتج المحلي الإجمالي",
+    "statPrice": "الأسعار",
+    "statIncome": "الدخل",
+    "statUnemployment": "معدل البطالة",
+    "statHealthcare": "كفاية الرعاية الصحية",
+    "statNutrition": "كفاية التغذية",
+    "statLeisure": "الترفيه وأوقات الفراغ",
+    "statFire": "الحرائق",
+    "statTraffic": "حوادث المرور",
+    "statCrime": "الجرائم",
+    "questCompleted": "أُنجزت!",
+    "questFailed": "انتهت المهلة"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "جارٍ مسح شبكة النقل",
+      "prepare": "جارٍ التحضير لهذه الحقبة",
+      "transit": "جارٍ ترتيب النقل العام",
+      "market": "جارٍ تداول السلع",
+      "production": "جارٍ الإنتاج والاستهلاك",
+      "commute": "الذهاب إلى العمل والمدرسة",
+      "growth": "المواطنون يكبرون",
+      "evaluate": "جارٍ تقييم المدينة",
+      "immigration": "جارٍ استقبال المهاجرين",
+      "labor": "جارٍ البحث عن وظائف",
+      "spawn": "متاجر وشركات جديدة تفتح أبوابها",
+      "relocate": "الأسر تنتقل إلى مساكن جديدة",
+      "construction": "جارٍ تشييد المباني",
+      "finance": "جارٍ تسوية التدفقات المالية",
+      "plan": "جارٍ وضع خطة الحقبة التالية",
+      "incident": "جارٍ التعامل مع الحرائق والحوادث",
+      "finalize": "جارٍ تجميع الإحصاءات"
+    }
+  }
+}

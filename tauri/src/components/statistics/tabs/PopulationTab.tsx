@@ -392,7 +392,7 @@ export function PopulationTab({ apiBaseUrl }: { apiBaseUrl: string }) {
               {t("statistics.female")}({t("statistics.immigrants")})
             </span>
           </div>
-          <div className="pop-pyramid__sides">
+          <div className="pop-pyramid__sides" dir="ltr">
             <span>◀ {t("statistics.male")}</span>
             <span>{t("statistics.female")} ▶</span>
           </div>

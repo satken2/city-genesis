@@ -79,6 +79,7 @@ pub fn game_language() -> Option<&'static str> {
         "turkish" => Some("tr"),
         "italian" => Some("it"),
         "indonesian" => Some("id"),
+        "arabic" => Some("ar"),
         _ => None,
     }
 }

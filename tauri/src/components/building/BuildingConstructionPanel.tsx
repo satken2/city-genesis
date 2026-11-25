@@ -1640,7 +1640,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                   data-guide="building.back"
                   onClick={() => setSelectedCategory(null)}
                 >
-                  <img src={turnBackIcon} alt="" className="bc-header-btn-icon" draggable={false} />
+                  <img src={turnBackIcon} alt="" className="bc-header-btn-icon rtl-mirror" draggable={false} />
                   <span>{t("building_construction.back")}</span>
                 </button>
                 <CopyExistingButton />
@@ -1676,7 +1676,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
               data-guide="building.back"
               onClick={handleVariantDeselect}
             >
-              <img src={turnBackIcon} alt="" className="bc-header-btn-icon" draggable={false} />
+              <img src={turnBackIcon} alt="" className="bc-header-btn-icon rtl-mirror" draggable={false} />
               <span>{t("building_construction.back")}</span>
             </button>
           )}

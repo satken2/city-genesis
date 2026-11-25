@@ -128,7 +128,7 @@
   padding: 4px 8px;
   font-size: 1rem;
   color: #f6fbff;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
@@ -265,7 +265,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin: 0;
-  padding-left: 4px;
+  padding-inline-start: 4px;
 }
 
 .pc-sections-container .pc-variant-grid {

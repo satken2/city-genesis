@@ -45,7 +45,7 @@
   border-radius: 4px;
   padding: 1px 4px;
   font-size: 1rem;
-  margin-left: 6px;
+  margin-inline-start: 6px;
   font-weight: bold;
   display: inline-block;
   vertical-align: middle;
@@ -54,7 +54,7 @@
 
 /* Proportion of revenue beside estimated cost and maintenance cost. */
 .construction-revenue-ratio {
-  margin-left: 6px;
+  margin-inline-start: 6px;
   color: #93a9c0;
 }
 

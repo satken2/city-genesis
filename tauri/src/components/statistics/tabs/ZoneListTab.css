@@ -69,7 +69,7 @@
   min-width: 0;
   padding: 0.45rem 0.75rem 0.55rem;
   background: var(--flat-surface);
-  box-shadow: inset 2px 0 0 var(--flat-selected);
+  box-shadow: inset calc(2px * var(--inline-sign)) 0 0 var(--flat-selected);
 }
 
 .zone-list-card__title {
@@ -181,7 +181,7 @@
 .zone-list-card__tooltip {
   position: absolute;
   bottom: calc(100% + 0.25rem);
-  right: 0;
+  inset-inline-end: 0;
   width: max-content;
   max-width: 26rem;
   padding: 0.5rem 0.7rem;
@@ -202,6 +202,6 @@
 }
 
 .zone-list-card__list:first-child .zone-list-card__tooltip {
-  right: auto;
-  left: 0;
+  inset-inline-end: auto;
+  inset-inline-start: 0;
 }

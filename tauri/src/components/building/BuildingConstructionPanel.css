@@ -118,7 +118,7 @@
 
 /* Copy existing building button: always align to the far right. */
 .bc-copy-btn {
-  margin-left: auto;
+  margin-inline-start: auto;
   flex: 0 0 auto;
 }
 
@@ -139,7 +139,7 @@
 
 .bc-variant-card-btn {
   width: 100%;
-  text-align: left;
+  text-align: start;
   font: inherit;
   color: inherit;
   cursor: pointer;
@@ -251,7 +251,7 @@
 }
 
 .bc-floor-range {
-  margin-left: 2px;
+  margin-inline-start: 2px;
   font-family: "Consolas", "Menlo", monospace;
   font-size: 1rem;
   color: #c5d4e3;
@@ -348,7 +348,7 @@
 
 /* Operating cost breakdown (labor/material costs). Indent one level and use a muted color. */
 .bc-info-label--sub {
-  padding-left: 12px;
+  padding-inline-start: 12px;
   font-weight: 400;
   color: #6f849b;
 }
@@ -444,7 +444,7 @@
   color: #93a9c0;
   font-family: "Consolas", "Menlo", monospace;
   width: 36px;
-  text-align: right;
+  text-align: end;
   flex-shrink: 0;
 }
 
@@ -461,7 +461,7 @@
 
 /* ---- Inline construction budget ratio (right of one month's construction cost) ---- */
 .bc-budget-ratio-inline {
-  margin-left: 6px;
+  margin-inline-start: 6px;
   color: #93a9c0;
   font-size: 0.94rem;
 }

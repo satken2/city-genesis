@@ -10,9 +10,9 @@
 .climate-effects-value-label { color: var(--flat-text-label); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .climate-effects-value-number { font-size: 1.3rem; font-weight: 600; color: var(--flat-text); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .climate-effects-table { width: 100%; border-collapse: collapse; font-size: 1rem; }
-.climate-effects-table th { padding: 0.55rem 0.75rem; text-align: left; vertical-align: bottom; font-weight: 600; color: var(--flat-text-label); border-bottom: 1px solid var(--flat-raised-hover); }
+.climate-effects-table th { padding: 0.55rem 0.75rem; text-align: start; vertical-align: bottom; font-weight: 600; color: var(--flat-text-label); border-bottom: 1px solid var(--flat-raised-hover); }
 .climate-effects-table td { padding: 0.5rem 0.75rem; white-space: nowrap; border-bottom: 1px solid var(--flat-raised); }
-.climate-effects-table .climate-effects-number { text-align: right; font-variant-numeric: tabular-nums; }
+.climate-effects-table .climate-effects-number { text-align: end; font-variant-numeric: tabular-nums; }
 .climate-effects-total { display: flex; align-items: center; gap: 0.5rem; }
 .climate-effects-total .meter { width: 6rem; }
-.climate-effects-total > span { min-width: 3em; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--flat-text); }
+.climate-effects-total > span { min-width: 3em; text-align: end; font-variant-numeric: tabular-nums; font-weight: 600; color: var(--flat-text); }

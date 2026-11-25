@@ -68,14 +68,14 @@
 }
 
 .transit-estimate__row--positive {
-  box-shadow: inset 4px 0 0 var(--flat-good), var(--flat-shadow-sm);
+  box-shadow: inset calc(4px * var(--inline-sign)) 0 0 var(--flat-good), var(--flat-shadow-sm);
 }
 .transit-estimate__row--positive .transit-estimate__main {
   color: var(--flat-good);
 }
 
 .transit-estimate__row--negative {
-  box-shadow: inset 4px 0 0 var(--flat-danger), var(--flat-shadow-sm);
+  box-shadow: inset calc(4px * var(--inline-sign)) 0 0 var(--flat-danger), var(--flat-shadow-sm);
 }
 .transit-estimate__row--negative .transit-estimate__main {
   color: var(--flat-danger);

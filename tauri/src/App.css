@@ -11,9 +11,35 @@
 }
 
 /* =========================================================================
+ * Right-to-left languages set dir="rtl" on the root, and window content mirrors through logical properties
+ * (margin-inline-start, inset-inline-end, text-align: start, ...). Write left/right with logical properties;
+ * keep physical values only for drawings that do not mirror.
+ * ========================================================================= */
+:root {
+  --inline-sign: 1; /* Sign of the start side for physical x offsets such as box-shadow edge accents. */
+}
+
+[dir="rtl"] {
+  --inline-sign: -1;
+}
+
+/* Charts, maps, canvases, and sliders keep their physical layout. Text inside them still renders right to left. */
+svg,
+canvas,
+.recharts-wrapper,
+input[type="range"] {
+  direction: ltr;
+}
+
+/* Icons pointing along the reading direction (back, next, expand). */
+[dir="rtl"] .rtl-mirror {
+  scale: -1 1;
+}
+
+/* =========================================================================
  * Shared flat design tokens. Used by top menu windows (new game, save/load, epoch results). Solid rectangles and
  * drop shadows express surface elevation without borders, rounded corners, or glow. Emphasis uses a solid
- * left-edge block (box-shadow: inset 4px 0 0 accent-color). Earlier implementations (NewGameWindow /
+ * start-edge block (box-shadow: inset calc(4px * var(--inline-sign)) 0 0 accent-color). Earlier implementations (NewGameWindow /
  * SaveListWindow / SaveLoadWindow) hardcode the same colors. New windows using this design must reference these
  * tokens instead; change colors here too.
  * ========================================================================= */
@@ -176,7 +202,8 @@ button:hover {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 0 0 0 10px;
+  padding-block: 0;
+  padding-inline: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(12, 20, 32, 0.95);
 }
@@ -231,7 +258,7 @@ button:hover {
   place-items: center;
   cursor: pointer;
   transition: background 0.1s;
-  margin-right: 4px;
+  margin-inline-end: 4px;
 }
 
 .titlebar-close-button:hover {
@@ -326,8 +353,9 @@ button:hover {
   font-size: 1rem;
   display: flex;
   align-items: center;
-  padding: 5px 12px 5px 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.15);
+  padding-block: 5px;
+  padding-inline: 0 12px;
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.15);
   min-height: 28px;
   box-sizing: border-box;
 }
@@ -337,7 +365,8 @@ button:hover {
   word-break: break-all;
   display: flex;
   align-items: center;
-  padding: 5px 0 5px 12px;
+  padding-block: 5px;
+  padding-inline: 12px 0;
   min-height: 28px;
   box-sizing: border-box;
 }

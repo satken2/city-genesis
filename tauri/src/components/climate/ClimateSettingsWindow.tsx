@@ -70,7 +70,7 @@ export function ClimateSettingsWindow({ apiBaseUrl, onClose }: { apiBaseUrl: str
             const positions = identifiers.map(id => { cumulative += entry.weather[id]; return cumulative; });
             return <div className={`climate-weather-row${month === index ? " is-selected" : ""}`} key={index}>
               <button type="button" className="climate-month-button" onClick={() => setMonth(index)}>{t("climateSettings.month", { month: index + 1 })}</button>
-              <div className="climate-weather-bar" onClick={() => setMonth(index)}>
+              <div className="climate-weather-bar" dir="ltr" onClick={() => setMonth(index)}>
                 {identifiers.map((id, weatherIndex) => <span key={id} style={{ width: `${entry.weather[id]}%`, background: WEATHER_COLORS[weatherIndex % WEATHER_COLORS.length] }}
                   title={`${weatherName(id)} ${entry.weather[id]}%`} />)}
                 {identifiers.slice(0, -1).map((id, boundary) => <button key={id} type="button" role="slider"

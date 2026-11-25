@@ -157,20 +157,20 @@
   width: 10px;
   height: 10px;
   border-radius: 2px;
-  margin-right: 6px;
+  margin-inline-end: 6px;
   flex-shrink: 0;
 }
 
 .pie-legend-item__label {
   color: #94a3b8;
-  margin-right: 12px;
+  margin-inline-end: 12px;
   white-space: nowrap;
 }
 
 .pie-legend-item__val {
   color: #e2e8f0;
   font-weight: 600;
-  margin-left: auto;
+  margin-inline-start: auto;
   font-variant-numeric: tabular-nums;
 }
 

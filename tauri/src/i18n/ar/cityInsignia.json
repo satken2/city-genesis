@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "الشعار",
+    "flag": "علم المدينة",
+    "motif": "الرسم",
+    "fieldColor": "لون الخلفية",
+    "motifColor": "لون الرسم",
+    "pattern": "نقش الخلفية",
+    "accentColor": "اللون المميِّز",
+    "placement": "موضع الشعار",
+    "loadImage": "تحميل صورة",
+    "randomize": "اختيار عشوائي",
+    "apply": "تأكيد",
+    "imageLoadFailed": "تعذّر تحميل الصورة",
+    "placements": {
+      "center": "الوسط",
+      "canton": "أعلى اليسار",
+      "none": "بلا"
+    },
+    "motifs": {
+      "wave": "موج",
+      "mountain": "جبل",
+      "star": "نجمة",
+      "tree": "شجرة",
+      "sun": "شمس",
+      "moon": "قمر",
+      "flower": "زهرة",
+      "leaf": "ورقة شجر",
+      "bird": "طائر",
+      "fish": "سمكة",
+      "anchor": "مرساة",
+      "gear": "ترس",
+      "tower": "قلعة",
+      "bridge": "جسر",
+      "key": "مفتاح",
+      "crown": "تاج",
+      "snowflake": "ندفة ثلج",
+      "flame": "لهب",
+      "diamond": "معيَّن",
+      "cross": "صليب"
+    },
+    "patterns": {
+      "plain": "سادة",
+      "bicolor": "لونان أعلى وأسفل",
+      "triband": "ثلاثة أشرطة عمودية",
+      "diagonal": "تقسيم قطري",
+      "border": "إطار",
+      "bands": "شريطان أعلى وأسفل"
+    }
+  }
+}

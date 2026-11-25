@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { buildApiUrl, fetchApi } from "../../utils/api";
-import { resolveIntlLocale } from "../../utils/locale";
+import { readingArrow, resolveIntlLocale } from "../../utils/locale";
 import { fetchRoadDetail } from "../road/roadApi";
 import type { CityMapCanvasHandle, CityMapPointerEvent, CityMapViewState } from "./CityMapCanvas";
 import { drawMapRoute, type MapRoute } from "./mapRoute";
@@ -276,7 +276,7 @@ export function useMapNavigation(apiBaseUrl: string, mapRef: RefObject<CityMapCa
             <button type="button" className={activeLeg === index ? "is-active" : ""} onClick={() => { setActiveLeg(index); fit(leg.points); }}>
               <span className={`map-nav__leg-icon map-nav__leg-icon--${leg.kind}`} aria-hidden="true">{leg.kind === "transit" ? "▣" : leg.kind === "drive" ? "➜" : "⋮"}</span>
               <span><strong>{leg.kind === "transit" ? leg.name : t(`mapNavigation.leg.${leg.kind}`)}</strong>
-                {leg.from_stop && <small>{leg.from_stop} → {leg.to_stop}</small>}
+                {leg.from_stop && <small>{leg.from_stop} {readingArrow(i18n.language)} {leg.to_stop}</small>}
                 <small>{duration(leg.minutes)} · {distance(leg.distance_m)}</small></span>
             </button></li>)}</ol>
         </>}

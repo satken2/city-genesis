@@ -63,7 +63,7 @@
 }
 
 .achieve-dashboard__add-quest-btn {
-  margin-left: auto;
+  margin-inline-start: auto;
   background: var(--flat-selected);
   font-size: 1rem;
 }
@@ -75,20 +75,20 @@
   flex-direction: column;
   gap: 9px;
   background: var(--flat-raised);
-  box-shadow: inset 3px 0 0 var(--flat-accent), var(--flat-shadow-sm);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-accent), var(--flat-shadow-sm);
 }
 
 .quest-grid-card--completed {
-  box-shadow: inset 3px 0 0 var(--flat-good), var(--flat-shadow-sm);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-good), var(--flat-shadow-sm);
 }
 
 .quest-grid-card--locked {
-  box-shadow: inset 3px 0 0 var(--flat-text-muted), var(--flat-shadow-sm);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-text-muted), var(--flat-shadow-sm);
 }
 
 .quest-grid-card--failed {
   background: var(--flat-danger-surface);
-  box-shadow: inset 3px 0 0 var(--flat-danger), var(--flat-shadow-sm);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-danger), var(--flat-shadow-sm);
 }
 
 .quest-grid-card--editable {
@@ -189,7 +189,7 @@
 
 .quest-grid-card__values {
   font-size: 1rem;
-  text-align: right;
+  text-align: end;
   color: var(--flat-text-label);
 }
 
@@ -220,7 +220,7 @@
   gap: 18px;
   padding: 16px;
   background: var(--flat-raised);
-  box-shadow: inset 3px 0 0 var(--flat-accent);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-accent);
 }
 
 .resident-score-main > span, .resident-score-total > span {

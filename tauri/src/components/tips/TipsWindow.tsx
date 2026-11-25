@@ -190,7 +190,7 @@ export function TipsWindow() {
         {currentTip.image && (
           <img
             key={currentTip.id}
-            className="tips-image"
+            className="tips-image rtl-mirror"
             src={currentTip.image}
             alt={currentTip.id}
             draggable={false}

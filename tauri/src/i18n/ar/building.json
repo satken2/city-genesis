@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "تكوين الطوابق",
+    "parking": "المواقف",
+    "type": "نوع المبنى",
+    "durability": "المتانة",
+    "floors": "عدد الطوابق",
+    "floorsValue": "الطوابق: {{floors}} (المساحة الطابقية {{area, number}} م²)",
+    "heightLabel": "الارتفاع: {{value}} م",
+    "baseAreaLabel": "مساحة البناء: {{area, number}} م²",
+    "underMaintenance": "قيد الترميم",
+    "parkingCapacity": "سعة المواقف",
+    "parkingCapacityValue": "{{capacity}} سيارة",
+    "parkingDay": "نهارًا",
+    "parkingNight": "ليلًا",
+    "parkingUsage": "{{used}} / {{capacity}} سيارة"
+  },
+  "building_appearance": {
+    "variantLabel": "المظهر {{index}}",
+    "layoutHint": "اسحب بطاقة إلى الموقع لوضعها / اسحب للتحريك / Shift+سحب للتدوير / مفتاح Delete للحذف",
+    "sizeLabel": "{{width}}×{{height}} م",
+    "deleteSelected": "حذف المبنى المحدد",
+    "apply": "تطبيق",
+    "saveFailed": "تعذّر حفظ المظهر",
+    "noSubbuildings": "لم تُعرَّف مبانٍ فرعية لهذا النوع من المباني"
+  }
+}

@@ -91,7 +91,7 @@
 
 .agent-detail-alert-desc {
   opacity: 0.85;
-  padding-left: 20px;
+  padding-inline-start: 20px;
 }
 
 /* ========== Target utilization ========== */

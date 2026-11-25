@@ -2,7 +2,7 @@
 
 .settings-currency-unit {
   width: 8rem;
-  text-align: left;
+  text-align: start;
 }
 
 /*
@@ -70,7 +70,7 @@
 .settings-slider-value {
   width: 40px;
   flex-shrink: 0;
-  text-align: right;
+  text-align: end;
   font-size: 1rem;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text-body);
@@ -87,7 +87,7 @@
   display: inline-block;
   width: 7px;
   height: 7px;
-  margin-right: 6px;
+  margin-inline-end: 6px;
   vertical-align: baseline;
   background-color: var(--flat-text-muted);
 }

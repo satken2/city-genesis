@@ -88,7 +88,7 @@
 }
 
 .path-traffic-row__count {
-  text-align: right;
+  text-align: end;
   font-size: 1rem;
   color: #e2eaf2;
   font-variant-numeric: tabular-nums;

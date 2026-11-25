@@ -17,7 +17,7 @@
 .policy-planning button { font: inherit; font-size: 1rem; border-radius: 0; }
 .policy-planning button:focus-visible { outline: 2px solid var(--flat-accent); outline-offset: 2px; }
 .policy-selector { display: flex; flex-direction: column; gap: 0.9rem; flex: 0 0 24rem; min-height: 0; }
-.policy-problems { display: flex; flex-direction: column; gap: 0.9rem; flex: 1; min-height: 6rem; overflow-y: auto; padding-right: 0.4rem; }
+.policy-problems { display: flex; flex-direction: column; gap: 0.9rem; flex: 1; min-height: 6rem; overflow-y: auto; padding-inline-end: 0.4rem; }
 .policy-section { display: flex; flex-direction: column; gap: 0.4rem; }
 .policy-section-title { margin: 0; font-size: 1rem; font-weight: 700; color: var(--flat-text-label); }
 .policy-problem-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
@@ -31,7 +31,7 @@
   border: 1px solid rgba(239, 68, 68, 0.35);
   background: rgba(239, 68, 68, 0.08);
   color: inherit;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
 }
 .policy-problem:hover { background: rgba(239, 68, 68, 0.18); }
@@ -52,14 +52,14 @@
   background: var(--flat-raised);
 }
 .policy-indicator:hover { background: var(--flat-raised-hover); }
-.policy-indicator--selected { background: var(--flat-selected); box-shadow: inset 3px 0 0 var(--flat-accent); }
+.policy-indicator--selected { background: var(--flat-selected); box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-accent); }
 .policy-indicator--selected:hover { background: var(--flat-selected-hover); }
 .policy-investigation { display: flex; flex-direction: column; flex: 1; min-width: 0; min-height: 0; }
-.policy-tree-scroll { overflow: auto; min-height: 0; flex: 1; border-left: 1px solid var(--flat-raised-hover); }
-.policy-clear { align-items: center; justify-content: center; border-left: 1px solid var(--flat-raised-hover); color: var(--flat-text-label); }
-.policy-diagram { position: relative; padding: 0.2rem 1rem 1rem 1.4rem; --policy-indent: 3rem; }
+.policy-tree-scroll { overflow: auto; min-height: 0; flex: 1; border-inline-start: 1px solid var(--flat-raised-hover); }
+.policy-clear { align-items: center; justify-content: center; border-inline-start: 1px solid var(--flat-raised-hover); color: var(--flat-text-label); }
+.policy-diagram { position: relative; padding-block: 0.2rem 1rem; padding-inline: 1.4rem 1rem; --policy-indent: 3rem; }
 .policy-rows { list-style: none; margin: 0; padding: 0; }
-.policy-row { display: grid; grid-template-rows: 1fr; --policy-row-gap: 1.3rem; padding-left: calc(var(--policy-depth) * var(--policy-indent)); margin-bottom: var(--policy-row-gap); }
+.policy-row { display: grid; grid-template-rows: 1fr; --policy-row-gap: 1.3rem; padding-inline-start: calc(var(--policy-depth) * var(--policy-indent)); margin-bottom: var(--policy-row-gap); }
 .policy-row:last-child { --policy-row-gap: 0rem; }
 .policy-row-content { min-height: 0; }
 /* 開閉中の高さを接続点にも使い、カードが伸縮する間も線を追従させる。 */
@@ -145,7 +145,7 @@
   border-radius: 0.35rem;
   background: color-mix(in srgb, white 45%, transparent);
   color: var(--flat-sunken);
-  text-align: left;
+  text-align: start;
   line-height: 1.45;
   transition: background 120ms, border-color 120ms;
 }
@@ -174,6 +174,6 @@
   .policy-planning { padding: 0.8rem; }
   .policy-body { flex-direction: column; }
   .policy-selector { flex: 0 1 40%; }
-  .policy-tree-scroll { border-left: 0; border-top: 1px solid var(--flat-raised-hover); }
+  .policy-tree-scroll { border-inline-start: 0; border-top: 1px solid var(--flat-raised-hover); }
   .policy-diagram { padding: 0.8rem 0.4rem; --policy-indent: 1.6rem; }
 }

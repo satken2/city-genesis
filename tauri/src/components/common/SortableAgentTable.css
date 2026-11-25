@@ -28,7 +28,7 @@
   z-index: 1;
   background: #1a2230;
   padding: 9px 12px;
-  text-align: left;
+  text-align: start;
   font-weight: 600;
   font-size: 1rem;
   color: #8ba3bb;
@@ -45,7 +45,7 @@
 }
 
 .agent-table .agent-table__cell--right {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
 }
 
@@ -67,7 +67,7 @@
 }
 
 .agent-table__arrow {
-  margin-left: 4px;
+  margin-inline-start: 4px;
   font-size: 1rem;
   opacity: 0.65;
 }

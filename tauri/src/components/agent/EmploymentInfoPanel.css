@@ -77,5 +77,5 @@
   gap: 6px;
   max-height: 180px;
   overflow-y: auto;
-  padding-right: 4px;
+  padding-inline-end: 4px;
 }

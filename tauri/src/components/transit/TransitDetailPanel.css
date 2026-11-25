@@ -43,7 +43,7 @@
   display: inline-block;
   width: 6px;
   height: 6px;
-  margin-left: 5px;
+  margin-inline-start: 5px;
   vertical-align: middle;
   border-radius: 50%;
   background: #f0c040;
@@ -52,7 +52,7 @@
 
 /* Units beside values. */
 .transit-detail__unit {
-  margin-left: 4px;
+  margin-inline-start: 4px;
   font-size: 1rem;
   color: #93a9c0;
 }
@@ -72,7 +72,7 @@
   min-width: 32px;
   font-size: 1rem;
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  text-align: end;
   color: var(--flat-text-body);
 }
 
@@ -113,14 +113,14 @@
 
 /* Balance sign. A solid left block indicates good/bad, matching top-menu design. */
 .transit-detail__tile--positive {
-  box-shadow: inset 4px 0 0 var(--flat-good), var(--flat-shadow-sm);
+  box-shadow: inset calc(4px * var(--inline-sign)) 0 0 var(--flat-good), var(--flat-shadow-sm);
 }
 .transit-detail__tile--positive .transit-detail__tile-value {
   color: var(--flat-good);
 }
 
 .transit-detail__tile--negative {
-  box-shadow: inset 4px 0 0 var(--flat-danger), var(--flat-shadow-sm);
+  box-shadow: inset calc(4px * var(--inline-sign)) 0 0 var(--flat-danger), var(--flat-shadow-sm);
 }
 .transit-detail__tile--negative .transit-detail__tile-value {
   color: var(--flat-danger);
@@ -205,7 +205,7 @@
   display: inline-block;
   width: 6px;
   height: 6px;
-  margin-right: 6px;
+  margin-inline-end: 6px;
   border-radius: 50%;
   background: #f0c040;
   vertical-align: middle;

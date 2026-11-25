@@ -55,7 +55,7 @@
   width: 100%;
   padding: 10px 14px;
   font: inherit;
-  text-align: left;
+  text-align: start;
   color: var(--flat-text-body);
   background: transparent;
   border: none;
@@ -69,7 +69,7 @@
 .save-menu-item:focus-visible {
   color: #ffffff;
   background: linear-gradient(90deg, rgba(78, 161, 255, 0.18), rgba(78, 161, 255, 0.02));
-  box-shadow: inset 3px 0 0 var(--flat-accent);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-accent);
   outline: none;
 }
 
@@ -135,7 +135,7 @@
 .save-menu-item--danger:hover:not(:disabled),
 .save-menu-item--danger:focus-visible {
   background: linear-gradient(90deg, rgba(255, 107, 107, 0.18), rgba(255, 107, 107, 0.02));
-  box-shadow: inset 3px 0 0 #ff6b6b;
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 #ff6b6b;
 }
 
 .save-menu-item--danger:hover:not(:disabled) .save-menu-icon {

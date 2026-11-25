@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "الطقس",
+    "choose": "اختيار الطقس",
+    "loading": "جارٍ التحقق من الطقس…",
+    "unknown": "غير معروف",
+    "automatic": "{{weather}} (تلقائي)",
+    "failed": "تعذّر تغيير الطقس",
+    "names": {
+      "clear": "صافٍ",
+      "high_clouds": "غيوم رقيقة",
+      "fair": "مشمس",
+      "broken_clouds": "فترات مشمسة",
+      "overcast": "غائم",
+      "rain_clouds": "غيوم ممطرة",
+      "fog": "ضباب",
+      "drizzle": "رذاذ",
+      "rain": "مطر",
+      "heavy_rain": "أمطار غزيرة",
+      "light_snow": "ثلوج خفيفة",
+      "snow": "ثلج",
+      "blizzard": "عاصفة ثلجية"
+    },
+    "epochClimate": "مناخ الحقبة",
+    "temperature": "درجة الحرارة",
+    "precipitation": "كمية الهطول",
+    "sunlight": "شدة الإشعاع الشمسي",
+    "windSpeed": "سرعة الرياح"
+  }
+}

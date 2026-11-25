@@ -102,7 +102,8 @@
   grid-template-columns: 12.5rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 18px;
-  padding: 10px 16px 10px 10px;
+  padding-block: 10px;
+  padding-inline: 10px 16px;
   background: var(--save-list-pane);
   transition: background 0.15s ease, box-shadow 0.15s ease;
   animation: save-list-rise 0.34s ease-out backwards;
@@ -111,7 +112,7 @@
 
 .save-card:hover {
   background: var(--save-list-pane-hover);
-  box-shadow: inset 3px 0 0 var(--flat-accent);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-accent);
 }
 
 /* When three columns do not fit, move the buttons/timestamp below the body. */
@@ -128,12 +129,12 @@
 /* Currently loaded save. Draw its solid left block as an inset shadow without a border. */
 .save-card--current {
   background: color-mix(in srgb, var(--flat-selected) 42%, transparent);
-  box-shadow: inset 4px 0 0 var(--flat-accent);
+  box-shadow: inset calc(4px * var(--inline-sign)) 0 0 var(--flat-accent);
 }
 
 .save-card--current:hover {
   background: color-mix(in srgb, var(--flat-selected) 58%, transparent);
-  box-shadow: inset 4px 0 0 var(--flat-accent);
+  box-shadow: inset calc(4px * var(--inline-sign)) 0 0 var(--flat-accent);
 }
 
 /* Saves without images show a cityscape icon over a grid, matching imageless scenarios in New Game. */
@@ -174,7 +175,7 @@
 .save-card-flag {
   position: absolute;
   top: 5px;
-  left: 5px;
+  inset-inline-start: 5px;
   padding: 1px 5px;
   font-size: 1rem;
   line-height: 1.25;
@@ -306,12 +307,12 @@
   font-weight: 700;
   color: #ffffff;
   background: var(--flat-selected);
-  box-shadow: inset 3px 0 0 var(--flat-accent);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-accent);
 }
 
 .save-card-load:hover:not(:disabled) {
   background: var(--flat-selected-hover);
-  box-shadow: inset 6px 0 0 var(--flat-accent);
+  box-shadow: inset calc(6px * var(--inline-sign)) 0 0 var(--flat-accent);
 }
 
 .save-card-delete {
@@ -360,7 +361,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px 8px 10px;
+  padding-block: 8px;
+  padding-inline: 10px 12px;
   font: inherit;
   font-size: 1rem;
   color: var(--flat-text-label);

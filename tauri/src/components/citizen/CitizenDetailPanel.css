@@ -23,7 +23,7 @@
   content: "";
   position: absolute;
   bottom: 100%;
-  left: 24px;
+  inset-inline-start: 24px;
   border-style: solid;
   border-width: 0 8px 10px;
   border-color: transparent transparent rgba(255, 255, 255, 0.1);
@@ -36,7 +36,8 @@
 
 /* Camera button at the right end of a link row, overlapping the row's padding so the row keeps the list's height. */
 .citizen-detail .agent-detail-value .camera-focus-btn {
-  margin: -0.25rem 0 -0.25rem auto;
+  margin-block: -0.25rem;
+  margin-inline: auto 0;
 }
 
 /* Car ownership, with the same road or pedestrian icon as the household details. */
@@ -133,7 +134,7 @@
 
 .citizen-visit-detail {
   margin-top: 2px;
-  padding-left: calc(4.5rem + 20px);
+  padding-inline-start: calc(4.5rem + 20px);
   font-size: 1rem;
   color: #9fb3c8;
 }

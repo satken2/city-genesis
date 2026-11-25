@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "البحث عن المواطنين",
+    "tabTracking": "قائمة المتابعة",
+    "name": "الاسم",
+    "age": "العمر",
+    "ageSeparator": "إلى",
+    "search": "بحث",
+    "noResults": "لا يوجد مواطنون يطابقون الشروط.",
+    "truncated": "يُعرض {{shown, number}} من أصل {{total, number}} مواطنًا يطابقون الشروط."
+  }
+}

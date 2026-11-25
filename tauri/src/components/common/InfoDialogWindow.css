@@ -48,11 +48,12 @@
 
 .info-dialog-subheading {
   margin: 0;
-  padding: 2px 0 2px 8px;
+  padding-block: 2px;
+  padding-inline: 8px 0;
   font-size: 1rem;
   font-weight: 600;
   color: var(--flat-text-label);
-  box-shadow: inset 3px 0 0 var(--flat-accent);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-accent);
 }
 
 .info-dialog-text {
@@ -82,7 +83,7 @@
   background: none;
   font-family: inherit;
   font-size: 1rem;
-  text-align: left;
+  text-align: start;
   overflow-wrap: anywhere;
   color: var(--flat-accent);
   cursor: pointer;

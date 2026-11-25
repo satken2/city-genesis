@@ -374,7 +374,7 @@ function IndustryCard({ b, fmt }: { b: GdpBreakdown; fmt: Formatters }) {
                 aria-expanded={open}
                 onClick={() => setExpanded(open ? null : row.industry)}
               >
-                <span className={`gdp-row__chevron${open ? " gdp-row__chevron--open" : ""}`} aria-hidden="true">›</span>
+                <span className={`gdp-row__chevron rtl-mirror${open ? " gdp-row__chevron--open" : ""}`} aria-hidden="true">›</span>
                 <span className="gdp-row__name">{t(`financialPolicy.industry.${row.industry}`)}</span>
                 <MagnitudeBar value={row.value_added} max={max} />
                 <span className="gdp-row__value" title={fmt.exact(row.value_added)}>{fmt.money(row.value_added)}</span>

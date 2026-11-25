@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "إشعارات المدينة",
+    "empty": "لا توجد حاليًا مشكلات تتطلب المعالجة",
+    "loadFailed": "تعذّر جلب الإشعارات",
+    "types": {
+      "resource_runway": "الحقب المتبقية قبل نفاد المورد «{{name}}»: نحو {{remaining_epochs}}",
+      "resource_depleted": "نفد المورد «{{name}}»",
+      "facility_inoperative": "المنشأة العامة «{{name}}» لا تعمل",
+      "facility_inoperative_labor": "المنشأة العامة «{{name}}» لا تعمل بسبب نقص الأيدي العاملة",
+      "facility_inoperative_material": "المنشأة العامة «{{name}}» لا تعمل بسبب نقص المواد الخام",
+      "facility_inoperative_high_skill": "قلّصت المنشأة العامة «{{name}}» تشغيلها بسبب نقص الكوادر المتخصصة",
+      "facility_inoperative_budget": "قلّصت المنشأة العامة «{{name}}» تشغيلها بسبب نقص الميزانية",
+      "education_low_enrollment": "المؤسسة التعليمية «{{name}}» ضعيفة التشغيل لقلة الطلاب (الملتحقون {{enrolled}} / السعة {{max_students}})",
+      "infra_facility_down": "منشأة البنية التحتية «{{name}}» متوقفة",
+      "infra_disconnected": "عدد المنشآت غير المتصلة بشبكة البنية التحتية: {{count}}",
+      "rail_capacity_exceeded": "عدد السكك التي يتجاوز فيها عدد رحلات القطارات سعتها: {{count}}",
+      "collapse": "عدد المباني والطرق التي انهارت: {{count}}",
+      "collapse_with_deaths": "انهارت مبانٍ وطرق (العدد: {{count}})، وبلغ عدد الوفيات {{deaths}}",
+      "deaths_traffic": "عدد الوفيات في حوادث المرور: {{count}}",
+      "tenant_blocked_by_parcel_size": "لا يمكن في الحي «{{zone_name}}» بناء مبنى يتسع لـ«{{tenant_name}}» (المطلوب {{required}} م²، وأقصى ما تسمح به قطع الأرض {{max_capacity}} م²). يلزم قطعة أرض أكبر",
+      "unknown": "وقع حدث خطير",
+      "sanitation": "تتدهور النظافة العامة لدى أسر عددها {{count}}. حسّن معالجة مياه الصرف والنفايات."
+    }
+  }
+}

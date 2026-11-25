@@ -1,0 +1,149 @@
+{
+  "settings": {
+    "title": "الإعدادات",
+    "groups": {
+      "general": "عام",
+      "display": "الشاشة",
+      "sound": "الصوت",
+      "system": "النظام",
+      "about": "حول",
+      "developer": "إعدادات المطورين"
+    },
+    "swagger": {
+      "label": "Swagger (توثيق API)",
+      "description": "يعرض مواصفات API المحاكي الأساسي في المتصفح الافتراضي",
+      "action": "فتح في المتصفح"
+    },
+    "currencyUnit": {
+      "label": "وحدة العملة",
+      "description": "الوحدة التي تُلحق بالمبالغ. إذا تُركت فارغة فستتبع لغة العرض."
+    },
+    "fontSize": {
+      "label": "حجم الخط",
+      "large": "كبير",
+      "medium": "متوسط",
+      "small": "صغير",
+      "custom": "مخصص",
+      "preview": "الحجم الحالي"
+    },
+    "monitor": {
+      "label": "الشاشة",
+      "prev": "الشاشة السابقة",
+      "next": "الشاشة التالية"
+    },
+    "graphicMonitor": {
+      "label": "شاشة عرض المشهد ثلاثي الأبعاد"
+    },
+    "multiDisplay": {
+      "label": "وضع الشاشات المتعددة",
+      "description": "يعرض النوافذ المختلفة على شاشة أخرى",
+      "on": "تشغيل",
+      "off": "إيقاف"
+    },
+    "popupMonitor": {
+      "label": "شاشة عرض النوافذ"
+    },
+    "hintbar": {
+      "label": "شريط التلميحات",
+      "show": "إظهار",
+      "hide": "إخفاء",
+      "description": "شريط في أعلى الشاشة يعرض تلميحات حول التحكم"
+    },
+    "citizenVoice": {
+      "label": "أصوات المواطنين",
+      "show": "إظهار",
+      "hide": "إخفاء",
+      "description": "بطاقة في أعلى يمين الشاشة تعرض أقوال المواطنين تباعًا"
+    },
+    "language": {
+      "label": "اللغة",
+      "description": "لغة عرض الواجهة. وهي مختلفة عن لغة بيانات الحفظ",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية"
+    },
+    "volume": {
+      "label": "مستوى الصوت",
+      "master": "مستوى الصوت الرئيسي",
+      "bgm": "الموسيقى الخلفية",
+      "sfx": "المؤثرات الصوتية"
+    },
+    "compute": {
+      "label": "التسريع بوحدة GPU",
+      "comingSoon": "قريبًا",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU مفعّل",
+      "statusInactive": "CPU مفعّل",
+      "restartRequired": "سيُعاد تشغيل البرنامج الرئيسي بعد تغيير الإعداد",
+      "restarting": "جارٍ إعادة التشغيل...",
+      "restartFailed": "تعذّرت إعادة التشغيل",
+      "restartUnavailable": "حُفظت الإعدادات. ستُطبَّق التغييرات عند تشغيل اللعبة في المرة القادمة",
+      "confirmRestart": "سيُغيَّر وضع المعالجة إلى {{mode}}. هل تريد إعادة تشغيل البرنامج الرئيسي؟",
+      "restartAction": "إعادة التشغيل"
+    },
+    "windowReset": {
+      "label": "موضع النوافذ وحجمها",
+      "action": "إعادة الضبط"
+    },
+    "credits": {
+      "label": "الاعتمادات",
+      "description": "إشعارات الحقوق للمواد والبرمجيات المستخدمة في هذه اللعبة",
+      "action": "عرض"
+    }
+  },
+  "saveLoad": {
+    "newGame": "لعبة جديدة",
+    "overwriteSave": "الحفظ فوق الملف الحالي",
+    "saveAs": "الحفظ باسم جديد",
+    "load": "تحميل",
+    "quitGame": "إنهاء اللعبة",
+    "returnToTop": "العودة إلى القائمة الرئيسية",
+    "loading": "جارٍ التحميل...",
+    "shuttingDown": "جارٍ الإنهاء...",
+    "saveFailed": "تعذّر الحفظ",
+    "loadFailed": "تعذّر التحميل",
+    "confirmNewGame": "ستفقد البيانات الحالية. هل تريد بدء لعبة جديدة؟",
+    "confirmQuitGame": "هل تريد إنهاء اللعبة؟ لن يُحفظ تقدمك الحالي تلقائيًا.",
+    "confirmReturnToTop": "هل تريد العودة إلى القائمة الرئيسية؟ لن يُحفظ تقدمك الحالي تلقائيًا.",
+    "confirm": "نعم",
+    "cancel": "لا",
+    "saveAsScenario": "الحفظ كسيناريو",
+    "saveAsNewScenario": "الحفظ كسيناريو آخر",
+    "overwriteScenario": "الحفظ فوق السيناريو",
+    "backToGame": "العودة إلى اللعبة",
+    "saveName": "اسم الحفظ",
+    "confirmOverwrite": "هل تريد الحفظ فوق «{{name}}»؟",
+    "confirmOverwriteScenario": "هل تريد الحفظ فوق السيناريو «{{name}}»؟"
+  },
+  "saveList": {
+    "noSaves": "لا توجد بيانات حفظ",
+    "currentSave": "البيانات الحالية",
+    "population": "السكان",
+    "inGameDate": "التاريخ",
+    "savedAt": "تاريخ الحفظ ووقته",
+    "loadButton": "تحميل",
+    "deleteButton": "حذف",
+    "confirmLoad": "هل تريد تحميل بيانات الحفظ هذه؟",
+    "confirmDelete": "هل تريد حذف بيانات الحفظ هذه؟ لا يمكن التراجع عن هذه العملية.",
+    "loading": "جارٍ التحميل...",
+    "loadFailed": "تعذّر التحميل",
+    "deleteFailed": "تعذّر الحذف",
+    "openFolderButton": "إظهار موقع المجلد",
+    "scenario": "السيناريو",
+    "autosaveName": "{{name}} (حفظ تلقائي عند الإنهاء)"
+  }
+}

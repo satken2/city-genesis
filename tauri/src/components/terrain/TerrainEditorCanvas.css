@@ -13,7 +13,7 @@
   width: 300px;
   height: 100%;
   background-color: #16161c;
-  border-right: 1px solid #2a2a35;
+  border-inline-end: 1px solid #2a2a35;
   padding: 16px 12px;
   overflow: hidden;
   box-sizing: border-box;
@@ -61,7 +61,7 @@
 }
 
 .terrain-editor-lock-notice ul {
-  padding-left: 1.2em;
+  padding-inline-start: 1.2em;
 }
 
 /* Card area. Show only the selected column, using the remaining height for scrolling. */
@@ -395,7 +395,7 @@
 
 /* River list rows. Click the heading row to select; a solid block at the left marks selection, following the flat design's emphasis style. */
 .terrain-editor-river-row {
-  padding-left: 6px;
+  padding-inline-start: 6px;
 }
 
 .terrain-editor-river-row-head {
@@ -403,7 +403,7 @@
 }
 
 .terrain-editor-river-row.is-selected {
-  box-shadow: inset 3px 0 0 #7cc4ff;
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 #7cc4ff;
   background-color: rgba(124, 196, 255, 0.08);
 }
 
@@ -428,4 +428,4 @@
   box-shadow: var(--flat-shadow);
 }
 .terrain-editor-metadata-dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
-.terrain-editor-dialog-close { display: block; margin-left: auto; margin-bottom: 12px; }
+.terrain-editor-dialog-close { display: block; margin-inline-start: auto; margin-bottom: 12px; }

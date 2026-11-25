@@ -70,7 +70,7 @@
   flex: 1;
   overflow-y: auto;
   max-height: 280px;
-  padding-right: 4px;
+  padding-inline-end: 4px;
 }
 
 .trade-bar-item {
@@ -125,7 +125,7 @@
   height: 100%;
   position: absolute;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   transition: width 0.3s ease-out;
 }
 

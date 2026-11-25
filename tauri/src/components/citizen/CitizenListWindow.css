@@ -35,7 +35,7 @@
 
 .citizen-list-age-input {
   width: 4.5rem;
-  text-align: right;
+  text-align: end;
 }
 
 .citizen-list-toolbar {

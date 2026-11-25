@@ -127,7 +127,7 @@ export function TrafficTab({
                 onClick={() => toggleGroup(typeId)}
                 aria-expanded={isExpanded}
               >
-                <span className="regulation-speed-group__toggle-icon">
+                <span className="regulation-speed-group__toggle-icon rtl-mirror">
                   {isExpanded ? "▼" : "▶"}
                 </span>
                 <h4 className="regulation-speed-group__label">

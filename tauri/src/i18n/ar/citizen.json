@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} سنة",
+    "male": "ذكر",
+    "female": "أنثى",
+    "single": "أعزب",
+    "married": "متزوج",
+    "household": "الأسرة",
+    "employer": "جهة العمل",
+    "unemployed": "عاطل عن العمل",
+    "school": "المدرسة",
+    "notEnrolled": "غير ملتحق بالدراسة",
+    "major": "مهارة التخصص",
+    "higherEducation": "التعليم العالي",
+    "graduated": "مكتمل",
+    "notGraduated": "غير مكتمل",
+    "skills": "المهارات",
+    "criminality": "النزعة الإجرامية",
+    "commuteTime": "مدة التنقل إلى العمل",
+    "automobile": "السيارة",
+    "automobileOwned": "يملك",
+    "automobileNone": "لا يملك",
+    "householdStatus": "حالة الأسرة"
+  },
+  "household": {
+    "title": "معلومات الأسرة",
+    "familyType": "نوع الأسرة",
+    "familySingle": "أعزب",
+    "familyCouple": "زوجان",
+    "familyFamily": "عائلة",
+    "familySenior": "مسنّون",
+    "hasAutomobile": "تملك سيارة",
+    "noAutomobile": "لا تملك سيارة",
+    "discretionaryIncome": "الدخل المتاح للإنفاق",
+    "livingStandard": "مستوى المعيشة",
+    "livingStandardLevel": {
+      "0": "فقر مدقع",
+      "1": "فقير",
+      "2": "طبقة وسطى",
+      "3": "ميسور"
+    },
+    "satisNutrition": "كفاية التغذية",
+    "satisHealthcare": "كفاية الرعاية الصحية",
+    "satisLeisure": "الترفيه وأوقات الفراغ",
+    "satisTourism": "كفاية السياحة",
+    "tourist": "سائح",
+    "partySize": "عدد الأفراد",
+    "members": "أفراد الأسرة"
+  },
+  "education": {
+    "people": "شخص"
+  }
+}

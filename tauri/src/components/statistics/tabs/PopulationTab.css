@@ -80,7 +80,7 @@
 }
 
 .pop-tab__current-immig {
-  margin-left: 8px;
+  margin-inline-start: 8px;
   font-size: 1rem;
   color: #f59e0b;
   font-variant-numeric: tabular-nums;
@@ -201,7 +201,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 1rem;
-  text-align: left;
+  text-align: start;
 }
 
 .pop-zones__table th,
@@ -230,7 +230,7 @@
 }
 
 .pop-zones__num {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
 }
 

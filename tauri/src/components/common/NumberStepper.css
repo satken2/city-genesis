@@ -60,8 +60,8 @@
   background: transparent;
   color: #cdd6f4;
   border: none;
-  border-left: 1px solid #45475a;
-  border-right: 1px solid #45475a;
+  border-inline-start: 1px solid #45475a;
+  border-inline-end: 1px solid #45475a;
   font-family: "Consolas", "Menlo", monospace;
   font-size: 1rem;
   outline: none;

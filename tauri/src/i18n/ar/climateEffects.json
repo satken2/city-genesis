@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "متوسط مناخ هذا الشهر",
+    "currentClimate_week": "متوسط مناخ هذا الأسبوع",
+    "title": "كفاءة إنتاج المنشآت حسب المناخ",
+    "facility": "المنشأة",
+    "factor": "كفاءة الإنتاج"
+  }
+}

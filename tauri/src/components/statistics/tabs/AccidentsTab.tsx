@@ -542,7 +542,7 @@ export function AccidentsTab({ apiBaseUrl, initialSubTab }: { apiBaseUrl: string
               <div className="accidents-tab-split__left">
                 {/* Crime history chart */}
                 <section className="accidents-chart" style={{ flex: 1 }}>
-                  <h3 className="accidents-chart__title" style={{ borderLeftColor: COLOR_CRIME }}>
+                  <h3 className="accidents-chart__title" style={{ borderInlineStartColor: COLOR_CRIME }}>
                     {t("statistics.crimeCountHistory")}
                   </h3>
                   <div className="accidents-chart__area">
@@ -575,7 +575,7 @@ export function AccidentsTab({ apiBaseUrl, initialSubTab }: { apiBaseUrl: string
                 </section>
                 {/* Crime list */}
                 <section className="accidents-list" style={{ flex: 1 }}>
-                  <h3 className="accidents-list__title" style={{ borderLeftColor: COLOR_CRIME }}>
+                  <h3 className="accidents-list__title" style={{ borderInlineStartColor: COLOR_CRIME }}>
                     {t("statistics.crimeList")}
                     <span className="accidents-list__count">({latest.crimes.length})</span>
                   </h3>
@@ -653,7 +653,7 @@ export function AccidentsTab({ apiBaseUrl, initialSubTab }: { apiBaseUrl: string
                 </section>
                 {/* Collapse list */}
                 <section className="accidents-list" style={{ flex: 1 }}>
-                  <h3 className="accidents-list__title" style={{ borderLeftColor: COLOR_COLLAPSE }}>
+                  <h3 className="accidents-list__title" style={{ borderInlineStartColor: COLOR_COLLAPSE }}>
                     {t("statistics.collapseList")}
                     <span className="accidents-list__count">
                       ({latest.collapses.length})

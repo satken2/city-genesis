@@ -17,7 +17,7 @@
   content: "";
   position: absolute;
   top: -1px;
-  left: 0;
+  inset-inline-start: 0;
   width: 2.6rem;
   height: 2px;
   background: var(--flat-accent);
@@ -32,15 +32,15 @@
 }
 
 .terrain-fact:first-child {
-  padding-left: 0;
+  padding-inline-start: 0;
 }
 
 .terrain-fact:last-child {
-  padding-right: 0;
+  padding-inline-end: 0;
 }
 
 .terrain-fact + .terrain-fact {
-  border-left: 1px solid rgba(255, 255, 255, 0.09);
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.09);
 }
 
 .terrain-fact dt {

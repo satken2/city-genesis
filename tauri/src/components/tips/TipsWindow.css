@@ -30,7 +30,7 @@
   }
 
   .tips-text-container {
-    padding-right: 0;
+    padding-inline-end: 0;
   }
 }
 
@@ -89,7 +89,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  right: 0;
+  inset-inline-end: 0;
   width: 460px;
   height: 100%;
   object-fit: cover;
@@ -101,7 +101,7 @@
 }
 
 .tips-text-container {
-  padding-right: 120px;
+  padding-inline-end: 120px;
   position: relative;
   z-index: 2;
 }

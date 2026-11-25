@@ -32,7 +32,7 @@
  */
 .pf-panel .operation-btn--util {
   width: auto;
-  margin-left: auto;
+  margin-inline-start: auto;
   gap: 4px;
   padding: 4px 8px;
 }
@@ -73,5 +73,5 @@
 
 /* Add a gap to the left of the delete button. */
 .pf-panel .operation-btn--delete {
-  margin-left: 12px;
+  margin-inline-start: 12px;
 }

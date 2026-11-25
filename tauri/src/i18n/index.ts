@@ -7,7 +7,7 @@
 
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES } from "../utils/locale";
+import { DEFAULT_LANGUAGE, SUPPORTED_LANGUAGES, textDirection } from "../utils/locale";
 
 /**
  * Manage translation resources in <language>/*.json by domain. Each file includes its top-level namespace
@@ -33,6 +33,11 @@ const resources = Object.fromEntries(
     { translation: assembleResources(language) },
   ])
 );
+
+// Mirrors window content for right-to-left languages; window placement on screen is not mirrored.
+i18n.on("languageChanged", (language) => {
+  document.documentElement.dir = textDirection(language);
+});
 
 i18n.use(initReactI18next).init({
   resources,

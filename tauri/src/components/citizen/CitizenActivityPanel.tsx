@@ -10,6 +10,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 import { useTranslation } from "react-i18next";
+import { readingArrow } from "../../utils/locale";
 
 import { useMasterData } from "../../contexts/MasterDataContext";
 import type { CitizenItinerary, CitizenTrip, CitizenVisit } from "../../utils/citizenTracking";
@@ -22,7 +23,7 @@ type CitizenActivityPanelProps = {
 };
 
 export function CitizenActivityPanel({ apiBaseUrl, itinerary, failed }: CitizenActivityPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const masterData = useMasterData();
 
   if (failed) return <p className="agent-detail-muted">{t("citizenTracking.status.error")}</p>;
@@ -50,7 +51,7 @@ export function CitizenActivityPanel({ apiBaseUrl, itinerary, failed }: CitizenA
       const label = leg.kind === "transit" ? leg.name || t("citizenTracking.legs.transit") : t(`citizenTracking.legs.${leg.kind}`);
       if (parts[parts.length - 1] !== label) parts.push(label);
     }
-    return parts.join(" → ");
+    return parts.join(` ${readingArrow(i18n.language)} `);
   }
 
   function openAgent(agentId: number) {

@@ -56,5 +56,6 @@
   padding: 12px;
   border: 1px solid var(--flat-raised-hover);
   border-top: 2px solid var(--flat-selected);
-  border-radius: 0 8px 8px 8px;
+  border-radius: 8px;
+  border-start-start-radius: 0;
 }

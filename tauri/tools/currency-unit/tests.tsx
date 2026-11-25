@@ -34,6 +34,7 @@ for (const [tag, language, locale] of [
   ["tr-TR", "tr", "tr-TR"],
   ["it-IT", "it", "it-IT"],
   ["id-ID", "id", "id-ID"],
+  ["ar-SA", "ar", "ar-EG-u-nu-latn"],
 ]) {
   assert.equal(languageFromLocaleTag(tag), language);
   assert.equal(resolveIntlLocale(tag), locale);

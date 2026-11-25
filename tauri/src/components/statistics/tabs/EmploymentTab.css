@@ -176,7 +176,7 @@
   color: #94a3b8;
   font-weight: 600;
   flex-shrink: 0;
-  text-align: right;
+  text-align: end;
 }
 
 .emp-skill-row__bar-area {
@@ -198,7 +198,7 @@
 
 .emp-skill-bar-overflow {
   position: absolute;
-  right: 0;
+  inset-inline-end: 0;
   top: 0;
   height: 100%;
   width: 3px;
@@ -209,7 +209,7 @@
   width: 38px;
   font-size: 1rem;
   font-weight: 700;
-  text-align: right;
+  text-align: end;
   flex-shrink: 0;
 }
 
@@ -217,7 +217,7 @@
   width: 60px;
   font-size: 1rem;
   color: #475569;
-  text-align: right;
+  text-align: end;
   flex-shrink: 0;
 }
 
@@ -245,7 +245,7 @@
   font-size: 1rem;
   font-weight: 600;
   padding: 5px 8px;
-  text-align: left;
+  text-align: start;
   white-space: nowrap;
   z-index: 1;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -256,7 +256,7 @@
 }
 
 .emp-industry-table__th--num {
-  text-align: right;
+  text-align: end;
   width: 14%;
 }
 
@@ -297,14 +297,14 @@
 }
 
 .emp-industry-table__td--num {
-  text-align: right;
+  text-align: end;
   color: #94a3b8;
   white-space: nowrap;
 }
 
 .emp-industry-table__td--bar {
   width: 38%;
-  padding-right: 10px;
+  padding-inline-end: 10px;
 }
 
 .emp-industry-bar-bg {

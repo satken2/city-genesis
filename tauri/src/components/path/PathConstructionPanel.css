@@ -37,7 +37,7 @@
 }
 
 .pc-bulk-create-btn {
-  margin-left: auto;
+  margin-inline-start: auto;
   flex: 0 0 auto;
 }
 

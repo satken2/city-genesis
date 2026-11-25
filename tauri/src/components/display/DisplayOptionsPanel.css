@@ -31,7 +31,7 @@
   display: flex;
   flex-direction: column;
   background: rgba(0, 0, 0, 0.2);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.08);
   flex-shrink: 0;
   overflow-y: auto;
 }
@@ -42,14 +42,14 @@
   gap: 8px;
   padding: 10px 10px;
   border: none;
-  border-left: 3px solid transparent;
+  border-inline-start: 3px solid transparent;
   background: transparent;
   color: #c5d4e3;
   font-family: "Segoe UI", sans-serif;
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
-  text-align: left;
+  text-align: start;
 }
 
 .do-tab:hover {
@@ -59,7 +59,7 @@
 
 .do-tab.selected {
   background: rgba(78, 161, 255, 0.12);
-  border-left-color: #4ea1ff;
+  border-inline-start-color: #4ea1ff;
   color: #ffffff;
 }
 
@@ -141,8 +141,8 @@
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
-  padding-left: 10px;
-  border-left: 2px solid rgba(78, 161, 255, 0.25);
+  padding-inline-start: 10px;
+  border-inline-start: 2px solid rgba(78, 161, 255, 0.25);
 }
 
 .do-submode-btn {
@@ -333,7 +333,7 @@ img.do-contour-icon {
 
 .do-alert-list > button.do-alert-card {
   width: 100%;
-  text-align: left;
+  text-align: start;
   font: inherit;
 }
 

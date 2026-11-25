@@ -14,7 +14,7 @@
 .demand-info-table th {
   color: #93a9c0;
   font-weight: 600;
-  text-align: left;
+  text-align: start;
   padding: 4px 6px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
@@ -25,6 +25,6 @@
 }
 
 .demand-info-num {
-  text-align: right;
+  text-align: end;
   white-space: nowrap;
 }

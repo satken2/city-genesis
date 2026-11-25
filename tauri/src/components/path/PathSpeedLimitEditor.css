@@ -53,7 +53,7 @@
   font-size: 1rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  text-align: end;
   padding: 2px 6px;
   line-height: 1.67rem;
 }
@@ -62,7 +62,7 @@
   color: #6b8299;
   font-weight: 400;
   font-size: 1rem;
-  text-align: right;
+  text-align: end;
 }
 
 .path-speed-limit__input:focus {

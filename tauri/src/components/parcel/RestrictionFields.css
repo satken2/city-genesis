@@ -47,7 +47,7 @@
   min-width: 4.17rem;
   max-width: 4.17rem;
   box-sizing: border-box;
-  text-align: right;
+  text-align: end;
   /* Hide spin buttons to reserve width for approximately three digits. */
   -moz-appearance: textfield;
   appearance: textfield;

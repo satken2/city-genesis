@@ -64,7 +64,7 @@
 
 .agent-creation__number {
   width: 64px;
-  text-align: right;
+  text-align: end;
 }
 
 .agent-creation__description {
@@ -91,7 +91,7 @@
 }
 
 .agent-creation__seg-btn + .agent-creation__seg-btn {
-  border-left: 1px solid #2a3149;
+  border-inline-start: 1px solid #2a3149;
 }
 
 .agent-creation__seg-btn--active {

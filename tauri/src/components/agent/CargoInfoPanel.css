@@ -15,7 +15,7 @@
 }
 
 .cargo-unit-suffix {
-  margin-left: 2px;
+  margin-inline-start: 2px;
   font-size: 1rem;
   color: #93a9c0;
 }
@@ -94,7 +94,7 @@
 .cargo-row__handled {
   height: 10px;
   border-radius: 2px;
-  margin-left: 1px;
+  margin-inline-start: 1px;
 }
 
 .cargo-row__sub {

@@ -68,8 +68,8 @@
 
 .pf-window__facilities .agent-table thead th,
 .pf-window__facilities .agent-table tbody td {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
+  padding-inline-start: 0.5rem;
+  padding-inline-end: 0.5rem;
 }
 
 .pf-window__loading,
@@ -178,7 +178,7 @@
 .psp-row__unit {
   color: #64748b;
   font-size: 1rem;
-  margin-left: 2px;
+  margin-inline-start: 2px;
 }
 
 .psp-row__input {
@@ -191,7 +191,7 @@
   font-family: monospace;
   font-size: 1rem;
   padding: 3px 5px;
-  text-align: right;
+  text-align: end;
 }
 
 .psp-row__input:focus {

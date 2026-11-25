@@ -7,8 +7,8 @@ use tauri::Manager;
 const SETTINGS_FILE_NAME: &str = "settings.json";
 
 /// Supported UI languages. Keep in sync with SUPPORTED_LANGUAGES in src/utils/locale.ts and the table in steam::game_language.
-const SUPPORTED_LANGUAGES: [&str; 15] = [
-    "ja", "en", "es-419", "zh-Hans", "zh-Hant", "fr", "ko", "de", "pl", "ru", "pt-BR", "es-ES", "tr", "it", "id",
+const SUPPORTED_LANGUAGES: [&str; 16] = [
+    "ja", "en", "es-419", "zh-Hans", "zh-Hant", "fr", "ko", "de", "pl", "ru", "pt-BR", "es-ES", "tr", "it", "id", "ar",
 ];
 /// Initial language when neither Steam nor the OS gives a supported language.
 const FALLBACK_LANGUAGE: &str = "en";
@@ -219,6 +219,7 @@ mod tests {
             ("tr-TR", Some("tr")),
             ("it-IT", Some("it")),
             ("id-ID", Some("id")),
+            ("ar-SA", Some("ar")),
             ("nl-NL", None),
             ("", None),
         ];

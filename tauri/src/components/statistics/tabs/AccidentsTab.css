@@ -226,7 +226,7 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  text-align: left;
+  text-align: start;
   padding: 5px 8px;
   font-weight: 600;
   background: #111827;
@@ -235,7 +235,7 @@
 }
 
 .accidents-table th.accidents-table__th--num {
-  text-align: right;
+  text-align: end;
 }
 
 .accidents-table td {
@@ -261,7 +261,7 @@
 }
 
 .accidents-table__cell--num {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
   color: #ff9b9b; /* Warning color */
 }
@@ -273,7 +273,7 @@
   color: #4ea1ff;
   cursor: pointer;
   font: inherit;
-  text-align: left;
+  text-align: start;
   text-decoration: none;
   max-width: 100%;
   overflow: hidden;
@@ -311,7 +311,7 @@
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   width: 32px;
-  text-align: right;
+  text-align: end;
 }
 
 /* ===== Loading and errors ===== */

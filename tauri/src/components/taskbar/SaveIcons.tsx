@@ -68,8 +68,8 @@ export function PowerIcon(props: IconProps) {
   </Icon>;
 }
 
-export function BackIcon(props: IconProps) {
-  return <Icon {...props}>
+export function BackIcon({ className }: IconProps) {
+  return <Icon className={className ? `${className} rtl-mirror` : "rtl-mirror"}>
     <path d="M19.5 12h-15" />
     <path d="M10.5 6l-6 6 6 6" />
   </Icon>;

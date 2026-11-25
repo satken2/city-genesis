@@ -11,7 +11,7 @@
  */
 .system-tray {
   width: max-content;
-  margin-left: auto;
+  margin-inline-start: auto;
   flex-direction: column;
   overflow: hidden;
 }

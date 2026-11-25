@@ -98,7 +98,7 @@
 }
 
 .city-map-window__overlay-label {
-  margin-right: 2px;
+  margin-inline-end: 2px;
   font-size: 1rem;
   color: #6c7a94;
   white-space: nowrap;
@@ -151,7 +151,7 @@
 .city-map-window__actions {
   display: flex;
   gap: 6px;
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .city-map-window__btn {
@@ -289,7 +289,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin-left: 0.5rem;
+  margin-inline-start: 0.5rem;
   font-size: 1rem;
   color: #93a9c0;
 }

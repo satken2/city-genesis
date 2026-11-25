@@ -38,7 +38,7 @@
 
 /* Column heading for boardings at each row's right edge. */
 .tld__summary-ridership {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .tld__list {
@@ -131,7 +131,7 @@
 }
 
 .tld__name {
-  margin-left: 8px;
+  margin-inline-start: 8px;
   padding: 2px 6px;
   min-width: 0;
   font-size: 1rem;
@@ -141,7 +141,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: left;
+  text-align: start;
 }
 
 /* Stops belonging to station buildings link to station details. Override App.css button defaults for a plain-text appearance. */
@@ -162,8 +162,8 @@
 /* Boardings at the right edge of each row. */
 .tld__ridership {
   flex: 0 0 auto;
-  margin-left: auto;
-  padding-left: 12px;
+  margin-inline-start: auto;
+  padding-inline-start: 12px;
   font-variant-numeric: tabular-nums;
   color: #c5d4e3;
 }
@@ -171,7 +171,7 @@
 /* Badge marking an intermediate turnback, e.g. on a loop service. */
 .tld__badge {
   flex: 0 0 auto;
-  margin-left: 6px;
+  margin-inline-start: 6px;
   padding: 0 6px;
   border-radius: 999px;
   border: 1px solid var(--tld-color);

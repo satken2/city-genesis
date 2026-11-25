@@ -105,7 +105,7 @@
 }
 
 .road-traffic__tooltip-dir {
-  margin-right: 6px;
+  margin-inline-end: 6px;
   color: #6b8299;
 }
 
@@ -134,7 +134,7 @@
 }
 
 .road-traffic__tooltip-unit {
-  margin-left: 3px;
+  margin-inline-start: 3px;
   font-weight: 400;
   color: #93a9c0;
 }

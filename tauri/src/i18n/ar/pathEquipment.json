@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "تجهيزات الطريق",
+    "streetlight_type": "إنارة الشوارع",
+    "fence_type": "السياج",
+    "street_tree_type": "أشجار الشوارع",
+    "utility_mode": "طريقة تمديد الأسلاك",
+    "none": "بلا",
+    "standard": "قياسي",
+    "overhead": "تمديد هوائي",
+    "underground": "تمديد تحت الأرض",
+    "apply": "تطبيق",
+    "bench_type": "المقاعد",
+    "bin_type": "سلال المهملات",
+    "planter_type": "أحواض الزرع",
+    "advert_type": "الإعلانات"
+  }
+}

@@ -59,7 +59,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 1rem;
-  text-align: left;
+  text-align: start;
 }
 
 .econ-table__header {
@@ -72,7 +72,7 @@
 }
 
 .econ-table__header--right {
-  text-align: right;
+  text-align: end;
 }
 
 .econ-table__row {
@@ -107,7 +107,7 @@
 }
 
 .econ-table__cell--right {
-  text-align: right;
+  text-align: end;
 }
 
 /* ========== Numeric cells with bars ========== */
@@ -122,7 +122,7 @@
 .econ-table__bar {
   position: absolute;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   bottom: 0;
   z-index: 1;
   transition: width 0.3s ease;
@@ -141,23 +141,23 @@
 /* Production: dark blue */
 .econ-table__bar--production {
   background-color: rgba(29, 78, 216, 0.55);
-  border-right: 2px solid rgba(59, 130, 246, 0.85);
+  border-inline-end: 2px solid rgba(59, 130, 246, 0.85);
 }
 
 /* Consumption: dark red */
 .econ-table__bar--consumption {
   background-color: rgba(185, 28, 28, 0.55);
-  border-right: 2px solid rgba(239, 68, 68, 0.85);
+  border-inline-end: 2px solid rgba(239, 68, 68, 0.85);
 }
 
 /* Exports: dark green */
 .econ-table__bar--export {
   background-color: rgba(4, 120, 87, 0.55);
-  border-right: 2px solid rgba(16, 185, 129, 0.85);
+  border-inline-end: 2px solid rgba(16, 185, 129, 0.85);
 }
 
 /* Imports: dark purple */
 .econ-table__bar--import {
   background-color: rgba(109, 40, 217, 0.55);
-  border-right: 2px solid rgba(139, 92, 246, 0.85);
+  border-inline-end: 2px solid rgba(139, 92, 246, 0.85);
 }

@@ -23,13 +23,15 @@ export const SUPPORTED_LANGUAGES = [
   "tr",
   "it",
   "id",
+  "ar",
 ] as const;
 
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
 
 /**
  * Language code → locale for Intl APIs. Intl accepts bare language codes, but explicit representative regions
- * make currency and compact number notation (万/億, K/M/B) more predictable.
+ * make currency and compact number notation (万/億, K/M/B) more predictable. Arabic pins Western digits, since
+ * Arabic locales may default to Arabic-Indic digits.
  */
 const INTL_LOCALES: Record<SupportedLanguage, string> = {
   ja: "ja-JP",
@@ -47,7 +49,21 @@ const INTL_LOCALES: Record<SupportedLanguage, string> = {
   tr: "tr-TR",
   it: "it-IT",
   id: "id-ID",
+  ar: "ar-EG-u-nu-latn",
 };
+
+/** Languages written right to left. Every WebView follows this for the document direction when the language changes. */
+const RTL_LANGUAGES: ReadonlySet<SupportedLanguage> = new Set(["ar"]);
+
+/** Text direction of a UI language, for the dir attribute. */
+export function textDirection(language: string | undefined): "rtl" | "ltr" {
+  return RTL_LANGUAGES.has(resolveSupportedLanguage(language)) ? "rtl" : "ltr";
+}
+
+/** Text arrow along the reading direction: forward for "from → to" sequences, back for back buttons. */
+export function readingArrow(language: string | undefined, back = false): string {
+  return (textDirection(language) === "rtl") !== back ? "←" : "→";
+}
 
 /** Fallback for unknown language codes. Match i18n fallbackLng. */
 export const DEFAULT_LANGUAGE: SupportedLanguage = "ja";

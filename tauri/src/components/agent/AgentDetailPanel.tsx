@@ -17,6 +17,7 @@ import { PLAY_MODE_SCENARIO } from "../../constants";
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { readingArrow } from "../../utils/locale";
 import { invoke } from "@tauri-apps/api/core";
 import type { AgentData, AgentResponse } from "../../types";
 import {
@@ -105,7 +106,7 @@ export function AgentDetailPanel({
   pathTemplate,
   initialEntityId,
 }: AgentDetailPanelProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const masterData = useMasterData();
   const scenarioMode = usePlayMode(apiBaseUrl) === PLAY_MODE_SCENARIO;
   const [entityHistory, setEntityHistory] = useState<string[]>([
@@ -487,7 +488,7 @@ export function AgentDetailPanel({
           onClick={navigateBack}
           type="button"
         >
-          ← {t("agent.back")}
+          {readingArrow(i18n.language, true)} {t("agent.back")}
         </button>
       )}
 

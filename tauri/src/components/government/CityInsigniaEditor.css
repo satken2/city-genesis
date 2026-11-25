@@ -40,15 +40,16 @@
 }
 
 .insignia-editor__column + .insignia-editor__column {
-  border-left: 1px solid rgba(148, 163, 184, 0.15);
+  border-inline-start: 1px solid rgba(148, 163, 184, 0.15);
 }
 
 .insignia-editor__column h2 {
   margin: 0;
-  padding: 2px 0 2px 10px;
+  padding-block: 2px;
+  padding-inline: 10px 0;
   font-size: 1.18rem;
   font-weight: 600;
-  box-shadow: inset 4px 0 0 var(--flat-accent);
+  box-shadow: inset calc(4px * var(--inline-sign)) 0 0 var(--flat-accent);
 }
 
 .insignia-editor__preview {
@@ -127,7 +128,7 @@
 }
 
 .insignia-editor__footer > .settings-btn:first-child {
-  margin-right: auto;
+  margin-inline-end: auto;
 }
 
 .insignia-editor__error {

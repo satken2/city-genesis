@@ -536,7 +536,7 @@ export function NewGameWindow({
                   onClick={() => setTutorialsExpanded(!tutorialsOpen)}
                 >
                   <span>{t("newGame.sectionTutorials")}</span>
-                  <span className="new-game-section-chevron" aria-hidden="true" />
+                  <span className="new-game-section-chevron rtl-mirror" aria-hidden="true" />
                 </button>
               </h3>
               <div id="new-game-tutorials" className="new-game-tiles" hidden={!tutorialsOpen}>
@@ -618,7 +618,7 @@ export function NewGameWindow({
               {detail.credits && (
                 <details className="new-game-detail-credits">
                   <summary>
-                    <span className="new-game-section-chevron" aria-hidden="true" />
+                    <span className="new-game-section-chevron rtl-mirror" aria-hidden="true" />
                     <span>{t("newGame.detailCreditsLabel")}</span>
                   </summary>
                   <p className="new-game-detail-block-text">{detail.credits}</p>

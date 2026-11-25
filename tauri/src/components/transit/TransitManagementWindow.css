@@ -43,8 +43,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
-  padding-right: 10px;
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.08);
+  padding-inline-end: 10px;
 }
 
 .transit-window__new-btn {
@@ -100,7 +100,7 @@
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
-  text-align: left;
+  text-align: start;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
 
@@ -154,7 +154,7 @@
   line-height: 1.48rem;
   text-align: center;
   font-variant-numeric: tabular-nums;
-  margin-left: auto;
+  margin-inline-start: auto;
   flex-shrink: 0;
 }
 
@@ -220,7 +220,7 @@
   color: #8ba3bb;
   font-size: 1rem;
   font-weight: 600;
-  text-align: left;
+  text-align: start;
   white-space: nowrap;
 }
 
@@ -233,7 +233,7 @@
 
 .transit-table th + th,
 .transit-table td + td {
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-inline-start: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Shrink non-name columns to content width and allocate all remaining width to line names. */
@@ -259,7 +259,7 @@
 }
 
 .transit-table .transit-table__num {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
 }
 
@@ -314,7 +314,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-weight: 600;
-  text-align: left;
+  text-align: start;
 }
 
 .transit-line .transit-badge {

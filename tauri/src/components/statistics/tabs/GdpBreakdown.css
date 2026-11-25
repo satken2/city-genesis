@@ -37,7 +37,7 @@
 }
 
 .gdp-headline__sources strong {
-  margin-left: 0.3rem;
+  margin-inline-start: 0.3rem;
   color: #cbd5e1;
   font-weight: 600;
 }
@@ -116,7 +116,7 @@
 
 .gdp-legend__value,
 .gdp-legend__share {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
 }
 
@@ -177,7 +177,7 @@
   grid-template-columns: 1rem minmax(0, 1.4fr) minmax(0, 1fr) 5.5rem 4rem;
   background: none;
   border: none;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   font: inherit;
 }
@@ -187,7 +187,7 @@
 }
 
 .gdp-row--sub {
-  padding-left: 1.5rem;
+  padding-inline-start: 1.5rem;
   color: #a4bccc;
 }
 
@@ -213,7 +213,7 @@
 
 .gdp-row__value,
 .gdp-row__share {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
 }
 
@@ -246,7 +246,7 @@
 }
 
 .gdp-table th {
-  text-align: left;
+  text-align: start;
   font-weight: 600;
   font-size: 1rem;
   color: #8ba3bb;
@@ -261,7 +261,7 @@
 }
 
 .gdp-table .gdp-table__num {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
 }
 
@@ -271,7 +271,7 @@
   padding: 0;
   color: var(--flat-accent);
   font: inherit;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
 }
 

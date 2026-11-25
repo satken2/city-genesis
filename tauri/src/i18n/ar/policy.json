@@ -1,0 +1,323 @@
+{
+  "policy": {
+    "pending": "المحاكاة قيد التشغيل",
+    "noData": "لا توجد بيانات",
+    "actionError": "تعذّر فتح شاشة الإجراء.",
+    "indicators": {
+      "unemployment": {
+        "tab": "معدل البطالة",
+        "issue": "معدل البطالة مرتفع",
+        "clear": "لم تُرصد مشكلات في البطالة",
+        "evidence": "معدل البطالة {{value}}"
+      },
+      "income": {
+        "tab": "الدخل",
+        "issue": "دخل الأسر منخفض",
+        "clear": "لم تُرصد مشكلات في الدخل",
+        "evidence": "متوسط دخل الأسرة {{value}}"
+      },
+      "tourism": {
+        "tab": "السياحة",
+        "issue": "عدد السياح قليل",
+        "clear": "لم تُرصد مشكلات في السياحة",
+        "evidence": "السياح المقيمون: {{value}} · الطاقة الاستيعابية: {{capacity}}"
+      },
+      "crime": {
+        "tab": "الجرائم",
+        "issue": "تقع جرائم ومشاحنات",
+        "clear": "لم تُرصد مشكلات في الجريمة",
+        "evidence": "أضرار الجرائم {{value}} · المشاحنات: {{incidents}}"
+      },
+      "sanitation": {
+        "tab": "النظافة العامة",
+        "issue": "توجد مشكلات في النظافة العامة",
+        "clear": "لم تُرصد مشكلات في النظافة العامة",
+        "evidence": "الأسر التي تتدهور لديها النظافة: {{value}}"
+      },
+      "water": {
+        "tab": "المياه",
+        "issue": "إمدادات المياه غير كافية",
+        "clear": "لم تُرصد مشكلات في إمدادات المياه",
+        "evidence": "نسبة ما استلمته الأسر والمنشآت من طلباتها {{value}}"
+      },
+      "electricity": {
+        "tab": "الكهرباء",
+        "issue": "إمدادات الكهرباء غير كافية",
+        "clear": "لم تُرصد مشكلات في إمدادات الكهرباء",
+        "evidence": "نسبة ما استلمته الأسر والمنشآت من طلباتها {{value}}"
+      },
+      "internet": {
+        "tab": "الاتصالات",
+        "issue": "إمدادات الاتصالات غير كافية",
+        "clear": "لم تُرصد مشكلات في إمدادات الاتصالات",
+        "evidence": "نسبة ما استلمته الأسر والمنشآت من طلباتها {{value}}"
+      },
+      "high_water": {
+        "tab": "المياه عالية الضغط",
+        "issue": "إمدادات المياه عالية الضغط غير كافية",
+        "clear": "لم تُرصد مشكلات في إمدادات المياه عالية الضغط",
+        "evidence": "استلمت المنشآت {{value}} من طلباتها"
+      },
+      "high_electricity": {
+        "tab": "الكهرباء عالية الجهد",
+        "issue": "إمدادات الكهرباء عالية الجهد غير كافية",
+        "clear": "لم تُرصد مشكلات في إمدادات الكهرباء عالية الجهد",
+        "evidence": "استلمت المنشآت {{value}} من طلباتها"
+      },
+      "upkeep": {
+        "tab": "صيانة المنشآت",
+        "issue": "صيانة المباني العامة والطرق والسكك غير كافية",
+        "clear": "لم تُرصد مشكلات في الصيانة",
+        "evidence": "الصيانة المتلقاة {{value}} من القدر المطلوب"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "لا توجد وظائف شاغرة ضمن حصص التوظيف الحالية",
+        "evidence": "الباحثون عن عمل: {{count}}"
+      },
+      "unfilled_jobs": {
+        "title": "وظائف شاغرة وبطالة في آن واحد",
+        "evidence": "الباحثون عن عمل: {{count}} · الشواغر: {{vacancies}} (قوة عمل فعلية)"
+      },
+      "public_budget": {
+        "title": "المنشآت العامة تقلّص عملها بسبب الميزانية",
+        "evidence": "منشآت قلّصت خطتها بسبب ميزانية التشغيل: {{count}}"
+      },
+      "education_gap": {
+        "title": "بعض الباحثين عن عمل لم يُتمّوا التعليم الأساسي",
+        "evidence": "باحثون عن عمل ينقصهم التعليم الأساسي: {{count}}"
+      },
+      "school_capacity": {
+        "title": "مقاعد التعليم الأساسي غير كافية",
+        "evidence": "الملتحقون: {{enrolled}} · غير الملتحقين: {{waiting}} / المقاعد: {{capacity}}"
+      },
+      "immigrant_education_gap": {
+        "title": "بين الباحثين عن عمل الذين ينقصهم التعليم الأساسي مهاجرون",
+        "evidence": "المهاجرون الباحثون عن عمل من هذه الفئة: {{count}}"
+      },
+      "specialists": {
+        "title": "منشآت لا تستطيع العمل لنقص الكوادر المتخصصة",
+        "evidence": "منشآت ينقصها أصحاب المهارات العالية: {{count}}"
+      },
+      "household_unemployment": {
+        "title": "توجد أسر فيها بالغون عاطلون عن العمل",
+        "evidence": "أسر فيها بالغون عاطلون: {{count}}"
+      },
+      "security_response": {
+        "title": "الشرطة عاجزة عن منع كل الأضرار",
+        "evidence": "أضرار الجرائم خلال الشهر الأخير: {{count}}",
+        "evidence_week": "أضرار الجرائم خلال الأسبوع الأخير: {{count}}"
+      },
+      "no_police": {
+        "title": "لا يوجد مركز شرطة عامل"
+      },
+      "police_staff": {
+        "title": "مراكز الشرطة تعاني نقصًا في الأفراد",
+        "evidence": "مراكز شرطة تعاني نقص الأفراد: {{count}}"
+      },
+      "police_budget": {
+        "title": "ميزانية الشرطة غير كافية",
+        "evidence": "مراكز شرطة تعاني نقص الميزانية: {{count}}"
+      },
+      "police_inputs": {
+        "title": "مراكز الشرطة تنقصها المستلزمات",
+        "evidence": "مراكز شرطة تعاني نقص المستلزمات: {{count}}"
+      },
+      "unemployment_pressure": {
+        "title": "البطالة من أسباب تدهور الأمن العام",
+        "evidence": "البالغون العاطلون عن العمل: {{count}}"
+      },
+      "citizen_criminality": {
+        "title": "يوجد مواطنون ذوو ميول إجرامية",
+        "evidence": "مواطنون ذوو ميول إجرامية: {{count}}"
+      },
+      "children_in_poverty": {
+        "title": "أطفال ينشؤون في أسر لا يبلغ دخلها تكاليف المعيشة",
+        "evidence": "أطفال في أسر دون تكاليف المعيشة: {{count}}"
+      },
+      "children_in_crime_zones": {
+        "title": "أطفال ينشؤون في أحياء وقعت فيها جرائم",
+        "evidence": "أطفال في أحياء وقعت فيها جرائم خلال الشهر الأخير: {{count}}",
+        "evidence_week": "أطفال في أحياء وقعت فيها جرائم خلال الأسبوع الأخير: {{count}}"
+      },
+      "service_no_facility": {
+        "title": "لا توجد منشأة توفّر هذه الخدمة",
+        "title_named": "لا يوجد أيٌّ من: {{suppliers}}"
+      },
+      "service_facility_limited": {
+        "title": "تعذّر تشغيل بعض المنشآت ({{kinds}})",
+        "evidence": "منشآت عاجزة فعليًا عن العمل: {{count}}"
+      },
+      "repair_budget_exhausted": {
+        "title": "نفدت ميزانية الترميم فقُلّصت طلبات الصيانة",
+        "evidence": "إنفاق الترميم {{expense}} / الميزانية {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "أسر أو منشآت خارج نطاق الإمداد",
+        "evidence": "خارج نطاق كل المنشآت: الأسر {{count}} · المنشآت {{facilities}}",
+        "title_named": "أسر أو منشآت خارج نطاق إمداد {{suppliers}}"
+      },
+      "facility_material_unmet": {
+        "title": "تعذّر حصول {{facility}} على {{product_name}}",
+        "evidence": "المستلم {{received}} من أصل المطلوب {{demand}}"
+      },
+      "facility_labor_shortage": {
+        "title": "نقص في الأيدي العاملة لدى {{facility}}",
+        "evidence": "المؤمَّن {{total_labor}} من أصل قوة العمل المطلوبة {{quota}} (قوة عمل فعلية)"
+      },
+      "facility_high_skill_shortage": {
+        "title": "تعذّر تأمين كوادر متخصصة لدى {{facility}}"
+      },
+      "facility_budget_capped": {
+        "title": "تقليص خطة {{facility}} لنقص الميزانية"
+      },
+      "facility_inactive": {
+        "title": "{{facility}} خارج الخدمة"
+      },
+      "facility_infra_disconnected": {
+        "title": "انقطاع اتصال {{facility}} بشبكة {{product_name}}"
+      },
+      "slum_sanitation": {
+        "title": "توجد أسر تسكن في أحياء عشوائية",
+        "evidence": "الأسر الساكنة في أحياء عشوائية: {{count}}"
+      },
+      "service_shortage": {
+        "title": "الأسر لا تحصل على ما يكفي من {{product_name}}",
+        "evidence": "استلمت الأسر {{percent}}% من الكمية المرجعية"
+      },
+      "tourism_no_attraction": {
+        "title": "لا توجد معالم سياحية"
+      },
+      "tourism_no_gateway": {
+        "title": "لا توجد بوابة يصل منها السياح"
+      },
+      "tourism_no_trade_hub": {
+        "title": "لا يوجد مركز استيراد وتصدير يدفع نفقات السفر"
+      },
+      "tourists_without_lodging": {
+        "title": "بعض السياح لا يجدون مكانًا للإقامة",
+        "evidence": "سياح ينتظرون مكانًا للإقامة: {{count}}"
+      },
+      "tourism_lodging_costly": {
+        "title": "تكلفة الإقامة مرتفعة مقارنةً بميزانية السفر",
+        "evidence": "طلبات السياح الجدد عند {{percent}}% من المعتاد"
+      },
+      "tourists_dissatisfied": {
+        "title": "رضا السياح منخفض",
+        "evidence": "طلبات السياح الجدد عند {{percent}}% من المعتاد · عادوا إلى بلادهم غير راضين: {{count}}"
+      },
+      "tourism_experience_short": {
+        "title": "السياح لا يحصلون على ما يكفي من التجارب السياحية",
+        "evidence": "كفاية التجارب السياحية {{percent}}%"
+      },
+      "tourism_leisure_short": {
+        "title": "السياح لا يحصلون على ما يكفي من الترفيه وأوقات الفراغ",
+        "evidence": "كفاية الترفيه وأوقات الفراغ {{percent}}%"
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "توفير فرص عمل في المنشآت البلدية"
+      },
+      "population": {
+        "title": "خفض عدد السكان بطرد مواطنين"
+      },
+      "budget": {
+        "title": "توزيع ميزانيات التشغيل"
+      },
+      "education": {
+        "title": "زيادة عدد المدارس"
+      },
+      "higher_education": {
+        "title": "إعداد كوادر متخصصة عبر التعليم العالي"
+      },
+      "welfare": {
+        "title": "زيادة الإعانات والمساعدات المعيشية"
+      },
+      "employment": {
+        "title": "فحص شروط التوظيف في إحصاءات التوظيف"
+      },
+      "police": {
+        "title": "بناء مراكز شرطة"
+      },
+      "facilities": {
+        "title": "التحقق من أحوال المنشآت"
+      },
+      "immigration_skills": {
+        "title": "مراجعة متطلبات مهارات المهاجرين"
+      },
+      "immigration_limit": {
+        "title": "تقييد استقبال المهاجرين"
+      },
+      "criminality": {
+        "title": "التحقق من الميول الإجرامية لدى المواطنين"
+      },
+      "service_facility": {
+        "title": "بناء منشأة توفّر الخدمة",
+        "title_named": "بناء {{suppliers}}",
+        "title_tourism_no_attraction": "بناء معلم سياحي",
+        "title_tourism_no_gateway": "بناء ميناء أو مطار"
+      },
+      "parcel": {
+        "title": "تجهيز قطعة أرض أكبر"
+      },
+      "transit": {
+        "title": "مراجعة عدد رحلات النقل العام والسكك"
+      },
+      "entity_detail": {
+        "title": "فتح التفاصيل"
+      }
+    },
+    "selectorTitle": "ما الذي تريد التحقيق فيه؟",
+    "eventsTitle": "ما يحدث",
+    "causeTitle": "السبب",
+    "adviceTitle": "إجراءات مقترحة",
+    "needsAttention": "قابل للتحسين",
+    "values": {
+      "money": "{{value}} /أسرة/يوم",
+      "per_thousand": "{{value}} لكل 1,000 نسمة (الشهر الأخير)",
+      "per_thousand_week": "{{value}} لكل 1,000 نسمة (الأسبوع الأخير)"
+    },
+    "collapse": "طيّ",
+    "investigate": {
+      "crime": "التحقيق في أسباب أضرار الجرائم",
+      "unemployment": "التحقيق في أسباب البطالة",
+      "income": "التحقيق في أسباب انخفاض الدخل",
+      "water": "التحقيق في أسباب نقص المياه",
+      "electricity": "التحقيق في أسباب نقص الكهرباء",
+      "internet": "التحقيق في أسباب نقص الاتصالات",
+      "upkeep": "التحقيق في أسباب نقص صيانة المنشآت",
+      "high_water": "التحقيق في أسباب نقص المياه عالية الضغط",
+      "high_electricity": "التحقيق في أسباب نقص الكهرباء عالية الجهد",
+      "facility": "التحقيق في أسباب مشكلة هذه المنشأة"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "المؤشرات",
+    "problems": {
+      "resource_runway": "سينضب المورد «{{name}}» بعد نحو {{remaining_epochs}} من الحقب",
+      "resource_depleted": "نضب المورد «{{name}}»",
+      "facility_inoperative": "المنشأة العامة «{{name}}» عاجزة عن العمل",
+      "facility_inoperative_labor": "المنشأة العامة «{{name}}» عاجزة عن العمل لنقص الأيدي العاملة",
+      "facility_inoperative_material": "المنشأة العامة «{{name}}» عاجزة عن العمل لنقص المواد الخام",
+      "facility_inoperative_high_skill": "المنشأة العامة «{{name}}» قلّصت تشغيلها لنقص الكوادر المتخصصة",
+      "facility_inoperative_budget": "المنشأة العامة «{{name}}» قلّصت تشغيلها لنقص الميزانية",
+      "education_low_enrollment": "المؤسسة التعليمية «{{name}}» قليلة التشغيل لقلة الطلاب (المسجلون {{enrolled}} / المقاعد {{max_students}})",
+      "infra_facility_down": "منشأة البنية التحتية «{{name}}» متوقفة",
+      "infra_disconnected": "منشآت غير متصلة بشبكة البنية التحتية: {{count}}",
+      "rail_capacity_exceeded": "عدد رحلات القطارات يتجاوز سعة السكة في مقاطع عددها {{count}}",
+      "collapse": "انهارت مبانٍ وطرق عددها {{count}}",
+      "collapse_with_deaths": "انهارت مبانٍ وطرق عددها {{count}}، وبلغ عدد الوفيات {{deaths}}",
+      "deaths_traffic": "عدد الوفيات في حوادث المرور: {{count}}",
+      "tenant_blocked_by_parcel_size": "تعذّر في الحي «{{zone_name}}» بناء مبنى يمكن أن تشغله «{{tenant_name}}» (المطلوب {{required}} م²، وأقصى ما تتيحه القطعة {{max_capacity}} م²)",
+      "unknown": "وقع حدث خطير",
+      "sanitation": "الأسر التي تتدهور لديها النظافة: {{count}}"
+    },
+    "facilitiesTitle": "منشآت لا تستطيع العمل",
+    "otherProblemsTitle": "مشكلات أخرى",
+    "facility": {
+      "title": "تعذّر تشغيل {{facility}}",
+      "evidence": "الإنتاج {{percent}}% من الخطة"
+    }
+  }
+}

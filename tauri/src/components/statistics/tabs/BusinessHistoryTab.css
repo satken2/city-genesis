@@ -45,7 +45,7 @@
 }
 
 .business-history-sub-tab-btn__count {
-  margin-left: 6px;
+  margin-inline-start: 6px;
   font-size: 1rem;
   font-weight: 400;
   color: #8ba3bb;
@@ -87,7 +87,7 @@
 }
 
 .business-history-table th {
-  text-align: left;
+  text-align: start;
   padding: 6px 10px;
   font-weight: 600;
   color: #94a3b8;
@@ -97,7 +97,7 @@
 }
 
 .business-history-table th.business-history-table__th--num {
-  text-align: right;
+  text-align: end;
 }
 
 .business-history-table td {
@@ -121,7 +121,7 @@
 }
 
 .business-history-table__id {
-  margin-left: 6px;
+  margin-inline-start: 6px;
   color: #5a6f86;
   font-size: 1rem;
   font-variant-numeric: tabular-nums;
@@ -133,7 +133,7 @@
 }
 
 .business-history-table__cell--num {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
 }
 

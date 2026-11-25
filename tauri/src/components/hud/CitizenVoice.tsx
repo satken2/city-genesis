@@ -92,7 +92,7 @@ function ceilToDevicePixel(length: number): number {
 /** Chevron for the slide arrows, drawn here so no asset credit is needed. */
 function ChevronIcon({ back }: { back: boolean }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg className="rtl-mirror" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d={back ? "M14.5 6l-6 6 6 6" : "M9.5 6l6 6-6 6"} />
     </svg>
   );

@@ -89,7 +89,7 @@
   position: absolute;
   top: anchor(--epoch-confirm-from center);
   bottom: anchor(--epoch-confirm-to center);
-  left: calc(var(--epoch-confirm-icon) / 2 - 3px);
+  inset-inline-start: calc(var(--epoch-confirm-icon) / 2 - 3px);
   width: 6px;
   background-color: var(--flat-text-muted);
   transition: --epoch-confirm-span 0.35s ease;
@@ -98,7 +98,8 @@
 .epoch-confirm-step {
   position: relative;
   display: flex;
-  padding: 10px 0 10px var(--epoch-confirm-indent);
+  padding-block: 10px;
+  padding-inline: var(--epoch-confirm-indent) 0;
 }
 
 .epoch-confirm-step--from,
@@ -111,7 +112,7 @@
 .epoch-confirm-badge {
   position: absolute;
   top: 50%;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 1;
   display: flex;
   align-items: center;

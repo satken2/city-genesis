@@ -181,7 +181,7 @@
 }
 
 .epoch-result-score-per-household {
-  margin-left: auto;
+  margin-inline-start: auto;
   font-size: 1rem;
   font-variant-numeric: tabular-nums;
   color: var(--flat-text-label);
@@ -272,22 +272,23 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px 6px 14px;
+  padding-block: 6px;
+  padding-inline: 14px 12px;
   font-size: 1rem;
   background-color: var(--epoch-result-pane);
   max-width: 320px;
 }
 
 .epoch-result-quest-chip--completed {
-  box-shadow: inset 3px 0 0 var(--flat-warn);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-warn);
 }
 
 .epoch-result-quest-chip--failed {
-  box-shadow: inset 3px 0 0 var(--flat-danger);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-danger);
 }
 
 .epoch-result-quest-chip--near {
-  box-shadow: inset 3px 0 0 var(--flat-accent);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-accent);
 }
 
 .epoch-result-quest-chip-icon {
@@ -403,11 +404,12 @@
  */
 .epoch-result-section-title {
   margin: 0;
-  padding: 1px 0 1px 9px;
+  padding-block: 1px;
+  padding-inline: 9px 0;
   font-size: 1.2rem;
   font-weight: 600;
   color: var(--flat-text);
-  border-left: 3px solid var(--flat-accent);
+  border-inline-start: 3px solid var(--flat-accent);
 }
 
 .epoch-result-empty {
@@ -578,12 +580,13 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 8px 12px 9px 14px;
+  padding-block: 8px 9px;
+  padding-inline: 14px 12px;
   background-color: var(--epoch-result-pane);
 }
 
 .epoch-result-quest--active {
-  box-shadow: inset 3px 0 0 var(--flat-warn);
+  box-shadow: inset calc(3px * var(--inline-sign)) 0 0 var(--flat-warn);
 }
 
 /* Display completed/failed achievements subtly on one line. */
@@ -639,7 +642,7 @@
 
 .epoch-result-quest-pct {
   flex: 0 0 auto;
-  margin-left: auto;
+  margin-inline-start: auto;
   font-size: 1rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -686,7 +689,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  left: 0;
+  inset-inline-start: 0;
   background-color: var(--flat-accent);
 }
 
@@ -816,7 +819,7 @@
 .epoch-result-progress-before {
   position: absolute;
   top: 0;
-  left: 0;
+  inset-inline-start: 0;
   height: 100%;
 }
 

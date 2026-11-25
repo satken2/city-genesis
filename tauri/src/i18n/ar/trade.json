@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "معلومات الإمداد",
+    "product": "المنتج المورَّد",
+    "amount": "كمية الإمداد",
+    "price": "سعر الإمداد",
+    "soldAmount": "الكمية المبيعة",
+    "profitRate": "معدل الربح",
+    "utilization": "معدل التشغيل"
+  },
+  "tourismSupply": {
+    "title": "استقبال السياح",
+    "touristCapacity": "عدد السياح الممكن استقبالهم",
+    "persons": "{{value}} شخص",
+    "218": {
+      "price": "رسوم الدخول",
+      "amount": "سعة الاستقبال (إجمالية)",
+      "soldAmount": "الزوار (إجمالي)"
+    },
+    "219": {
+      "price": "الأجرة",
+      "amount": "سعة النقل (إجمالية)",
+      "soldAmount": "الركاب (إجمالي)"
+    }
+  },
+  "demand": {
+    "product": "السلعة",
+    "demandAmount": "كمية الطلب",
+    "receivedAmount": "الكمية المحصّلة",
+    "acquiredAmount": "المخزون"
+  },
+  "cargo": {
+    "title": "معلومات المناولة",
+    "description": "يستورد هذا المركز السلع من خارج المنطقة ويوردها إلى أسواق المدينة، ويشتري فائض إنتاج المدينة ليصدّره إلى خارج المنطقة.",
+    "capacity": "طاقة المناولة",
+    "perPeriod": "/شهر",
+    "perPeriod_week": "/أسبوع",
+    "materialCapacity": "الحد بحسب المواد الخام",
+    "areaCapacity": "الحد بحسب المساحة",
+    "importHandled": "حجم الاستيراد المُناوَل",
+    "exportHandled": "حجم التصدير المُناوَل",
+    "utilization": "معدل التشغيل",
+    "importSectionTitle": "الاستيراد",
+    "exportSectionTitle": "التصدير",
+    "handledImport": "كمية البيع",
+    "handledExport": "كمية الشراء",
+    "allocation": "الكمية المخصصة",
+    "priceImport": "سعر بيع الوحدة",
+    "priceExport": "سعر شراء الوحدة",
+    "lost": "مبيعات فائتة",
+    "noProducts": "لا توجد أصناف متداولة"
+  }
+}

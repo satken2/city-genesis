@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "المحطة",
+    "name": "اسم المحطة",
+    "ridership": "عدد مرات الركوب",
+    "platforms": "قائمة الأرصفة",
+    "noPlatforms": "لا توجد أرصفة تابعة لهذه المحطة (تتبعها الأرصفة التي يتقاطع معها الخط)",
+    "lines": "الخطوط المارّة",
+    "noLines": "لا توجد خطوط تمر بهذه المحطة",
+    "stops": "عدد مرات الركوب حسب الموقف",
+    "noStops": "لا توجد مواقف في هذه المحطة",
+    "lineRunning": "في الخدمة",
+    "lineSuspended": "متوقف عن الخدمة",
+    "houseEnds": "موضع مبنى المحطة",
+    "houseEnds_both": "الطرفان",
+    "houseEnds_start": "نقطة البداية",
+    "houseEnds_end": "نقطة النهاية",
+    "passageMode": "موضع الممر",
+    "passageMode_elevated": "علوي",
+    "passageMode_ground": "على مستوى الأرض",
+    "passageMode_underground": "تحت الأرض"
+  }
+}

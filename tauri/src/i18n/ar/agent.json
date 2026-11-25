@@ -1,0 +1,212 @@
+{
+  "agent": {
+    "back": "رجوع",
+    "editAppearance": "تغيير المظهر",
+    "relocateCityHall": "نقل مبنى البلدية",
+    "publicFacility": "منشأة عامة",
+    "underAcquisition": "قيد التفاوض على الاستملاك",
+    "publicFacilityPanel": {
+      "title": "منشأة عامة/بلدية"
+    },
+    "abandon": "تخلٍّ",
+    "abandonHint": "التخلي عن الصيانة وترك المنشأة تتقادم دون ترميم",
+    "statusSince": {
+      "founded": "تاريخ التأسيس",
+      "householdFormed": "تاريخ تكوين الأسرة",
+      "arrived": "تاريخ الوصول",
+      "opened": "تاريخ الافتتاح",
+      "schoolOpened": "تاريخ افتتاح المدرسة",
+      "completed": "تاريخ اكتمال البناء",
+      "operatingSince": "تاريخ بدء التشغيل",
+      "resumed": "تاريخ الاستئناف",
+      "paused": "تاريخ الإيقاف",
+      "suspended": "تاريخ تعليق النشاط",
+      "schoolClosed": "تاريخ تعليق الدراسة",
+      "constructionStarted": "تاريخ بدء البناء",
+      "demolitionScheduled": "تاريخ تقرير الهدم",
+      "demolitionStarted": "تاريخ بدء الهدم",
+      "demolished": "تاريخ اكتمال الهدم",
+      "collapsed": "تاريخ الانهيار",
+      "burnedDown": "تاريخ الاحتراق",
+      "default": "تاريخ تغيّر الحالة"
+    },
+    "reserves": "النقد المتاح",
+    "revenues": "الإيرادات",
+    "expenses": "المصروفات",
+    "zone": "الحي",
+    "building": "المبنى المشغول",
+    "rent": "الإيجار",
+    "floorOccupancy": "المساحة الطابقية المشغولة",
+    "tenants": "المستأجرون",
+    "guests": "النزلاء",
+    "tabBasicInfo": "المعلومات الأساسية",
+    "utilizationTarget": "نسبة التشغيل المستهدفة",
+    "currentUtilization": "نسبة التشغيل الحالية",
+    "constructionSpeed": "سرعة البناء",
+    "constructionCostPerEpoch": "تكلفة البناء لكل حقبة",
+    "remainingConstruction": "مدة البناء المتبقية",
+    "remainingEpochs": "عدد الحقب: {{n}} تقريبًا",
+    "tabBuildingInfo": "معلومات المبنى",
+    "tabCargoInfo": "مناولة البضائع",
+    "tabTradeInfo": "العرض والطلب والتجارة",
+    "tabTourismInfo": "السياحة",
+    "tabEmploymentInfo": "التوظيف",
+    "action": {
+      "purchase": "شراء",
+      "bulldoze": "إزالة",
+      "cancelBulldoze": "إلغاء الإزالة",
+      "pause": "إيقاف مؤقت",
+      "resume": "استئناف",
+      "delete": "حذف",
+      "repair": "ترميم",
+      "rebuild": "إعادة البناء",
+      "edit": "تعديل",
+      "startConstruction": "بدء البناء",
+      "stopConstruction": "تعليق",
+      "cancelAbandon": "إلغاء التخلي",
+      "explode": "تفجير",
+      "explodeConfirm": "هل تريد تفجير هذا المبنى وإظهار الأمر كأنه حادث؟\nسينهار المبنى فورًا ويلقى كل من يسكنه أو يعمل فيه حتفه. ستسوء مشاعر المواطنين كثيرًا، ولا يمكن التراجع عن هذا الإجراء.",
+      "explodeTitle": "تفجير المبنى",
+      "explodeConfirmAction": "تفجير"
+    },
+    "pendingWarning": "هذا المبنى قيد التخطيط. أصدر أمر بدء البناء.",
+    "alerts": {
+      "diagnoseHint": "انقر لتشخيص السبب",
+      "title": "التنبيهات",
+      "constructionShortage": {
+        "title": "نقص في خدمات البناء",
+        "description": "تتأخر الأعمال لعدم كفاية ميزانية البناء."
+      },
+      "onFire": {
+        "title": "اندلع حريق!",
+        "description": "اندلع حريق في المبنى."
+      },
+      "accidentalFire": {
+        "title": "حريق عَرَضي (صغير)",
+        "description": "اندلع حريق عَرَضي في المبنى، لكن أمكن احتواؤه وهو صغير."
+      },
+      "infraDisconnected": {
+        "title": "غير متصل بشبكة البنية التحتية",
+        "description": "لا يوجد مسار بنية تحتية متصل بنقطة الربط في هذه المنشأة. لا يمكنها التوريد أو الاستلام حتى تتصل بالشبكة."
+      },
+      "capacityTight": {
+        "title": "قدرة شبه مستنفدة",
+        "description": "بلغت الكمية المُناولة 90% أو أكثر من قدرة هذه المنشأة. بالكاد يمكنها تلبية أي طلب إضافي."
+      },
+      "nonconforming": {
+        "title": "غير مطابق للوائح البناء",
+        "description": "لا يطابق المبنى لوائح البناء في قطعة الأرض. لن يُرمَّم، وسيُهدم عندما يتهالك."
+      },
+      "crime": {
+        "title": "وقوع جريمة",
+        "description": "وقعت جريمة في هذا المبنى."
+      },
+      "crimeSign": {
+        "title": "مؤشرات جريمة",
+        "description": "رُصدت مؤشرات جريمة في هذا المبنى. انتبه إلى تدهور الأمن العام."
+      },
+      "laborShortage": {
+        "title": "نقص في الأيدي العاملة",
+        "description": "عدد الموظفين غير كافٍ، لذا يقل الإنتاج وتقديم الخدمات عن الخطة."
+      },
+      "materialShortage": {
+        "title": "نقص في المواد الخام",
+        "description": "توريد المواد الخام غير كافٍ، لذا يقل الإنتاج وتقديم الخدمات عن الخطة."
+      },
+      "highSkillShortage": {
+        "title": "نقص في الكوادر المتخصصة",
+        "description": "لا يتوفر العدد المطلوب من أصحاب المهارات العالية، لذا خُفض الإنتاج إلى ما يستطيع الموجودون إنجازه."
+      },
+      "budgetCapped": {
+        "title": "عجز في الميزانية",
+        "description": "الميزانية المخصصة أقل بكثير من المبلغ المطلوب، لذا قُلّص التشغيل. راجع توزيع الميزانية."
+      },
+      "facilityWarning": {
+        "title": "منشأة عامة عاجزة عن العمل",
+        "description": "الخدمة التي تقدمها هذه المنشأة أقل بكثير من المستهدف. تحقق من توفر الأيدي العاملة والمواد الخام."
+      },
+      "sanitationWarning": {
+        "title": "تدهور الصرف الصحي والنظافة",
+        "description": "تدهورت حالة النظافة في موقع هذا المبنى تدهورًا خطيرًا وأثّرت في الأسر المقيمة. حسّن خدمات الصرف الصحي ومعالجة النفايات."
+      },
+      "infraWarning": {
+        "title": "توقف منشأة بنية تحتية أو انهيارها",
+        "description": "توقف هذه المنشأة أو انهيارها يؤثر في إمدادات البنية التحتية. تحقق من حالة المنشأة ومسارات الإمداد."
+      },
+      "farFromRoad": {
+        "title": "بعيد عن الطريق",
+        "description": "يبعد أقرب طريق نحو {{distance}} م. هذا يضعف كثيرًا الوصول لتوريد المواد والتنقل إلى العمل والتسوق، ففكّر في مدّ طريق إلى قرب المبنى."
+      },
+      "noRoadAccess": {
+        "title": "لا يوجد طريق يمكن الاتصال به",
+        "description": "لا يوجد طريق يمكن لهذا المبنى الاتصال به. هذا يضعف كثيرًا الوصول لتوريد المواد والتنقل إلى العمل والتسوق، فأنشئ طريقًا بالقرب منه."
+      }
+    },
+    "infra": {
+      "title": "الاتصال بالبنية التحتية",
+      "connected": "متصل",
+      "disconnected": "غير متصل",
+      "received": "الكمية المستلمة"
+    },
+    "tabConstructionInfo": "أعمال البناء",
+    "tabEducationInfo": "التعليم",
+    "education": {
+      "totalStudents": "عدد الطلاب المسجلين",
+      "totalCapacity": "الطاقة الاستيعابية الكلية",
+      "statusTitle": "حالة التسجيل",
+      "enrolled": "مسجَّل",
+      "vacant": "مقاعد شاغرة",
+      "noCapacity": "بلا طاقة استيعابية",
+      "countLabel": "العدد",
+      "enrollmentBySkill": "التسجيل حسب المهارة",
+      "settingsTitle": "إعداد حصص القبول",
+      "settingsHint": "حدّد وزن التوزيع لكل مهارة. تُقسم الطاقة الاستيعابية الكلية بنسبة الأوزان.",
+      "skillHeader": "المهارة",
+      "weightHeader": "الوزن",
+      "previewHeader": "المقاعد",
+      "save": "حفظ",
+      "saving": "جارٍ الحفظ...",
+      "saveFailed": "فشل الحفظ",
+      "sumMustBePositive": "يجب أن يكون مجموع الحصص 1 على الأقل",
+      "invalidWeight": "أدخل الأوزان أعدادًا صحيحة تساوي 0 أو أكثر",
+      "studentsList": "قائمة الطلاب",
+      "noStudents": "لا يوجد طلاب",
+      "showMore": "عرض المزيد ({{count}})"
+    }
+  },
+  "agentList": {
+    "filterType": "النوع",
+    "filterVariant": "الطراز",
+    "filterZone": "الحي",
+    "allVariants": "كل الطرازات",
+    "allZones": "كل الأحياء",
+    "resultCount": "النتائج: {{count}}",
+    "capped": "(من أصل {{total}})",
+    "loading": "جارٍ التحميل...",
+    "noResults": "لا توجد جهات اقتصادية مطابقة",
+    "colStatus": "الحالة",
+    "colVariant": "الطراز",
+    "colName": "الاسم",
+    "colProduct": "المنتج",
+    "colPrice": "السعر",
+    "colProduction": "كمية الإنتاج",
+    "colStock": "المخزون",
+    "colSold": "الكمية المبيعة",
+    "colWage": "معدل الأجر",
+    "colEmployment": "التوظيف",
+    "colUtilization": "نسبة التشغيل",
+    "colBdType": "نوع المبنى",
+    "colDurability": "المتانة",
+    "colRent": "الإيجار",
+    "colFloors": "عدد الطوابق",
+    "colFloorArea": "المساحة الطابقية",
+    "colOccupancy": "نسبة الإشغال",
+    "colFamilyType": "نوع الأسرة",
+    "colDiscretionaryIncome": "الدخل المتاح للإنفاق",
+    "colSatisNutrition": "التغذية",
+    "colSatisHealthcare": "الرعاية الصحية",
+    "colSatisLeisure": "الترفيه وأوقات الفراغ",
+    "colSatisResidential": "السكن",
+    "colAutomobile": "السيارة الخاصة"
+  }
+}

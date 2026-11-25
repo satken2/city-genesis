@@ -52,7 +52,7 @@
 }
 
 .biz-filter__count {
-  margin-left: auto;
+  margin-inline-start: auto;
   align-self: center;
   font-size: 1rem;
   color: #94a3b8;
@@ -97,7 +97,7 @@
   z-index: 1;
   background: #111827;
   padding: 8px 12px;
-  text-align: left;
+  text-align: start;
   font-weight: 600;
   font-size: 1rem;
   color: #8ba3bb;
@@ -107,7 +107,7 @@
 }
 
 .biz-th--right {
-  text-align: right !important;
+  text-align: end !important;
 }
 
 .biz-th--center {
@@ -128,7 +128,7 @@
 }
 
 .biz-th__arrow {
-  margin-left: 4px;
+  margin-inline-start: 4px;
   font-size: 1rem;
   opacity: 0.65;
 }
@@ -140,7 +140,7 @@
 }
 
 .biz-td--right {
-  text-align: right;
+  text-align: end;
   font-variant-numeric: tabular-nums;
 }
 

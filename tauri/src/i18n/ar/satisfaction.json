@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "منهك",
+    "unhappy": "غير راضٍ",
+    "neutral": "عادي",
+    "happy": "راضٍ",
+    "delighted": "راضٍ جدًا",
+    "zero": "رضا معدوم"
+  }
+}

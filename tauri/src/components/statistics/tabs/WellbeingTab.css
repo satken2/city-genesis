@@ -92,7 +92,7 @@
 }
 
 .wellbeing-kpi-card__unit {
-  margin-left: 6px;
+  margin-inline-start: 6px;
   font-size: 1rem;
   font-weight: 400;
   color: #5a6f86;
@@ -216,7 +216,7 @@
 }
 
 .wellbeing-detail__unit {
-  margin-left: 6px;
+  margin-inline-start: 6px;
   font-size: 1rem;
   font-weight: 400;
   color: #5a6f86;
@@ -232,7 +232,7 @@
 }
 
 .wellbeing-detail__range b {
-  margin-left: 4px;
+  margin-inline-start: 4px;
   color: #e2e8f0;
   font-weight: 600;
   font-variant-numeric: tabular-nums;

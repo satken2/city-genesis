@@ -55,7 +55,7 @@
   flex: 0 0 14rem;
   gap: 2px;
   padding: 12px 8px;
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.08);
   overflow-y: auto;
 }
 
@@ -67,7 +67,7 @@
   border-radius: 6px;
   color: #8ba3bb;
   font-size: 1rem;
-  text-align: left;
+  text-align: start;
   cursor: pointer;
   transition: background 0.12s, color 0.12s;
 }
@@ -137,7 +137,7 @@
   border-radius: 4px;
   color: #e5eef9;
   font-size: 1rem;
-  text-align: right;
+  text-align: end;
   box-sizing: border-box;
   transition: border-color 0.12s;
 }

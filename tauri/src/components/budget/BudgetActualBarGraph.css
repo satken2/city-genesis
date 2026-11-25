@@ -70,7 +70,7 @@
   white-space: nowrap;
   width: 32px;
   flex-shrink: 0;
-  text-align: right;
+  text-align: end;
 }
 
 /* Individual horizontal bar. */
