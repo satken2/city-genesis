@@ -20,8 +20,9 @@
  *
  * Brush radius is fixed in screen pixels, so zoom changes its world coverage; there is no size setting.
  * Exclude road sides outside the city's rectangle, whose outside-city district membership cannot change.
- * The core validates connectivity and size (ZONE_CONTIGUITY_ERROR / ZONE_SIZE_ERROR); this panel only displays
- * results. On success, refresh map vectors and 3D through session:reload.
+ * Disconnected brushed roads are ignored in the live preview and discarded by the core (other districts split
+ * by the edit are separated into new districts). The core still validates size (ZONE_SIZE_ERROR); this panel
+ * displays any error. On success with changes, refresh map vectors and 3D through session:reload.
  *
  * District fills change only with data and belong in overlayDraw. Use animatedOverlayDraw for the moving brush,
  * highlights, and stroke trail without redrawing the whole map.
@@ -49,6 +50,7 @@ import {
   buildFrontages,
   buildRoadTargets,
   circleTouches,
+  connectedBrushPathIds,
   faceKey,
   findZoneAt,
   findSingleRoadGaps,
@@ -78,8 +80,10 @@ type Stroke = {
   mode: PaintMode;
   points: WorldPoint[];
   touched: Set<Block | RoadTarget>;
-  /** Directly touched sides and sides including filled intervening roads, shared by display and submission. */
+  /** Directly touched sides and sides including filled intervening roads. */
   picked: Set<Block | RoadTarget>;
+  /** Subset of picked connected to the target district (or the largest component when creating), used for preview. */
+  activePicked: Set<Block | RoadTarget>;
   faces: Set<FaceKey>;
   /** Submission succeeded; waiting for the map refresh. */
   committed: boolean;
@@ -177,6 +181,7 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   const zonesRef = useRef(zones);
   zonesRef.current = zones;
   const blocksRef = useRef<Block[]>([]);
+  const streetsRef = useRef<StreetEdge[]>([]);
   const frontagesRef = useRef<Frontage[]>([]);
   const roadTargetsRef = useRef<RoadTarget[]>([]);
   /** District membership per road side (<= 0 means unassigned). Avoid sending sides already belonging to the extension target. */
@@ -221,6 +226,7 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         width: path.width ?? 0,
       });
     }
+    streetsRef.current = streets;
     blocksRef.current = buildBlocks(streets);
     frontagesRef.current = buildFrontages(streets, vectors.parcels);
     roadTargetsRef.current = buildRoadTargets(streets, frontagesRef.current);
@@ -297,11 +303,26 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         for (const target of findSingleRoadGaps(roadTargetsRef.current, stroke.touched)) stroke.picked.add(target);
       }
       stroke.faces.clear();
+      const pickedPathIds: number[] = [];
       for (const target of stroke.picked) {
         for (const face of target.faces) {
-          if (isInsideCity(face)) stroke.faces.add(face);
+          if (isInsideCity(face)) {
+            stroke.faces.add(face);
+            pickedPathIds.push(parseFaceKey(face).pathId);
+          }
         }
       }
+      const connectedIds = connectedBrushPathIds(
+        streetsRef.current,
+        faceZonesRef.current,
+        pickedPathIds,
+        stroke.zoneId
+      );
+      stroke.activePicked = new Set(
+        [...stroke.picked].filter((target) =>
+          target.faces.some((face) => isInsideCity(face) && connectedIds.has(parseFaceKey(face).pathId))
+        )
+      );
     },
     [isInsideCity]
   );
@@ -338,6 +359,7 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         points: [e.world],
         touched: new Set(),
         picked: new Set(),
+        activePicked: new Set(),
         faces: new Set(),
         committed: false,
       };
@@ -383,11 +405,15 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         });
         setTool("expand");
       } else {
-        await fetchApi(buildApiUrl(apiBaseUrl, "/api/v1/paths/batch-zone"), {
+        const result = await fetchApi<{ updated_count?: number }>(buildApiUrl(apiBaseUrl, "/api/v1/paths/batch-zone"), {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ ...assignment, zone_id: stroke.zoneId }),
         });
+        if (result?.updated_count === 0) {
+          strokeRef.current = null;
+          return;
+        }
       }
       // Retain the stroke result until map refresh, when handleVectorsLoaded clears it.
       stroke.committed = true;
@@ -454,7 +480,7 @@ export function ZoneEditWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
       for (const p of stroke.points) ctx.lineTo(p.x, p.z);
       ctx.stroke();
       ctx.globalAlpha = PICKED_FILL_ALPHA;
-      for (const picked of stroke.picked) {
+      for (const picked of stroke.activePicked) {
         for (const ring of "ring" in picked ? [picked.ring] : picked.rings) {
           fillRing(ctx, ring);
           ctx.fill();

@@ -4,7 +4,7 @@ import { createRoot } from "react-dom/client";
 import { ZoneEditWindow } from "../../src/components/zone/ZoneEditWindow";
 import { PATH_SIDE_LEFT as LEFT, PATH_SIDE_RIGHT as RIGHT, PATH_STREET } from "../../src/constants";
 import {
-  buildFrontages, buildRoadTargets, faceKey, findSingleRoadGaps, findZoneAt,
+  buildFrontages, buildRoadTargets, connectedBrushPathIds, faceKey, findSingleRoadGaps, findZoneAt,
   type RoadTarget, type StreetEdge,
 } from "../../src/components/zone/zoneBrushTargets";
 import { mapProps } from "./mock-map";
@@ -123,3 +123,23 @@ const square = [
 assert.deepEqual((await paint(square, [], [[5, 5]], "block")).faces,
   new Set(square.map((path) => faceKey(path.pathId, LEFT))));
 console.log("PASS: a single parcel previews and submits only its frontage; one-road gap filling and block painting remain available");
+
+// 繋がっていない道路はプレビューから除外され、新規作成では最大(同数なら先頭)の塊だけが残る。
+const disconnectedStreets = [
+  street(31, 31, 32, [0, 0], [10, 0]),
+  street(32, 32, 33, [10, 0], [20, 0]),
+  street(33, 34, 35, [0, 40], [10, 40]),
+];
+const disconnectedFaces = new Map([
+  [faceKey(31, LEFT), 1], [faceKey(31, RIGHT), 1],
+  [faceKey(32, LEFT), 2], [faceKey(32, RIGHT), 2],
+  [faceKey(33, LEFT), 2], [faceKey(33, RIGHT), 2],
+]);
+assert.deepEqual(connectedBrushPathIds(disconnectedStreets, disconnectedFaces, [32, 33], 1), new Set([32]));
+assert.deepEqual(connectedBrushPathIds(disconnectedStreets, disconnectedFaces, [33], 1), new Set());
+assert.deepEqual(connectedBrushPathIds(disconnectedStreets, disconnectedFaces, [33, 31, 32], null), new Set([31, 32]));
+assert.deepEqual(connectedBrushPathIds(disconnectedStreets, disconnectedFaces, [33, 31], null), new Set([33]));
+const detachedPaint = await paint(disconnectedStreets, [], [[5, 41], [5, 1], [15, 1]], "road");
+assert.ok(detachedPaint.paints.some((ring) => ring.some(([, z]) => z < 10)));
+assert.ok(!detachedPaint.paints.some((ring) => ring.some(([, z]) => z > 30)));
+console.log("PASS: disconnected brushed streets are excluded from live preview for both expand and create");

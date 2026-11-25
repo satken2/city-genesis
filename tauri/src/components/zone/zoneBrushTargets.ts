@@ -276,3 +276,111 @@ export function findSingleRoadGaps(targets: RoadTarget[], touched: ReadonlySet<{
   return targets.filter((target) => !touched.has(target)
     && target.neighbors.length === 2 && target.neighbors.every((face) => faces.has(face)));
 }
+
+/**
+ * Filter brushed road IDs for live preview to those connected to the target district (when zoneId is set) or
+ * to the largest connected component (when creating a new district, breaking ties by first brushed order).
+ * Streets missing an endpoint node are kept so the core can resolve their virtual construction connections.
+ */
+export function connectedBrushPathIds(
+  streets: StreetEdge[],
+  faceZones: ReadonlyMap<FaceKey, number>,
+  pickedPathIds: number[],
+  zoneId: number | null
+): Set<number> {
+  const streetById = new Map<number, StreetEdge>();
+  const pathsByNode = new Map<number, number[]>();
+  for (const street of streets) {
+    streetById.set(street.pathId, street);
+    for (const nodeId of [street.startNodeId, street.endNodeId]) {
+      if (nodeId <= 0) continue;
+      const list = pathsByNode.get(nodeId);
+      if (list) list.push(street.pathId);
+      else pathsByNode.set(nodeId, [street.pathId]);
+    }
+  }
+
+  const order = new Map<number, number>();
+  for (const id of pickedPathIds) {
+    if (!order.has(id)) order.set(id, order.size);
+  }
+  if (order.size === 0) return new Set();
+
+  const unwelded = new Set<number>();
+  for (const id of order.keys()) {
+    const street = streetById.get(id);
+    if (!street || street.startNodeId <= 0 || street.endNodeId <= 0) unwelded.add(id);
+  }
+
+  const neighbors = (id: number, allowed: ReadonlySet<number>): number[] => {
+    const street = streetById.get(id);
+    if (!street) return [];
+    const out: number[] = [];
+    for (const nodeId of [street.startNodeId, street.endNodeId]) {
+      if (nodeId <= 0) continue;
+      for (const next of pathsByNode.get(nodeId) ?? []) {
+        if (next !== id && allowed.has(next)) out.push(next);
+      }
+    }
+    return out;
+  };
+
+  if (zoneId !== null) {
+    const seeds = new Set<number>();
+    for (const street of streets) {
+      if (
+        faceZones.get(faceKey(street.pathId, PATH_SIDE_LEFT)) === zoneId ||
+        faceZones.get(faceKey(street.pathId, PATH_SIDE_RIGHT)) === zoneId
+      ) {
+        seeds.add(street.pathId);
+      }
+    }
+    // Keep all brushed roads when none of the district's streets are inside the current map bbox.
+    if (seeds.size === 0) return new Set(order.keys());
+    const allowed = new Set<number>([...seeds, ...order.keys()]);
+    const visited = new Set<number>(seeds);
+    const queue = [...seeds];
+    while (queue.length > 0) {
+      const current = queue.pop()!;
+      for (const next of neighbors(current, allowed)) {
+        if (!visited.has(next)) {
+          visited.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    const result = new Set<number>(unwelded);
+    for (const id of order.keys()) {
+      if (visited.has(id)) result.add(id);
+    }
+    return result;
+  }
+
+  const allowed = new Set<number>(order.keys());
+  const visited = new Set<number>();
+  let best: number[] = [];
+  let bestOrder = Infinity;
+  for (const start of order.keys()) {
+    if (visited.has(start)) continue;
+    const component: number[] = [];
+    let minOrder = Infinity;
+    const queue = [start];
+    visited.add(start);
+    while (queue.length > 0) {
+      const current = queue.pop()!;
+      component.push(current);
+      minOrder = Math.min(minOrder, order.get(current)!);
+      for (const next of neighbors(current, allowed)) {
+        if (!visited.has(next)) {
+          visited.add(next);
+          queue.push(next);
+        }
+      }
+    }
+    if (component.length > best.length || (component.length === best.length && minOrder < bestOrder)) {
+      best = component;
+      bestOrder = minOrder;
+    }
+  }
+  return new Set<number>([...best, ...unwelded]);
+}
