@@ -20,6 +20,8 @@ public static class WindowsBuild
         if (scenes.Length == 0)
             throw new BuildFailedException("ビルド対象のシーンがありません。");
 
+        TerrainBuildShaders.EnsureIncluded();
+
         Directory.CreateDirectory(output);
         BuildReport report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
         {

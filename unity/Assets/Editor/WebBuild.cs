@@ -29,6 +29,8 @@ public static class WebBuild
         PlayerSettings.WebGL.nameFilesAsHashes = false;
         PlayerSettings.WebGL.maximumMemorySize = 4096;
 
+        TerrainBuildShaders.EnsureIncluded();
+
         string[] scenes = EditorBuildSettings.scenes.Where(scene => scene.enabled).Select(scene => scene.path).ToArray();
         BuildReport report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
         {
