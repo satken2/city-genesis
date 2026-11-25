@@ -28,6 +28,7 @@ public static class TrafficSignalsQA
     static readonly Dictionary<int, float[]> sections = new Dictionary<int, float[]>
     {
         [102] = new[] { 5.5f, 1, 0, .5f, 0, .2f, 2 },
+        [201] = new[] { 3f, 1, 0, 0f, 0, 0, 1 },
         [211] = new[] { 3f, 1, 0, .5f, 0, 0, 1 },
         [212] = new[] { 6f, 1, 0, .5f, 0, 0, 1 },
         [221] = new[] { 12f, 2, 2.5f, .5f, 0, 0, 1 },
@@ -112,7 +113,11 @@ public static class TrafficSignalsQA
             Scenario("cross-221", new[] { A(1, 221, 0), A(2, 221, 90), A(3, 221, 180), A(4, 221, 270) }, 4, 4, "cross");
             Scenario("tee-221", new[] { A(1, 221, 0), A(2, 221, 180), A(3, 221, 270) }, 3, 3, "tee");
             Scenario("cross-221x212", new[] { A(1, 221, 0), A(2, 212, 90), A(3, 221, 180), A(4, 212, 270) }, 4, 4, "alley-cross");
-            Scenario("tee-221x211", new[] { A(1, 221, 0), A(2, 221, 180), A(3, 211, 90) }, 3, 3);
+            Scenario("tee-221x211", new[] { A(1, 221, 0), A(2, 221, 180), A(3, 211, 90) }, 0, 0);
+            Scenario("tee-231x201", new[] { A(1, 231, 0), A(2, 231, 180), A(3, 201, 90) }, 0, 0);
+            Scenario("tee-231x212", new[] { A(1, 231, 0), A(2, 231, 180), A(3, 212, 90) }, 0, 0);
+            Scenario("cross-231x212", new[] { A(1, 231, 0), A(2, 212, 90), A(3, 231, 180), A(4, 212, 270) }, 4, 4);
+            Scenario("tee-231x221", new[] { A(1, 231, 0), A(2, 231, 180), A(3, 221, 90) }, 3, 3);
             Scenario("wide-231x241", new[] { A(1, 231, 0), A(2, 241, 90), A(3, 231, 180), A(4, 241, 270) }, 4, 4, "wide");
             Scenario("skew-221", new[] { A(1, 221, 10), A(2, 221, 75), A(3, 221, 190), A(4, 221, 290) }, 4, 4, "skew");
             Scenario("ramp-221", new[] { A(1, 221, 0), A(2, 221, 180), A(3, 102, 270, 1, true) }, 3, 3);

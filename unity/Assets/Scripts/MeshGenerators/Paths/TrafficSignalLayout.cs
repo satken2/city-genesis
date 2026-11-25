@@ -56,6 +56,7 @@ public static class TrafficSignalLayout
             if (path.start_node_id != path.end_node_id && sections.ContainsKey(path.path_id)) arms.Add(path);
         arms.Sort((a, b) => a.path_id.CompareTo(b.path_id));
         if (!IsSignalized(arms)) return null;
+        if (RoadJunctionPriority.TryResolve(nodeId, arms, p => sections[p.path_id].Direction, out _)) return null;
 
         var context = new Context
         {

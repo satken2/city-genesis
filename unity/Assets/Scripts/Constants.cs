@@ -343,6 +343,8 @@ public static class Constants
     public const float ADJACENT_LOGISTICS_GAP_M = 50.0f;
     public const float NEAR_PARCEL_NODE_THRESHOLD = 2.0f;
     public const float PATH_CURVATURE_WINDOW_M = 10.0f;
+    public const float JUNCTION_MAIN_MAX_DEFLECTION_DEG = 45.0f;
+    public const float JUNCTION_MINOR_MAX_IMPEDANCE = 0.15f;
     public const float IRREGULAR_QUAD_FILL_THRESHOLD = 0.9f;
     public const float IRREGULAR_QUAD_IMPROVEMENT_RATIO = 1.1f;
     public const float IRREGULAR_QUAD_MARGIN = 1.0f;

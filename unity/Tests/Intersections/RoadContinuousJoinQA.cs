@@ -80,6 +80,63 @@ internal static class RoadContinuousJoinQA
             Check(Join() == null, "折れ角・向き・位置の不一致、または長さのない道路を直接つなぎました。");
             checks++;
         }
+        checks += CheckMinorJunctionPriority();
+        return checks;
+    }
+
+    private static int CheckMinorJunctionPriority()
+    {
+        int checks = 0;
+        PathSummary Street(int id, float width, float deg, int dir = Constants.DIR_BOTH)
+        {
+            float rad = deg * MathF.PI / 180f;
+            return new PathSummary {
+                path_id = id, path_type = Constants.PATH_STREET, path_variant = width >= 24f ? 231 : width >= 12f ? 221 : width >= 6f ? 212 : 201,
+                width = width, status = Constants.STATUS_ACTIVE, travel_direction = dir,
+                start_node_id = 1, end_node_id = 100 + id,
+                start_point = new List<object> { 0f, 0f, 0f },
+                end_point = new List<object> { MathF.Cos(rad) * 60f, 0f, MathF.Sin(rad) * 60f },
+            };
+        }
+        Vector2 Dir(PathSummary p) => RoadMarkingRules.Outward(p, 1);
+
+        // 4車線(24m)本線＋未舗装(3m)T字: p = 3/51 < 0.15 → 本線優先(非交差点)
+        var arterialMinorT = new List<PathSummary> { Street(1, 24f, 0f), Street(2, 24f, 180f), Street(3, 3f, 90f) };
+        Check(RoadJunctionPriority.TryResolve(1, arterialMinorT, Dir, out var main) && main.IsMain(1) && main.IsMain(2) && !main.IsMain(3),
+            "4車線＋未舗装T字が本線優先になりません。");
+        // 本線側だけアプローチ標示を消し、脇道側は残す
+        var prevConnected = RoadMarkingRules.ConnectedPaths;
+        RoadMarkingRules.ConnectedPaths = _ => arterialMinorT;
+        try
+        {
+            Check(RoadMarkingRules.Available(arterialMinorT[0], 1) == RoadMarkingTurns.None, "本線優先ノードの本線にアプローチ標示が残りました。");
+            Check(RoadMarkingRules.Available(arterialMinorT[2], 1) != RoadMarkingTurns.None, "本線優先ノードの脇道のアプローチ標示が消えました。");
+        }
+        finally { RoadMarkingRules.ConnectedPaths = prevConnected; }
+        checks += 3;
+
+        // 4車線(24m)本線＋1車線(6m)T字(p=6/54=0.111)は非交差点、十字(p=12/60=0.20)は通常交差点
+        var arterialOneLaneT = new List<PathSummary> { Street(1, 24f, 0f), Street(2, 24f, 180f), Street(3, 6f, 90f) };
+        Check(RoadJunctionPriority.TryResolve(1, arterialOneLaneT, Dir, out _), "4車線＋1車線T字が本線優先になりません。");
+        var arterialOneLaneCross = new List<PathSummary> { Street(1, 24f, 0f), Street(2, 24f, 180f), Street(3, 6f, 90f), Street(4, 6f, 270f) };
+        Check(!RoadJunctionPriority.TryResolve(1, arterialOneLaneCross, Dir, out _), "4車線＋1車線十字が通常交差点になりません。");
+        checks += 2;
+
+        // 1車線(6m)＋極小路地(3m)T字(p=3/15=0.20)と4車線＋2車線T字(p=12/60=0.20)は通常交差点
+        var oneLaneAlley = new List<PathSummary> { Street(1, 6f, 0f), Street(2, 6f, 180f), Street(3, 3f, 90f) };
+        Check(!RoadJunctionPriority.TryResolve(1, oneLaneAlley, Dir, out _), "1車線＋極小路地T字が通常交差点になりません。");
+        var arterialTwoLane = new List<PathSummary> { Street(1, 24f, 0f), Street(2, 24f, 180f), Street(3, 12f, 90f) };
+        Check(!RoadJunctionPriority.TryResolve(1, arterialTwoLane, Dir, out _), "4車線＋2車線T字が通常交差点になりません。");
+        checks += 2;
+
+        // 踏切(線路)や高速ランプが混ざれば幅比にかかわらず通常交差点
+        var railArm = Street(3, 3f, 90f); railArm.path_type = Constants.PATH_TRACK;
+        Check(!RoadJunctionPriority.TryResolve(1, new List<PathSummary> { Street(1, 24f, 0f), Street(2, 24f, 180f), railArm }, Dir, out _),
+            "踏切が本線優先として扱われました。");
+        var rampArm = Street(3, 5.5f, 90f); rampArm.path_type = Constants.PATH_MOTORWAY;
+        Check(!RoadJunctionPriority.TryResolve(1, new List<PathSummary> { Street(1, 24f, 0f), Street(2, 24f, 180f), rampArm }, Dir, out _),
+            "高速ランプ接続が本線優先として扱われました。");
+        checks += 2;
         return checks;
     }
 

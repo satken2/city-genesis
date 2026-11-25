@@ -164,6 +164,8 @@ public static class RoadMarkingRules
         int count = 0;
         foreach (var p in roads) if (IsRoad(p) && p.status == Constants.STATUS_ACTIVE) count++;
         if (count < 3 || path.path_type != Constants.PATH_STREET) return RoadMarkingTurns.None;
+        if (RoadJunctionPriority.TryResolve(node, roads, p => Outward(p, node), out var main) && main.IsMain(path.path_id))
+            return RoadMarkingTurns.None;
         Vector2 incoming = -Outward(path, node);
         RoadMarkingTurns result = RoadMarkingTurns.None;
         foreach (var p in roads)

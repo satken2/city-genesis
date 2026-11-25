@@ -252,7 +252,20 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
                 if (wb > 0f) specs.Add(MakeConnector(end - sb.Direction * Mathf.Min(wb * 2f, sb.Distance * 0.25f), end, sb.Direction, sb.Direction, 0f, wb, PathParts.Folder(b), b.path_type, node, horizontalPlane, "wall"));
             }
         }
-        bool transition = ordered.Count == 2 && Vector2.Dot(sections[ordered[0].path_id].Direction, sections[ordered[1].path_id].Direction) < -0.8f;
+        bool twoWayTransition = ordered.Count == 2 && Vector2.Dot(sections[ordered[0].path_id].Direction, sections[ordered[1].path_id].Direction) < -0.8f;
+        PathSummary throughA = twoWayTransition ? ordered[0] : null;
+        PathSummary throughB = twoWayTransition ? ordered[1] : null;
+        bool minorJunction = false;
+        if (!twoWayTransition
+            && RoadJunctionPriority.TryResolve(nodeId, paths,
+                p => sections.TryGetValue(p.path_id, out var s) ? s.Direction : RoadMarkingRules.Outward(p, nodeId),
+                out var mainPair)
+            && sections.ContainsKey(mainPair.A.path_id) && sections.ContainsKey(mainPair.B.path_id))
+        {
+            minorJunction = true;
+            throughA = mainPair.A;
+            throughB = mainPair.B;
+        }
         foreach (var path in ordered)
         {
             if (TrackIntersectionMeshGenerator.IsTrackType(path.path_type)) continue;
@@ -260,11 +273,12 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             var master = MasterDataStore.Instance?.GetPathMaster(path.path_variant);
             float width = Mathf.Max(0f, master?.center_width ?? 0f);
             if (width <= 0f) continue;
-            var other = transition ? ordered[ordered[0] == path ? 1 : 0] : null;
+            var other = throughA != null && (path == throughA || path == throughB)
+                ? (path == throughA ? throughB : throughA) : null;
             float otherWidth = other != null ? Mathf.Max(0f, MasterDataStore.Instance?.GetPathMaster(other.path_variant)?.center_width ?? 0f) : 0f;
             if (otherWidth > 0f)
             {
-                if (path != ordered[0]) continue;
+                if (path != throughA) continue;
                 var otherSection = sections[other.path_id];
                 var spec = MakeConnector(section.Center, otherSection.Center, -section.Direction, otherSection.Direction,
                     width, otherWidth, PathParts.Folder(path), path.path_type, node, horizontalPlane, "center");
@@ -274,12 +288,27 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             else specs.Add(MakeConnector(section.Center, section.Center - section.Direction * Mathf.Min(width * 2f, section.Distance * 0.5f),
                 -section.Direction, -section.Direction, width, 0f, PathParts.Folder(path), path.path_type, node, horizontalPlane, "center"));
         }
-        if (transition && !TrackIntersectionMeshGenerator.IsTrackType(ordered[0].path_type) && !TrackIntersectionMeshGenerator.IsTrackType(ordered[1].path_type))
-            BuildTransitionLines(ordered[0], ordered[1], sections, specs, node, horizontalPlane);
+        if (throughA != null && !TrackIntersectionMeshGenerator.IsTrackType(throughA.path_type) && !TrackIntersectionMeshGenerator.IsTrackType(throughB.path_type))
+        {
+            // 脇道が刺さる側の外側線は省き、入口を実線で塞がない。
+            bool leftOpen = false, rightOpen = false;
+            if (minorJunction)
+            {
+                var sa = sections[throughA.path_id];
+                foreach (var p in ordered)
+                {
+                    if (p == throughA || p == throughB) continue;
+                    float sideDot = Vector2.Dot(sections[p.path_id].Direction, sa.Left);
+                    if (sideDot > 0.1f) leftOpen = true;
+                    else if (sideDot < -0.1f) rightOpen = true;
+                }
+            }
+            BuildTransitionLines(throughA, throughB, sections, specs, node, horizontalPlane, leftOpen, rightOpen);
+        }
     }
 
     private static void BuildTransitionLines(PathSummary a, PathSummary b, Dictionary<int, PathEndSection> sections,
-        List<SidewalkConnectorSpec> specs, Vector3 node, bool horizontalPlane)
+        List<SidewalkConnectorSpec> specs, Vector3 node, bool horizontalPlane, bool omitLeftEdge = false, bool omitRightEdge = false)
     {
         RoadPath.GetPathMasterParams(a, out float aw, out float asw, out float aside, out _, out int alanes, out _, out float acenter, out _, out _, out _, out _);
         RoadPath.GetPathMasterParams(b, out float bw, out float bsw, out float bside, out _, out int blanes, out _, out float bcenter, out _, out _, out _, out _);
@@ -287,9 +316,26 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         var sa = sections[a.path_id]; var sb = sections[b.path_id];
         float ae = aw * 0.5f - asw - aside * 0.5f, be = bw * 0.5f - bsw - bside * 0.5f;
         for (int side = -1; side <= 1; side += 2)
+        {
+            if ((side > 0 && omitLeftEdge) || (side < 0 && omitRightEdge)) continue;
             specs.Add(MakeConnector(sa.Center + sa.Left * ae * side, sb.Center - sb.Left * be * side,
                 -sa.Direction, sb.Direction, aside * 0.3f, bside * 0.3f, PathParts.Folder(a), a.path_type, node, horizontalPlane, "line"));
-        if (acenter <= 0f && bcenter <= 0f)
+        }
+        var layoutA = new RoadLaneLayout(aw, asw, aside, acenter, alanes, a.travel_direction);
+        var layoutB = new RoadLaneLayout(bw, bsw, bside, bcenter, blanes, b.travel_direction);
+        var boundsA = new List<(float offset, bool dashed)>(layoutA.Boundaries());
+        var boundsB = new List<(float offset, bool dashed)>(layoutB.Boundaries());
+        if (boundsA.Count == boundsB.Count && boundsA.Count > 0)
+        {
+            for (int i = 0; i < boundsA.Count; i++)
+            {
+                var spec = MakeConnector(sa.Center + sa.Left * boundsA[i].offset, sb.Center - sb.Left * boundsB[i].offset,
+                    -sa.Direction, sb.Direction, aside * 0.3f, bside * 0.3f, PathParts.Folder(a), a.path_type, node, horizontalPlane, "line");
+                spec.Dashed = boundsA[i].dashed && boundsB[i].dashed;
+                specs.Add(spec);
+            }
+        }
+        else if (acenter <= 0f && bcenter <= 0f)
         {
             int count = Mathf.Max(alanes, blanes);
             for (int lane = 1; lane < count; lane++)
