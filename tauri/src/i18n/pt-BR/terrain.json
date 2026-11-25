@@ -9,7 +9,8 @@
     "2": "Deserto",
     "3": "Campo verdejante",
     "4": "Campo de neve",
-    "5": "Semiárido"
+    "5": "Semiárido",
+    "6": "Grade"
   },
   "climate": {
     "label": "Clima",

@@ -9,7 +9,8 @@
     "2": "Pustynia",
     "3": "Bujna łąka",
     "4": "Pole śnieżne",
-    "5": "Teren półsuchy"
+    "5": "Teren półsuchy",
+    "6": "Siatka"
   },
   "climate": {
     "label": "Klimat",

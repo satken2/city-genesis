@@ -9,7 +9,8 @@
     "2": "Desert",
     "3": "Lush Meadow",
     "4": "Snowfield",
-    "5": "Semi-arid"
+    "5": "Semi-arid",
+    "6": "Grid"
   },
   "climate": {
     "label": "Climate",

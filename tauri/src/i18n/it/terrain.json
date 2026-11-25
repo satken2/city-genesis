@@ -9,7 +9,8 @@
     "2": "Deserto",
     "3": "Prato rigoglioso",
     "4": "Distesa innevata",
-    "5": "Zona semiarida"
+    "5": "Zona semiarida",
+    "6": "Griglia"
   },
   "climate": {
     "label": "Clima",

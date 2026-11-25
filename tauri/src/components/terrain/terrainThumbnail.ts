@@ -1,6 +1,7 @@
 import {
   GROUND_COVER_DESERT,
   GROUND_COVER_GRASSLAND,
+  GROUND_COVER_GRID,
   GROUND_COVER_LUSH,
   GROUND_COVER_SEMI_ARID,
   GROUND_COVER_SNOW,
@@ -30,6 +31,7 @@ const THUMBNAIL_GROUND_COVER_RAMPS: Record<number, readonly Rgb[]> = {
   [GROUND_COVER_LUSH]: [[146, 192, 124], [106, 162, 88], [70, 128, 62], [42, 90, 44]],
   [GROUND_COVER_SNOW]: [[232, 238, 245], [214, 224, 236], [186, 200, 216], [148, 164, 184]],
   [GROUND_COVER_SEMI_ARID]: ELEVATION_RAMP,
+  [GROUND_COVER_GRID]: [[218, 222, 227], [198, 203, 210], [176, 182, 190], [148, 154, 164]],
 };
 
 export function thumbnailElevationRamp(groundCover?: number): readonly Rgb[] {

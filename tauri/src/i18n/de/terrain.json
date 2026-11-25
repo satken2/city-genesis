@@ -9,7 +9,8 @@
     "2": "Wüste",
     "3": "Sattes Grünland",
     "4": "Schneefeld",
-    "5": "Trockengebiet"
+    "5": "Trockengebiet",
+    "6": "Raster"
   },
   "climate": {
     "label": "Klima",

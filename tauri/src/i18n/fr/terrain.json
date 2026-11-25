@@ -9,7 +9,8 @@
     "2": "Désert",
     "3": "Prairie luxuriante",
     "4": "Champ de neige",
-    "5": "Semi-aride"
+    "5": "Semi-aride",
+    "6": "Grille"
   },
   "climate": {
     "label": "Climat",

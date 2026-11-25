@@ -1,5 +1,6 @@
 import {
   GROUND_COVER_DESERT,
+  GROUND_COVER_GRID,
   GROUND_COVER_LUSH,
   GROUND_COVER_SEMI_ARID,
   GROUND_COVER_SNOW,
@@ -34,6 +35,9 @@ export function GroundCoverIcon({ cover, label }: { cover: number; label: string
       break;
     case GROUND_COVER_SEMI_ARID:
       shape = <><path d="M4 34h40M8 34l6 6-3 5M14 40h12l5-6M26 40l6 5M25 33V21m0 7-6-6m6 2 6-8M8 23l3 3m25-1 4-3" /></>;
+      break;
+    case GROUND_COVER_GRID:
+      shape = <><rect x="6" y="6" width="36" height="36" rx="3" /><path d="M18 6v36M30 6v36M6 18h36M6 30h36" /></>;
       break;
     default:
       shape = <><path d="M4 41h40M14 40Q15 27 7 23M14 35q3-13 8-17M25 40q-1-18-7-29M25 32q4-11 9-13M35 40q0-12 6-16" /></>;

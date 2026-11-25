@@ -352,6 +352,7 @@ public static class Constants
     public const int GROUND_COVER_LUSH = 3;
     public const int GROUND_COVER_SNOW = 4;
     public const int GROUND_COVER_SEMI_ARID = 5;
+    public const int GROUND_COVER_GRID = 6;
     public const int CLIMATE_AF = 1;
     public const int CLIMATE_AM = 2;
     public const int CLIMATE_AW = 3;
@@ -527,7 +528,7 @@ public static class Constants
 
     public static readonly int[] SHIP_VEHICLE_KEYS = new int[] { VEHICLE_FERRY };
 
-    public static readonly int[] GROUND_COVER_TYPES = new int[] { GROUND_COVER_GRASSLAND, GROUND_COVER_DESERT, GROUND_COVER_LUSH, GROUND_COVER_SNOW, GROUND_COVER_SEMI_ARID };
+    public static readonly int[] GROUND_COVER_TYPES = new int[] { GROUND_COVER_GRASSLAND, GROUND_COVER_DESERT, GROUND_COVER_LUSH, GROUND_COVER_SNOW, GROUND_COVER_SEMI_ARID, GROUND_COVER_GRID };
 
     public static readonly int[] CLIMATE_TYPES = new int[] { CLIMATE_AF, CLIMATE_AM, CLIMATE_AW, CLIMATE_BWH, CLIMATE_BWK, CLIMATE_BSH, CLIMATE_BSK, CLIMATE_CSA, CLIMATE_CSB, CLIMATE_CFA, CLIMATE_CWA, CLIMATE_CFB, CLIMATE_CFC, CLIMATE_DFA, CLIMATE_DFB, CLIMATE_DFC, CLIMATE_DFD, CLIMATE_DWA, CLIMATE_ET, CLIMATE_EF, CLIMATE_H };
 

@@ -148,3 +148,30 @@ MonoBehaviour:
     shoreSandColor: {r: 0.8, g: 0.72, b: 0.56, a: 1}
     shoreRockStartAngle: 56.633
     shoreRockFullAngle: 68.284
+  - groundCover: 6
+    textureResource: Textures/ground-grid-albedo
+    textureTileSize: {x: 50, y: 50}
+    textureColorWeight: 1
+    textureLuminance: 0.646
+    textureContrast: 1
+    smoothness: 0.08
+    proceduralBlend: 0
+    proceduralScale: 50
+    groundColorA: {r: 0.81, g: 0.825, b: 0.845, a: 1}
+    groundColorB: {r: 0.79, g: 0.805, b: 0.825, a: 1}
+    groundColorC: {r: 0.84, g: 0.855, b: 0.875, a: 1}
+    detailNormalStrength: 0
+    rippleStrength: 0
+    rippleWavelength: 0.6
+    macroVariationStrength: 0
+    macroVariationTint: {r: 1, g: 1, b: 1, a: 1}
+    colorGradeStrength: 0
+    lowColor: {r: 1, g: 1, b: 1, a: 1}
+    highColor: {r: 1, g: 1, b: 1, a: 1}
+    slopeColor: {r: 0.75, g: 0.77, b: 0.8, a: 1}
+    rockTint: {r: 0.82, g: 0.84, b: 0.87, a: 1}
+    rockStartAngle: 56.633
+    rockFullAngle: 68.284
+    shoreSandColor: {r: 0.78, g: 0.8, b: 0.82, a: 1}
+    shoreRockStartAngle: 56.633
+    shoreRockFullAngle: 68.284

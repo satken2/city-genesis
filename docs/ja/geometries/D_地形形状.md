@@ -75,6 +75,7 @@ Tauri の地形エディタは、シナリオの地形 API で標高・水面・
 | `GROUND_COVER_LUSH` | 濃い草地 |
 | `GROUND_COVER_SNOW` | 雪原 |
 | `GROUND_COVER_SEMI_ARID` | 乾燥地 |
+| `GROUND_COVER_GRID` | グリッド（灰色のグリッド床） |
 
 気候は都市とシナリオが保存する12か月の天気・気温・降水量・日照で、[天気と環境光](U_天気と環境光.md) に定める。
 

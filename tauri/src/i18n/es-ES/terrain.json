@@ -9,7 +9,8 @@
     "2": "Desierto",
     "3": "Pradera frondosa",
     "4": "Campo nevado",
-    "5": "Semiárido"
+    "5": "Semiárido",
+    "6": "Cuadrícula"
   },
   "climate": {
     "label": "Clima",

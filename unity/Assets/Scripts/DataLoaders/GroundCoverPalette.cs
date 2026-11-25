@@ -176,14 +176,15 @@ public class GroundCoverProfile
     }
 
     /// <summary>
-    /// Defaults for five types. Grassland uses the values already tuned in the scene (GameScene.unity), preserving its prior appearance.
-    /// The other four start from brightness values compatible with the same lighting and tone mapping, intended for refinement in the running game.
+    /// Defaults for all ground cover types. Grassland uses the values already tuned in the scene (GameScene.unity), preserving its prior appearance.
+    /// The other types start from brightness values compatible with the same lighting and tone mapping, intended for refinement in the running game.
     /// </summary>
     public static GroundCoverProfile[] CreateDefaults()
     {
         const string grassTexture = "grass-2500-mm-architextures";
         const string sandTexture = "Textures/ground-sand-albedo";
         const string dryGrassTexture = "Textures/ground-dry-grass-albedo";
+        const string gridTexture = "Textures/ground-grid-albedo";
         return new[]
         {
             new GroundCoverProfile
@@ -276,6 +277,25 @@ public class GroundCoverProfile
                 slopeColor = new Color(0.70f, 0.58f, 0.44f),
                 rockTint = new Color(1.05f, 0.99f, 0.90f), shoreSandColor = new Color(0.80f, 0.72f, 0.56f),
                 rockStartAngle = 56.633f, rockFullAngle = 68.284f, shoreRockStartAngle = 56.633f, shoreRockFullAngle = 68.284f, // Dry coasts stay sandy up to cliff angles
+            },
+            new GroundCoverProfile
+            {
+                groundCover = Constants.GROUND_COVER_GRID,
+                // 50m tile divides CellSize (500m) evenly so Terrain tiles and Far/Background meshes align seamlessly.
+                textureResource = gridTexture, textureTileSize = new Vector2(50f, 50f),
+                textureColorWeight = 1f, textureLuminance = 0.646f, textureContrast = 1f, smoothness = 0.08f,
+                proceduralBlend = 0f, proceduralScale = 50f,
+                groundColorA = new Color(0.81f, 0.825f, 0.845f),
+                groundColorB = new Color(0.79f, 0.805f, 0.825f),
+                groundColorC = new Color(0.84f, 0.855f, 0.875f),
+                detailNormalStrength = 0f, rippleStrength = 0f, rippleWavelength = 0.6f,
+                macroVariationStrength = 0f, macroVariationTint = Color.white,
+                colorGradeStrength = 0f,
+                lowColor = Color.white,
+                highColor = Color.white,
+                slopeColor = new Color(0.75f, 0.77f, 0.80f),
+                rockTint = new Color(0.82f, 0.84f, 0.87f), shoreSandColor = new Color(0.78f, 0.80f, 0.82f),
+                rockStartAngle = 56.633f, rockFullAngle = 68.284f, shoreRockStartAngle = 56.633f, shoreRockFullAngle = 68.284f,
             },
         };
     }

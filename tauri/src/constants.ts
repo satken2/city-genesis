@@ -347,6 +347,7 @@ export const GROUND_COVER_DESERT: number = 2;
 export const GROUND_COVER_LUSH: number = 3;
 export const GROUND_COVER_SNOW: number = 4;
 export const GROUND_COVER_SEMI_ARID: number = 5;
+export const GROUND_COVER_GRID: number = 6;
 export const CLIMATE_AF: number = 1;
 export const CLIMATE_AM: number = 2;
 export const CLIMATE_AW: number = 3;
@@ -519,7 +520,7 @@ export const RAIL_VEHICLE_KEYS: number[] = [20, 21, 22, 23, 24];
 
 export const SHIP_VEHICLE_KEYS: number[] = [30];
 
-export const GROUND_COVER_TYPES: number[] = [1, 2, 3, 4, 5];
+export const GROUND_COVER_TYPES: number[] = [1, 2, 3, 4, 5, 6];
 
 export const CLIMATE_TYPES: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
 

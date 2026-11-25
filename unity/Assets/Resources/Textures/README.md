@@ -6,6 +6,7 @@
 | `cliff-rock-normal.png` | 崖用岩肌法線マップ(Rock051 2K NormalGL) | https://ambientcg.com/a/Rock051 | CC0 1.0 (商用利用可・クレジット不要) |
 | `ground-sand-albedo.jpg` | 砂の地面(Aerial Beach 01 2K Diffuse、作者 Rob Tuytel)。砂漠・雪原の濃淡と、沿岸の砂浜・海底の砂に使う | https://polyhaven.com/a/aerial_beach_01 | CC0 1.0 (商用利用可・クレジット不要) |
 | `ground-dry-grass-albedo.jpg` | 枯れ草の地面(Withered Grass 2K Diffuse、作者 Charlotte Baglioni)。乾燥地に使う | https://polyhaven.com/a/withered_grass | CC0 1.0 (商用利用可・クレジット不要) |
+| `ground-grid-albedo.png` | 灰色のグリッド床のアルベド(50m周期・10m副グリッド)。グリッド地表種別に使う | 自作(手続き生成) | 自作 |
 | `collapsed-rubble-albedo.png` | 倒壊した建物の瓦礫のアルベド(6m周期) | 自作(手続き生成。非公開の制作ツール `genesis-gallery` の `pipeline/jobs/build_collapsed_rubble_texture.py`) | 自作 |
 | `collapsed-rubble-normal.png` | 倒壊した建物の瓦礫の法線マップ(6m周期、NormalGL) | 同上 | 自作 |
 | `collapsed-sand-albedo.png` / `collapsed-sand-normal.png` | 倒壊した建物の砂の山のアルベドと法線マップ(3m周期、NormalGL) | 同上 | 自作 |

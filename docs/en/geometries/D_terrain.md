@@ -75,6 +75,7 @@ Ground cover selects the city's visual surface type and affects rendering only. 
 | `GROUND_COVER_LUSH` | Lush grass |
 | `GROUND_COVER_SNOW` | Snowfield |
 | `GROUND_COVER_SEMI_ARID` | Dry land |
+| `GROUND_COVER_GRID` | Grid (gray grid floor) |
 
 Cities and scenarios save twelve months of weather, temperature, precipitation, and sunshine. See [weather and lighting](U_weather-and-lighting.md).
 

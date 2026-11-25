@@ -3,6 +3,7 @@ import type { ClimateSettings } from "../../utils/climate";
 import {
   GROUND_COVER_DESERT,
   GROUND_COVER_GRASSLAND,
+  GROUND_COVER_GRID,
   GROUND_COVER_LUSH,
   GROUND_COVER_SEMI_ARID,
   GROUND_COVER_SNOW,
@@ -353,6 +354,7 @@ const GROUND_COVER_RAMPS: Record<number, [Rgb, Rgb, Rgb]> = {
   [GROUND_COVER_LUSH]: [[26, 84, 50], [72, 124, 52], [122, 98, 60]],
   [GROUND_COVER_SNOW]: [[208, 218, 230], [236, 240, 246], [150, 156, 166]],
   [GROUND_COVER_SEMI_ARID]: [[180, 160, 96], [168, 150, 92], [150, 112, 72]],
+  [GROUND_COVER_GRID]: [[210, 214, 219], [192, 197, 204], [164, 170, 178]],
 };
 
 /** Sea color (elevation at or below 0), also used as the 2D terrain editor background. */
