@@ -103,6 +103,7 @@ public static class Constants
     public const int MODEL_WASTE_PLANT = 17;
     public const int MODEL_QUARRY = 18;
     public const int MODEL_GAS_STATION = 19;
+    public const int MODEL_HUTS = 20;
     public const float MASHUP_CELL_SIZE = 12.0f;
     public const float MASHUP_GRID_PHASE_STEP = 0.5f;
     public const float OPEN_PIT_YARD_DEPTH = 40.0f;

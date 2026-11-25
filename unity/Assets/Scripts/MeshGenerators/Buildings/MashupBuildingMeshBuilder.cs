@@ -27,8 +27,6 @@ using GeneratedModels;
 ///
 /// Draw site decorations along the parcel: fences (fence-w / fence-c) opened at the front entry, gates and trails there, and ground panels (floor, only with master draw_floor=yes).
 /// Do not place tiles (tile).
-/// Tile the lane part (lane; footpaths between huts, pipes between tanks) down the gaps between adjacent wings (<see cref="MashupLaneLayout"/>).
-/// Like the wings they connect, lanes always follow terrain. Buildings without the part get none.
 /// Extrude the parcel polygon to the maximum rendered height for the collider
 /// (so clicking anywhere in the parcel selects the building).
 ///
@@ -98,18 +96,6 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
             centerPointWorld, deformToTerrain: isDynamic,
             combineInstances, materials, temporaryMeshes, frontFootprint: footprint);
 
-        // --- Lanes between wings ---
-        // Deferred with the other site decorations while a shown building is generated.
-        if (BuildingExteriorRenderer.Capture != null && BuildingExteriorRenderer.DeferSiteDecorations)
-        {
-            BuildingExteriorRenderer.Capture.Add((meshes, laneMaterials, temporary) =>
-                AddLanes(buildingData, glbPrefix, centerPointWorld, meshes, laneMaterials, temporary));
-        }
-        else
-        {
-            AddLanes(buildingData, glbPrefix, centerPointWorld, combineInstances, materials, temporaryMeshes);
-        }
-
         if (combineInstances.Count == 0 && !BuildingExteriorRenderer.HasCapturedWork)
         {
             // If no sub-buildings are registered and no decoration parts exist, show only a white footprint box to indicate presence.
@@ -146,44 +132,6 @@ public class MashupBuildingMeshBuilder : IBuildingMeshGenerator
         UnityLog.If(LocalConstants.UNITY_LOG_BUILDING,
             $"[Mashup] agent_id={buildingData.agent_id} の sub_buildings に不正なエントリがあるためスキップします。");
         return false;
-    }
-
-    /// <summary>
-    /// Tile the building's lane part along the gaps between adjacent wings. The part lives in folder 0 like the other site decorations.
-    /// </summary>
-    private static void AddLanes(BuildingSummary buildingData, string glbPrefix, Vector3 centerPointWorld,
-        List<CombineInstance> combineInstances, List<Material> materials, List<Mesh> temporaryMeshes)
-    {
-        if (buildingData.sub_buildings == null) return;
-        GameObject laneModule = BuildingMeshUtils.GetPartNoPosition(glbPrefix, "lane", 0, true);
-        if (laneModule == null) return;
-
-        var wings = new List<MashupLaneLayout.Wing>();
-        foreach (SubBuildingPlacement placement in buildingData.sub_buildings)
-        {
-            if (placement?.position == null || placement.position.Length < 2) continue;
-            MasterDataStore.SubBuildingMasterItem master = MasterDataStore.Instance != null
-                ? MasterDataStore.Instance.GetSubBuildingMaster(placement.subbuilding_id)
-                : null;
-            wings.Add(new MashupLaneLayout.Wing
-            {
-                Position = new Vector2(placement.position[0], placement.position[1]),
-                Rotation = placement.rotation,
-                CellsWide = CellSpan(master?.width),
-                CellsDeep = CellSpan(master?.height),
-            });
-        }
-        foreach (MashupLaneLayout.Run run in MashupLaneLayout.Plan(wings, Constants.MASHUP_CELL_SIZE, ModularBodyBuilder.PartRunWidth(laneModule)))
-        {
-            ModularBodyBuilder.AddPartRun(run.Start, run.End, laneModule, centerPointWorld, true,
-                combineInstances, materials, temporaryMeshes);
-        }
-    }
-
-    /// <summary>Cells a wing occupies along one side. Master sizes are in cells; unset is one cell and fractions round up, as the backend allocates them.</summary>
-    private static int CellSpan(float? size)
-    {
-        return Mathf.Max(1, Mathf.CeilToInt((size ?? 1f) - 1e-6f));
     }
 
     /// <summary>

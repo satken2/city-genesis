@@ -32,13 +32,14 @@ public static partial class OpenSpaceLayout
         "site_crusher", "site_conveyor", "site_rom", "site_workshop", "site_pond",
         "site_excavator", "site_truck", "site_loader", "site_pickup", "site_drill",
         "site_canopy", "site_fascia", "site_store", "site_sign", "site_fill", "site_vent", "site_air", "site_dumpster", "site_tanker",
-        "site_bollard", "site_stop", "site_pad", "site_joint", "site_paving", "site_curb", "site_grass", "site_marking" };
+        "site_bollard", "site_stop", "site_pad", "site_joint", "site_paving", "site_curb", "site_grass", "site_marking", "lane" };
     /// <summary>Numbered parts the plant plans place: as many as are numbered consecutively from 1.</summary>
-    public static readonly string[] FacilitySeries = { "site_stockpile", "site_rock", "site_heap", "site_clutter", "site_car", "site_shrub", "site_tree" };
+    public static readonly string[] FacilitySeries = { "site_stockpile", "site_rock", "site_heap", "site_clutter", "site_car", "site_shrub", "site_tree", "site_hut" };
 
     public static bool IsFacilityModel(int modelType) => modelType == Constants.MODEL_SUBSTATION
         || modelType == Constants.MODEL_WATER_STATION || modelType == Constants.MODEL_SEWAGE_PLANT || modelType == Constants.MODEL_WASTE_PLANT
-        || modelType == Constants.MODEL_OPEN_PIT || modelType == Constants.MODEL_QUARRY || modelType == Constants.MODEL_GAS_STATION;
+        || modelType == Constants.MODEL_OPEN_PIT || modelType == Constants.MODEL_QUARRY || modelType == Constants.MODEL_GAS_STATION
+        || modelType == Constants.MODEL_HUTS;
 
     /// <summary>Where the front of a building in a <see cref="FacilityYard.ListRow"/> points.</summary>
     enum Face { Street, Spine, Yard }

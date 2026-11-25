@@ -25,7 +25,7 @@ public static partial class OpenSpaceLayout
     const float GasCarAtPump = .5f, GasTanker = .35f;  // Chance that a car stands at a pump, that a tanker is unloading.
 
     /// <summary>Whether a model type's plan lays out the building's whole parcel rather than its footprint, which does not fill the parcel.</summary>
-    public static bool CoversParcel(int modelType) => modelType == Constants.MODEL_GAS_STATION;
+    public static bool CoversParcel(int modelType) => modelType == Constants.MODEL_GAS_STATION || modelType == Constants.MODEL_HUTS;
 
     static void GasStation(Plan p, uint seed, IReadOnlyDictionary<string, Vector2> sizes)
     {

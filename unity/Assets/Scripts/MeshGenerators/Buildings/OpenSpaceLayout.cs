@@ -25,7 +25,7 @@ public static partial class OpenSpaceLayout
         public string Part;
         public Vector2 Position;
         public Vector2 Forward;
-        public float Scale = 1f;
+        public Vector3 Scale = Vector3.one;  // Along the model's own axes (X width, Y height, Z depth).
         public bool Fitted;        // Placed from the actual model size, so the renderer skips its protrusion recheck.
         public bool Unit;          // A plant's building or equipment: always combined into the building mesh, with its own distant model.
         public float Use;          // Drawn only while the building's operation rate (0-1) exceeds this. 0 draws always.
@@ -43,6 +43,8 @@ public static partial class OpenSpaceLayout
         public Vector2? Gate;      // Center of the fence opening at a plant's gate. Null for sites without a fence.
         public Vector2[] Pit;      // Area the backend digs at an open pit or quarry. Null for other sites.
         public Vector2? PitFloor;  // Where a quarry's floor level is read (the backend cuts down to the ground here). Null where the backend digs as deep as it can.
+        public bool Bare;          // The site keeps its terrain: no ground panel, only a surface to click on.
+        public readonly List<(Vector2 a, Vector2 b)> Lanes = new List<(Vector2, Vector2)>();  // Runs the building's lane part is tiled along.
     }
     sealed class Grid
     {
@@ -79,6 +81,7 @@ public static partial class OpenSpaceLayout
         if (modelType == Constants.MODEL_OPEN_PIT) { OpenPit(plan, seed, partSizes); return plan; }
         if (modelType == Constants.MODEL_QUARRY) { Quarry(plan, seed, partSizes); return plan; }
         if (modelType == Constants.MODEL_GAS_STATION) { GasStation(plan, seed, partSizes); return plan; }
+        if (modelType == Constants.MODEL_HUTS) { Huts(plan, seed, partSizes); return plan; }
         var grid = MakeGrid(polygon);
         if (grid.Entry < 0) return plan;
         if (modelType == Constants.MODEL_PARKING) Parking(plan, grid);

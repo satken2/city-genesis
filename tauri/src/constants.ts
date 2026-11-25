@@ -98,6 +98,7 @@ export const MODEL_SEWAGE_PLANT: number = 16;
 export const MODEL_WASTE_PLANT: number = 17;
 export const MODEL_QUARRY: number = 18;
 export const MODEL_GAS_STATION: number = 19;
+export const MODEL_HUTS: number = 20;
 export const MASHUP_CELL_SIZE: number = 12.0;
 export const MASHUP_GRID_PHASE_STEP: number = 0.5;
 export const OPEN_PIT_YARD_DEPTH: number = 40.0;

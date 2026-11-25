@@ -115,6 +115,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
     /// a plant's units are always combined. fencePrefix is the model prefix whose fence parts enclose a plan with a gate.
     /// While a shown building is generated (<see cref="BuildingExteriorRenderer.Capture"/> set), the ground (the panel and the surfaces
     /// flush with it) becomes deferred low-priority work like other buildings' ground panels, and only a coarse surface to click on is made now.
+    /// A bare plan (<see cref="OpenSpaceLayout.Plan.Bare"/>) gets that surface to click on and no ground.
     /// </summary>
     public static BuildingMeshResult Build(OpenSpaceLayout.Plan plan,Dictionary<string,GameObject> parts,Vector3 center,bool terrain,Material floorOverride=null,
         Dictionary<string,string> paths=null,string fencePrefix=null)
@@ -178,14 +179,15 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
             }
             Mesh click;
             float clickLift=0f;
-            if(terrain && BuildingExteriorRenderer.Capture!=null)
+            if(terrain && (plan.Bare || BuildingExteriorRenderer.Capture!=null))
             {
-                BuildingExteriorRenderer.Capture.Add((meshes,mats,temporary)=>Ground(meshes,mats,temporary,true));
+                if(!plan.Bare)BuildingExteriorRenderer.Capture.Add((meshes,mats,temporary)=>Ground(meshes,mats,temporary,true));
                 click=ModularBodyBuilder.GenerateTerrainConformingFloorMesh(plan.Polygon,center,ClickTolerance);
                 if(click!=null)owned.Add(click);
                 // Raised by the most the coarse surface can dip (twice the tolerance, at its fans), so no part of it lies under the terrain.
                 clickLift=2f*ClickTolerance;
             }
+            else if(plan.Bare){click=BuildingMeshBuilder.GenerateHorizontalPolygonMesh(plan.Polygon,0f);if(click!=null)owned.Add(click);}
             else click=Ground(instances,materials,owned,false);
             if(click!=null)colliders.Add(new CombineInstance {mesh=click,transform=Matrix4x4.Translate(new Vector3(0,clickLift,0))});
             // A raised surface meets its sides, which read the terrain, so it is cut by the terrain grid instead of lying on the panel.
@@ -231,7 +233,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
                 var rect=new Vector2[4];
                 for(int i=0;i<4;i++)
                 {
-                    var local=new Vector3(i==0||i==3?b.min.x:b.max.x,0,i<2?b.min.z:b.max.z)*prop.Scale;
+                    var local=Vector3.Scale(new Vector3(i==0||i==3?b.min.x:b.max.x,0,i<2?b.min.z:b.max.z),prop.Scale);
                     var transformed=rotation*local;
                     rect[i]=prop.Position+new Vector2(transformed.x,transformed.z);
                 }
@@ -240,7 +242,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
                 Vector2 foot=prop.Ground??prop.Position;
                 float y=terrain?Utils.GetGroundHeight(new Vector3(center.x+foot.x,1000,center.z+foot.y))-center.y:0f;
                 var position=new Vector3(prop.Position.x,y+.02f+PropLift(raised,prop.Position),prop.Position.y);
-                var matrix=Matrix4x4.TRS(position,rotation,Vector3.one*prop.Scale);
+                var matrix=Matrix4x4.TRS(position,rotation,prop.Scale);
                 if(mesh==null)sink.Add(new InstancedPartRenderer.Instance {path=path,local=matrix,use=prop.Use});
                 else
                 {
@@ -249,8 +251,18 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
                 }
                 // A car that comes and goes is not part of what a click on the building hits.
                 if(prop.Use>0f)continue;
-                var collider=BuildingMeshBuilder.GenerateColliderMesh(rect,Mathf.Max(.1f,b.max.y*prop.Scale));
+                var collider=BuildingMeshBuilder.GenerateColliderMesh(rect,Mathf.Max(.1f,b.max.y*prop.Scale.y));
                 if(collider!=null){owned.Add(collider);colliders.Add(new CombineInstance {mesh=collider,transform=Matrix4x4.Translate(new Vector3(0,y,0))});}
+            }
+            // Lanes follow the terrain like fences, deferred with the other site decorations while a shown building is generated.
+            if(plan.Lanes.Count>0 && parts.TryGetValue("lane",out var lane))
+            {
+                void Lanes(List<CombineInstance> meshes,List<Material> mats,List<Mesh> temporary)
+                {
+                    foreach(var (a,b) in plan.Lanes)ModularBodyBuilder.AddPartRun(a,b,lane,center,terrain,meshes,mats,temporary);
+                }
+                if(BuildingExteriorRenderer.Capture!=null && BuildingExteriorRenderer.DeferSiteDecorations)BuildingExteriorRenderer.Capture.Add(Lanes);
+                else Lanes(instances,materials,owned);
             }
             // The fence follows the site edge and opens at the gate, as the shared site decorations place it for other buildings.
             if(fencePrefix!=null && plan.Gate.HasValue)

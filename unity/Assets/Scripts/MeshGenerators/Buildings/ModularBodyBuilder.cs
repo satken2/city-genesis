@@ -1350,13 +1350,6 @@ public static class ModularBodyBuilder
         }
     }
 
-    /// <summary>Extent across the run (m) of a part tiled by <see cref="AddPartRun"/>. Zero without a mesh.</summary>
-    public static float PartRunWidth(GameObject module)
-    {
-        Mesh mesh = GetWallSourceMesh(module);
-        return mesh != null ? mesh.bounds.size.z : 0f;
-    }
-
     /// <summary>
     /// Shared tiling of wall-style parts (base/mid/top-w, fence-w, scaffold-wall) along one edge.
     ///

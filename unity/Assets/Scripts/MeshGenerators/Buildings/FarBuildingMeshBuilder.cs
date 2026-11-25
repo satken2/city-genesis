@@ -11,7 +11,7 @@ using UnityEngine;
 ///   (wings are authored smaller than their cells and the remainder is the gap between wings), × wing floors×floor height,
 ///   where the normal assembly draws the wing (MashupBuildingMeshBuilder.ResolveDrawnPlacement).
 ///   Wings without distant models stretch a unit cube to the occupied cells (sub-building master width×height cells).
-/// - Plant unit: draw `{part}_far` at its authored size where the plant's plan places the unit. Units without distant models are left out.
+/// - Plant unit: draw `{part}_far` at its authored size, scaled as the plan scales the unit, where the plan places it. Units without distant models are left out.
 /// Resolve models by scanning exterior model-number folders.
 /// Fit height above the model origin (contact plane), so underground/underwater geometry below origin scales identically.
 /// Keep the model's materials and UVs; triangles sharing a material go into one submesh across wings.
@@ -39,7 +39,7 @@ public static class FarBuildingMeshBuilder
                 if (model == null) continue;
                 float baseY = Utils.GetGroundHeight(new Vector3(center.x + unit.Position.x, 1000f, center.z + unit.Position.y)) - center.y;
                 AddStretched(model, null, 0f, Quaternion.LookRotation(new Vector3(unit.Forward.x, 0f, unit.Forward.y)),
-                    new Vector3(unit.Position.x, baseY, unit.Position.y), parts);
+                    new Vector3(unit.Position.x, baseY, unit.Position.y), parts, unit.Scale);
             }
         }
         else if (buildingData.sub_buildings != null && buildingData.sub_buildings.Count > 0)
@@ -129,9 +129,9 @@ public static class FarBuildingMeshBuilder
 
     /// <summary>
     /// Stretch the model (or unit cube) in unrotated local space to rect in XZ and height vertically, then rotate/translate into place.
-    /// A null rect keeps the authored XZ about the model origin; a height of 0 keeps the authored height.
+    /// A null rect keeps the authored XZ about the model origin; a height of 0 keeps the authored height. scale then applies along the model's axes.
     /// </summary>
-    private static void AddStretched(GameObject model, Rect? rect, float height, Quaternion rotation, Vector3 offset, Parts parts)
+    private static void AddStretched(GameObject model, Rect? rect, float height, Quaternion rotation, Vector3 offset, Parts parts, Vector3? scale = null)
     {
         Material[] materials = null;
         Mesh source = model != null ? BuildingMeshUtils.CombineModuleMeshes(model, out materials) : null;
@@ -147,7 +147,7 @@ public static class FarBuildingMeshBuilder
                 local.x = fit.xMin + (v.x - bounds.min.x) * fit.width / Mathf.Max(bounds.size.x, 0.01f);
                 local.z = fit.yMin + (v.z - bounds.min.z) * fit.height / Mathf.Max(bounds.size.z, 0.01f);
             }
-            parts.vertices.Add(rotation * local + offset);
+            parts.vertices.Add(rotation * Vector3.Scale(local, scale ?? Vector3.one) + offset);
         }
         Vector2[] uv = mesh.uv;
         if (uv.Length == mesh.vertexCount) parts.uvs.AddRange(uv);

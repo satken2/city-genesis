@@ -891,7 +891,7 @@ public static partial class OpenSpaceLayout
                 if (placer.OnHard(s, t) || (placer.HardEdges != null && placer.HardEdges.Distance(s, t, 1.2) < Math.Max(.7, radius * .22))) continue;
                 if (placer.Crowns.Near(s, t, radius, factor, largest) || placer.Objects.Near(s, t, .5, 1, 5)) continue;
                 placer.Crowns.Add(s, t, radius);
-                placer.Plan.Props.Add(new Prop { Part = part, Position = placer.F.World(s, t), Forward = placer.F.Dir(Math.Cos(turn), Math.Sin(turn)), Scale = (float)size, Fitted = true });
+                placer.Plan.Props.Add(new Prop { Part = part, Position = placer.F.World(s, t), Forward = placer.F.Dir(Math.Cos(turn), Math.Sin(turn)), Scale = Vector3.one * (float)size, Fitted = true });
                 placed++;
             }
         }
@@ -923,7 +923,7 @@ public static partial class OpenSpaceLayout
                 if (chance > Math.Max(Math.Max(.75 - border / 5, .6 - path / 3.5), (clump - .55) * 1.6) * weight) continue;
                 if (placer.Objects.Near(s, t, radius, .9, 5)) continue;
                 placer.Objects.Add(s, t, radius);
-                placer.Plan.Props.Add(new Prop { Part = part, Position = placer.F.World(s, t), Forward = placer.F.Dir(Math.Cos(turn), Math.Sin(turn)), Scale = (float)size, Fitted = true });
+                placer.Plan.Props.Add(new Prop { Part = part, Position = placer.F.World(s, t), Forward = placer.F.Dir(Math.Cos(turn), Math.Sin(turn)), Scale = Vector3.one * (float)size, Fitted = true });
                 placed++;
             }
         }

@@ -197,6 +197,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             case Constants.MODEL_OPEN_PIT:
             case Constants.MODEL_QUARRY:
             case Constants.MODEL_GAS_STATION:
+            case Constants.MODEL_HUTS:
                 using (openSpaceMarker.Auto())
                     result = openSpaceGenerator.Generate(buildingData, isDynamic);
                 break;

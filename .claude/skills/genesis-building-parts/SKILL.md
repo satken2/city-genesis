@@ -93,7 +93,7 @@ LOD制作は**同じ建物を距離に応じて表現する作業**である。�
 | 敷地を塀・柵で囲みたい | `fence-w1`(角も要るなら `fence-c1`)。形状は原点の線から内側(Blender +Y)に置く。Unityは区画の外周を少し内側へ引いた線に原点を並べる。正面の入口では柵が開く |
 | 敷地の入口に門を置きたい | `gate`(原点=入口の中心・接地0。bbox の幅がそのまま柵の開口の幅。入口の決め方は `SiteEntryLayout.cs` のコメント) |
 | 正面から入口まで通路を敷きたい | `trail`(柵と同じく X 方向に敷き詰める。原点は進む線上=Y中心) |
-| マッシュアップの棟の間に小道・配管を通したい | `lane`(`trail` と同じ原点・向きで、隣り合う棟のセルの境目に敷き詰められる。幅=bbox の Y が交差部の切り欠きに使われる。配置の前提は `MashupLaneLayout.cs` のコメント) |
+| 小屋(model_type HUTS)の棟・棟の間の小道 | 棟は番号付きの `site_hut1`…(接写 `_close`・遠景 `_far`)。原点は土間の中心で、外接箱を区画に合わせて縦横に伸縮させて並べる。小道は `lane`(`trail` と同じ原点・向きで、隣り合う棟の土間の間の中心線に敷き詰められる。幅=bbox の Y が交差部の切り欠きに使われる)。配置の前提は `OpenSpaceLayout.Huts.cs` のコメント |
 | 敷地の空き地に植栽・車両・資材を散らしたい | `scatter1`, `scatter2`, …。犬小屋のように1棟に1個までの物は `scatter-single1`, … (配置の前提は `ScatterLayout.cs` のコメント。既存のプロップ・車両は `genesis-gallery/pipeline/jobs/scatter_parts.py` で写す。植え込み・庭木の葉は [[genesis-prop-parts]] の「樹木・植え込みの葉」に従う。接道側に空き地をまとめるならマスターの `building_shape=setback`) |
 | モジュラー建物の敷地を駐車場にしたい(ロードサイド店) | 材質参照 `site_marking`(区画線。これがあると柵・散布パーツ・地面パネルの代わりに駐車場を描く)・`site_curb`・`site_grass`・`site_paving`、小物 `site_stop`・`site_bollard`・`site_light`、立て看板 `site_sign`(遠景 `_far` も)、番号付きの `site_car1`…・`site_clutter1`…・`site_shrub1`…・`site_tree1`…。原点・外接箱の扱いは供給処理施設と同じで、車は車体の前を Blender -Y にする。配置の前提は `OpenSpaceLayout.Lot.cs` のコメント |
 | 敷地の全体を小屋などで埋め尽くしたい(区画の形が変わる建物でも配置が動かない) | `fill1`, `fill2`, …(遠景は各 `fill{n}_far`。配置の前提は `FillLayout.cs` のコメント) |

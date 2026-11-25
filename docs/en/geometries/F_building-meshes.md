@@ -18,13 +18,13 @@ FBX files live at `Assets/Models/Buildings/{prefix}/{number}/{part}.fbx`, with m
 | `roofprop` / `entrance` / `interior-floor` | Rooftop structures, entrances, and floor slabs |
 | `ceil` / `floor` / `generic-wall` | Material-only sources for roofs, ground panels, and gable walls ([material resolution](R_material-resolution.md)) |
 | `gate` / `trail` | Gate at the site entry and walkway from the front to the entry |
-| `lane` | Lane tiled between adjacent mashup wings, such as footpaths or pipes |
+| `lane` | Lane tiled between adjacent huts |
 | `tile` / `scatter{n}` / `scatter-single{n}` | Ground tiles and plants, vehicles, or materials scattered over the vacant site (`scatter-single` at most once per building) |
 | `fill{n}` | Fill parts, such as shacks, covering the whole site |
 | `base-prebuilt` / `mid-prebuilt` / `top-prebuilt` | Prebuilt tiers; mashup wings use names such as `mashup-{model_prefix}-base-prebuilt` |
-| `port_*` / `yard_*` / `site_*` | Port, depot, open-space, utility-plant, open-pit, quarry, gas-station, and building parking-lot parts |
+| `port_*` / `yard_*` / `site_*` | Port, depot, open-space, utility-plant, open-pit, quarry, gas-station, hut, and building parking-lot parts |
 | `scaffold-*` / `crane-*` / `demo-*` / `excavator` | Construction and demolition sites |
-| `far` / `mashup-{model_prefix}-far` / `site_{name}_far` | Far models for whole buildings, individual wings, or individual utility-plant, open-pit, quarry, and gas-station units |
+| `far` / `mashup-{model_prefix}-far` / `site_{name}_far` | Far models for whole buildings, individual wings, individual utility-plant, open-pit, quarry, and gas-station units, or individual huts |
 | `{part}_close` | Close-up model |
 | `road_access_{type}_{identifier}` | Empty model objects marking road-access frontages |
 | Names starting with `rotor` | Child meshes in a model that spin with the utilization of an operating building (wind turbine blades) |
