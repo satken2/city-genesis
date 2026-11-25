@@ -949,6 +949,8 @@ export async function sendEditPathChangeGridDivisions(gridDivisions: [number, nu
  * construction panel. Fields depend on op.
  * - apply_layout: JSON sequence of [start, end] pairs from placement layout expansion (POST /paths/layout);
  * accepted only for the matching source editing generation.
+ * - apply_lots: JSON list of roadside parcel outlines [[x, z], ...] from POST /paths/lot-preview; accepted only for
+ * the matching editing generation. Unity drops them when the shape changes, and an empty list clears them.
  * - select_node: index.
  * - move_node: index, x, z (XZ only; Unity preserves ground-relative height).
  * - move_control: index, which("in"|"out"), x, z (Unity preserves absolute control elevation).
@@ -959,6 +961,7 @@ export type PathShapeCommand =
   | { op: "apply_alignment"; revision: string; alignment_json: string; junction_json: string }
   | { op: "apply_route"; revision: string; route_json: string }
   | { op: "apply_layout"; revision: string; layout_json: string }
+  | { op: "apply_lots"; revision: string; lots_json: string }
   | { op: "undo_route"; revision: string }
   | { op: "select_node"; index: number }
   | { op: "move_node"; index: number; x: number; z: number }
@@ -991,6 +994,16 @@ export async function sendEditPathAlignment(revision: string, alignments: unknow
     revision,
     alignment_json: JSON.stringify(alignments ?? null),
     junction_json: JSON.stringify(junctions),
+  });
+}
+
+/** Share roadside parcel outlines with the Unity editing generation they were computed for. Display-only, so rounded to 1 cm. */
+export async function sendEditPathLots(revision: string, lots: number[][][]): Promise<void> {
+  const round = (v: number) => Math.round(v * 100) / 100;
+  await sendEditPathShapeCommand({
+    op: "apply_lots",
+    revision,
+    lots_json: JSON.stringify(lots.map((lot) => lot.map((point) => point.map(round)))),
   });
 }
 

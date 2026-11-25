@@ -172,6 +172,7 @@ public partial class RoadPlanManager : MonoBehaviour
     {
         routeRevision = System.Guid.NewGuid().ToString("N");
         authoritativeAlignments = null;
+        lotOutlines = null;
         cachedRenderPoints = null;
         cachedEditingElevationSegments = null;
         cachedElevationViolations = null;

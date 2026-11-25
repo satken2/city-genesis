@@ -23,6 +23,7 @@ import { describeError } from "../../utils/errors";
  * (they are either immutable after construction or edited in path details). Set road membership afterward in path/road details.
  * Streets that allow roadside parcels also take the parcel area for each side, used once when the street is completed.
  * Existing path editing loads the saved areas so they can still be changed before construction.
+ * Once the shape is finalized, Unity outlines the parcels the street would receive if completed now (usePathLotPreview).
  * Unity's controls (Ctrl radial menu and cursor HUD) handle curve/straight and snapping settings, which are absent here.
  * During station building placement, Unity disables snapping to existing roads/tracks (grid snapping remains enabled).
  */
@@ -39,6 +40,7 @@ import { showNotification } from "../../utils/notification";
 import { fetchApi } from "../../utils/api";
 import { resolvePathCategoryIcon } from "../../utils/pathCategoryIcon";
 import { usePathConstruction } from "./usePathConstruction";
+import { usePathLotPreview } from "./usePathLotPreview";
 import { useVariantAffordability } from "../../hooks/useVariantAffordability";
 import { sendEditPathFinish, sendSetGrid, sendChangeDisplay, sendChangeState, sendFocusGraphic, IPC_EVENT_VIEW_GRID_TOGGLED } from "../../utils/ipc";
 import type { GridDisplayMode } from "./GridSettingsPanel";
@@ -98,6 +100,14 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
   const allowsLots = selectedPathType === PATH_STREET && selectedVariantData?.frontage_allowed === true;
   const canSplitLots = pathConstruction.buildMethod !== PATH_BUILD_METHOD_GRID;
   const sentLotAreas = splitLots && canSplitLots ? lotAreas : { left: lotAreas.left, right: lotAreas.left };
+  usePathLotPreview(
+    apiBaseUrl,
+    pathConstruction.constructionBody,
+    pathConstruction.shapePhase,
+    pathConstruction.shapeRevision,
+    allowsLots ? sentLotAreas : null,
+    editPathId ?? null,
+  );
 
   /* ---- New placement: return Unity to normal editing state when opened. ---- */
   // Do not enter placement mode until a variant is selected, and do not leave the previous mode (e.g. bulldoze) active.

@@ -1382,5 +1382,9 @@ export function usePathConstruction(
     confirmMessages,
     canRetryValidation,
     retryValidation,
+    // Request geometry and the Unity editing generation it belongs to (roadside parcel preview).
+    constructionBody,
+    shapePhase,
+    shapeRevision,
   };
 }

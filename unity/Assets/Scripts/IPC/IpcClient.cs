@@ -490,6 +490,7 @@ public class IpcClient : MonoBehaviour
                             alignmentJson = GetParamString(payload, "alignment_json"),
                             junctionJson = GetParamString(payload, "junction_json"),
                             layoutJson = GetParamString(payload, "layout_json"),
+                            lotsJson = GetParamString(payload, "lots_json"),
                             index = GetParamInt(payload, "index"),
                             edgeIndex = GetParamInt(payload, "edge_index"),
                             which = GetParamString(payload, "which"),

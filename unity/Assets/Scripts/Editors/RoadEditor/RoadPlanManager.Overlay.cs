@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using GeneratedModels;
 
@@ -22,6 +23,12 @@ public partial class RoadPlanManager
     private const float DISTANCE_START_FADE = 280f;
     private const float DISTANCE_INVISIBLE = 480f;
 
+    // Roadside parcels the planned paths would receive on completion (ApplyLotOutlines). null = none.
+    private List<Vector3[]> lotOutlines;
+    private static readonly Color LotOutlineColor = new Color(0.2f, 0.6f, 1f, 1f); // Same as parcel creation previews (ParcelPlanRenderer)
+    private const float LotOutlineThickness = 1f;
+    private const float LotOutlineLift = 0.1f; // Height above the ground (m), as in ParcelPlanRenderer
+
     private void UpdateOverlay()
     {
         if (overlayRenderer == null) return;
@@ -32,6 +39,7 @@ public partial class RoadPlanManager
         UpdateBackgroundOverlay(cam);
 
         overlayRenderer.BeginFrame();
+        DrawLotOutlines(cam);
 
         // Grid points specify an area; do not draw polyline edges, controls, or local interference estimates.
         if (IsGridBuild)
@@ -129,6 +137,24 @@ public partial class RoadPlanManager
                 if (Vector3.Dot(a - camPos, camFwd) < 0f && Vector3.Dot(b - camPos, camFwd) < 0f)
                     continue;
                 overlayRenderer.AddSolidLine(a, b, tunnelColor, dashedLineThickness * 1.5f);
+            }
+        }
+    }
+
+    /// <summary>Draws the roadside parcel outlines received through ApplyLotOutlines.</summary>
+    private void DrawLotOutlines(Camera cam)
+    {
+        if (lotOutlines == null) return;
+        Vector3 camPos = cam.transform.position;
+        Vector3 camFwd = cam.transform.forward;
+        foreach (var outline in lotOutlines)
+        {
+            for (int i = 0; i < outline.Length; i++)
+            {
+                Vector3 a = outline[i];
+                Vector3 b = outline[(i + 1) % outline.Length];
+                if (Vector3.Dot(a - camPos, camFwd) < 0f && Vector3.Dot(b - camPos, camFwd) < 0f) continue;
+                overlayRenderer.AddSolidLine(a, b, LotOutlineColor, LotOutlineThickness);
             }
         }
     }

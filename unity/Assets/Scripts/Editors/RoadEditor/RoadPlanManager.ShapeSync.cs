@@ -32,6 +32,8 @@ public partial class RoadPlanManager
         public string junctionJson;
         /// <summary>apply_layout: sequence of generated [start, end] path pairs from construction method expansion (JSON).</summary>
         public string layoutJson;
+        /// <summary>apply_lots: roadside parcel outlines [[x, z], ...] the planned paths would receive on completion (JSON).</summary>
+        public string lotsJson;
     }
 
     /// <summary>Alignment sample spacing sent to 2D (m). Downsamples 1m estimates to limit edit_path:update_shape size.</summary>
@@ -109,6 +111,32 @@ public partial class RoadPlanManager
         EmitShapeUpdate();
     }
 
+    /// <summary>
+    /// Accepts roadside parcel outlines the core computed for the current generation (also for grids).
+    /// InvalidateShapeCache drops them, so outlines never outlive the shape they were computed for.
+    /// </summary>
+    private void ApplyLotOutlines(string revision, string json)
+    {
+        if (revision != routeRevision) return;
+        float[][][] lots;
+        try { lots = JsonConvert.DeserializeObject<float[][][]>(json ?? "null"); }
+        catch (JsonException) { return; }
+        var outlines = new List<Vector3[]>();
+        foreach (var lot in lots ?? System.Array.Empty<float[][]>())
+        {
+            if (lot == null || lot.Length < 3) continue;
+            var outline = new Vector3[lot.Length];
+            for (int i = 0; i < lot.Length; i++)
+            {
+                if (lot[i] == null || lot[i].Length < 2) { outline = null; break; }
+                float x = lot[i][0], z = lot[i][1];
+                outline[i] = new Vector3(x, Utils.GetGroundHeight(new Vector3(x, 1000f, z)) + LotOutlineLift, z);
+            }
+            if (outline != null) outlines.Add(outline);
+        }
+        lotOutlines = outlines;
+    }
+
     private List<List<Vector3>> ApplyAuthoritativeAlignmentCache(List<List<Vector3>> violations)
     {
         foreach (var line in authoritativeAlignments)
@@ -166,6 +194,11 @@ public partial class RoadPlanManager
         if (cmd.op == "apply_layout")
         {
             ApplyGridLayout(cmd.revision, cmd.layoutJson);
+            return;
+        }
+        if (cmd.op == "apply_lots")
+        {
+            ApplyLotOutlines(cmd.revision, cmd.lotsJson);
             return;
         }
         if (isDragging) return;
