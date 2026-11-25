@@ -43,10 +43,12 @@ public sealed class WeatherClock
     public float Elevation => ElevationAt(Phase);
 
     /// <summary>Sun bearing in clockwise degrees from north=0. Rises east, passes south, and sets west.</summary>
-    public float Azimuth => 90f + 180f * Phase;
+    public float Azimuth => AzimuthAt(Phase);
 
     /// <summary>Displayed time in hours, with sunrise at 6 and sunset at 18.</summary>
     public float Hours => 6f + 12f * Mathf.Clamp01(Phase);
+
+    public static float AzimuthAt(float phase) => 90f + 180f * phase;
 
     public static float ElevationAt(float phase)
     {

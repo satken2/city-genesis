@@ -322,6 +322,23 @@ public sealed class WeatherQaHost : MonoBehaviour
         controller.enabled = true;
         Check(RenderSettings.skybox != originalSky, "environment restored on enable");
 
+        // Sun light rotation stays fixed within each update interval to avoid shadow shimmering, then steps once the interval elapses.
+        controller.Clock.StartMorning();
+        controller.Clock.Paused = true;
+        yield return null;
+        Quaternion initialSunRotation = sun.transform.rotation;
+        controller.Clock.Paused = false;
+        controller.Clock.Advance(WeatherController.SunRotationIntervalSeconds * 0.5f);
+        controller.Clock.Paused = true;
+        yield return null;
+        Check(sun.transform.rotation == initialSunRotation, "sun light rotation holds within the update interval");
+        controller.Clock.Paused = false;
+        controller.Clock.Advance(WeatherController.SunRotationIntervalSeconds);
+        controller.Clock.Paused = true;
+        yield return null;
+        Check(sun.transform.rotation != initialSunRotation, "sun light rotation steps after the update interval");
+        controller.Clock.Paused = false;
+
         var camera = new GameObject("Camera").AddComponent<Camera>(); camera.tag = "MainCamera";
         camera.transform.position = new Vector3(220,95,-230); camera.transform.LookAt(new Vector3(0,28,70));
         camera.clearFlags = CameraClearFlags.Skybox; camera.farClipPlane = 8000;

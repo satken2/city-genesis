@@ -47,6 +47,7 @@ public sealed class WeatherController : MonoBehaviour
     private ReflectionProbe reflection;
     private WeatherPrecipitation precipitation;
 
+    public const float SunRotationIntervalSeconds = 5f;
     private const float GroundAlbedo = 0.2f; // Typical reflectance of streets and vegetation.
     private static readonly int SunScatterId = Shader.PropertyToID("_SunScatterFraction");
     private static readonly Color LowSunZenith = Hex("696E9B"), LowSunHorizon = Hex("ECA68D"), LowSunLight = Hex("FFA477"), LowSunCloud = Hex("EDB7AB");
@@ -383,8 +384,11 @@ public sealed class WeatherController : MonoBehaviour
         // Remove direct light just below the horizon; represent post-sunset glow only through sky colors. Low sun weakens through its longer atmospheric path.
         float daylight = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(-3f, 5f, elevation)) * (1f - darkness);
         float lowSun = Mathf.Lerp(0.6f, 1f, Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0f, 30f, elevation)));
+        // Snap directional light rotation to discrete intervals during normal daytime to prevent continuous shadow-map texel swimming;
+        // keep epoch sunset/sunrise transitions smooth.
+        float lightPhase = Clock.IsPresenting ? Clock.Phase : SnapSunPhase(Clock.Phase);
         // Bearing points toward the sun, whereas Light.forward follows the light, so reverse it. Do not illuminate from below the horizon.
-        sun.transform.rotation = Quaternion.Euler(Mathf.Max(elevation, 2f), Clock.Azimuth + 180f, 0f);
+        sun.transform.rotation = Quaternion.Euler(Mathf.Max(WeatherClock.ElevationAt(lightPhase), 2f), WeatherClock.AzimuthAt(lightPhase) + 180f, 0f);
         sun.color = sunlight;
         sun.intensity = look.Intensity * lowSun * daylight;
         NightLights.SetLevel(darkness);
@@ -532,6 +536,12 @@ public sealed class WeatherController : MonoBehaviour
     }
 
     private float NewSeed() => (float)(random.NextDouble() * 100.0);
+
+    private static float SnapSunPhase(float phase)
+    {
+        float step = SunRotationIntervalSeconds / WeatherClock.DaySeconds;
+        return WeatherClock.MorningPhase + Mathf.Floor((phase - WeatherClock.MorningPhase) / step + 1e-4f) * step;
+    }
 
     private static Vector3 SunDirection(float elevation, float azimuth)
     {
