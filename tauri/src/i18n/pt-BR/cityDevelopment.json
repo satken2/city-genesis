@@ -23,6 +23,38 @@
     "create": "Confirmar",
     "creating": "Criando...",
     "previewed": "Nivela levemente o terreno na área de {{area}} e pode planejar {{roads}} vias e {{parcels}} lotes ({{rejected}} vias descartadas)",
-    "created": "Terreno nivelado: {{roads}} vias e {{parcels}} lotes planejados ({{rejected}} vias descartadas)"
+    "created": "Terreno nivelado: {{roads}} vias e {{parcels}} lotes planejados ({{rejected}} vias descartadas)",
+    "tabs": {
+      "autoGrowth": "Expansão automática",
+      "areaFill": "Desenvolvimento de área"
+    },
+    "autoGrowth": {
+      "style": "Estilo das ruas",
+      "styles": {
+        "blocks": "Quarteirões",
+        "ribbon": "Faixa linear",
+        "sprawl_1": "Expansão 1",
+        "sprawl_2": "Expansão 2",
+        "sprawl_3": "Expansão 3"
+      },
+      "arterialVariant": "Via arterial",
+      "laneVariant": "Rua local",
+      "variantAuto": "Automático (seguir entorno)",
+      "blocks": "Tamanho da expansão",
+      "blocksUnit": "quarteirões",
+      "hint": "Segure Ctrl e arraste para pintar a área permitida. Vias e quarteirões crescem automaticamente a partir do melhor ponto.",
+      "noCandidate": "Não foi encontrado um local adequado para expandir na área pintada.",
+      "previewed": "Pode expandir {{blocks}} quarteirões ({{roads}} trechos, {{parcels}} lotes, est. {{cost}}, {{rejected}} rejeitados)",
+      "created": "Expandido em {{blocks}} quarteirões ({{roads}} trechos, {{parcels}} lotes, {{rejected}} rejeitados)"
+    },
+    "proposal": {
+      "message": "Há pouco espaço livre para construir. Deseja expandir a cidade com o plano abaixo?",
+      "vacantInfo": "Lotes vagos: {{vacant}} / {{total}}",
+      "planInfo": "Proposta: {{blocks}} quarteirões, {{roads}} trechos, {{parcels}} lotes (est. {{cost}})",
+      "legendArterial": "Via arterial",
+      "legendLane": "Rua local",
+      "legendParcel": "Novos lotes",
+      "suppressLabel": "Não sugerir novamente por um tempo ({{epochs}} épocas)"
+    }
   }
 }

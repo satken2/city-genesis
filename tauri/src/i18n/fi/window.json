@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Maanhankinnan vahvistus",
     "agent_creation": "Taloustoimijan luonti",
     "resource_edit": "Luonnonvarojen muokkaus",
-    "property_edit": "Ominaisuuksien muokkaus"
+    "property_edit": "Ominaisuuksien muokkaus",
+    "city_expansion_proposal": "Kaupungin laajennusehdotus"
   },
   "cityMap": {
     "layers": {

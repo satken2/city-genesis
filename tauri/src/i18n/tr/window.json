@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Arazi edinimini onayla",
     "agent_creation": "Ekonomik aktör oluştur",
     "resource_edit": "Kaynakları düzenle",
-    "property_edit": "Özellikleri düzenle"
+    "property_edit": "Özellikleri düzenle",
+    "city_expansion_proposal": "Şehir Genişletme Önerisi"
   },
   "cityMap": {
     "layers": {

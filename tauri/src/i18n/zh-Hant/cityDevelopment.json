@@ -23,6 +23,38 @@
     "create": "確定",
     "creating": "建立中...",
     "previewed": "將 {{area}} 範圍內的地形稍加整平，可規劃 {{roads}} 段道路與 {{parcels}} 塊地塊（拒絕 {{rejected}} 段）",
-    "created": "已整平地形並規劃 {{roads}} 段道路與 {{parcels}} 塊地塊（拒絕 {{rejected}} 段）"
+    "created": "已整平地形並規劃 {{roads}} 段道路與 {{parcels}} 塊地塊（拒絕 {{rejected}} 段）",
+    "tabs": {
+      "autoGrowth": "自動擴展",
+      "areaFill": "區域開發"
+    },
+    "autoGrowth": {
+      "style": "街巷樣式",
+      "styles": {
+        "blocks": "街區型",
+        "ribbon": "沿路單排型",
+        "sprawl_1": "蔓延風格1",
+        "sprawl_2": "蔓延風格2",
+        "sprawl_3": "蔓延風格3"
+      },
+      "arterialVariant": "主幹道",
+      "laneVariant": "支路",
+      "variantAuto": "自動（配合周邊）",
+      "blocks": "擴展規模",
+      "blocksUnit": "個街區",
+      "hint": "按住 Ctrl 並左鍵拖曳以塗抹允許擴展的範圍。系統會在範圍內自動尋找最佳起點延伸幹道與街區。",
+      "noCandidate": "指定範圍內找不到適合擴展的位置",
+      "previewed": "可擴展 {{blocks}} 個街區（道路 {{roads}} 段、地塊 {{parcels}} 塊、預估費用 {{cost}}、略過 {{rejected}} 段）",
+      "created": "已擴展 {{blocks}} 個街區（道路 {{roads}} 段、地塊 {{parcels}} 塊、略過 {{rejected}} 段）"
+    },
+    "proposal": {
+      "message": "可供建設的空地已不多。是否依下列計畫擴展城市？",
+      "vacantInfo": "空閒地塊：{{vacant}} / {{total}} 塊",
+      "planInfo": "預計新增：{{blocks}} 個街區、道路 {{roads}} 段、地塊 {{parcels}} 塊（預估費用 {{cost}}）",
+      "legendArterial": "主幹道",
+      "legendLane": "支路",
+      "legendParcel": "新建地塊",
+      "suppressLabel": "暫時不再提示（{{epochs}} 個週期）"
+    }
   }
 }

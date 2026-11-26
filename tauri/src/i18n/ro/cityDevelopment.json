@@ -23,6 +23,38 @@
     "create": "Confirmă",
     "creating": "Se creează…",
     "previewed": "Terenul din zona de {{area}} va fi nivelat ușor. Se pot planifica tronsoane de drum: {{roads}}, parcele: {{parcels}} (respinse: {{rejected}})",
-    "created": "Terenul a fost nivelat. Planificate – tronsoane de drum: {{roads}}, parcele: {{parcels}} (respinse: {{rejected}})"
+    "created": "Terenul a fost nivelat. Planificate – tronsoane de drum: {{roads}}, parcele: {{parcels}} (respinse: {{rejected}})",
+    "tabs": {
+      "autoGrowth": "Extindere auto",
+      "areaFill": "Dezvoltare zonă"
+    },
+    "autoGrowth": {
+      "style": "Stilul străzilor",
+      "styles": {
+        "blocks": "Cvadrate urbane",
+        "ribbon": "Fâșie rutieră",
+        "sprawl_1": "Extindere 1",
+        "sprawl_2": "Extindere 2",
+        "sprawl_3": "Extindere 3"
+      },
+      "arterialVariant": "Arteră principală",
+      "laneVariant": "Stradă locală",
+      "variantAuto": "Automat (ca în jur)",
+      "blocks": "Volum de extindere",
+      "blocksUnit": "cvartale",
+      "hint": "Ține apăsat Ctrl și trage pentru a marca zona permisă. Drumurile și cvartalele se vor extinde automat din cel mai bun punct.",
+      "noCandidate": "Nu s-a găsit niciun loc potrivit pentru extindere în zona marcată.",
+      "previewed": "Se pot extinde {{blocks}} cvartale ({{roads}} segmente, {{parcels}} parcele, est. {{cost}}, {{rejected}} respinse)",
+      "created": "S-au extins {{blocks}} cvartale ({{roads}} segmente, {{parcels}} parcele, {{rejected}} respinse)"
+    },
+    "proposal": {
+      "message": "Spațiul construibil este pe terminate. Doriți să extindeți orașul după planul de mai jos?",
+      "vacantInfo": "Parcele libere: {{vacant}} / {{total}}",
+      "planInfo": "Propunere: {{blocks}} cvartale, {{roads}} segmente, {{parcels}} parcele (est. {{cost}})",
+      "legendArterial": "Arteră principală",
+      "legendLane": "Stradă locală",
+      "legendParcel": "Parcele noi",
+      "suppressLabel": "Nu mai propune o vreme ({{epochs}} epoci)"
+    }
   }
 }

@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Confirmer l'acquisition foncière",
     "agent_creation": "Créer un agent",
     "resource_edit": "Modifier les ressources",
-    "property_edit": "Édition des propriétés"
+    "property_edit": "Édition des propriétés",
+    "city_expansion_proposal": "Proposition d'extension urbaine"
   },
   "cityMap": {
     "layers": {

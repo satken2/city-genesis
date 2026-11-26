@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Confirm Land Acquisition",
     "agent_creation": "Create Agent",
     "resource_edit": "Edit Resources",
-    "property_edit": "Edit Properties"
+    "property_edit": "Edit Properties",
+    "city_expansion_proposal": "City Expansion Proposal"
   },
   "cityMap": {
     "layers": {

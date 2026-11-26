@@ -23,6 +23,38 @@
     "create": "Sahkan",
     "creating": "Mencipta...",
     "previewed": "Rupa bumi dalam kawasan {{area}} akan diratakan sedikit, dan {{roads}} segmen jalan serta {{parcels}} lot boleh dirancang ({{rejected}} ditolak)",
-    "created": "Rupa bumi telah diratakan, dan {{roads}} segmen jalan serta {{parcels}} lot telah dirancang ({{rejected}} ditolak)"
+    "created": "Rupa bumi telah diratakan, dan {{roads}} segmen jalan serta {{parcels}} lot telah dirancang ({{rejected}} ditolak)",
+    "tabs": {
+      "autoGrowth": "Peluasan Auto",
+      "areaFill": "Pembangunan Kawasan"
+    },
+    "autoGrowth": {
+      "style": "Susun atur jalan",
+      "styles": {
+        "blocks": "Blok bandar",
+        "ribbon": "Jalur tepi jalan",
+        "sprawl_1": "Serakan 1",
+        "sprawl_2": "Serakan 2",
+        "sprawl_3": "Serakan 3"
+      },
+      "arterialVariant": "Jalan utama",
+      "laneVariant": "Jalan tempatan",
+      "variantAuto": "Auto (ikut sekitar)",
+      "blocks": "Saiz peluasan",
+      "blocksUnit": "blok",
+      "hint": "Tahan Ctrl dan seret untuk mewarnakan kawasan yang dibenarkan. Jalan dan blok akan berkembang secara automatik dari titik terbaik.",
+      "noCandidate": "Tiada lokasi sesuai ditemui untuk peluasan di kawasan bertanda.",
+      "previewed": "Boleh meluaskan {{blocks}} blok ({{roads}} segmen jalan, {{parcels}} petak, angg. {{cost}}, {{rejected}} ditolak)",
+      "created": "Meluaskan {{blocks}} blok ({{roads}} segmen jalan, {{parcels}} petak, {{rejected}} ditolak)"
+    },
+    "proposal": {
+      "message": "Ruang untuk membina semakin terhad. Adakah anda ingin meluaskan bandar mengikut pelan di bawah?",
+      "vacantInfo": "Petak kosong: {{vacant}} / {{total}}",
+      "planInfo": "Cadangan: {{blocks}} blok, {{roads}} segmen jalan, {{parcels}} petak (angg. {{cost}})",
+      "legendArterial": "Jalan utama",
+      "legendLane": "Jalan tempatan",
+      "legendParcel": "Petak baharu",
+      "suppressLabel": "Jangan cadangkan buat sementara ({{epochs}} epok)"
+    }
   }
 }

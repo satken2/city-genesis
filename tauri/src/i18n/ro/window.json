@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Confirmarea achiziției de terenuri",
     "agent_creation": "Crearea unui agent economic",
     "resource_edit": "Editarea resurselor",
-    "property_edit": "Editarea proprietăților"
+    "property_edit": "Editarea proprietăților",
+    "city_expansion_proposal": "Propunere de extindere a orașului"
   },
   "cityMap": {
     "layers": {

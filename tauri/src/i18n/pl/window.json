@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Potwierdź wykup gruntu",
     "agent_creation": "Utwórz podmiot gospodarczy",
     "resource_edit": "Edytuj zasoby",
-    "property_edit": "Edytuj właściwości"
+    "property_edit": "Edytuj właściwości",
+    "city_expansion_proposal": "Propozycja rozbudowy miasta"
   },
   "cityMap": {
     "layers": {

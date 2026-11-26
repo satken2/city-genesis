@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Telekvásárlás megerősítése",
     "agent_creation": "Gazdasági szereplő létrehozása",
     "resource_edit": "Erőforrások szerkesztése",
-    "property_edit": "Tulajdonságok szerkesztése"
+    "property_edit": "Tulajdonságok szerkesztése",
+    "city_expansion_proposal": "Városbővítési javaslat"
   },
   "cityMap": {
     "layers": {

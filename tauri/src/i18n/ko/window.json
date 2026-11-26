@@ -60,7 +60,8 @@
     "building_direct_acquisition": "용지 매입 확인",
     "agent_creation": "경제 주체 생성",
     "resource_edit": "자원 편집",
-    "property_edit": "프로퍼티 편집"
+    "property_edit": "프로퍼티 편집",
+    "city_expansion_proposal": "도시 확장 제안"
   },
   "cityMap": {
     "layers": {

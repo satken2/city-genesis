@@ -23,6 +23,38 @@
     "create": "Bekræft",
     "creating": "Opretter…",
     "previewed": "Terrænet i området {{area}} jævnes let, og der kan planlægges {{roads}} vejstykker og {{parcels}} parceller ({{rejected}} afvist)",
-    "created": "Terrænet er jævnet, og der er planlagt {{roads}} vejstykker og {{parcels}} parceller ({{rejected}} afvist)"
+    "created": "Terrænet er jævnet, og der er planlagt {{roads}} vejstykker og {{parcels}} parceller ({{rejected}} afvist)",
+    "tabs": {
+      "autoGrowth": "Auto-udvidelse",
+      "areaFill": "Områdeudvikling"
+    },
+    "autoGrowth": {
+      "style": "Gademønster",
+      "styles": {
+        "blocks": "Bykvarterer",
+        "ribbon": "Vejstribe",
+        "sprawl_1": "Spredning 1",
+        "sprawl_2": "Spredning 2",
+        "sprawl_3": "Spredning 3"
+      },
+      "arterialVariant": "Hovedvej",
+      "laneVariant": "Lokalgade",
+      "variantAuto": "Automatisk (som omgivelser)",
+      "blocks": "Udvidelsesomfang",
+      "blocksUnit": "kvarterer",
+      "hint": "Hold Ctrl nede og træk for at male det tilladte område. Veje og kvarterer udvides automatisk fra det bedste punkt.",
+      "noCandidate": "Der blev ikke fundet noget egnet sted at udvide i det malede område.",
+      "previewed": "Kan udvide med {{blocks}} kvarterer ({{roads}} vejstrækninger, {{parcels}} grunde, ca. {{cost}}, {{rejected}} afvist)",
+      "created": "Udvidede med {{blocks}} kvarterer ({{roads}} vejstrækninger, {{parcels}} grunde, {{rejected}} afvist)"
+    },
+    "proposal": {
+      "message": "Der er ved at være lidt byggeplads tilbage. Vil du udvide byen med nedenstående plan?",
+      "vacantInfo": "Ledige grunde: {{vacant}} / {{total}}",
+      "planInfo": "Forslag: {{blocks}} kvarterer, {{roads}} vejstrækninger, {{parcels}} grunde (ca. {{cost}})",
+      "legendArterial": "Hovedvej",
+      "legendLane": "Lokalgade",
+      "legendParcel": "Nye grunde",
+      "suppressLabel": "Foreslå ikke igen i et stykke tid ({{epochs}} epoker)"
+    }
   }
 }

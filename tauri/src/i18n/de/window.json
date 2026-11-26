@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Grunderwerb bestätigen",
     "agent_creation": "Wirtschaftsakteur erstellen",
     "resource_edit": "Ressourcen bearbeiten",
-    "property_edit": "Eigenschaften bearbeiten"
+    "property_edit": "Eigenschaften bearbeiten",
+    "city_expansion_proposal": "Vorschlag zur Stadterweiterung"
   },
   "cityMap": {
     "layers": {

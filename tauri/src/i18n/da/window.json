@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Bekræft arealerhvervelse",
     "agent_creation": "Opret aktør",
     "resource_edit": "Rediger ressourcer",
-    "property_edit": "Rediger egenskaber"
+    "property_edit": "Rediger egenskaber",
+    "city_expansion_proposal": "Forslag til byudvidelse"
   },
   "cityMap": {
     "layers": {

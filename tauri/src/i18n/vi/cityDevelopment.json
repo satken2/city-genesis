@@ -23,6 +23,38 @@
     "create": "Xác nhận",
     "creating": "Đang tạo…",
     "previewed": "Có thể san nhẹ địa hình trong phạm vi {{area}} và lên kế hoạch {{roads}} đoạn đường, {{parcels}} lô đất (loại bỏ {{rejected}} đoạn)",
-    "created": "Đã san địa hình và lên kế hoạch {{roads}} đoạn đường, {{parcels}} lô đất (loại bỏ {{rejected}} đoạn)"
+    "created": "Đã san địa hình và lên kế hoạch {{roads}} đoạn đường, {{parcels}} lô đất (loại bỏ {{rejected}} đoạn)",
+    "tabs": {
+      "autoGrowth": "Mở rộng tự động",
+      "areaFill": "Phát triển vùng"
+    },
+    "autoGrowth": {
+      "style": "Kiểu đường nội bộ",
+      "styles": {
+        "blocks": "Khối phố",
+        "ribbon": "Dải ven đường",
+        "sprawl_1": "Lan tỏa 1",
+        "sprawl_2": "Lan tỏa 2",
+        "sprawl_3": "Lan tỏa 3"
+      },
+      "arterialVariant": "Đường trục chính",
+      "laneVariant": "Đường nhánh",
+      "variantAuto": "Tự động (theo xung quanh)",
+      "blocks": "Quy mô mở rộng",
+      "blocksUnit": "khối",
+      "hint": "Giữ Ctrl và kéo để tô vùng cho phép mở rộng. Đường và khối phố sẽ tự động phát triển từ vị trí tối ưu bên trong.",
+      "noCandidate": "Không tìm thấy vị trí phù hợp để mở rộng trong vùng đã tô.",
+      "previewed": "Có thể mở rộng {{blocks}} khối ({{roads}} đoạn đường, {{parcels}} lô đất, ước tính {{cost}}, bỏ qua {{rejected}})",
+      "created": "Đã mở rộng {{blocks}} khối ({{roads}} đoạn đường, {{parcels}} lô đất, bỏ qua {{rejected}})"
+    },
+    "proposal": {
+      "message": "Quỹ đất có thể xây dựng đang cạn dần. Bạn có muốn mở rộng thành phố theo kế hoạch dưới đây không?",
+      "vacantInfo": "Lô đất trống: {{vacant}} / {{total}}",
+      "planInfo": "Đề xuất: {{blocks}} khối, {{roads}} đoạn đường, {{parcels}} lô đất (ước tính {{cost}})",
+      "legendArterial": "Đường trục chính",
+      "legendLane": "Đường nhánh",
+      "legendParcel": "Lô đất mới",
+      "suppressLabel": "Tạm thời không đề xuất nữa ({{epochs}} chu kỳ)"
+    }
   }
 }

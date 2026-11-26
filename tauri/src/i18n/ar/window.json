@@ -60,7 +60,8 @@
     "building_direct_acquisition": "تأكيد استملاك الأراضي",
     "agent_creation": "إنشاء جهة اقتصادية",
     "resource_edit": "تحرير الموارد",
-    "property_edit": "تحرير الخصائص"
+    "property_edit": "تحرير الخصائص",
+    "city_expansion_proposal": "مقترح توسعة المدينة"
   },
   "cityMap": {
     "layers": {

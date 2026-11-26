@@ -2,6 +2,7 @@ import { describeError } from "./errors";
 import type { TFunction } from "i18next";
 import { invoke } from "@tauri-apps/api/core";
 import type { EpochReport } from "../components/taskbar/EpochResultWindow";
+import type { ExpansionProposal } from "../components/development/CityExpansionProposalWindow";
 import type { QuestNotification } from "../types";
 import { showUnlockedAchievements, takeUnlockedAchievements } from "./achievements";
 import { buildApiUrl, fetchApi } from "./api";
@@ -23,6 +24,7 @@ type EpochResponse = {
   epoch_report?: EpochReport;
   completed_quests?: QuestNotification[];
   failed_quests?: QuestNotification[];
+  expansion_proposal?: ExpansionProposal | null;
 };
 
 /**
@@ -102,6 +104,7 @@ export async function executeEpochs(options: {
             completedQuests: quests,
             failedQuests,
             unlockedAchievements: achievements,
+            expansionProposal: data.expansion_proposal ?? null,
           },
         },
       });
@@ -114,6 +117,12 @@ export async function executeEpochs(options: {
         });
       }
       await showUnlockedAchievements(achievements).catch(console.error);
+      if (data.expansion_proposal) {
+        await invoke("open_registered_window", {
+          windowType: "city_expansion_proposal",
+          params: { extra: { proposal: data.expansion_proposal } },
+        });
+      }
     }
 
     if (!data.epoch_report) await presentation.finish();

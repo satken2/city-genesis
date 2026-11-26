@@ -23,6 +23,38 @@
     "create": "Vahvista",
     "creating": "Luodaan…",
     "previewed": "Alueen {{area}} maastoa tasoitetaan hieman, ja suunniteltavissa on teitä {{roads}} ja tontteja {{parcels}} (hylätty {{rejected}} tietä)",
-    "created": "Maasto tasoitettiin ja suunniteltiin teitä {{roads}} ja tontteja {{parcels}} (hylätty {{rejected}} tietä)"
+    "created": "Maasto tasoitettiin ja suunniteltiin teitä {{roads}} ja tontteja {{parcels}} (hylätty {{rejected}} tietä)",
+    "tabs": {
+      "autoGrowth": "Automaattilaajennus",
+      "areaFill": "Aluekehitys"
+    },
+    "autoGrowth": {
+      "style": "Katutyyppi",
+      "styles": {
+        "blocks": "Korttelit",
+        "ribbon": "Tienvarsinauha",
+        "sprawl_1": "Haja-asutus 1",
+        "sprawl_2": "Haja-asutus 2",
+        "sprawl_3": "Haja-asutus 3"
+      },
+      "arterialVariant": "Pääkatu",
+      "laneVariant": "Paikalliskatu",
+      "variantAuto": "Automaattinen (ympäristön mukaan)",
+      "blocks": "Laajennuksen määrä",
+      "blocksUnit": "korttelia",
+      "hint": "Pidä Ctrl painettuna ja maalaa sallittu alue. Kadut ja korttelit laajenevat automaattisesti parhaasta kohdasta.",
+      "noCandidate": "Maalatulta alueelta ei löytynyt sopivaa laajennuskohtaa.",
+      "previewed": "Voidaan laajentaa {{blocks}} korttelia ({{roads}} tieosuutta, {{parcels}} tonttia, arvio {{cost}}, {{rejected}} hylätty)",
+      "created": "Laajennettiin {{blocks}} korttelia ({{roads}} tieosuutta, {{parcels}} tonttia, {{rejected}} hylätty)"
+    },
+    "proposal": {
+      "message": "Rakennuskelpoinen tila on vähissä. Haluatko laajentaa kaupunkia alla olevan suunnitelman mukaan?",
+      "vacantInfo": "Vapaat tontit: {{vacant}} / {{total}}",
+      "planInfo": "Ehdotus: {{blocks}} korttelia, {{roads}} tieosuutta, {{parcels}} tonttia (arvio {{cost}})",
+      "legendArterial": "Pääkatu",
+      "legendLane": "Paikalliskatu",
+      "legendParcel": "Uudet tontit",
+      "suppressLabel": "Älä ehdota hetkeen uudelleen ({{epochs}} jaksoa)"
+    }
   }
 }

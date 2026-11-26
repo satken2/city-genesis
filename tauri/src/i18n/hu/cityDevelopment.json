@@ -23,6 +23,38 @@
     "create": "Jóváhagyás",
     "creating": "Létrehozás…",
     "previewed": "Terület: {{area}}. Enyhe tereprendezéssel {{roads}} útszakasz és {{parcels}} telek tervezhető ({{rejected}} elvetve)",
-    "created": "Tereprendezés kész, {{roads}} útszakasz és {{parcels}} telek megtervezve ({{rejected}} elvetve)"
+    "created": "Tereprendezés kész, {{roads}} útszakasz és {{parcels}} telek megtervezve ({{rejected}} elvetve)",
+    "tabs": {
+      "autoGrowth": "Auto-bővítés",
+      "areaFill": "Területfejlesztés"
+    },
+    "autoGrowth": {
+      "style": "Utcahálózat",
+      "styles": {
+        "blocks": "Várostömbök",
+        "ribbon": "Útmenti sáv",
+        "sprawl_1": "Szórt 1",
+        "sprawl_2": "Szórt 2",
+        "sprawl_3": "Szórt 3"
+      },
+      "arterialVariant": "Főút",
+      "laneVariant": "Mellékutca",
+      "variantAuto": "Automatikus (környezet szerint)",
+      "blocks": "Bővítés mértéke",
+      "blocksUnit": "tömb",
+      "hint": "Tartsa lenyomva a Ctrl billentyűt és húzással jelölje ki az engedélyezett területet. Az utak és tömbök automatikusan a legjobb pontról terjeszkednek.",
+      "noCandidate": "Nem található megfelelő bővítési hely a kijelölt területen.",
+      "previewed": "{{blocks}} tömb bővíthető ({{roads}} útszakasz, {{parcels}} telek, becs. {{cost}}, {{rejected}} elutasítva)",
+      "created": "{{blocks}} tömb bővítve ({{roads}} útszakasz, {{parcels}} telek, {{rejected}} elutasítva)"
+    },
+    "proposal": {
+      "message": "Kevés a beépíthető hely. Szeretné bővíteni a várost az alábbi terv alapján?",
+      "vacantInfo": "Üres telkek: {{vacant}} / {{total}}",
+      "planInfo": "Javaslat: {{blocks}} tömb, {{roads}} útszakasz, {{parcels}} telek (becs. {{cost}})",
+      "legendArterial": "Főút",
+      "legendLane": "Mellékutca",
+      "legendParcel": "Új telkek",
+      "suppressLabel": "Egy ideig ne javasolja újra ({{epochs}} korszak)"
+    }
   }
 }

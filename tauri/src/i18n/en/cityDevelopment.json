@@ -23,6 +23,38 @@
     "create": "Confirm",
     "creating": "Creating...",
     "previewed": "Lightly smooths the terrain in {{area}} and can plan {{roads}} road segments and {{parcels}} parcels ({{rejected}} rejected)",
-    "created": "Smoothed the terrain and planned {{roads}} road segments and {{parcels}} parcels ({{rejected}} rejected)"
+    "created": "Smoothed the terrain and planned {{roads}} road segments and {{parcels}} parcels ({{rejected}} rejected)",
+    "tabs": {
+      "autoGrowth": "Auto Expand",
+      "areaFill": "Area Fill"
+    },
+    "autoGrowth": {
+      "style": "Street layout",
+      "styles": {
+        "blocks": "City blocks",
+        "ribbon": "Roadside ribbon",
+        "sprawl_1": "Sprawl 1",
+        "sprawl_2": "Sprawl 2",
+        "sprawl_3": "Sprawl 3"
+      },
+      "arterialVariant": "Arterial road",
+      "laneVariant": "Local street",
+      "variantAuto": "Auto (match nearby)",
+      "blocks": "Expansion size",
+      "blocksUnit": "blocks",
+      "hint": "Hold Ctrl and drag to paint the area allowed for expansion. Roads and blocks grow automatically from the best point inside.",
+      "noCandidate": "No suitable place to expand was found in the painted area.",
+      "previewed": "Can expand by {{blocks}} blocks ({{roads}} road segments, {{parcels}} parcels, est. {{cost}}, {{rejected}} rejected)",
+      "created": "Expanded by {{blocks}} blocks ({{roads}} road segments, {{parcels}} parcels, {{rejected}} rejected)"
+    },
+    "proposal": {
+      "message": "Buildable space is running low. Would you like to expand the city with the plan below?",
+      "vacantInfo": "Vacant parcels: {{vacant}} / {{total}}",
+      "planInfo": "Proposed: {{blocks}} blocks, {{roads}} road segments, {{parcels}} parcels (est. {{cost}})",
+      "legendArterial": "Arterial road",
+      "legendLane": "Local street",
+      "legendParcel": "New parcels",
+      "suppressLabel": "Don't suggest again for a while ({{epochs}} epochs)"
+    }
   }
 }

@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Potvrzení výkupu pozemků",
     "agent_creation": "Vytvoření ekonomického subjektu",
     "resource_edit": "Úprava zdrojů",
-    "property_edit": "Úprava vlastností"
+    "property_edit": "Úprava vlastností",
+    "city_expansion_proposal": "Návrh rozšíření města"
   },
   "cityMap": {
     "layers": {

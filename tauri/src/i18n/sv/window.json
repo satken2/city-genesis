@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Bekräfta markförvärv",
     "agent_creation": "Skapa ekonomisk aktör",
     "resource_edit": "Redigera resurser",
-    "property_edit": "Redigera egenskaper"
+    "property_edit": "Redigera egenskaper",
+    "city_expansion_proposal": "Förslag på stadsutbyggnad"
   },
   "cityMap": {
     "layers": {

@@ -23,6 +23,38 @@
     "create": "Bevestigen",
     "creating": "Aanmaken…",
     "previewed": "Het terrein in het gebied ({{area}}) wordt licht geëffend. Te plannen – wegdelen: {{roads}}, percelen: {{parcels}} (afgewezen: {{rejected}})",
-    "created": "Terrein geëffend en gepland – wegdelen: {{roads}}, percelen: {{parcels}} (afgewezen: {{rejected}})"
+    "created": "Terrein geëffend en gepland – wegdelen: {{roads}}, percelen: {{parcels}} (afgewezen: {{rejected}})",
+    "tabs": {
+      "autoGrowth": "Auto-uitbreiding",
+      "areaFill": "Gebiedsontwikkeling"
+    },
+    "autoGrowth": {
+      "style": "Stratenpatroon",
+      "styles": {
+        "blocks": "Stadsblokken",
+        "ribbon": "Lintbebouwing",
+        "sprawl_1": "Uitwaaierend 1",
+        "sprawl_2": "Uitwaaierend 2",
+        "sprawl_3": "Uitwaaierend 3"
+      },
+      "arterialVariant": "Hoofdweg",
+      "laneVariant": "Lokale straat",
+      "variantAuto": "Automatisch (zoals omgeving)",
+      "blocks": "Uitbreidingsomvang",
+      "blocksUnit": "blokken",
+      "hint": "Houd Ctrl ingedrukt en sleep om het toegestane gebied te markeren. Wegen en blokken groeien automatisch vanaf het beste punt.",
+      "noCandidate": "Geen geschikte plek gevonden om uit te breiden binnen het gemarkeerde gebied.",
+      "previewed": "Kan uitbreiden met {{blocks}} blokken ({{roads}} wegdelen, {{parcels}} kavels, ca. {{cost}}, {{rejected}} afgewezen)",
+      "created": "Uitgebreid met {{blocks}} blokken ({{roads}} wegdelen, {{parcels}} kavels, {{rejected}} afgewezen)"
+    },
+    "proposal": {
+      "message": "Er is weinig bouwruimte over. Wilt u de stad uitbreiden volgens het onderstaande plan?",
+      "vacantInfo": "Vrije kavels: {{vacant}} / {{total}}",
+      "planInfo": "Voorstel: {{blocks}} blokken, {{roads}} wegdelen, {{parcels}} kavels (ca. {{cost}})",
+      "legendArterial": "Hoofdweg",
+      "legendLane": "Lokale straat",
+      "legendParcel": "Nieuwe kavels",
+      "suppressLabel": "Even niet opnieuw voorstellen ({{epochs}} epochen)"
+    }
   }
 }

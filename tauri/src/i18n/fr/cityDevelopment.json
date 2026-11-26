@@ -23,6 +23,38 @@
     "create": "Confirmer",
     "creating": "Création...",
     "previewed": "Adoucit légèrement le relief sur {{area}} : {{roads}} tronçons de route et {{parcels}} parcelles peuvent être planifiés ({{rejected}} rejetés)",
-    "created": "Relief adouci : {{roads}} tronçons de route et {{parcels}} parcelles planifiés ({{rejected}} rejetés)"
+    "created": "Relief adouci : {{roads}} tronçons de route et {{parcels}} parcelles planifiés ({{rejected}} rejetés)",
+    "tabs": {
+      "autoGrowth": "Extension auto",
+      "areaFill": "Développement de zone"
+    },
+    "autoGrowth": {
+      "style": "Type de rues",
+      "styles": {
+        "blocks": "Îlots urbains",
+        "ribbon": "Alignement linéaire",
+        "sprawl_1": "Étalement 1",
+        "sprawl_2": "Étalement 2",
+        "sprawl_3": "Étalement 3"
+      },
+      "arterialVariant": "Artère principale",
+      "laneVariant": "Rue locale",
+      "variantAuto": "Auto (selon les environs)",
+      "blocks": "Ampleur de l'extension",
+      "blocksUnit": "îlots",
+      "hint": "Maintenez Ctrl et glissez pour peindre la zone autorisée. Les routes et îlots s'étendent automatiquement depuis le meilleur point.",
+      "noCandidate": "Aucun emplacement adapté à l'extension n'a été trouvé dans la zone peinte.",
+      "previewed": "Extension possible de {{blocks}} îlots ({{roads}} tronçons, {{parcels}} parcelles, est. {{cost}}, {{rejected}} rejetés)",
+      "created": "Extension de {{blocks}} îlots planifiée ({{roads}} tronçons, {{parcels}} parcelles, {{rejected}} rejetés)"
+    },
+    "proposal": {
+      "message": "L'espace constructible vient à manquer. Souhaitez-vous étendre la ville selon le plan ci-dessous ?",
+      "vacantInfo": "Parcelles vacantes : {{vacant}} / {{total}}",
+      "planInfo": "Proposition : {{blocks}} îlots, {{roads}} tronçons, {{parcels}} parcelles (est. {{cost}})",
+      "legendArterial": "Artère principale",
+      "legendLane": "Rue locale",
+      "legendParcel": "Nouvelles parcelles",
+      "suppressLabel": "Ne plus proposer pendant un moment ({{epochs}} époques)"
+    }
   }
 }

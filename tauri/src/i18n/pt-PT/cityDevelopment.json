@@ -23,6 +23,38 @@
     "create": "Confirmar",
     "creating": "A criar…",
     "previewed": "Aplana ligeiramente o terreno em {{area}} e permite planear estradas: {{roads}}, lotes: {{parcels}} (rejeitadas: {{rejected}})",
-    "created": "Terreno aplanado. Estradas planeadas: {{roads}}, lotes: {{parcels}} (rejeitadas: {{rejected}})"
+    "created": "Terreno aplanado. Estradas planeadas: {{roads}}, lotes: {{parcels}} (rejeitadas: {{rejected}})",
+    "tabs": {
+      "autoGrowth": "Expansão automática",
+      "areaFill": "Desenvolvimento de área"
+    },
+    "autoGrowth": {
+      "style": "Estilo das ruas",
+      "styles": {
+        "blocks": "Quarteirões",
+        "ribbon": "Faixa linear",
+        "sprawl_1": "Expansão 1",
+        "sprawl_2": "Expansão 2",
+        "sprawl_3": "Expansão 3"
+      },
+      "arterialVariant": "Via arterial",
+      "laneVariant": "Rua local",
+      "variantAuto": "Automático (seguir envolvente)",
+      "blocks": "Dimensão da expansão",
+      "blocksUnit": "quarteirões",
+      "hint": "Mantenha Ctrl e arraste para pintar a área permitida. Vias e quarteirões crescem automaticamente a partir do melhor ponto.",
+      "noCandidate": "Não foi encontrado um local adequado para expandir na área pintada.",
+      "previewed": "Pode expandir {{blocks}} quarteirões ({{roads}} troços, {{parcels}} lotes, est. {{cost}}, {{rejected}} rejeitados)",
+      "created": "Expandido em {{blocks}} quarteirões ({{roads}} troços, {{parcels}} lotes, {{rejected}} rejeitados)"
+    },
+    "proposal": {
+      "message": "Há pouco espaço disponível para construir. Pretende expandir a cidade com o plano abaixo?",
+      "vacantInfo": "Lotes vagos: {{vacant}} / {{total}}",
+      "planInfo": "Proposta: {{blocks}} quarteirões, {{roads}} troços, {{parcels}} lotes (est. {{cost}})",
+      "legendArterial": "Via arterial",
+      "legendLane": "Rua local",
+      "legendParcel": "Novos lotes",
+      "suppressLabel": "Não sugerir novamente durante algum tempo ({{epochs}} épocas)"
+    }
   }
 }

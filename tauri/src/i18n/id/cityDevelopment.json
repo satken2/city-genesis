@@ -23,6 +23,38 @@
     "create": "Konfirmasi",
     "creating": "Membuat...",
     "previewed": "Medan di area {{area}} akan sedikit diratakan, dan {{roads}} ruas jalan serta {{parcels}} kavling dapat direncanakan ({{rejected}} ruas ditolak)",
-    "created": "Medan telah diratakan, dan {{roads}} ruas jalan serta {{parcels}} kavling telah direncanakan ({{rejected}} ruas ditolak)"
+    "created": "Medan telah diratakan, dan {{roads}} ruas jalan serta {{parcels}} kavling telah direncanakan ({{rejected}} ruas ditolak)",
+    "tabs": {
+      "autoGrowth": "Perluasan Otomatis",
+      "areaFill": "Pengembangan Area"
+    },
+    "autoGrowth": {
+      "style": "Pola jalan",
+      "styles": {
+        "blocks": "Blok kota",
+        "ribbon": "Deret tepi jalan",
+        "sprawl_1": "Menyebar 1",
+        "sprawl_2": "Menyebar 2",
+        "sprawl_3": "Menyebar 3"
+      },
+      "arterialVariant": "Jalan utama",
+      "laneVariant": "Jalan lokal",
+      "variantAuto": "Otomatis (ikuti sekitar)",
+      "blocks": "Ukuran perluasan",
+      "blocksUnit": "blok",
+      "hint": "Tahan Ctrl dan seret untuk mewarnai area yang diizinkan. Jalan dan blok akan meluas otomatis dari titik terbaik.",
+      "noCandidate": "Tidak ditemukan lokasi yang cocok untuk diperluas di area tersebut.",
+      "previewed": "Dapat memperluas {{blocks}} blok ({{roads}} ruas jalan, {{parcels}} kavling, perk. {{cost}}, {{rejected}} ditolak)",
+      "created": "Memperluas {{blocks}} blok ({{roads}} ruas jalan, {{parcels}} kavling, {{rejected}} ditolak)"
+    },
+    "proposal": {
+      "message": "Lahan siap bangun semakin menipis. Ingin memperluas kota dengan rencana di bawah ini?",
+      "vacantInfo": "Kavling kosong: {{vacant}} / {{total}}",
+      "planInfo": "Usulan: {{blocks}} blok, {{roads}} ruas jalan, {{parcels}} kavling (perk. {{cost}})",
+      "legendArterial": "Jalan utama",
+      "legendLane": "Jalan lokal",
+      "legendParcel": "Kavling baru",
+      "suppressLabel": "Jangan sarankan lagi untuk sementara ({{epochs}} epok)"
+    }
   }
 }

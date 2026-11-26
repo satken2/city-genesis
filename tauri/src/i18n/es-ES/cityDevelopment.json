@@ -23,6 +23,38 @@
     "create": "Confirmar",
     "creating": "Creando...",
     "previewed": "Suaviza un poco el terreno en {{area}} y se pueden planificar {{roads}} tramos de calle y {{parcels}} parcelas ({{rejected}} rechazados)",
-    "created": "Se suavizó el terreno y se planificaron {{roads}} tramos de calle y {{parcels}} parcelas ({{rejected}} rechazados)"
+    "created": "Se suavizó el terreno y se planificaron {{roads}} tramos de calle y {{parcels}} parcelas ({{rejected}} rechazados)",
+    "tabs": {
+      "autoGrowth": "Expansión automática",
+      "areaFill": "Desarrollo de área"
+    },
+    "autoGrowth": {
+      "style": "Diseño de calles",
+      "styles": {
+        "blocks": "Manzanas urbanas",
+        "ribbon": "Franja viaria",
+        "sprawl_1": "Expansión 1",
+        "sprawl_2": "Expansión 2",
+        "sprawl_3": "Expansión 3"
+      },
+      "arterialVariant": "Vía arterial",
+      "laneVariant": "Calle local",
+      "variantAuto": "Automático (según entorno)",
+      "blocks": "Cantidad de expansión",
+      "blocksUnit": "manzanas",
+      "hint": "Mantén Ctrl y arrastra para pintar el área permitida. Las vías y manzanas crecerán desde el mejor punto del área.",
+      "noCandidate": "No se ha encontrado ningún lugar adecuado para expandir en el área pintada.",
+      "previewed": "Se pueden expandir {{blocks}} manzanas ({{roads}} tramos de vía, {{parcels}} parcelas, est. {{cost}}, {{rejected}} rechazados)",
+      "created": "Se han expandido {{blocks}} manzanas ({{roads}} tramos de vía, {{parcels}} parcelas, {{rejected}} rechazados)"
+    },
+    "proposal": {
+      "message": "Queda poco espacio edificable. ¿Quieres expandir la ciudad con el siguiente plan?",
+      "vacantInfo": "Parcelas vacías: {{vacant}} / {{total}}",
+      "planInfo": "Propuesta: {{blocks}} manzanas, {{roads}} tramos de vía, {{parcels}} parcelas (est. {{cost}})",
+      "legendArterial": "Vía arterial",
+      "legendLane": "Calle local",
+      "legendParcel": "Nuevas parcelas",
+      "suppressLabel": "No volver a sugerir durante un tiempo ({{epochs}} épocas)"
+    }
   }
 }

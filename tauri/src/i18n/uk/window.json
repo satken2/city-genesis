@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Підтвердження викупу землі",
     "agent_creation": "Створення економічного суб'єкта",
     "resource_edit": "Редагування ресурсів",
-    "property_edit": "Редагування властивостей"
+    "property_edit": "Редагування властивостей",
+    "city_expansion_proposal": "Пропозиція розширення міста"
   },
   "cityMap": {
     "layers": {

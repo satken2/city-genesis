@@ -60,7 +60,8 @@
     "building_direct_acquisition": "征地确认",
     "agent_creation": "创建经济主体",
     "resource_edit": "资源编辑",
-    "property_edit": "属性编辑"
+    "property_edit": "属性编辑",
+    "city_expansion_proposal": "城市扩展建议"
   },
   "cityMap": {
     "layers": {

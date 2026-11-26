@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Επιβεβαίωση εξαγοράς γης",
     "agent_creation": "Δημιουργία οικονομικού φορέα",
     "resource_edit": "Επεξεργασία πόρων",
-    "property_edit": "Επεξεργασία ιδιοτήτων"
+    "property_edit": "Επεξεργασία ιδιοτήτων",
+    "city_expansion_proposal": "Πρόταση επέκτασης πόλης"
   },
   "cityMap": {
     "layers": {

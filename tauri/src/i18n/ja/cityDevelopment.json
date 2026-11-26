@@ -23,6 +23,38 @@
     "create": "確定",
     "creating": "作成中...",
     "previewed": "範囲 {{area}} の地形を少しならし、道路 {{roads}} 本・土地区画 {{parcels}} 件を計画できます（棄却 {{rejected}} 本）",
-    "created": "地形をならし、道路 {{roads}} 本・土地区画 {{parcels}} 件を計画しました（棄却 {{rejected}} 本）"
+    "created": "地形をならし、道路 {{roads}} 本・土地区画 {{parcels}} 件を計画しました（棄却 {{rejected}} 本）",
+    "tabs": {
+      "autoGrowth": "自動拡張",
+      "areaFill": "範囲開発"
+    },
+    "autoGrowth": {
+      "style": "路地の形式",
+      "styles": {
+        "blocks": "街区型",
+        "ribbon": "沿道一列型",
+        "sprawl_1": "スプロール風1",
+        "sprawl_2": "スプロール風2",
+        "sprawl_3": "スプロール風3"
+      },
+      "arterialVariant": "幹線道路",
+      "laneVariant": "路地",
+      "variantAuto": "自動（周辺に合わせる）",
+      "blocks": "拡張する量",
+      "blocksUnit": "街区",
+      "hint": "Ctrl＋左ドラッグで拡張を許可する範囲を塗ります。範囲内の最適な位置から幹線と街区を自動で広げます。",
+      "noCandidate": "指定した範囲には拡張できる場所がありませんでした",
+      "previewed": "{{blocks}} 街区を拡張できます（道路 {{roads}} 本・土地区画 {{parcels}} 件・推定費用 {{cost}}・棄却 {{rejected}} 本）",
+      "created": "{{blocks}} 街区を拡張しました（道路 {{roads}} 本・土地区画 {{parcels}} 件・棄却 {{rejected}} 本）"
+    },
+    "proposal": {
+      "message": "建物を建てられる余地が少なくなっています。以下の計画で都市を拡張しませんか？",
+      "vacantInfo": "空き区画: {{vacant}} / {{total}} 件",
+      "planInfo": "追加予定: {{blocks}} 街区・道路 {{roads}} 本・土地区画 {{parcels}} 件（推定費用 {{cost}}）",
+      "legendArterial": "幹線道路",
+      "legendLane": "路地",
+      "legendParcel": "新規区画",
+      "suppressLabel": "しばらく提案しない（{{epochs}}エポック）"
+    }
   }
 }

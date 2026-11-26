@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Konfirmasi pengadaan lahan",
     "agent_creation": "Buat pelaku ekonomi",
     "resource_edit": "Edit sumber daya",
-    "property_edit": "Edit properti"
+    "property_edit": "Edit properti",
+    "city_expansion_proposal": "Usulan Perluasan Kota"
   },
   "cityMap": {
     "layers": {

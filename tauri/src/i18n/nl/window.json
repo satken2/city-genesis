@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Grondverwerving bevestigen",
     "agent_creation": "Economische actor maken",
     "resource_edit": "Hulpbronnen bewerken",
-    "property_edit": "Eigenschappen bewerken"
+    "property_edit": "Eigenschappen bewerken",
+    "city_expansion_proposal": "Voorstel voor stadsuitbreiding"
   },
   "cityMap": {
     "layers": {

@@ -60,7 +60,8 @@
     "building_direct_acquisition": "徵地確認",
     "agent_creation": "建立經濟主體",
     "resource_edit": "資源編輯",
-    "property_edit": "屬性編輯"
+    "property_edit": "屬性編輯",
+    "city_expansion_proposal": "城市擴展建議"
   },
   "cityMap": {
     "layers": {

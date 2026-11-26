@@ -23,6 +23,38 @@
     "create": "Bekräfta",
     "creating": "Skapar…",
     "previewed": "Terrängen inom {{area}} jämnas till lite, och {{roads}} vägar och {{parcels}} tomter kan planeras ({{rejected}} vägar förkastade)",
-    "created": "Terrängen jämnades till och {{roads}} vägar och {{parcels}} tomter planerades ({{rejected}} vägar förkastade)"
+    "created": "Terrängen jämnades till och {{roads}} vägar och {{parcels}} tomter planerades ({{rejected}} vägar förkastade)",
+    "tabs": {
+      "autoGrowth": "Auto-utbyggnad",
+      "areaFill": "Områdesutveckling"
+    },
+    "autoGrowth": {
+      "style": "Gatumönster",
+      "styles": {
+        "blocks": "Stadskvarter",
+        "ribbon": "Vägband",
+        "sprawl_1": "Spridning 1",
+        "sprawl_2": "Spridning 2",
+        "sprawl_3": "Spridning 3"
+      },
+      "arterialVariant": "Huvudgata",
+      "laneVariant": "Lokalgata",
+      "variantAuto": "Automatiskt (som omgivning)",
+      "blocks": "Utbyggnadsmängd",
+      "blocksUnit": "kvarter",
+      "hint": "Håll Ctrl intryckt och dra för att måla det tillåtna området. Vägar och kvarter växer automatiskt från bästa plats.",
+      "noCandidate": "Ingen lämplig plats att bygga ut hittades i det målade området.",
+      "previewed": "Kan bygga ut med {{blocks}} kvarter ({{roads}} vägavsnitt, {{parcels}} tomter, ca {{cost}}, {{rejected}} avvisade)",
+      "created": "Byggde ut med {{blocks}} kvarter ({{roads}} vägavsnitt, {{parcels}} tomter, {{rejected}} avvisade)"
+    },
+    "proposal": {
+      "message": "Byggbar mark börjar ta slut. Vill du bygga ut staden enligt planen nedan?",
+      "vacantInfo": "Lediga tomter: {{vacant}} / {{total}}",
+      "planInfo": "Förslag: {{blocks}} kvarter, {{roads}} vägavsnitt, {{parcels}} tomter (ca {{cost}})",
+      "legendArterial": "Huvudgata",
+      "legendLane": "Lokalgata",
+      "legendParcel": "Nya tomter",
+      "suppressLabel": "Föreslå inte igen på ett tag ({{epochs}} epoker)"
+    }
   }
 }

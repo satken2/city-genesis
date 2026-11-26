@@ -23,6 +23,38 @@
     "create": "Conferma",
     "creating": "Creazione...",
     "previewed": "Area di {{area}}: il terreno verrà leggermente spianato e si possono pianificare {{roads}} strade e {{parcels}} lotti ({{rejected}} strade scartate)",
-    "created": "Terreno spianato: pianificate {{roads}} strade e {{parcels}} lotti ({{rejected}} strade scartate)"
+    "created": "Terreno spianato: pianificate {{roads}} strade e {{parcels}} lotti ({{rejected}} strade scartate)",
+    "tabs": {
+      "autoGrowth": "Espansione auto",
+      "areaFill": "Sviluppo area"
+    },
+    "autoGrowth": {
+      "style": "Disposizione strade",
+      "styles": {
+        "blocks": "Isolati urbani",
+        "ribbon": "Fascia lineare",
+        "sprawl_1": "Espansione 1",
+        "sprawl_2": "Espansione 2",
+        "sprawl_3": "Espansione 3"
+      },
+      "arterialVariant": "Arteria principale",
+      "laneVariant": "Strada locale",
+      "variantAuto": "Automatico (come dintorni)",
+      "blocks": "Ampiezza espansione",
+      "blocksUnit": "isolati",
+      "hint": "Tieni premuto Ctrl e trascina per dipingere l'area consentita. Strade e isolati cresceranno automaticamente dal punto migliore.",
+      "noCandidate": "Nessun punto adatto all'espansione trovato nell'area selezionata.",
+      "previewed": "Espansione possibile di {{blocks}} isolati ({{roads}} tratti, {{parcels}} lotti, stima {{cost}}, {{rejected}} scartati)",
+      "created": "Espansi {{blocks}} isolati ({{roads}} tratti, {{parcels}} lotti, {{rejected}} scartati)"
+    },
+    "proposal": {
+      "message": "Lo spazio edificabile sta per esaurirsi. Vuoi espandere la città con il piano seguente?",
+      "vacantInfo": "Lotti liberi: {{vacant}} / {{total}}",
+      "planInfo": "Proposta: {{blocks}} isolati, {{roads}} tratti, {{parcels}} lotti (stima {{cost}})",
+      "legendArterial": "Arteria principale",
+      "legendLane": "Strada locale",
+      "legendParcel": "Nuovi lotti",
+      "suppressLabel": "Non proporre di nuovo per un po' ({{epochs}} epoche)"
+    }
   }
 }

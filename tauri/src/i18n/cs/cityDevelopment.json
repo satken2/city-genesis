@@ -23,6 +23,38 @@
     "create": "Potvrdit",
     "creating": "Vytváření…",
     "previewed": "V oblasti {{area}} lze mírně srovnat terén a naplánovat úseky silnic: {{roads}}, parcely: {{parcels}} (zamítnuté úseky: {{rejected}})",
-    "created": "Terén byl srovnán a naplánovány byly úseky silnic: {{roads}}, parcely: {{parcels}} (zamítnuté úseky: {{rejected}})"
+    "created": "Terén byl srovnán a naplánovány byly úseky silnic: {{roads}}, parcely: {{parcels}} (zamítnuté úseky: {{rejected}})",
+    "tabs": {
+      "autoGrowth": "Auto-rozšíření",
+      "areaFill": "Rozvoj oblasti"
+    },
+    "autoGrowth": {
+      "style": "Rozvržení ulic",
+      "styles": {
+        "blocks": "Městské bloky",
+        "ribbon": "Pás podél silnice",
+        "sprawl_1": "Rozptýlené 1",
+        "sprawl_2": "Rozptýlené 2",
+        "sprawl_3": "Rozptýlené 3"
+      },
+      "arterialVariant": "Hlavní silnice",
+      "laneVariant": "Místní ulice",
+      "variantAuto": "Automaticky (dle okolí)",
+      "blocks": "Rozsah rozšíření",
+      "blocksUnit": "bloků",
+      "hint": "Podržte Ctrl a tažením označte povolenou oblast. Silnice a bloky se automaticky rozšíří z nejlepšího místa.",
+      "noCandidate": "V označené oblasti nebylo nalezeno vhodné místo pro rozšíření.",
+      "previewed": "Lze rozšířit o {{blocks}} bloků ({{roads}} úseků, {{parcels}} parcel, odhad {{cost}}, {{rejected}} zamítnuto)",
+      "created": "Rozšířeno o {{blocks}} bloků ({{roads}} úseků, {{parcels}} parcel, {{rejected}} zamítnuto)"
+    },
+    "proposal": {
+      "message": "Dochází místo pro výstavbu. Chcete město rozšířit podle následujícího plánu?",
+      "vacantInfo": "Volné parcely: {{vacant}} / {{total}}",
+      "planInfo": "Návrh: {{blocks}} bloků, {{roads}} úseků, {{parcels}} parcel (odhad {{cost}})",
+      "legendArterial": "Hlavní silnice",
+      "legendLane": "Místní ulice",
+      "legendParcel": "Nové parcely",
+      "suppressLabel": "Nějakou dobu znovu nenavrhovat ({{epochs}} epoch)"
+    }
   }
 }

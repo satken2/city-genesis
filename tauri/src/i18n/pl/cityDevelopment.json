@@ -23,6 +23,38 @@
     "create": "Zatwierdź",
     "creating": "Tworzenie...",
     "previewed": "Teren w obszarze {{area}} zostanie lekko wyrównany. Można zaplanować: drogi – {{roads}}, działki – {{parcels}} (odrzucone drogi: {{rejected}})",
-    "created": "Wyrównano teren i zaplanowano: drogi – {{roads}}, działki – {{parcels}} (odrzucone drogi: {{rejected}})"
+    "created": "Wyrównano teren i zaplanowano: drogi – {{roads}}, działki – {{parcels}} (odrzucone drogi: {{rejected}})",
+    "tabs": {
+      "autoGrowth": "Auto-rozbudowa",
+      "areaFill": "Zabudowa obszaru"
+    },
+    "autoGrowth": {
+      "style": "Układ ulic",
+      "styles": {
+        "blocks": "Kwartały miejskie",
+        "ribbon": "Pas przy drodze",
+        "sprawl_1": "Rozproszony 1",
+        "sprawl_2": "Rozproszony 2",
+        "sprawl_3": "Rozproszony 3"
+      },
+      "arterialVariant": "Droga główna",
+      "laneVariant": "Ulica lokalna",
+      "variantAuto": "Automatycznie (jak w okolicy)",
+      "blocks": "Skala rozbudowy",
+      "blocksUnit": "kwartały",
+      "hint": "Przytrzymaj Ctrl i przeciągnij, aby zamalować obszar. Drogi i kwartały rozwiną się automatycznie z najlepszego punktu.",
+      "noCandidate": "Nie znaleziono odpowiedniego miejsca do rozbudowy w zaznaczonym obszarze.",
+      "previewed": "Można rozbudować o {{blocks}} kwartałów ({{roads}} odcinków dróg, {{parcels}} działek, szac. {{cost}}, {{rejected}} odrzuconych)",
+      "created": "Rozbudowano o {{blocks}} kwartałów ({{roads}} odcinków dróg, {{parcels}} działek, {{rejected}} odrzuconych)"
+    },
+    "proposal": {
+      "message": "Kończy się miejsce pod zabudowę. Czy chcesz rozbudować miasto według poniższego planu?",
+      "vacantInfo": "Wolne działki: {{vacant}} / {{total}}",
+      "planInfo": "Propozycja: {{blocks}} kwartałów, {{roads}} odcinków dróg, {{parcels}} działek (szac. {{cost}})",
+      "legendArterial": "Droga główna",
+      "legendLane": "Ulica lokalna",
+      "legendParcel": "Nowe działki",
+      "suppressLabel": "Nie proponuj przez jakiś czas ({{epochs}} epok)"
+    }
   }
 }

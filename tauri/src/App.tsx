@@ -75,10 +75,12 @@ const Terrain3DPreviewCanvas = lazy(() => import("./components/terrain/Terrain3D
 const CityMapWindow = lazy(() => import("./components/map/CityMapWindow").then(m => ({ default: m.CityMapWindow })));
 const PropertyEditPanel = lazy(() => import("./components/debug/PropertyEditPanel").then(m => ({ default: m.PropertyEditPanel })));
 const CityDevelopmentWindow = lazy(() => import("./components/development/CityDevelopmentWindow").then(m => ({ default: m.CityDevelopmentWindow })));
+const CityExpansionProposalWindow = lazy(() => import("./components/development/CityExpansionProposalWindow").then(m => ({ default: m.CityExpansionProposalWindow })));
 const ScenarioToolsWindow = lazy(() => import("./components/scenario/ScenarioToolsWindow").then(m => ({ default: m.ScenarioToolsWindow })));
 const AgentCreationPanel = lazy(() => import("./components/scenario/AgentCreationPanel").then(m => ({ default: m.AgentCreationPanel })));
 // EpochReport is used only as a type; use a type-only import to exclude its implementation from the bundle.
 import type { EpochReport } from "./components/taskbar/EpochResultWindow";
+import type { ExpansionProposal } from "./components/development/CityExpansionProposalWindow";
 import type { PendingZoneMerge } from "./components/zone/ZoneMergeConfirmWindow";
 import type { PendingDirectAcquisition } from "./components/building/BuildingDirectAcquisitionConfirmWindow";
 import type { InfoDialogContent } from "./components/common/InfoDialogWindow";
@@ -105,7 +107,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * Window types with dedicated panels. Render these with dedicated components instead of the generic JSON
  * display.
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_list", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "city_insignia", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "achievement_unlocked", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "city_development", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_list", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "city_insignia", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "achievement_unlocked", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "city_development", "city_expansion_proposal", "agent_creation"]);
 
 
 function App() {
@@ -603,6 +605,7 @@ function App() {
                   completedQuests?: QuestNotification[];
                   failedQuests?: QuestNotification[];
                   unlockedAchievements?: UnlockedAchievement[];
+                  expansionProposal?: ExpansionProposal | null;
                 };
                 return (
                   <EpochResultWindow
@@ -624,6 +627,12 @@ function App() {
                       }
                       // Achievements also wait for the results to close, so the camera button is not hidden behind them.
                       await showUnlockedAchievements(extra.unlockedAchievements ?? []).catch(console.error);
+                      if (extra.expansionProposal) {
+                        await invoke("open_registered_window", {
+                          windowType: "city_expansion_proposal",
+                          params: { extra: { proposal: extra.expansionProposal } },
+                        });
+                      }
                       await closeWindow();
                     }}
                   />
@@ -656,6 +665,12 @@ function App() {
               <ScenarioToolsWindow apiBaseUrl={context.api_base_url} />
             ) : context.window_type === "city_development" ? (
               <CityDevelopmentWindow apiBaseUrl={context.api_base_url} />
+            ) : context.window_type === "city_expansion_proposal" ? (
+              <CityExpansionProposalWindow
+                apiBaseUrl={context.api_base_url}
+                proposal={(windowExtra(context)?.proposal as ExpansionProposal | null | undefined) ?? null}
+                onClose={closeWindow}
+              />
             ) : context.window_type === "agent_creation" ? (
               // Scenario mode only. Create an already moved-in non-building agent in a shared building selected in the 3D view.
               <AgentCreationPanel apiBaseUrl={context.api_base_url} />

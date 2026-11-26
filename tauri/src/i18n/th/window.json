@@ -60,7 +60,8 @@
     "building_direct_acquisition": "ยืนยันการเวนคืนที่ดิน",
     "agent_creation": "สร้างหน่วยเศรษฐกิจ",
     "resource_edit": "แก้ไขทรัพยากร",
-    "property_edit": "แก้ไขคุณสมบัติ"
+    "property_edit": "แก้ไขคุณสมบัติ",
+    "city_expansion_proposal": "ข้อเสนอการขยายเมือง"
   },
   "cityMap": {
     "layers": {

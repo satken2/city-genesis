@@ -23,6 +23,38 @@
     "create": "확정",
     "creating": "생성 중...",
     "previewed": "{{area}} 범위의 지형을 조금 고르게 하고 도로 {{roads}}개와 구획 {{parcels}}개를 계획할 수 있습니다(거부 {{rejected}}개)",
-    "created": "지형을 고르게 하고 도로 {{roads}}개와 구획 {{parcels}}개를 계획했습니다(거부 {{rejected}}개)"
+    "created": "지형을 고르게 하고 도로 {{roads}}개와 구획 {{parcels}}개를 계획했습니다(거부 {{rejected}}개)",
+    "tabs": {
+      "autoGrowth": "자동 확장",
+      "areaFill": "구역 개발"
+    },
+    "autoGrowth": {
+      "style": "골목 형식",
+      "styles": {
+        "blocks": "블록형",
+        "ribbon": "연도 일렬형",
+        "sprawl_1": "스프롤 1",
+        "sprawl_2": "스프롤 2",
+        "sprawl_3": "스프롤 3"
+      },
+      "arterialVariant": "간선 도로",
+      "laneVariant": "이면 도로",
+      "variantAuto": "자동(주변에 맞춤)",
+      "blocks": "확장 규모",
+      "blocksUnit": "블록",
+      "hint": "Ctrl+좌클릭 드래그로 확장을 허용할 범위를 칠하세요. 범위 내 최적의 지점에서 간선과 블록을 자동으로 확장합니다.",
+      "noCandidate": "지정한 범위에서 확장할 수 있는 위치를 찾지 못했습니다",
+      "previewed": "{{blocks}}개 블록 확장 가능 (도로 {{roads}}구간, 필지 {{parcels}}개, 예상 비용 {{cost}}, 제외 {{rejected}}구간)",
+      "created": "{{blocks}}개 블록을 확장했습니다 (도로 {{roads}}구간, 필지 {{parcels}}개, 제외 {{rejected}}구간)"
+    },
+    "proposal": {
+      "message": "건물을 지을 수 있는 빈 토지가 부족합니다. 아래 계획으로 도시를 확장할까요?",
+      "vacantInfo": "빈 필지: {{vacant}} / {{total}}개",
+      "planInfo": "추가 예정: {{blocks}}개 블록, 도로 {{roads}}구간, 필지 {{parcels}}개 (예상 비용 {{cost}})",
+      "legendArterial": "간선 도로",
+      "legendLane": "이면 도로",
+      "legendParcel": "신규 필지",
+      "suppressLabel": "당분간 제안하지 않기 ({{epochs}}에포크)"
+    }
   }
 }

@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Xác nhận thu mua đất",
     "agent_creation": "Tạo chủ thể kinh tế",
     "resource_edit": "Chỉnh sửa tài nguyên",
-    "property_edit": "Chỉnh thuộc tính"
+    "property_edit": "Chỉnh thuộc tính",
+    "city_expansion_proposal": "Đề xuất mở rộng thành phố"
   },
   "cityMap": {
     "layers": {

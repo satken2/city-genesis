@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Confirmar aquisição de terrenos",
     "agent_creation": "Criar agente económico",
     "resource_edit": "Editar recursos",
-    "property_edit": "Editar propriedades"
+    "property_edit": "Editar propriedades",
+    "city_expansion_proposal": "Proposta de expansão urbana"
   },
   "cityMap": {
     "layers": {

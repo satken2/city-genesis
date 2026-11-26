@@ -60,7 +60,8 @@
     "building_direct_acquisition": "Sahkan pengambilan tanah",
     "agent_creation": "Cipta entiti ekonomi",
     "resource_edit": "Sunting sumber",
-    "property_edit": "Sunting sifat"
+    "property_edit": "Sunting sifat",
+    "city_expansion_proposal": "Cadangan Peluasan Bandar"
   },
   "cityMap": {
     "layers": {

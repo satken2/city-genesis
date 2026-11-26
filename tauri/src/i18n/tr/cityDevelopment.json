@@ -23,6 +23,38 @@
     "create": "Onayla",
     "creating": "Oluşturuluyor...",
     "previewed": "Alan: {{area}}. Arazi hafifçe düzleştirilerek {{roads}} yol ve {{parcels}} parsel planlanabilir ({{rejected}} yol reddedildi)",
-    "created": "Arazi düzleştirildi; {{roads}} yol ve {{parcels}} parsel planlandı ({{rejected}} yol reddedildi)"
+    "created": "Arazi düzleştirildi; {{roads}} yol ve {{parcels}} parsel planlandı ({{rejected}} yol reddedildi)",
+    "tabs": {
+      "autoGrowth": "Otomatik Genişlet",
+      "areaFill": "Alan Geliştirme"
+    },
+    "autoGrowth": {
+      "style": "Sokak düzeni",
+      "styles": {
+        "blocks": "Şehir blokları",
+        "ribbon": "Yol boyu şerit",
+        "sprawl_1": "Yayılma 1",
+        "sprawl_2": "Yayılma 2",
+        "sprawl_3": "Yayılma 3"
+      },
+      "arterialVariant": "Ana cadde",
+      "laneVariant": "Ara sokak",
+      "variantAuto": "Otomatik (çevreye uygun)",
+      "blocks": "Genişletme miktarı",
+      "blocksUnit": "blok",
+      "hint": "Genişletmeye izin verilen alanı boyamak için Ctrl tuşuna basıp sürükleyin. Yollar ve bloklar en uygun noktadan otomatik genişler.",
+      "noCandidate": "Boyanan alanda genişletmeye uygun yer bulunamadı.",
+      "previewed": "{{blocks}} blok genişletilebilir ({{roads}} yol parçası, {{parcels}} parsel, tahm. {{cost}}, {{rejected}} reddedildi)",
+      "created": "{{blocks}} blok genişletildi ({{roads}} yol parçası, {{parcels}} parsel, {{rejected}} reddedildi)"
+    },
+    "proposal": {
+      "message": "İnşa edilebilir alan azaldı. Şehri aşağıdaki planla genişletmek ister misiniz?",
+      "vacantInfo": "Boş parseller: {{vacant}} / {{total}}",
+      "planInfo": "Öneri: {{blocks}} blok, {{roads}} yol parçası, {{parcels}} parsel (tahm. {{cost}})",
+      "legendArterial": "Ana cadde",
+      "legendLane": "Ara sokak",
+      "legendParcel": "Yeni parseller",
+      "suppressLabel": "Bir süre tekrar önerme ({{epochs}} dönem)"
+    }
   }
 }

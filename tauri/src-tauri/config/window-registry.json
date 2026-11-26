@@ -217,6 +217,15 @@
     "empty_shell": false,
     "actions": []
   },
+  "city_expansion_proposal": {
+    "title": "都市の拡張提案",
+    "width": 820,
+    "height": 660,
+    "resizable": true,
+    "policy": "single",
+    "empty_shell": false,
+    "actions": []
+  },
   "agent_creation": {
     "title": "経済主体の作成",
     "width": 440,

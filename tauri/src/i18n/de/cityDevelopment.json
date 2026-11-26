@@ -23,6 +23,38 @@
     "create": "Bestätigen",
     "creating": "Wird erstellt...",
     "previewed": "Das Gelände im Bereich {{area}} wird leicht geglättet; es können {{roads}} Straßen und {{parcels}} Grundstücke geplant werden ({{rejected}} verworfen)",
-    "created": "Gelände geglättet und {{roads}} Straßen sowie {{parcels}} Grundstücke geplant ({{rejected}} verworfen)"
+    "created": "Gelände geglättet und {{roads}} Straßen sowie {{parcels}} Grundstücke geplant ({{rejected}} verworfen)",
+    "tabs": {
+      "autoGrowth": "Auto-Erweiterung",
+      "areaFill": "Flächenentwicklung"
+    },
+    "autoGrowth": {
+      "style": "Straßenmuster",
+      "styles": {
+        "blocks": "Stadtblöcke",
+        "ribbon": "Straßendorf-Band",
+        "sprawl_1": "Zersiedelung 1",
+        "sprawl_2": "Zersiedelung 2",
+        "sprawl_3": "Zersiedelung 3"
+      },
+      "arterialVariant": "Hauptstraße",
+      "laneVariant": "Nebenstraße",
+      "variantAuto": "Automatisch (wie Umgebung)",
+      "blocks": "Erweiterungsumfang",
+      "blocksUnit": "Blöcke",
+      "hint": "Strg gedrückt halten und ziehen, um den erlaubten Bereich zu markieren. Straßen und Blöcke wachsen automatisch vom besten Punkt aus.",
+      "noCandidate": "Im markierten Bereich wurde kein geeigneter Platz zum Erweitern gefunden.",
+      "previewed": "Kann um {{blocks}} Blöcke erweitern ({{roads}} Straßenabschnitte, {{parcels}} Parzellen, ca. {{cost}}, {{rejected}} verworfen)",
+      "created": "Um {{blocks}} Blöcke erweitert ({{roads}} Straßenabschnitte, {{parcels}} Parzellen, {{rejected}} verworfen)"
+    },
+    "proposal": {
+      "message": "Bauland wird knapp. Möchten Sie die Stadt mit folgendem Plan erweitern?",
+      "vacantInfo": "Freie Parzellen: {{vacant}} / {{total}}",
+      "planInfo": "Vorschlag: {{blocks}} Blöcke, {{roads}} Straßenabschnitte, {{parcels}} Parzellen (ca. {{cost}})",
+      "legendArterial": "Hauptstraße",
+      "legendLane": "Nebenstraße",
+      "legendParcel": "Neue Parzellen",
+      "suppressLabel": "Eine Weile nicht mehr vorschlagen ({{epochs}} Epochen)"
+    }
   }
 }

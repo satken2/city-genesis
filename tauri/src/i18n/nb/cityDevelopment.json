@@ -23,6 +23,38 @@
     "create": "Bekreft",
     "creating": "Oppretter …",
     "previewed": "Jevner terrenget litt ut i området {{area}} og kan planlegge veier: {{roads}}, parseller: {{parcels}} (forkastet: {{rejected}})",
-    "created": "Jevnet ut terrenget og planla veier: {{roads}}, parseller: {{parcels}} (forkastet: {{rejected}})"
+    "created": "Jevnet ut terrenget og planla veier: {{roads}}, parseller: {{parcels}} (forkastet: {{rejected}})",
+    "tabs": {
+      "autoGrowth": "Auto-utvidelse",
+      "areaFill": "Områdeutvikling"
+    },
+    "autoGrowth": {
+      "style": "Gatemønster",
+      "styles": {
+        "blocks": "Bykvartaler",
+        "ribbon": "Veistripe",
+        "sprawl_1": "Spredning 1",
+        "sprawl_2": "Spredning 2",
+        "sprawl_3": "Spredning 3"
+      },
+      "arterialVariant": "Hovedvei",
+      "laneVariant": "Lokalgate",
+      "variantAuto": "Automatisk (som omgivelser)",
+      "blocks": "Utvidelsesmengde",
+      "blocksUnit": "kvartaler",
+      "hint": "Hold Ctrl og dra for å male tillatt område. Veier og kvartaler utvides automatisk fra beste punkt.",
+      "noCandidate": "Fant ingen egnet plass å utvide i det malte området.",
+      "previewed": "Kan utvide med {{blocks}} kvartaler ({{roads}} veistrekninger, {{parcels}} tomter, ca. {{cost}}, {{rejected}} avvist)",
+      "created": "Utvidet med {{blocks}} kvartaler ({{roads}} veistrekninger, {{parcels}} tomter, {{rejected}} avvist)"
+    },
+    "proposal": {
+      "message": "Det er lite byggbar plass igjen. Vil du utvide byen med planen nedenfor?",
+      "vacantInfo": "Ledige tomter: {{vacant}} / {{total}}",
+      "planInfo": "Forslag: {{blocks}} kvartaler, {{roads}} veistrekninger, {{parcels}} tomter (ca. {{cost}})",
+      "legendArterial": "Hovedvei",
+      "legendLane": "Lokalgate",
+      "legendParcel": "Nye tomter",
+      "suppressLabel": "Ikke foreslå igjen på en stund ({{epochs}} epoker)"
+    }
   }
 }
