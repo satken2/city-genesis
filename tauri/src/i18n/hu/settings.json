@@ -55,6 +55,11 @@
       "hide": "Elrejtés",
       "description": "A képernyő jobb felső sarkában a lakosok megszólalásait sorban megjelenítő kártya"
     },
+    "epochInterval": {
+      "label": "Korszakok közötti idő",
+      "description": "Amíg az idő halad, a következő korszak ennyi idő után automatikusan elindul",
+      "minutes": "{{minutes}} perc"
+    },
     "language": {
       "label": "Nyelv",
       "description": "A felhasználói felület megjelenítési nyelve. Ez független a mentés nyelvétől.",

@@ -55,6 +55,11 @@
       "hide": "Sembunyikan",
       "description": "Kartu di kanan atas layar yang menampilkan ucapan warga secara bergiliran"
     },
+    "epochInterval": {
+      "label": "Interval siklus",
+      "description": "Selama waktu berjalan, siklus berikutnya dimulai otomatis dengan interval ini",
+      "minutes": "{{minutes}} mnt"
+    },
     "language": {
       "label": "Bahasa",
       "description": "Bahasa tampilan UI. Ini berbeda dengan bahasa data simpanan",

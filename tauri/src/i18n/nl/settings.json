@@ -55,6 +55,11 @@
       "hide": "Verbergen",
       "description": "Kaart rechtsboven in het scherm die om beurten uitspraken van inwoners toont"
     },
+    "epochInterval": {
+      "label": "Interval tussen tijdvakken",
+      "description": "Zolang de tijd loopt, begint het volgende tijdvak automatisch na dit interval",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Taal",
       "description": "De weergavetaal van de interface. Deze staat los van de taal van je opgeslagen spel",

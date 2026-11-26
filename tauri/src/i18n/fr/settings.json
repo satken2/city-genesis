@@ -55,6 +55,11 @@
       "hide": "Masquer",
       "description": "Carte en haut à droite de l'écran qui affiche tour à tour les propos des habitants"
     },
+    "epochInterval": {
+      "label": "Intervalle entre les époques",
+      "description": "Tant que le temps s’écoule, l’époque suivante démarre automatiquement à cet intervalle",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Langue",
       "description": "Langue d'affichage de l'interface. Elle est distincte de la langue des données de sauvegarde.",

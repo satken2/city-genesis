@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "Taban alanı {{area}} m². Bu bina için en az {{minimum}} m² taban alanı gerekir",
     "PARCEL_MERGE_BLOCKED": "Yalnızca belediye yönetimine ait boş parseller düzenlenebilir",
     "UNVERIFIED_POPULATION_LIMIT": "Steam kimlik doğrulaması onaylanamadığından daha fazla dönem çalıştırılamaz. (Doğrulama olmadan nüfus {{limit}} kişiye ulaşana kadar oynayabilirsiniz.)",
-    "EPOCH_ALREADY_RUNNING": "Başka bir dönem çalışıyor. Bittikten sonra tekrar çalıştırın.",
+    "EPOCH_ALREADY_RUNNING": "Bir dönem çalışıyor. Bittikten sonra tekrar deneyin.",
     "BUILDING_FLOORS_RANGE": "Kat sayısı {{minimum}}–{{maximum}} arasında olmalıdır.",
     "BUILDING_COVERAGE_RANGE": "Taban alanı oranı %0 ile %100 arasında olmalıdır.",
     "BUILDING_PATH_CLEARANCE": "Bina, üstündeki bir yola veya hatta temas ediyor. Binanın yüksekliğini düşürün.",

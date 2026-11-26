@@ -1,26 +1,27 @@
 using UnityEngine;
 
 /// <summary>
-/// Rendering time advances from sunrise to sunset over about 10 minutes, independently of epochs. Skip nighttime, linking sunset
-/// to the next sunrise through brief twilight; switch the sun from west to east while it is below the horizon and the scene is dark.
-/// エポック計算後は日没・暗転で待機し、結果を閉じると日の出から朝へ進む。
+/// Rendering time doubles as the epoch countdown: one cycle runs from morning to the low evening sun, and the next epoch
+/// starts there (the UI sets the cycle length and whether time is stopped). Night is never shown during play; the sun
+/// sets only after an epoch's calculation finishes, so the city stays viewable while it runs: the evening holds during the
+/// calculation, sunset and darkness follow it, and closing the results brings sunrise and the next cycle's morning.
 /// </summary>
 public sealed class WeatherClock
 {
-    public const float DaySeconds = 600f;
-    public const float TwilightSeconds = 20f;
+    public const float DefaultCycleSeconds = 600f;
+    public const float EveningPhase = 0.97f;      // End of a cycle: low evening sun (about 5 degrees) that still lights the city.
+    public const float RushSeconds = 1f;          // Time to reach the evening when an epoch starts before the cycle ends.
     public const float SunsetSeconds = 1f;
     public const float SunriseSeconds = 1.5f;
     public const float FadeSeconds = 0.5f;
     public const float DuskSeconds = SunsetSeconds + FadeSeconds;
     public const float DawnSeconds = SunriseSeconds + FadeSeconds;
-    public const float MorningPhase = 0.12f;      // Position at session start, about 1.5 hours after sunrise.
+    public const float MorningPhase = 0.12f;      // Start of a cycle, about 1.5 hours after sunrise.
     public const float MaxElevation = 55f;        // Noon sun elevation (degrees).
     public const float BelowHorizon = 0.02f;      // Below-horizon travel after sunset/before sunrise, as a fraction of daytime duration.
     public const float LowestElevation = -6f;     // Lowest below-horizon elevation (degrees).
-    public const float TwilightDarkness = 0.55f;  // Twilight darkness between sunset and sunrise.
 
-    public enum Stage { Day, Twilight, Dusk, Night, Dawn }
+    public enum Stage { Day, Dusk, Night, Dawn }
 
     public Stage Current { get; private set; } = Stage.Day;
 
@@ -34,11 +35,31 @@ public sealed class WeatherClock
     public bool IsPresenting => Current == Stage.Dusk || Current == Stage.Night || Current == Stage.Dawn;
     public bool IsDarkening => Current == Stage.Dusk || Current == Stage.Night;
 
-    /// <summary>撮影用の時刻固定。昼間・薄明を保持し、エポックの演出は最後まで進める。</summary>
+    /// <summary>Real seconds from morning to evening. The sun's speed follows it, so changing it keeps the current position.</summary>
+    public float CycleSeconds { get; set; } = DefaultCycleSeconds;
+
+    /// <summary>
+    /// The player stopped time from the UI. Starts true so nothing runs before the UI says so.
+    /// Separate from the traffic pause: vehicles and pedestrians keep moving.
+    /// </summary>
+    public bool Stopped { get; set; } = true;
+
+    /// <summary>Time freeze for capture. Holds the daytime; epoch presentations still run to the end.</summary>
     public bool Paused;
 
     private float progress, startPhase, startDarkness, startFadeAlpha;
-    private bool dawnRequested;
+    private bool dawnRequested, executing;
+
+    public float PhasePerSecond => (EveningPhase - MorningPhase) / Mathf.Max(1f, CycleSeconds);
+
+    /// <summary>Real seconds until the evening; 0 outside the day or while the epoch runs.</summary>
+    public float RemainingSeconds => Current == Stage.Day && !executing ? Mathf.Max(0f, EveningPhase - Phase) / PhasePerSecond : 0f;
+
+    /// <summary>Whether the countdown is decreasing now (the UI counts down locally only while this holds).</summary>
+    public bool Running => Current == Stage.Day && !executing && !Stopped && !Paused && Phase < EveningPhase;
+
+    /// <summary>The cycle has ended and the day waits in the evening for the next epoch.</summary>
+    public bool AtEvening => Current == Stage.Day && !executing && Phase >= EveningPhase;
 
     public float Elevation => ElevationAt(Phase);
 
@@ -57,21 +78,18 @@ public sealed class WeatherClock
         return MaxElevation * Mathf.Sin(Mathf.PI * phase);
     }
 
-    /// <summary>日の出が始まる瞬間だけtrueを返す。空が明るくなる前に天気を切り替えるための境界。</summary>
-    public bool Advance(float seconds, bool trafficPaused = false)
+    /// <summary>
+    /// epochExecuting is true from the epoch's start until its results close. The day then moves to the evening and holds there.
+    /// Returns true only as sunrise begins: the boundary for switching weather before the sky brightens.
+    /// </summary>
+    public bool Advance(float seconds, bool epochExecuting)
     {
-        if ((Paused || trafficPaused) && !IsPresenting) return false;
+        executing = epochExecuting;
         switch (Current)
         {
             case Stage.Day:
-                Phase += seconds / DaySeconds;
-                if (Phase >= 1f) { Current = Stage.Twilight; progress = 0f; }
-                break;
-            case Stage.Twilight:
-                progress += seconds / TwilightSeconds;
-                if (progress >= 1f) { Current = Stage.Day; Phase = 0f; Darkness = 0f; break; }
-                Phase = progress < 0.5f ? 1f + BelowHorizon * progress * 2f : -BelowHorizon * (2f - progress * 2f);
-                Darkness = TwilightDarkness * Mathf.Sin(Mathf.PI * progress);
+                if (executing) Phase = Mathf.MoveTowards(Phase, EveningPhase, seconds * (EveningPhase - MorningPhase) / RushSeconds);
+                else if (!Stopped && !Paused) Phase = Mathf.Min(EveningPhase, Phase + seconds * PhasePerSecond);
                 break;
             case Stage.Dusk:
                 progress += seconds;
@@ -105,7 +123,7 @@ public sealed class WeatherClock
     {
         dawnRequested = false;
         if (IsDarkening) return;
-        // 薄明で東へ戻った太陽は地平線下に保ち、日没の途中で昼間を横切らせない。
+        // A sun still below the horizon during sunrise moves to the west so the sunset does not cross the daytime sky.
         startPhase = Phase < 0f ? 1f + BelowHorizon : Phase;
         startDarkness = Darkness;
         startFadeAlpha = FadeAlpha;
@@ -128,10 +146,10 @@ public sealed class WeatherClock
         dawnRequested = false;
     }
 
-    /// <summary>Advance or rewind daytime for capture, only during the day and without crossing sunrise/sunset.</summary>
+    /// <summary>Advance or rewind daytime for capture, only during the day and without passing the evening.</summary>
     public void Step(float hours)
     {
         if (Current != Stage.Day) return;
-        Phase = Mathf.Clamp(Phase + hours / 12f, 0f, 0.999f);
+        Phase = Mathf.Clamp(Phase + hours / 12f, 0f, EveningPhase);
     }
 }

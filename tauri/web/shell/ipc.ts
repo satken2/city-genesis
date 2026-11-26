@@ -139,7 +139,7 @@ const BROADCAST_EVENTS = new Set([
 ]);
 
 /** 常駐するコックピットだけが扱うもの。 */
-const COCKPIT_EVENTS = new Set(["remove_object:request_confirm", "weather:state", "citizen:pick_failed", "drive:request"]);
+const COCKPIT_EVENTS = new Set(["remove_object:request_confirm", "weather:state", "clock:state", "epoch:due", "citizen:pick_failed", "drive:request"]);
 
 async function handleIncomingMessage(envelope: Envelope): Promise<void> {
   if (!envelope.event.startsWith("system:") && !state.graphicConnected) return;

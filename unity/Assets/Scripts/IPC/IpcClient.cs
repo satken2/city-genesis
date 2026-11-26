@@ -119,6 +119,19 @@ public class IpcClient : MonoBehaviour
     }
     public event Action OnWeatherQuery;
     public event Action<string> OnWeatherSet;
+    // Epoch clock settings from the UI (cycle seconds, whether time is stopped). Sent on changes and Unity restarts only,
+    // so deliver the latest value on subscription like the ambience volume.
+    private Action<float, bool> _onClockSet;
+    private (float cycleSeconds, bool stopped)? _clockSettings;
+    public event Action<float, bool> OnClockSet
+    {
+        add
+        {
+            _onClockSet += value;
+            if (_clockSettings.HasValue) value(_clockSettings.Value.cycleSeconds, _clockSettings.Value.stopped);
+        }
+        remove { _onClockSet -= value; }
+    }
     // End of an epoch execution when closing results (false). The start arrives as OnEpochPrepare.
     public event Action<bool> OnEpochExecuting;
     // Start of an epoch execution (argument: execution ID). The UI starts the HTTP execution after EmitEpochReady returns the ID.
@@ -887,6 +900,12 @@ public class IpcClient : MonoBehaviour
 
                 case "weather:set":
                     OnWeatherSet?.Invoke(GetParamString(payload, "id"));
+                    break;
+
+                case "clock:set":
+                    _clockSettings = (GetParamFloat(payload, "cycle_seconds"),
+                        bool.TryParse(GetParamString(payload, "stopped"), out bool stopped) && stopped);
+                    _onClockSet?.Invoke(_clockSettings.Value.cycleSeconds, _clockSettings.Value.stopped);
                     break;
 
                 case "epoch:executing":
@@ -1692,6 +1711,18 @@ public class IpcClient : MonoBehaviour
         {
             ["id"] = id, ["locked"] = locked, ["rain"] = rain, ["snow"] = snow, ["presets"] = presets
         });
+    }
+
+    /// <summary>Countdown to the next epoch. Sent only when it departs from what the UI counts locally (see WeatherController).</summary>
+    public void EmitClockState(float remainingSeconds, bool running)
+    {
+        SendEnvelope("clock:state", new Dictionary<string, object> { ["remaining_seconds"] = remainingSeconds, ["running"] = running });
+    }
+
+    /// <summary>The cycle reached the evening outside editing; the UI starts the epoch as if its start button were pressed.</summary>
+    public void EmitEpochDue()
+    {
+        SendEnvelope("epoch:due", new Dictionary<string, object>());
     }
 
     public void EmitEpochReady(string id)

@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "Amprenta are {{area}} m², sub suprafața construită minimă a acestei clădiri, de {{minimum}} m²",
     "PARCEL_MERGE_BLOCKED": "Pot fi modificate doar terenurile libere ale municipalității",
     "UNVERIFIED_POPULATION_LIMIT": "Autentificarea Steam nu a putut fi confirmată, așa că nu mai poți rula epoci. (Fără autentificare, poți juca până la o populație de {{limit}}.)",
-    "EPOCH_ALREADY_RUNNING": "Rulează deja o altă epocă. Încearcă din nou după ce se termină.",
+    "EPOCH_ALREADY_RUNNING": "Rulează o epocă. Încearcă din nou după ce se termină.",
     "BUILDING_FLOORS_RANGE": "Numărul de etaje trebuie să fie între {{minimum}} și {{maximum}}.",
     "BUILDING_COVERAGE_RANGE": "Procentul de ocupare a terenului trebuie să fie între 0 și 100%.",
     "BUILDING_PATH_CLEARANCE": "Clădirea ar atinge un drum sau o cale ferată de deasupra. Micșorează înălțimea clădirii.",

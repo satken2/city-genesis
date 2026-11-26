@@ -2,7 +2,7 @@
  * Cockpit styles (bottom center)
  *
  * Horizontal layout: [common tools, 2 rows × 2 columns] [public service adequacy] [city name/date / realized
- * climate / score/budget] [alerts] [policy] [start epoch].
+ * climate / score/budget] [alerts] [policy] [epoch countdown].
  * Render to content size and use its measured size for the window. Referencing window size creates a resize
  * loop.
  * Adequacy meter styles are in PublicServiceGauges.css.
@@ -241,49 +241,73 @@
   color: #1c1508;
 }
 
-/* ─── Start epoch button ─── */
+/* ─── Epoch countdown ─── */
 
-.cockpit-execute {
-  height: 36px;
-  min-width: 60px;
-  padding: 0 14px;
+/* 次のエポックまでの残り時間と、同じ高さの小さな2つのボタン(時間を止める・今すぐ開始)。 */
+.cockpit-epoch {
   display: flex;
-  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.cockpit-epoch-time {
+  height: 36px;
+  min-width: 3.6em;
+  padding: 0 10px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  border: none;
   border-radius: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  color: var(--flat-text);
+  font-size: 1.33rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.cockpit-epoch-btn {
+  width: 28px;
+  height: 36px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
   background: linear-gradient(135deg, #1a5fb4, #1c71d8);
   color: #f6fbff;
-  font-size: 1rem;
   cursor: pointer;
-  white-space: nowrap;
   transition: background 0.15s, transform 0.1s;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
   flex-shrink: 0;
 }
 
-.cockpit-execute:hover {
+.cockpit-epoch-btn:hover {
   background: linear-gradient(135deg, #2563c4, #2e7de8);
 }
 
-.cockpit-execute:active {
+.cockpit-epoch-btn:active {
   transform: scale(0.96);
 }
 
-.cockpit-execute:disabled {
+.cockpit-epoch-btn:disabled {
   opacity: 0.3;
   pointer-events: none;
   filter: grayscale(100%);
   cursor: not-allowed;
 }
 
-.cockpit-execute-img {
-  height: 38px;
-  width: auto;
-  object-fit: contain;
-  flex-shrink: 0;
+.cockpit-epoch-icon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+.cockpit-epoch-img {
+  width: 24px;
+  height: auto;
   pointer-events: none;
 }
 

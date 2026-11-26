@@ -55,6 +55,11 @@
       "hide": "表示しない",
       "description": "画面右上に市民の発言を順に表示するカードです"
     },
+    "epochInterval": {
+      "label": "エポックの間隔",
+      "description": "時間を止めていないとき、この間隔で次のエポックが自動で始まります",
+      "minutes": "{{minutes}}分"
+    },
     "language": {
       "label": "言語",
       "description": "UIの表示言語です。セーブデータの言語とは異なります",

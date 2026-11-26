@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "A área de implantação é de {{area}} m², abaixo do mínimo de {{minimum}} m² deste edifício",
     "PARCEL_MERGE_BLOCKED": "Só é possível editar lotes vazios do Município.",
     "UNVERIFIED_POPULATION_LIMIT": "Não foi possível confirmar a autenticação Steam, pelo que não é possível executar mais épocas. (Sem autenticação, pode jogar até uma população de {{limit}} habitantes.)",
-    "EPOCH_ALREADY_RUNNING": "Já está a ser executada outra época. Tente novamente quando terminar.",
+    "EPOCH_ALREADY_RUNNING": "Está a ser executada uma época. Tente novamente quando terminar.",
     "BUILDING_FLOORS_RANGE": "O número de pisos tem de estar entre {{minimum}} e {{maximum}}.",
     "BUILDING_COVERAGE_RANGE": "O índice de implantação tem de estar entre 0% e 100%.",
     "BUILDING_PATH_CLEARANCE": "O edifício tocaria numa estrada ou via férrea por cima. Reduza a altura do edifício.",

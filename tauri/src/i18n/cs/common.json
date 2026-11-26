@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "Půdorys má {{area}} m², méně než minimální zastavěná plocha této budovy {{minimum}} m²",
     "PARCEL_MERGE_BLOCKED": "Upravovat lze jen volné parcely ve vlastnictví města",
     "UNVERIFIED_POPULATION_LIMIT": "Ověření přes Steam se nepodařilo potvrdit, další epochy proto nelze spustit. (Bez ověření lze hrát do počtu obyvatel {{limit}}.)",
-    "EPOCH_ALREADY_RUNNING": "Již probíhá jiná epocha. Zkuste to znovu, až skončí.",
+    "EPOCH_ALREADY_RUNNING": "Právě probíhá epocha. Zkuste to znovu, až skončí.",
     "BUILDING_FLOORS_RANGE": "Počet podlaží musí být {{minimum}}–{{maximum}}.",
     "BUILDING_COVERAGE_RANGE": "Zastavěnost musí být v rozmezí 0–100 %.",
     "BUILDING_PATH_CLEARANCE": "Budova by zasahovala do silnice nebo koleje nad ní. Snižte její výšku.",

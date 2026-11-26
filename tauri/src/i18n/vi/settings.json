@@ -55,6 +55,11 @@
       "hide": "Ẩn",
       "description": "Thẻ ở góc trên bên phải màn hình lần lượt hiển thị lời của cư dân"
     },
+    "epochInterval": {
+      "label": "Khoảng cách giữa các kỳ",
+      "description": "Khi thời gian đang chạy, kỳ tiếp theo tự động bắt đầu sau khoảng này",
+      "minutes": "{{minutes}} phút"
+    },
     "language": {
       "label": "Ngôn ngữ",
       "description": "Ngôn ngữ hiển thị của giao diện, khác với ngôn ngữ của dữ liệu lưu",

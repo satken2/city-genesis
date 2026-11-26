@@ -55,6 +55,11 @@
       "hide": "Nascondi",
       "description": "Scheda in alto a destra dello schermo che mostra a turno i commenti dei cittadini"
     },
+    "epochInterval": {
+      "label": "Intervallo tra le epoche",
+      "description": "Finché il tempo scorre, l'epoca successiva inizia automaticamente a questo intervallo",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Lingua",
       "description": "La lingua dell'interfaccia. È diversa dalla lingua della partita salvata.",

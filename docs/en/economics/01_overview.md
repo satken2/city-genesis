@@ -4,7 +4,7 @@ City Genesis is a city-building simulation in which the player, acting as mayor,
 
 ## 1.1. Epochs
 
-The player allocates budgets and prepares construction plans, then runs one epoch of simulation. The city's state does not advance until the epoch runs, leaving time to think.
+The player allocates budgets and prepares construction plans, and the simulation advances one epoch at a time. Epochs start automatically at a fixed interval; the player can stop time or start the next epoch at any moment. The city's state changes only when an epoch runs, so stopping time leaves as long as needed to think.
 
 ![Epoch cycle](../../images/epoch.svg)
 

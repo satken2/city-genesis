@@ -55,6 +55,11 @@
       "hide": "Sembunyikan",
       "description": "Kad di penjuru kanan atas skrin yang memaparkan kata-kata warga kota secara bergilir"
     },
+    "epochInterval": {
+      "label": "Selang epok",
+      "description": "Selagi masa berjalan, epok seterusnya bermula secara automatik pada selang ini",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Bahasa",
       "description": "Bahasa paparan UI. Ini berasingan daripada bahasa data simpanan anda.",

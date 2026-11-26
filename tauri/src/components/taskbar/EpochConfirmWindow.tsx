@@ -14,6 +14,7 @@
  * Confirm starts epoch execution and result display through executeEpochs in `utils/epochExecution`, hiding this
  * confirmation window while execution continues.
  * Close it once execution has occurred; redisplay if execution did not occur.
+ * An epoch started elsewhere (the cockpit's countdown) also closes it, so it never shows dates from before that run.
  */
 import { PLAY_MODE_SCENARIO } from "../../constants";
 
@@ -116,6 +117,23 @@ export function EpochConfirmWindow({ apiBaseUrl, onClose }: EpochConfirmWindowPr
     if (Math.abs(height - window.innerHeight) < 1) return;
     void getCurrentWindow().setSize(new LogicalSize(window.innerWidth, height)).catch(console.error);
   }, [city, epochCount, scenarioMode, i18n.language, fontSize]);
+
+  useEffect(() => {
+    const appWindow = getCurrentWindow();
+    let disposed = false;
+    let unlisten: (() => void) | undefined;
+    appWindow
+      .listen<{ executing: boolean }>("epoch:executing", (event) => {
+        if (!event.payload.executing || executingRef.current) return;
+        void appWindow.isVisible().then((visible) => { if (visible) onClose(); }).catch(console.error);
+      })
+      .then((fn) => (disposed ? fn() : (unlisten = fn)))
+      .catch(console.error);
+    return () => {
+      disposed = true;
+      unlisten?.();
+    };
+  }, [onClose]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

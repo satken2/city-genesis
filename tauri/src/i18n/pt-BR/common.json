@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "A base tem {{area}} m², abaixo da área de projeção mínima deste edifício, {{minimum}} m²",
     "PARCEL_MERGE_BLOCKED": "Só é possível editar lotes vazios do governo municipal",
     "UNVERIFIED_POPULATION_LIMIT": "Não foi possível confirmar a autenticação da Steam, por isso não é possível executar mais épocas. (Sem autenticação, é possível jogar até uma população de {{limit}} pessoas.)",
-    "EPOCH_ALREADY_RUNNING": "Outra época já está em execução. Tente novamente quando ela terminar.",
+    "EPOCH_ALREADY_RUNNING": "Uma época está em execução. Tente novamente quando ela terminar.",
     "BUILDING_FLOORS_RANGE": "Use de {{minimum}} a {{maximum}} andares.",
     "BUILDING_COVERAGE_RANGE": "A taxa de ocupação deve ficar entre 0% e 100%.",
     "BUILDING_PATH_CLEARANCE": "O edifício encostaria em uma via ou via férrea acima dele. Reduza a altura do edifício.",

@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "Het grondvlak is {{area}} m², minder dan het minimale bebouwde oppervlak van {{minimum}} m² voor dit gebouw",
     "PARCEL_MERGE_BLOCKED": "Alleen lege percelen van de gemeente kunnen worden bewerkt.",
     "UNVERIFIED_POPULATION_LIMIT": "De verificatie via Steam kon niet worden bevestigd, dus je kunt geen tijdvakken meer uitvoeren. (Zonder verificatie kun je spelen tot een bevolking van {{limit}}.)",
-    "EPOCH_ALREADY_RUNNING": "Er wordt al een ander tijdvak uitgevoerd. Probeer het opnieuw als dat klaar is.",
+    "EPOCH_ALREADY_RUNNING": "Er wordt een tijdvak uitgevoerd. Probeer het opnieuw als dat klaar is.",
     "BUILDING_FLOORS_RANGE": "Kies {{minimum}} tot {{maximum}} verdiepingen.",
     "BUILDING_COVERAGE_RANGE": "Het bebouwingspercentage moet tussen 0% en 100% liggen.",
     "BUILDING_PATH_CLEARANCE": "Het gebouw raakt een weg of spoor erboven. Maak het gebouw lager.",

@@ -23,6 +23,8 @@ export type AppSettings = {
   popup_monitor_index: number;
   /** 初回起動時のチュートリアル開始確認を表示済みか。 */
   first_launch_tutorial_prompted: boolean;
+  /** 時間を止めていないとき、次のエポックが自動で始まるまでの分数。 */
+  epoch_interval_minutes: number;
 };
 
 /**

@@ -55,6 +55,11 @@
       "hide": "Hide",
       "description": "Card at the top right of the screen that shows residents' remarks in turn"
     },
+    "epochInterval": {
+      "label": "Epoch interval",
+      "description": "While time is running, the next epoch starts automatically at this interval",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Language",
       "description": "The display language of the UI. This is separate from the language of your save data.",

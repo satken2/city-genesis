@@ -8,7 +8,8 @@ using UnityEngine.UI;
 
 /// <summary>
 /// Manage Unity sky, lighting, fog, and precipitation from weather, time, and climate. Do not write to economics, master data, or saves.
-/// Weather slowly transitions between neighboring states through WeatherChain, independently of epochs; WeatherClock advances time.
+/// Weather slowly transitions between neighboring states through WeatherChain, independently of epochs; WeatherClock advances time,
+/// which is also the countdown to the next epoch (reported to the UI with clock:state, and epoch:due when the cycle ends).
 /// Read climate name and monthly occurrence shares from climate and current_date in GET /api/v1/city.
 /// </summary>
 public sealed class WeatherController : MonoBehaviour
@@ -30,6 +31,9 @@ public sealed class WeatherController : MonoBehaviour
     private Coroutine query;
     private bool pending, suspended, panel, sessionStart = true;
     private bool awaitingDawn, darkenedSent;
+    private bool editing, dueSent;
+    private bool publishedRunning;
+    private float publishedRemaining = -1f, publishedAt;
     private string presentationId;
     private int blackFrame = -1;
     private CanvasGroup fadeOverlay;
@@ -48,6 +52,7 @@ public sealed class WeatherController : MonoBehaviour
     private WeatherPrecipitation precipitation;
 
     public const float SunRotationIntervalSeconds = 5f;
+    private const float ClockToleranceSeconds = 0.5f; // Drift from the UI's local countdown tolerated before resending clock:state.
     private const float GroundAlbedo = 0.2f; // Typical reflectance of streets and vegetation.
     private static readonly int SunScatterId = Shader.PropertyToID("_SunScatterFraction");
     private static readonly Color LowSunZenith = Hex("696E9B"), LowSunHorizon = Hex("ECA68D"), LowSunLight = Hex("FFA477"), LowSunCloud = Hex("EDB7AB");
@@ -135,6 +140,7 @@ public sealed class WeatherController : MonoBehaviour
         cloudSeed = NewSeed();
         StartWeather(WeatherChain.Sample(random, weights));
         CreateFadeOverlay();
+        IpcStateCoordinator.OnStateApplied += StateApplied;
     }
 
     private void Update()
@@ -144,11 +150,13 @@ public sealed class WeatherController : MonoBehaviour
         if (pending && query == null && !suspended && Time.unscaledTime >= retryAt)
             query = StartCoroutine(ReadCity());
         float seconds = Time.unscaledDeltaTime;
-        if (Clock.Advance(seconds, TrafficClock.Paused) && !Locked)
+        bool executing = ipc != null && ipc.EpochExecuting;
+        if (Clock.Advance(seconds, executing) && !Locked)
         {
             cloudSeed = NewSeed();
             StartWeather(WeatherChain.Sample(random, weights));
         }
+        UpdateEpochClock(executing);
         AdvanceWeather(seconds);
         ApplyEnvironment();
         fadeOverlay.alpha = Clock.FadeAlpha;
@@ -180,6 +188,7 @@ public sealed class WeatherController : MonoBehaviour
                 ipc.OnEpochExecuting += SetEpochExecuting;
                 ipc.OnWeatherQuery += PublishWeather;
                 ipc.OnWeatherSet += SetWeatherFromUi;
+                ipc.OnClockSet += SetClock;
                 PublishWeather();
             }
         }
@@ -293,6 +302,38 @@ public sealed class WeatherController : MonoBehaviour
             Clock.StartMorning();
         }
         if (changed) PublishWeather();
+    }
+
+    private void SetClock(float cycleSeconds, bool stopped)
+    {
+        Clock.CycleSeconds = cycleSeconds > 0f ? cycleSeconds : WeatherClock.DefaultCycleSeconds;
+        Clock.Stopped = stopped;
+        PublishClock(true);
+    }
+
+    /// <summary>Unity's input states other than STATE_NORMAL are all editing; the next epoch waits in the evening until editing ends.</summary>
+    private void StateApplied(string value) => editing = value != "STATE_NORMAL";
+
+    /// <summary>Report the cycle's end once each time it becomes due, and the countdown whenever it departs from the UI's local count.</summary>
+    private void UpdateEpochClock(bool executing)
+    {
+        bool due = !suspended && !executing && !editing && !Clock.Stopped && !Clock.Paused && Clock.AtEvening;
+        if (due && !dueSent) ipc?.EmitEpochDue();
+        dueSent = due;
+        PublishClock(false);
+    }
+
+    private void PublishClock(bool force)
+    {
+        if (ipc == null) return;
+        bool running = Clock.Running;
+        float remaining = Clock.RemainingSeconds;
+        float expected = publishedRunning ? publishedRemaining - (Time.unscaledTime - publishedAt) : publishedRemaining;
+        if (!force && running == publishedRunning && Mathf.Abs(remaining - expected) < ClockToleranceSeconds) return;
+        publishedRunning = running;
+        publishedRemaining = remaining;
+        publishedAt = Time.unscaledTime;
+        ipc.EmitClockState(remaining, running);
     }
 
     private void AdvanceWeather(float seconds)
@@ -533,13 +574,14 @@ public sealed class WeatherController : MonoBehaviour
         ipc.OnEpochExecuting -= SetEpochExecuting;
         ipc.OnWeatherQuery -= PublishWeather;
         ipc.OnWeatherSet -= SetWeatherFromUi;
+        ipc.OnClockSet -= SetClock;
     }
 
     private float NewSeed() => (float)(random.NextDouble() * 100.0);
 
-    private static float SnapSunPhase(float phase)
+    private float SnapSunPhase(float phase)
     {
-        float step = SunRotationIntervalSeconds / WeatherClock.DaySeconds;
+        float step = SunRotationIntervalSeconds * Clock.PhasePerSecond;
         return WeatherClock.MorningPhase + Mathf.Floor((phase - WeatherClock.MorningPhase) / step + 1e-4f) * step;
     }
 
@@ -583,6 +625,7 @@ public sealed class WeatherController : MonoBehaviour
 
     private void OnDestroy()
     {
+        IpcStateCoordinator.OnStateApplied -= StateApplied;
         if (fadeOverlay != null) Destroy(fadeOverlay.gameObject);
         if (Instance == this) Instance = null;
         if (sky != null) Destroy(sky);

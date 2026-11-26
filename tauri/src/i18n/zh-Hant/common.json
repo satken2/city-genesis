@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "底面積為{{area}}m²，低於此建築的最小建築面積{{minimum}}m²",
     "PARCEL_MERGE_BLOCKED": "僅可編輯市政府所有的空地",
     "UNVERIFIED_POPULATION_LIMIT": "無法確認Steam認證，因此無法繼續執行紀元。（未認證狀態下可遊玩至人口{{limit}}人）",
-    "EPOCH_ALREADY_RUNNING": "另一個紀元正在執行。請在其完成後再試。",
+    "EPOCH_ALREADY_RUNNING": "紀元正在執行。請在其完成後再試。",
     "BUILDING_FLOORS_RANGE": "樓層數應為{{minimum}}至{{maximum}}層。",
     "BUILDING_COVERAGE_RANGE": "建蔽率應為0%至100%。",
     "BUILDING_PATH_CLEARANCE": "建築會與上方道路或軌道相交。請降低建築高度。",

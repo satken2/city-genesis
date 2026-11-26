@@ -630,6 +630,10 @@ pub async fn handle_incoming_message(
         "weather:state" => {
             let _ = app.emit_to(window::LABEL_COCKPIT, "weather:state", envelope.payload);
         }
+        "clock:state" | "epoch:due" => {
+            // 次のエポックまでの残り時間と周期の終わり。残り時間の表示とエポックの開始はコックピットが持つ。
+            let _ = app.emit_to(window::LABEL_COCKPIT, &envelope.event, envelope.payload);
+        }
         "epoch:ready" | "epoch:darkened" => {
             let current = state.lock().epoch_presentation_id.clone();
             if current.is_some() && envelope.payload.get("id").and_then(|id| id.as_str()) == current.as_deref() {

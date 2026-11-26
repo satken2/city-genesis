@@ -55,6 +55,11 @@
       "hide": "Piilota",
       "description": "Näytön oikean yläkulman kortti, joka näyttää asukkaiden kommentteja vuorotellen"
     },
+    "epochInterval": {
+      "label": "Kausien väli",
+      "description": "Kun aika kulkee, seuraava kausi alkaa automaattisesti tämän välein",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Kieli",
       "description": "Käyttöliittymän kieli. Se on eri asia kuin tallennuksen kieli.",

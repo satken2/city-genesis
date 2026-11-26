@@ -15,7 +15,6 @@ import { resolveIntlLocale } from "../../src/utils/locale";
 import { iconUrl } from "../../src/components/hud/hudCommon";
 import { useHudSession } from "../../src/components/hud/useHudSession";
 import "../../src/components/hud/hud.css";
-import "../../src/components/hud/Cockpit.css";
 import "./DebugBar.css";
 
 export function DebugBar() {
@@ -57,14 +56,14 @@ export function DebugBar() {
         onBlur={() => setCountText(String(count))}
       />
       <button
-        className="cockpit-execute debug-bar__execute"
+        className="debug-bar__execute"
         type="button"
         title={t("taskbar.menuExecute")}
         disabled={isLocked || running}
         onClick={() => void run()}
       >
         {t("taskbar.menuExecute")}
-        <img src={iconUrl("menu_execute.png")} alt="" className="cockpit-execute-img" draggable={false} />
+        <img src={iconUrl("menu_execute.png")} alt="" className="debug-bar__execute-img" draggable={false} />
       </button>
     </div>
   );

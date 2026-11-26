@@ -55,6 +55,11 @@
       "hide": "Ocultar",
       "description": "Tarjeta en la esquina superior derecha que muestra comentarios de los residentes uno tras otro"
     },
+    "epochInterval": {
+      "label": "Intervalo entre épocas",
+      "description": "Mientras el tiempo corre, la siguiente época comienza automáticamente con este intervalo",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Idioma",
       "description": "Idioma de visualización de la interfaz. No es el mismo que el idioma de los datos guardados.",

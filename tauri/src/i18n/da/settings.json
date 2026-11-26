@@ -55,6 +55,11 @@
       "hide": "Skjul",
       "description": "Kort øverst til højre på skærmen, der viser borgernes bemærkninger på skift"
     },
+    "epochInterval": {
+      "label": "Epokeinterval",
+      "description": "Mens tiden går, starter den næste epoke automatisk med dette interval",
+      "minutes": "{{minutes}} min."
+    },
     "language": {
       "label": "Sprog",
       "description": "Brugerfladens visningssprog. Det er uafhængigt af sproget i dine gemte spil.",

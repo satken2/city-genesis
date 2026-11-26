@@ -55,6 +55,11 @@
       "hide": "Ascunde",
       "description": "Card din colțul din dreapta sus al ecranului care afișează pe rând replicile locuitorilor"
     },
+    "epochInterval": {
+      "label": "Intervalul dintre epoci",
+      "description": "Cât timp curge timpul, următoarea epocă începe automat la acest interval",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Limbă",
       "description": "Limba de afișare a interfeței. Este diferită de limba salvării.",

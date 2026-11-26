@@ -16,6 +16,7 @@ export interface AppSettings {
   multi_display: boolean;
   popup_monitor_index: number;
   first_launch_tutorial_prompted: boolean;
+  epoch_interval_minutes: number;
 }
 
 const STORAGE_KEY = "city-genesis.settings";
@@ -32,6 +33,7 @@ function defaults(): AppSettings {
     multi_display: false,
     popup_monitor_index: 0,
     first_launch_tutorial_prompted: false,
+    epoch_interval_minutes: 10,
   };
 }
 
@@ -54,6 +56,7 @@ function normalize(raw: unknown): AppSettings {
     multi_display: pick("multi_display", (v) => typeof v === "boolean"),
     popup_monitor_index: pick("popup_monitor_index", isNumber),
     first_launch_tutorial_prompted: pick("first_launch_tutorial_prompted", (v) => typeof v === "boolean"),
+    epoch_interval_minutes: pick("epoch_interval_minutes", isNumber),
   };
 }
 

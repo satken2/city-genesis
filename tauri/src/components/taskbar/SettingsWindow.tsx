@@ -54,6 +54,9 @@ const VOLUME_KEYS = [
 const FONT_SIZE_MIN = 8;
 const FONT_SIZE_MAX = 32;
 
+/** 次のエポックが自動で始まるまでの分数の選択肢 */
+const EPOCH_INTERVAL_MINUTES = [5, 10, 15, 20, 30] as const;
+
 /**
  * Whether GPU acceleration settings are enabled.
  * Until ready, show Coming Soon and disable the whole row.
@@ -88,6 +91,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
   /** Whether to show the top hint bar. Default to visible if absent from settings. */
   const [hintbarVisible, setHintbarVisible] = useState(true);
   const [citizenVoiceVisible, setCitizenVoiceVisible] = useState(true);
+  const [epochIntervalMinutes, setEpochIntervalMinutes] = useState<number | null>(null);
 
   const [multiDisplay, setMultiDisplay] = useState(false);
 
@@ -122,6 +126,7 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
         }
         setHintbarVisible(settings.hintbar_visible !== false);
         setCitizenVoiceVisible(settings.citizen_voice_visible !== false);
+        setEpochIntervalMinutes(settings.epoch_interval_minutes);
         setMultiDisplay(settings.multi_display === true);
       })
       .catch((err) => {
@@ -287,6 +292,12 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
     void persistCurrentSettings({ citizen_voice_visible: next });
   }
 
+  /** コックピットが settings-updated を受けて Unity の時計へ渡す。 */
+  function handleEpochIntervalChange(next: number) {
+    setEpochIntervalMinutes(next);
+    void persistCurrentSettings({ epoch_interval_minutes: next });
+  }
+
   /**
    * Language switch handler.
    * Change i18n language and persist it in settings.
@@ -443,6 +454,24 @@ export function SettingsWindow({ apiBaseUrl }: { apiBaseUrl: string }) {
                   type="button"
                 >
                   {t(value ? "settings.citizenVoice.show" : "settings.citizenVoice.hide")}
+                </button>
+              ))}
+            </div>
+          </SettingsRow>
+
+          <SettingsRow
+            label={t("settings.epochInterval.label")}
+            description={t("settings.epochInterval.description")}
+          >
+            <div className="settings-seg">
+              {EPOCH_INTERVAL_MINUTES.map((value) => (
+                <button
+                  key={value}
+                  className={`settings-seg-btn ${epochIntervalMinutes === value ? "active" : ""}`}
+                  onClick={() => handleEpochIntervalChange(value)}
+                  type="button"
+                >
+                  {t("settings.epochInterval.minutes", { minutes: value })}
                 </button>
               ))}
             </div>

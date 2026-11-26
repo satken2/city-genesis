@@ -55,6 +55,11 @@
       "hide": "不顯示",
       "description": "在畫面右上方依序顯示市民發言的卡片"
     },
+    "epochInterval": {
+      "label": "紀元間隔",
+      "description": "時間流動時，下一紀元會按此間隔自動開始",
+      "minutes": "{{minutes}} 分鐘"
+    },
     "language": {
       "label": "語言",
       "description": "介面的顯示語言。與存檔資料的語言不同。",

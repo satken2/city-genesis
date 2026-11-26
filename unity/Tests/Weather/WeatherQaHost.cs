@@ -13,6 +13,14 @@ public class IpcClient : MonoBehaviour
     public event Action<string> OnWeatherSet;
     public event Action<string> OnEpochSunset;
     public event Action<bool> OnEpochExecuting;
+    public bool EpochExecuting;
+    public event Action<float, bool> OnClockSet;
+    public int ClockStates, Dues;
+    public float ClockRemaining;
+    public bool ClockRunning;
+    public void SetClock(float cycleSeconds, bool stopped) => OnClockSet?.Invoke(cycleSeconds, stopped);
+    public void EmitClockState(float remainingSeconds, bool running) { ClockStates++; ClockRemaining = remainingSeconds; ClockRunning = running; }
+    public void EmitEpochDue() => Dues++;
     public string DarkenedId;
     public int Darkenings;
     public void EmitEpochDarkened(string id) { DarkenedId = id; Darkenings++; }
@@ -35,6 +43,11 @@ public class IpcClient : MonoBehaviour
     public void Begin() => OnGameStart?.Invoke();
     public void End() => OnGameEnd?.Invoke();
     public void Force() => OnSessionForceReload?.Invoke();
+}
+public static class IpcStateCoordinator
+{
+    public static event Action<string> OnStateApplied;
+    public static void Apply(string state) => OnStateApplied?.Invoke(state);
 }
 public class GameStateManager : MonoBehaviour
 {
@@ -159,38 +172,35 @@ public sealed class WeatherQaHost : MonoBehaviour
         // Time
         var clock = new WeatherClock();
         Check(clock.Current == WeatherClock.Stage.Day && Mathf.Approximately(clock.Phase, WeatherClock.MorningPhase), "clock starts in the morning");
+        clock.Advance(100f, false);
+        Check(clock.Stopped && !clock.Running && Mathf.Approximately(clock.Phase, WeatherClock.MorningPhase), "time stays stopped until the UI starts it");
         Check(Mathf.Approximately(WeatherClock.ElevationAt(0.5f), WeatherClock.MaxElevation) && WeatherClock.ElevationAt(0f) == 0f, "noon is highest, sunrise on the horizon");
-        clock.Advance(WeatherClock.DaySeconds * (0.5f - WeatherClock.MorningPhase));
+        clock.Stopped = false;
+        Check(Mathf.Abs(clock.RemainingSeconds - clock.CycleSeconds) < 0.01f, "a cycle counts down its full length from the morning");
+        clock.Advance((0.5f - WeatherClock.MorningPhase) / clock.PhasePerSecond, false);
         Check(Mathf.Abs(clock.Azimuth - 180f) < 0.1f, "noon sun is due south");
-        clock.Paused = true; clock.Advance(100f);
-        Check(Mathf.Abs(clock.Phase - 0.5f) < 1e-4f, "paused clock holds the time");
+        Check(Mathf.Abs(clock.RemainingSeconds - (WeatherClock.EveningPhase - 0.5f) / clock.PhasePerSecond) < 0.01f, "remaining seconds follow the sun");
+        clock.Paused = true; clock.Advance(100f, false);
+        Check(Mathf.Abs(clock.Phase - 0.5f) < 1e-4f && !clock.Running, "paused clock holds the time");
         clock.Step(3f); Check(Mathf.Abs(clock.Hours - 15f) < 0.01f, "stepping moves by hours");
         clock.Paused = false;
-        clock.Advance(WeatherClock.DaySeconds * 0.26f);
-        Check(clock.Current == WeatherClock.Stage.Twilight, "sunset leads into twilight");
-        for (int half = 0; half < 2; half++)
-        {
-            var twilight = new WeatherClock();
-            twilight.Advance(WeatherClock.DaySeconds);
-            twilight.Advance(WeatherClock.TwilightSeconds * (0.25f + half * 0.5f));
-            float phase = twilight.Phase, darkness = twilight.Darkness;
-            twilight.Paused = true;
-            twilight.Advance(WeatherClock.TwilightSeconds * 2f);
-            Check(twilight.Current == WeatherClock.Stage.Twilight && twilight.Phase == phase && twilight.Darkness == darkness,
-                "paused twilight holds sun position and sky brightness on both sides of the sun's return");
-            twilight.Paused = false;
-            twilight.Advance(WeatherClock.TwilightSeconds * 0.1f);
-            Check(twilight.Current == WeatherClock.Stage.Twilight && twilight.Phase != phase && twilight.Darkness != darkness,
-                "unpaused twilight resumes from the held time");
-            twilight.Advance(WeatherClock.TwilightSeconds);
-            Check(twilight.Current == WeatherClock.Stage.Day, "unpaused twilight reaches sunrise");
-        }
-        float peak = 0;
-        for (int i = 0; i < 40; i++) { clock.Advance(WeatherClock.TwilightSeconds / 40f); peak = Mathf.Max(peak, clock.Darkness); }
-        clock.Advance(0.01f);
-        Check(clock.Current == WeatherClock.Stage.Day && clock.Phase < 0.01f && Mathf.Abs(clock.Azimuth - 90f) < 1f, "twilight hands over to sunrise in the east");
-        Check(peak > 0.5f && peak < 0.6f, "twilight dims without going dark");
-        clock.Advance(WeatherClock.DaySeconds * 0.5f);
+        clock.Stopped = true; clock.Advance(100f, false);
+        Check(Mathf.Abs(clock.Hours - 15f) < 0.01f && !clock.Running, "stopped time holds the sun");
+        clock.Stopped = false;
+        float remainingBefore = clock.RemainingSeconds, phaseBefore = clock.Phase;
+        clock.CycleSeconds *= 2f;
+        Check(clock.Phase == phaseBefore && Mathf.Abs(clock.RemainingSeconds - remainingBefore * 2f) < 0.01f, "changing the cycle keeps the sun and rescales the countdown");
+        clock.Advance(clock.CycleSeconds, false);
+        Check(clock.AtEvening && clock.Phase == WeatherClock.EveningPhase && clock.Elevation > 3f && !clock.Running && clock.RemainingSeconds == 0f,
+            "a cycle ends in the evening with the sun still up");
+        clock.Advance(100f, false);
+        Check(clock.AtEvening && clock.Phase == WeatherClock.EveningPhase, "the evening holds until the next epoch");
+        var rush = new WeatherClock();
+        rush.Advance(WeatherClock.RushSeconds * 0.5f, true);
+        Check(rush.Phase > WeatherClock.MorningPhase && rush.Phase < WeatherClock.EveningPhase && !rush.Running && rush.RemainingSeconds == 0f,
+            "an early epoch start moves the sun toward the evening even while stopped");
+        rush.Advance(WeatherClock.RushSeconds, true);
+        Check(rush.Phase == WeatherClock.EveningPhase && !rush.AtEvening, "the running epoch holds the evening without becoming due again");
         clock.StartMorning();
         Check(clock.Current == WeatherClock.Stage.Day && Mathf.Approximately(clock.Phase, WeatherClock.MorningPhase) && clock.Darkness == 0f, "session start resets to the morning");
 
@@ -209,21 +219,23 @@ public sealed class WeatherQaHost : MonoBehaviour
         clock.RequestDawn();
         Check(clock.Advance(0f, true) && clock.Phase < 0f && clock.FadeAlpha == 1f, "weather boundary is still black and below the horizon");
         Check(!clock.Advance(WeatherClock.FadeSeconds, true), "dawn boundary is emitted only once");
-        clock.Advance(WeatherClock.SunsetSeconds, true);
+        clock.Advance(WeatherClock.SunsetSeconds, false);
         Check(clock.Current == WeatherClock.Stage.Day && clock.FadeAlpha == 0f && clock.Darkness == 0f, "paused presentation reaches morning");
         float heldMorning = clock.Phase;
-        clock.Advance(100f, true);
+        clock.Advance(100f, false);
         Check(clock.Phase == heldMorning && clock.Paused, "normal clock remains paused after presentation");
         clock.Paused = false;
-        clock.Advance(WeatherClock.DaySeconds);
-        clock.Advance(WeatherClock.TwilightSeconds * 0.75f);
-        Check(clock.Phase < 0f, "twilight has moved the sun east below the horizon");
         clock.BeginNight();
-        clock.Advance(WeatherClock.SunsetSeconds / 2f);
-        Check(clock.Elevation < 0f, "sunset from twilight does not cross daylight again");
+        clock.Advance(WeatherClock.DuskSeconds, true);
         clock.RequestDawn();
-        clock.Advance(WeatherClock.DuskSeconds);
-        Check(clock.Advance(0f), "early close waits for sunset before dawn");
+        clock.Advance(0f, false);
+        Check(clock.Current == WeatherClock.Stage.Dawn && clock.Phase < 0f, "dawn starts with the sun east below the horizon");
+        clock.BeginNight();
+        clock.Advance(WeatherClock.SunsetSeconds / 2f, true);
+        Check(clock.Elevation < 0f, "sunset during dawn does not cross daylight again");
+        clock.RequestDawn();
+        clock.Advance(WeatherClock.DuskSeconds, true);
+        Check(clock.Advance(0f, false), "early close waits for sunset before dawn");
         clock.StartMorning();
         Check(!clock.IsPresenting && clock.FadeAlpha == 0f, "session reset clears blackout and pending dawn");
 
@@ -243,6 +255,36 @@ public sealed class WeatherQaHost : MonoBehaviour
         Check(controller.Season == WeatherClimate.Summer, "season from the city date");
         Check(desertSummer[controller.CurrentIndex] > 0, "session starts with weather possible in the climate");
         Check(controller.Clock.Current == WeatherClock.Stage.Day && controller.Clock.Phase < WeatherClock.MorningPhase + 0.01f, "session starts in the morning");
+
+        ipc.SetClock(120f, false);
+        yield return null;
+        Check(controller.Clock.CycleSeconds == 120f && !controller.Clock.Stopped && ipc.ClockRunning, "clock settings from the UI apply and the countdown is acknowledged");
+        int clockStates = ipc.ClockStates;
+        yield return Frames(4);
+        Check(ipc.ClockStates == clockStates, "a steady countdown sends nothing");
+        IpcStateCoordinator.Apply("STATE_EDIT_PATH");
+        controller.Clock.Step(12f);
+        yield return Frames(2);
+        Check(ipc.Dues == 0 && !ipc.ClockRunning && ipc.ClockRemaining == 0f, "the evening waits while editing");
+        IpcStateCoordinator.Apply("STATE_NORMAL");
+        yield return Frames(2);
+        Check(ipc.Dues == 1, "ending the edit makes the epoch due");
+        yield return Frames(4);
+        Check(ipc.Dues == 1, "a due epoch is reported once");
+        ipc.SetClock(120f, true);
+        yield return null;
+        ipc.SetClock(120f, false);
+        yield return Frames(2);
+        Check(ipc.Dues == 2, "resuming in the evening reports the epoch again");
+        ipc.EpochExecuting = true;
+        controller.Clock.StartMorning();
+        yield return Frames(2);
+        Check(ipc.Dues == 2 && !ipc.ClockRunning && controller.Clock.Phase > WeatherClock.MorningPhase, "an epoch started early rushes to the evening without becoming due");
+        ipc.EpochExecuting = false;
+        controller.Clock.StartMorning();
+        yield return Frames(2);
+        Check(ipc.ClockRunning && Mathf.Abs(ipc.ClockRemaining - 120f) < 0.5f, "a new cycle sends the full countdown");
+        ipc.SetClock(WeatherClock.DefaultCycleSeconds, true);
         int reads = ApiClient.Reads;
         ipc.Reload();
         yield return Frames(4);
@@ -324,16 +366,17 @@ public sealed class WeatherQaHost : MonoBehaviour
 
         // Sun light rotation stays fixed within each update interval to avoid shadow shimmering, then steps once the interval elapses.
         controller.Clock.StartMorning();
+        controller.Clock.Stopped = false;
         controller.Clock.Paused = true;
         yield return null;
         Quaternion initialSunRotation = sun.transform.rotation;
         controller.Clock.Paused = false;
-        controller.Clock.Advance(WeatherController.SunRotationIntervalSeconds * 0.5f);
+        controller.Clock.Advance(WeatherController.SunRotationIntervalSeconds * 0.5f, false);
         controller.Clock.Paused = true;
         yield return null;
         Check(sun.transform.rotation == initialSunRotation, "sun light rotation holds within the update interval");
         controller.Clock.Paused = false;
-        controller.Clock.Advance(WeatherController.SunRotationIntervalSeconds);
+        controller.Clock.Advance(WeatherController.SunRotationIntervalSeconds, false);
         controller.Clock.Paused = true;
         yield return null;
         Check(sun.transform.rotation != initialSunRotation, "sun light rotation steps after the update interval");
@@ -525,12 +568,14 @@ public sealed class WeatherQaHost : MonoBehaviour
         Check(sun.intensity > 0f && sun.intensity < WeatherPreset.All[Index("clear")].Intensity, "low evening sun is weaker");
         Capture(camera, "t_evening");
         controller.Clock.Paused = false;
-        controller.Clock.Advance(WeatherClock.DaySeconds);
-        yield return Until(() => controller.Clock.Current == WeatherClock.Stage.Twilight && controller.Clock.Darkness > 0.45f, 30f, "twilight reached");
-        Check(sun.intensity < 0.05f, "sun below the horizon casts no light");
-        Capture(camera, "t_twilight");
+        controller.Clock.Stopped = false;
+        controller.Clock.Advance(controller.Clock.CycleSeconds, false);
+        yield return Frames(8);
+        Check(controller.Clock.AtEvening && sun.intensity > 0f, "the evening that ends a cycle still lights the city");
+        Capture(camera, "t_cycle_end");
         ipc.Sunset("capture");
         yield return Until(() => ipc.DarkenedId == "capture", 6f, "capture blackout");
+        Check(sun.intensity < 0.05f, "sun below the horizon casts no light");
         Check(controller.GetComponentInChildren<CanvasGroup>().alpha == 1f, "fullscreen overlay is black before acknowledgement");
         ipc.ResetSession();
         Check(controller.Clock.FadeAlpha == 0f && controller.GetComponentInChildren<CanvasGroup>().alpha == 0f, "session switch clears the rendered blackout");

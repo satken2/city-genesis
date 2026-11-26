@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "La huella mide {{area}} m², por debajo del área mínima de construcción de este edificio ({{minimum}} m²)",
     "PARCEL_MERGE_BLOCKED": "Solo se pueden editar los terrenos baldíos propiedad del municipio",
     "UNVERIFIED_POPULATION_LIMIT": "No se pudo verificar la autenticación de Steam, por lo que no es posible ejecutar más épocas. (Sin verificar se puede jugar hasta una población de {{limit}} habitantes).",
-    "EPOCH_ALREADY_RUNNING": "Ya se está ejecutando otra época. Vuelve a intentarlo cuando termine.",
+    "EPOCH_ALREADY_RUNNING": "Se está ejecutando una época. Vuelve a intentarlo cuando termine.",
     "BUILDING_FLOORS_RANGE": "Usa entre {{minimum}} y {{maximum}} pisos.",
     "BUILDING_COVERAGE_RANGE": "La ocupación debe estar entre 0% y 100%.",
     "BUILDING_PATH_CLEARANCE": "El edificio chocaría con una vía elevada. Reduce su altura.",

@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "Az alapterület {{area}} m², ami kevesebb, mint az épület minimális beépített területe ({{minimum}} m²)",
     "PARCEL_MERGE_BLOCKED": "Csak az önkormányzat tulajdonában lévő üres telkek szerkeszthetők.",
     "UNVERIFIED_POPULATION_LIMIT": "A Steam-hitelesítés nem erősíthető meg, ezért több korszak nem futtatható. (Hitelesítés nélkül legfeljebb {{limit}} fős népességig lehet játszani.)",
-    "EPOCH_ALREADY_RUNNING": "Már fut egy másik korszak. Ha véget ért, próbáld újra.",
+    "EPOCH_ALREADY_RUNNING": "Éppen fut egy korszak. Ha véget ért, próbáld újra.",
     "BUILDING_FLOORS_RANGE": "A szintek száma {{minimum}} és {{maximum}} között legyen.",
     "BUILDING_COVERAGE_RANGE": "A beépítési arány 0% és 100% között legyen.",
     "BUILDING_PATH_CLEARANCE": "Az épület hozzáérne a felette futó úthoz vagy vágányhoz. Csökkentsd a magasságát.",

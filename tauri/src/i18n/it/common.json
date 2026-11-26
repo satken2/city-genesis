@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "La superficie di base è di {{area}} m², inferiore alla superficie coperta minima di questo edificio ({{minimum}} m²)",
     "PARCEL_MERGE_BLOCKED": "Si possono modificare solo i lotti liberi di proprietà dell'amministrazione comunale.",
     "UNVERIFIED_POPULATION_LIMIT": "Impossibile verificare l'autenticazione Steam: non puoi eseguire altre epoche. (Senza autenticazione puoi giocare fino a {{limit}} abitanti.)",
-    "EPOCH_ALREADY_RUNNING": "È già in esecuzione un'altra epoca. Riprova quando sarà terminata.",
+    "EPOCH_ALREADY_RUNNING": "È in esecuzione un'epoca. Riprova quando sarà terminata.",
     "BUILDING_FLOORS_RANGE": "Il numero di piani deve essere compreso tra {{minimum}} e {{maximum}}.",
     "BUILDING_COVERAGE_RANGE": "Il rapporto di copertura deve essere compreso tra 0 e 100%.",
     "BUILDING_PATH_CLEARANCE": "L'edificio toccherebbe una strada o un binario soprastante. Riduci l'altezza dell'edificio.",

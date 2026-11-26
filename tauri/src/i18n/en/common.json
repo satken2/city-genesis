@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "The footprint is {{area}} m², below this building's minimum building area of {{minimum}} m²",
     "PARCEL_MERGE_BLOCKED": "Only vacant city-owned parcels can be edited.",
     "UNVERIFIED_POPULATION_LIMIT": "Steam verification could not be confirmed, so no more epochs can be run. (Without verification, you can play up to a population of {{limit}}.)",
-    "EPOCH_ALREADY_RUNNING": "Another epoch is already running. Try again after it finishes.",
+    "EPOCH_ALREADY_RUNNING": "An epoch is running. Try again after it finishes.",
     "BUILDING_FLOORS_RANGE": "Use {{minimum}}–{{maximum}} floors.",
     "BUILDING_COVERAGE_RANGE": "Coverage must be between 0% and 100%.",
     "BUILDING_PATH_CLEARANCE": "The building would intersect a path above it. Reduce its height.",

@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "底面が{{area}}m²で、この建物の最低建築面積{{minimum}}m²に足りません",
     "PARCEL_MERGE_BLOCKED": "市政府所有の空き地のみ編集できます",
     "UNVERIFIED_POPULATION_LIMIT": "Steamの認証が確認できないため、これ以上エポックを実行できません。(未認証では人口{{limit}}人までプレイできます)",
-    "EPOCH_ALREADY_RUNNING": "別のエポックを実行中です。終わってからもう一度実行してください。",
+    "EPOCH_ALREADY_RUNNING": "エポックを実行中です。終わってからもう一度お試しください。",
     "BUILDING_FLOORS_RANGE": "階数は{{minimum}}〜{{maximum}}階にしてください。",
     "BUILDING_COVERAGE_RANGE": "建ぺい率は0〜100%にしてください。",
     "BUILDING_PATH_CLEARANCE": "上空の道路・線路に接触します。建物の高さを下げてください。",

@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "Podstawa ma {{area}} m², czyli mniej niż minimalna powierzchnia zabudowy tego budynku ({{minimum}} m²)",
     "PARCEL_MERGE_BLOCKED": "Można edytować tylko puste działki należące do urzędu miasta",
     "UNVERIFIED_POPULATION_LIMIT": "Nie udało się potwierdzić uwierzytelnienia Steam, więc nie można wykonywać kolejnych epok. (Bez uwierzytelnienia możesz grać, dopóki ludność nie przekroczy {{limit}}).",
-    "EPOCH_ALREADY_RUNNING": "Trwa wykonywanie innej epoki. Spróbuj ponownie, gdy się zakończy.",
+    "EPOCH_ALREADY_RUNNING": "Trwa wykonywanie epoki. Spróbuj ponownie, gdy się zakończy.",
     "BUILDING_FLOORS_RANGE": "Liczba kondygnacji musi wynosić od {{minimum}} do {{maximum}}.",
     "BUILDING_COVERAGE_RANGE": "Wskaźnik powierzchni zabudowy musi wynosić od 0 do 100%.",
     "BUILDING_PATH_CLEARANCE": "Budynek zetknąłby się z drogą lub torem nad nim. Zmniejsz wysokość budynku.",

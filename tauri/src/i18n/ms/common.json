@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "Keluasan tapak asas {{area}} m², kurang daripada keluasan binaan minimum bangunan ini iaitu {{minimum}} m²",
     "PARCEL_MERGE_BLOCKED": "Hanya tanah kosong milik kerajaan tempatan boleh diedit.",
     "UNVERIFIED_POPULATION_LIMIT": "Pengesahan Steam tidak dapat dipastikan, jadi epok tidak boleh dijalankan lagi. (Tanpa pengesahan, anda boleh bermain sehingga penduduk {{limit}} orang.)",
-    "EPOCH_ALREADY_RUNNING": "Epok lain sedang berjalan. Cuba lagi selepas ia selesai.",
+    "EPOCH_ALREADY_RUNNING": "Epok sedang berjalan. Cuba lagi selepas ia selesai.",
     "BUILDING_FLOORS_RANGE": "Bilangan tingkat mesti antara {{minimum}}-{{maximum}}.",
     "BUILDING_COVERAGE_RANGE": "Nisbah liputan tapak mesti antara 0% dan 100%.",
     "BUILDING_PATH_CLEARANCE": "Bangunan akan menyentuh jalan atau landasan di atasnya. Kurangkan ketinggian bangunan.",

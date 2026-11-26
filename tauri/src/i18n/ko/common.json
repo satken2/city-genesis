@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "바닥 면적이 {{area}}m²로, 이 건물의 최소 건축 면적 {{minimum}}m²에 미치지 못합니다",
     "PARCEL_MERGE_BLOCKED": "시정부 소유의 빈 땅만 편집할 수 있습니다",
     "UNVERIFIED_POPULATION_LIMIT": "Steam 인증을 확인할 수 없어 더 이상 에포크를 실행할 수 없습니다. (미인증 상태에서는 인구 {{limit}}명까지 플레이할 수 있습니다)",
-    "EPOCH_ALREADY_RUNNING": "다른 에포크가 이미 실행 중입니다. 완료된 후 다시 실행하세요.",
+    "EPOCH_ALREADY_RUNNING": "에포크가 실행 중입니다. 완료된 후 다시 시도하세요.",
     "BUILDING_FLOORS_RANGE": "층수는 {{minimum}}~{{maximum}}층으로 설정해 주세요.",
     "BUILDING_COVERAGE_RANGE": "건폐율은 0~100%로 설정해 주세요.",
     "BUILDING_PATH_CLEARANCE": "위쪽 도로나 선로와 충돌합니다. 건물 높이를 낮춰 주세요.",

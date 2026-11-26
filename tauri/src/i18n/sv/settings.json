@@ -55,6 +55,11 @@
       "hide": "Dölj",
       "description": "Ett kort uppe till höger på skärmen som visar vad invånarna säger, ett i taget"
     },
+    "epochInterval": {
+      "label": "Epokintervall",
+      "description": "Medan tiden går startar nästa epok automatiskt med detta intervall",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Språk",
       "description": "Gränssnittets visningsspråk. Det är skilt från språket i dina sparade spel",

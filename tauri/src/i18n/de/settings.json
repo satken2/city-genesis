@@ -55,6 +55,11 @@
       "hide": "Ausblenden",
       "description": "Karte oben rechts auf dem Bildschirm, die nacheinander Äußerungen der Bürger anzeigt"
     },
+    "epochInterval": {
+      "label": "Epochenintervall",
+      "description": "Solange die Zeit läuft, beginnt die nächste Epoche automatisch in diesem Abstand",
+      "minutes": "{{minutes}} Min."
+    },
     "language": {
       "label": "Sprache",
       "description": "Anzeigesprache der Benutzeroberfläche. Sie ist unabhängig von der Sprache des Spielstands.",

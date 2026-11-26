@@ -55,6 +55,11 @@
       "hide": "Gizle",
       "description": "Ekranın sağ üstünde vatandaşların sözlerini sırayla gösteren karttır"
     },
+    "epochInterval": {
+      "label": "Dönem aralığı",
+      "description": "Zaman akarken bir sonraki dönem bu aralıkla otomatik olarak başlar",
+      "minutes": "{{minutes}} dk"
+    },
     "language": {
       "label": "Dil",
       "description": "Arayüzün görüntüleme dilidir. Kayıt verisinin dilinden ayrıdır",

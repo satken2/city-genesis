@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "Diện tích đáy là {{area}} m², chưa đạt diện tích xây dựng tối thiểu {{minimum}} m² của tòa nhà này",
     "PARCEL_MERGE_BLOCKED": "Chỉ có thể chỉnh sửa đất trống thuộc sở hữu của chính quyền thành phố.",
     "UNVERIFIED_POPULATION_LIMIT": "Không xác minh được xác thực Steam nên không thể chạy thêm kỳ. (Khi chưa xác thực, bạn có thể chơi đến dân số {{limit}} người.)",
-    "EPOCH_ALREADY_RUNNING": "Đang chạy một kỳ khác. Hãy thử lại khi kỳ đó kết thúc.",
+    "EPOCH_ALREADY_RUNNING": "Đang chạy một kỳ. Hãy thử lại khi kỳ đó kết thúc.",
     "BUILDING_FLOORS_RANGE": "Số tầng phải từ {{minimum}} đến {{maximum}} tầng.",
     "BUILDING_COVERAGE_RANGE": "Mật độ xây dựng phải từ 0 đến 100%.",
     "BUILDING_PATH_CLEARANCE": "Tòa nhà sẽ chạm vào đường hoặc đường ray phía trên. Hãy giảm chiều cao tòa nhà.",

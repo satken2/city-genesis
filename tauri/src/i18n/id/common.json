@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "Luas tapak {{area}} m², kurang dari luas dasar minimum bangunan ini, yaitu {{minimum}} m²",
     "PARCEL_MERGE_BLOCKED": "Hanya kavling kosong milik pemerintah kota yang dapat diedit",
     "UNVERIFIED_POPULATION_LIMIT": "Autentikasi Steam tidak dapat dikonfirmasi, sehingga siklus tidak dapat dijalankan lagi. (Tanpa autentikasi, Anda dapat bermain hingga populasi {{limit}} orang.)",
-    "EPOCH_ALREADY_RUNNING": "Siklus lain sedang berjalan. Jalankan lagi setelah selesai.",
+    "EPOCH_ALREADY_RUNNING": "Siklus sedang berjalan. Coba lagi setelah selesai.",
     "BUILDING_FLOORS_RANGE": "Jumlah lantai harus antara {{minimum}}–{{maximum}} lantai.",
     "BUILDING_COVERAGE_RANGE": "Koefisien dasar bangunan harus antara 0–100%.",
     "BUILDING_PATH_CLEARANCE": "Bangunan akan menyentuh jalan atau rel di atasnya. Turunkan tinggi bangunan.",

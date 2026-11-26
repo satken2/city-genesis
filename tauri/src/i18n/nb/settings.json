@@ -55,6 +55,11 @@
       "hide": "Skjul",
       "description": "Kort øverst til høyre på skjermen som viser hva innbyggerne sier, ett utsagn om gangen"
     },
+    "epochInterval": {
+      "label": "Epokeintervall",
+      "description": "Mens tiden går, starter neste epoke automatisk med dette intervallet",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Språk",
       "description": "Visningsspråket i brukergrensesnittet. Dette er noe annet enn språket i det lagrede spillet.",

@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "L'emprise fait {{area}} m², en dessous de la surface bâtie minimale de ce bâtiment ({{minimum}} m²)",
     "PARCEL_MERGE_BLOCKED": "Seuls les terrains vacants appartenant à la ville sont modifiables",
     "UNVERIFIED_POPULATION_LIMIT": "L'authentification Steam n'a pas pu être vérifiée : aucune époque supplémentaire ne peut être exécutée. (Sans vérification, vous pouvez jouer jusqu'à une population de {{limit}} habitants.)",
-    "EPOCH_ALREADY_RUNNING": "Une autre époque est déjà en cours d’exécution. Réessayez lorsqu’elle sera terminée.",
+    "EPOCH_ALREADY_RUNNING": "Une époque est en cours d’exécution. Réessayez lorsqu’elle sera terminée.",
     "BUILDING_FLOORS_RANGE": "Choisissez de {{minimum}} à {{maximum}} étages.",
     "BUILDING_COVERAGE_RANGE": "L’emprise au sol doit être comprise entre 0 % et 100 %.",
     "BUILDING_PATH_CLEARANCE": "Le bâtiment toucherait une voie en hauteur. Réduisez sa hauteur.",

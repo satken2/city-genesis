@@ -14,6 +14,18 @@ export async function sendTutorialGuide(state: import("../tutorial/model").Snaps
 }
 
 export const IPC_EVENT_WEATHER_STATE = "weather:state";
+/**
+ * 次のエポックまでの残り秒数。running の間だけ UI の手元で減らす。Unity は手元の数え方と食い違ったとき
+ * (周期の開始・停止・再開・周期の変更・夕焼けへの到着)だけ送る。
+ */
+export type ClockState = { remaining_seconds: number; running: boolean };
+export const IPC_EVENT_CLOCK_STATE = "clock:state";
+/** 周期が夕焼けに着き、編集中でもないとき Unity が1回送る。UI は開始ボタンと同じ手順でエポックを始める。 */
+export const IPC_EVENT_EPOCH_DUE = "epoch:due";
+/** 周期の長さと時間を止めているかを Unity の時計へ渡す。変わったときと Unity の再起動時だけ送る。Unity は clock:state で応える。 */
+export async function sendClockSettings(cycleSeconds: number, stopped: boolean): Promise<void> {
+  await invoke("send_window_action", { windowType: "cockpit", entity: null, action: "clock:set", params: { cycle_seconds: cycleSeconds, stopped } });
+}
 /** appearances: the variant's appearance numbers, ascending, in the open city's pack or standard assets (standard itself is not listed). */
 export type PathAppearances = { variant: number; appearances: number[] };
 export const IPC_EVENT_PATH_APPEARANCES = "path:appearances";

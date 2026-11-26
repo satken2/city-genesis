@@ -39,6 +39,8 @@ pub struct AppSettings {
     pub popup_monitor_index: usize,
     /// 初回起動時のチュートリアル開始確認を表示済みか。既存プレイヤーや2回目以降は再表示しない。
     pub first_launch_tutorial_prompted: bool,
+    /// 時間を止めていないとき、次のエポックが自動で始まるまでの分数。
+    pub epoch_interval_minutes: u32,
 }
 
 impl Default for AppSettings {
@@ -58,6 +60,7 @@ impl Default for AppSettings {
             multi_display: false,
             popup_monitor_index: 0,
             first_launch_tutorial_prompted: false,
+            epoch_interval_minutes: 10,
         }
     }
 }

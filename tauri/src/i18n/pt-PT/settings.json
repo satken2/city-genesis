@@ -55,6 +55,11 @@
       "hide": "Ocultar",
       "description": "Cartão no canto superior direito do ecrã que mostra, à vez, comentários dos moradores"
     },
+    "epochInterval": {
+      "label": "Intervalo entre épocas",
+      "description": "Enquanto o tempo corre, a época seguinte começa automaticamente com este intervalo",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Língua",
       "description": "Língua da interface. É independente da língua do jogo guardado.",

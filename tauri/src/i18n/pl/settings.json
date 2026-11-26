@@ -55,6 +55,11 @@
       "hide": "Nie pokazuj",
       "description": "Karta w prawym górnym rogu ekranu, na której kolejno pojawiają się wypowiedzi mieszkańców"
     },
+    "epochInterval": {
+      "label": "Odstęp między epokami",
+      "description": "Gdy czas płynie, następna epoka zaczyna się automatycznie w tym odstępie",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Język",
       "description": "Język interfejsu. Jest niezależny od języka zapisu gry.",

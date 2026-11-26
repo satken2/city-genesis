@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "Grundytan är {{area}} m², vilket är mindre än byggnadens minsta byggnadsarea på {{minimum}} m²",
     "PARCEL_MERGE_BLOCKED": "Bara tomma tomter som ägs av stadsförvaltningen kan redigeras.",
     "UNVERIFIED_POPULATION_LIMIT": "Steam-verifieringen kunde inte bekräftas, så det går inte att köra fler epoker. (Utan verifiering kan du spela upp till en befolkning på {{limit}}.)",
-    "EPOCH_ALREADY_RUNNING": "En annan epok körs redan. Försök igen när den är klar.",
+    "EPOCH_ALREADY_RUNNING": "En epok körs. Försök igen när den är klar.",
     "BUILDING_FLOORS_RANGE": "Ange {{minimum}}–{{maximum}} våningar.",
     "BUILDING_COVERAGE_RANGE": "Byggnadsandelen måste vara mellan 0 % och 100 %.",
     "BUILDING_PATH_CLEARANCE": "Byggnaden skulle nå upp till en väg eller ett spår ovanför. Sänk byggnadens höjd.",

@@ -178,7 +178,7 @@
     "BUILDING_TOO_SMALL": "Die Grundfläche beträgt {{area}} m² und unterschreitet die Mindestbebauungsfläche dieses Gebäudes von {{minimum}} m²",
     "PARCEL_MERGE_BLOCKED": "Nur freie Grundstücke im Besitz der Stadtverwaltung können bearbeitet werden.",
     "UNVERIFIED_POPULATION_LIMIT": "Die Steam-Authentifizierung konnte nicht bestätigt werden, daher können keine weiteren Epochen ausgeführt werden. (Ohne Authentifizierung können Sie bis zu einer Bevölkerung von {{limit}} spielen.)",
-    "EPOCH_ALREADY_RUNNING": "Es wird bereits eine andere Epoche ausgeführt. Versuchen Sie es nach deren Abschluss erneut.",
+    "EPOCH_ALREADY_RUNNING": "Gerade wird eine Epoche ausgeführt. Versuchen Sie es nach deren Abschluss erneut.",
     "BUILDING_FLOORS_RANGE": "Die Geschosszahl muss zwischen {{minimum}} und {{maximum}} liegen.",
     "BUILDING_COVERAGE_RANGE": "Die Grundflächenzahl muss zwischen 0 und 100% liegen.",
     "BUILDING_PATH_CLEARANCE": "Das Gebäude würde eine darüber verlaufende Straße oder ein Gleis berühren. Verringern Sie die Gebäudehöhe.",

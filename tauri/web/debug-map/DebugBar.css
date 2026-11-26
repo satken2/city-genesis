@@ -33,8 +33,33 @@
 .debug-bar__execute {
   height: 34px;
   padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1a5fb4, #1c71d8);
+  color: #f6fbff;
+  font-size: 1rem;
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
 }
 
-.debug-bar__execute .cockpit-execute-img {
+.debug-bar__execute:hover {
+  background: linear-gradient(135deg, #2563c4, #2e7de8);
+}
+
+.debug-bar__execute:disabled {
+  opacity: 0.3;
+  pointer-events: none;
+  filter: grayscale(100%);
+}
+
+.debug-bar__execute-img {
   height: 30px;
+  width: auto;
+  pointer-events: none;
 }

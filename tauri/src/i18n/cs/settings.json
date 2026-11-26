@@ -55,6 +55,11 @@
       "hide": "Skrýt",
       "description": "Karta vpravo nahoře, na které se postupně zobrazují výroky občanů"
     },
+    "epochInterval": {
+      "label": "Interval epoch",
+      "description": "Když čas běží, další epocha začne automaticky po tomto intervalu",
+      "minutes": "{{minutes}} min"
+    },
     "language": {
       "label": "Jazyk",
       "description": "Jazyk uživatelského rozhraní. Je nezávislý na jazyku uložené hry.",
