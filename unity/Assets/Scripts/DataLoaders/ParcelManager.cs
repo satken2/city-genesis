@@ -11,6 +11,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     private const string PARCEL_PREFIX = "Parcel_";
     private const string PARCEL_TAG = "ParcelObject";
+    private const float LandPriceHalfColorPerSquareMeter = 10000f;
 
     /// <summary>
     /// Outline data for one parcel. Store endpoints in world coordinates;
@@ -26,6 +27,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         /// </summary>
         public Vector3 center;
         public Vector3[] worldPoints;
+        public float area;
         /// <summary>
         /// Data visualization triangles covering the parcel interior (lazily generated from worldPoints).
         /// OverlayMeshRenderer.AddPreTriangulated retains references until EndFrame, so do not modify after generation.
@@ -1309,14 +1311,16 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     {
         parcelGO.transform.position = new Vector3(center.x, centerGround + ParcelSurfaceOffset, center.y);
 
+        Vector2[] points = new Vector2[polygon.Length];
+        for (int i = 0; i < polygon.Length; i++)
+            points[i] = new Vector2(polygon[i][0], polygon[i][1]);
+
         MeshFilter mf = parcelGO.GetComponent<MeshFilter>();
         if (mf != null)
         {
-            Vector2[] points = new Vector2[polygon.Length];
             float[] topLocalY = new float[polygon.Length];
             for (int i = 0; i < polygon.Length; i++)
             {
-                points[i] = new Vector2(polygon[i][0], polygon[i][1]);
                 topLocalY[i] = vertexGround[i] - centerGround;
             }
 
@@ -1334,7 +1338,7 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
             }
         }
 
-        CreateParcelOutline(parcelData.parcel_id, polygon, center, vertexGround, centerGround);
+        CreateParcelOutline(parcelData.parcel_id, points, center, vertexGround, centerGround);
     }
 
     /// <summary>
@@ -1725,7 +1729,13 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         {
             case VisualModeParcel.LAND_PRICE:
             {
-                float t = Mathf.Clamp01(stats.land_price / 10000f);
+                if (outline.area <= 0f || float.IsNaN(stats.land_price) || float.IsInfinity(stats.land_price))
+                    return null;
+
+                // Compare prices per square meter across parcels. A soft scale keeps high prices
+                // distinguishable and keeps the same reference point across cities and epochs.
+                float totalPrice = Mathf.Max(0f, stats.land_price);
+                float t = totalPrice / (totalPrice + outline.area * LandPriceHalfColorPerSquareMeter);
                 // UI legend: white (#ffffff) to green (#4caf50)
                 return Color.Lerp(new Color(1f, 1f, 1f), HexToColor(0x4c, 0xaf, 0x50), t);
             }
@@ -1822,14 +1832,14 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
     /// Receive the same sampled heights (SampleParcelGround) as the top mesh to avoid sampling identical positions twice.
     /// Replace existing outlines in place, preserving hover highlights.
     /// </summary>
-    private void CreateParcelOutline(int parcelId, float[][] polygon, Vector2 center, float[] vertexGround, float centerGround)
+    private void CreateParcelOutline(int parcelId, Vector2[] polygon, Vector2 center, float[] vertexGround, float centerGround)
     {
         EnsureOverlayRenderer();
 
         Vector3[] worldPoints = new Vector3[polygon.Length];
         for (int i = 0; i < polygon.Length; i++)
         {
-            worldPoints[i] = new Vector3(polygon[i][0], vertexGround[i] + OutlineHeightOffset, polygon[i][1]);
+            worldPoints[i] = new Vector3(polygon[i].x, vertexGround[i] + OutlineHeightOffset, polygon[i].y);
         }
 
         // Store ground height in the center point to avoid terrain sampling during per-frame distance checks.
@@ -1837,7 +1847,8 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
         {
             parcelId = parcelId,
             center = new Vector3(center.x, centerGround, center.y),
-            worldPoints = worldPoints
+            worldPoints = worldPoints,
+            area = Mathf.Abs(PolygonUtils.SignedArea(polygon))
         };
 
         if (parcelIdToOutlineIndex.TryGetValue(parcelId, out int index))

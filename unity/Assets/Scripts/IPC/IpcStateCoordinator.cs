@@ -1406,10 +1406,6 @@ public class IpcStateCoordinator : MonoBehaviour
     {
         Debug.Log("IpcStateCoordinator: セッションリロードを実行します（versionベース差分更新）");
 
-        // Clear remembered display state.
-        var viewCoordinator = FindAnyObjectByType<IpcViewCoordinator>();
-        viewCoordinator?.ClearNormalStateMemory();
-
         // Session reload may load another save, so refetch
         // coastlines/water surfaces/rivers before updating 3D.
         StartCoroutine(PrepareCityThenReload(FindAnyObjectByType<TerrainManager>()));
@@ -1442,6 +1438,9 @@ public class IpcStateCoordinator : MonoBehaviour
         yield return ApiClient.Get<SessionIdentity>("/sessions", session => sessionId = session?.session_id);
         if (sessionId != null && sessionId != preparedSessionId)
         {
+            // A first identity lookup can complete after the user already chose a view.
+            if (preparedSessionId != null)
+                FindAnyObjectByType<IpcViewCoordinator>()?.ClearNormalStateMemory();
             // Do not retain render objects/caches resolved using the previous city's master data/asset packs/traffic side.
             CellDataLoader.Instance?.ClearAllManagerDataForSessionReset();
             yield return AssetPackStore.PrepareForCity();

@@ -31,6 +31,9 @@ import {
   Line,
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
+import { useCurrencyUnit } from "../../../hooks/useCurrencyUnit";
+import { resolveIntlLocale } from "../../../utils/locale";
+import { formatCompactAmount, formatExactAmount } from "../../../utils/money";
 import "./IncomeTab.css";
 import { useRemPx } from "../../../hooks/useRemPx";
 
@@ -80,10 +83,19 @@ const COLOR_TIER2 = "#eeb902";          // Tier 2 (through ordinary goods): yell
 const COLOR_TIER3 = "#40c057";          // Tier 3 (through luxury goods): green.
 
 // Shared Recharts settings.
-const CHART_MARGIN = { top: 10, right: 15, left: -5, bottom: 5 };
+const CHART_MARGIN = { top: 10, right: 15, left: 4, bottom: 5 };
+
+function formatIncomeRange(bin: string, money: (value: number) => string): string {
+  const bounds = /^(\d+)(?:-(\d+)|\+)$/.exec(bin);
+  if (!bounds) return bin;
+  const lower = money(Number(bounds[1]));
+  return bounds[2] === undefined ? `${lower}+` : `${lower}–${money(Number(bounds[2]))}`;
+}
 
 export function IncomeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  useCurrencyUnit();
+  const locale = resolveIntlLocale(i18n.language);
   const remPx = useRemPx();
   const { data, loading, error } = useEpochCachedStats<IncomeStats>(
     apiBaseUrl,
@@ -132,13 +144,16 @@ export function IncomeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
     );
   }
 
+  const formatBinTick = (bin: string) => formatIncomeRange(bin, (value) => formatCompactAmount(value, locale, true));
+  const formatBinTooltip = (bin: string) => formatIncomeRange(bin, (value) => formatExactAmount(value, locale, true));
+
   // --- Custom income/disposable income distribution tooltip (one series per chart) ---
   const makeDistBarTooltip = (color: string, legendLabel: string) =>
     function DistBarTooltip({ active, payload, label }: any) {
       if (active && payload && payload.length) {
         return (
           <div className="income-tooltip">
-            <p className="income-tooltip__bin">{`${t("statistics.incomeRangeLabel", "所得範囲")}: ${label}`}</p>
+            <p className="income-tooltip__bin">{`${t("statistics.incomeRangeLabel", "所得範囲")}: ${formatBinTooltip(label)}`}</p>
             <p className="income-tooltip__item" style={{ color }}>
               {`${legendLabel}: ${payload[0]?.value || 0} ${t("statistics.householdsUnit", "世帯")}`}
             </p>
@@ -209,7 +224,7 @@ export function IncomeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#253545" horizontal={true} vertical={false} />
                   <XAxis type="number" stroke="#8ba3bb" fontSize="0.83rem" />
-                  <YAxis dataKey="bin" type="category" stroke="#8ba3bb" fontSize="0.83rem" width={remPx(7.41)} />
+                  <YAxis dataKey="bin" type="category" stroke="#8ba3bb" fontSize="0.83rem" width="auto" tickFormatter={formatBinTick} />
                   <Tooltip
                     content={makeDistBarTooltip(COLOR_INCOME, t("statistics.incomeLegend", "平均所得"))}
                     cursor={{ fill: "rgba(255,255,255,0.03)" }}
@@ -238,7 +253,7 @@ export function IncomeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#253545" horizontal={true} vertical={false} />
                   <XAxis type="number" stroke="#8ba3bb" fontSize="0.83rem" />
-                  <YAxis dataKey="bin" type="category" stroke="#8ba3bb" fontSize="0.83rem" width={remPx(7.41)} />
+                  <YAxis dataKey="bin" type="category" stroke="#8ba3bb" fontSize="0.83rem" width="auto" tickFormatter={formatBinTick} />
                   <Tooltip
                     content={makeDistBarTooltip(COLOR_DISCRETIONARY, t("statistics.discretionaryLegend", "可処分所得"))}
                     cursor={{ fill: "rgba(255,255,255,0.03)" }}

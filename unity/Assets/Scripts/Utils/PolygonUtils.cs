@@ -100,15 +100,16 @@ public static class PolygonUtils
     /// <summary>Signed area using the shoelace formula; positive means counterclockwise (CCW). Used to normalize winding.</summary>
     public static float SignedArea(IReadOnlyList<Vector2> polygon)
     {
-        float area = 0f;
+        // World coordinates can make the two cross products much larger than a small parcel's area.
+        double area = 0d;
         int n = polygon.Count;
         for (int i = 0; i < n; i++)
         {
             Vector2 a = polygon[i];
             Vector2 b = polygon[(i + 1) % n];
-            area += a.x * b.y - b.x * a.y;
+            area += (double)a.x * b.y - (double)b.x * a.y;
         }
-        return area * 0.5f;
+        return (float)(area * 0.5d);
     }
 
     /// <summary>Shortest distance from a point to any polygon boundary edge, unsigned regardless of containment.</summary>

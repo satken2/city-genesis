@@ -57,7 +57,7 @@ public class IpcClient : MonoBehaviour
     public event Action OnSessionForceReload;
     public event Action<int> OnZoneUpdated;
     // The UI committed a building or parcels to the backend: (parcel IDs to draw first, building agent ID or 0).
-    // The city is unchanged, so unlike session:reload nothing city-level is refetched and display state is kept.
+    // Leaves display state in place and skips city-level refetches.
     public event Action<int[], int> OnWorldObjectsCommitted;
     public event Action OnEditPathFinish;
     // Abort path merge/split selection. Rust (window.rs) sends this when the path detail panel closes.

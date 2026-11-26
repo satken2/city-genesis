@@ -132,18 +132,12 @@ public class IpcViewCoordinator : MonoBehaviour
     /// <summary>Applies remembered defaults to rendering.</summary>
     private void ApplyDefaultLayers()
     {
-        if (VisualModeHandler.Instance != null)
+        foreach (var layer in LAYER_DEFAULTS.Keys)
         {
-            foreach (var layer in LAYER_DEFAULTS.Keys)
-            {
-                _layerSubModes.TryGetValue(layer, out var subMode);
-                _layerFlags.TryGetValue(layer, out var flags);
-                ApplyLayerMode(layer, _layerModes[layer], subMode, flags ?? "");
-            }
+            _layerSubModes.TryGetValue(layer, out var subMode);
+            _layerFlags.TryGetValue(layer, out var flags);
+            ApplyLayerMode(layer, _layerModes[layer], subMode, flags ?? "");
         }
-        // ApplyLayerMode does not apply alerts (alert filtering changes only through view:change_view).
-        _layerSubModes.TryGetValue("alert", out var alertSubMode);
-        ApplyAlertMode(_layerModes["alert"], alertSubMode);
     }
 
     private void OnEnable()
@@ -223,58 +217,7 @@ public class IpcViewCoordinator : MonoBehaviour
             Debug.Log($"HandleViewChange: STATE_NORMAL 中の変更を記憶 -> {layer}={mode}, sub={subMode ?? "(none)"}, flags={effectiveFlags}");
         }
 
-        if (VisualModeHandler.Instance == null) return;
-
-        switch (layer)
-        {
-            case "terrain":
-                ApplyTerrainMode(mode, subMode, effectiveFlags);
-                break;
-
-            case "grid":
-                ApplyGridMode(mode);
-                break;
-
-            case "road":
-                ApplyRoadMode(mode, subMode, effectiveFlags);
-                break;
-
-            case "building":
-                ApplyBuildingMode(mode, subMode, effectiveFlags);
-                break;
-
-            case "parcel":
-                ApplyParcelMode(mode, subMode);
-                break;
-
-            case "district":
-                ApplyDistrictMode(mode);
-                break;
-
-            case "resource":
-                ApplyResourceMode(mode);
-                break;
-
-            case "alert":
-                ApplyAlertMode(mode, subMode);
-                break;
-
-            case "transit":
-                ApplyTransitMode(mode, subMode);
-                break;
-
-            case "prop":
-                ApplyPropMode(mode);
-                break;
-
-            case "coverage":
-                ApplyCoverageMode(mode, subMode);
-                break;
-
-            default:
-                Debug.LogWarning($"IpcViewCoordinator: 未知のレイヤー: {layer}");
-                break;
-        }
+        ApplyLayerMode(layer, mode, subMode, effectiveFlags);
     }
 
     /// <summary>
@@ -507,7 +450,6 @@ public class IpcViewCoordinator : MonoBehaviour
             }
         }
 
-        if (VisualModeHandler.Instance == null) return;
         string effectiveFlags = _layerFlags.TryGetValue(layer, out var f) ? f : "";
         ApplyLayerMode(layer, _layerModes[layer], _layerSubModes.TryGetValue(layer, out var s) ? s : null, effectiveFlags);
     }
@@ -546,7 +488,6 @@ public class IpcViewCoordinator : MonoBehaviour
             }
         }
 
-        if (VisualModeHandler.Instance == null) return;
         string effectiveFlags = _layerFlags.TryGetValue(layer, out var f) ? f : "";
         ApplyLayerMode(layer, mode, _layerSubModes.TryGetValue(layer, out var s) ? s : null, effectiveFlags);
     }
@@ -674,8 +615,6 @@ public class IpcViewCoordinator : MonoBehaviour
     /// </summary>
     public void ApplyAllLayerModes()
     {
-        if (VisualModeHandler.Instance == null) return;
-
         foreach (var kvp in _layerModes)
         {
             string sub = _layerSubModes.TryGetValue(kvp.Key, out var s) ? s : null;
@@ -686,6 +625,8 @@ public class IpcViewCoordinator : MonoBehaviour
 
     private void ApplyLayerMode(string layer, string mode, string subMode, string flags)
     {
+        if (layer != "alert" && VisualModeHandler.Instance == null) return;
+
         switch (layer)
         {
             case "terrain": ApplyTerrainMode(mode, subMode, flags); break;
@@ -698,6 +639,8 @@ public class IpcViewCoordinator : MonoBehaviour
             case "transit": ApplyTransitMode(mode, subMode); break;
             case "prop": ApplyPropMode(mode); break;
             case "coverage": ApplyCoverageMode(mode, subMode); break;
+            case "alert": ApplyAlertMode(subMode); break;
+            default: Debug.LogWarning($"IpcViewCoordinator: 未知のレイヤー: {layer}"); break;
         }
     }
 
@@ -985,16 +928,11 @@ public class IpcViewCoordinator : MonoBehaviour
     /// subMode is an alert-type bitmask (low bits=ALERT_AGENT_*,
     /// ALERT_PATH_* shifted up by ALERT_PATH_MASK_SHIFT). Unspecified shows all types.
     /// </summary>
-    private void ApplyAlertMode(string mode, string subMode = null)
+    private void ApplyAlertMode(string subMode)
     {
         if (AlertManager.Instance != null)
         {
-            int mask = AlertManager.DefaultFilterMask;
-            if (!string.IsNullOrEmpty(subMode))
-            {
-                int.TryParse(subMode, out mask);
-            }
-            AlertManager.Instance.SetFilterMask(mask);
+            AlertManager.Instance.SetFilterMask(int.TryParse(subMode, out int mask) ? mask : AlertManager.DefaultFilterMask);
         }
     }
 

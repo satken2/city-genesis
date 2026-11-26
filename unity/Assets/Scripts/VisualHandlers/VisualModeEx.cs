@@ -16,7 +16,7 @@ public static class VisualModePath
 
 public static class VisualModeParcel
 {
-    public const int LAND_PRICE = 200;      // Land price 0..10000: white -> red.
+    public const int LAND_PRICE = 200;      // Land price per square meter: white -> green.
     public const int FILTER_HOUSE = 201;    // Detached houses.
     public const int FILTER_APARTMENT = 202;// Apartments.
     public const int FILTER_COMMERCIAL = 203;// Commercial.

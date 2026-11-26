@@ -6,7 +6,7 @@ using UnityEngine;
 /// </summary>
 public class VisualParcelStats : MonoBehaviour
 {
-    public float land_price; // 0..10000
+    public float land_price; // Total price for the parcel.
     public int allowed_bd_mask;
     public int? owner_agent_id;
     // Parcel type: PARCEL_LAND / PARCEL_SHORE / PARCEL_WATER / PARCEL_RECLAIMED.

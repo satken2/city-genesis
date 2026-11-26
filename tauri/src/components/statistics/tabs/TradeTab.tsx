@@ -16,9 +16,9 @@ import {
 } from "recharts";
 import { useEpochCachedStats } from "../useEpochCache";
 import { resolveIntlLocale } from "../../../utils/locale";
-import { formatExactAmount } from "../../../utils/money";
+import { formatCompactAmount, formatExactAmount } from "../../../utils/money";
+import { useCurrencyUnit } from "../../../hooks/useCurrencyUnit";
 import "./TradeTab.css";
-import { useRemPx } from "../../../hooks/useRemPx";
 
 type HistoryPoint = {
   epoch: number;
@@ -44,8 +44,7 @@ type TradeStats = {
 const COLOR_EXPORT = "#10b981";        // Exports: emerald green.
 const COLOR_IMPORT = "#ef4444";        // Imports: rose red.
 
-const CHART_MARGIN = { top: 12, right: 16, left: -10, bottom: 0 };
-const Y_AXIS_WIDTH_REM = 4.44; // Y-axis width (rem). Convert to px with useRemPx when rendering.
+const CHART_MARGIN = { top: 12, right: 16, left: 4, bottom: 0 };
 const AXIS_TICK = { fontSize: "0.93rem", fill: "#8ba3bb" };
 const TOOLTIP_STYLE = {
   background: "#1a2230",
@@ -57,9 +56,10 @@ const TOOLTIP_STYLE = {
 export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
   const { t, i18n } = useTranslation();
   const master = useMasterData();
+  useCurrencyUnit();
   const locale = resolveIntlLocale(i18n.language);
-  const money = (value: number) => formatExactAmount(value, locale);
-  const remPx = useRemPx();
+  const money = (value: number) => formatExactAmount(value, locale, true);
+  const formatMoneyTick = (value: number) => formatCompactAmount(value, locale, true);
   const { data, loading, error } = useEpochCachedStats<TradeStats>(
     apiBaseUrl,
     "/api/v1/stats/trade"
@@ -133,8 +133,8 @@ export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       axisLine={{ stroke: "#253246" }}
                     />
                     <YAxis
-                      tickFormatter={money}
-                      width={remPx(Y_AXIS_WIDTH_REM)}
+                      tickFormatter={formatMoneyTick}
+                      width="auto"
                       tick={AXIS_TICK}
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}
@@ -184,8 +184,8 @@ export function TradeTab({ apiBaseUrl }: { apiBaseUrl: string }) {
                       axisLine={{ stroke: "#253246" }}
                     />
                     <YAxis
-                      tickFormatter={money}
-                      width={remPx(Y_AXIS_WIDTH_REM)}
+                      tickFormatter={formatMoneyTick}
+                      width="auto"
                       tick={AXIS_TICK}
                       tickLine={false}
                       axisLine={{ stroke: "#253246" }}

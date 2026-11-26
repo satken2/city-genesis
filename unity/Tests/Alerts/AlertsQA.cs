@@ -109,6 +109,23 @@ public static class AlertsQA
             int full = (int)managerType.GetField("DefaultFilterMask").GetValue(null);
             Check((full & (resourceBit | facilityBit | sanitationBit | infraBit)) == (resourceBit | facilityBit | sanitationBit | infraBit), "新しい4種類は既定で表示");
 
+            var viewType = source.GetType("IpcViewCoordinator", true);
+            var viewGO = new GameObject("ViewCoordinatorQA");
+            var view = viewGO.AddComponent(viewType);
+            var viewChange = viewType.GetMethod("HandleViewChange", Flags);
+            var syncView = viewType.GetMethod("SyncFromState");
+            var applyView = viewType.GetMethod("ApplyAllLayerModes");
+            var filterField = managerType.GetField("_filterMask", Flags);
+            viewChange.Invoke(view, new object[] { "alert", "visible", "0", null });
+            syncView.Invoke(view, new object[] { "STATE_EDIT_PARCEL", null });
+            viewChange.Invoke(view, new object[] { "alert", "visible", resourceBit.ToString(), null });
+            syncView.Invoke(view, new object[] { "STATE_NORMAL", null });
+            applyView.Invoke(view, null);
+            Check((int)filterField.GetValue(manager) == 0, "編集から戻ると通常表示の絞り込みを描画へ戻す");
+            viewType.GetMethod("HandleGameLoading", Flags).Invoke(view, null);
+            Check((int)filterField.GetValue(manager) == full, "都市の読み込みでは既定の絞り込みを使う");
+            UnityEngine.Object.DestroyImmediate(viewGO);
+
             applyResponse(response);
             Check(entries.Count == 3, "資源・区画・建物の同一IDは独立");
             Check(iconList("resource:1").Count == 1, "資源描画オブジェクトがなくても警告を表示");

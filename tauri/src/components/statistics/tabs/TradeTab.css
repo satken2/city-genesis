@@ -50,6 +50,7 @@
   flex: 1;
   min-height: 160px;
   position: relative;
+  direction: ltr;
 }
 
 .trade-card__no-data {

@@ -808,8 +808,7 @@ export async function sendSessionReload(): Promise<void> {
 /**
  * `world.objects_committed`
  * Notify graphics that the UI committed a building or parcels to the backend. Graphics draws the listed objects
- * first, then synchronizes the rest of the city. Unlike `session:reload`, display state is kept and city-level
- * data is not refetched.
+ * first, then synchronizes the rest of the city without refetching city-level data.
  *
  * @param parcelIds Parcels the commit created or changed (for a building, its site).
  * @param agentId Building the commit created or changed. Omit when only parcels were committed.

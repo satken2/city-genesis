@@ -183,7 +183,7 @@ function getLegendInfo(layerId: string, modeId: string, t: TFunction): LegendInf
       case "land_price_color":
         return {
           type: "meter",
-          description: t("display.descParcelLandPrice"),
+          description: `${t("display.descParcelLandPrice")} (/m²)`,
           meterStartColor: "#ffffff",
           meterEndColor: "#4caf50",
           meterLabel: t("display.meterLandPrice"),
