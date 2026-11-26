@@ -551,7 +551,8 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
     }
 
     /// <summary>
-    /// Nodes with only two straight roads of identical variant/width draw surfaces/sidewalks/medians to their ends.
+    /// Nodes with only two smoothly continuing roads of identical variant/width draw surfaces/sidewalks/medians to their ends.
+    /// Compare exact endpoint tangents from stored controls/anchors on curved paths so 1m chord sampling error does not reject smooth curves.
     /// Treat width/position differences ≤1cm and unit-direction difference ≤0.001 as numeric error; do not join corners without plates.
     /// </summary>
     public static RoadContinuousJoin TryContinuousRoadJoin(int nodeId, List<PathSummary> paths,
@@ -565,6 +566,7 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         if (Mathf.Abs(ResolveRoadWidth(a) - ResolveRoadWidth(b)) > 0.01f) return null;
 
         var ends = new List<PathEndSection>(2);
+        var directions = new List<Vector2>(2);
         foreach (var path in paths)
         {
             bool start = path.start_node_id == nodeId, end = path.end_node_id == nodeId;
@@ -576,12 +578,29 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
             if (IntersectionPolygonUtil.Length(points) < 1e-6f) return null;
             var section = IntersectionPolygonUtil.AtDistance(points, 0f);
             ends.Add(section);
+            directions.Add(ResolveContinuousEndDirection(path, start, section));
         }
         if (Vector3.Distance(ends[0].Position, ends[1].Position) > 0.01f
-            || (ends[0].Direction + ends[1].Direction).sqrMagnitude > 1e-6f) return null;
+            || (directions[0] + directions[1]).sqrMagnitude > 1e-6f) return null;
 
         connectionPoints = new Dictionary<int, Vector3> { { a.path_id, ends[0].Position }, { b.path_id, ends[1].Position } };
         return new RoadContinuousJoin { PathA = a.path_id, PathB = b.path_id };
+    }
+
+    /// <summary>
+    /// Outward XZ unit tangent at a path endpoint. Curved non-single-span paths use stored control/anchor tangents
+    /// when the sampled polyline starts at that anchor, avoiding Δs/(2R) chord bias from discrete sampling.
+    /// </summary>
+    internal static Vector2 ResolveContinuousEndDirection(PathSummary path, bool atStart, PathEndSection section)
+    {
+        if (path != null && path.curved
+            && !(MasterDataStore.Instance?.GetPathMaster(path.path_variant)?.single_span ?? false)
+            && TryGetPathEndTangent(path, atStart, out Vector2 anchor, out Vector2 outward)
+            && Vector2.Distance(section.Center, anchor) <= 0.01f)
+        {
+            return outward;
+        }
+        return section.Direction;
     }
 
     // The path's own width, as road meshes use (RoadPath.GetPathMasterParams).
@@ -803,19 +822,35 @@ public class RoadIntersectionMeshGenerator : INodeMeshGenerator
         nodePoint = directionPoint = Vector2.zero;
         bool start = path.start_node_id == nodeId;
         if (!start && path.end_node_id != nodeId) return false;
-        var anchor = start ? path.GetStartPointList() : path.GetEndPointList();
+        return TryGetPathEndReference(path, start, out nodePoint, out directionPoint);
+    }
+
+    /// <summary>Stored endpoint anchor and inward-along-path XZ unit tangent (from Bezier control when curved, otherwise next anchor).</summary>
+    internal static bool TryGetPathEndTangent(PathSummary path, bool atStart, out Vector2 anchor, out Vector2 outward)
+    {
+        outward = Vector2.zero;
+        if (!TryGetPathEndReference(path, atStart, out anchor, out Vector2 reference)) return false;
+        outward = (reference - anchor).normalized;
+        return outward.sqrMagnitude > 1e-6f;
+    }
+
+    private static bool TryGetPathEndReference(PathSummary path, bool atStart, out Vector2 nodePoint, out Vector2 directionPoint)
+    {
+        nodePoint = directionPoint = Vector2.zero;
+        if (path == null) return false;
+        var anchor = atStart ? path.GetStartPointList() : path.GetEndPointList();
         if (anchor == null || anchor.Count < 3) return false;
         nodePoint = new Vector2(anchor[0], anchor[2]);
         var refs = new List<Vector2>();
-        var control = start ? path.GetStartControlList() : path.GetEndControlList();
+        var control = atStart ? path.GetStartControlList() : path.GetEndControlList();
         if (path.curved && control != null && control.Count >= 3) refs.Add(new Vector2(control[0], control[2]));
         var waypoints = path.GetWaypointList();
         if (waypoints != null && waypoints.Count > 0)
         {
-            var w = waypoints[start ? 0 : waypoints.Count - 1].position;
+            var w = waypoints[atStart ? 0 : waypoints.Count - 1].position;
             if (w != null && w.Length >= 3) refs.Add(new Vector2(w[0], w[2]));
         }
-        var other = start ? path.GetEndPointList() : path.GetStartPointList();
+        var other = atStart ? path.GetEndPointList() : path.GetStartPointList();
         if (other != null && other.Count >= 3) refs.Add(new Vector2(other[0], other[2]));
         foreach (var point in refs) if ((point - nodePoint).sqrMagnitude > 1e-6f) { directionPoint = point; return true; }
         return false;

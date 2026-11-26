@@ -80,7 +80,129 @@ internal static class RoadContinuousJoinQA
             Check(Join() == null, "折れ角・向き・位置の不一致、または長さのない道路を直接つなぎました。");
             checks++;
         }
+        checks += CheckCurvedContinuousJoin();
+        checks += CheckConnectorArcLengthAndCaps();
         checks += CheckMinorJunctionPriority();
+        return checks;
+    }
+
+    private static int CheckCurvedContinuousJoin()
+    {
+        int checks = 0;
+        // C1-continuous curves split at a degree-2 node (both gentle R≈570m and tighter R≈95m) join without an intersection slab.
+        foreach (float radius in new[] { 570f, 95f })
+        {
+            float halfAngle = 60f / radius;
+            float handle = radius * (4f / 3f) * MathF.Tan(halfAngle * 0.25f);
+            Vector3 CirclePoint(float angle) => new Vector3(MathF.Sin(angle) * radius, 0f, (MathF.Cos(angle) - 1f) * radius);
+            Vector3 CircleTangent(float angle) => new Vector3(MathF.Cos(angle), 0f, -MathF.Sin(angle));
+
+            Vector3 startA = CirclePoint(-halfAngle), mid = Vector3.zero, endB = CirclePoint(halfAngle);
+            Vector3 ctrlAOut = startA + CircleTangent(-halfAngle) * handle;
+            Vector3 ctrlAIn = mid - CircleTangent(0f) * handle;
+            Vector3 ctrlBOut = mid + CircleTangent(0f) * handle;
+            Vector3 ctrlBIn = endB - CircleTangent(halfAngle) * handle;
+
+            var pathA = new PathSummary {
+                path_id = 9, path_type = Constants.PATH_STREET, path_variant = 221, width = 12f,
+                start_node_id = 12, end_node_id = 13, status = Constants.STATUS_ACTIVE, curved = true,
+                start_point = new List<object> { startA.x, 0f, startA.z },
+                end_point = new List<object> { mid.x, 0f, mid.z },
+                start_control = new List<object> { ctrlAOut.x, 0f, ctrlAOut.z },
+                end_control = new List<object> { ctrlAIn.x, 0f, ctrlAIn.z },
+            };
+            var pathB = new PathSummary {
+                path_id = 10, path_type = Constants.PATH_STREET, path_variant = 221, width = 12f,
+                start_node_id = 13, end_node_id = 14, status = Constants.STATUS_ACTIVE, curved = true,
+                start_point = new List<object> { mid.x, 0f, mid.z },
+                end_point = new List<object> { endB.x, 0f, endB.z },
+                start_control = new List<object> { ctrlBOut.x, 0f, ctrlBOut.z },
+                end_control = new List<object> { ctrlBIn.x, 0f, ctrlBIn.z },
+            };
+            var sampled = new Dictionary<int, List<Vector3>> {
+                [9] = IntersectionPolygonUtil.SamplePlan(pathA),
+                [10] = IntersectionPolygonUtil.SamplePlan(pathB),
+            };
+            var result = NodeMeshFactory.GenerateNodeMesh(13, mid, new List<PathSummary> { pathA, pathB }, 0f, p => sampled[p.path_id]);
+            Check(result != null && result.RoadJoin != null && result.Mesh == null,
+                $"滑らかに接続する曲線道路(R={radius}m)に交差点メッシュが作られました。");
+            Check(result.ConnectionPoints.Count == 2
+                && Vector3.Distance(result.ConnectionPoints[9], mid) < 0.001f
+                && Vector3.Distance(result.ConnectionPoints[10], mid) < 0.001f,
+                $"滑らかに接続する曲線道路(R={radius}m)の端がノードより手前で切られました。");
+            checks += 2;
+
+            // Kinked tangent (2.75 deg) at the node must still fall back to an intersection slab.
+            float kink = 2.75f * MathF.PI / 180f;
+            Vector3 kinkedOut = mid + new Vector3(MathF.Cos(kink), 0f, MathF.Sin(kink)) * handle;
+            pathB.start_control = new List<object> { kinkedOut.x, 0f, kinkedOut.z };
+            sampled[10] = IntersectionPolygonUtil.SamplePlan(pathB);
+            var kinked = RoadIntersectionMeshGenerator.TryContinuousRoadJoin(13, new List<PathSummary> { pathA, pathB }, p => sampled[p.path_id], out _);
+            Check(kinked == null, $"接線が折れた曲線道路(R={radius}m)を板なしで直接つなぎました。");
+            checks++;
+        }
+        return checks;
+    }
+
+    private static int CheckConnectorArcLengthAndCaps()
+    {
+        int checks = 0;
+        var flags = System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static;
+        var buildArcLengths = typeof(RoadPath).GetMethod("BuildConnectorArcLengths", flags);
+        var evaluate = typeof(RoadPath).GetMethod("EvaluateConnector", flags);
+        var classifyCaps = typeof(RoadPath).GetMethod("ClassifyEndCapTriangles", flags);
+
+        // Non-uniform connector polyline mimicking a nearly straight corner: 8.85m straight, 0.10m tiny arc, 8.85m straight.
+        var points = new List<Vector3> {
+            new Vector3(0f, 0f, 0f),
+            new Vector3(8.85f, 0f, 0f),
+            new Vector3(8.95f, 0f, 0f),
+            new Vector3(17.80f, 0f, 0f),
+        };
+        var spec = new SidewalkConnectorSpec(points, new List<float> { 2.5f, 2.5f, 2.5f, 2.5f }, "Models/Paths/p1", 1) {
+            Directions = new List<Vector2> { Vector2.right, Vector2.right, Vector2.right, Vector2.right },
+            StartDirection = Vector2.right,
+            EndDirection = Vector2.right,
+        };
+        var arcLengths = (float[])buildArcLengths.Invoke(null, new object[] { points });
+        Check(MathF.Abs(arcLengths[arcLengths.Length - 1] - 17.80f) < 1e-4f, "コネクタ弧長合計が不正です。");
+        foreach (float t in new[] { 0f, 0.25f, 0.5f, 0.75f, 1f })
+        {
+            var args = new object[] { spec, arcLengths, t, Vector3.zero, Vector2.zero, 0f };
+            evaluate.Invoke(null, args);
+            var pos = (Vector3)args[3];
+            Check(MathF.Abs(pos.x - 17.80f * t) < 0.01f, $"不均一な点列のコネクタ評価が弧長と一致しません(t={t}, x={pos.x})。");
+        }
+        checks += 6;
+
+        // Duplicate endpoint must not yield NaN or zero direction.
+        var dupPoints = new List<Vector3> { Vector3.zero, Vector3.zero, new Vector3(10f, 0f, 0f), new Vector3(10f, 0f, 0f) };
+        var dupSpec = new SidewalkConnectorSpec(dupPoints, new List<float> { 2f, 2f, 2f, 2f }, "Models/Paths/p1", 1);
+        var dupArcs = (float[])buildArcLengths.Invoke(null, new object[] { dupPoints });
+        foreach (float t in new[] { 0f, 0.5f, 1f })
+        {
+            var args = new object[] { dupSpec, dupArcs, t, Vector3.zero, Vector2.zero, 0f };
+            evaluate.Invoke(null, args);
+            var pos = (Vector3)args[3];
+            var dir = (Vector2)args[4];
+            Check(MathF.Abs(pos.x - 10f * t) < 0.01f && dir.sqrMagnitude > 0.99f, $"重複点を含むコネクタの評価が不正です(t={t})。");
+        }
+        checks += 3;
+
+        // ClassifyEndCapTriangles must mark only min-Z (-1) and max-Z (+1) end-cap triangles.
+        var boxVerts = new[] {
+            new Vector3(0f, 0f, -1f), new Vector3(1f, 0f, -1f), new Vector3(1f, 1f, -1f), new Vector3(0f, 1f, -1f),
+            new Vector3(0f, 0f,  1f), new Vector3(1f, 0f,  1f), new Vector3(1f, 1f,  1f), new Vector3(0f, 1f,  1f),
+        };
+        var boxTris = new[] {
+            0, 1, 2,  0, 2, 3, // min-Z cap (-1)
+            4, 6, 5,  4, 7, 6, // max-Z cap (+1)
+            3, 2, 6,  3, 6, 7, // top face (0)
+        };
+        var caps = (sbyte[])classifyCaps.Invoke(null, new object[] { boxVerts, boxTris });
+        Check(caps.Length == 6 && caps[0] == -1 && caps[1] == -1 && caps[2] == 1 && caps[3] == 1 && caps[4] == 0 && caps[5] == 0,
+            "タイル端面キャップの分類が不正です。");
+        checks++;
         return checks;
     }
 

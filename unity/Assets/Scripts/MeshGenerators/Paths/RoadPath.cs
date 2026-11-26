@@ -19,9 +19,9 @@ public class RoadPath : IPathMeshGenerator
     private static readonly Dictionary<string, Material> MaterialCache = new Dictionary<string, Material>();
     private static readonly Dictionary<Mesh, Mesh> MirroredMeshCache = new Dictionary<Mesh, Mesh>();
     private static readonly Dictionary<Mesh, Bounds> BodySurfaceBoundsCache = new Dictionary<Mesh, Bounds>();
-    /// <summary>Part vertices/UVs/triangles copied by sidewalk connectors. Keys are immutable shared-prefab meshes; read only.</summary>
-    private static readonly Dictionary<Mesh, (Vector3[] vertices, Vector2[] uv, int[][] triangles)> ConnectorSourceCache
-        = new Dictionary<Mesh, (Vector3[], Vector2[], int[][])>();
+    /// <summary>Part vertices/UVs/triangles and end-cap flags copied by sidewalk connectors. Keys are immutable shared-prefab meshes; read only.</summary>
+    private static readonly Dictionary<Mesh, (Vector3[] vertices, Vector2[] uv, int[][] triangles, sbyte[][] triangleCaps)> ConnectorSourceCache
+        = new Dictionary<Mesh, (Vector3[], Vector2[], int[][], sbyte[][])>();
 
     // Shared-pool materials and part-mesh derivatives may reference asset-pack resources; discard on city switches.
     static RoadPath() => AssetPackStore.CityChanging += ClearSharedCaches;
@@ -254,7 +254,17 @@ public class RoadPath : IPathMeshGenerator
         GameObject container = new GameObject($"Road_{pathData.path_id}");
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] コンテナ作成: {container.name}");
 
-        SplineComputer spline = BuildSpline(container, points, isCurved);
+        Vector2? startForward = null, endForward = null;
+        if (isCurved)
+        {
+            if (RoadIntersectionMeshGenerator.TryGetPathEndTangent(pathData, true, out Vector2 startAnchor, out Vector2 startOutward)
+                && Vector2.Distance(IntersectionPolygonUtil.XZ(points[0]), startAnchor) <= 0.01f)
+                startForward = startOutward;
+            if (RoadIntersectionMeshGenerator.TryGetPathEndTangent(pathData, false, out Vector2 endAnchor, out Vector2 endOutward)
+                && Vector2.Distance(IntersectionPolygonUtil.XZ(points[points.Count - 1]), endAnchor) <= 0.01f)
+                endForward = -endOutward;
+        }
+        SplineComputer spline = BuildSpline(container, points, isCurved, startForward, endForward);
 
         float splineLength = spline.CalculateLength();
         UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] スプライン長: {splineLength:F2}m");
@@ -959,7 +969,8 @@ public class RoadPath : IPathMeshGenerator
     /// Disable assuming points will remain unchanged (Evaluate/Project/CalculateLength still work).
     /// Disabled splines do not follow Transform movement; do not move the container in world space after generation.
     /// </summary>
-    public static SplineComputer BuildSpline(GameObject container, List<Vector3> points, bool isCurved)
+    public static SplineComputer BuildSpline(GameObject container, List<Vector3> points, bool isCurved,
+        Vector2? startForward = null, Vector2? endForward = null)
     {
         SplineComputer spline = container.AddComponent<SplineComputer>();
 
@@ -978,6 +989,9 @@ public class RoadPath : IPathMeshGenerator
                 p.type = SplinePoint.Type.Broken;
                 Vector3 tangent = (points[Mathf.Min(i + 1, points.Count - 1)] - points[Mathf.Max(0, i - 1)]) / 6f;
                 if (i == 0 || i == points.Count - 1) tangent *= 2f;
+                // Align uncut curved endpoints to stored Bezier tangents so continuous curved joins meet flush without chord-angle gaps.
+                if (i == 0 && startForward.HasValue) tangent = AlignHorizontalTangent(tangent, startForward.Value);
+                else if (i == points.Count - 1 && endForward.HasValue) tangent = AlignHorizontalTangent(tangent, endForward.Value);
                 p.tangent = p.position - tangent;
                 p.tangent2 = p.position + tangent;
             }
@@ -992,6 +1006,14 @@ public class RoadPath : IPathMeshGenerator
         spline.RebuildImmediate();
         spline.enabled = false;
         return spline;
+    }
+
+    private static Vector3 AlignHorizontalTangent(Vector3 tangent, Vector2 forward)
+    {
+        float horizontal = new Vector2(tangent.x, tangent.z).magnitude;
+        if (horizontal < 1e-5f || forward.sqrMagnitude < 1e-6f) return tangent;
+        Vector2 unit = forward.normalized;
+        return new Vector3(unit.x * horizontal, tangent.y, unit.y * horizontal);
     }
 
     /// <summary>
@@ -1849,7 +1871,8 @@ public class RoadPath : IPathMeshGenerator
         if (source == null) return;
         Bounds bounds = source.bounds;
         if (bounds.size.x < 1e-5f || bounds.size.z < 1e-5f) return;
-        float length = IntersectionPolygonUtil.Length(connector.Points);
+        float[] arcLengths = BuildConnectorArcLengths(connector.Points);
+        float length = arcLengths[arcLengths.Length - 1];
         if (length < 1e-5f) return;
         GameObject endPrefab = connector.EndPrefabFolder != null
             ? ModelManager.Instance.GetModel($"{connector.EndPrefabFolder}/{part}", suppressWarning: true)
@@ -1859,14 +1882,22 @@ public class RoadPath : IPathMeshGenerator
         int tiles = Mathf.Max(1, Mathf.CeilToInt(length / 0.5f));
         if (!ConnectorSourceCache.TryGetValue(source, out var sourceArrays))
         {
+            var sourceVerts = source.vertices;
             var triangles = new int[source.subMeshCount][];
-            for (int sub = 0; sub < triangles.Length; sub++) triangles[sub] = source.GetTriangles(sub);
-            sourceArrays = (source.vertices, source.uv, triangles);
+            var caps = new sbyte[source.subMeshCount][];
+            for (int sub = 0; sub < triangles.Length; sub++)
+            {
+                triangles[sub] = source.GetTriangles(sub);
+                caps[sub] = ClassifyEndCapTriangles(sourceVerts, triangles[sub]);
+            }
+            sourceArrays = (sourceVerts, source.uv, triangles, caps);
             ConnectorSourceCache[source] = sourceArrays;
         }
         Vector3[] original = sourceArrays.vertices;
         Vector2[] originalUv = sourceArrays.uv;
         int[][] sourceTriangles = sourceArrays.triangles;
+        sbyte[][] sourceCaps = sourceArrays.triangleCaps;
+        bool stripInternalCaps = !connector.Dashed && tiles > 1;
         var vertices = new List<Vector3>();
         var uv = new List<Vector2>();
         var indices = new List<int>[sourceTriangles.Length];
@@ -1878,14 +1909,26 @@ public class RoadPath : IPathMeshGenerator
             foreach (var vertex in original)
             {
                 float t = (tile + (vertex.z - bounds.min.z) / bounds.size.z) / tiles;
-                EvaluateConnector(connector, t, out Vector3 position, out Vector2 forward, out float width);
+                EvaluateConnector(connector, arcLengths, t, out Vector3 position, out Vector2 forward, out float width);
                 Vector3 right = new Vector3(forward.y, 0f, -forward.x);
                 // Apply only width in X. Do not deform height through SplinePoint.size.
                 float heightScale = bounds.size.y > 1e-5f ? Mathf.Lerp(bounds.size.y, endHeight, t*t*(3f-2f*t)) / bounds.size.y : 1f;
                 vertices.Add(position + right * ((vertex.x - bounds.center.x) * width / bounds.size.x) + Vector3.Slerp(connector.StartNormal, connector.EndNormal, t*t*(3f-2f*t)).normalized * (vertex.y * heightScale));
             }
             for (int v = 0; v < original.Length; v++) uv.Add(v < originalUv.Length ? originalUv[v] : Vector2.zero);
-            for (int sub = 0; sub < indices.Length; sub++) foreach (int triangle in sourceTriangles[sub]) indices[sub].Add(offset + triangle);
+            for (int sub = 0; sub < indices.Length; sub++)
+            {
+                int[] tris = sourceTriangles[sub];
+                sbyte[] caps = sourceCaps[sub];
+                for (int tri = 0; tri < tris.Length; tri += 3)
+                {
+                    sbyte cap = caps[tri / 3];
+                    if (stripInternalCaps && ((cap < 0 && tile > 0) || (cap > 0 && tile < tiles - 1))) continue;
+                    indices[sub].Add(offset + tris[tri]);
+                    indices[sub].Add(offset + tris[tri + 1]);
+                    indices[sub].Add(offset + tris[tri + 2]);
+                }
+            }
         }
         var mesh = new Mesh { name = $"Intersection_{part}_{index}", indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
         mesh.SetVertices(vertices); mesh.SetUVs(0, uv); mesh.subMeshCount = indices.Length;
@@ -1903,16 +1946,62 @@ public class RoadPath : IPathMeshGenerator
             for (int i = 0; i < materials.Length; i++) materials[i] = GetOrCreateRoadMaterial(materials[i]);
             renderer.sharedMaterials = materials;
         }
+        if (bounds.size.y <= GROUND_SLAB_MAX_HEIGHT && endHeight <= GROUND_SLAB_MAX_HEIGHT)
+        {
+            var worldPoints = new List<Vector3>(connector.Points.Count);
+            Vector3 bottomShift = Vector3.up * bounds.min.y;
+            foreach (var p in connector.Points) worldPoints.Add(go.transform.TransformPoint(p) + bottomShift);
+            ApplyGroundSurfaceShadow(renderer, worldPoints);
+        }
     }
 
-    private static void EvaluateConnector(SidewalkConnectorSpec connector, float t, out Vector3 position, out Vector2 forward, out float width)
+    /// <summary>Classify each source triangle: -1 for min-Z cap, +1 for max-Z cap, 0 otherwise.</summary>
+    internal static sbyte[] ClassifyEndCapTriangles(Vector3[] vertices, int[] triangles)
     {
-        float f = Mathf.Clamp01(t) * (connector.Points.Count - 1);
-        int index = Mathf.Min(Mathf.FloorToInt(f), connector.Points.Count - 2);
-        float fraction = f - index;
+        var result = new sbyte[triangles.Length / 3];
+        if (vertices == null || vertices.Length == 0 || triangles.Length < 3) return result;
+        float minZ = float.MaxValue, maxZ = float.MinValue;
+        foreach (var vertex in vertices) { minZ = Mathf.Min(minZ, vertex.z); maxZ = Mathf.Max(maxZ, vertex.z); }
+        if (maxZ - minZ < 0.001f) return result;
+        var ends = new sbyte[vertices.Length];
+        for (int i = 0; i < vertices.Length; i++)
+            ends[i] = Mathf.Abs(vertices[i].z - minZ) < 0.00001f ? (sbyte)-1 : Mathf.Abs(vertices[i].z - maxZ) < 0.00001f ? (sbyte)1 : (sbyte)0;
+        for (int i = 0; i < triangles.Length; i += 3)
+        {
+            sbyte end = ends[triangles[i]];
+            if (end != 0 && ends[triangles[i + 1]] == end && ends[triangles[i + 2]] == end) result[i / 3] = end;
+        }
+        return result;
+    }
+
+    /// <summary>Cumulative XZ arc lengths along connector points for uniform-spacing tile placement.</summary>
+    internal static float[] BuildConnectorArcLengths(List<Vector3> points)
+    {
+        var cumulative = new float[points.Count];
+        for (int i = 1; i < points.Count; i++)
+            cumulative[i] = cumulative[i - 1] + Vector2.Distance(IntersectionPolygonUtil.XZ(points[i - 1]), IntersectionPolygonUtil.XZ(points[i]));
+        return cumulative;
+    }
+
+    internal static void EvaluateConnector(SidewalkConnectorSpec connector, float[] cumulative, float t, out Vector3 position, out Vector2 forward, out float width)
+    {
+        int last = cumulative.Length - 1;
+        float target = Mathf.Clamp01(t) * cumulative[last];
+        int lo = 0, hi = last - 1;
+        while (lo < hi)
+        {
+            int mid = (lo + hi) >> 1;
+            if (cumulative[mid + 1] < target) lo = mid + 1;
+            else hi = mid;
+        }
+        int index = lo;
+        while (index < last - 1 && cumulative[index + 1] - cumulative[index] <= 1e-6f) index++;
+        while (index > 0 && cumulative[index + 1] - cumulative[index] <= 1e-6f) index--;
+        float segLength = cumulative[index + 1] - cumulative[index];
+        float fraction = segLength > 1e-6f ? Mathf.Clamp01((target - cumulative[index]) / segLength) : 0f;
         position = Vector3.Lerp(connector.Points[index], connector.Points[index + 1], fraction);
         forward = IntersectionPolygonUtil.XZ(connector.Points[index + 1] - connector.Points[index]).normalized;
-        if (connector.Directions != null) forward = Vector2.Lerp(connector.Directions[index], connector.Directions[index+1], fraction).normalized;
+        if (connector.Directions != null) forward = Vector2.Lerp(connector.Directions[index], connector.Directions[index + 1], fraction).normalized;
         if (t <= 1e-5f && connector.StartDirection.sqrMagnitude > 0f) forward = connector.StartDirection;
         if (t >= 1f - 1e-5f && connector.EndDirection.sqrMagnitude > 0f) forward = connector.EndDirection;
         width = connector.Widths != null ? Mathf.Lerp(connector.Widths[index], connector.Widths[index + 1], fraction) : 0.5f;
