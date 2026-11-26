@@ -30,7 +30,7 @@ import { listen } from "@tauri-apps/api/event";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import { loadAppSettings, type AppSettings } from "../../utils/settings";
 import { citizenFaceUrl, citySkinTone } from "../../utils/citizenFace";
-import { useCityClimate } from "../../hooks/useCityClimate";
+import { useCitizenPortraitSettings } from "../../hooks/useCitizenPortraitSettings";
 import { useHudSession } from "./useHudSession";
 import { composeRemark, remarkText, type Voice, type VoiceRemark } from "../citizen/citizenVoiceRemark";
 import "./hud.css";
@@ -104,7 +104,7 @@ export function CitizenVoice() {
   const { visible, apiBaseUrl, epochExecuting } = useHudSession();
   const [enabled, setEnabled] = useState(true);
   const active = visible && enabled && !epochExecuting;
-  const climate = useCityClimate(apiBaseUrl);
+  const portraitSettings = useCitizenPortraitSettings(apiBaseUrl);
   const [deck, dispatch] = useReducer(deckReducer, EMPTY_DECK);
   const [paused, setPaused] = useState(false);
   const [exhausted, setExhausted] = useState(false);
@@ -173,7 +173,7 @@ export function CitizenVoice() {
     };
   }, [counting, currentKey]);
 
-  const shown = active && deck.current !== null;
+  const shown = active && portraitSettings !== undefined && deck.current !== null;
   useEffect(() => {
     const element = panelRef.current;
     if (!shown || !element) {
@@ -193,6 +193,7 @@ export function CitizenVoice() {
     return () => observer.disconnect();
   }, [shown]);
 
+  const climate = portraitSettings?.climate;
   const skinTone = useMemo(() => citySkinTone(climate), [climate]);
 
   function handleCardClick(card: Card) {
@@ -222,7 +223,13 @@ export function CitizenVoice() {
       >
         <img
           className="citizen-voice-face"
-          src={citizenFaceUrl({ citizenId: card.citizen_id, gender: card.gender, age: card.age, ...skinTone })}
+          src={citizenFaceUrl({
+            citizenId: card.citizen_id,
+            gender: card.gender,
+            age: card.age,
+            ...skinTone,
+            cityLanguage: portraitSettings?.cityLanguage,
+          })}
           alt=""
           draggable={false}
         />

@@ -26,6 +26,8 @@ export type CitizenFaceInput = {
   /** 0 = male, 1 = female (backend gender). */
   gender: number;
   age: number;
+  /** セーブに記録された都市の言語。 */
+  cityLanguage?: string | null;
   /** Median skin tone from 0 (lightest) to 1 (darkest). Default 0.5. */
   skinMedian?: number;
   /** Spread around the median. 0 gives everyone the median; 1 with median 0.5 spreads tones evenly. Default 1. */
@@ -266,16 +268,40 @@ const FACIAL_HAIR: readonly (Weighted & { kind: "none" | "stubble" | "mustache" 
   { weights: [0.12, 0], kind: "beard" },
 ];
 
+function faceOutline(W: number, T: number, C: number, jaw: number): string {
+  return svg`M ${-W} 0 C ${-W} ${-T * 0.56} ${-W * 0.56} ${-T} 0 ${-T} C ${W * 0.56} ${-T} ${W} ${-T * 0.56} ${W} 0 C ${W} ${C * 0.55} ${W * jaw} ${C} 0 ${C} C ${-W * jaw} ${C} ${-W} ${C * 0.55} ${-W} 0 Z`;
+}
+
+function drawHijab(W: number, T: number, C: number, jaw: number, hem: number, shoulder: number, cloth: string): string {
+  const edge = W + 4;
+  const top = -T - 4.5;
+  const color = mix(cloth, "#201b2b", 0.38);
+  // 顔の輪郭に沿って布をくり抜くと、頭の大きさや顎の形が変わっても隙間が出ない。
+  const opening = faceOutline(W - 1.3, T * 0.68, C - 0.9, jaw);
+  const drape = svg`M 0 ${top}
+    C ${edge * 0.64} ${top} ${edge + 1} ${-T * 0.56} ${edge} 2
+    C ${edge - 1} ${C * 0.55} ${edge - 4} ${C + 6} ${shoulder * 0.93} ${hem - 5}
+    Q ${shoulder * 0.23} ${hem + 6} ${-shoulder * 0.9} ${hem - 1}
+    C ${-edge + 5} ${C + 6} ${-edge} ${C * 0.6} ${-edge} 1
+    C ${-edge} ${-T * 0.58} ${-edge * 0.68} ${top} 0 ${top} Z`;
+  const folds = svg`M ${-W - 0.2} 6 C ${-W + 0.5} ${C * 0.74} ${-W * 0.35} ${hem - 5} ${shoulder * 0.68} ${hem - 8}
+    M ${W * 0.76} ${C * 0.83} Q ${W * 0.35} ${hem - 8} ${-shoulder * 0.55} ${hem - 3}`;
+  return svg`<path d="${drape} ${opening}" fill="${color}" fill-rule="evenodd"/>
+    <path d="${opening}" fill="none" stroke="${mix(color, "#000000", 0.18)}" stroke-width="1"/>
+    <path d="${folds}" fill="none" stroke="${mix(color, "#ffffff", 0.22)}" stroke-width="1.2" stroke-linecap="round"/>`;
+}
+
 /** Build the portrait SVG. The canvas is 100 x 100 and the head group is drawn in head coordinates. */
-function buildFaceSvg({ citizenId, gender, age, skinMedian = 0.5, skinSpread = 1 }: CitizenFaceInput): string {
+function buildFaceSvg({ citizenId, gender, age, cityLanguage, skinMedian = 0.5, skinSpread = 1 }: CitizenFaceInput): string {
   const seed = citizenId >>> 0;
   const p = (trait: keyof typeof TRAIT) => param(seed, TRAIT[trait]);
   const masc = gender === 0 ? 1 : 0;
+  const wearsHijab = cityLanguage === "ar" && gender === 1;
   const child = 1 - smoothstep(2, 19, age);
   const adult = smoothstep(12, 20, age);
   const mature = smoothstep(25, 55, age);
   const elder = smoothstep(55, 85, age);
-  // Sex differences in bone structure and grooming appear with puberty; children differ only by hair.
+  // 骨格や化粧など、顔立ちに現れる性差は思春期から徐々に強くなる。
   const man = masc * adult;
   const woman = (1 - masc) * adult;
 
@@ -322,8 +348,8 @@ function buildFaceSvg({ citizenId, gender, age, skinMedian = 0.5, skinSpread = 1
   // Thinning hair lies flat, and both small children and the old wear their hair shorter.
   const hairVolume = (1 - 0.25 * elder) * (1 - smoothstep(0.1, 0.5, recession));
   const hairLength = lerp(0.35, 1, smoothstep(1, 12, age)) * (1 - 0.5 * elder);
-  const hair = pick(HAIR_STYLES, p("hairStyle"), masc).draw(W, T, hairVolume, hairLength);
-  const hairFill = mix(hairColor, skin, hair.scalp ?? 0);
+  const hair = wearsHijab ? null : pick(HAIR_STYLES, p("hairStyle"), masc).draw(W, T, hairVolume, hairLength);
+  const hairFill = mix(hairColor, skin, hair?.scalp ?? 0);
   const facialHair = pick(FACIAL_HAIR, p("facialHair"), masc).kind;
   const hasGlasses = p("glasses") < 0.08 + 0.42 * smoothstep(35, 70, age);
   const hasEarrings = p("earring") < 0.45 * woman;
@@ -354,7 +380,7 @@ function buildFaceSvg({ citizenId, gender, age, skinMedian = 0.5, skinSpread = 1
       + (sink > 0 ? svg`<path d="M -60 -60 L 60 -60 L 60 3 L ${domeRx} 3 A ${domeRx} ${lerp(60, 29, sink)} 0 0 0 ${-domeRx} 3 L -60 3 Z" fill="#000"/>` : "")
       + "</mask></defs>");
   }
-  if (hair.back) parts.push(svg`<g transform="${head}"><path d="${hair.back}" fill="${hairFill}"${hairMask}/></g>`);
+  if (hair?.back) parts.push(svg`<g transform="${head}"><path d="${hair.back}" fill="${hairFill}"${hairMask}/></g>`);
 
   const chinY = headY + C * scale;
   parts.push(svg`<rect x="${50 - neck}" y="${chinY - 10}" width="${neck * 2}" height="${necklineY - chinY + 10 + necklineHalf}" fill="${shade(0.14)}"/>`);
@@ -370,12 +396,14 @@ function buildFaceSvg({ citizenId, gender, age, skinMedian = 0.5, skinSpread = 1
   ][Math.floor(p("clothStyle") * 4)]);
 
   const face: string[] = [];
-  face.push(svg`<ellipse cx="${-W + 0.5}" cy="5" rx="3.6" ry="${earRy}" fill="${skin}"/><ellipse cx="${W - 0.5}" cy="5" rx="3.6" ry="${earRy}" fill="${skin}"/>`);
-  face.push(svg`<ellipse cx="${-W - 0.2}" cy="5" rx="1.6" ry="${earRy * 0.55}" fill="${shade(0.22)}"/><ellipse cx="${W + 0.2}" cy="5" rx="1.6" ry="${earRy * 0.55}" fill="${shade(0.22)}"/>`);
-  if (hasEarrings) {
-    face.push(svg`<circle cx="${-W - 0.2}" cy="${5 + earRy * 0.85}" r="1.2" fill="#e8c25a"/><circle cx="${W + 0.2}" cy="${5 + earRy * 0.85}" r="1.2" fill="#e8c25a"/>`);
+  if (!wearsHijab) {
+    face.push(svg`<ellipse cx="${-W + 0.5}" cy="5" rx="3.6" ry="${earRy}" fill="${skin}"/><ellipse cx="${W - 0.5}" cy="5" rx="3.6" ry="${earRy}" fill="${skin}"/>`);
+    face.push(svg`<ellipse cx="${-W - 0.2}" cy="5" rx="1.6" ry="${earRy * 0.55}" fill="${shade(0.22)}"/><ellipse cx="${W + 0.2}" cy="5" rx="1.6" ry="${earRy * 0.55}" fill="${shade(0.22)}"/>`);
+    if (hasEarrings) {
+      face.push(svg`<circle cx="${-W - 0.2}" cy="${5 + earRy * 0.85}" r="1.2" fill="#e8c25a"/><circle cx="${W + 0.2}" cy="${5 + earRy * 0.85}" r="1.2" fill="#e8c25a"/>`);
+    }
   }
-  face.push(svg`<path d="M ${-W} 0 C ${-W} ${-T * 0.56} ${-W * 0.56} ${-T} 0 ${-T} C ${W * 0.56} ${-T} ${W} ${-T * 0.56} ${W} 0 C ${W} ${C * 0.55} ${W * jaw} ${C} 0 ${C} C ${-W * jaw} ${C} ${-W} ${C * 0.55} ${-W} 0 Z" fill="${skin}"/>`);
+  face.push(`<path d="${faceOutline(W, T, C, jaw)}" fill="${skin}"/>`);
   if (hairMask) face.push(svg`<ellipse cx="-6" cy="-19" rx="5" ry="2.6" fill="#ffffff" opacity="${0.18 * smoothstep(0.4, 0.8, recession)}"/>`);
 
   const blush = 0.26 * child + 0.1 * p("blush") * (1 - man);
@@ -444,7 +472,11 @@ function buildFaceSvg({ citizenId, gender, age, skinMedian = 0.5, skinSpread = 1
       + svg`<path d="M ${-mw} ${my} Q 0 ${dip} ${mw} ${my}" fill="none" stroke="${lipLine}" stroke-width="1" stroke-linecap="round"/>`);
   }
 
-  face.push(svg`<g${hairMask}><path d="${hair.front}" fill="${hairFill}"/>${hair.line ? svg`<path d="${hair.line}" fill="none" stroke="${mix(hairFill, "#000000", 0.35)}" stroke-width="0.8" stroke-linecap="round"/>` : ""}</g>`);
+  if (hair) {
+    face.push(svg`<g${hairMask}><path d="${hair.front}" fill="${hairFill}"/>${hair.line ? svg`<path d="${hair.line}" fill="none" stroke="${mix(hairFill, "#000000", 0.35)}" stroke-width="0.8" stroke-linecap="round"/>` : ""}</g>`);
+  } else {
+    face.push(drawHijab(W, T, C, jaw, (necklineY + 12 - headY) / scale, shoulder / scale, cloth));
+  }
 
   if (hasGlasses) {
     const frame = GLASSES[Math.floor(p("glassesColor") * GLASSES.length)];

@@ -73,7 +73,7 @@ import { citizenFaceUrl, citySkinTone } from "../../utils/citizenFace";
 import trafficPedestrian from "../../assets/images/traffics/traffic_pedestrian.png";
 import trafficRoad from "../../assets/images/traffics/traffic_road.png";
 import nameIcon from "../../assets/images/citizen-voice/name.svg";
-import { useCityClimate } from "../../hooks/useCityClimate";
+import { useCitizenPortraitSettings } from "../../hooks/useCitizenPortraitSettings";
 import "../agent/AgentDetailPanel.css";
 import "../agent/AgentOperationPanel.css";
 import "./CitizenDetailPanel.css";
@@ -156,7 +156,7 @@ export function CitizenDetailPanel({
   const [itineraryFailed, setItineraryFailed] = useState(false);
   const [tracked, setTracked] = useState(false);
   const followed = useFollowedCitizen();
-  const climate = useCityClimate(apiBaseUrl);
+  const portraitSettings = useCitizenPortraitSettings(apiBaseUrl);
   const citizenId = Number(initialEntityId);
 
   const url = buildApiUrl(apiBaseUrl, pathTemplate, initialEntityId);
@@ -322,8 +322,8 @@ export function CitizenDetailPanel({
     };
   }, [apiBaseUrl, url]);
 
-  // Wait for the climate and the voice as well, so the face keeps its skin tone and the layout holds still after opening.
-  if (loading || !masterData || climate === undefined || remark === undefined) {
+  // 肌色・服装と吹き出しが、画面を開いた直後に切り替わらないようにする。
+  if (loading || !masterData || portraitSettings === undefined || remark === undefined) {
     return <p className="agent-detail-muted">{t("common.loading")}</p>;
   }
 
@@ -379,7 +379,8 @@ export function CitizenDetailPanel({
           citizenId: citizenData.citizen_id,
           gender: citizenData.gender,
           age: citizenData.age,
-          ...citySkinTone(climate),
+          ...citySkinTone(portraitSettings.climate),
+          cityLanguage: portraitSettings.cityLanguage,
         })}
         showStatus={false}
         variantName={profile}
