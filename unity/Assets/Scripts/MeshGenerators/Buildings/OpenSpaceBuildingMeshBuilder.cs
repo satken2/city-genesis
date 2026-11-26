@@ -9,7 +9,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
 {
     static readonly string[] Parts={"floor","site_asphalt","site_paving","site_grass","site_marking","site_curb","site_yellow","site_tactile","site_gravel","site_sand",
         "site_stop","site_bench","site_tree","site_shelter","site_light","site_clock","site_taxi","site_bollard","site_planter","site_vending",
-        "site_hedge","site_bin","site_drink",
+        "site_hedge","site_bin","site_drink","site_joint","site_flagpole",
         "site_diamond","site_track","site_pitch","site_court","site_backstop","site_goal","site_net","site_fence","site_floodlight","site_stand"};
     // 番号付きの部品。1から連番である分だけ使う。
     static readonly string[] Series={"site_tree","site_shrub","site_feature","site_play","site_flower"};
@@ -27,7 +27,7 @@ public sealed class OpenSpaceBuildingMeshBuilder : IBuildingMeshGenerator
         int modelType=MasterDataStore.Instance?.GetAgentMaster(data.variant)?.model_type??Constants.MODEL_PARKING;
         var parts=new Dictionary<string,GameObject>();
         var paths=CollectParts(naming.Prefix,data.visual_variant,OpenSpaceLayout.IsFacilityModel(modelType),parts);
-        bool sized=modelType==Constants.MODEL_PARK || OpenSpaceLayout.IsFacilityModel(modelType);
+        bool sized=modelType==Constants.MODEL_PARK || modelType==Constants.MODEL_PLAZA || OpenSpaceLayout.IsFacilityModel(modelType);
         var plan=sized?SizedPlan(data,modelType,paths):BuildingRoadAccessIndex.GetOpenSpacePlan(data);
         // Parks draw their thousands of trees and shrubs by instancing, plants their pipes and lights, open pits the machines in the pit. Parking lots and rotaries combine everything.
         return Build(plan,parts,center,true,BuildingMeshUtils.ResolveFloorMaterialFromMaster(data,naming.Prefix),sized?paths:null,naming.Prefix);

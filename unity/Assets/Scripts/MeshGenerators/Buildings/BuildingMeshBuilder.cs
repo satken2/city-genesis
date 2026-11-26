@@ -155,7 +155,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
     }
 
     public static bool IsOpenSpaceModel(int modelType) => modelType == Constants.MODEL_PARKING
-        || modelType == Constants.MODEL_ROTARY || modelType == Constants.MODEL_PARK;
+        || modelType == Constants.MODEL_ROTARY || modelType == Constants.MODEL_PARK || modelType == Constants.MODEL_PLAZA;
 
     private BuildingMeshResult GenerateDetailed(BuildingSummary buildingData, bool isDynamic, bool animateCrane)
     {
@@ -190,6 +190,7 @@ public class BuildingMeshBuilder : IBuildingMeshGenerator
             case Constants.MODEL_PARKING:
             case Constants.MODEL_ROTARY:
             case Constants.MODEL_PARK:
+            case Constants.MODEL_PLAZA:
             case Constants.MODEL_SUBSTATION:
             case Constants.MODEL_WATER_STATION:
             case Constants.MODEL_SEWAGE_PLANT:

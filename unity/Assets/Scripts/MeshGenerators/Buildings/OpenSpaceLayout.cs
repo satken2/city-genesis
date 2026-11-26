@@ -27,7 +27,7 @@ public static partial class OpenSpaceLayout
         public Vector2 Forward;
         public Vector3 Scale = Vector3.one;  // Along the model's own axes (X width, Y height, Z depth).
         public bool Fitted;        // Placed from the actual model size, so the renderer skips its protrusion recheck.
-        public bool Unit;          // A plant's building or equipment: always combined into the building mesh, with its own distant model.
+        public bool Unit;          // A plant's building or equipment, or a civic square's flagpole: always combined into the building mesh. A plant's unit has its own distant model.
         public float Use;          // Drawn only while the building's operation rate (0-1) exceeds this. 0 draws always.
         public Vector2? Ground;    // Where the ground height is read for a part fixed to another unit (that unit's position). Null reads it at Position.
     }
@@ -65,8 +65,8 @@ public static partial class OpenSpaceLayout
         }
     }
     /// <summary>
-    /// visualVariant2 seeds the layout. Parks also take visualVariant3 (tree density). Parks and plants take the actual sizes (X width, Z depth)
-    /// of the parts in the model folder; without sizes a park gets its paths only and a plant nothing.
+    /// visualVariant2 seeds the layout. Parks also take visualVariant3 (tree density). Parks, civic squares and plants take the actual sizes
+    /// (X width, Z depth) of the parts in the model folder; without sizes a park or a civic square gets its ground only and a plant nothing.
     /// </summary>
     public static Plan Create(Vector2[] polygon, int modelType, float visualVariant2, float visualVariant3 = .5f, IReadOnlyDictionary<string, Vector2> partSizes = null)
     {
@@ -82,6 +82,7 @@ public static partial class OpenSpaceLayout
         if (modelType == Constants.MODEL_QUARRY) { Quarry(plan, seed, partSizes); return plan; }
         if (modelType == Constants.MODEL_GAS_STATION) { GasStation(plan, seed, partSizes); return plan; }
         if (modelType == Constants.MODEL_HUTS) { Huts(plan, seed, partSizes); return plan; }
+        if (modelType == Constants.MODEL_PLAZA) { Plaza(plan, partSizes); return plan; }
         var grid = MakeGrid(polygon);
         if (grid.Entry < 0) return plan;
         if (modelType == Constants.MODEL_PARKING) Parking(plan, grid);
