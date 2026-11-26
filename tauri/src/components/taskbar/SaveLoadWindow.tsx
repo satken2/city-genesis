@@ -23,6 +23,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { emit } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
+import { PLAY_MODE_TUTORIAL } from "../../constants";
+import { usePlayMode } from "../../hooks/usePlayMode";
 import { sendSessionReset } from "../../utils/ipc";
 import { buildApiUrl, fetchApi } from "../../utils/api";
 import {
@@ -80,6 +82,7 @@ function MenuItem({ icon, label, detail, danger = false, className, disabled, on
 
 export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
   const { t, i18n } = useTranslation();
+  const playMode = usePlayMode(apiBaseUrl);
   const [editingScenario, setEditingScenario] = useState(false);
   const [currentSave, setCurrentSave] = useState<SaveEntry | ScenarioEntry | null>(null);
   const [cityName, setCityName] = useState("");
@@ -87,6 +90,8 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
   const [saveName, setSaveName] = useState("");
   const [busy, setBusy] = useState(false);
   const [failure, setFailure] = useState("");
+  // 教材を終えて通常プレイに戻ると、手動セーブできる。
+  const saveDisabled = busy || playMode === null || playMode === PLAY_MODE_TUTORIAL;
 
   /** Fetch the overwrite target (current saved file) and city name used as the initial Save As name. */
   useEffect(() => {
@@ -167,6 +172,7 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
 
   /** Save and close the menu on success. */
   const save = useCallback(async (overwrite: boolean) => {
+    if (saveDisabled) return;
     setBusy(true);
     setFailure("");
     try {
@@ -190,7 +196,7 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
     } finally {
       setBusy(false);
     }
-  }, [apiBaseUrl, currentSave, editingScenario, onClose, saveName, t]);
+  }, [apiBaseUrl, currentSave, editingScenario, onClose, saveDisabled, saveName, t]);
 
   const runConfirmed = useCallback(async (action: ConfirmAction) => {
     setBusy(true);
@@ -225,7 +231,7 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
         return (
           <SaveDialog icon={<SaveIcon />} title={overwriteLabel} busy={busy} onDismiss={dismissDialog}
             onSubmit={() => void save(true)}
-            actions={<>{cancel}<SaveDialogButton kind="primary" type="submit" busy={busy}>
+            actions={<>{cancel}<SaveDialogButton kind="primary" type="submit" busy={busy} disabled={saveDisabled}>
               {busy ? t("common.saving") : overwriteLabel}
             </SaveDialogButton></>}>
             <p className="save-dialog-text">
@@ -238,7 +244,7 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
         return (
           <SaveDialog icon={<SaveAsIcon />} title={t("saveLoad.saveAs")} busy={busy} onDismiss={dismissDialog}
             onSubmit={() => void save(false)}
-            actions={<>{cancel}<SaveDialogButton kind="primary" type="submit" busy={busy} disabled={!saveName.trim()}>
+            actions={<>{cancel}<SaveDialogButton kind="primary" type="submit" busy={busy} disabled={saveDisabled || !saveName.trim()}>
               {busy ? t("common.saving") : t("common.save")}
             </SaveDialogButton></>}>
             <label className="save-dialog-field">
@@ -272,13 +278,13 @@ export function SaveLoadWindow({ apiBaseUrl, onClose }: SaveLoadWindowProps) {
     <div className="save-menu">
       <nav className="save-menu-list" aria-label={t("windowType.save_load")}>
         <div className="save-menu-group">
-          <MenuItem icon={<SaveIcon />} label={overwriteLabel} detail={currentName || undefined} disabled={busy} onClick={openOverwrite} />
+          <MenuItem icon={<SaveIcon />} label={overwriteLabel} detail={currentName || undefined} disabled={saveDisabled} onClick={openOverwrite} />
           {editingScenario ? (
-            <MenuItem icon={<ScenarioIcon />} label={t("saveLoad.saveAsNewScenario")} disabled={busy}
+            <MenuItem icon={<ScenarioIcon />} label={t("saveLoad.saveAsNewScenario")} disabled={saveDisabled}
               onClick={() => openScenarioCreate("saveLoad.saveAsNewScenario")} />
           ) : <>
-            <MenuItem icon={<SaveAsIcon />} label={t("saveLoad.saveAs")} disabled={busy} onClick={openSaveAs} />
-            <MenuItem icon={<ScenarioIcon />} label={t("saveLoad.saveAsScenario")} disabled={busy}
+            <MenuItem icon={<SaveAsIcon />} label={t("saveLoad.saveAs")} disabled={saveDisabled} onClick={openSaveAs} />
+            <MenuItem icon={<ScenarioIcon />} label={t("saveLoad.saveAsScenario")} disabled={saveDisabled}
               onClick={() => openScenarioCreate("saveLoad.saveAsScenario")} />
           </>}
         </div>

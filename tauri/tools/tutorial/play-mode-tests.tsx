@@ -5,6 +5,7 @@ import { Window } from "happy-dom";
 import { PLAY_MODE_NORMAL, PLAY_MODE_SCENARIO, PLAY_MODE_TUTORIAL } from "../../src/constants";
 import { IconPanel } from "../../src/components/hud/IconPanel";
 import { SystemTray } from "../../src/components/hud/SystemTray";
+import { SaveLoadWindow } from "../../src/components/taskbar/SaveLoadWindow";
 import { usePlayMode } from "../../src/hooks/usePlayMode";
 import { emit, invocations } from "./mock-runtime";
 
@@ -17,7 +18,9 @@ const container = document.createElement("div");
 document.body.append(container);
 const root = createRoot(container);
 const originalFetch = globalThis.fetch;
-globalThis.fetch = async () => Response.json({ play_mode: PLAY_MODE_NORMAL });
+globalThis.fetch = async () => Response.json({
+  play_mode: PLAY_MODE_NORMAL, current_save_id: null, city: { name: "Fixture City" },
+});
 function Probe() {
   const mode = usePlayMode("http://fixture");
   return <output id="mode">{mode}</output>;
@@ -28,8 +31,9 @@ const update = async (mode: number) => {
       session: { play_mode: mode, debug_execution: true }, city: { city: { city_hall_placed: false } } });
   });
 };
+const saveMenuItems = () => [...container.querySelectorAll<HTMLButtonElement>(".save-menu-group:first-child button")];
 try {
-  await act(async () => { root.render(<><IconPanel /><SystemTray /><Probe /></>); });
+  await act(async () => { root.render(<><IconPanel /><SystemTray /><Probe /><SaveLoadWindow apiBaseUrl="http://fixture" onClose={() => {}} /></>); });
   await update(PLAY_MODE_NORMAL);
   const normalIcons = [...container.querySelectorAll(".icon-panel button")].map(button => button.id);
   assert.equal(container.querySelector<HTMLButtonElement>("#stat")!.disabled, true, "normal HUD locks before founding");
@@ -45,12 +49,17 @@ try {
   assert.equal(container.querySelector("#mode")!.textContent, String(PLAY_MODE_TUTORIAL), "shared hook follows mode changes");
   assert.deepEqual([...container.querySelectorAll(".icon-panel button")].map(button => button.id), normalIcons, "tutorial uses the normal icon set");
   assert.equal(container.querySelector<HTMLButtonElement>("#stat")!.disabled, false, "tutorial HUD works before founding");
+  assert.deepEqual(saveMenuItems().map(button => button.disabled), [true, true, true], "tutorial disables all save actions");
+  await act(async () => { saveMenuItems()[1].click(); });
+  assert.equal(container.querySelector(".save-dialog"), null, "disabled Save As does not open a dialog");
+  assert.equal(container.querySelector<HTMLButtonElement>(".save-menu-back")!.disabled, false, "return to game remains available");
   for (const id of ["scenario_tools"]) {
     assert.equal(container.querySelector(`#${id}`), null, `tutorial hides ${id}`);
   }
   await update(PLAY_MODE_NORMAL);
   assert.equal(container.querySelector("#mode")!.textContent, String(PLAY_MODE_NORMAL), "tutorial finish reaches reused windows");
-  console.log("PASS: normal/scenario/tutorial HUD menus, founding lock, tray buttons and live play mode updates");
+  assert.deepEqual(saveMenuItems().map(button => button.disabled), [false, false, false], "tutorial finish re-enables saving");
+  console.log("PASS: HUD and save menus follow normal/scenario/tutorial modes and live changes");
 } finally {
   await act(async () => root.unmount());
   globalThis.fetch = originalFetch;
