@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Rendering;
 using Newtonsoft.Json;
 
 /// <summary>
@@ -575,10 +576,26 @@ public partial class TerrainManager : BaseApiDataManager
         }
     }
 
+    private void OnEnable()
+    {
+        RenderPipelineManager.beginContextRendering += OnBeginContextRendering;
+    }
+
+    private void OnDisable()
+    {
+        RenderPipelineManager.beginContextRendering -= OnBeginContextRendering;
+    }
+
+    // Update the UltraFar sinking mask after LateUpdate (where RenderWorkScheduler unloads/publishes tiles)
+    // and before rendering, preventing one-frame holes when tiles are hidden.
+    private void OnBeginContextRendering(ScriptableRenderContext context, List<Camera> cameras)
+    {
+        UpdateLoadedCellMask();
+    }
+
     private void Update()
     {
         UpdateCameraClipDistance();
-        UpdateLoadedCellMask();
 
         if (groundCoverMaterialsDirty)
         {
@@ -1670,8 +1687,8 @@ public partial class TerrainManager : BaseApiDataManager
     }
 
     /// <summary>
-    /// Rebuild the loaded-cell mask for UltraFar sinking from terrainTiles. Called every frame, but create contents only
-    /// when terrainTiles changes (loadedCellMaskDirty) or the texture is recreated.
+    /// Rebuild the loaded-cell mask for UltraFar sinking from terrainTiles. Called before each frame renders
+    /// (after LateUpdate tile unloads/publications), updating contents only when terrainTiles changes (loadedCellMaskDirty) or the texture is recreated.
     ///
     /// Mask visible tile cells in R8 to prevent protrusions caused by Far/normal terrain height differences.
     /// Shaders also check one surrounding grid step per vertex and sink only when connected faces
