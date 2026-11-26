@@ -242,6 +242,20 @@
     "languageNote": "*Tidak dapat diubah nanti",
     "simulationDaysLabel": "Jumlah hari simulasi",
     "simulationDaysNote": "*Tidak dapat diubah nanti",
+    "skipConstruction": {
+      "label": "Lewati waktu dan biaya konstruksi",
+      "building": "Bangunan",
+      "path": "Jalan dan rel"
+    },
+    "freeSupply": {
+      "label": "Pasokan gratis tanpa batas",
+      "electricity": "Listrik",
+      "water": "Pasokan air",
+      "garbage": "Pengelolaan sampah",
+      "sewage": "Pengolahan air limbah",
+      "vehicle_lease": "Sewa kendaraan"
+    },
+    "assistNote": "*Jika memilih salah satu opsi ini, pencapaian tidak dapat dibuka di kota ini. Tidak dapat diubah nanti",
     "daysOption": "{{days}} hari",
     "startButton": "Mulai",
     "backButton": "Kembali",

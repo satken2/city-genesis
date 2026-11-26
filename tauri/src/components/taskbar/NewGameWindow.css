@@ -804,6 +804,19 @@
   color: var(--flat-text-muted);
 }
 
+.new-game-confirm-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+}
+
+.new-game-confirm-checks label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--flat-text);
+}
+
 /* Warn that choosing a language different from the scenario regenerates names; emphasize more than ordinary notes. */
 .new-game-confirm-relocalize {
   padding-block: 8px;

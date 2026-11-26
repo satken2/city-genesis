@@ -72,7 +72,7 @@ export type ScenarioEntry = CommonSaveEntry & {
  * Start settings the author may lock (core SCENARIO_START_OPTIONS). A locked language starts in the player's display
  * language without asking. Excludes asset packs, which players always choose.
  */
-export type ScenarioStartOption = "city_name" | "language" | "simulation_days" | "ground_cover";
+export type ScenarioStartOption = "city_name" | "language" | "simulation_days" | "ground_cover" | "skip_construction" | "free_supply";
 
 /** Available asset packs (owned and installed), excluding standard. */
 export type AssetPackEntry = { pack_id: string; display_name: LocalizedText };

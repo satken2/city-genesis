@@ -242,6 +242,20 @@
     "languageNote": "* لا يمكن تغييرها لاحقًا",
     "simulationDaysLabel": "عدد أيام المحاكاة",
     "simulationDaysNote": "* لا يمكن تغييره لاحقًا",
+    "skipConstruction": {
+      "label": "تخطي مدة البناء وتكلفته",
+      "building": "المباني",
+      "path": "الطرق والسكك"
+    },
+    "freeSupply": {
+      "label": "إمداد مجاني غير محدود",
+      "electricity": "كهرباء",
+      "water": "مياه الشبكة",
+      "garbage": "معالجة النفايات",
+      "sewage": "معالجة مياه الصرف",
+      "vehicle_lease": "تأجير المركبات"
+    },
+    "assistNote": "* عند اختيار أي من هذه الخيارات لن يمكن فتح الإنجازات في هذه المدينة. لا يمكن تغييرها لاحقًا",
     "daysOption": "{{days}} يوم",
     "startButton": "بدء",
     "backButton": "رجوع",

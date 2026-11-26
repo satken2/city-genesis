@@ -242,6 +242,20 @@
     "languageNote": "*Non potrai cambiarla in seguito",
     "simulationDaysLabel": "Giorni di simulazione",
     "simulationDaysNote": "*Non potrai cambiarli in seguito",
+    "skipConstruction": {
+      "label": "Salta tempi e costi di costruzione",
+      "building": "Edifici",
+      "path": "Strade e binari"
+    },
+    "freeSupply": {
+      "label": "Fornitura gratuita e illimitata",
+      "electricity": "Elettricità",
+      "water": "Fornitura d'acqua",
+      "garbage": "Gestione dei rifiuti",
+      "sewage": "Trattamento delle acque reflue",
+      "vehicle_lease": "Noleggio veicoli"
+    },
+    "assistNote": "*Se scegli una di queste opzioni, non potrai sbloccare obiettivi in questa città. Non potrai cambiarle in seguito",
     "daysOption": "{{days}} giorni",
     "startButton": "Inizia",
     "backButton": "Indietro",

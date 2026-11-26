@@ -408,7 +408,8 @@ fn close_registered_window(
 /// tutorial). Ask Unity to clear the previous city, hide topmenu and
 /// current popups, show Tips, then POST /api/v1/sessions to the backend.
 ///
-/// Pass extra parameters (language, ground cover, and asset pack) to the backend as query parameters.
+/// Pass extra parameters (language, ground cover, construction skipping, free supply, and asset pack) to the backend
+/// as query parameters. Construction skipping and free supply are comma-separated choices.
 /// When loading a scenario, only settings not locked by the author may override scenario values (the core
 /// rejects different values for locked settings with 422). City name and simulation days are chosen after the
 /// city appears, on the start settings page of the information window.
@@ -423,6 +424,8 @@ async fn create_session(
     tutorial_id: Option<String>,
     accept_balance_change: Option<bool>,
     ground_cover: Option<i32>,
+    skip_construction: Option<String>,
+    free_supply: Option<String>,
     asset_pack: Option<String>,
     intro_dialog: Option<serde_json::Value>,
 ) -> Result<(), ApiFailure> {
@@ -431,8 +434,8 @@ async fn create_session(
         return Err("PLAY_MODE_FORBIDDEN".into());
     }
     log::info!(
-        "[create_session] scenario_id={:?} language={:?} play_mode={} tutorial_id={:?} ground_cover={:?} asset_pack={:?}",
-        scenario_id, language, play_mode, tutorial_id, ground_cover, asset_pack
+        "[create_session] scenario_id={:?} language={:?} play_mode={} tutorial_id={:?} ground_cover={:?} skip_construction={:?} free_supply={:?} asset_pack={:?}",
+        scenario_id, language, play_mode, tutorial_id, ground_cover, skip_construction, free_supply, asset_pack
     );
 
     version::verify_core(state.inner()).await?;
@@ -481,6 +484,8 @@ async fn create_session(
         tutorial_id: Option<String>,
         accept_balance_change: bool,
         ground_cover: Option<i32>,
+        skip_construction: Option<String>,
+        free_supply: Option<String>,
         asset_pack: Option<String>,
     }
     let query_params = SessionParams {
@@ -490,6 +495,8 @@ async fn create_session(
         tutorial_id: tutorial_id.clone(),
         accept_balance_change: accept_balance_change.unwrap_or(false),
         ground_cover,
+        skip_construction,
+        free_supply,
         asset_pack,
     };
 

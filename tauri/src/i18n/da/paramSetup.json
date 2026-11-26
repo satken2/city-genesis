@@ -242,6 +242,20 @@
     "languageNote": "*Kan ikke ændres senere",
     "simulationDaysLabel": "Simulationsdage",
     "simulationDaysNote": "*Kan ikke ændres senere",
+    "skipConstruction": {
+      "label": "Spring byggetid og byggeomkostninger over",
+      "building": "Bygninger",
+      "path": "Veje og spor"
+    },
+    "freeSupply": {
+      "label": "Ubegrænset gratis forsyning",
+      "electricity": "El",
+      "water": "Vandforsyning",
+      "garbage": "Affaldshåndtering",
+      "sewage": "Spildevandsrensning",
+      "vehicle_lease": "Køretøjsleasing"
+    },
+    "assistNote": "*Vælger du noget af dette, kan der ikke låses op for præstationer i denne by. Kan ikke ændres senere",
     "daysOption": "{{days}} dage",
     "startButton": "Start",
     "backButton": "Tilbage",

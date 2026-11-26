@@ -242,6 +242,20 @@
     "languageNote": "*Kann später nicht geändert werden",
     "simulationDaysLabel": "Simulationstage",
     "simulationDaysNote": "*Kann später nicht geändert werden",
+    "skipConstruction": {
+      "label": "Bauzeit und Baukosten überspringen",
+      "building": "Gebäude",
+      "path": "Straßen und Gleise"
+    },
+    "freeSupply": {
+      "label": "Unbegrenzte kostenlose Versorgung",
+      "electricity": "Strom",
+      "water": "Wasserversorgung",
+      "garbage": "Abfallwirtschaft",
+      "sewage": "Abwasserbehandlung",
+      "vehicle_lease": "Fahrzeugleasing"
+    },
+    "assistNote": "*Wird eine dieser Optionen gewählt, lassen sich in dieser Stadt keine Erfolge freischalten. Kann später nicht geändert werden",
     "daysOption": "{{days}} Tage",
     "startButton": "Starten",
     "backButton": "Zurück",

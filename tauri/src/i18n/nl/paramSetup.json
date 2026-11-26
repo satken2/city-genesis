@@ -242,6 +242,20 @@
     "languageNote": "*Kan later niet meer worden gewijzigd",
     "simulationDaysLabel": "Simulatiedagen",
     "simulationDaysNote": "*Kan later niet meer worden gewijzigd",
+    "skipConstruction": {
+      "label": "Bouwtijd en bouwkosten overslaan",
+      "building": "Gebouwen",
+      "path": "Wegen en spoor"
+    },
+    "freeSupply": {
+      "label": "Onbeperkte gratis levering",
+      "electricity": "Elektriciteit",
+      "water": "Drinkwater",
+      "garbage": "Afvalverwerking",
+      "sewage": "Afvalwaterzuivering",
+      "vehicle_lease": "Voertuiglease"
+    },
+    "assistNote": "*Als je een van deze opties kiest, kun je in deze stad geen prestaties ontgrendelen. Kan later niet meer worden gewijzigd",
     "daysOption": "{{days}} dagen",
     "startButton": "Starten",
     "backButton": "Terug",

@@ -525,12 +525,15 @@ assert.ok(container.querySelector(".localized-text__panel")?.contains(container.
 assert.ok(!container.querySelector(".localized-text__panel")?.textContent?.includes("scenarios.author"), "the author is outside the tab frame");
 assert.equal(container.querySelector(".scenario-group-title")?.textContent, "scenarios.startSettings", "the start settings title sits inside its frame");
 assert.deepEqual([...container.querySelectorAll<HTMLElement>(".scenario-start-row")].map(row => row.dataset.option),
-  ["language", "simulation_days", "ground_cover", "asset_pack"], "the city language leads the start settings");
+  ["language", "simulation_days", "ground_cover", "skip_construction", "free_supply", "asset_pack"], "the city language leads the start settings");
 const changeableBox = (option: string) => container.querySelector<HTMLInputElement>(`.scenario-start-row[data-option=${option}] input[type=checkbox]`)!;
 assert.ok(changeableBox("language").checked && changeableBox("language").disabled, "players can always change the language");
 assert.ok(changeableBox("asset_pack").checked && changeableBox("asset_pack").disabled, "authors only choose the default asset pack");
 assert.ok(!changeableBox("simulation_days").checked && changeableBox("ground_cover").checked, "the checkbox shows what players may change");
+assert.ok(!container.querySelector(".scenario-start-row[data-option=skip_construction] select"), "a scenario never chooses construction skipping");
+assert.ok(changeableBox("skip_construction").checked && changeableBox("free_supply").checked, "players may choose assists unless the author fixes them");
 await act(async () => { changeableBox("ground_cover").click(); });
+await act(async () => { changeableBox("free_supply").click(); });
 await act(async () => { setText(container.querySelector<HTMLSelectElement>(".scenario-start-row[data-option=simulation_days] select")!, "7"); });
 // クレジットは言語のタブの外にある翻訳しない1つの文。
 const creditsBox = [...container.querySelectorAll<HTMLTextAreaElement>("textarea")]
@@ -542,7 +545,7 @@ assert.equal(metadataWritten.scenario_credits, "Source — https://example.com/d
 assert.deepEqual(metadataWritten.scenario_title, { en: "My scenario" });
 assert.deepEqual(metadataWritten.scenario_description, { ja: "説明", en: "Description" });
 assert.deepEqual(metadataWritten.scenario_city_name, { ja: "見本市", en: "Sample Town" });
-assert.deepEqual(metadataWritten.scenario_fixed_options, ["simulation_days", "ground_cover"]);
+assert.deepEqual(metadataWritten.scenario_fixed_options, ["simulation_days", "ground_cover", "free_supply"]);
 assert.deepEqual([metadataWritten.simulation_days, metadataWritten.ground_cover, metadataWritten.asset_pack], [7, 4, "standard"]);
 assert.equal(metadataWritten.author, entry.author);
 assert.ok(!("language" in metadataWritten), "the city language is not editable here");
@@ -657,8 +660,16 @@ await act(async () => { setText(languageSelect, "es-ES"); });
 const optionRow = (option: string) => container.querySelector(`.new-game-confirm-field[data-option=${option}]`);
 assert.equal(container.querySelector(".new-game-confirm-title")?.textContent, "newGame.confirmTitle");
 assert.deepEqual([...container.querySelectorAll<HTMLElement>(".new-game-confirm-field")].map(field => field.dataset.option),
-  ["language", "ground_cover", "asset_pack"], "city name and simulation days are chosen after the city appears");
+  ["language", "ground_cover", "skip_construction", "free_supply", "asset_pack"], "city name and simulation days are chosen after the city appears");
 await act(async () => { setText(optionRow("ground_cover")!.querySelector("select")!, "2"); });
+// 建設期間と費用の省略・商品の無限・無料供給はいくつでも選べ、選ぶと実績が記録されないことを添える。
+assert.ok(overlay()?.textContent?.includes("newGame.assistNote"));
+const assistBoxes = (option: string) => [...optionRow(option)!.querySelectorAll<HTMLInputElement>("input[type=checkbox]")];
+assert.deepEqual(assistBoxes("free_supply").map(box => box.parentElement?.textContent),
+  ["newGame.freeSupply.electricity", "newGame.freeSupply.water", "newGame.freeSupply.garbage", "newGame.freeSupply.sewage", "newGame.freeSupply.vehicle_lease"]);
+await act(async () => { assistBoxes("skip_construction")[1].click(); });
+await act(async () => { assistBoxes("free_supply")[4].click(); });
+await act(async () => { assistBoxes("free_supply")[0].click(); });
 // 開始に失敗したら、理由をダイアログの中に出して開いたままにする。
 state.errors.create_session = { code: "SAVE_CORRUPT", params: {} };
 await act(async () => { button("newGame.startButton").click(); });
@@ -677,6 +688,7 @@ assert.equal(session.introDialog?.pages?.[0]?.textKey, "newGame.developmentNotic
 assert.deepEqual(session.introDialog?.pages?.[1]?.scenario?.scenario_description, entry.scenario_description,
   "the introduction matches the scenario details");
 assert.deepEqual([session.language, session.groundCover, session.assetPack], ["es-ES", 2, "standard"]);
+assert.deepEqual([session.skipConstruction, session.freeSupply], ["path", "electricity,vehicle_lease"], "assists are sent in the core's order");
 assert.ok(!("cityName" in session) && !("simulationDays" in session),
   "city name and simulation days keep the scenario values until the start settings page");
 delete state.results.load_app_settings;

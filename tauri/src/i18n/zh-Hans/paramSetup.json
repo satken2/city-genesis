@@ -242,6 +242,20 @@
     "languageNote": "※之后无法更改",
     "simulationDaysLabel": "模拟天数",
     "simulationDaysNote": "※之后无法更改",
+    "skipConstruction": {
+      "label": "省略建设工期与费用",
+      "building": "建筑",
+      "path": "道路与轨道"
+    },
+    "freeSupply": {
+      "label": "商品无限免费供应",
+      "electricity": "电力",
+      "water": "自来水",
+      "garbage": "废弃物处理",
+      "sewage": "污水处理",
+      "vehicle_lease": "车辆租赁"
+    },
+    "assistNote": "※只要选择任意一项，此城市将无法解锁成就。之后无法更改",
     "daysOption": "{{days}}天",
     "startButton": "开始",
     "backButton": "返回",

@@ -242,6 +242,20 @@
     "languageNote": "*Tidak boleh diubah kemudian",
     "simulationDaysLabel": "Bilangan hari simulasi",
     "simulationDaysNote": "*Tidak boleh diubah kemudian",
+    "skipConstruction": {
+      "label": "Langkau masa dan kos pembinaan",
+      "building": "Bangunan",
+      "path": "Jalan dan landasan"
+    },
+    "freeSupply": {
+      "label": "Bekalan percuma tanpa had",
+      "electricity": "Elektrik",
+      "water": "Bekalan air",
+      "garbage": "Pengurusan sisa",
+      "sewage": "Rawatan kumbahan",
+      "vehicle_lease": "Pajakan kenderaan"
+    },
+    "assistNote": "*Jika anda memilih mana-mana pilihan ini, pencapaian tidak boleh dibuka di bandar ini. Tidak boleh diubah kemudian",
     "daysOption": "{{days}} hari",
     "startButton": "Mula",
     "backButton": "Kembali",

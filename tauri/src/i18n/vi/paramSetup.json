@@ -242,6 +242,20 @@
     "languageNote": "* Không thể thay đổi sau này",
     "simulationDaysLabel": "Số ngày mô phỏng",
     "simulationDaysNote": "* Không thể thay đổi sau này",
+    "skipConstruction": {
+      "label": "Bỏ qua thời gian và chi phí xây dựng",
+      "building": "Tòa nhà",
+      "path": "Đường và đường ray"
+    },
+    "freeSupply": {
+      "label": "Cung cấp miễn phí không giới hạn",
+      "electricity": "Điện",
+      "water": "Cấp nước",
+      "garbage": "Xử lý rác thải",
+      "sewage": "Xử lý nước thải",
+      "vehicle_lease": "Thuê phương tiện"
+    },
+    "assistNote": "* Nếu chọn bất kỳ tùy chọn nào trong số này, thành phố này sẽ không thể mở khóa thành tựu. Không thể thay đổi sau này",
     "daysOption": "{{days}} ngày",
     "startButton": "Bắt đầu",
     "backButton": "Quay lại",

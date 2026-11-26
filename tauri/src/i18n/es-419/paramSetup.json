@@ -242,6 +242,20 @@
     "languageNote": "* No podrá cambiarse después",
     "simulationDaysLabel": "Días de simulación",
     "simulationDaysNote": "* No podrá cambiarse después",
+    "skipConstruction": {
+      "label": "Omitir el tiempo y el costo de construcción",
+      "building": "Edificios",
+      "path": "Calles y vías férreas"
+    },
+    "freeSupply": {
+      "label": "Suministro gratuito e ilimitado",
+      "electricity": "Electricidad",
+      "water": "Suministro de agua",
+      "garbage": "Gestión de residuos",
+      "sewage": "Tratamiento de aguas residuales",
+      "vehicle_lease": "Arrendamiento de vehículos"
+    },
+    "assistNote": "* Si eliges cualquiera de estas opciones, no podrás desbloquear logros en esta ciudad. No podrá cambiarse después",
     "daysOption": "{{days}} días",
     "startButton": "Iniciar",
     "backButton": "Volver",

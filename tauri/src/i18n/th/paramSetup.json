@@ -242,6 +242,20 @@
     "languageNote": "※เปลี่ยนภายหลังไม่ได้",
     "simulationDaysLabel": "จำนวนวันจำลอง",
     "simulationDaysNote": "※เปลี่ยนภายหลังไม่ได้",
+    "skipConstruction": {
+      "label": "ข้ามระยะเวลาและค่าก่อสร้าง",
+      "building": "อาคาร",
+      "path": "ถนนและรางรถไฟ"
+    },
+    "freeSupply": {
+      "label": "จัดหาสินค้าฟรีไม่จำกัด",
+      "electricity": "ไฟฟ้า",
+      "water": "น้ำประปา",
+      "garbage": "การกำจัดขยะ",
+      "sewage": "การบำบัดน้ำเสีย",
+      "vehicle_lease": "เช่ายานพาหนะ"
+    },
+    "assistNote": "※หากเลือกตัวเลือกใดตัวเลือกหนึ่ง เมืองนี้จะปลดล็อกความสำเร็จไม่ได้ เปลี่ยนภายหลังไม่ได้",
     "daysOption": "{{days}} วัน",
     "startButton": "เริ่ม",
     "backButton": "ย้อนกลับ",

@@ -242,6 +242,20 @@
     "languageNote": "*Později nelze změnit",
     "simulationDaysLabel": "Počet dní simulace",
     "simulationDaysNote": "*Později nelze změnit",
+    "skipConstruction": {
+      "label": "Přeskočit dobu a náklady výstavby",
+      "building": "Budovy",
+      "path": "Silnice a koleje"
+    },
+    "freeSupply": {
+      "label": "Neomezené bezplatné zásobování",
+      "electricity": "Elektřina",
+      "water": "Voda",
+      "garbage": "Odpadové hospodářství",
+      "sewage": "Čištění odpadních vod",
+      "vehicle_lease": "Pronájem vozidel"
+    },
+    "assistNote": "*Pokud zvolíte kteroukoli z těchto možností, nebude možné v tomto městě odemykat úspěchy. Později nelze změnit",
     "daysOption": "{{days}} dní",
     "startButton": "Spustit",
     "backButton": "Zpět",

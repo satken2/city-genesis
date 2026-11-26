@@ -242,6 +242,20 @@
     "languageNote": "*Ei voi muuttaa myöhemmin",
     "simulationDaysLabel": "Simulaatiopäivät",
     "simulationDaysNote": "*Ei voi muuttaa myöhemmin",
+    "skipConstruction": {
+      "label": "Ohita rakennusaika ja -kustannukset",
+      "building": "Rakennukset",
+      "path": "Tiet ja raiteet"
+    },
+    "freeSupply": {
+      "label": "Rajaton ilmainen jakelu",
+      "electricity": "Sähkö",
+      "water": "Vesihuolto",
+      "garbage": "Jätehuolto",
+      "sewage": "Jätevedenkäsittely",
+      "vehicle_lease": "Kaluston vuokraus"
+    },
+    "assistNote": "*Jos valitset minkä tahansa näistä, tässä kaupungissa ei voi avata saavutuksia. Ei voi muuttaa myöhemmin",
     "daysOption": "{{days}} päivää",
     "startButton": "Aloita",
     "backButton": "Takaisin",

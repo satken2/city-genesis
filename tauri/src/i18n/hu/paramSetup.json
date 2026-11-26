@@ -242,6 +242,20 @@
     "languageNote": "*Később nem módosítható",
     "simulationDaysLabel": "Szimulált napok száma",
     "simulationDaysNote": "*Később nem módosítható",
+    "skipConstruction": {
+      "label": "Építési idő és költség kihagyása",
+      "building": "Épületek",
+      "path": "Utak és vágányok"
+    },
+    "freeSupply": {
+      "label": "Korlátlan ingyenes ellátás",
+      "electricity": "Áram",
+      "water": "Vízellátás",
+      "garbage": "Hulladékkezelés",
+      "sewage": "Szennyvízkezelés",
+      "vehicle_lease": "Járműlízing"
+    },
+    "assistNote": "*Ha ezek közül bármelyiket választod, ebben a városban nem szerezhetők teljesítmények. Később nem módosítható",
     "daysOption": "{{days}} nap",
     "startButton": "Indítás",
     "backButton": "Vissza",

@@ -242,6 +242,20 @@
     "languageNote": "*Daha sonra değiştirilemez",
     "simulationDaysLabel": "Simülasyon gün sayısı",
     "simulationDaysNote": "*Daha sonra değiştirilemez",
+    "skipConstruction": {
+      "label": "İnşaat süresini ve maliyetini atla",
+      "building": "Binalar",
+      "path": "Yollar ve hatlar"
+    },
+    "freeSupply": {
+      "label": "Sınırsız ücretsiz tedarik",
+      "electricity": "Elektrik",
+      "water": "Su",
+      "garbage": "Atık yönetimi",
+      "sewage": "Atık su arıtma",
+      "vehicle_lease": "Araç kiralama"
+    },
+    "assistNote": "*Bunlardan herhangi birini seçerseniz bu şehirde başarımlar açılamaz. Daha sonra değiştirilemez",
     "daysOption": "{{days}} gün",
     "startButton": "Başlat",
     "backButton": "Geri",

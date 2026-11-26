@@ -242,6 +242,20 @@
     "languageNote": "*Nu poate fi schimbată ulterior",
     "simulationDaysLabel": "Zile de simulare",
     "simulationDaysNote": "*Nu pot fi schimbate ulterior",
+    "skipConstruction": {
+      "label": "Omite durata și costul construcției",
+      "building": "Clădiri",
+      "path": "Drumuri și căi ferate"
+    },
+    "freeSupply": {
+      "label": "Aprovizionare gratuită nelimitată",
+      "electricity": "Electricitate",
+      "water": "Apă",
+      "garbage": "Gestionarea deșeurilor",
+      "sewage": "Epurarea apelor uzate",
+      "vehicle_lease": "Leasing de vehicule"
+    },
+    "assistNote": "*Dacă alegi oricare dintre aceste opțiuni, realizările nu pot fi deblocate în acest oraș. Nu poate fi schimbată ulterior",
     "daysOption": "{{days}} zile",
     "startButton": "Începe",
     "backButton": "Înapoi",

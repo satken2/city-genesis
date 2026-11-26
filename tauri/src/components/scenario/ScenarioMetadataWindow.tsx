@@ -9,6 +9,8 @@
  *   to the city, so creation mode starts from the current city's credits and derived scenarios keep them.
  * - Set starting options (simulation days, ground cover) and whether players may change them at game
  *   start. UI checkboxes mean Editable; invert them into fixed fields (scenario_fixed_options) for the core.
+ *   Construction skipping and free supply have no value here (a scenario never chooses them); the author only
+ *   decides whether players may choose them.
  *   Also select a default asset pack; like language, players may always change it, so it cannot be fixed.
  * - Show the city's naming language first in starting options. It cannot be edited here: changing language
  *   without renaming would break name-regeneration decisions at game start. Players may always change it, so
@@ -38,6 +40,7 @@ type Options = Record<ValueOption, number>;
 
 const TEXT_KEYS = ["scenario_title", "scenario_description", "scenario_objective", "scenario_city_name"] as const;
 const START_OPTIONS: ValueOption[] = ["simulation_days", "ground_cover"];
+const ASSIST_OPTIONS: ScenarioStartOption[] = ["skip_construction", "free_supply"];
 
 /** Initial form data: saved scenario when editing; current city (GET /api/v1/city/) and city language when creating. */
 type ScenarioSource = Pick<ScenarioEntry, (typeof TEXT_KEYS)[number] | "scenario_fixed_options" | "author" | "language"
@@ -97,6 +100,9 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
   const optionLabels: Record<ValueOption, string> = {
     simulation_days: t("newGame.simulationDaysLabel"), ground_cover: t("groundCover.label"),
   };
+  const assistLabels: Record<string, string> = {
+    skip_construction: t("newGame.skipConstruction.label"), free_supply: t("newGame.freeSupply.label"),
+  };
   // If the default pack is not owned by the author, retain its ID as an option so resaving does not change the default.
   const packChoices = assetPacks.some(pack => pack.pack_id === assetPack) || assetPack === ASSET_PACK_STANDARD
     ? assetPacks : [...assetPacks, { pack_id: assetPack, display_name: { en: assetPack } }];
@@ -111,7 +117,7 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
     const body = JSON.stringify({
       ...Object.fromEntries(TEXT_KEYS.map(key => [key, compactLocalizedText(texts[key])])),
       author, scenario_credits: credits, ...options, asset_pack: assetPack,
-      scenario_fixed_options: START_OPTIONS.filter(option => fixed.includes(option)),
+      scenario_fixed_options: [...START_OPTIONS, ...ASSIST_OPTIONS].filter(option => fixed.includes(option)),
     });
     try {
       if (create) {
@@ -166,6 +172,15 @@ export function ScenarioMetadataWindow({ apiBaseUrl, scenarioId, create = false,
             onChange={e => setOptions({ ...options, [option]: Number(e.target.value) })}>
             {choices[option].values.map(value => <option key={value} value={value}>{choices[option].label(value)}</option>)}
           </select>
+          <label className="scenario-start-changeable">
+            <input type="checkbox" checked={!fixed.includes(option)} disabled={busy}
+              onChange={e => setFixed(e.target.checked ? fixed.filter(value => value !== option) : [...fixed, option])} />
+            {t("scenarios.changeableOption")}
+          </label>
+        </div>)}
+        {ASSIST_OPTIONS.map(option => <div className="scenario-start-row" key={option} data-option={option}>
+          <span>{assistLabels[option]}</span>
+          <span className="scenario-start-value" />
           <label className="scenario-start-changeable">
             <input type="checkbox" checked={!fixed.includes(option)} disabled={busy}
               onChange={e => setFixed(e.target.checked ? fixed.filter(value => value !== option) : [...fixed, option])} />

@@ -177,6 +177,9 @@ public static class Constants
     public const float DEFAULT_PUBLIC_SERVICE_COST_RATIO = 1.0f;
     public const int PRODUCT_METRO_VEHICLE = 501;
     public const int PRODUCT_BUS_VEHICLE = 502;
+    public const int PRODUCT_TRAM_VEHICLE = 503;
+    public const int PRODUCT_MONORAIL_VEHICLE = 504;
+    public const int PRODUCT_FERRY_VEHICLE = 505;
     public const int PRODUCT_FOOD_RETAIL = 201;
     public const int PRODUCT_PROCESSED_FOOD = 202;
     public const int PRODUCT_ALCOHOL_RETAIL = 203;
@@ -385,6 +388,13 @@ public static class Constants
     public const float WIND_SPEED_VARIATION = 1.0f;
     public const float CLIMATE_TEMPERATURE_FADE = 10.0f;
     public const string ASSET_PACK_STANDARD = "standard";
+    public const string SKIP_CONSTRUCTION_BUILDING = "building";
+    public const string SKIP_CONSTRUCTION_PATH = "path";
+    public const string FREE_SUPPLY_ELECTRICITY = "electricity";
+    public const string FREE_SUPPLY_WATER = "water";
+    public const string FREE_SUPPLY_GARBAGE = "garbage";
+    public const string FREE_SUPPLY_SEWAGE = "sewage";
+    public const string FREE_SUPPLY_VEHICLE_LEASE = "vehicle_lease";
     public const int INTERCHANGE_KIND_IC = 1;
     public const int INTERCHANGE_KIND_JCT = 2;
     public const float INTERCHANGE_HULL_MARGIN_M = 10.0f;
@@ -538,7 +548,11 @@ public static class Constants
 
     public static readonly int[] SIMULATION_DAYS_CHOICES = new int[] { 7, 30 };
 
-    public static readonly string[] SCENARIO_START_OPTIONS = new string[] { "city_name", "language", "simulation_days", "ground_cover" };
+    public static readonly string[] SCENARIO_START_OPTIONS = new string[] { "city_name", "language", "simulation_days", "ground_cover", "skip_construction", "free_supply" };
+
+    public static readonly string[] SKIP_CONSTRUCTION_OPTIONS = new string[] { SKIP_CONSTRUCTION_BUILDING, SKIP_CONSTRUCTION_PATH };
+
+    public static readonly string[] FREE_SUPPLY_OPTIONS = new string[] { FREE_SUPPLY_ELECTRICITY, FREE_SUPPLY_WATER, FREE_SUPPLY_GARBAGE, FREE_SUPPLY_SEWAGE, FREE_SUPPLY_VEHICLE_LEASE };
 
     public static readonly int[] PATH_TYPES_NAMED_ROAD = new int[] { PATH_STREET, PATH_MOTORWAY };
 

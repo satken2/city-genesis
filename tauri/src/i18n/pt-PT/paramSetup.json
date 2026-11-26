@@ -242,6 +242,20 @@
     "languageNote": "*Não pode ser alterado mais tarde",
     "simulationDaysLabel": "Dias de simulação",
     "simulationDaysNote": "*Não pode ser alterado mais tarde",
+    "skipConstruction": {
+      "label": "Ignorar o tempo e o custo de construção",
+      "building": "Edifícios",
+      "path": "Estradas e vias férreas"
+    },
+    "freeSupply": {
+      "label": "Fornecimento gratuito e ilimitado",
+      "electricity": "Eletricidade",
+      "water": "Abastecimento de água",
+      "garbage": "Tratamento de resíduos",
+      "sewage": "Saneamento",
+      "vehicle_lease": "Aluguer de veículos"
+    },
+    "assistNote": "*Se escolher qualquer uma destas opções, não será possível desbloquear conquistas nesta cidade. Não pode ser alterado mais tarde",
     "daysOption": "{{days}} dias",
     "startButton": "Iniciar",
     "backButton": "Voltar",

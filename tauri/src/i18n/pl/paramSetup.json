@@ -242,6 +242,20 @@
     "languageNote": "*Nie można zmienić później",
     "simulationDaysLabel": "Liczba dni symulacji",
     "simulationDaysNote": "*Nie można zmienić później",
+    "skipConstruction": {
+      "label": "Pominięcie czasu i kosztów budowy",
+      "building": "Budynki",
+      "path": "Drogi i tory"
+    },
+    "freeSupply": {
+      "label": "Nieograniczone darmowe dostawy",
+      "electricity": "Elektryczność",
+      "water": "Zaopatrzenie w wodę",
+      "garbage": "Gospodarowanie odpadami",
+      "sewage": "Oczyszczanie ścieków",
+      "vehicle_lease": "Dzierżawa pojazdów"
+    },
+    "assistNote": "*Wybranie którejkolwiek z tych opcji blokuje zdobywanie osiągnięć w tym mieście. Nie można zmienić później",
     "daysOption": "{{days}} dni",
     "startButton": "Rozpocznij",
     "backButton": "Wstecz",

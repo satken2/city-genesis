@@ -172,6 +172,9 @@ export const PUBLIC_PRICE_MODE_COST_RATIO: string = "cost_ratio";
 export const DEFAULT_PUBLIC_SERVICE_COST_RATIO: number = 1.0;
 export const PRODUCT_METRO_VEHICLE: number = 501;
 export const PRODUCT_BUS_VEHICLE: number = 502;
+export const PRODUCT_TRAM_VEHICLE: number = 503;
+export const PRODUCT_MONORAIL_VEHICLE: number = 504;
+export const PRODUCT_FERRY_VEHICLE: number = 505;
 export const PRODUCT_FOOD_RETAIL: number = 201;
 export const PRODUCT_PROCESSED_FOOD: number = 202;
 export const PRODUCT_ALCOHOL_RETAIL: number = 203;
@@ -380,6 +383,13 @@ export const WIND_SPEED_AVERAGE: number = 5.0;
 export const WIND_SPEED_VARIATION: number = 1.0;
 export const CLIMATE_TEMPERATURE_FADE: number = 10.0;
 export const ASSET_PACK_STANDARD: string = "standard";
+export const SKIP_CONSTRUCTION_BUILDING: string = "building";
+export const SKIP_CONSTRUCTION_PATH: string = "path";
+export const FREE_SUPPLY_ELECTRICITY: string = "electricity";
+export const FREE_SUPPLY_WATER: string = "water";
+export const FREE_SUPPLY_GARBAGE: string = "garbage";
+export const FREE_SUPPLY_SEWAGE: string = "sewage";
+export const FREE_SUPPLY_VEHICLE_LEASE: string = "vehicle_lease";
 export const INTERCHANGE_KIND_IC: number = 1;
 export const INTERCHANGE_KIND_JCT: number = 2;
 export const INTERCHANGE_HULL_MARGIN_M: number = 10.0;
@@ -530,7 +540,11 @@ export const CLIMATE_TYPES: number[] = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 1
 
 export const SIMULATION_DAYS_CHOICES: number[] = [7, 30];
 
-export const SCENARIO_START_OPTIONS: string[] = ["city_name", "language", "simulation_days", "ground_cover"];
+export const SCENARIO_START_OPTIONS: string[] = ["city_name", "language", "simulation_days", "ground_cover", "skip_construction", "free_supply"];
+
+export const SKIP_CONSTRUCTION_OPTIONS: string[] = ["building", "path"];
+
+export const FREE_SUPPLY_OPTIONS: string[] = ["electricity", "water", "garbage", "sewage", "vehicle_lease"];
 
 export const PATH_TYPES_NAMED_ROAD: number[] = [1, 2];
 

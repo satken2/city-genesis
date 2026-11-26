@@ -242,6 +242,20 @@
     "languageNote": "※나중에 변경할 수 없습니다",
     "simulationDaysLabel": "시뮬레이션 일수",
     "simulationDaysNote": "※나중에 변경할 수 없습니다",
+    "skipConstruction": {
+      "label": "건설 기간과 비용 생략",
+      "building": "건물",
+      "path": "도로・선로"
+    },
+    "freeSupply": {
+      "label": "상품 무한・무료 공급",
+      "electricity": "전력",
+      "water": "상수도",
+      "garbage": "폐기물 처리",
+      "sewage": "하수 처리",
+      "vehicle_lease": "차량 리스"
+    },
+    "assistNote": "※하나라도 선택하면 이 도시에서는 업적을 달성할 수 없습니다. 나중에 변경할 수 없습니다",
     "daysOption": "{{days}}일",
     "startButton": "시작",
     "backButton": "뒤로",

@@ -242,6 +242,20 @@
     "languageNote": "*Kan inte ändras senare",
     "simulationDaysLabel": "Simuleringsdagar",
     "simulationDaysNote": "*Kan inte ändras senare",
+    "skipConstruction": {
+      "label": "Hoppa över byggtid och byggkostnad",
+      "building": "Byggnader",
+      "path": "Vägar och spår"
+    },
+    "freeSupply": {
+      "label": "Obegränsad gratis försörjning",
+      "electricity": "El",
+      "water": "Vatten",
+      "garbage": "Avfallshantering",
+      "sewage": "Avloppsrening",
+      "vehicle_lease": "Fordonsleasing"
+    },
+    "assistNote": "*Om du väljer något av dessa kan inga prestationer låsas upp i den här staden. Kan inte ändras senare",
     "daysOption": "{{days}} dagar",
     "startButton": "Starta",
     "backButton": "Tillbaka",

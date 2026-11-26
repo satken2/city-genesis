@@ -242,6 +242,20 @@
     "languageNote": "*Cannot be changed later",
     "simulationDaysLabel": "Simulation Days",
     "simulationDaysNote": "*Cannot be changed later",
+    "skipConstruction": {
+      "label": "Skip Construction Time and Cost",
+      "building": "Buildings",
+      "path": "Roads and Tracks"
+    },
+    "freeSupply": {
+      "label": "Unlimited Free Supply",
+      "electricity": "Electricity",
+      "water": "Water Supply",
+      "garbage": "Waste Management",
+      "sewage": "Sewage Treatment",
+      "vehicle_lease": "Vehicle Leasing"
+    },
+    "assistNote": "*Choosing any of these means achievements cannot be unlocked in this city. Cannot be changed later",
     "daysOption": "{{days}} days",
     "startButton": "Start",
     "backButton": "Back",

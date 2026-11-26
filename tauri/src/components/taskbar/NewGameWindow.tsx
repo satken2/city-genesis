@@ -25,7 +25,8 @@
  *
  * Start opens a settings confirmation overlay within the window, not a native popup. It lists only the start
  * settings chosen before loading because changing them afterwards renames or redraws the whole city (city language,
- * ground cover, asset pack); with none left, it only asks whether to start. During play, warn about unsaved changes
+ * ground cover, asset pack) or cannot be changed at all (construction skipping and free supply, which lock achievements);
+ * with none left, it only asks whether to start. During play, warn about unsaved changes
  * here. Keep the current city and Unity view until final Start.
  *
  * Once a scenario's city appears, the information window shows the development notice, the scenario introduction,
@@ -61,7 +62,7 @@ import developmentNoticeImage from "../../assets/images/development_notice.jpg";
 import "./NewGameWindow.css";
 import { fetchApi } from "../../utils/api";
 import { AssetPackEntry, SaveCompatibility, ScenarioEntry, ScenarioStartOption, fetchAssetPacks, prepareSaveLoad, saveError, scenarioDisplayTitle } from "../../utils/saves";
-import { ASSET_PACK_STANDARD, GROUND_COVER_TYPES } from "../../constants";
+import { ASSET_PACK_STANDARD, FREE_SUPPLY_OPTIONS, GROUND_COVER_TYPES, SKIP_CONSTRUCTION_OPTIONS } from "../../constants";
 import { SaveCompatibilityReason } from "../common/SaveVersionInfo";
 import type { InfoDialogContent, InfoDialogPage } from "../common/InfoDialogWindow";
 
@@ -132,13 +133,24 @@ type ConfirmSelection = {
   tutorialId?: string | null;
 };
 
+/** Start options chosen as any number of checkboxes. Choosing any of them locks achievements in that city. */
+type AssistOption = Extract<ScenarioStartOption, "skip_construction" | "free_supply">;
+
 /** Scenario starting options listed after the common fields (scenario starts only). */
-type ExtraStartOption = Exclude<ScenarioStartOption, "city_name" | "language" | "simulation_days">;
+type ExtraStartOption = Exclude<ScenarioStartOption, "city_name" | "language" | "simulation_days" | AssistOption>;
 
 /** Value lists and translation key prefixes for ExtraStartOption. */
 const EXTRA_START_OPTIONS: { key: ExtraStartOption; values: number[]; labelKey: string }[] = [
   { key: "ground_cover", values: GROUND_COVER_TYPES, labelKey: "groundCover" },
 ];
+
+/** Choices and translation key prefixes for AssistOption, in the order the core stores them. */
+const ASSIST_OPTIONS: { key: AssistOption; values: string[]; labelKey: string }[] = [
+  { key: "skip_construction", values: SKIP_CONSTRUCTION_OPTIONS, labelKey: "newGame.skipConstruction" },
+  { key: "free_supply", values: FREE_SUPPLY_OPTIONS, labelKey: "newGame.freeSupply" },
+];
+
+const NO_ASSISTS: Record<AssistOption, string[]> = { skip_construction: [], free_supply: [] };
 
 function startOptionValuesOf(scenario: ScenarioEntry | null): Record<ExtraStartOption, number> {
   return {
@@ -236,6 +248,7 @@ export function NewGameWindow({
   // Input values in settings confirmation
   const [language, setLanguage] = useState("ja");
   const [startOptions, setStartOptions] = useState(() => startOptionValuesOf(null));
+  const [assists, setAssists] = useState(NO_ASSISTS);
   // Available additional asset packs and selected pack. Default to the scenario pack, or standard if unavailable.
   const [assetPacks, setAssetPacks] = useState<AssetPackEntry[]>([]);
   const [assetPack, setAssetPack] = useState(ASSET_PACK_STANDARD);
@@ -311,6 +324,7 @@ export function NewGameWindow({
       const defaultLang = resolveSupportedLanguage(settings.language || i18n.language);
       setLanguage(defaultLang);
       setStartOptions(startOptionValuesOf(scenario));
+      setAssists(NO_ASSISTS);
       const packs = await fetchAssetPacks(apiBaseUrl).catch((): AssetPackEntry[] => []);
       setAssetPacks(packs);
       setAssetPack(packs.some(pack => pack.pack_id === scenario.asset_pack) ? scenario.asset_pack! : ASSET_PACK_STANDARD);
@@ -415,6 +429,8 @@ export function NewGameWindow({
     const fixed = new Set(confirmSelection.fixedOptions);
     const chosen = (option: ScenarioStartOption, value: number) =>
       confirmSelection.scenario && !fixed.has(option) ? value : null;
+    const chosenAssists = (option: AssistOption) =>
+      confirmSelection.scenario && !fixed.has(option) && assists[option].length > 0 ? assists[option].join(",") : null;
     try {
       if (confirmSelection.scenarioId && !await prepareSaveLoad(apiBaseUrl, confirmSelection.scenarioId, true, t)) {
         setBusy(false);
@@ -425,6 +441,8 @@ export function NewGameWindow({
         scenarioId: confirmSelection.scenarioId,
         language,
         groundCover: chosen("ground_cover", startOptions.ground_cover),
+        skipConstruction: chosenAssists("skip_construction"),
+        freeSupply: chosenAssists("free_supply"),
         assetPack: confirmSelection.scenario ? assetPack : null,
         playMode: confirmSelection.playMode,
         tutorialId: confirmSelection.tutorialId || null,
@@ -435,7 +453,7 @@ export function NewGameWindow({
       setFailure(saveError(error, t) || t("newGame.startFailed"));
       setBusy(false);
     }
-  }, [apiBaseUrl, t, onClose, confirmSelection, hasCurrentGame, language, startOptions, assetPack]);
+  }, [apiBaseUrl, t, onClose, confirmSelection, hasCurrentGame, language, startOptions, assists, assetPack]);
 
   /**
    * Close settings confirmation and return to tile selection.
@@ -502,6 +520,12 @@ export function NewGameWindow({
   const confirmScenario = confirmSelection?.scenario ?? null;
   const fixedOptions = new Set<ScenarioStartOption>(confirmSelection?.fixedOptions ?? []);
   const extraOptions = confirmScenario ? EXTRA_START_OPTIONS.filter(({ key }) => !fixedOptions.has(key)) : [];
+  const assistOptions = confirmScenario ? ASSIST_OPTIONS.filter(({ key }) => !fixedOptions.has(key)) : [];
+  const toggleAssist = (key: AssistOption, value: string, checked: boolean) => setAssists({
+    ...assists,
+    [key]: ASSIST_OPTIONS.find(option => option.key === key)!.values
+      .filter(choice => choice === value ? checked : assists[key].includes(choice)),
+  });
   // Scenario starts always list the asset pack.
   const hasStartFields = confirmScenario != null || !fixedOptions.has("language");
   const isSelected = (kind: Selection["kind"], id: string) => selection?.kind === kind && selection.id === id;
@@ -721,6 +745,27 @@ export function NewGameWindow({
                     </div>
                   </div>
                 ))}
+                {assistOptions.map(({ key, values, labelKey }) => (
+                  <div className="new-game-confirm-field" key={key} data-option={key}>
+                    <span className="new-game-confirm-label">{t(`${labelKey}.label`)}</span>
+                    <div className="new-game-confirm-checks">
+                      {values.map((value) => (
+                        <label key={value}>
+                          <input
+                            type="checkbox"
+                            checked={assists[key].includes(value)}
+                            onChange={(e) => toggleAssist(key, value, e.target.checked)}
+                            disabled={busy}
+                          />
+                          {t(`${labelKey}.${value}`)}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                {assistOptions.length > 0 && (
+                  <span className="new-game-confirm-note">{t("newGame.assistNote")}</span>
+                )}
                 {confirmScenario && (
                   <div className="new-game-confirm-field" data-option="asset_pack">
                     <label className="new-game-confirm-label">{t("assetPack.label")}</label>

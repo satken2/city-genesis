@@ -347,6 +347,9 @@ interface CreateSessionArgs {
   acceptBalanceChange?: boolean | null;
   climate?: number | null;
   groundCover?: number | null;
+  /** 建設期間と費用の省略・商品の無限・無料供給で選んだ項目(カンマ区切り)。 */
+  skipConstruction?: string | null;
+  freeSupply?: string | null;
   assetPack?: string | null;
   /** 都市が表示されたあとに開く案内ウィンドウの内容。 */
   introDialog?: unknown;
@@ -377,6 +380,8 @@ export async function createSession(args: CreateSessionArgs): Promise<void> {
     ["accept_balance_change", args.acceptBalanceChange ?? false],
     ["climate", args.climate],
     ["ground_cover", args.groundCover],
+    ["skip_construction", args.skipConstruction],
+    ["free_supply", args.freeSupply],
     ["asset_pack", args.assetPack],
   ];
   for (const [key, value] of optional) if (value !== null && value !== undefined) query.set(key, String(value));
