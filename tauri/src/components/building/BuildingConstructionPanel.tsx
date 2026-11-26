@@ -483,6 +483,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     return masterData.agents[selectedVariant] ?? null;
   }, [masterData, selectedVariant]);
 
+  // Coverage ratio in use: the player's choice capped by the building type's max_coverage_ratio (the slider's maximum).
+  const coverageCap = selectedVariantData?.max_coverage_ratio ?? 1;
+  const effectiveCoverageRatio = Math.min(coverageRatio, coverageCap);
+
   /**
  * Landmarks in the selected variant (ascending ID). Empty for variants without a landmark axis.
  * placed indicates existing city landmarks; disable them as choices.
@@ -625,9 +629,9 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
   useEffect(() => {
     if (selectedVariant === null || parcelId === null) return;
     const controller = new AbortController();
-    void fetchPreview(selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, landmark, controller.signal);
+    void fetchPreview(selectedVariant, parcelId, floors, effectiveCoverageRatio, copySourceAgentId, landmark, controller.signal);
     return () => controller.abort();
-  }, [selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, landmark, fetchPreview]);
+  }, [selectedVariant, parcelId, floors, effectiveCoverageRatio, copySourceAgentId, landmark, fetchPreview]);
 
   /* ---- Fetch estimated construction cost ---- */
   useEffect(() => {
@@ -659,7 +663,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
         variant: selectedVariant,
         parcel_id: parcelId,
         floors,
-        construction_ratio: coverageRatio,
+        construction_ratio: effectiveCoverageRatio,
         ...(landmark != null ? { landmark } : {}),
         // In copy mode, send copy_source_agent_id and receive discounted costs for faithful copies.
         ...(copySourceAgentId != null ? { copy_source_agent_id: copySourceAgentId } : {}),
@@ -711,7 +715,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
       });
 
     return () => controller.abort();
-  }, [selectedVariant, parcelId, floors, coverageRatio, copySourceAgentId, landmark, apiBaseUrl, editAgentId]);
+  }, [selectedVariant, parcelId, floors, effectiveCoverageRatio, copySourceAgentId, landmark, apiBaseUrl, editAgentId]);
 
   /* ---- Fetch infrastructure service areas and visualize in 3D ---- */
 
@@ -1473,7 +1477,7 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
             parcel_id: parcelId,
             type: selectedVariantData.type,
             variant: selectedVariant,
-            construction_ratio: coverageRatio,
+            construction_ratio: effectiveCoverageRatio,
             floors,
             ...(landmark != null ? { landmark } : {}),
             ...(acknowledgeAcquisition ? { acknowledge_acquisition: true } : {}),
@@ -1932,10 +1936,10 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
                 <div className="bc-section-title">{t("building_construction.coverageRatio")}</div>
                 <div className="bc-stepper-row">
                   <NumberStepper
-                    value={Math.round(coverageRatio * 100)}
+                    value={Math.round(effectiveCoverageRatio * 100)}
                     onChange={(v) => setCoverageRatio(v / 100)}
                     min={10}
-                    max={100}
+                    max={Math.round(coverageCap * 100)}
                     step={5}
                     integerOnly={true}
                   />

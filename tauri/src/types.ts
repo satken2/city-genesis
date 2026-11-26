@@ -517,6 +517,8 @@ export type AgentMasterEntry = {
   default_width?: number;
   // Initial footprint depth for direct placement and fixed footprint depth in m when resizable=false. Square if unset.
   default_height?: number;
+  // Maximum building coverage ratio for this building type (0-1). The backend caps any requested ratio to it. Unset means 1.
+  max_coverage_ratio?: number;
   // Building mesh generation method (MODEL_* in constants.ts). MODEL_MASHUP (7) buildings
   // consist of multiple subbuildings from the master and can open a placement editor from details.
   model_type?: number;
