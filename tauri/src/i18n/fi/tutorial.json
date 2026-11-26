@@ -1,0 +1,756 @@
+{
+  "tutorial": {
+    "startButton": "Aloita",
+    "controls": {
+      "title": "Perusohjaus",
+      "description": "Opi, millaista kaupunkia pormestarina rakennat ja miten peliä pelataan: ensin suunnitellaan, sitten aika etenee. Tutustu näytön tietoihin, painikkeiden toimintoihin ja kameran ohjaukseen. Sen jälkeen jatkat tietä, luot uuden asuinalueen ja hankit sille asunnot, sähkön ja veden.",
+      "step1": {
+        "title": "Aloita kaupunkirakentaminen pormestarina",
+        "role": "City Genesisissä kasvatat kaupunkia sen pormestarina. Suunnittelet teiden ja laitosten rakentamisen ja päätät maankäytöstä, veroista sekä julkisten palvelujen budjeteista. Pormestarin tehtävä on luoda edellytykset asukkaiden elämälle ja yritysten toiminnalle. Jatka painamalla ”Seuraava”.",
+        "goal": "Tavoitteena on kaupunki, jossa asukkaat voivat elää vauraasti ja turvallisesti. Lisää asuntoja ja työpaikkoja ja tuo kaupunkiin sähkö, vesi ja terveydenhuolto. Kaupungin kasvattaminen vaatii myös rahaa. Mieti, mitä kehität, ja pidä silmällä sekä asukkaiden arkea että kaupungin taloutta.",
+        "epoch": "Tässä pelissä aika etenee kuukauden kerrallaan. Päätä ensin budjetit ja rakennussuunnitelmat ja paina ”Aloita”, kun olet valmis. Silloin aika etenee, rakennustyöt edistyvät ja asukkaat ja yritykset toimivat. Katso tulokset ja suunnittele niiden pohjalta seuraava vaihe. Päivämäärä ei muutu ennen kuin painat ”Aloita”, joten voit miettiä rauhassa.",
+        "epoch_week": "Tässä pelissä aika etenee viikon kerrallaan. Päätä ensin budjetit ja rakennussuunnitelmat ja paina ”Aloita”, kun olet valmis. Silloin aika etenee, rakennustyöt edistyvät ja asukkaat ja yritykset toimivat. Katso tulokset ja suunnittele niiden pohjalta seuraava vaihe. Päivämäärä ei muutu ennen kuin painat ”Aloita”, joten voit miettiä rauhassa."
+      },
+      "step2": {
+        "title": "Seuraa kaupungin tilaa ohjaamosta",
+        "tools": "Näytön alareunan ohjaamosta näet kaupungin tilan ja voit miettiä seuraavaa siirtoa. ”Näkymä” värittää kartan, jotta löydät puutteet ja ongelmakohdat. ”Kartta” näyttää koko kaupungin sijainnit. Ne auttavat löytämään oikean paikan, vaikka kaupunki kasvaisi suureksi.",
+        "tracking": "”Kaupunkilaisluettelosta” voit etsiä asukkaita esimerkiksi nimellä ja palata myöhemmin kiinnostavien asukkaiden arkeen ja työmatkoihin. Kun lisäät kaupunkilaisen seurantaan hänen tiedoistaan, voit avata hänen tietonsa täältä. Käytä tätä, kun haluat tietää yksittäisten ihmisten elämästä enemmän kuin koko kaupungin luvut kertovat.",
+        "bulldozer": "”Puskutraktorilla” voit poistaa tyhjiä tontteja ja perua suunniteltuja rakennuksia ja teitä. Paina painiketta, napsauta kohdetta 3D-näkymässä ja lopeta painamalla painiketta uudelleen. Jos haluat poistaa valmiin rakennuksen tai tien, avaa kohteen tiedot ja valitse raivaus.",
+        "services": "Salama-, pisara- ja laivamittarit kertovat, paljonko sähkön, veden sekä viennin ja tuonnin kapasiteetissa on vielä varaa. Mitä täydempi mittari, sitä suurempi kysyntä tai käsittelymäärä ja sitä vähemmän varaa. Painamalla mittaria näet julkiset laitokset ja vienti- ja tuontikeskukset. Tarkista ennen kaupungin laajentamista, tarvitaanko lisää laitoksia.",
+        "score": "”Pisteet” kuvaavat kokonaisuutena, kuinka tyytyväisiä asukkaat ovat elämäänsä kaupungissa. Mitä korkeammat pisteet, sitä viihtyisämpi kaupunki. Asunnot, työpaikat, terveydenhuolto ja hyvä elinympäristö parantavat niitä. Jos pisteet laskevat, selvitä, mikä asukkaita vaivaa.",
+        "budget": "”Budjetti” vertaa ensi kuun arvioituja menoja edellisen kuun tuloihin. Kun mittari kallistuu oikealle, menot ovat tuloja suuremmat. Kun se kallistuu vasemmalle, rahaa jää yli. Tarkista se ennen kuin annat ajan edetä.",
+        "budget_week": "”Budjetti” vertaa ensi viikon arvioituja menoja edellisen viikon tuloihin. Kun mittari kallistuu oikealle, menot ovat tuloja suuremmat. Kun se kallistuu vasemmalle, rahaa jää yli. Tarkista se ennen kuin annat ajan edetä.",
+        "budgetChanges": "Kun lisäät tie- ja laitostöitä tai nostat laitosten toiminnan tai rakentamisen tahtia, rahantarve kasvaa ja budjettimittari nousee. Hidastamalla toimintaa tai rakentamista voit pienentää arvioituja menoja. Kun verotulot kasvavat, mittari laskee samoillakin menoilla.",
+        "budgetPlanning": "Kun mittari on matalalla, rahaa on varaa käyttää kaupungin hyväksi. Harkitse investointeja puuttuviin palveluihin tai laitoksiin, joita tarvitaan pian.",
+        "date": "Päivämäärä kertoo, kuinka pitkälle kaupungin aika on edennyt. Sen avulla voit seurata rakentamisen etenemistä ja vuodenaikojen vaikutusta kaupunkiin. Päivämäärä ei muutu suunnittelun aikana, vaan päivittyy, kun annat ajan edetä painamalla ”Aloita”.",
+        "climate": "Lämpötila-, sademäärä-, auringonpaiste- ja tuulipaneelit näyttävät tämän kuun keskimääräisen sään. Olosuhteet vaikuttavat maatalouden sekä tuuli- ja aurinkovoiman tuotantotehoon. Jos sato tai sähköntuotanto jää pieneksi, tarkista myös sää.",
+        "climate_week": "Lämpötila-, sademäärä-, auringonpaiste- ja tuulipaneelit näyttävät tämän viikon keskimääräisen sään. Olosuhteet vaikuttavat maatalouden sekä tuuli- ja aurinkovoiman tuotantotehoon. Jos sato tai sähköntuotanto jää pieneksi, tarkista myös sää.",
+        "climateEffects": "Heikko auringonpaiste pienentää aurinkovoiman ja heikko tuuli tuulivoiman tuotantoa. Maatalouteen vaikuttavat myös lämpötila ja sademäärä. Painamalla ilmastopaneelia näet, miten tämän kuun olosuhteet vaikuttavat kunkin laitoksen tuotantotehoon. Ota huomioon, että tuotanto vaihtelee vuodenajan mukaan, kun rakennat laitoksia.",
+        "climateEffects_week": "Heikko auringonpaiste pienentää aurinkovoiman ja heikko tuuli tuulivoiman tuotantoa. Maatalouteen vaikuttavat myös lämpötila ja sademäärä. Painamalla ilmastopaneelia näet, miten tämän viikon olosuhteet vaikuttavat kunkin laitoksen tuotantotehoon. Ota huomioon, että tuotanto vaihtelee vuodenajan mukaan, kun rakennat laitoksia.",
+        "notifications": "”Ilmoitusten” luku kertoo, montako varoitusta tai huomautusta kannattaa tarkistaa nyt. Punainen vilkkuva luku tarkoittaa ongelmaa, joka haittaa kaupungin toimintaa ja vaatii pikaista korjausta. Keltainen luku on huomautus esimerkiksi kasvuun varautumisesta tai ongelmasta, jonka korjaaminen vie aikaa. Paina ensin painiketta ja lue ilmoitukset.",
+        "notificationActions": "Jos ilmoitus koskee tiettyä laitosta tai kaupunginosaa, voit painaa riviä nähdäksesi lisätietoja. Korjaa ongelma sen syyn mukaan: yhdistä irrallinen voimalinja tai varmista, että laitos saa puuttuvat raaka-aineet. Jatkuvan ongelman ilmoitus poistuu, kun syy on korjattu. Tarkista korjauksen jälkeen seuraavan kuun tulokset."
+      },
+      "step3": {
+        "title": "Etsi ongelmia vaihtamalla näkymää",
+        "open": "Kaupungin ulkonäöstä on vaikea nähdä sähköpulaa tai liikenneruuhkia. ”Näkymä” tuo haluamasi tiedot kartalle. Avaa paneeli painamalla ohjaamon ”Näkymä”-painiketta.",
+        "tabs": "Pystysuorista välilehdistä valitset tarkasteltavan kohteen, kuten rakennukset, tiet, tontit tai kaupunginosat. Jos tiedot menevät päällekkäin ja näkymä on sekava, voit piilottaa tarpeettomat kohteet. Katso näkymän käyttö painamalla ”Seuraava”.",
+        "modes": "Kunkin välilehden painikkeilla valitset, minkä tiedon mukaan kohteet väritetään. Etsi ruuhkaisia teitä tai ongelmallisia rakennuksia ja mieti niiden avulla ratkaisuja. Voit tutkia kohdetta tarkemmin napsauttamalla sitä 3D-näkymässä. Paina ”Seuraava”."
+      },
+      "step4": {
+        "title": "Tutustu kaupunkirakentamisen työkaluihin",
+        "grading": "Esittelemme näytön vasemman reunan painikkeet ylhäältä alas. ”Maanrakennus” tasoittaa rinteitä, joille on vaikea rakentaa, ja täyttää merta käyttökelpoiseksi maaksi. Kun haluat lisää asuntoja tai työpaikkoja mutta maa loppuu, tällä saat kaupungille kasvunvaraa.",
+        "road": "”Tiet, raiteet ja infra” rakentaa yhteydet, joita pitkin ihmiset, tavarat, sähkö ja vesi kulkevat. Tiet yhdistävät asunnot ja työpaikat, raiteet kaukaiset paikat, ja voimalinjat ja vesijohdot laitokset toisiinsa. Niiden varassa toimivat asukkaiden liikkuminen, yritysten kauppa sekä sähkön- ja vedenjakelu.",
+        "land": "”Tontit” valmistaa rakennuspaikkoja rakennuksille. Pelkkä maa ei riitä, jotta rakennuksia syntyisi. Niin asuntojen lisääminen kuin suuren laitoksen houkutteleminenkin vaatii sopivan kokoisen rakennuspaikan.",
+        "landDevelopment": "Valmiille tonteille kaupunki voi rakentaa omia rakennuksiaan, ja niille syntyy myös yksityisiä asuntoja ja yrityksiä. Yksityiset rakennukset syntyvät kysynnän ja kaupunginosan rakentamismääräysten mukaan. Kun haluat lisää asuntoja tai työpaikkoja, tarkista myös, onko vapaita tontteja riittävästi.",
+        "district": "”Kaupunginosat” jakaa kaupungin osiin, joita hallitaan kokonaisuuksina. Voit linjata paikkakohtaisesti esimerkiksi asuinalueita ja teollisuusalueita. Koska kaupunginosittain voi rajata sallitut rakennustyypit, voit päättää koko alueelle sopivasta rakentamisesta.",
+        "districtRules": "Kaupunginosan tiedoissa voit päättää, millaisia rakennuksia saa rakentaa. Voit esimerkiksi estää tehtaiden sekoittumisen asuinalueelle sen mukaan, millaista kaupunkia haluat kasvattaa. Voit myös vertailla kaupunginosien väestöä ja elinoloja, mikä auttaa näkemään, mitkä alueet tarvitsevat tukea.",
+        "construction": "”Rakentaminen” on kaupungin omien rakennusten suunnitteluun. Voit rakentaa asuntoja, työpaikkoja, sairaaloita, kouluja, voimalaitoksia ja muuta. Käytä sitä asuntojen ja työpaikkojen lisäämiseen sekä puuttuvien palvelujen, kuten terveydenhuollon, koulutuksen ja sähkön, täydentämiseen.",
+        "transport": "”Joukkoliikenne” tukee asukkaiden liikkumista busseilla ja junilla. Voit määrittää linjat ja pysäkit sekä säätää lipun hintaa ja vuoroväliä. Yhdistä asunnot työpaikkoihin ja kouluihin ja kevennä työ- ja koulumatkoja.",
+        "propPlacement": "”Koriste-esineiden sijoittelu” kaunistaa kaupunkikuvaa puilla, kivillä ja muilla koristeilla. Käytä sitä, kun haluat tuoda katuihin vihreää tai somistaa maastoa.",
+        "cityDevelopment": "”Kaupungin automaattinen kehitys” suunnittelee tiet ja tontit kerralla laajalle alueelle. Maalaa kartalle kehitettävä alue ja valitse kaupunkirakenteen malli, niin tiet ja tontit valmistuvat yhdellä kertaa. Käytä sitä, kun raivaat uutta asuinaluetta tai keskustaa tyhjästä.",
+        "constructionProjects": "”Rakennushankkeet” näyttää kaikki suunnitellut ja käynnissä olevat työmaat. Katso, mitkä työt etenevät ja mihin rahaa kuluu, ja päätä, mitä töitä jatketaan.",
+        "regulation": "”Määräykset” asettaa kaupungin asumisen ja työnteon säännöt. Voit määrittää esimerkiksi nopeusrajoitukset, työajat, tulomuuton ja sosiaaliturvan. Mieti, painotatko turvallisuutta, elämän väljyyttä vai kaupungin kasvua, ja säädä tilanteen mukaan.",
+        "stat": "”Tilastot” näyttää kaupunkirakentamisesi tulokset. Kaavioista näet väestön, tulojen, työmatkojen, asukastyytyväisyyden, talouden koon, hintatason ja muiden tekijöiden muutokset. Tarkista politiikan tai laitosten muutosten jälkeen, paraneeko elämä ja mitä vielä puuttuu. Siinä vasemman reunan painikkeet."
+      },
+      "step5": {
+        "title": "Toteuta suunnitelma ja katso tulokset",
+        "flow": "Kun olet tarkistanut kaupungin tilan ja miettinyt tarvittavat rakennushankkeet ja budjetit, anna ajan edetä ohjaamon ”Aloita”-painikkeella. Rakennustyöt etenevät, asukkaat käyvät töissä, yritykset tuottavat, ja kaupungin talous ja pisteet muuttuvat. Suunnitelman vaikutusten näkymiseen voi kulua useita kuukausia.",
+        "execute": "Kun aika on edennyt, tarkista tulokset ja ilmoitukset. Jos jokin on vialla, korjaa se seuraavassa suunnitelmassa ja anna ajan taas edetä. Kaupunki kasvaa toistamalla kierrosta suunnittele – etene – tarkista tulokset. Nyt ”Aloita”-painiketta ei tarvitse painaa. Siirry kameran ohjaukseen painamalla ”Seuraava”."
+      },
+      "step6": {
+        "title": "Liikuta kameraa",
+        "description": "Kameraa ohjataan näin: vasen veto siirtää näkymää, oikea veto kääntää, W, A, S ja D (tai nuolinäppäimet) liikuttavat, Q ja E kääntävät, R ja F muuttavat korkeutta ja hiiren rulla zoomaa. Kokeile vapaasti ja paina sitten ”Seuraava”."
+      },
+      "step7": {
+        "title": "Lentotila ja kuvaustila",
+        "description": "Kamerassa on kaksi erikoistilaa. ”Lentotilaan” pääset painamalla Shift+F: W, A, S ja D vievät katseen suuntaan, hiirellä katselet ympärillesi, ja R ja F nostavat ja laskevat. Esc lopettaa tilan. ”Kuvaustila” käynnistyy näytön vasemman yläkulman painikkeesta, ja siinä kamera kiertää kaupunkia. Hiirellä katselet ympärillesi, Shift vaihtaa kiertämisen ja liikkumisen välillä, välilyönti pysäyttää, Backspace toistaa taaksepäin ja Esc lopettaa. Kummassakin tilassa näytön paneelit piiloutuvat ja palaavat, kun poistut Escillä. Kun olet kokeillut, lopeta molemmat tilat ja paina ”Seuraava”."
+      },
+      "step8": {
+        "title": "Katso kaupungin rajaa",
+        "description": "Kamera on nyt siirretty kaupungin itäreunalle. Kaupunkia voi rakentaa vain tämän nelikulmion sisälle, jonne on luotu yksityiskohtainen maasto. Kamerakaan ei pääse rajan ulkopuolelle. Näytön ja ohjauksen esittely päättyy tähän. Seuraavaksi rakennat oikean uuden asuinalueen. Paina ”Seuraava”."
+      },
+      "step9": {
+        "title": "Jatka tietä",
+        "description": "Nyt rakennat asuinalueen, jolle uudet asukkaat voivat muuttaa. Ilman tieyhteyttä ihmiset eivät pääse kotien ja työpaikkojen välillä, eivätkä tavarat kulje. Jatka ensin kaupungin itä–länsisuuntaista katua länteen ja rakenna tie asuinalueelle. Avaa rakennuspaneeli painamalla kuvakepaneelin ”Tiet, raiteet ja infra” -painiketta.",
+        "confirm": "Tien varren maa jaetaan tonteiksi, kun tie valmistuu. Tontin koon voi valita rakennuspaneelin kohdasta ”Valmistuessa luotavat tienvarsitontit” erikseen tien kummallekin puolelle. Valitse koko sen mukaan, millaisia rakennuksia haluat: asuinalueelle pienehköt tontit, tehtaille ja maatiloille suuret. Nyt alueesta tulee asuinalue, joten jätä asetus ennalleen. Tallenna painamalla rakennuspaneelin ”Vahvista”-painiketta ja paina sitten ”Seuraava”."
+      },
+      "step10": {
+        "title": "Rakenna tie valmiiksi",
+        "description": "Tie on vielä tilassa ”Rakentaminen suunniteltu”. Pelkkä suunnitelma ei ole käyttökelpoinen, vaan ihmiset ja autot pääsevät kulkemaan vasta, kun työ on valmis. Anna ajan edetä painamalla ohjaamon ”Aloita”-painiketta 2–3 kertaa ja odota, että tie valmistuu. Rakennustyöt maksavat joka kuukausi.",
+        "description_week": "Tie on vielä tilassa ”Rakentaminen suunniteltu”. Pelkkä suunnitelma ei ole käyttökelpoinen, vaan ihmiset ja autot pääsevät kulkemaan vasta, kun työ on valmis. Anna ajan edetä painamalla ohjaamon ”Aloita”-painiketta 2–3 kertaa ja odota, että tie valmistuu. Rakennustyöt maksavat joka viikko."
+      },
+      "step11": {
+        "title": "Tontit ovat valmiit",
+        "description": "Tie on valmis, ja sen varrelle on syntynyt tontteja. Rakennuksia voi rakentaa vain tonteille, ja koska tontit ovat tien varrella, ihmiset ja tavarat pääsevät niille. Jos haluat lisätä tontteja olemassa olevan tien varrelle, luo ne kuvakepaneelin ”Tontit”-painikkeella."
+      },
+      "step12": {
+        "title": "Luo kaupunginosa",
+        "description": "Päätä ennen rakentamista, millaiseksi paikaksi tämä katu kasvaa. Ilman linjausta tehdas voi nousta aivan asuintalon viereen. Paikkakohtaiset linjaukset tehdään kaupunginosittain. Kaupunginosa määritetään teittäin, ja tontti kuuluu sen tien kaupunginosaan, jonka varrella se on. Avaa kaupunginosaeditori painamalla kuvakepaneelin ”Kaupunginosat”-painiketta. Huomaat, että koko kaupunki on nyt yhtä kaupunginosaa.",
+        "create": "Valitse valintatavaksi ”Kadun puoli”. Vaihda toiminnoksi ”Uusi kaupunginosa” ja vedä Ctrl-näppäin painettuna jatkamasi tien päältä. Tien molemmat puolet ja niiden varren tontit muodostavat uuden kaupunginosan."
+      },
+      "step13": {
+        "title": "Kaupunginosa on jaettu",
+        "description": "Uusi katu on nyt eri kaupunginosaa kuin kaupungin keskusta. Voit tarkastella väestöä ja hintatasoa kaupunginosittain ja päättää sallituista rakennuksista, joten voit rakentaa kuhunkin paikkaan sopivaa kaupunkia. Kun olet katsonut, sulje kaupunginosaeditori."
+      },
+      "step14": {
+        "title": "Avaa kaupunginosan tiedot",
+        "description": "Määritä uusi kaupunginosa asuinalueeksi. Tuo kaupunginosat näkyviin näytön vasemman alakulman kuvakkeesta, napsauta äsken luomasi kaupunginosan nimeä ja avaa kaupunginosan tiedot."
+      },
+      "step15": {
+        "title": "Tee alueesta asuinalue",
+        "description": "Paneelin alaosan rakentamismääräyksistä valitset, millaisia rakennuksia kaupunginosan tonteille saa rakentaa. Tästä halutaan rauhallinen asuinalue, joten poista käytöstä napsauttamalla kaikki rakennukset paitsi ”Kerrostalo” ja ”Omakotitalo”."
+      },
+      "step16": {
+        "title": "Tarkista tontti",
+        "description": "Kaupunginosalle asetetut määräykset koskevat kaikkia sen tontteja. Napsauta keltaisella merkillä merkittyä tonttia ja avaa sen tiedot."
+      },
+      "step17": {
+        "title": "Määräykset ovat voimassa",
+        "description": "Tonttipaneelin alaosassa näkyy kaupunginosalle asetettu määräys, joka sallii vain ”Kerrostalon” ja ”Omakotitalon”. Tämän kadun tonteille voi nyt rakentaa vain asuntoja. Tontteja ei tarvitse määrittää yksitellen: kun linjaat kaupunginosan, koko katu noudattaa linjausta."
+      },
+      "step18": {
+        "title": "Rakenna asuntoja",
+        "description": "Hanki nyt asunnot. Yleensä yksityiset rakentavat asuntoja automaattisesti, kun asukkaita on tulossa, mutta rakentamalla kunnallisia asuntoja kaupunki voi korjata asuntopulan heti. Rakenna nyt kunnallinen kerrostalo. Paina kuvakepaneelin ”Rakentaminen”-painiketta.",
+        "select": "Valitse ”Asuminen”-luokasta ”Kerrostalo”, valitse rakennuspaikaksi mikä tahansa uuden kaupunginosan tontti napsauttamalla ja paina ”Vahvista”."
+      },
+      "step19": {
+        "title": "Rakenna asunnot valmiiksi",
+        "description": "Kuten tiehenkään, rakennukseen ei voi muuttaa pelkän suunnitelman perusteella. Kerrostalon valmistuminen kestää yli puoli vuotta. Anna ajan edetä ”Aloita”-painikkeella ja odota, että talo valmistuu."
+      },
+      "step20": {
+        "title": "Tarkista, tuleeko sähköä",
+        "description": "Asunto ei riitä, jos sähköä ja vettä ei tule. Kaupungissa ei ole vielä voimalaitosta eikä vesihuoltoa. Napsauta keltaisella merkillä merkittyä kerrostaloa, jossa kaupunkilaiset asuvat, ja avaa sen tiedot. Valitse ”Rakennustiedot”-välilehdeltä yksi vuokralainen ja avaa ”Kysyntä, tarjonta ja kauppa” -välilehti. Näet, että saatu sähkömäärä on 0."
+      },
+      "step21": {
+        "title": "Rakenna aurinkovoimala",
+        "description": "Sähkön jakeluun tarvitaan ensin voimalaitos, joka tuottaa sähköä. Rakenna ”Aurinkovoimala” keltaisella merkillä merkitylle tontille. Tavallisesti valmistuminen vie aikaa, mutta opetusohjelmassa rakennusaika ohitetaan."
+      },
+      "step22": {
+        "title": "Rakenna sähköasema",
+        "description": "Voimalaitoksen tuottamaa suurjännitesähköä ei voi sellaisenaan käyttää kodeissa. Sähköasema muuntaa sen kotitalouksille sopivaksi ja jakaa sen tieyhteyden päässä oleviin ympäröiviin rakennuksiin. Rakenna ”Sähköasema” kerrostalon lähellä olevalle keltaisella merkillä merkitylle tontille."
+      },
+      "step23": {
+        "title": "Yhdistä voimalinjalla",
+        "description": "Vaikka voimalaitos ja sähköasema ovat erillään, ne voi yhdistää, kun sähkölle on reitti. Avaa kuvakepaneelin ”Tiet, raiteet ja infra”, valitse ”Sähkö”-kohdasta ”Voimalinja” ja vedä linja aurinkovoimalan liitäntäpisteestä sähköaseman liitäntäpisteeseen. Kun yhdistät pisteet suoraan, linja syntyy yhdellä vedolla."
+      },
+      "step24": {
+        "title": "Tarkista sähkönjakelu",
+        "description": "Tarkista yhdistämisen jälkeen, että sähköä todella kulkee. Anna ajan edetä ”Aloita”-painikkeella, napsauta sähköasemaa ja avaa sen tiedot. Tarkista ”Kysyntä, tarjonta ja kauppa” -välilehdeltä, että vastaanotettu suurjännitesähkö ei ole 0. Voimalaitoksen käynnistymiseen ja sähkön perillemenoon voi kulua useita kuukausia."
+      },
+      "step25": {
+        "title": "Sähkö on kodeissa",
+        "description": "Avaa kerrostalon tiedoista vuokralaisen ”Kysyntä, tarjonta ja kauppa” -välilehti samoin kuin aiemmin ja tarkista, että saatu sähkömäärä ei ole enää 0. Joskus aikaa on annettava edetä vielä 1–2 kuukautta, ennen kuin sähkö on kodeissa. Voimalaitos tuottaa, voimalinja siirtää ja sähköasema jakaa. Vasta kun kaikki kolme on yhdistetty, sähkö tulee kotiin."
+      },
+      "step26": {
+        "title": "Etsi vesilähde",
+        "description": "Seuraavaksi vesihuolto. Vesijohtovesi pumpataan maan alta ja johdetaan kaupunkiin. Selvitä ensin, mistä vettä voi pumpata. Avaa näkymäpaneeli painamalla ohjaamon ”Näkymä”-painiketta.",
+        "show": "Valitse pystysuorista välilehdistä ”Luonnonvarat” ja vaihda asetukseksi ”Näytä”. Vesilähteet näkyvät kartalla vaaleansinisinä. Napsauta keltaisella merkillä merkittyä vesilähdettä ja avaa sen tiedot."
+      },
+      "step27": {
+        "title": "Rakenna pohjavesipumppu",
+        "description": "Pohjavesipumppu pumppaa vettä maan alta, joten se on rakennettava vesilähteen kohdalle. Toimiakseen se tarvitsee myös sähköä ja työntekijöitä, ja siksi sähkö vedettiin ensin. Rakenna ”Pohjavesipumppu” vesilähteen päällä olevalle keltaisella merkillä merkitylle tontille. Opetusohjelmassa rakennusaika ohitetaan."
+      },
+      "step28": {
+        "title": "Rakenna vesipumppaamo",
+        "description": "Pumpattua vettä ei voi sellaisenaan jakaa kotitalouksiin. Samaan tapaan kuin sähköasema jakaa sähköä, vesipumppaamo jakaa vettä tieyhteyden päässä oleviin ympäröiviin rakennuksiin. Rakenna ”Vesipumppaamo” kerrostalon lähellä olevalle keltaisella merkillä merkitylle tontille."
+      },
+      "step29": {
+        "title": "Yhdistä siirtovesijohdolla",
+        "description": "Pohjavesipumpun pumppaama vesi tarvitsee putken, jota pitkin se kulkee vesipumppaamolle. Avaa kuvakepaneelin ”Tiet, raiteet ja infra”, valitse ”Vesi”-kohdasta ”Siirtovesijohto” ja vedä putki pohjavesipumpun liitäntäpisteestä vesipumppaamon liitäntäpisteeseen. Kierrä laajasti itäpuolelta, jotta putki ei osu teihin tai voimalinjoihin."
+      },
+      "step30": {
+        "title": "Tarkista vedenjakelu",
+        "description": "Anna ajan edetä ”Aloita”-painikkeella, napsauta vesipumppaamoa ja avaa sen tiedot. Tarkista ”Kysyntä, tarjonta ja kauppa” -välilehdeltä, että vastaanotettu runkovesi ei ole 0. Ennen kuin pohjavesipumppu saa työntekijät ja vesi tulee perille, voi kulua useita kuukausia."
+      },
+      "step31": {
+        "title": "Kaupunkirakentamisen perusteet hallussa",
+        "description": "Vesi on tullut vesipumppaamolle, joten ympäröivissä kodeissa voi nyt käyttää vesijohtovettä. Rakenna tie, valmistele tontit, linjaa kaupunginosa, rakenna asunnot ja tuo sähkö ja vesi. Tämä on kaupunkirakentamisen perusrunko. Suorita perusohjauksen opetusohjelma loppuun painamalla ”Seuraava”."
+      }
+    },
+    "scenario4": {
+      "title": "Rakenna rautatie",
+      "description": "Haluamme yhdistää asuinalueen ja työpaikat rautatiellä, mutta suunnitellulla reitillä on yksityisiä rakennuksia ja kaupungin sairaala. Tässä opetusohjelmassa opit maanhankinnan, julkisen laitoksen raivauksen, ylätasoradan rakentamisen tien yläpuolelle, laitureiden, asemarakennusten ja varikon rakentamisen, kaarteiden ja kaltevuuksien säätämisen sekä sähkönsyötön ja linjan avaamisen.",
+      "step1": {
+        "title": "Rakenna ylätasolaiturit",
+        "description": "Valitse ”Tiet, raiteet ja infra” → ”Rautatiet” ja rakenna kaupungin länsipuolelle ”Korotettu sivulaituriasema” ja itäpuolelle ”Kaksiraiteinen sivulaituriasema”. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista. Molempien korkeus on 6 m.",
+        "open": "Valitse ”Tiet, raiteet ja infra” → ”Rautatiet” ja rakenna kaupungin länsipuolelle ”Korotettu sivulaituriasema” ja itäpuolelle ”Kaksiraiteinen sivulaituriasema”. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista. Molempien korkeus on 6 m.",
+        "variant": "Valitse ”Tiet, raiteet ja infra” → ”Rautatiet” ja rakenna kaupungin länsipuolelle ”Korotettu sivulaituriasema” ja itäpuolelle ”Kaksiraiteinen sivulaituriasema”. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista. Molempien korkeus on 6 m.",
+        "start": "Valitse ”Tiet, raiteet ja infra” → ”Rautatiet” ja rakenna kaupungin länsipuolelle ”Korotettu sivulaituriasema” ja itäpuolelle ”Kaksiraiteinen sivulaituriasema”. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista. Molempien korkeus on 6 m.",
+        "end": "Valitse ”Tiet, raiteet ja infra” → ”Rautatiet” ja rakenna kaupungin länsipuolelle ”Korotettu sivulaituriasema” ja itäpuolelle ”Kaksiraiteinen sivulaituriasema”. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista. Molempien korkeus on 6 m.",
+        "confirm": "Valitse ”Tiet, raiteet ja infra” → ”Rautatiet” ja rakenna kaupungin länsipuolelle ”Korotettu sivulaituriasema” ja itäpuolelle ”Kaksiraiteinen sivulaituriasema”. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista. Molempien korkeus on 6 m.",
+        "town": "Rakenna läntinen ”Korotettu sivulaituriasema”. Napsauta 6 metrin korkeudella ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista.",
+        "new": "Rakenna seuraavaksi itäinen laituri. Palaa tyyppiluetteloon paneelin ”Takaisin”-painikkeella ja valitse rautateistä ”Kaksiraiteinen sivulaituriasema”. Napsauta 6 metrin korkeudella ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista. Jos suljit paneelin, avaa se uudelleen kohdasta ”Tiet, raiteet ja infra”.",
+        "east": "Rakenna seuraavaksi itäinen laituri. Palaa tyyppiluetteloon paneelin ”Takaisin”-painikkeella ja valitse rautateistä ”Kaksiraiteinen sivulaituriasema”. Napsauta 6 metrin korkeudella ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista. Jos suljit paneelin, avaa se uudelleen kohdasta ”Tiet, raiteet ja infra”."
+      },
+      "step2": {
+        "title": "Rakenna asemarakennukset ja sisäänkäynnit",
+        "description": "Valitse ”Pieni asemarakennus” ja yhdistä lännessä ja idessä kumpikin merkkipari lyhyellä käytävällä, joka ylittää laiturin. Sijoita sisäänkäynnit aivan laiturin molemmille puolille. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista.",
+        "open": "Valitse ”Pieni asemarakennus” ja yhdistä lännessä ja idessä kumpikin merkkipari lyhyellä käytävällä, joka ylittää laiturin. Sijoita sisäänkäynnit aivan laiturin molemmille puolille. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista.",
+        "variant": "Valitse ”Pieni asemarakennus” ja yhdistä lännessä ja idessä kumpikin merkkipari lyhyellä käytävällä, joka ylittää laiturin. Sijoita sisäänkäynnit aivan laiturin molemmille puolille. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista.",
+        "start": "Valitse ”Pieni asemarakennus” ja yhdistä lännessä ja idessä kumpikin merkkipari lyhyellä käytävällä, joka ylittää laiturin. Sijoita sisäänkäynnit aivan laiturin molemmille puolille. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista.",
+        "end": "Valitse ”Pieni asemarakennus” ja yhdistä lännessä ja idessä kumpikin merkkipari lyhyellä käytävällä, joka ylittää laiturin. Sijoita sisäänkäynnit aivan laiturin molemmille puolille. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista.",
+        "confirm": "Valitse ”Pieni asemarakennus” ja yhdistä lännessä ja idessä kumpikin merkkipari lyhyellä käytävällä, joka ylittää laiturin. Sijoita sisäänkäynnit aivan laiturin molemmille puolille. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista.",
+        "town": "Valitse ”Pieni asemarakennus” ja yhdistä lännessä ja idessä kumpikin merkkipari lyhyellä käytävällä, joka ylittää laiturin. Sijoita sisäänkäynnit aivan laiturin molemmille puolille. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista.",
+        "new": "Valitse ”Pieni asemarakennus” ja yhdistä lännessä ja idessä kumpikin merkkipari lyhyellä käytävällä, joka ylittää laiturin. Sijoita sisäänkäynnit aivan laiturin molemmille puolille. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista.",
+        "east": "Valitse ”Pieni asemarakennus” ja yhdistä lännessä ja idessä kumpikin merkkipari lyhyellä käytävällä, joka ylittää laiturin. Sijoita sisäänkäynnit aivan laiturin molemmille puolille. Napsauta ympyröityjä alku- ja loppupisteitä hiiren vasemmalla painikkeella, viimeistele muoto oikealla painikkeella ja vahvista."
+      },
+      "step3": {
+        "title": "Suunnittele maanhankintaa vaativa osuus",
+        "description": "Valitse ”Kaksiraiteinen rata” ja vedä 6 metrin korkeudella suora raide läntisen laiturin itäpäästä pääkadun länsipäähän. Raide kulkee rakennusten kohdalta, joten tarvitaan maanhankintaa. Vahvista suunnitelma ja paina ”Seuraava”. Tämän osuuden rakennusaikaa ei ohiteta.",
+        "open": "Valitse ”Kaksiraiteinen rata” ja vedä 6 metrin korkeudella suora raide läntisen laiturin itäpäästä pääkadun länsipäähän. Raide kulkee rakennusten kohdalta, joten tarvitaan maanhankintaa. Vahvista suunnitelma ja paina ”Seuraava”. Tämän osuuden rakennusaikaa ei ohiteta.",
+        "variant": "Valitse ”Kaksiraiteinen rata” ja vedä 6 metrin korkeudella suora raide läntisen laiturin itäpäästä pääkadun länsipäähän. Raide kulkee rakennusten kohdalta, joten tarvitaan maanhankintaa. Vahvista suunnitelma ja paina ”Seuraava”. Tämän osuuden rakennusaikaa ei ohiteta.",
+        "start": "Valitse ”Kaksiraiteinen rata” ja vedä 6 metrin korkeudella suora raide läntisen laiturin itäpäästä pääkadun länsipäähän. Raide kulkee rakennusten kohdalta, joten tarvitaan maanhankintaa. Vahvista suunnitelma ja paina ”Seuraava”. Tämän osuuden rakennusaikaa ei ohiteta.",
+        "end": "Valitse ”Kaksiraiteinen rata” ja vedä 6 metrin korkeudella suora raide läntisen laiturin itäpäästä pääkadun länsipäähän. Raide kulkee rakennusten kohdalta, joten tarvitaan maanhankintaa. Vahvista suunnitelma ja paina ”Seuraava”. Tämän osuuden rakennusaikaa ei ohiteta.",
+        "confirm": "Valitse ”Kaksiraiteinen rata” ja vedä 6 metrin korkeudella suora raide läntisen laiturin itäpäästä pääkadun länsipäähän. Raide kulkee rakennusten kohdalta, joten tarvitaan maanhankintaa. Vahvista suunnitelma ja paina ”Seuraava”. Tämän osuuden rakennusaikaa ei ohiteta.",
+        "town": "Valitse ”Kaksiraiteinen rata” ja vedä 6 metrin korkeudella suora raide läntisen laiturin itäpäästä pääkadun länsipäähän. Raide kulkee rakennusten kohdalta, joten tarvitaan maanhankintaa. Vahvista suunnitelma ja paina ”Seuraava”. Tämän osuuden rakennusaikaa ei ohiteta.",
+        "new": "Valitse ”Kaksiraiteinen rata” ja vedä 6 metrin korkeudella suora raide läntisen laiturin itäpäästä pääkadun länsipäähän. Raide kulkee rakennusten kohdalta, joten tarvitaan maanhankintaa. Vahvista suunnitelma ja paina ”Seuraava”. Tämän osuuden rakennusaikaa ei ohiteta.",
+        "east": "Valitse ”Kaksiraiteinen rata” ja vedä 6 metrin korkeudella suora raide läntisen laiturin itäpäästä pääkadun länsipäähän. Raide kulkee rakennusten kohdalta, joten tarvitaan maanhankintaa. Vahvista suunnitelma ja paina ”Seuraava”. Tämän osuuden rakennusaikaa ei ohiteta."
+      },
+      "step4": {
+        "title": "Määrää sairaala raivattavaksi",
+        "description": "Yksityisten rakennusten maista alkavat ostoneuvottelut automaattisesti, mutta kaupungin julkista laitosta, sairaalaa, ei raivata automaattisesti, ja se estää raiteen rakentamisen aloituksen. Napsauta sairaalaa ja paina yläreunan painikkeista ”Raivaa”. Kun tilaksi tulee ”Purku suunniteltu”, paina ”Seuraava”.",
+        "open": "Yksityisten rakennusten maista alkavat ostoneuvottelut automaattisesti, mutta kaupungin julkista laitosta, sairaalaa, ei raivata automaattisesti, ja se estää raiteen rakentamisen aloituksen. Napsauta sairaalaa ja paina yläreunan painikkeista ”Raivaa”. Kun tilaksi tulee ”Purku suunniteltu”, paina ”Seuraava”.",
+        "variant": "Yksityisten rakennusten maista alkavat ostoneuvottelut automaattisesti, mutta kaupungin julkista laitosta, sairaalaa, ei raivata automaattisesti, ja se estää raiteen rakentamisen aloituksen. Napsauta sairaalaa ja paina yläreunan painikkeista ”Raivaa”. Kun tilaksi tulee ”Purku suunniteltu”, paina ”Seuraava”.",
+        "start": "Yksityisten rakennusten maista alkavat ostoneuvottelut automaattisesti, mutta kaupungin julkista laitosta, sairaalaa, ei raivata automaattisesti, ja se estää raiteen rakentamisen aloituksen. Napsauta sairaalaa ja paina yläreunan painikkeista ”Raivaa”. Kun tilaksi tulee ”Purku suunniteltu”, paina ”Seuraava”.",
+        "end": "Yksityisten rakennusten maista alkavat ostoneuvottelut automaattisesti, mutta kaupungin julkista laitosta, sairaalaa, ei raivata automaattisesti, ja se estää raiteen rakentamisen aloituksen. Napsauta sairaalaa ja paina yläreunan painikkeista ”Raivaa”. Kun tilaksi tulee ”Purku suunniteltu”, paina ”Seuraava”.",
+        "confirm": "Yksityisten rakennusten maista alkavat ostoneuvottelut automaattisesti, mutta kaupungin julkista laitosta, sairaalaa, ei raivata automaattisesti, ja se estää raiteen rakentamisen aloituksen. Napsauta sairaalaa ja paina yläreunan painikkeista ”Raivaa”. Kun tilaksi tulee ”Purku suunniteltu”, paina ”Seuraava”.",
+        "town": "Yksityisten rakennusten maista alkavat ostoneuvottelut automaattisesti, mutta kaupungin julkista laitosta, sairaalaa, ei raivata automaattisesti, ja se estää raiteen rakentamisen aloituksen. Napsauta sairaalaa ja paina yläreunan painikkeista ”Raivaa”. Kun tilaksi tulee ”Purku suunniteltu”, paina ”Seuraava”.",
+        "new": "Yksityisten rakennusten maista alkavat ostoneuvottelut automaattisesti, mutta kaupungin julkista laitosta, sairaalaa, ei raivata automaattisesti, ja se estää raiteen rakentamisen aloituksen. Napsauta sairaalaa ja paina yläreunan painikkeista ”Raivaa”. Kun tilaksi tulee ”Purku suunniteltu”, paina ”Seuraava”.",
+        "east": "Yksityisten rakennusten maista alkavat ostoneuvottelut automaattisesti, mutta kaupungin julkista laitosta, sairaalaa, ei raivata automaattisesti, ja se estää raiteen rakentamisen aloituksen. Napsauta sairaalaa ja paina yläreunan painikkeista ”Raivaa”. Kun tilaksi tulee ”Purku suunniteltu”, paina ”Seuraava”."
+      },
+      "step5": {
+        "title": "Odota osuuden valmistumista",
+        "description": "Kuluta aikaa, kunnes yksityisten maiden hankinta, sairaalan raivaus ja raidetyöt ovat valmiit. Se vie useita kuukausia. Tällä osuudella rakennusaikaa ei ohiteta, vaan raide valmistuu tavallisena rakennustyönä.",
+        "open": "Kuluta aikaa, kunnes yksityisten maiden hankinta, sairaalan raivaus ja raidetyöt ovat valmiit. Se vie useita kuukausia. Tällä osuudella rakennusaikaa ei ohiteta, vaan raide valmistuu tavallisena rakennustyönä.",
+        "variant": "Kuluta aikaa, kunnes yksityisten maiden hankinta, sairaalan raivaus ja raidetyöt ovat valmiit. Se vie useita kuukausia. Tällä osuudella rakennusaikaa ei ohiteta, vaan raide valmistuu tavallisena rakennustyönä.",
+        "start": "Kuluta aikaa, kunnes yksityisten maiden hankinta, sairaalan raivaus ja raidetyöt ovat valmiit. Se vie useita kuukausia. Tällä osuudella rakennusaikaa ei ohiteta, vaan raide valmistuu tavallisena rakennustyönä.",
+        "end": "Kuluta aikaa, kunnes yksityisten maiden hankinta, sairaalan raivaus ja raidetyöt ovat valmiit. Se vie useita kuukausia. Tällä osuudella rakennusaikaa ei ohiteta, vaan raide valmistuu tavallisena rakennustyönä.",
+        "confirm": "Kuluta aikaa, kunnes yksityisten maiden hankinta, sairaalan raivaus ja raidetyöt ovat valmiit. Se vie useita kuukausia. Tällä osuudella rakennusaikaa ei ohiteta, vaan raide valmistuu tavallisena rakennustyönä.",
+        "town": "Kuluta aikaa, kunnes yksityisten maiden hankinta, sairaalan raivaus ja raidetyöt ovat valmiit. Se vie useita kuukausia. Tällä osuudella rakennusaikaa ei ohiteta, vaan raide valmistuu tavallisena rakennustyönä.",
+        "new": "Kuluta aikaa, kunnes yksityisten maiden hankinta, sairaalan raivaus ja raidetyöt ovat valmiit. Se vie useita kuukausia. Tällä osuudella rakennusaikaa ei ohiteta, vaan raide valmistuu tavallisena rakennustyönä.",
+        "east": "Kuluta aikaa, kunnes yksityisten maiden hankinta, sairaalan raivaus ja raidetyöt ovat valmiit. Se vie useita kuukausia. Tällä osuudella rakennusaikaa ei ohiteta, vaan raide valmistuu tavallisena rakennustyönä."
+      },
+      "step6": {
+        "title": "Vedä raide pääkadun yläpuolelle",
+        "description": "Vedä ”Kaksiraiteinen rata” 6 metrin korkeudella pääkadun länsipäästä itäpäähän. Kun raide kulkee tien keskilinjan yläpuolella, se ei osu kadun varren yksityisiin tontteihin, eikä maanhankintaa tarvita. Jos raide poikkeaa tieltä rakennusten kohdalle, tarvitaan maanhankintaa tai julkisen laitoksen raivausta.",
+        "open": "Vedä ”Kaksiraiteinen rata” 6 metrin korkeudella pääkadun länsipäästä itäpäähän. Kun raide kulkee tien keskilinjan yläpuolella, se ei osu kadun varren yksityisiin tontteihin, eikä maanhankintaa tarvita. Jos raide poikkeaa tieltä rakennusten kohdalle, tarvitaan maanhankintaa tai julkisen laitoksen raivausta.",
+        "variant": "Vedä ”Kaksiraiteinen rata” 6 metrin korkeudella pääkadun länsipäästä itäpäähän. Kun raide kulkee tien keskilinjan yläpuolella, se ei osu kadun varren yksityisiin tontteihin, eikä maanhankintaa tarvita. Jos raide poikkeaa tieltä rakennusten kohdalle, tarvitaan maanhankintaa tai julkisen laitoksen raivausta.",
+        "start": "Vedä ”Kaksiraiteinen rata” 6 metrin korkeudella pääkadun länsipäästä itäpäähän. Kun raide kulkee tien keskilinjan yläpuolella, se ei osu kadun varren yksityisiin tontteihin, eikä maanhankintaa tarvita. Jos raide poikkeaa tieltä rakennusten kohdalle, tarvitaan maanhankintaa tai julkisen laitoksen raivausta.",
+        "end": "Vedä ”Kaksiraiteinen rata” 6 metrin korkeudella pääkadun länsipäästä itäpäähän. Kun raide kulkee tien keskilinjan yläpuolella, se ei osu kadun varren yksityisiin tontteihin, eikä maanhankintaa tarvita. Jos raide poikkeaa tieltä rakennusten kohdalle, tarvitaan maanhankintaa tai julkisen laitoksen raivausta.",
+        "confirm": "Vedä ”Kaksiraiteinen rata” 6 metrin korkeudella pääkadun länsipäästä itäpäähän. Kun raide kulkee tien keskilinjan yläpuolella, se ei osu kadun varren yksityisiin tontteihin, eikä maanhankintaa tarvita. Jos raide poikkeaa tieltä rakennusten kohdalle, tarvitaan maanhankintaa tai julkisen laitoksen raivausta.",
+        "town": "Vedä ”Kaksiraiteinen rata” 6 metrin korkeudella pääkadun länsipäästä itäpäähän. Kun raide kulkee tien keskilinjan yläpuolella, se ei osu kadun varren yksityisiin tontteihin, eikä maanhankintaa tarvita. Jos raide poikkeaa tieltä rakennusten kohdalle, tarvitaan maanhankintaa tai julkisen laitoksen raivausta.",
+        "new": "Vedä ”Kaksiraiteinen rata” 6 metrin korkeudella pääkadun länsipäästä itäpäähän. Kun raide kulkee tien keskilinjan yläpuolella, se ei osu kadun varren yksityisiin tontteihin, eikä maanhankintaa tarvita. Jos raide poikkeaa tieltä rakennusten kohdalle, tarvitaan maanhankintaa tai julkisen laitoksen raivausta.",
+        "east": "Vedä lopuksi ”Kaksiraiteinen rata” 6 metrin korkeudella pääkadun itäpäästä itäisen laiturin länsipäähän. Kun molemmat laiturit on yhdistetty, ”Seuraava” ohittaa rakennusajan."
+      },
+      "step7": {
+        "title": "Rakenna varikko",
+        "description": "Valitse rakennuspaneelista ”Junavarikko” ja rakenna se kaupungin pohjoispuolella olevalle keltaiselle tontille. Sijoita varikko itse. ”Seuraava” ohittaa varikon rakennusajan ja viimeistelee sen.",
+        "open": "Valitse rakennuspaneelista ”Junavarikko” ja rakenna se kaupungin pohjoispuolella olevalle keltaiselle tontille. Sijoita varikko itse. ”Seuraava” ohittaa varikon rakennusajan ja viimeistelee sen.",
+        "variant": "Valitse rakennuspaneelista ”Junavarikko” ja rakenna se kaupungin pohjoispuolella olevalle keltaiselle tontille. Sijoita varikko itse. ”Seuraava” ohittaa varikon rakennusajan ja viimeistelee sen.",
+        "start": "Valitse rakennuspaneelista ”Junavarikko” ja rakenna se kaupungin pohjoispuolella olevalle keltaiselle tontille. Sijoita varikko itse. ”Seuraava” ohittaa varikon rakennusajan ja viimeistelee sen.",
+        "end": "Valitse rakennuspaneelista ”Junavarikko” ja rakenna se kaupungin pohjoispuolella olevalle keltaiselle tontille. Sijoita varikko itse. ”Seuraava” ohittaa varikon rakennusajan ja viimeistelee sen.",
+        "confirm": "Valitse rakennuspaneelista ”Junavarikko” ja rakenna se kaupungin pohjoispuolella olevalle keltaiselle tontille. Sijoita varikko itse. ”Seuraava” ohittaa varikon rakennusajan ja viimeistelee sen.",
+        "town": "Valitse rakennuspaneelista ”Junavarikko” ja rakenna se kaupungin pohjoispuolella olevalle keltaiselle tontille. Sijoita varikko itse. ”Seuraava” ohittaa varikon rakennusajan ja viimeistelee sen.",
+        "new": "Valitse rakennuspaneelista ”Junavarikko” ja rakenna se kaupungin pohjoispuolella olevalle keltaiselle tontille. Sijoita varikko itse. ”Seuraava” ohittaa varikon rakennusajan ja viimeistelee sen.",
+        "east": "Valitse rakennuspaneelista ”Junavarikko” ja rakenna se kaupungin pohjoispuolella olevalle keltaiselle tontille. Sijoita varikko itse. ”Seuraava” ohittaa varikon rakennusajan ja viimeistelee sen."
+      },
+      "step8": {
+        "title": "Säädä kaarteet ja kaltevuus ja liitä pääväylään",
+        "description": "Valitse ”Rautatie (yksiraiteinen)” ja vedä se varikon itäpuolen maantason liitäntäpisteestä laajalla kaarella itään, koillisen merkin kautta pääväylän liitoskohtaan 6 metrin korkeuteen. Käytä keltaisia välipisteitä apuna, jotta kaarresäde ja kaltevuus pysyvät rajoissa. Kun olet vahvistanut muodon oikealla painikkeella, voit säätää sitä vetämällä kärkipisteitä ja ohjauspisteitä.",
+        "open": "Valitse ”Rautatie (yksiraiteinen)” ja vedä se varikon itäpuolen maantason liitäntäpisteestä laajalla kaarella itään, koillisen merkin kautta pääväylän liitoskohtaan 6 metrin korkeuteen. Käytä keltaisia välipisteitä apuna, jotta kaarresäde ja kaltevuus pysyvät rajoissa. Kun olet vahvistanut muodon oikealla painikkeella, voit säätää sitä vetämällä kärkipisteitä ja ohjauspisteitä.",
+        "variant": "Valitse ”Rautatie (yksiraiteinen)” ja vedä se varikon itäpuolen maantason liitäntäpisteestä laajalla kaarella itään, koillisen merkin kautta pääväylän liitoskohtaan 6 metrin korkeuteen. Käytä keltaisia välipisteitä apuna, jotta kaarresäde ja kaltevuus pysyvät rajoissa. Kun olet vahvistanut muodon oikealla painikkeella, voit säätää sitä vetämällä kärkipisteitä ja ohjauspisteitä.",
+        "start": "Valitse ”Rautatie (yksiraiteinen)” ja vedä se varikon itäpuolen maantason liitäntäpisteestä laajalla kaarella itään, koillisen merkin kautta pääväylän liitoskohtaan 6 metrin korkeuteen. Käytä keltaisia välipisteitä apuna, jotta kaarresäde ja kaltevuus pysyvät rajoissa. Kun olet vahvistanut muodon oikealla painikkeella, voit säätää sitä vetämällä kärkipisteitä ja ohjauspisteitä.",
+        "end": "Valitse ”Rautatie (yksiraiteinen)” ja vedä se varikon itäpuolen maantason liitäntäpisteestä laajalla kaarella itään, koillisen merkin kautta pääväylän liitoskohtaan 6 metrin korkeuteen. Käytä keltaisia välipisteitä apuna, jotta kaarresäde ja kaltevuus pysyvät rajoissa. Kun olet vahvistanut muodon oikealla painikkeella, voit säätää sitä vetämällä kärkipisteitä ja ohjauspisteitä.",
+        "confirm": "Valitse ”Rautatie (yksiraiteinen)” ja vedä se varikon itäpuolen maantason liitäntäpisteestä laajalla kaarella itään, koillisen merkin kautta pääväylän liitoskohtaan 6 metrin korkeuteen. Käytä keltaisia välipisteitä apuna, jotta kaarresäde ja kaltevuus pysyvät rajoissa. Kun olet vahvistanut muodon oikealla painikkeella, voit säätää sitä vetämällä kärkipisteitä ja ohjauspisteitä.",
+        "town": "Valitse ”Rautatie (yksiraiteinen)” ja vedä se varikon itäpuolen maantason liitäntäpisteestä laajalla kaarella itään, koillisen merkin kautta pääväylän liitoskohtaan 6 metrin korkeuteen. Käytä keltaisia välipisteitä apuna, jotta kaarresäde ja kaltevuus pysyvät rajoissa. Kun olet vahvistanut muodon oikealla painikkeella, voit säätää sitä vetämällä kärkipisteitä ja ohjauspisteitä.",
+        "new": "Valitse ”Rautatie (yksiraiteinen)” ja vedä se varikon itäpuolen maantason liitäntäpisteestä laajalla kaarella itään, koillisen merkin kautta pääväylän liitoskohtaan 6 metrin korkeuteen. Käytä keltaisia välipisteitä apuna, jotta kaarresäde ja kaltevuus pysyvät rajoissa. Kun olet vahvistanut muodon oikealla painikkeella, voit säätää sitä vetämällä kärkipisteitä ja ohjauspisteitä.",
+        "east": "Valitse ”Rautatie (yksiraiteinen)” ja vedä se varikon itäpuolen maantason liitäntäpisteestä laajalla kaarella itään, koillisen merkin kautta pääväylän liitoskohtaan 6 metrin korkeuteen. Käytä keltaisia välipisteitä apuna, jotta kaarresäde ja kaltevuus pysyvät rajoissa. Kun olet vahvistanut muodon oikealla painikkeella, voit säätää sitä vetämällä kärkipisteitä ja ohjauspisteitä."
+      },
+      "step9": {
+        "title": "Johda sähkö voimalaitokselta varikolle",
+        "description": "Sähköjunat tarvitsevat voimalinjan voimalaitokselta. Valitse ”Voimalinja”, yhdistä voimalaitoksen liitäntäpiste varikon itäpuolen yhteiseen liitäntäpisteeseen ja vahvista.",
+        "open": "Sähköjunat tarvitsevat voimalinjan voimalaitokselta. Valitse ”Voimalinja”, yhdistä voimalaitoksen liitäntäpiste varikon itäpuolen yhteiseen liitäntäpisteeseen ja vahvista.",
+        "variant": "Sähköjunat tarvitsevat voimalinjan voimalaitokselta. Valitse ”Voimalinja”, yhdistä voimalaitoksen liitäntäpiste varikon itäpuolen yhteiseen liitäntäpisteeseen ja vahvista.",
+        "start": "Sähköjunat tarvitsevat voimalinjan voimalaitokselta. Valitse ”Voimalinja”, yhdistä voimalaitoksen liitäntäpiste varikon itäpuolen yhteiseen liitäntäpisteeseen ja vahvista.",
+        "end": "Sähköjunat tarvitsevat voimalinjan voimalaitokselta. Valitse ”Voimalinja”, yhdistä voimalaitoksen liitäntäpiste varikon itäpuolen yhteiseen liitäntäpisteeseen ja vahvista.",
+        "confirm": "Sähköjunat tarvitsevat voimalinjan voimalaitokselta. Valitse ”Voimalinja”, yhdistä voimalaitoksen liitäntäpiste varikon itäpuolen yhteiseen liitäntäpisteeseen ja vahvista.",
+        "town": "Sähköjunat tarvitsevat voimalinjan voimalaitokselta. Valitse ”Voimalinja”, yhdistä voimalaitoksen liitäntäpiste varikon itäpuolen yhteiseen liitäntäpisteeseen ja vahvista.",
+        "new": "Sähköjunat tarvitsevat voimalinjan voimalaitokselta. Valitse ”Voimalinja”, yhdistä voimalaitoksen liitäntäpiste varikon itäpuolen yhteiseen liitäntäpisteeseen ja vahvista.",
+        "east": "Sähköjunat tarvitsevat voimalinjan voimalaitokselta. Valitse ”Voimalinja”, yhdistä voimalaitoksen liitäntäpiste varikon itäpuolen yhteiseen liitäntäpisteeseen ja vahvista."
+      },
+      "step10": {
+        "title": "Avaa junalinja",
+        "description": "Valitse ”Joukkoliikenne” → ”+ Uusi linja” ja tyypiksi ”Taajamajunalinja”. Sijoita pysäkit läntiselle ja itäiselle ylätasolaiturille ja sulje kierros napsauttamalla ensimmäistä pysäkkiä. Aseta lipun hinnaksi 0 ja tavoitevuoroväliksi 5 minuuttia ja vahvista.",
+        "open": "Valitse ”Joukkoliikenne” → ”+ Uusi linja” ja tyypiksi ”Taajamajunalinja”. Sijoita pysäkit läntiselle ja itäiselle ylätasolaiturille ja sulje kierros napsauttamalla ensimmäistä pysäkkiä. Aseta lipun hinnaksi 0 ja tavoitevuoroväliksi 5 minuuttia ja vahvista.",
+        "variant": "Valitse ”Joukkoliikenne” → ”+ Uusi linja” ja tyypiksi ”Taajamajunalinja”. Sijoita pysäkit läntiselle ja itäiselle ylätasolaiturille ja sulje kierros napsauttamalla ensimmäistä pysäkkiä. Aseta lipun hinnaksi 0 ja tavoitevuoroväliksi 5 minuuttia ja vahvista.",
+        "start": "Valitse ”Joukkoliikenne” → ”+ Uusi linja” ja tyypiksi ”Taajamajunalinja”. Sijoita pysäkit läntiselle ja itäiselle ylätasolaiturille ja sulje kierros napsauttamalla ensimmäistä pysäkkiä. Aseta lipun hinnaksi 0 ja tavoitevuoroväliksi 5 minuuttia ja vahvista.",
+        "end": "Valitse ”Joukkoliikenne” → ”+ Uusi linja” ja tyypiksi ”Taajamajunalinja”. Sijoita pysäkit läntiselle ja itäiselle ylätasolaiturille ja sulje kierros napsauttamalla ensimmäistä pysäkkiä. Aseta lipun hinnaksi 0 ja tavoitevuoroväliksi 5 minuuttia ja vahvista.",
+        "confirm": "Valitse ”Joukkoliikenne” → ”+ Uusi linja” ja tyypiksi ”Taajamajunalinja”. Sijoita pysäkit läntiselle ja itäiselle ylätasolaiturille ja sulje kierros napsauttamalla ensimmäistä pysäkkiä. Aseta lipun hinnaksi 0 ja tavoitevuoroväliksi 5 minuuttia ja vahvista.",
+        "town": "Valitse ”Joukkoliikenne” → ”+ Uusi linja” ja tyypiksi ”Taajamajunalinja”. Sijoita pysäkit läntiselle ja itäiselle ylätasolaiturille ja sulje kierros napsauttamalla ensimmäistä pysäkkiä. Aseta lipun hinnaksi 0 ja tavoitevuoroväliksi 5 minuuttia ja vahvista.",
+        "new": "Valitse ”Joukkoliikenne” → ”+ Uusi linja” ja tyypiksi ”Taajamajunalinja”. Sijoita pysäkit läntiselle ja itäiselle ylätasolaiturille ja sulje kierros napsauttamalla ensimmäistä pysäkkiä. Aseta lipun hinnaksi 0 ja tavoitevuoroväliksi 5 minuuttia ja vahvista.",
+        "east": "Valitse ”Joukkoliikenne” → ”+ Uusi linja” ja tyypiksi ”Taajamajunalinja”. Sijoita pysäkit läntiselle ja itäiselle ylätasolaiturille ja sulje kierros napsauttamalla ensimmäistä pysäkkiä. Aseta lipun hinnaksi 0 ja tavoitevuoroväliksi 5 minuuttia ja vahvista."
+      },
+      "step11": {
+        "title": "Tarkista kalusto ja liikennöinti",
+        "description": "Kuluta aikaa ja tarkista joukkoliikenteen hallinnasta linjan kuljetuskapasiteetti ja vuoroväli. Varikolta kestää useita kuukausia hankkia kalusto. Kun linjalla on kapasiteettia, se on avattu. Asukkaat vertailevat myös kävelyreittejä, joten näin lyhyellä asemavälillä matkustajia ei välttämättä ole vielä.",
+        "open": "Kuluta aikaa ja tarkista joukkoliikenteen hallinnasta linjan kuljetuskapasiteetti ja vuoroväli. Varikolta kestää useita kuukausia hankkia kalusto. Kun linjalla on kapasiteettia, se on avattu. Asukkaat vertailevat myös kävelyreittejä, joten näin lyhyellä asemavälillä matkustajia ei välttämättä ole vielä.",
+        "variant": "Kuluta aikaa ja tarkista joukkoliikenteen hallinnasta linjan kuljetuskapasiteetti ja vuoroväli. Varikolta kestää useita kuukausia hankkia kalusto. Kun linjalla on kapasiteettia, se on avattu. Asukkaat vertailevat myös kävelyreittejä, joten näin lyhyellä asemavälillä matkustajia ei välttämättä ole vielä.",
+        "start": "Kuluta aikaa ja tarkista joukkoliikenteen hallinnasta linjan kuljetuskapasiteetti ja vuoroväli. Varikolta kestää useita kuukausia hankkia kalusto. Kun linjalla on kapasiteettia, se on avattu. Asukkaat vertailevat myös kävelyreittejä, joten näin lyhyellä asemavälillä matkustajia ei välttämättä ole vielä.",
+        "end": "Kuluta aikaa ja tarkista joukkoliikenteen hallinnasta linjan kuljetuskapasiteetti ja vuoroväli. Varikolta kestää useita kuukausia hankkia kalusto. Kun linjalla on kapasiteettia, se on avattu. Asukkaat vertailevat myös kävelyreittejä, joten näin lyhyellä asemavälillä matkustajia ei välttämättä ole vielä.",
+        "confirm": "Kuluta aikaa ja tarkista joukkoliikenteen hallinnasta linjan kuljetuskapasiteetti ja vuoroväli. Varikolta kestää useita kuukausia hankkia kalusto. Kun linjalla on kapasiteettia, se on avattu. Asukkaat vertailevat myös kävelyreittejä, joten näin lyhyellä asemavälillä matkustajia ei välttämättä ole vielä.",
+        "town": "Kuluta aikaa ja tarkista joukkoliikenteen hallinnasta linjan kuljetuskapasiteetti ja vuoroväli. Varikolta kestää useita kuukausia hankkia kalusto. Kun linjalla on kapasiteettia, se on avattu. Asukkaat vertailevat myös kävelyreittejä, joten näin lyhyellä asemavälillä matkustajia ei välttämättä ole vielä.",
+        "new": "Kuluta aikaa ja tarkista joukkoliikenteen hallinnasta linjan kuljetuskapasiteetti ja vuoroväli. Varikolta kestää useita kuukausia hankkia kalusto. Kun linjalla on kapasiteettia, se on avattu. Asukkaat vertailevat myös kävelyreittejä, joten näin lyhyellä asemavälillä matkustajia ei välttämättä ole vielä.",
+        "east": "Kuluta aikaa ja tarkista joukkoliikenteen hallinnasta linjan kuljetuskapasiteetti ja vuoroväli. Varikolta kestää useita kuukausia hankkia kalusto. Kun linjalla on kapasiteettia, se on avattu. Asukkaat vertailevat myös kävelyreittejä, joten näin lyhyellä asemavälillä matkustajia ei välttämättä ole vielä."
+      },
+      "step12": {
+        "title": "Rautatien rakentamisen kertaus",
+        "description": "Kamera siirtyi läntiselle asemalle. Katso laiturille pysähtyviä junia. Rakensit laiturit, asemarakennukset, pääväylän, varikon ja sen pistoraiteen, sähkönsyötön ja linjan. Kävit läpi yksityisten maiden hankinnan ja julkisen laitoksen raivauksen ja vältit maanhankinnan rakentamalla tien yläpuolelle. Hyödynnä kaarresäteen ja kaltevuuden tarkkailua myös tulevissa rautatiehankkeissa.",
+        "open": "Kamera siirtyi läntiselle asemalle. Katso laiturille pysähtyviä junia. Rakensit laiturit, asemarakennukset, pääväylän, varikon ja sen pistoraiteen, sähkönsyötön ja linjan. Kävit läpi yksityisten maiden hankinnan ja julkisen laitoksen raivauksen ja vältit maanhankinnan rakentamalla tien yläpuolelle. Hyödynnä kaarresäteen ja kaltevuuden tarkkailua myös tulevissa rautatiehankkeissa.",
+        "variant": "Kamera siirtyi läntiselle asemalle. Katso laiturille pysähtyviä junia. Rakensit laiturit, asemarakennukset, pääväylän, varikon ja sen pistoraiteen, sähkönsyötön ja linjan. Kävit läpi yksityisten maiden hankinnan ja julkisen laitoksen raivauksen ja vältit maanhankinnan rakentamalla tien yläpuolelle. Hyödynnä kaarresäteen ja kaltevuuden tarkkailua myös tulevissa rautatiehankkeissa.",
+        "start": "Kamera siirtyi läntiselle asemalle. Katso laiturille pysähtyviä junia. Rakensit laiturit, asemarakennukset, pääväylän, varikon ja sen pistoraiteen, sähkönsyötön ja linjan. Kävit läpi yksityisten maiden hankinnan ja julkisen laitoksen raivauksen ja vältit maanhankinnan rakentamalla tien yläpuolelle. Hyödynnä kaarresäteen ja kaltevuuden tarkkailua myös tulevissa rautatiehankkeissa.",
+        "end": "Kamera siirtyi läntiselle asemalle. Katso laiturille pysähtyviä junia. Rakensit laiturit, asemarakennukset, pääväylän, varikon ja sen pistoraiteen, sähkönsyötön ja linjan. Kävit läpi yksityisten maiden hankinnan ja julkisen laitoksen raivauksen ja vältit maanhankinnan rakentamalla tien yläpuolelle. Hyödynnä kaarresäteen ja kaltevuuden tarkkailua myös tulevissa rautatiehankkeissa.",
+        "confirm": "Kamera siirtyi läntiselle asemalle. Katso laiturille pysähtyviä junia. Rakensit laiturit, asemarakennukset, pääväylän, varikon ja sen pistoraiteen, sähkönsyötön ja linjan. Kävit läpi yksityisten maiden hankinnan ja julkisen laitoksen raivauksen ja vältit maanhankinnan rakentamalla tien yläpuolelle. Hyödynnä kaarresäteen ja kaltevuuden tarkkailua myös tulevissa rautatiehankkeissa.",
+        "town": "Kamera siirtyi läntiselle asemalle. Katso laiturille pysähtyviä junia. Rakensit laiturit, asemarakennukset, pääväylän, varikon ja sen pistoraiteen, sähkönsyötön ja linjan. Kävit läpi yksityisten maiden hankinnan ja julkisen laitoksen raivauksen ja vältit maanhankinnan rakentamalla tien yläpuolelle. Hyödynnä kaarresäteen ja kaltevuuden tarkkailua myös tulevissa rautatiehankkeissa.",
+        "new": "Kamera siirtyi läntiselle asemalle. Katso laiturille pysähtyviä junia. Rakensit laiturit, asemarakennukset, pääväylän, varikon ja sen pistoraiteen, sähkönsyötön ja linjan. Kävit läpi yksityisten maiden hankinnan ja julkisen laitoksen raivauksen ja vältit maanhankinnan rakentamalla tien yläpuolelle. Hyödynnä kaarresäteen ja kaltevuuden tarkkailua myös tulevissa rautatiehankkeissa.",
+        "east": "Kamera siirtyi läntiselle asemalle. Katso laiturille pysähtyviä junia. Rakensit laiturit, asemarakennukset, pääväylän, varikon ja sen pistoraiteen, sähkönsyötön ja linjan. Kävit läpi yksityisten maiden hankinnan ja julkisen laitoksen raivauksen ja vältit maanhankinnan rakentamalla tien yläpuolelle. Hyödynnä kaarresäteen ja kaltevuuden tarkkailua myös tulevissa rautatiehankkeissa."
+      }
+    },
+    "complete": {
+      "title": "Opetusohjelma suoritettu",
+      "description": "Onnittelut! Opetusohjelma on nyt suoritettu. Paina ”Lopeta”, niin opastus sulkeutuu ja voit jatkaa tämän kaupungin rakentamista vapaasti.",
+      "button": "Lopeta"
+    },
+    "nextButton": "Seuraava",
+    "checking": "Tarkistetaan…",
+    "failed": "Ehto ei täyty. Yritä uudelleen.",
+    "completed": "Opetusohjelma suoritettu! Hyvää työtä.",
+    "stepProgress": "Vaihe {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Avaa rakennuspaneeli tiekuvakkeesta.",
+      "selectRoad": "Valitse kohdasta ”Kadut” maantason 2-kaistainen katu. Vain sallittu tyyppi on valittavissa.",
+      "placeStart": "Aseta tien alkupiste napsauttamalla hiiren vasemmalla painikkeella vaaleansinisen ympyrän sisällä.",
+      "placeEnd": "Aseta tien loppupiste napsauttamalla hiiren vasemmalla painikkeella keltaisen ympyrän sisällä.",
+      "finalizeRoad": "Viimeistele tien muoto napsauttamalla 3D-näkymää hiiren oikealla painikkeella.",
+      "confirmRoad": "Tallenna painamalla rakennuspaneelin ”Vahvista” ja paina sitten ”Seuraava”.",
+      "failed": "Valmistelu tai tiedonsiirto epäonnistui. Jos uusi yritys ei auta, lopeta ja aloita opetusohjelma uudessa kaupungissa.",
+      "retry": "Yritä uudelleen",
+      "placementRequired": "Sijoita opastuksen osoittamaa tyyppiä opastettuihin kohtiin.",
+      "preparing": "Valmistellaan opetusohjelman kaupunkia.",
+      "finishFailed": "Opetusohjelman lopettaminen epäonnistui. Yritä uudelleen."
+    },
+    "trade": {
+      "title": "Aloita kansainvälinen kauppa",
+      "description": "Paikallinen tehdas haluaa myydä tuotteitaan ulkomaille. Tässä opetusohjelmassa opit viemään elintarvikkeita satamasta ja tuomaan tavaroita naapurimaahan johtavaa tavararataa pitkin.",
+      "step1": {
+        "description": "Saarella tuotettujen elintarvikkeiden vientiin tarvitaan vientisatama. Rakenna ”Konttiterminaali” rannikon tontille, jolla on keltainen merkki. Koska kyseessä on opetusohjelma, rakennusaika ohitetaan.",
+        "title": "Rakenna konttisatama"
+      },
+      "step2": {
+        "description": "Tehtaan tuotannon ja kuljetusten käynnistyminen kestää muutaman kuukauden, joten kuluta aikaa ja katso sataman vientiä. Sulje konttiterminaalin tiedot ja avaa ne uudelleen, niin näet viennin ja tuonnin lastinkäsittelyn tiedoista.",
+        "title": "Tarkista elintarvikkeiden vienti"
+      },
+      "step3": {
+        "description": "Nyt sinulla on paikka, jossa tuodaan ja viedään tavaraa laivoilla. Rakennetaan seuraavaksi paikka, jossa tavaraa tuodaan ja viedään rautateitse. Rakenna ”Kansainvälinen rahtiasema” tien varren tontille, jolla on keltainen merkki. Itärajalla on naapurimaahan johtava raide ja rajan rahtiasema.",
+        "title": "Rakenna kansainvälinen rahtiasema"
+      },
+      "step4": {
+        "open": "Avaa kuvakepaneelista ”Tiet, raiteet ja infra” ja valitse kohdasta ”Rautatiet” ”Konttirahtilaituri”.",
+        "place": "Rakenna laituri kansainvälisen rahtiaseman pohjoispuolelle aseman suuntaisesti. Aseta alkupiste napsauttamalla hiiren vasemmalla painikkeella vaaleansinisen ympyrän sisällä (länsi) ja loppupiste keltaisen ympyrän sisällä (itä) ja viimeistele muoto napsauttamalla 3D-näkymää oikealla painikkeella. Vaihda ”Laiturin puoli” asentoon ”Sisäpuoli” ja varmista ennen vahvistamista, että laituri tulee asemarakennuksen puolelle (etelään). Kun olet valmis, paina ”Seuraava”.",
+        "title": "Rakenna laituri aseman viereen"
+      },
+      "step5": {
+        "description": "Palaa luetteloon painamalla ”Takaisin”, valitse ”Rautatie (yksiraiteinen)” ja vedä raide laiturin itäpäästä sen raiteen länsipäähän, joka tulee kaupungin ulkopuolella olevalta rajan rahtiasemalta.",
+        "title": "Vedä raide rajalle"
+      },
+      "step6": {
+        "title": "Rakenna varikko",
+        "description": "Rakenna ”Junavarikko” raiteen varren tontille, jolla on keltainen merkki. Kun painat ”Seuraava”, rakennusaika ohitetaan, koska kyseessä on opetusohjelma, ja varikko valmistuu."
+      },
+      "step7": {
+        "title": "Liitä varikko pääväylään",
+        "description": "Vedä pistoraide varikon itäpään liitäntäpisteestä pääväylään. Liitä se pääväylään loivassa kulmassa itään päin, ei suorassa kulmassa. Kun olet valmis, paina ”Seuraava”."
+      },
+      "step8": {
+        "description": "Avaa kuvakepaneelista ”Tiet, raiteet ja infra” ja yhdistä kohdan ”Sähkö” ”Voimalinjalla” kaupungin itäpuolella olevan aurinkovoimalan liitäntäpiste varikon liitäntäpisteeseen.",
+        "title": "Johda sähkö varikolle"
+      },
+      "step9": {
+        "description": "Paina kohdassa ”Joukkoliikenne” ”+ Uusi linja” ja valitse tyypiksi ”Kansainvälinen rahtilinja”. Sijoita pysäkit kansainvälisen rahtiaseman ja rajan rahtiaseman laitureille, sulje kierros napsauttamalla ensimmäistä pysäkkiä ja avaa linja. Yksiraiteisella radalla junat eivät voi kohdata, joten aseta tavoitevuoroväliksi 45 minuuttia, jotta yksi juna ehtii edestakaisen matkan.",
+        "title": "Avaa kansainvälinen rahtilinja"
+      },
+      "step10": {
+        "description": "Kuluta aikaa ja varmista, että tavarajunat alkavat kulkea kansainvälisellä rahtilinjalla. Varikolta kestää muutaman kuukauden palkata henkilöstö, ostaa tarvikkeet ja valmistella kalusto.",
+        "title": "Laita tavarajunat liikkeelle"
+      }
+    },
+    "highway": {
+      "title": "Rakenna moottoritie",
+      "description": "Kasvava kaupunki tarvitsee autoille uuden reitin. Tässä opetusohjelmassa opit rakentamaan moottoritien, joka ylittää tavallisen tien ylätasossa, ja tekemään eritasoliittymän yhdistämällä tiet rampeilla.",
+      "step1": {
+        "title": "Risteä ylätasossa",
+        "open": "Ylitä keskellä kulkeva tavallinen tie ylätasolla kulkevalla moottoritiellä. Avaa kuvakepaneelista ”Tiet, raiteet ja infra” ja valitse kohdasta ”Moottoritiet” ”Kaksikaistainen moottoritie”.",
+        "start": "Aseta moottoritien alkupiste napsauttamalla hiiren vasemmalla painikkeella vaaleansinisen ympyrän sisällä. Alkupiste kiinnittyy 7 metrin korkeudella olevaan siltaan.",
+        "end": "Aseta loppupiste napsauttamalla hiiren vasemmalla painikkeella keltaisen ympyrän sisällä. Se kiinnittyy samaan 7 metrin korkeuteen tavallisen tien toisella puolella.",
+        "confirm": "Tallenna painamalla rakennuspaneelin ”Vahvista” ja paina sitten ”Seuraava”. Koska kyseessä on opetusohjelma, rakennusaika ohitetaan ja tie valmistuu heti."
+      },
+      "step2": {
+        "title": "Nimeä moottoritie",
+        "description": "Teitä voi hallita antamalla niille nimen. Rakentamasi moottoritien tietoikkunan yläreunassa tie on nyt ”Ei mitään (nimetön tie)”, joten anna sille haluamasi nimi."
+      },
+      "step3": {
+        "title": "Rakenna ramppi",
+        "description": "Rakenna ramppi, joka yhdistää moottoritien tavalliseen tiehen. Valitse tien tyypiksi ”Ramppi” ja liitä loivasti kaartuva ramppi näytön keltaisen merkin kohdalta moottoritiehen."
+      },
+      "step4": {
+        "title": "Tarkista eritasoliittymä",
+        "description": "Napsauttamalla rampin lähellä näkyvää ”IC1”-merkintää avaat eritasoliittymän tietopaneelin. Tarkista, että tavallinen tie ja moottoritie on yhdistetty."
+      }
+    },
+    "mining": {
+      "title": "Hyödynnä luonnonvaroja",
+      "description": "Saaren maaperässä on arvokkaita luonnonvaroja, mutta niitä ei ole millään kuljettaa pois. Tässä opetusohjelmassa opit rakentamaan kaivoksen, tavararadan ja sataman sekä louhimaan malmia, kuljettamaan sen ja viemään sen ulkomaille.",
+      "step1": {
+        "description": "Ota luonnonvarojen näyttö käyttöön ja avaa kaakkoisen malmion tietopaneeli.",
+        "title": "Tarkista malmio"
+      },
+      "step2": {
+        "description": "Rakenna ”Kaivos” kaakkoisen malmion päällä olevalle keltaiselle tontille. Koska kyseessä on opetusohjelma, rakennusaika ohitetaan.",
+        "title": "Rakenna kaivos"
+      },
+      "step3": {
+        "description": "Rakenna ”Malmin lastausasema” kaivoksen kaakkoispuolella olevalle suurelle tontille. Malmin lastausasemalla kaivoksesta louhittu malmi lastataan juniin.",
+        "title": "Rakenna lastausasema kaivoksen viereen"
+      },
+      "step4": {
+        "description": "Rakenna ”Malmin purkuasema” sataman eteläpuolella olevalle suurelle tontille. Malmin purkuasemalla junilla tuotu malmi puretaan ja kuljetetaan eteenpäin.",
+        "title": "Rakenna purkuasema sataman lähelle"
+      },
+      "step5": {
+        "description": "Rakenna ”Bulkkisatama” rannikon keltaiselle tontille.",
+        "title": "Rakenna bulkkisatama"
+      },
+      "step6": {
+        "open": "Valitse rautateistä ”Malmirahtilaituri” ja yhdistä merkkiparit lastausaseman lounaispuolella ja purkuaseman eteläpuolella. Käännä kumpikin laituri oman laitoksensa puolelle.",
+        "loading": "Valitse rautateistä ”Malmirahtilaituri” ja yhdistä merkkiparit lastausaseman lounaispuolella ja purkuaseman eteläpuolella. Käännä kumpikin laituri oman laitoksensa puolelle.",
+        "unloading": "Valitse rautateistä ”Malmirahtilaituri” ja yhdistä merkkiparit lastausaseman lounaispuolella ja purkuaseman eteläpuolella. Käännä kumpikin laituri oman laitoksensa puolelle.",
+        "title": "Rakenna laituri aseman viereen"
+      },
+      "step7": {
+        "town": "Vedä tavararaide satamanpuoleisen laiturin itäpäästä tien välipisteen eteläpuolen kautta vuorenpuoleisen laiturin luoteispäähän. Raidetta ei ole vielä yhdistetty, joten rakenna se itse. Suuntaa kulkusuunta kaarteilla, aseta mäkeä nousevalle osuudelle maastonmukaisuudeksi ”Älä myötäile” ja säädä muotoa, kunnes punaiset kaltevuus- ja kaarresädevirheet häviävät. Lisää välipisteitä niin, että jokainen osuus on enintään 500 m.",
+        "climb": "Vedä tavararaide satamanpuoleisen laiturin itäpäästä tien välipisteen eteläpuolen kautta vuorenpuoleisen laiturin luoteispäähän. Raidetta ei ole vielä yhdistetty, joten rakenna se itse. Suuntaa kulkusuunta kaarteilla, aseta mäkeä nousevalle osuudelle maastonmukaisuudeksi ”Älä myötäile” ja säädä muotoa, kunnes punaiset kaltevuus- ja kaarresädevirheet häviävät. Lisää välipisteitä niin, että jokainen osuus on enintään 500 m.",
+        "title": "Yhdistä asemat raiteella"
+      },
+      "step8": {
+        "title": "Rakenna varikko",
+        "description": "Rakenna ”Junavarikko” sataman lounaispuolella olevalle tontille. Suuntaa se niin, että sen itäpään liitäntäpisteestä voi vetää raiteen satamanpuoleiselle laiturille."
+      },
+      "step9": {
+        "title": "Liitä varikko pääväylään",
+        "description": "Vedä pistoraide varikon itäpään maantason liitäntäpisteestä satamanpuoleisen laiturin länsipäähän. Liitä se sujuvasti loivassa kulmassa."
+      },
+      "step10": {
+        "description": "Vedä voimalinja nykyisen aurinkovoimalan liitäntäpisteestä varikon itäpään yhteiseen liitäntäpisteeseen.",
+        "title": "Johda sähkö varikolle"
+      },
+      "step11": {
+        "description": "Valitse ”Joukkoliikenne” → ”Uusi linja” → ”Malmijunalinja”, sijoita pysäkit vuoren- ja satamanpuoleisille malmirahtilaitureille ja sulje kierros napsauttamalla ensimmäistä pysäkkiä. Yksiraiteisella radalla junat eivät voi kohdata, joten aseta tavoitevuoroväliksi 45 minuuttia, jotta yksi juna ehtii edestakaisen matkan, ja vahvista.",
+        "title": "Avaa malmikuljetuslinja"
+      },
+      "step12": {
+        "description": "Kuluta aikaa, niin louhinta, lastaus, rautatiekuljetus, purku ja vienti käynnistyvät. Kaluston hankinta ja kuljetusten käynnistyminen vievät muutaman kuukauden.",
+        "title": "Kuluta aikaa"
+      },
+      "step13": {
+        "description": "Kuluta aikaa ja tarkista rannikon bulkkisataman tiedoista malmin vastaanotto ja vienti. Kaluston hankinta, louhinta ja kuljetus vievät useita kuukausia.",
+        "title": "Tarkista malmin vienti"
+      }
+    },
+    "tourism": {
+      "title": "Kehitä matkailua",
+      "description": "Saaren raunioille ei ole satamaa eikä majoitusta matkailijoita varten, eikä matkailijoille ole bussilinjaa. Tässä opetusohjelmassa opit rakentamaan hotellin ja risteilyterminaalin, perustamaan bussilinjan ja seuraamaan matkailijoiden saapumista, ravintolan myyntiä ja bussin käyttöä.",
+      "step1": {
+        "description": "Rakenna ”Lomahotelli” muinaisten raunioiden länsipuolelle tontille, jolla on keltainen merkki. Koska kyseessä on opetusohjelma, rakennusaika ohitetaan.",
+        "title": "Rakenna hotelli raunioiden viereen"
+      },
+      "step2": {
+        "description": "Matkailijoiden vastaanottamiseen tarvitaan satama. Rakenna ”Risteilyterminaali” merkitylle satamatontille.",
+        "title": "Rakenna risteilyterminaali"
+      },
+      "step3": {
+        "description": "Matkailijoilla ei ole omaa autoa, joten tarvitaan joukkoliikennettä. Valitse ”Joukkoliikenne” → ”Uusi linja” ja tyypiksi ”Bussilinja”. Sijoita pysäkit keltaisilla merkeillä merkityille teille järjestyksessä satama → asuintalot → rauniot → asuintalot ja sulje kierros lopuksi napsauttamalla sataman pysäkkiä. Aseta lipun hinnaksi 0 ja tavoitevuoroväliksi 1 minuutti ja vahvista.",
+        "title": "Perusta bussilinja satamasta raunioille"
+      },
+      "step4": {
+        "description": "Kuluta aikaa ja ota matkailijat vastaan. Laitosten käynnistyminen ja bussikaluston hankinta vievät muutaman kuukauden.",
+        "title": "Kuluta aikaa"
+      },
+      "step5": {
+        "description": "Tarkista raunioiden luona olevan ravintolan myynti ja perustamasi bussilinjan matkustajat. Vaihe on suoritettu, kun matkailijoita on saapunut, ravintolan myynti on kasvanut lähtötasosta ja bussilla on matkustajia. Kuluta tarvittaessa lisää aikaa.",
+        "title": "Tarkista myynti ja bussin matkustajat"
+      }
+    },
+    "intro": {
+      "controls": "Olet kaupungin uusi pormestari. Rakenna kaupunki, jossa asukkaat voivat elää turvallisesti. Tässä kaupungissa ei vielä ole asuntoja uusille asukkaille eikä elämän välttämättömyyksiä, sähköä ja vettä. Tässä opetusohjelmassa opit pormestarin tehtävät, ajan kuluttamisen, kaupungin tilan lukemisen sekä painikkeiden ja kameran käytön. Sen jälkeen käyt läpi kaupungin rakentamisen vaiheet: teiden ja tonttien valmistelun, kaupunginosan linjauksen päättämisen, asuntojen rakentamisen sekä sähkön ja veden toimittamisen.",
+      "scenario4": "Haluamme yhdistää asuinalueen ja työpaikat rautatiellä, mutta suunnitellulla reitillä on yksityisiä rakennuksia ja kaupungin sairaala. Tässä opetusohjelmassa opit maanhankinnan, julkisen laitoksen raivauksen, ylätasoradan rakentamisen tien yläpuolelle, laitureiden, asemarakennusten ja varikon rakentamisen, kaarteiden ja kaltevuuksien säätämisen sekä sähkönsyötön ja linjan avaamisen.",
+      "trade": "Paikallinen elintarviketehdas haluaisi myydä tuotteitaan myös ulkomaille. Kaupunki haluaa myös reitin, jota pitkin se voi tuoda tarvitsemiaan tavaroita ulkomailta. Tässä opetusohjelmassa opit viemään elintarvikkeita satamasta ja tuomaan tavaroita naapurimaahan johtavaa tavararataa pitkin.",
+      "highway": "Kun kaupunki kasvaa, ihmisiä ja tavaraa kuljettavien autojen määrä lisääntyy. Jotta kaupungin läpi ajavat autot eivät ruuhkauttaisi tavallisia teitä, niille kannattaa valmistella oma reitti jo nyt. Tässä opetusohjelmassa opit rakentamaan moottoritien, joka ylittää tavallisen tien ylätasossa, ja tekemään eritasoliittymän yhdistämällä tiet rampeilla.",
+      "mining": "Tämän saaren maaperässä on arvokkaita luonnonvaroja. Niitä ei kuitenkaan ole millään kuljettaa vuorilta satamaan, joten aarteet jäävät saaren teollisuudelta hyödyntämättä. Tässä opetusohjelmassa opit rakentamaan kaivoksen, tavararadan ja sataman sekä louhimaan malmia, kuljettamaan sen ja viemään sen ulkomaille.",
+      "tourism": "Saarelaiset toivovat, että yhä useampi pääsisi näkemään sisämaan muinaiset rauniot. Matkailijoita varten ei kuitenkaan ole satamaa eikä majoitusta, eikä satamasta kaupunkiin kulje vielä bussilinjaa. Tässä opetusohjelmassa opit rakentamaan hotellin ja risteilyterminaalin, perustamaan bussilinjan ja seuraamaan matkailijoiden saapumista, ravintolan myyntiä ja bussin käyttöä.",
+      "heading": "Pyyntö pormestarille",
+      "windowTitle": "Opetusohjelma",
+      "marine": "Lahden rannalla sijaitsevassa kaupungissa ei vielä ole satamaa eikä öljylaitoksia. Tässä opetusohjelmassa opit täyttämään merta ja rakentamaan tankkerilaiturin, rakentamaan riippusillan lahden suulle, pumppaamaan raakaöljyä merenalaisesta öljykentästä ja viemään sen öljyputkea pitkin vientiin sekä yhdistämään saaren ja kaupungin lauttayhteydellä."
+    },
+    "marine": {
+      "title": "Kehitä merialuetta",
+      "description": "Lahden rannalla sijaitsevassa kaupungissa ei vielä ole satamaa eikä öljylaitoksia. Tässä opetusohjelmassa opit täyttämään merta ja rakentamaan tankkerilaiturin, rakentamaan riippusillan lahden suulle, pumppaamaan raakaöljyä merenalaisesta öljykentästä ja viemään sen öljyputkea pitkin vientiin sekä yhdistämään saaren ja kaupungin lauttayhteydellä.",
+      "step1": {
+        "title": "Suunnittele maantäyttö",
+        "description": "Satama tarvitsee laiturin, johon suuret laivat voivat kiinnittyä, ja maata laitoksille. Täytä merta lahden pohjukassa, niin satamalle syntyy maata. Paina maanrakennuskuvaketta, piirrä alue napsauttamalla neljää keltaista merkkiä järjestyksessä hiiren vasemmalla painikkeella ja sulje se oikealla painikkeella. Varmista, että arvion tyyppi on ”Täyttö”, ja vahvista työ."
+      },
+      "step2": {
+        "title": "Viimeistele täyttömaa",
+        "description": "Kuluta aikaa vähintään kuukausi painamalla ”Aloita” ja paina sitten ”Seuraava”. Tässä opetusohjelmassa ei ole rakennusyrityksiä, joten ”Seuraava” ohittaa täyttötyön rakennusajan. Kun työ valmistuu, merestä tulee maata ja sen meren puoleisesta reunasta laituri, johon laivat voivat kiinnittyä."
+      },
+      "step3": {
+        "title": "Rakenna tie täyttömaalle",
+        "description": "Vaikka täyttömaalle rakennettaisiin satama tai öljyterminaali, ilman tieyhteyttä ihmiset eivät pääse töihin eikä tavaraa voi kuljettaa. Rakenna tie kaupungin tien päästä täyttömaalle. Tässä opetusohjelmassa tie valmistuu heti, kun vahvistat sen. Avaa rakennuspaneeli painamalla kuvakepaneelin ”Tiet, raiteet ja infra”."
+      },
+      "step4": {
+        "title": "Rakenna tankkerilaituri",
+        "description": "Raakaöljyä kuljettavat tankkerit ovat suuria laivoja, joten satama voidaan rakentaa vain paikkaan, jossa laiturin edessä on riittävän syvää vettä. Täyttömaan laiturin edessä on syvää vettä, joten se sopii satamaksi. Paina rakennuskuvaketta, valitse luokasta ”Satamat” ”Tankkerilaituri”, valitse paikka napsauttamalla laiturilla olevan keltaisen ympyrän sisällä hiiren vasemmalla painikkeella ja paina rakennuspaneelin ”Vahvista”. Kun satama on rakennettu, siitä vedetään automaattisesti yhdysväylä avomeren laivaväylälle, ja laivat pääsevät kulkemaan. Tässä opetusohjelmassa rakennusaika ohitetaan."
+      },
+      "step5": {
+        "title": "Rakenna riippusilta lahden suulle",
+        "description": "Moottoritie katkeaa lahden suun molemmilla rannoilla. Lahden suu on 1,6 km leveä, eikä sitä voi ylittää tavallisella pilarisillalla, joten yhdistä rannat riippusillalla, joka ylittää pitkän matkan yhdellä jänteellä. Sillan alta kulkee suurten laivojen väylä, joten sillan on oltava niin korkealla, etteivät laivat osu siihen. Moottoritien päät molemmilla rannoilla ovat jo valmiiksi tällä korkeudella. Avaa kuvakepaneelista ”Tiet, raiteet ja infra”, valitse kohdasta ”Moottoritiet” ”Nelikaistainen riippusilta” ja vedä se pohjoisesta päästä (vaaleansininen ympyrä) eteläiseen päähän (keltainen ympyrä). Viimeistele muoto oikealla painikkeella, paina rakennuspaneelin ”Vahvista” ja paina sitten ”Seuraava”."
+      },
+      "step6": {
+        "title": "Etsi merenalainen öljykenttä",
+        "description": "Seuraavaksi hyödynnetään meren luonnonvaroja. Tarkista ennen öljyterminaalin rakentamista, onko lähistön merenpohjassa öljykenttää. Avaa näkymäpaneeli painamalla ohjaamon ”Näkymä”.",
+        "show": "Valitse pystysuuntaisista välilehdistä ”Luonnonvarat” ja vaihda se tilaan ”Näytä”. Näet lahden pohjassa laajan öljykentän. Avaa öljykentän tiedot napsauttamalla sitä keltaisen merkin kohdalta."
+      },
+      "step7": {
+        "title": "Rakenna öljyterminaali",
+        "description": "Merenalaisesta öljykentästä pumpattu raakaöljy johdetaan öljyputkea pitkin rannalla olevaan öljyterminaaliin, josta se myydään markkinoille. Öljyterminaali rakennetaan laiturin äärelle, jonne öljyputki voidaan tuoda. Paina rakennuskuvaketta, valitse luokasta ”Satamat” ”Öljyputken vastaanottoterminaali”, valitse paikka napsauttamalla laiturilla olevan keltaisen ympyrän sisällä hiiren vasemmalla painikkeella ja paina rakennuspaneelin ”Vahvista”. Tässä opetusohjelmassa rakennusaika ohitetaan."
+      },
+      "step8": {
+        "title": "Rakenna öljynporauslautta",
+        "description": "Raakaöljyä pumppaava öljynporauslautta on rakennettava merelle suoraan öljykentän päälle. Paina rakennuskuvaketta, valitse luokasta ”Maatalous ja luonnonvarat” ”Öljynporauslautta”, valitse paikka napsauttamalla meren päällä olevan keltaisen ympyrän sisällä hiiren vasemmalla painikkeella ja paina rakennuspaneelin ”Vahvista”. Tässä opetusohjelmassa rakennusaika ohitetaan."
+      },
+      "step9": {
+        "title": "Yhdistä öljyputkella",
+        "description": "Johda porauslautan pumppaama raakaöljy merenalaista öljyputkea pitkin öljyterminaaliin. Avaa kuvakepaneelista ”Tiet, raiteet ja infra”, valitse kohdasta ”Öljy” ”Merenalainen öljyputki” ja vedä se porauslautan liitäntäpisteestä öljyterminaalin liitäntäpisteeseen. Kun vahvistat sen ja painat ”Seuraava”, öljyputki valmistuu heti."
+      },
+      "step10": {
+        "title": "Vie raakaöljyä",
+        "description": "Öljyterminaali myy vastaanottamansa raakaöljyn markkinoille, ja tankkerilaituri ostaa sen ja vie sen laivoilla ulkomaille. Työntekijöiden saapuminen ja öljyn myynnin alkaminen vievät muutaman kuukauden. Kuluta aikaa muutama kuukausi painamalla ”Aloita” ja paina sitten ”Seuraava”. Jos vientiä ei vielä ole, kuluta vähän lisää aikaa ja paina uudelleen."
+      },
+      "step11": {
+        "title": "Rakenna lauttalaituri",
+        "description": "Ulkosaarelta ei pääse mitenkään kaupunkiin. Avaa lauttayhteys, jotta saaren asukkaat voivat kulkea kaupunkiin. Rakenna ensin lauttalaituri kaupungin rantaan. Avaa kuvakepaneelista ”Tiet, raiteet ja infra”, valitse kohdasta ”Vesiväylä” ”Lauttalaituri” ja vedä se rannalta (vaaleansininen ympyrä) merelle (keltainen ympyrä). Viimeistele muoto oikealla painikkeella, paina rakennuspaneelin ”Vahvista” ja paina sitten ”Seuraava”."
+      },
+      "step12": {
+        "title": "Vedä lauttaväylä",
+        "description": "Vedä seuraavaksi väylä, jota laiva kulkee saaren laiturilta kaupungin laiturille. Väylä ei voi kulkea maan yli, joten kierrä saaren pohjoispuolelta, alita lahden suun riippusilta ja aja lahteen. Aseta matkan varrelle pisteitä napsauttamalla hiiren vasemmalla painikkeella. Valitse kohdasta ”Vesiväylä” ”Lauttaväylä”, yhdistä saaren laiturin kärki kaupungin laiturin kärkeen, vahvista ja paina sitten ”Seuraava”."
+      },
+      "step13": {
+        "title": "Avaa lauttalinja",
+        "description": "Perusta lopuksi väylällä kulkeva lauttalinja. Valitse ”Joukkoliikenne” → ”Uusi linja” → ”Lauttalinja”, sijoita pysäkit saaren laiturille ja kaupungin laiturille, sulje kierros napsauttamalla ensimmäistä pysäkkiä ja vahvista. Kun linja on perustettu, opetusohjelma on suoritettu. Jotta laivat todella liikennöisivät, tarvitaan myös laivoja vuokraava huoltotelakka."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Aloita peli",
+    "nowLoading": "Ladataan…",
+    "startError": "Aloittaminen epäonnistui. Yritä uudelleen.",
+    "todaysTips": "Päivän vinkki",
+    "gotIt": "Sulje",
+    "items": {
+      "tip1": {
+        "title": "Raha kiertää",
+        "description": "Kaupungin rakennustyöt ja julkisten laitosten palkat päätyvät yritysten ja kotitalouksien tuloiksi ja rahoittavat ostoksia ja uutta tuotantoa. Pelkkä verojen kerääminen ei pidä taloutta käynnissä. Ohjaa budjettia tarpeellisiin palveluihin ja korjauksiin ja palauta raha kaupungin kiertoon."
+      },
+      "tip2": {
+        "title": "Pitkä tie turvallisuuteen",
+        "description": "Turvattomassa ympäristössä kasvaneet kaupunkilaiset syyllistyvät aikuisinakin muita herkemmin rikoksiin. Jatka poliisitoimintaa ja lasten kasvuympäristön parantamista. Yleisen turvallisuuden korjaaminen juuria myöten vie vähintään sukupolven."
+      },
+      "tip3": {
+        "title": "Tietä, kiitos!",
+        "description": "Palokunnasta on apua vasta, kun se pääsee paikalle. Vaikka paloasema olisi olemassa, vahingot kasvavat, jos matka on liian pitkä tai tiet ruuhkautuneet. Tarkista budjetin lisäksi asemien sijainti ja kulkureitit."
+      },
+      "tip5": {
+        "title": "Kivinen tie",
+        "description": "Jyrkkään rinteeseen rakennettava tie on paljon työläämpi kuin tasamaalle tehtävä. Kartan lyhin reitti ei aina ole halvin. Vertaa maastoa ja rakennuskustannusarvioita ja harkitse myös pientä kiertotietä."
+      },
+      "tip6": {
+        "title": "Suunnitelmallisuutta, kiitos",
+        "description": "Kun asukkaita ja tehtaita tulee lisää, myös sähkön ja veden kysyntä kasvaa. Jos laitosten rakentaminen aloitetaan vasta pulan iskiessä, valmistumista saa odottaa. Tarkista tarjonnan varmuusmarginaali ennen uuden kaupunginosan rakentamista."
+      },
+      "tip7": {
+        "title": "Hiljaa hyvä tulee",
+        "description": "Nopeusrajoituksen nostaminen nopeuttaa matkoja, mutta lisää onnettomuusriskiä. Myös jyrkät kaarteet vaativat varovaisuutta. Tarkista tien muoto ja nopeusrajoitus paikoissa, joissa sattuu paljon onnettomuuksia."
+      },
+      "tip8": {
+        "title": "Sijoitus tulevaisuuteen",
+        "description": "Sairaaloiden ja kehittyneiden tehtaiden työvoimapula ei ratkea pelkästään väkilukua kasvattamalla. Järjestä yliopistoon pääaineet ja aloituspaikat, joilla koulutetaan tarvittavia osaajia, ja varaa suunnitelmassa aikaa myös valmistumiselle."
+      },
+      "tip9": {
+        "title": "Kestämään tehty",
+        "description": "Jos korjaukset laiminlyödään, rakennukset ja tiet rapistuvat ja voivat lopulta romahtaa. Tulipalot ja romahdukset heikentävät myös kaupunkilaisten mielialaa, joten koko budjetin käyttäminen uudisrakentamiseen on riskialtista. Jätä rahaa myös olemassa olevien rakennusten korjauksiin ja palontorjuntaan."
+      },
+      "tip10": {
+        "title": "Suurpalo",
+        "description": "Tiiviisti rakennetulla alueella yhden talon tulipalo leviää helposti naapureihin. Palokunnan lisäksi myös rakennusten väliin jätettävä tila suojaa kaupunkia."
+      },
+      "tip11": {
+        "title": "Kaiva syvemmältä",
+        "description": "Valitse kaivosten ja öljykenttien sijainti luonnonvarojen esiintymien perusteella. Varannot hupenevat, kun niitä hyödynnetään. Kaivoksista elävän kaupungin on mietittävä myös, mistä työpaikat ja verotulot tulevat esiintymien ehdyttyä."
+      },
+      "tip12": {
+        "title": "Kaupungin lypsylehmä",
+        "description": "Kun pormestari rakennuttaa asuin- tai liikerakennuksia, kaupunki saa vuokratuloja asukkailta ja yrityksiltä. Tyhjät tilat eivät tuota mitään, joten tarkista kysytyt käyttötarkoitukset, lähialueen tyhjät tilat ja sijainti."
+      },
+      "tip13": {
+        "title": "Verokarhu tulee",
+        "description": "Veroprosentit vaikuttavat kaupungin tulojen lisäksi yritysten kustannuksiin ja kannattavuuteen. Niitä voi käyttää myös elinkeinopolitiikkaan esimerkiksi keventämällä kasvatettavan toimialan verotaakkaa. Kun verotulot eivät riitä, tarkista toimialojen tilanne ennen kuin korotat veroja kaikille."
+      },
+      "tip14": {
+        "title": "Varasuunnitelma",
+        "description": "Kun voimalaitos tai voimalinja pysähtyy onnettomuuden tai katastrofin vuoksi, vaikutukset leviävät sähköä käyttäviin tehtaisiin ja kaupunkilaisten arkeen. Varaa tärkeälle infralle sekä varalaitoksia että vaihtoehtoisia siirtoreittejä, jotta yksi vika ei pysäytä koko kaupunkia."
+      },
+      "tip15": {
+        "title": "Koti hakusessa",
+        "description": "Jos keskustan tyhjiä tontteja jätetään käyttämättä, kotinsa menettäneet asettuvat niille helposti ja syntyy slummi. Kun tarjolla on asuntoja kohtuulliseen vuokraan, asukkaat muuttavat vähitellen niihin ja slummi kutistuu itsestään."
+      },
+      "tip16": {
+        "title": "Teollisuuskeskittymät",
+        "description": "Kun samaa tuotetta tai sen raaka-aineita valmistavat toimialat sijoittuvat lähekkäin, sijainti on tuotannolle edullinen. Mieti, voisitko keskittää toisiinsa liittyvät toimialat sen sijaan, että hajauttaisit tehtaita ympäri kaupunkia. Asuinalueiden lähellä on kuitenkin otettava huomioon melu ja ilmansaasteet."
+      },
+      "tip17": {
+        "title": "Duunia yötä päivää",
+        "description": "Kun pidennät työaikaa määräyspaneelista, sama määrä työntekijöitä riittää suurempaan tuotantoon. Samalla terveys ja vapaa-aika kärsivät, ja viihdekulutus vähenee. Jos tienaamiseen menee liikaa aikaa, rahan käyttämiseen ei jää aikaa."
+      },
+      "tip18": {
+        "title": "Työmatkahelvetti",
+        "description": "Pitkät työmatkat vähentävät vapaa-aikaa ja viihteeseen käytettävää rahaa. Tarkista kotien ja työpaikkojen välinen etäisyys ja työmatkareittien ruuhkat. Vilkas ostoskatu on pelkkää ikkunamaisemaa kaupunkilaiselle, joka ehtii kotiin vain nukkumaan."
+      },
+      "tip19": {
+        "title": "Kauaskatseisuutta",
+        "description": "Pitkiä junia voi käyttää vain, jos ne mahtuvat linjan jokaisen aseman laituriin. Mieti laiturien pituus jo asemaa rakentaessasi, jotta matkustajamäärien kasvulle on tilaa. Yhden aseman pidentäminen ei auta, jos muut asemat jäävät lyhyiksi."
+      },
+      "tip20": {
+        "title": "Maton alle",
+        "description": "Maan alle rakennetut tiet eivät aiheuta melua eivätkä ilmansaasteita, joten ne ovat yksi tapa suojella asuinalueiden asuinympäristöä. Jotkin ongelmat voi tosiaan haudata."
+      },
+      "tip21": {
+        "title": "Pilvenpiirtäjien varjossa",
+        "description": "Korkeat rakennukset luovat varjon pohjoispuolelleen ja heikentävät lähiympäristön asuinympäristöä. Kiinnitä huomiota rakennusten korkeuteen ja väleihin. Myös vuoret ja muut maastonmuodot luovat varjoa. Kaupungin tulevaisuus voi olla valoisa, vaikka kadulla olisi pilkkopimeää."
+      },
+      "tip22": {
+        "title": "Kausikortti autoa parempi",
+        "description": "Kun joukkoliikenteellä pääsee helposti töihin, kouluun ja kauppaan, kotitaloudet valitsevat helpommin autottoman elämän. Auton omistamisesta säästyvät rahat voi käyttää muuhun kulutukseen."
+      },
+      "tip23": {
+        "title": "Seuraava pysäkki: ei kukaan",
+        "description": "Bussit lisäävät tieliikennettä, vaikka niissä ei olisi yhtään matkustajaa. Liian tiheä vuoroväli voi pahentaa ruuhkia sen sijaan, että helpottaisi niitä. Mieti tarvittavaa vuoromäärää matkustajamäärien ja vuorovälien perusteella."
+      },
+      "tip24": {
+        "title": "Myyrä ei maksa maavuokraa",
+        "description": "Riittävän syvälle rakennettu tunneli voi kulkea ostamatta maata sen yläpuolelta. Matalilla osuuksilla maanhankinta on tarpeen, joten tarkista syvyydet ja kustannusarviot. Jos neuvottelut takkuavat, kaiva vähän syvemmälle."
+      },
+      "tip25": {
+        "title": "Työmatka ilmassa",
+        "description": "Köysirata tuo joukkoliikenteen myös vuorille ja jyrkille rinteille, joille tien rakentaminen on hankalaa. Huolehdi myös kulkuyhteyksistä asemille ja vaihdoista muihin kulkuvälineisiin. Jos maata pitkin kulkeminen on liian työlästä, kaupunkilaiset voi aina jättää roikkumaan."
+      },
+      "tip26": {
+        "title": "Sähköruuhka",
+        "description": "Ylimääräisestä tuotantokapasiteetista ei ole hyötyä, jos voimalinjojen siirtokyky ei riitä. Tarkista ennen uusien voimalaitosten rakentamista yhteydet ja siirtokapasiteetti alueelle, jossa sähköstä on pulaa. Yksi ohut voimalinja voi rajoittaa koko kaupungin sähkönsaantia."
+      },
+      "tip27": {
+        "title": "Valitettava onnettomuus",
+        "description": "Rakentamisen tiellä olevan rakennuksen voi räjäyttää ja lavastaa onnettomuudeksi. Kaupunkilaisten mieliala kuitenkin heikkenee pahasti. Kun haluat vapauttaa maata, punnitse ostamisen ja raivauksen kustannuksia sekä sitä, millaisen jäljen väkivaltaiset keinot jättävät kaupunkiin."
+      },
+      "tip28": {
+        "title": "Merelle!",
+        "description": "Jos maa loppuu kesken, uutta rakennusmaata voi tehdä täyttämällä merta. Merenpohjan luonnonvarojen kohdalle voi myös rakentaa öljynporauslauttoja."
+      },
+      "tip29": {
+        "title": "Punaisten valojen kirous",
+        "description": "Mitä enemmän liikennevaloristeyksiä, sitä enemmän matka-aikaa kuluu valoja odotellessa. Vältä liian tiheitä risteyksiä pääteillä. Jos teet tarkan ruutukaavan, aurinko voi laskea ennen kuin kukaan näkee vihreää valoa."
+      },
+      "tip30": {
+        "title": "Näköala kunnossa",
+        "description": "Mitä korkeammalle ja mitä korkeampana radiomasto rakennetaan, sitä laajemman alueen se kattaa. Tarkista, onko maston ja katvealueen välissä vuoria tai muita esteitä. Estynyttä signaalia ei korjata pelkällä tahdonvoimalla."
+      },
+      "tip31": {
+        "title": "Meren antimet",
+        "description": "Vaikka lähellä ei olisi makean veden lähdettä, rannikolle rakennettu suolanpoistolaitos voi toimittaa kaupunkiin vettä. Se tarvitsee kuitenkin toimiakseen sähköä. Vedenlähteen jälkeen etsitään siis virtalähdettä."
+      },
+      "tip32": {
+        "title": "Toisenlaista rikostorjuntaa",
+        "description": "Työttömyys on yksi yleistä turvallisuutta heikentävistä tekijöistä. Pelkkä poliisien lisääminen ei riitä, vaan kaupunkilaiset tarvitsevat myös työpaikkoja. Jos työttömiä on paljon, tarkista avointen työpaikkojen määrä, vaadittu osaaminen ja se, pääsevätkö asukkaat työpaikoille."
+      },
+      "tip33": {
+        "title": "Tulevaisuuden minän ongelma",
+        "description": "Rakennukset ja tiet vaativat korjauksia vielä valmistumisensa jälkeenkin. Jos laajennat vain siksi, että rakennuskustannukset ovat maksettavissa, tulevat budjetit voivat hukkua ylläpitoon. Muista, että tulevaisuuden pormestari olet myös sinä."
+      },
+      "tip34": {
+        "title": "Varo ylipumppausta",
+        "description": "Vedenlähteet uusiutuvat ajan myötä, mutta jos vettä otetaan enemmän kuin sitä uusiutuu, varannot pienenevät. Varmista uudet vedenlähteet ennen kuin kysyntä kasvaa. Lisäpumput eivät tuo lisää vettä."
+      },
+      "tip35": {
+        "title": "Kohtalokas virhe",
+        "description": "Teitä ja rakennuksia ei voi helposti siirtää, kun rakentaminen on alkanut. Tarkista ennen vahvistamista suunta, liitännät ja ympärille jäävä maa. Toisaalta vahingossa vinoon mennyt tiekin alkaa ajan mittaan tuntua kaupungin omaleimaiselta piirteeltä."
+      },
+      "tip36": {
+        "title": "Pormestari valvoo",
+        "description": "Napsauttamalla jalankulkijaa tai autoa voit lisätä kaupunkilaisen seurantaluetteloon. Sen avulla voit seurata kiinnostavan asukkaan elämää. Koko kaupungin tilastojen lisäksi voit tarkastella kaupunkia yhden ihmisen arjen kautta."
+      },
+      "tip37": {
+        "title": "Perusvoima",
+        "description": "Aurinko- ja tuulivoiman tuotanto vaihtelee sään mukaan. Jos mitoitat tarjonnan vain hyvän sään tuotannon mukaan, sähköä voi puuttua, kun sää muuttuu. Yhdistä niihin myös säästä vähemmän riippuvaisia voimanlähteitä, kuten lämpövoimaa tai ydinvoimaa."
+      },
+      "tip38": {
+        "title": "Koolla on väliä",
+        "description": "Kaikki rakennukset eivät mahdu pienille tonteille. Jos haluat rakentaa tietyn laitoksen, tarkista sen vaatima pinta-ala ennen tonttien jakamista. Vaikka maata olisi vapaana, suuri rakennus ei mahdu, jos kaikki tontit ovat pieniä."
+      },
+      "tip39": {
+        "title": "Palvelu on maksullinen",
+        "description": "Jäteveden käsittely, jätehuolto, tietoliikenne, terveydenhuolto ja muut julkiset palvelut voivat olla oletuksena maksuttomia. Asettamalla maksun saat käyttäjät kattamaan osan käyttökustannuksista. Pormestari päättää, ovatko hinnat kaupunkilaisystävällisiä vai rohkeita."
+      },
+      "tip40": {
+        "title": "Kopioi ja liitä -kaupunki",
+        "description": "Kun pormestari rakennuttaa rakennuksia, olemassa olevan rakennuksen voi kopioida. Jos tyyppi ja kerrosluku pysyvät samoina ja tontille mahtuu alkuperäinen rakennus, rakennuskustannukset pienenevät. Katukuva on yksitoikkoinen, mutta lompakko kiittää."
+      },
+      "tip41": {
+        "title": "Ratkaiseeko vain vuokra?",
+        "description": "Asukkaat vertailevat uutta kotia valitessaan vuokraa, työ-, koulu- ja ostosmatkojen vaivaa, asunnon laatua ja asuinympäristöä. Myös melu, ilmansaasteet, yleinen turvallisuus ja auringonvalo ovat tärkeitä. Halpaa mutta hankalasti sijaitsevaa asuntoa ei helposti valita, ja kätevästikin sijaitsevan asunnon vuokran on sovittava kotitalouden budjettiin ja tilaa on oltava tarpeeksi."
+      },
+      "tip42": {
+        "title": "Karilla on myöhäistä",
+        "description": "Suuret satamat, kuten kontti-, bulkki- ja tankkerisatamat, tarvitsevat riittävän syvää vettä. Rannikot, joilla merenpohja viettää jyrkästi, sopivat satamille, koska syvä vesi on lähellä rantaa. Loivasti syvenevällä matalalla rannikollakin satama onnistuu, kun maata jatketaan täyttämällä syvään veteen asti."
+      },
+      "tip43": {
+        "title": "Ihan vain hetkeksi",
+        "description": "Kadunvarsipysäköinnin lisääntyminen hidastaa liikennettä ja lisää onnettomuuksia. Rakenna pysäköintipaikkoja, jotta kaduille levinneille autoille löytyy muu paikka. Pysäköinti ”ihan vain hetkeksi” voi pysäyttää koko kaupungin."
+      },
+      "tip44": {
+        "title": "Mottiin jäänyt",
+        "description": "Rakennuksia voi rakentaa myös kauas teistä, mutta mitä pidempi matka tielle on, sitä huonommat ovat kulkuyhteydet. Tehtaille ja kaupoille tavaroiden hankinta vie enemmän aikaa, ja asukkaiden työ- ja ostosmatkat käyvät raskaammiksi. Rakenna rakennukset teiden varsille tai vedä tie aivan niiden viereen."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Valitsemalla tontin voit suunnitella sille rakennuksen. Suunnittelusta valmistumiseen kuluu jonkin aikaa.",
+    "parcelCreation": "Avaa Ctrl-näppäimellä rengasvalikko ja valitse luontitapa, ja valitse sitten kohde napsauttamalla 3D-näkymää. Säädä mitat paneelissa ja vahvista.",
+    "transitCreation": "Aseta pysäkit järjestyksessä hiiren vasemmalla painikkeella ja sulje kierros napsauttamalla ensimmäistä pysäkkiä. Lisää välipiste vetämällä osuutta, siirrä pistettä vetämällä ja poista oikealla painikkeella. Edestakaisessa liikenteessä aseta myös paluusuunnan pysäkit. Jos napsautat asetettua pysäkkiä uudelleen tai pudotat pysäkin toisen pysäkin päälle, linja pysähtyy siinä uudelleen.",
+    "transitManagement": "Joukkoliikenteen linjaluettelo. Voit säätää lipun hintoja ja vuorovälejä sekä perustaa ja poistaa linjoja. Lipun hinta vaikuttaa asukkaiden reitinvalintaan. Liian korkea hinta vähentää matkustajia ja lisää autonomistusta.",
+    "pathConstruction": "Rakenna teitä ja raiteita. Napsauta maastoa 3D-näkymässä: lisää kärkipisteitä hiiren vasemmalla painikkeella, vahvista muoto oikealla painikkeella ja siirrä kärkipisteitä vetämällä. Pitämällä Ctrl-näppäintä painettuna avaat asetusvalikon (kaari/suora ja kiinnitys). Muuta penkereen tai leikkauksen korkeutta näppäimillä 3/4.",
+    "pathConstructionElevated": "Rakenna teitä ja raiteita. Napsauta maastoa 3D-näkymässä: lisää kärkipisteitä hiiren vasemmalla painikkeella, vahvista muoto oikealla painikkeella ja siirrä kärkipisteitä vetämällä. Pitämällä Ctrl-näppäintä painettuna avaat asetusvalikon (kaari/suora ja kiinnitys). Muuta korkeutta näppäimillä PageUp/PageDown tai 1/2 ja penkereen tai leikkauksen korkeutta näppäimillä 3/4.",
+    "districtEdit": "Luo, laajenna ja yhdistä kaupunginosia, jotka ovat määräysten ja tilastojen yksiköitä. Vaihda työkalua pitämällä Ctrl-näppäintä painettuna 3D-näkymässä. Luontityökalu: napsauta tietä hiiren vasemmalla painikkeella, niin syntyy uusi kaupunginosa näytetyllä värillä (väri vaihtuu aina, kun valitset työkalun). Laajennustyökalu: valitse laajennettava kaupunginosa oikealla painikkeella ja liitä siihen teitä napsauttamalla niitä vasemmalla painikkeella. Yhdistämistyökalu: valitse oikealla painikkeella kaupunginosa, johon yhdistetään, ja napsauta yhdistettävää kaupunginosaa vasemmalla painikkeella, niin vahvistuspaneeli avautuu. Valitun kaupunginosan väri ja nimi näkyvät hiiren osoittimen vieressä. Lopeta painamalla painiketta uudelleen.",
+    "bulldozer": "Puskutraktoritila. Poista tyhjiä tontteja, suunniteltuja rakennuksia, suunniteltuja teitä ja maaston koriste-esineitä hiiren vasemmalla painikkeella (alueelle sirotellut koriste-esineet poistetaan koko alueelta vahvistuksen jälkeen). Lopeta painamalla painiketta uudelleen.",
+    "bulldozerInstant": "Puskutraktoritila. Hiiren vasen painike poistaa rakennukset, tiet, tyhjät tontit ja maaston koriste-esineet heti ilman vahvistusta. Rakennukset katoavat käyttäjineen ja asukkaineen, eikä maastoa palauteta ennalleen (kaupungintaloa, rajanylityspaikkaa ja joukkoliikenteen osuuksia ei voi poistaa; vain alueelle sirotellut koriste-esineet poistetaan koko alueelta vahvistuksen jälkeen). Lopeta painamalla painiketta uudelleen.",
+    "cityBudget": "Päätä, miten verotuloista ja liiketoiminnasta saadut varat jaetaan seuraavalle kaudelle. Kun kaupunki ostaa tarvikkeita esimerkiksi tienrakennukseen tai julkisten laitosten toimintaan, se voi ostaa niitä vain tässä päätetyn budjetin rajoissa. Jos budjetti ei riitä, julkisten laitosten henkilöstöä voidaan myös irtisanoa.",
+    "resourceEdit": "Luo luonnonvara-alue. Valitse luonnonvaran tyyppi ja napsauta sitten maastoa. Lisää kärkipiste hiiren vasemmalla painikkeella, lisää kärkipiste väliin napsauttamalla reunaa ja poista kärkipiste oikealla painikkeella. Siirrä kärkipistettä vetämällä.",
+    "grading": "Aseta kärkipisteitä hiiren vasemmalla painikkeella ja vahvista alue oikealla painikkeella."
+  }
+}

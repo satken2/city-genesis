@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Våningsfördelning",
+    "parking": "Parkering",
+    "type": "Byggnadstyp",
+    "durability": "Hållbarhet",
+    "floors": "Våningar",
+    "floorsValue": "{{floors}} vån. (våningsyta {{area, number}} m²)",
+    "heightLabel": "Höjd: {{value}} m",
+    "baseAreaLabel": "Byggnadsarea: {{area, number}} m²",
+    "underMaintenance": "Under reparation",
+    "parkingCapacity": "Parkeringskapacitet",
+    "parkingCapacityValue": "{{capacity}} bilar",
+    "parkingDay": "Dagtid",
+    "parkingNight": "Nattetid",
+    "parkingUsage": "{{used}} / {{capacity}} bilar"
+  },
+  "building_appearance": {
+    "variantLabel": "Utseende {{index}}",
+    "layoutHint": "Dra ett kort till byggplatsen för att placera / dra för att flytta / Shift+dra för att rotera / Delete för att ta bort",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Ta bort markerad byggnad",
+    "apply": "Verkställ",
+    "saveFailed": "Det gick inte att spara utseendet.",
+    "noSubbuildings": "Inga delbyggnader är definierade för den här byggnadstypen"
+  }
+}

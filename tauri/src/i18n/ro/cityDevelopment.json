@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritm",
+    "roadVariants": "Tipuri de drum",
+    "patterns": {
+      "grid_1": "Grilă 1",
+      "grid_2": "Grilă 2",
+      "sprawl_1": "Extindere haotică 1",
+      "sprawl_2": "Extindere haotică 2",
+      "sprawl_3": "Extindere haotică 3",
+      "planned_city_1": "Oraș planificat 1",
+      "split_1": "Subdivizare 1"
+    },
+    "spacing": "Distanța dintre drumuri",
+    "blockLength": "Lungimea cvartalului",
+    "splitHint": "Include în zonă cvartale întregi delimitate de drumuri. Drumurile paralele cu latura lungă a cvartalului se trasează la fiecare „Distanța dintre drumuri”, iar cele perpendiculare la fiecare „Lungimea cvartalului”.",
+    "createParcels": "Creează parcele",
+    "parcelArea": "Suprafața parcelei",
+    "hint": "Ține apăsat Ctrl și trage cu butonul stâng ca să colorezi zona de dezvoltat. Trage cu butonul stâng ca să muți harta, folosește rotița ca să mărești sau să micșorezi.",
+    "clear": "Golește",
+    "preview": "Previzualizare",
+    "previewing": "Se calculează…",
+    "create": "Confirmă",
+    "creating": "Se creează…",
+    "previewed": "Terenul din zona de {{area}} va fi nivelat ușor. Se pot planifica tronsoane de drum: {{roads}}, parcele: {{parcels}} (respinse: {{rejected}})",
+    "created": "Terenul a fost nivelat. Planificate – tronsoane de drum: {{roads}}, parcele: {{parcels}} (respinse: {{rejected}})"
+  }
+}

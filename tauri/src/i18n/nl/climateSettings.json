@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Klimaatinstellingen",
+    "name": "Naam van het klimaat",
+    "probabilities": "Weerkansen per maand",
+    "probabilityHint": "Sleep de kleurgrenzen naar links of rechts. Met de invoervelden hieronder kun je ook weertypen op 0% instellen.",
+    "month": "Maand {{month}}",
+    "preset": "Klimaatvoorinstelling",
+    "current": "Huidige instellingen",
+    "chartHint": "Kies een reeks in de legenda en sleep de punten per maand omhoog of omlaag.",
+    "averageHint": "Temperatuur, neerslag en zonneschijn zijn maandgemiddelden. De werkelijke waarden schommelen per tijdvak rond deze gemiddelden.",
+    "apply": "Toepassen",
+    "chart": "Klimaatdiagram per maand"
+  }
+}

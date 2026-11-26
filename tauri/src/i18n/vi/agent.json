@@ -1,0 +1,212 @@
+{
+  "agent": {
+    "back": "Quay lại",
+    "editAppearance": "Đổi diện mạo",
+    "relocateCityHall": "Di dời tòa thị chính",
+    "publicFacility": "Công trình công cộng",
+    "underAcquisition": "Đang đàm phán thu mua đất",
+    "publicFacilityPanel": {
+      "title": "Công trình công cộng"
+    },
+    "abandon": "Bỏ mặc",
+    "abandonHint": "Ngừng duy trì, không sửa chữa và để công trình tự xuống cấp",
+    "statusSince": {
+      "founded": "Ngày thành lập",
+      "householdFormed": "Ngày lập hộ",
+      "arrived": "Ngày đến",
+      "opened": "Ngày khai trương",
+      "schoolOpened": "Ngày mở trường",
+      "completed": "Ngày hoàn công",
+      "operatingSince": "Ngày bắt đầu hoạt động",
+      "resumed": "Ngày hoạt động lại",
+      "paused": "Ngày tạm dừng",
+      "suspended": "Ngày tạm ngừng kinh doanh",
+      "schoolClosed": "Ngày tạm đóng cửa trường",
+      "constructionStarted": "Ngày khởi công",
+      "demolitionScheduled": "Ngày quyết định phá dỡ",
+      "demolitionStarted": "Ngày bắt đầu phá dỡ",
+      "demolished": "Ngày phá dỡ xong",
+      "collapsed": "Ngày sập đổ",
+      "burnedDown": "Ngày cháy rụi",
+      "default": "Ngày đổi trạng thái"
+    },
+    "reserves": "Tiền mặt",
+    "revenues": "Thu nhập",
+    "expenses": "Chi tiêu",
+    "zone": "Khu vực",
+    "building": "Tòa nhà đang ở",
+    "rent": "Tiền thuê",
+    "floorOccupancy": "Diện tích sàn sử dụng",
+    "tenants": "Đơn vị thuê",
+    "guests": "Khách lưu trú",
+    "tabBasicInfo": "Thông tin cơ bản",
+    "utilizationTarget": "Tỷ lệ vận hành mục tiêu",
+    "currentUtilization": "Tỷ lệ vận hành hiện tại",
+    "constructionSpeed": "Tốc độ xây dựng",
+    "constructionCostPerEpoch": "Chi phí xây dựng mỗi kỳ",
+    "remainingConstruction": "Thời gian thi công còn lại",
+    "remainingEpochs": "Khoảng {{n}} kỳ",
+    "tabBuildingInfo": "Thông tin tòa nhà",
+    "tabCargoInfo": "Bốc dỡ hàng",
+    "tabTradeInfo": "Cung cầu và giao dịch",
+    "tabTourismInfo": "Du lịch",
+    "tabEmploymentInfo": "Việc làm",
+    "action": {
+      "purchase": "Thu mua",
+      "bulldoze": "Giải tỏa",
+      "cancelBulldoze": "Hủy giải tỏa",
+      "pause": "Tạm dừng",
+      "resume": "Tiếp tục",
+      "delete": "Xóa",
+      "repair": "Sửa chữa",
+      "rebuild": "Xây lại",
+      "edit": "Sửa",
+      "startConstruction": "Khởi công",
+      "stopConstruction": "Tạm hoãn",
+      "cancelAbandon": "Hủy bỏ mặc",
+      "explode": "Cho nổ",
+      "explodeConfirm": "Cho nổ tòa nhà này và ngụy trang thành tai nạn?\nTòa nhà sẽ sập ngay lập tức, cư dân và nhân viên bên trong đều thiệt mạng. Lòng dân sẽ xấu đi nghiêm trọng và thao tác này không thể hoàn tác.",
+      "explodeTitle": "Cho nổ tòa nhà",
+      "explodeConfirmAction": "Cho nổ"
+    },
+    "pendingWarning": "Tòa nhà này đang ở giai đoạn quy hoạch. Hãy ra lệnh khởi công.",
+    "alerts": {
+      "diagnoseHint": "Nhấp để chẩn đoán nguyên nhân",
+      "title": "Cảnh báo",
+      "constructionShortage": {
+        "title": "Thiếu dịch vụ xây dựng",
+        "description": "Ngân sách xây dựng không đủ nên công trình bị chậm tiến độ."
+      },
+      "onFire": {
+        "title": "Đang cháy!",
+        "description": "Tòa nhà đang xảy ra hỏa hoạn."
+      },
+      "accidentalFire": {
+        "title": "Cháy nhỏ do bất cẩn",
+        "description": "Tòa nhà đã xảy ra cháy do bất cẩn nhưng được khống chế ở quy mô nhỏ."
+      },
+      "infraDisconnected": {
+        "title": "Chưa nối mạng lưới hạ tầng",
+        "description": "Chưa có đường dẫn hạ tầng nào nối vào điểm đấu nối của công trình này. Công trình không thể cung cấp hay tiếp nhận cho đến khi được nối vào mạng lưới."
+      },
+      "capacityTight": {
+        "title": "Gần hết công suất",
+        "description": "Lượng xử lý đã đạt từ 90% công suất của công trình này trở lên. Công trình gần như không thể đáp ứng thêm nhu cầu."
+      },
+      "nonconforming": {
+        "title": "Không phù hợp quy định xây dựng",
+        "description": "Tòa nhà không phù hợp với quy định xây dựng của lô đất. Tòa nhà sẽ không được sửa chữa và sẽ bị phá dỡ khi xuống cấp."
+      },
+      "crime": {
+        "title": "Xảy ra tội phạm",
+        "description": "Đã có tội phạm xảy ra tại tòa nhà này."
+      },
+      "crimeSign": {
+        "title": "Dấu hiệu tội phạm",
+        "description": "Đã phát hiện dấu hiệu tội phạm tại tòa nhà này. Hãy chú ý tình trạng an ninh xấu đi."
+      },
+      "laborShortage": {
+        "title": "Thiếu lao động",
+        "description": "Thiếu nhân viên nên sản xuất và cung cấp dịch vụ đang thấp hơn kế hoạch."
+      },
+      "materialShortage": {
+        "title": "Thiếu nguyên liệu",
+        "description": "Không thu mua đủ nguyên liệu nên sản xuất và cung cấp dịch vụ đang thấp hơn kế hoạch."
+      },
+      "highSkillShortage": {
+        "title": "Thiếu nhân lực chuyên môn",
+        "description": "Không đủ nhân lực kỹ năng cao cần thiết nên sản lượng bị giảm xuống mức mà nhân lực hiện có đảm đương được."
+      },
+      "budgetCapped": {
+        "title": "Thiếu ngân sách",
+        "description": "Ngân sách được phân bổ thấp hơn nhiều so với mức cần thiết nên hoạt động đã bị thu hẹp. Hãy xem lại việc phân bổ ngân sách."
+      },
+      "facilityWarning": {
+        "title": "Công trình công cộng không thể vận hành",
+        "description": "Lượng dịch vụ công trình này cung cấp thấp hơn nhiều so với mục tiêu. Hãy kiểm tra tình hình lao động và thu mua nguyên liệu."
+      },
+      "sanitationWarning": {
+        "title": "Vệ sinh xuống cấp",
+        "description": "Tình trạng vệ sinh trong khuôn viên tòa nhà này đã xấu đi nghiêm trọng, ảnh hưởng đến các hộ đang sinh sống. Hãy cải thiện việc cung cấp dịch vụ xử lý nước thải và rác thải."
+      },
+      "infraWarning": {
+        "title": "Công trình hạ tầng ngừng hoạt động hoặc sập đổ",
+        "description": "Công trình này đã ngừng hoạt động hoặc sập đổ, ảnh hưởng đến việc cung cấp hạ tầng. Hãy kiểm tra tình trạng công trình và đường cung cấp."
+      },
+      "farFromRoad": {
+        "title": "Cách xa đường",
+        "description": "Đường gần nhất cách khoảng {{distance}} m. Việc nhập hàng, đi làm và mua sắm sẽ rất bất lợi, hãy cân nhắc kéo dài đường đến gần hơn."
+      },
+      "noRoadAccess": {
+        "title": "Không có đường để kết nối",
+        "description": "Tòa nhà này không có đường nào để kết nối. Việc nhập hàng, đi làm và mua sắm sẽ rất bất lợi, hãy xây đường ở gần đây."
+      }
+    },
+    "infra": {
+      "title": "Kết nối hạ tầng",
+      "connected": "Đã kết nối",
+      "disconnected": "Chưa kết nối",
+      "received": "Lượng tiếp nhận"
+    },
+    "tabConstructionInfo": "Thi công",
+    "tabEducationInfo": "Giáo dục",
+    "education": {
+      "totalStudents": "Số học sinh đang theo học",
+      "totalCapacity": "Tổng chỉ tiêu",
+      "statusTitle": "Tình hình theo học",
+      "enrolled": "Đang học",
+      "vacant": "Chỗ trống",
+      "noCapacity": "Không có chỉ tiêu",
+      "countLabel": "Số người",
+      "enrollmentBySkill": "Tình hình theo học theo kỹ năng",
+      "settingsTitle": "Thiết lập chỉ tiêu tuyển sinh",
+      "settingsHint": "Đặt trọng số phân bổ cho từng kỹ năng. Tổng chỉ tiêu được chia theo tỷ lệ trọng số.",
+      "skillHeader": "Kỹ năng",
+      "weightHeader": "Trọng số",
+      "previewHeader": "Chỉ tiêu",
+      "save": "Lưu",
+      "saving": "Đang lưu…",
+      "saveFailed": "Không thể lưu",
+      "sumMustBePositive": "Tổng chỉ tiêu phải từ 1 trở lên",
+      "invalidWeight": "Trọng số phải là số nguyên từ 0 trở lên",
+      "studentsList": "Danh sách học sinh",
+      "noStudents": "Không có học sinh",
+      "showMore": "Xem thêm ({{count}} người)"
+    }
+  },
+  "agentList": {
+    "filterType": "Loại",
+    "filterVariant": "Biến thể",
+    "filterZone": "Khu vực",
+    "allVariants": "Tất cả biến thể",
+    "allZones": "Tất cả khu vực",
+    "resultCount": "{{count}} kết quả",
+    "capped": "(trên tổng số {{total}})",
+    "loading": "Đang tải…",
+    "noResults": "Không có chủ thể kinh tế phù hợp",
+    "colStatus": "Trạng thái",
+    "colVariant": "Biến thể",
+    "colName": "Tên",
+    "colProduct": "Sản phẩm",
+    "colPrice": "Giá",
+    "colProduction": "Sản lượng",
+    "colStock": "Tồn kho",
+    "colSold": "Lượng bán",
+    "colWage": "Đơn giá lương",
+    "colEmployment": "Lao động",
+    "colUtilization": "Tỷ lệ vận hành",
+    "colBdType": "Loại tòa nhà",
+    "colDurability": "Độ bền",
+    "colRent": "Tiền thuê",
+    "colFloors": "Số tầng",
+    "colFloorArea": "Diện tích sàn",
+    "colOccupancy": "Tỷ lệ lấp đầy",
+    "colFamilyType": "Loại hộ",
+    "colDiscretionaryIncome": "Thu nhập khả dụng",
+    "colSatisNutrition": "Dinh dưỡng",
+    "colSatisHealthcare": "Y tế",
+    "colSatisLeisure": "Giải trí",
+    "colSatisResidential": "Nhà ở",
+    "colAutomobile": "Ô tô riêng"
+  }
+}

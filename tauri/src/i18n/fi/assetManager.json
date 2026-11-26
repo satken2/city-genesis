@@ -1,0 +1,22 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Rakennukset",
+      "paths": "Väylät",
+      "vehicles": "Ajoneuvot",
+      "props": "Koriste-esineet"
+    },
+    "additional": "Lisämallit",
+    "loading": "Ladataan malleja 3D-näkymästä…",
+    "noModel": "Ei mallia",
+    "noImage": "Ei kuvaa",
+    "weight": "Painotus",
+    "applyNote": "Painotusten muutokset tulevat voimaan, kun seuraavan kerran aloitat tai lataat pelin.",
+    "preview": {
+      "hint": "Kierrä vetämällä / zoomaa rullalla",
+      "zoomIn": "Lähennä",
+      "zoomOut": "Loitonna",
+      "reset": "Palauta"
+    }
+  }
+}

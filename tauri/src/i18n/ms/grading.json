@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Jenis",
+    "kind": {
+      "land": "Perataan tanah",
+      "shore": "Tebus guna tanah"
+    },
+    "baseHeight": "Ketinggian asas",
+    "targetHeight": "Ketinggian sasaran",
+    "cutVolume": "Isi padu potongan",
+    "fillVolume": "Isi padu timbusan",
+    "quayLength": "Panjang tembok dermaga",
+    "quayArea": "Keluasan muka tembok dermaga",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Ketinggian (beza dari asas)",
+    "seaLevelHeight": "Ketinggian (dari aras laut)",
+    "baseNote": {
+      "frontage": "0 ialah aras permukaan jalan yang dihadapi ({{value}} m)",
+      "terrain_mean": "0 ialah ketinggian purata semasa kawasan ini ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "Bentuk kawasan tidak sah. Lukis tanpa sisi yang bersilang.",
+      "outside_city": "Kawasan terkeluar dari sempadan bandar.",
+      "too_large": "Kawasan terlalu luas (had: {{limit}} km²).",
+      "on_water": "Kawasan yang sepenuhnya di atas laut tidak boleh dibuat kerja tanah. Lukis supaya kawasan itu mencecah darat.",
+      "no_land_overlap": "Lukis kawasan supaya bertindih dengan darat (jika tidak, jalur laut akan tertinggal antara pantai dan kawasan itu).",
+      "overlaps_parcel": "Kawasan bertindih dengan lot sedia ada.",
+      "overlaps_path": "Kawasan bertindih dengan jajaran seperti jalan atau landasan.",
+      "overlaps_water": "Kawasan menyentuh sungai atau tasik.",
+      "overlaps_quay_band": "Kawasan bertindih dengan tembok dermaga tanah tebus guna.",
+      "invalid_height_offset": "Ketinggian di luar julat (sehingga ±{{offsetLimit}} m dari ketinggian asas).",
+      "below_sea_level": "Ketinggian tidak boleh lebih rendah daripada aras laut.",
+      "too_narrow": "Kawasan terlalu sempit; tiada bahagian yang boleh ditambak di dalam tembok dermaga.",
+      "no_work": "Tanah sudah berada pada ketinggian sasaran, jadi tiada kerja diperlukan.",
+      "insufficient_funds": "Tidak dapat membuat tempahan kerana dana tidak mencukupi."
+    },
+    "confirm": "Sahkan",
+    "confirming": "Mengesahkan...",
+    "cancel": "Batal",
+    "confirmFailed": "Gagal menempah kerja tanah."
+  }
+}

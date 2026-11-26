@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Tato hra využívá níže uvedené materiály. Jména autorů, zdroje, názvy licencí a texty uvedení autorství vyžadované licencemi jsou uvedeny v původním znění.",
+    "empty": "Žádné položky.",
+    "requiredText": "Požadované uvedení autorství",
+    "categories": {
+      "bgm": "Hudba",
+      "sfx": "Zvukové efekty",
+      "image": "Obrázky a ikony",
+      "font": "Písma",
+      "model": "3D modely",
+      "texture": "Textury"
+    }
+  }
+}

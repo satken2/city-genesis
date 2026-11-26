@@ -1,0 +1,63 @@
+{
+  "mapNavigation": {
+    "title": "Utforska staden",
+    "openSidebar": "Öppna sidofältet",
+    "closeSidebar": "Stäng sidofältet",
+    "back": "Tillbaka",
+    "search": "Sök efter en plats",
+    "origin": "Sök startpunkt",
+    "destination": "Sök resmål",
+    "clear": "Rensa",
+    "searching": "Söker…",
+    "error": "Det går inte att ansluta. Ladda om och försök igen.",
+    "noResults": "Inga platser hittades",
+    "mode": "Färdsätt",
+    "pedestrian": "Gång och kollektivtrafik",
+    "automobile": "Bil",
+    "pickOrigin": "Välj startpunkt på kartan",
+    "pickDestination": "Välj resmål på kartan",
+    "swap": "Byt plats",
+    "cancel": "Avbryt",
+    "directions": "Vägbeskrivning hit",
+    "intro": "Sök efter anläggningar, stationer, stadsdelar eller vägar, eller välj en plats på kartan.",
+    "chooseOrigin": "Sök efter en startpunkt eller välj en på kartan.",
+    "routing": "Söker resväg…",
+    "showRoute": "Visa hela resvägen",
+    "mapPoint": "Punkt på kartan",
+    "minutes": "Ca {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Uppskattning baserad på vägnätet från resvägsberäkning nr {{epoch}}. Streckade linjer visar gångsträckor och anslutningar till vägar.",
+    "busy": "Simuleringen pågår. Resultatet uppdateras när den är klar.",
+    "not_ready": "Det finns inga resvägsdata ännu. Kör en simulering i den här staden för att se resvägar.",
+    "unreachable": "Det finns ingen resväg mellan de här två platserna.",
+    "no_access": "Ingen tillgänglig väg hittades nära den valda platsen.",
+    "geometry_unavailable": "Kollektivtrafikens sträckning för den här resvägen går inte att hämta.",
+    "place_missing": "Den valda platsen har tagits bort. Välj en plats igen.",
+    "kind": {
+      "agent": "Anläggning",
+      "zone": "Stadsdel",
+      "stop": "Hållplats",
+      "station": "Station",
+      "point": "Punkt",
+      "road": "Väg"
+    },
+    "leg": {
+      "walk": "Gång",
+      "drive": "Bil",
+      "transit": "Kollektivtrafik",
+      "conveyor": "Persontransport",
+      "access": "Anslutning till väg",
+      "turn": "Vändning i korsning"
+    },
+    "picking": {
+      "origin": "Klicka på startpunkten på kartan.",
+      "destination": "Klicka på resmålet på kartan."
+    },
+    "pins": {
+      "tab": "Nålar",
+      "hint": "Klicka på kartan för att sätta ut en nål i den valda färgen. Högerklicka på en nål för att ta bort den.",
+      "list": "Nålar",
+      "remove": "Ta bort nål"
+    }
+  }
+}

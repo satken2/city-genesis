@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Структура поверхів",
+    "parking": "Паркування",
+    "type": "Тип будівлі",
+    "durability": "Міцність",
+    "floors": "Поверхи",
+    "floorsValue": "{{floors}} пов. (площа {{area, number}} м²)",
+    "heightLabel": "Висота: {{value}} м",
+    "baseAreaLabel": "Площа забудови: {{area, number}} м²",
+    "underMaintenance": "Ремонтується",
+    "parkingCapacity": "Місткість паркування",
+    "parkingCapacityValue": "{{capacity}} м/м",
+    "parkingDay": "Удень",
+    "parkingNight": "Уночі",
+    "parkingUsage": "{{used}} / {{capacity}} м/м"
+  },
+  "building_appearance": {
+    "variantLabel": "Вигляд {{index}}",
+    "layoutHint": "Перетягніть картку на майданчик, щоб розмістити / перетягуйте, щоб перемістити / Shift+перетягування — обернути / Delete — видалити",
+    "sizeLabel": "{{width}}×{{height}} м",
+    "deleteSelected": "Видалити вибраний корпус",
+    "apply": "Застосувати",
+    "saveFailed": "Не вдалося зберегти зовнішній вигляд",
+    "noSubbuildings": "Для цього типу будівель не визначено додаткових корпусів"
+  }
+}

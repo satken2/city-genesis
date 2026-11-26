@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "การจัดชั้น",
+    "parking": "ที่จอดรถ",
+    "type": "ประเภทอาคาร",
+    "durability": "ความทนทาน",
+    "floors": "จำนวนชั้น",
+    "floorsValue": "{{floors}} ชั้น (พื้นที่ใช้สอย {{area, number}} ㎡)",
+    "heightLabel": "ความสูง: {{value}} m",
+    "baseAreaLabel": "พื้นที่อาคารคลุมดิน: {{area, number}} ㎡",
+    "underMaintenance": "กำลังซ่อมแซม",
+    "parkingCapacity": "ความจุที่จอดรถ",
+    "parkingCapacityValue": "{{capacity}} คัน",
+    "parkingDay": "กลางวัน",
+    "parkingNight": "กลางคืน",
+    "parkingUsage": "{{used}} / {{capacity}} คัน"
+  },
+  "building_appearance": {
+    "variantLabel": "รูปลักษณ์ {{index}}",
+    "layoutHint": "ลากการ์ดไปวางบนที่ดินอาคาร / ลากเพื่อย้าย / Shift+ลากเพื่อหมุน / กด Delete เพื่อลบ",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "ลบอาคารย่อยที่เลือก",
+    "apply": "ใช้",
+    "saveFailed": "บันทึกรูปลักษณ์ไม่สำเร็จ",
+    "noSubbuildings": "อาคารประเภทนี้ไม่มีอาคารย่อยที่กำหนดไว้"
+  }
+}

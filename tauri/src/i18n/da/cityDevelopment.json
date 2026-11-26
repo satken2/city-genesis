@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritme",
+    "roadVariants": "Vejtyper",
+    "patterns": {
+      "grid_1": "Gitter 1",
+      "grid_2": "Gitter 2",
+      "sprawl_1": "Byspredning 1",
+      "sprawl_2": "Byspredning 2",
+      "sprawl_3": "Byspredning 3",
+      "planned_city_1": "Planlagt by 1",
+      "split_1": "Opdeling 1"
+    },
+    "spacing": "Vejafstand",
+    "blockLength": "Karrélængde",
+    "splitHint": "Medtag hele karréer, der er omgivet af veje. Veje parallelt med karréens lange side lægges med »Vejafstand« imellem, og tværgående veje med »Karrélængde« imellem.",
+    "createParcels": "Opret parceller",
+    "parcelArea": "Parcelareal",
+    "hint": "Hold Ctrl nede, og træk med venstre knap for at male det område, der skal udbygges. Træk med venstre knap for at flytte kortet, og brug hjulet til at zoome.",
+    "clear": "Ryd",
+    "preview": "Forhåndsvisning",
+    "previewing": "Beregner…",
+    "create": "Bekræft",
+    "creating": "Opretter…",
+    "previewed": "Terrænet i området {{area}} jævnes let, og der kan planlægges {{roads}} vejstykker og {{parcels}} parceller ({{rejected}} afvist)",
+    "created": "Terrænet er jævnet, og der er planlagt {{roads}} vejstykker og {{parcels}} parceller ({{rejected}} afvist)"
+  }
+}

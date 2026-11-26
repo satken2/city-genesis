@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "E havi átlagos éghajlat",
+    "currentClimate_week": "E heti átlagos éghajlat",
+    "title": "A létesítmények termelési hatékonysága az éghajlat szerint",
+    "facility": "Létesítmény",
+    "factor": "Termelési hatékonyság"
+  }
+}

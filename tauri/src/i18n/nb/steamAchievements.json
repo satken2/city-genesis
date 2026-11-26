@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Neste",
+    "close": "Lukk",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "Byens første skritt",
+        "description": "Fullfør din første bygning. Her begynner byens historie."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "En by som strekker seg mot havet",
+        "description": "Fullfør din første havvindpark eller oljeplattform til havs. Byens industri drar ut på havet."
+      },
+      "RAIL_LINES_1": {
+        "name": "Alle om bord!",
+        "description": "Åpne en jernbanelinje"
+      },
+      "RAIL_LINES_20": {
+        "name": "Jernbanerike",
+        "description": "Ha 20 jernbanelinjer i drift i én by. Linjekartet begynner å bli et syn."
+      },
+      "BUS_LINES_1": {
+        "name": "Bussen kommer til byen",
+        "description": "Åpne en busslinje"
+      },
+      "BUS_LINES_20": {
+        "name": "Med buss overalt",
+        "description": "Ha 20 busslinjer i drift i én by"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Pendling over byen",
+        "description": "Åpne en monorail-linje. Se de kjente gatene fra litt høyere oppe."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Byen i luften",
+        "description": "Ha 20 monorail-linjer i drift i én by"
+      },
+      "LRT_LINES_1": {
+        "name": "Trikken kommer til byen",
+        "description": "Åpne en LRT-linje"
+      },
+      "LRT_LINES_20": {
+        "name": "Trikkebyen",
+        "description": "Ha 20 LRT-linjer i drift i én by"
+      },
+      "POPULATION_10K": {
+        "name": "Hjem for 10 000",
+        "description": "Nå et folketall på 10 000"
+      },
+      "POPULATION_100K": {
+        "name": "En livlig regionby",
+        "description": "Nå et folketall på 100 000"
+      },
+      "POPULATION_500K": {
+        "name": "Blant storbyene",
+        "description": "Nå et folketall på 500 000"
+      },
+      "POPULATION_1M": {
+        "name": "Millionbyen",
+        "description": "Nå et folketall på 1 000 000. En storby som bærer en million liv."
+      },
+      "FLOORS_5": {
+        "name": "En by som vokser oppover",
+        "description": "Få fullført en privat bygning med 5 etasjer eller flere"
+      },
+      "FLOORS_10": {
+        "name": "Første skritt mot høyhusbyen",
+        "description": "Få fullført en privat bygning med 10 etasjer eller flere. Godt det finnes heis."
+      },
+      "FLOORS_20": {
+        "name": "En skyline tar form",
+        "description": "Få fullført en privat bygning med 20 etasjer eller flere"
+      },
+      "FLOORS_40": {
+        "name": "Skyskraper",
+        "description": "Få fullført en privat bygning med 40 etasjer eller flere. Et nytt symbol for byen."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Industri for bedre helse",
+        "description": "Få en legemiddelfabrikk i drift i byen. Herfra kan byen bidra til folks helse."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Silisiumbyen",
+        "description": "Få en halvlederfabrikk i drift i byen. Små brikker, stor industri."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "En by med presisjon",
+        "description": "Få en fabrikk for presisjonsinstrumenter i drift i byen. Solid teknisk kunnskap blir byens styrke."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Et nytt hjem for programvare",
+        "description": "Få et programvareselskap i drift i byen. Et sted der nye ideer kan vokse."
+      },
+      "TOURISTS_1": {
+        "name": "Velkommen til byen vår",
+        "description": "Få den første turisten til å overnatte i byen"
+      },
+      "TOURISTS_1K": {
+        "name": "Verdt en reise",
+        "description": "Ha 1 000 turister på besøk i byen samtidig"
+      },
+      "TOURISTS_10K": {
+        "name": "Verden kommer på besøk",
+        "description": "Ha 10 000 turister på besøk i byen samtidig"
+      },
+      "YEARS_10": {
+        "name": "Ti år med byen",
+        "description": "Spill i 10 år i én by. Byggingen av byen fortsetter."
+      },
+      "YEARS_100": {
+        "name": "Hundreårsbyen",
+        "description": "Spill i 100 år i én by. Følg byen gjennom et helt århundre."
+      },
+      "YEARS_500": {
+        "name": "En by som skriver historie",
+        "description": "Spill i 500 år i én by. Generasjoner kommer og går, og byen lever videre."
+      },
+      "YEARS_1000": {
+        "name": "Tusenårsbyen",
+        "description": "Spill i 1 000 år i én by. Bygg en by med tusen års historie."
+      },
+      "YEARS_10000": {
+        "name": "Den evige byen",
+        "description": "Spill i 10 000 år i én by. Det har blitt en lang periode som ordfører."
+      }
+    }
+  }
+}

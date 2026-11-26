@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "วันที่ปัจจุบัน",
+    "afterDate": "วันที่หลังดำเนินการ",
+    "epochCount": "จำนวนรอบ",
+    "message": "จบงานของเทิร์นนี้และเดินเวลาต่อหรือไม่",
+    "yes": "ใช่",
+    "no": "ไม่",
+    "executing": "กำลังจำลอง...",
+    "errorSteamLimit": "ยืนยันตัวตนกับ Steam ไม่ได้ จึงเริ่มรอบต่อไปไม่ได้แล้ว (หากยังไม่ยืนยันตัวตน เล่นได้จนถึงประชากร {{limit}} คน)",
+    "errorAlreadyRunning": "มีรอบอื่นกำลังทำงานอยู่ โปรดรอให้เสร็จแล้วลองอีกครั้ง",
+    "errorFailed": "เริ่มรอบไม่สำเร็จ: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "(ดำเนินการ {{count}} รอบ)",
+    "sectionConstruction": "สถานะการก่อสร้าง",
+    "kindPath": "ถนน",
+    "kindBuilding": "สถานที่",
+    "kindProject": "โครงการ",
+    "noItems": "ไม่มีรายการ",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "เสร็จสมบูรณ์",
+    "sectionStatistics": "สถิติ",
+    "sectionScore": "คะแนน",
+    "scoreGain": "คะแนนบวก",
+    "scoreLoss": "คะแนนลบ",
+    "questState": {
+      "completed": "สำเร็จ",
+      "active": "กำลังดำเนินการ",
+      "locked": "ยังไม่ปลดล็อก",
+      "failed": "ล้มเหลว"
+    },
+    "trendHint": "แนวโน้มใน {{count}} รอบล่าสุด: {{trend}}",
+    "trend": {
+      "up": "แนวโน้มขาขึ้น",
+      "flat": "ทรงตัว",
+      "down": "แนวโน้มขาลง",
+      "none": "ประวัติไม่เพียงพอ"
+    },
+    "statPopulation": "ประชากร",
+    "statTourists": "นักท่องเที่ยว",
+    "statGdp": "GDP",
+    "statPrice": "ระดับราคา",
+    "statIncome": "รายได้",
+    "statUnemployment": "อัตราการว่างงาน",
+    "statHealthcare": "ความเพียงพอด้านการแพทย์",
+    "statNutrition": "ความเพียงพอด้านโภชนาการ",
+    "statLeisure": "บันเทิงและพักผ่อน",
+    "statFire": "เพลิงไหม้",
+    "statTraffic": "อุบัติเหตุจราจร",
+    "statCrime": "อาชญากรรม",
+    "questCompleted": "สำเร็จ!",
+    "questFailed": "หมดเวลา"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "กำลังสำรวจโครงข่ายคมนาคม",
+      "prepare": "กำลังเตรียมงวดนี้",
+      "transit": "กำลังจัดการขนส่งสาธารณะ",
+      "market": "กำลังซื้อขายสินค้า",
+      "production": "กำลังผลิตและบริโภค",
+      "commute": "กำลังเดินทางไปทำงานและไปโรงเรียน",
+      "growth": "ชาวเมืองกำลังเติบโต",
+      "evaluate": "กำลังคำนวณการประเมินเมือง",
+      "immigration": "กำลังรับผู้ย้ายถิ่นเข้า",
+      "labor": "กำลังหางาน",
+      "spawn": "ร้านค้าและบริษัทใหม่กำลังเกิดขึ้น",
+      "relocate": "กำลังย้ายที่อยู่",
+      "construction": "กำลังก่อสร้างอาคาร",
+      "finance": "กำลังจัดระเบียบกระแสเงิน",
+      "plan": "กำลังวางแผนขั้นต่อไป",
+      "incident": "กำลังรับมือไฟไหม้และอุบัติเหตุ",
+      "finalize": "กำลังสรุปสถิติ"
+    }
+  }
+}

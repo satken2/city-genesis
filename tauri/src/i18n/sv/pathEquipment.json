@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Gatuutrustning",
+    "streetlight_type": "Gatubelysning",
+    "fence_type": "Staket",
+    "street_tree_type": "Gatuträd",
+    "utility_mode": "Ledningsdragning",
+    "none": "Ingen",
+    "standard": "Standard",
+    "overhead": "Luftledning",
+    "underground": "Markförlagd",
+    "apply": "Verkställ",
+    "bench_type": "Bänkar",
+    "bin_type": "Papperskorgar",
+    "planter_type": "Planteringar",
+    "advert_type": "Reklam"
+  }
+}

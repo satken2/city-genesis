@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Stesen",
+    "name": "Nama stesen",
+    "ridership": "Bilangan naik",
+    "platforms": "Senarai platform",
+    "noPlatforms": "Tiada platform dalam stesen ini (platform yang bersilang dengan garis akan tergolong di sini)",
+    "lines": "Laluan yang berhenti",
+    "noLines": "Tiada laluan yang berhenti di stesen ini",
+    "stops": "Bilangan naik mengikut hentian",
+    "noStops": "Tiada hentian di stesen ini",
+    "lineRunning": "Beroperasi",
+    "lineSuspended": "Digantung",
+    "houseEnds": "Kedudukan bangunan stesen",
+    "houseEnds_both": "Kedua-dua hujung",
+    "houseEnds_start": "Titik mula",
+    "houseEnds_end": "Titik akhir",
+    "passageMode": "Kedudukan koridor",
+    "passageMode_elevated": "Atas",
+    "passageMode_ground": "Aras tanah",
+    "passageMode_underground": "Bawah tanah"
+  }
+}

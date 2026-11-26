@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Thiết lập tham số trò chơi",
+    "description": "Nên giữ giá trị mặc định. Chỉ điều chỉnh khi bạn muốn thay đổi.",
+    "skip": "Bỏ qua",
+    "start": "Bắt đầu trò chơi",
+    "apply": "Áp dụng và đóng",
+    "close": "Đóng",
+    "loading": "Đang tải…",
+    "reload": "Tải lại",
+    "reloadHint": "Tải lại sau khi máy chủ khởi tạo xong để nhận giá trị mới nhất.",
+    "fetchError": "Không thể tải tham số",
+    "category": {
+      "population": "Dân số và nhập cư",
+      "citizen": "Đời sống công dân",
+      "economy": "Kinh tế",
+      "labor": "Lao động và tiền lương",
+      "education": "Giáo dục",
+      "construction": "Xây dựng và bất động sản",
+      "environment": "Môi trường",
+      "traffic": "Giao thông",
+      "general": "Chung",
+      "pathfind": "Giao thông và lộ trình",
+      "building": "Tòa nhà và xây dựng",
+      "disaster": "Thảm họa và an ninh",
+      "slum": "Khu ổ chuột",
+      "production": "Sản xuất và tồn kho",
+      "zone": "Khu vực và lô đất",
+      "financial": "Tài chính"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Hệ số cô đặc đô thị",
+        "desc": "Diện tích sàn mà nhà ở và công trình sử dụng được chia cho giá trị này, để một bản đồ nhỏ vẫn chứa được hoạt động kinh tế của một thành phố lớn. Nếu thay đổi sau khi đã xây dù chỉ một con đường hay một tòa nhà, thành phố sẽ bị hỏng, vì vậy hãy quyết định trước khi xây bất cứ thứ gì."
+      },
+      "TFR_TARGET": {
+        "label": "Mục tiêu tổng tỷ suất sinh (TFR)",
+        "desc": "Tỷ suất sinh mà các hộ gia đình hướng tới. Càng cao thì trẻ em càng dễ ra đời."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Tỷ lệ kết hôn",
+        "desc": "Hệ số xác suất cơ bản để công dân kết hôn. Càng lớn thì càng dễ kết hôn."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Tuổi sinh con tối thiểu",
+        "desc": "Độ tuổi thấp nhất có thể sinh con. Dưới tuổi này sẽ không có ca sinh nào."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Tuổi sinh con tối đa",
+        "desc": "Độ tuổi cao nhất có thể sinh con. Quá tuổi này sẽ không có ca sinh nào."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Tỷ lệ kết hôn của hộ nhập cư",
+        "desc": "Xác suất một hộ người nhập cư chuyển đến thành phố là một cặp vợ chồng."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Tỷ lệ có con thứ nhất (nhập cư)",
+        "desc": "Xác suất một hộ người nhập cư xuất hiện cùng 1 con."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Tỷ lệ có con thứ hai (nhập cư)",
+        "desc": "Xác suất một hộ người nhập cư xuất hiện cùng 2 con."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Tỷ lệ có con thứ ba (nhập cư)",
+        "desc": "Xác suất một hộ người nhập cư xuất hiện cùng 3 con."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Tuổi tối thiểu của người nhập cư trưởng thành",
+        "desc": "Độ tuổi thấp nhất của người trưởng thành chuyển đến với tư cách người nhập cư."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Tuổi tối đa của người nhập cư trưởng thành",
+        "desc": "Độ tuổi cao nhất của người trưởng thành chuyển đến với tư cách người nhập cư."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Hệ số tuổi thọ",
+        "desc": "Hệ số nhân với tuổi thọ tối đa của công dân. 1,08 cho giới hạn khoảng 100 tuổi, 1,06 cho khoảng 150 tuổi.",
+        "graphX": "Tuổi",
+        "graphY": "Xác suất tử vong mỗi năm (sức khỏe 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Diện tích ở của hộ độc thân (m²)",
+        "desc": "Diện tích ở tối thiểu mà một hộ độc thân cần."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Diện tích thêm cho vợ/chồng (m²)",
+        "desc": "Diện tích ở mà hộ vợ chồng cần thêm so với hộ độc thân."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Diện tích thêm cho mỗi con (m²)",
+        "desc": "Diện tích ở tăng thêm với mỗi người con trong hộ."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Tỷ lệ tiền thuê trên thu nhập (mức tối đa)",
+        "desc": "Tỷ lệ tối đa của thu nhập hộ gia đình có thể dùng để trả tiền thuê nhà. 0,3 nghĩa là tối đa 30% thu nhập."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Trọng số thời gian đi lại khi chọn nhà",
+        "desc": "Khi chọn nhà, mỗi phút đi về để đi làm, đi học và mua sắm được tính là gánh nặng bằng bao nhiêu lần mức lương trung bình của thành phố. 1 là đúng bằng mức lương. Càng lớn thì nhà gần nơi làm việc và cửa hàng càng được ưu tiên."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Lương trung bình (giá trị chuẩn)",
+        "desc": "Mức lương trung bình chuẩn khi bắt đầu mô phỏng."
+      },
+      "AVERAGE_RENT": {
+        "label": "Tiền thuê trung bình (giá trị chuẩn)",
+        "desc": "Tiền thuê trung bình chuẩn khi bắt đầu mô phỏng (mỗi m² mỗi ngày)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Phần cổ tức theo tài sản",
+        "desc": "Phần cổ tức được chia theo tỷ lệ tiền mặt của từng hộ gia đình. Phần còn lại chia đều cho mọi hộ. 0 là chia đều toàn bộ, 1 là chia toàn bộ theo tiền mặt."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Tỷ lệ khấu hao thiết bị",
+        "desc": "Tỷ lệ khấu hao mỗi kỳ của vốn tích lũy từ đầu tư thiết bị."
+      },
+      "WORK_HOURS": {
+        "label": "Giờ làm việc mỗi ngày (h)",
+        "desc": "Số giờ làm việc tiêu chuẩn của một công dân mỗi ngày."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Tuổi bắt đầu giáo dục phổ thông",
+        "desc": "Độ tuổi trẻ em bắt đầu giáo dục phổ thông (tương đương tiểu học)."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Tuổi kết thúc giáo dục phổ thông",
+        "desc": "Độ tuổi kết thúc giáo dục phổ thông (tương đương tốt nghiệp trung học phổ thông)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Tuổi tốt nghiệp đại học và ra ở riêng",
+        "desc": "Độ tuổi hoàn thành giáo dục đại học và tách khỏi hộ gia đình để ra ở riêng."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Tuổi lao động tối thiểu",
+        "desc": "Công dân dưới tuổi này không tìm việc và không được tính vào tỷ lệ thất nghiệp."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Số tầng tối đa (tầng)",
+        "desc": "Giới hạn số tầng của tòa nhà do khu vực tư nhân tự động xây."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Hệ số phạt theo số tầng",
+        "desc": "Hệ số phạt chi phí khi xây cao tầng. Càng lớn thì mức phạt cho nhà cao tầng càng nhỏ.",
+        "graphX": "Số tầng",
+        "graphY": "Hệ số chi phí xây dựng"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Hệ số hiệu quả giải tỏa",
+        "desc": "Giải tỏa hiệu quả gấp bao nhiêu lần so với xây mới (hệ số nhân)."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Xác suất sập cơ bản mỗi năm",
+        "desc": "Xác suất cơ bản để một tòa nhà có độ bền 0,5 bị sập trong một năm."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Tham số hình dạng Weibull của xác suất sập",
+        "desc": "Càng lớn thì xác suất sập tăng vọt càng mạnh khi gần hết tuổi thọ thiết kế."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Tỷ lệ chi phí sửa chữa",
+        "desc": "Chi phí sửa chữa tính theo tỷ lệ so với chi phí xây mới."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Hệ số xuống cấp khi thiếu duy tu",
+        "desc": "Tốc độ xuống cấp của tòa nhà hoặc đường dẫn hoàn toàn không được duy tu thường xuyên, tính bằng bội số so với khi được duy tu đầy đủ. Giá trị thay đổi tuyến tính từ 1 đến giá trị này theo phần duy tu bị thiếu."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Xác suất bắt đầu sửa chữa cơ bản mỗi năm",
+        "desc": "Xác suất cơ bản mỗi năm để một tòa nhà cần sửa chữa thực sự bắt đầu được sửa."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Nợ xây dựng ban đầu (mỗi m²)",
+        "desc": "Nợ xây dựng ban đầu trên mỗi m² tổng diện tích sàn của tòa nhà (reserves âm)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Hệ số tiếng ồn giao thông đường bộ",
+        "desc": "Mức đóng góp của lưu lượng xe trên đường vào bản đồ nhiệt tiếng ồn. Càng lớn thì ven đường càng ồn."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Hệ số tiếng ồn của người đi bộ",
+        "desc": "Mức đóng góp của lưu lượng người đi bộ vào bản đồ nhiệt tiếng ồn."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Ngưỡng phát sinh tiếng ồn của người đi bộ",
+        "desc": "Chỉ phần lưu lượng người đi bộ vượt quá giá trị này mới gây tiếng ồn."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Khoảng cách suy giảm tiếng ồn (m)",
+        "desc": "Tiếng ồn giảm theo bình phương khoảng cách, và cứ mỗi quãng bằng khoảng cách này lại yếu đi còn 1/e (do tòa nhà che chắn, không khí và mặt đất hấp thụ). Càng nhỏ thì tiếng ồn càng chỉ quanh quẩn gần nguồn."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Hệ số ô nhiễm không khí do giao thông đường bộ",
+        "desc": "Mức đóng góp của lưu lượng xe trên đường vào bản đồ nhiệt ô nhiễm không khí."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Khoảng cách suy giảm ô nhiễm không khí (m)",
+        "desc": "Ô nhiễm không khí và mùi hôi giảm theo bình phương khoảng cách, và cứ mỗi quãng bằng khoảng cách này lại yếu đi còn 1/e (do khuếch tán và lắng đọng). Càng nhỏ thì ô nhiễm càng chỉ quanh quẩn gần nguồn."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Trọng số tội phạm do thất nghiệp",
+        "desc": "Mức ảnh hưởng của tỷ lệ thất nghiệp lên bản đồ nhiệt an ninh. Càng lớn thì thất nghiệp càng trực tiếp làm an ninh xấu đi."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Phạm vi lan tỏa tội phạm (m)",
+        "desc": "Bán kính làm mờ Gauss của bản đồ nhiệt an ninh."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Tốc độ người đi bộ (km/h)",
+        "desc": "Tốc độ di chuyển của người đi bộ, dùng để tính chi phí khi tìm lộ trình."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Quãng tăng tốc của ô tô (m)",
+        "desc": "Quãng đường ô tô dùng để tăng tốc. Ảnh hưởng đến cách tính tốc độ trên đường ngắn."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Số giờ hoạt động của đường mỗi ngày (h)",
+        "desc": "Số giờ mỗi ngày con đường có xe chạy. Dùng để quy đổi lưu lượng giao thông."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Ngưỡng bão hòa thưởng lưu lượng xe",
+        "desc": "Khi lưu lượng xe trên đường đạt từ giá trị này trở lên, cửa hàng bán lẻ nhận mức thưởng giao thông tối đa."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Ngưỡng bão hòa thưởng lưu lượng người đi bộ",
+        "desc": "Khi lưu lượng người đi bộ đạt từ giá trị này trở lên, cửa hàng bán lẻ nhận mức thưởng người đi bộ tối đa."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Đang tải…",
+    "noScenarios": "Không có kịch bản nào",
+    "starting": "Đang bắt đầu…",
+    "startFailed": "Không thể bắt đầu",
+    "confirmTitle": "Xác nhận thiết lập trò chơi",
+    "confirmStartTitle": "Bắt đầu trò chơi?",
+    "unsavedChangesWarning": "Khi bắt đầu, các thay đổi chưa lưu của trò chơi hiện tại sẽ bị mất.",
+    "startSettingsHeading": "Thiết lập thành phố",
+    "cityNameLabel": "Tên thành phố",
+    "insigniaLabel": "Huy hiệu và cờ thành phố",
+    "languageLabel": "Ngôn ngữ của thành phố",
+    "languageNote": "* Không thể thay đổi sau này",
+    "simulationDaysLabel": "Số ngày mô phỏng",
+    "simulationDaysNote": "* Không thể thay đổi sau này",
+    "daysOption": "{{days}} ngày",
+    "startButton": "Bắt đầu",
+    "backButton": "Quay lại",
+    "cleared": "Đã hoàn thành",
+    "tutorialBadge": "Hướng dẫn",
+    "sectionDebug": "Gỡ lỗi",
+    "sectionTutorials": "Hướng dẫn",
+    "sectionScenarios": "Kịch bản",
+    "detailPlaceholder": "Hãy chọn một kịch bản trong danh sách bên trái.",
+    "detailMapSizeLabel": "Kích thước bản đồ",
+    "detailUnknown": "Không rõ",
+    "detailObjectiveLabel": "Điều kiện hoàn thành",
+    "detailCreditsLabel": "Ghi công",
+    "detailNoObjective": "Không có điều kiện hoàn thành",
+    "detailNoDescription": "Kịch bản này chưa có mô tả.",
+    "tutorialObjective": "Hoàn thành mọi bước của phần hướng dẫn.",
+    "startScenarioButton": "Bắt đầu kịch bản này",
+    "tabSelect": "Chọn kịch bản",
+    "tabBrowse": "Tìm kịch bản",
+    "tabTerrain": "Chọn địa hình",
+    "relocalizeNote": "Kịch bản này được tạo bằng {{from}}. Nếu bắt đầu bằng {{to}}, tên khu vực, công trình, cư dân, nhà ga và các tên khác sẽ được đặt lại bằng {{to}}.",
+    "developmentNotice": {
+      "heading": "Đây là bản thử nghiệm đang phát triển",
+      "subheading": "Vui lòng đọc trước khi chơi",
+      "text": "Các tham số và cơ chế kinh tế vẫn đang được tinh chỉnh, nên thành phố có thể không phát triển như mong đợi. Tỷ lệ thất nghiệp có thể tăng và thành phố thậm chí có thể sụp đổ, nhưng đó hoàn toàn không phải lỗi của bạn. Hãy đón chờ các bản cập nhật sắp tới, và thêm trò chơi vào danh sách mong muốn để chờ ngày phát hành chính thức!"
+    }
+  }
+}

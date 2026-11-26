@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Byggprojekt",
+    "none": "(Ingen tagg)",
+    "createNew": "+ Ny tagg…",
+    "newPlaceholder": "Ange ett taggnamn",
+    "add": "Lägg till",
+    "cancel": "Avbryt",
+    "saveFailed": "Det gick inte att spara taggen",
+    "showObject": "Visa i 3D-vyn",
+    "hideObject": "Dölj i 3D-vyn"
+  },
+  "constructionProjects": {
+    "all": "Alla",
+    "empty": "Inga byggarbeten ännu. Välj en tagg när du placerar något från en byggpanel, eller lägg till en i detaljpanelen för en offentlig anläggning eller väg som är planerad eller under byggnad, så samlas arbetena per projekt.",
+    "loadFailed": "Kunde inte hämta byggprojekten",
+    "totalCost": "Byggkostnad (uppskattad)",
+    "duration": "Återstående byggtid",
+    "progress": "Framsteg",
+    "progressValue": "{{done}} / {{total}} klara",
+    "monthsValue": "{{value}} mån.",
+    "stalled": "Står still",
+    "stalledWarning": "Byggarbeten som inte går framåt eftersom bygghastigheten är 0: {{count}} (räknas inte med i byggtiden).",
+    "done": "Klar",
+    "unnamed": "#{{id}}",
+    "showAll": "Visa allt igen ({{count}})",
+    "showTag": "Visa det här projektet i 3D-vyn",
+    "hideTag": "Dölj det här projektet i 3D-vyn",
+    "showObject": "Visa i 3D-vyn",
+    "hideObject": "Dölj i 3D-vyn",
+    "deleteTag": "Ta bort taggen",
+    "confirmDeleteTag": "Vill du ta bort taggen ”{{tag}}”? Den tas bort från byggnaderna och vägarna (själva byggarbetena finns kvar).",
+    "columns": {
+      "name": "Objekt",
+      "status": "Status",
+      "cost": "Återstående kostnad",
+      "remaining": "Återstående tid"
+    }
+  }
+}

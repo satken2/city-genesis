@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Echipamente stradale",
+    "streetlight_type": "Iluminat stradal",
+    "fence_type": "Garduri",
+    "street_tree_type": "Arbori stradali",
+    "utility_mode": "Rețele de utilități",
+    "none": "Fără",
+    "standard": "Standard",
+    "overhead": "Aeriene",
+    "underground": "Subterane",
+    "apply": "Aplică",
+    "bench_type": "Bănci",
+    "bin_type": "Coșuri de gunoi",
+    "planter_type": "Jardiniere",
+    "advert_type": "Publicitate"
+  }
+}

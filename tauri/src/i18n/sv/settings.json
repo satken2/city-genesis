@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Inställningar",
+    "groups": {
+      "general": "Allmänt",
+      "display": "Skärm",
+      "sound": "Ljud",
+      "system": "System",
+      "about": "Om",
+      "developer": "Utvecklarinställningar"
+    },
+    "swagger": {
+      "label": "Swagger (API-dokumentation)",
+      "description": "Visar kärnsimulatorns API-specifikation i din standardwebbläsare",
+      "action": "Öppna i webbläsaren"
+    },
+    "currencyUnit": {
+      "label": "Valutaenhet",
+      "description": "Enheten som visas vid belopp. Lämna tomt för att följa visningsspråket."
+    },
+    "fontSize": {
+      "label": "Textstorlek",
+      "large": "Stor",
+      "medium": "Medel",
+      "small": "Liten",
+      "custom": "Anpassad",
+      "preview": "Nuvarande storlek"
+    },
+    "monitor": {
+      "label": "Bildskärm",
+      "prev": "Föregående bildskärm",
+      "next": "Nästa bildskärm"
+    },
+    "graphicMonitor": {
+      "label": "Bildskärm för 3D-vyn"
+    },
+    "multiDisplay": {
+      "label": "Flerskärmsläge",
+      "description": "Visar fönstren på en annan bildskärm än spelet",
+      "on": "På",
+      "off": "Av"
+    },
+    "popupMonitor": {
+      "label": "Bildskärm för fönster"
+    },
+    "hintbar": {
+      "label": "Tipsrad",
+      "show": "Visa",
+      "hide": "Dölj",
+      "description": "En rad högst upp på skärmen som visar tips om hur du gör"
+    },
+    "citizenVoice": {
+      "label": "Medborgarnas röster",
+      "show": "Visa",
+      "hide": "Dölj",
+      "description": "Ett kort uppe till höger på skärmen som visar vad invånarna säger, ett i taget"
+    },
+    "language": {
+      "label": "Språk",
+      "description": "Gränssnittets visningsspråk. Det är skilt från språket i dina sparade spel",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Volym",
+      "master": "Huvudvolym",
+      "bgm": "Musik",
+      "sfx": "Ljudeffekter"
+    },
+    "compute": {
+      "label": "GPU-acceleration",
+      "comingSoon": "Kommer snart",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU aktiv",
+      "statusInactive": "CPU aktiv",
+      "restartRequired": "Huvudprogrammet startas om när inställningen ändras",
+      "restarting": "Startar om…",
+      "restartFailed": "Det gick inte att starta om",
+      "restartUnavailable": "Inställningen har sparats. Ändringen börjar gälla nästa gång spelet startas",
+      "confirmRestart": "Vill du byta beräkningsläge till {{mode}}? Huvudprogrammet startas om.",
+      "restartAction": "Starta om"
+    },
+    "windowReset": {
+      "label": "Fönstrens position och storlek",
+      "action": "Återställ"
+    },
+    "credits": {
+      "label": "Medverkande",
+      "description": "Upphovsrättsinformation för material och programvara som används i spelet",
+      "action": "Visa"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Nytt spel",
+    "overwriteSave": "Skriv över sparat spel",
+    "saveAs": "Spara som",
+    "load": "Läs in",
+    "quitGame": "Avsluta spelet",
+    "returnToTop": "Tillbaka till huvudmenyn",
+    "loading": "Läser in…",
+    "shuttingDown": "Avslutar…",
+    "saveFailed": "Det gick inte att spara",
+    "loadFailed": "Det gick inte att läsa in",
+    "confirmNewGame": "Nuvarande data går förlorade. Vill du starta ett nytt spel?",
+    "confirmQuitGame": "Vill du avsluta spelet? Dina framsteg sparas inte automatiskt.",
+    "confirmReturnToTop": "Vill du gå tillbaka till huvudmenyn? Dina framsteg sparas inte automatiskt.",
+    "confirm": "Ja",
+    "cancel": "Nej",
+    "saveAsScenario": "Spara som scenario",
+    "saveAsNewScenario": "Spara som nytt scenario",
+    "overwriteScenario": "Skriv över scenario",
+    "backToGame": "Tillbaka till spelet",
+    "saveName": "Namn på sparat spel",
+    "confirmOverwrite": "Vill du skriva över det sparade spelet ”{{name}}”?",
+    "confirmOverwriteScenario": "Vill du skriva över scenariot ”{{name}}”?"
+  },
+  "saveList": {
+    "noSaves": "Inga sparade spel",
+    "currentSave": "Nuvarande data",
+    "population": "Befolkning",
+    "inGameDate": "Datum",
+    "savedAt": "Sparat",
+    "loadButton": "Läs in",
+    "deleteButton": "Ta bort",
+    "confirmLoad": "Vill du läsa in det här sparade spelet?",
+    "confirmDelete": "Vill du ta bort det här sparade spelet? Det går inte att ångra.",
+    "loading": "Läser in…",
+    "loadFailed": "Det gick inte att läsa in",
+    "deleteFailed": "Det gick inte att ta bort",
+    "openFolderButton": "Visa mappen",
+    "scenario": "Scenario",
+    "autosaveName": "{{name}} (automatiskt sparat vid avslut)"
+  }
+}

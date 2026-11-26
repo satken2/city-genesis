@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "La volan",
+    "car": "Automobil",
+    "rail": "Linii feroviare",
+    "running": "Vehicule în mers",
+    "standard": "Autoturism",
+    "commercial": "Vehicul comercial",
+    "truck": "Camion",
+    "finishEditing": "Termină editarea înainte să pornești la drum.",
+    "noLines": "Nu există nicio linie feroviară în funcțiune cu care să poți călători.",
+    "pickRail": "Dă clic pe calea ferată a liniei alese.",
+    "pickRoad": "Dă clic pe un drum în funcțiune.",
+    "pickVehicle": "Dă clic pe o mașină, un autobuz sau un tren în mers (trage ca să muți harta).",
+    "clickStart": "Alege punctul de plecare (trage ca să muți harta)",
+    "startSelected": "Punctul de plecare a fost ales. Pornești în direcția săgeții.",
+    "reverse": "Inversează direcția",
+    "start": "Pornește",
+    "back": "Înapoi",
+    "close": "Ieșire (Esc)",
+    "invalidStart": "Nu poți porni de aici. Alege un drum carosabil sau calea ferată a liniei selectate.",
+    "invalidVehicle": "Vehiculul nu a putut fi selectat. Dă clic pe o mașină, un autobuz sau un tren în mers.",
+    "notReady": "Nu poți porni în această direcție sau împrejurimile se încarcă încă. Schimbă direcția ori poziția sau așteaptă puțin și încearcă din nou."
+  }
+}

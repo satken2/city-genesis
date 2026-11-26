@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Разпределение по етажи",
+    "parking": "Паркиране",
+    "type": "Тип сграда",
+    "durability": "Издръжливост",
+    "floors": "Етажи",
+    "floorsValue": "{{floors}} ет. (подова площ {{area, number}} м²)",
+    "heightLabel": "Височина: {{value}} м",
+    "baseAreaLabel": "Застроена площ: {{area, number}} м²",
+    "underMaintenance": "В ремонт",
+    "parkingCapacity": "Капацитет на паркинга",
+    "parkingCapacityValue": "{{capacity}} места",
+    "parkingDay": "През деня",
+    "parkingNight": "През нощта",
+    "parkingUsage": "{{used}} / {{capacity}} места"
+  },
+  "building_appearance": {
+    "variantLabel": "Облик {{index}}",
+    "layoutHint": "Плъзнете карта върху терена, за да я поставите / плъзнете, за да преместите / Shift+плъзгане за завъртане / Delete за премахване",
+    "sizeLabel": "{{width}}×{{height}} м",
+    "deleteSelected": "Премахни избраното",
+    "apply": "Приложи",
+    "saveFailed": "Обликът не можа да бъде запазен",
+    "noSubbuildings": "За този тип сграда няма определени подсгради"
+  }
+}

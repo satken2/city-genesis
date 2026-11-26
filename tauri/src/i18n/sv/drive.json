@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Körning",
+    "car": "Bil",
+    "rail": "Järnvägslinjer",
+    "running": "Fordon i trafik",
+    "standard": "Personbil",
+    "commercial": "Nyttofordon",
+    "truck": "Lastbil",
+    "finishEditing": "Avsluta redigeringen innan du börjar köra.",
+    "noLines": "Det finns inga järnvägslinjer i drift att åka med.",
+    "pickRail": "Klicka på ett spår på den valda linjen.",
+    "pickRoad": "Klicka på en väg i drift.",
+    "pickVehicle": "Klicka på en bil, buss eller ett tåg i rörelse (dra för att flytta kartan).",
+    "clickStart": "Välj startposition (dra för att flytta kartan)",
+    "startSelected": "Startposition vald. Du åker i pilens riktning.",
+    "reverse": "Byt färdriktning",
+    "start": "Åk",
+    "back": "Tillbaka",
+    "close": "Avsluta (Esc)",
+    "invalidStart": "Det går inte att starta här. Välj en väg som går att köra på eller ett spår på den valda linjen.",
+    "invalidVehicle": "Det gick inte att välja fordonet. Klicka på en bil, buss eller ett tåg i rörelse.",
+    "notReady": "Det går inte att åka åt det här hållet, eller så läses omgivningen in. Byt riktning eller position, eller vänta en stund och försök igen."
+  }
+}

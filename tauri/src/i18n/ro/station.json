@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Stație",
+    "name": "Numele stației",
+    "ridership": "Urcări",
+    "platforms": "Peroane",
+    "noPlatforms": "Nu aparține niciun peron acestei stații (îi aparțin peroanele intersectate de linie)",
+    "lines": "Linii deservite",
+    "noLines": "Nicio linie nu deservește această stație",
+    "stops": "Urcări pe puncte de oprire",
+    "noStops": "Nu există puncte de oprire la această stație",
+    "lineRunning": "În circulație",
+    "lineSuspended": "Circulație suspendată",
+    "houseEnds": "Amplasarea clădirii stației",
+    "houseEnds_both": "La ambele capete",
+    "houseEnds_start": "La început",
+    "houseEnds_end": "La capăt",
+    "passageMode": "Amplasarea pasajului",
+    "passageMode_elevated": "Suspendat",
+    "passageMode_ground": "La sol",
+    "passageMode_underground": "Subteran"
+  }
+}

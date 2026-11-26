@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Stav dodávek",
+    "selected": "Vybráno",
+    "providers": "Dodavatelé: {{product}}",
+    "executing": "Během simulace nelze zobrazit graf dodávek.",
+    "fetchError": "Stav dodávek se nepodařilo načíst.",
+    "activeCount": "V provozu {{active}}/{{count}}",
+    "production": "Poslední výroba: {{amount}} {{unit}}",
+    "resourceRemaining": "Dostupná zásoba surovin: {{amount}} {{unit}}",
+    "state": {
+      "ok": "K dispozici",
+      "unknown": "Neurčeno",
+      "missing": "Chybí",
+      "inactive": "Mimo provoz",
+      "partial": "Částečné potíže",
+      "limited": "Nedostatek / zastaveno",
+      "disconnected": "Nepřipojeno",
+      "supply_shortage": "Možný nedostatek dodávek",
+      "capacity_limited": "Možné omezení kapacity"
+    },
+    "facilities": {
+      "401": "Elektrárny",
+      "402": "Vodní zdroje",
+      "403": "Zdroje ropy",
+      "404": "Nákladová nádraží",
+      "405": "Zdroje rudy",
+      "406": "Námořní plavební dráha (otevřené moře)",
+      "501": "Železniční depa",
+      "502": "Autobusová depa",
+      "503": "Depa LRT",
+      "504": "Depa monorailu",
+      "505": "Opravárenský dok"
+    },
+    "consumers": {
+      "401": "Odběratelé elektřiny",
+      "402": "Vodárenské čerpací stanice",
+      "403": "Odběratelé ropy",
+      "404": "Odběratelé nákladní dopravy",
+      "405": "Odběratelé rudy",
+      "406": "Přístavy",
+      "501": "Železniční linky",
+      "502": "Autobusové linky",
+      "503": "Linky LRT",
+      "504": "Linky monorailu",
+      "505": "Trajektové linky"
+    }
+  }
+}

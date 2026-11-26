@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Spelparameters instellen",
+    "description": "De standaardwaarden worden aanbevolen. Pas alleen aan wat je echt wilt veranderen.",
+    "skip": "Overslaan",
+    "start": "Spel starten",
+    "apply": "Toepassen en sluiten",
+    "close": "Sluiten",
+    "loading": "Laden…",
+    "reload": "Opnieuw laden",
+    "reloadHint": "Laad opnieuw zodra de backend klaar is met initialiseren om de nieuwste waarden te zien",
+    "fetchError": "Parameters ophalen mislukt",
+    "category": {
+      "population": "Bevolking en migratie",
+      "citizen": "Dagelijks leven",
+      "economy": "Economie",
+      "labor": "Werk en lonen",
+      "education": "Onderwijs",
+      "construction": "Bouw en vastgoed",
+      "environment": "Milieu",
+      "traffic": "Verkeer",
+      "general": "Algemeen",
+      "pathfind": "Verkeer en routes",
+      "building": "Gebouwen en bouw",
+      "disaster": "Rampen en veiligheid",
+      "slum": "Sloppenwijken",
+      "production": "Productie en voorraad",
+      "zone": "Wijken en percelen",
+      "financial": "Financiën"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Stadsverdichting",
+        "desc": "De vloeroppervlakte die woningen en voorzieningen gebruiken, wordt door deze waarde gedeeld, zodat een kleine kaart de economie van een grote stad kan dragen. Wijzig je dit nadat er ook maar één weg of gebouw staat, dan loopt de stad stuk. Bepaal het dus voordat je iets bouwt."
+      },
+      "TFR_TARGET": {
+        "label": "Doel vruchtbaarheidscijfer (TFR)",
+        "desc": "Het geboortecijfer waar huishoudens naar streven. Hoe hoger, hoe eerder er kinderen worden geboren."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Huwelijkscijfer",
+        "desc": "Coëfficiënt voor de basiskans dat burgers trouwen. Hoe hoger, hoe meer huwelijken."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Minimale leeftijd voor kinderen",
+        "desc": "Laagste leeftijd waarop kinderen kunnen worden geboren. Daaronder vinden geen geboortes plaats."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Maximale leeftijd voor kinderen",
+        "desc": "Hoogste leeftijd waarop kinderen kunnen worden geboren. Daarboven vinden geen geboortes plaats."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Aandeel getrouwde immigrantenhuishoudens",
+        "desc": "Kans dat een huishouden dat de stad binnenkomt een getrouwd stel is."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Kans op 1e kind (immigranten)",
+        "desc": "Kans dat een immigrantenhuishouden met 1 kind verschijnt."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Kans op 2e kind (immigranten)",
+        "desc": "Kans dat een immigrantenhuishouden met 2 kinderen verschijnt."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Kans op 3e kind (immigranten)",
+        "desc": "Kans dat een immigrantenhuishouden met 3 kinderen verschijnt."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Minimumleeftijd volwassen immigranten",
+        "desc": "Laagste leeftijd van volwassenen die als immigrant binnenkomen."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Maximumleeftijd volwassen immigranten",
+        "desc": "Hoogste leeftijd van volwassenen die als immigrant binnenkomen."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Levensduurfactor",
+        "desc": "Factor voor de maximale levensduur van burgers. Bij 1.08 ligt de grens rond 100 jaar, bij 1.06 rond 150 jaar.",
+        "graphX": "Leeftijd",
+        "graphY": "Sterftekans per jaar (gezondheid 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Woonruimte eenpersoonshuishouden (m²)",
+        "desc": "Minimale woonoppervlakte die een eenpersoonshuishouden nodig heeft."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Extra ruimte voor partner (m²)",
+        "desc": "Extra woonoppervlakte die een stel nodig heeft ten opzichte van een alleenstaande."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Extra ruimte per kind (m²)",
+        "desc": "Extra woonoppervlakte per kind in het huishouden."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Huur-inkomensverhouding (max.)",
+        "desc": "Maximaal deel van het huishoudinkomen dat aan huur kan opgaan. Bij 0.3 is dat tot 30% van het inkomen."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Gewicht reistijd bij woningkeuze",
+        "desc": "Hoe zwaar elke minuut heen-en-weer reizen naar werk, school en winkels weegt bij het kiezen van een woning, als veelvoud van het gemiddelde loon in de stad. Bij 1 telt het als het loon zelf. Hoe hoger, hoe vaker woningen dicht bij werk en winkels worden gekozen."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Gemiddeld loon (basiswaarde)",
+        "desc": "Gemiddeld referentieloon bij de start van de simulatie."
+      },
+      "AVERAGE_RENT": {
+        "label": "Gemiddelde huur (basiswaarde)",
+        "desc": "Gemiddelde referentiehuur bij de start van de simulatie (per dag per m²)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Vermogensgebonden deel dividend",
+        "desc": "Deel van het dividend dat naar verhouding van de liquide middelen van huishoudens wordt uitgekeerd. De rest wordt gelijk over alle huishoudens verdeeld. 0 = alles gelijk, 1 = alles naar verhouding van de liquide middelen."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Afschrijving bedrijfsmiddelen",
+        "desc": "Percentage waarmee de kapitaalvoorraad uit investeringen elk tijdvak wordt afgeschreven."
+      },
+      "WORK_HOURS": {
+        "label": "Werkuren per dag (h)",
+        "desc": "Standaard aantal uren dat een burger per dag werkt."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Beginleeftijd basisonderwijs",
+        "desc": "Leeftijd waarop kinderen met het basisonderwijs (lagere school) beginnen."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Eindleeftijd basisonderwijs",
+        "desc": "Leeftijd waarop het basisonderwijs eindigt (vergelijkbaar met het einde van de middelbare school)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Leeftijd afstuderen en zelfstandig worden",
+        "desc": "Leeftijd waarop een burger het hoger onderwijs afrondt en het huishouden verlaat."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Minimale werkleeftijd",
+        "desc": "Burgers onder deze leeftijd zoeken geen werk en tellen niet mee in de werkloosheid."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Maximaal aantal verdiepingen",
+        "desc": "Bovengrens voor het aantal verdiepingen van gebouwen die de private sector automatisch bouwt."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Hoogbouwstraffactor",
+        "desc": "Coëfficiënt voor de extra kosten van hoogbouw. Hoe hoger, hoe kleiner de straf voor hoge gebouwen.",
+        "graphX": "Verdiepingen",
+        "graphY": "Bouwkostenfactor"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Efficiëntie van slopen",
+        "desc": "Hoeveel efficiënter slopen is dan nieuwbouw (factor)."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Basiskans op instorting per jaar",
+        "desc": "Basiskans dat een gebouw met duurzaamheid 0.5 binnen een jaar instort."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Weibull-vormparameter instorting",
+        "desc": "Hoe hoger, hoe sterker de kans op instorting stijgt rond het einde van de levensduur."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Verhouding herstelkosten",
+        "desc": "Herstelkosten als deel van de nieuwbouwkosten."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Verouderingsfactor zonder onderhoud",
+        "desc": "Hoe snel een gebouw of tracé veroudert zonder enig dagelijks onderhoud, als veelvoud van de veroudering met volledig onderhoud. De factor loopt lineair van 1 tot deze waarde, naar verhouding van het onderhoud dat uitblijft."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Basiskans op herstel per jaar",
+        "desc": "Basiskans per jaar dat een gebouw dat herstel nodig heeft, daadwerkelijk in herstel gaat."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Initiële bouwschuld (per m²)",
+        "desc": "Initiële bouwschuld per m² bruto vloeroppervlak van een gebouw (negatieve reserves)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Geluidscoëfficiënt wegverkeer",
+        "desc": "Hoeveel het wegverkeer bijdraagt aan de geluidskaart. Hoe hoger, hoe luider langs wegen."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Geluidscoëfficiënt voetgangers",
+        "desc": "Hoeveel voetgangersverkeer bijdraagt aan de geluidskaart."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Geluidsdrempel voetgangers",
+        "desc": "Alleen het voetgangersverkeer boven deze waarde draagt bij aan geluid."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Dempingsafstand geluid (m)",
+        "desc": "Geluid neemt af met het kwadraat van de afstand en zwakt bovendien per deze afstand af tot 1/e (afscherming door gebouwen, absorptie door lucht en bodem). Hoe lager, hoe dichter het bij de bron blijft."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Luchtvervuilingscoëfficiënt wegverkeer",
+        "desc": "Hoeveel het wegverkeer bijdraagt aan de luchtvervuilingskaart."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Dempingsafstand luchtvervuiling (m)",
+        "desc": "Luchtvervuiling en stank nemen af met het kwadraat van de afstand en zwakken bovendien per deze afstand af tot 1/e (verspreiding en neerslag). Hoe lager, hoe dichter het bij de bron blijft."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Gewicht werkloosheid in criminaliteit",
+        "desc": "Hoe sterk de werkloosheid doorwerkt in de criminaliteitskaart. Hoe hoger, hoe directer werkloosheid de openbare veiligheid verslechtert."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Verspreidingsstraal criminaliteit (m)",
+        "desc": "Straal van de gaussische vervaging van de criminaliteitskaart."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Loopsnelheid (km/h)",
+        "desc": "Loopsnelheid die wordt gebruikt om routekosten te berekenen."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Optrekafstand voertuigen (m)",
+        "desc": "Afstand die voertuigen nodig hebben om op te trekken. Beïnvloedt de snelheid op korte wegen."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Actieve uren van wegen per dag (h)",
+        "desc": "Aantal uren per dag dat een weg in gebruik is. Wordt gebruikt om verkeersvolumes om te rekenen."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Verzadigingsdrempel bonus wegverkeer",
+        "desc": "Vanaf dit verkeersvolume op de weg krijgen winkels de maximale verkeersbonus."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Verzadigingsdrempel bonus voetgangers",
+        "desc": "Vanaf dit aantal voetgangers krijgen winkels de maximale voetgangersbonus."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Laden…",
+    "noScenarios": "Geen scenario's beschikbaar",
+    "starting": "Starten…",
+    "startFailed": "Starten mislukt",
+    "confirmTitle": "Spelinstellingen bevestigen",
+    "confirmStartTitle": "Spel starten?",
+    "unsavedChangesWarning": "Als je start, gaan niet-opgeslagen wijzigingen in je huidige spel verloren.",
+    "startSettingsHeading": "Stadsinstellingen",
+    "cityNameLabel": "Naam van de stad",
+    "insigniaLabel": "Wapen en stadsvlag",
+    "languageLabel": "Taal van de stad",
+    "languageNote": "*Kan later niet meer worden gewijzigd",
+    "simulationDaysLabel": "Simulatiedagen",
+    "simulationDaysNote": "*Kan later niet meer worden gewijzigd",
+    "daysOption": "{{days}} dagen",
+    "startButton": "Starten",
+    "backButton": "Terug",
+    "cleared": "Voltooid",
+    "tutorialBadge": "Tutorial",
+    "sectionDebug": "Debug",
+    "sectionTutorials": "Tutorials",
+    "sectionScenarios": "Scenario's",
+    "detailPlaceholder": "Kies links een scenario uit de lijst.",
+    "detailMapSizeLabel": "Kaartgrootte",
+    "detailUnknown": "Onbekend",
+    "detailObjectiveLabel": "Doelen",
+    "detailCreditsLabel": "Credits",
+    "detailNoObjective": "Geen doelen",
+    "detailNoDescription": "Dit scenario heeft geen beschrijving.",
+    "tutorialObjective": "Voltooi alle stappen van de tutorial.",
+    "startScenarioButton": "Dit scenario starten",
+    "tabSelect": "Scenario kiezen",
+    "tabBrowse": "Scenario's zoeken",
+    "tabTerrain": "Terrein kiezen",
+    "relocalizeNote": "Dit scenario is gemaakt in de taal {{from}}. Start je het in {{to}}, dan krijgen wijken, voorzieningen, inwoners, stations en andere zaken nieuwe namen in die taal.",
+    "developmentNotice": {
+      "heading": "Dit spel is een testversie in ontwikkeling",
+      "subheading": "Lees dit voordat je gaat spelen",
+      "text": "De economische parameters en logica worden nog bijgesteld, dus je stad groeit misschien niet zoals het hoort. De werkloosheid kan oplopen en de stad kan zelfs failliet gaan, maar dat ligt nooit aan jouw manier van spelen. Houd de komende updates in de gaten! Zet het spel op je verlanglijst en kijk uit naar de officiële release."
+    }
+  }
+}

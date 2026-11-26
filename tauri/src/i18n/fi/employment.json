@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Vaadittu osaaminen",
+    "wage": "Palkka",
+    "quota": "Tarvittava työvoima",
+    "totalLabor": "Palkattu työvoima",
+    "employees": "Työntekijät",
+    "hired": "Palkattu",
+    "vacant": "Avoinna",
+    "noQuota": "Työvoimaa ei tarvita",
+    "noEmployees": "Ei työntekijöitä",
+    "statusTitle": "Työllisyystilanne"
+  }
+}

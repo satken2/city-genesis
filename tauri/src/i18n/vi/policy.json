@@ -1,0 +1,323 @@
+{
+  "policy": {
+    "pending": "Đang mô phỏng",
+    "noData": "Chưa có dữ liệu",
+    "actionError": "Không thể mở màn hình thao tác.",
+    "indicators": {
+      "unemployment": {
+        "tab": "Thất nghiệp",
+        "issue": "Tỷ lệ thất nghiệp cao",
+        "clear": "Chưa phát hiện vấn đề thất nghiệp",
+        "evidence": "Tỷ lệ thất nghiệp {{value}}"
+      },
+      "income": {
+        "tab": "Thu nhập",
+        "issue": "Thu nhập hộ gia đình thấp",
+        "clear": "Chưa phát hiện vấn đề thu nhập",
+        "evidence": "Thu nhập hộ gia đình trung bình {{value}}"
+      },
+      "tourism": {
+        "tab": "Du lịch",
+        "issue": "Ít khách du lịch",
+        "clear": "Chưa phát hiện vấn đề du lịch",
+        "evidence": "Khách du lịch đang lưu trú: {{value}} người · sức chứa {{capacity}} người"
+      },
+      "crime": {
+        "tab": "Tội phạm",
+        "issue": "Đang xảy ra tội phạm và xích mích",
+        "clear": "Chưa phát hiện vấn đề tội phạm",
+        "evidence": "Thiệt hại do tội phạm {{value}} · {{incidents}} vụ xích mích"
+      },
+      "sanitation": {
+        "tab": "Vệ sinh",
+        "issue": "Đang có vấn đề vệ sinh",
+        "clear": "Chưa phát hiện vấn đề vệ sinh",
+        "evidence": "Vệ sinh đang xấu đi ở {{value}} hộ gia đình"
+      },
+      "water": {
+        "tab": "Nước",
+        "issue": "Thiếu nước sinh hoạt",
+        "clear": "Chưa phát hiện vấn đề cấp nước",
+        "evidence": "Hộ gia đình và công trình nhận được {{value}} lượng đặt hàng"
+      },
+      "electricity": {
+        "tab": "Điện",
+        "issue": "Thiếu điện",
+        "clear": "Chưa phát hiện vấn đề cấp điện",
+        "evidence": "Hộ gia đình và công trình nhận được {{value}} lượng đặt hàng"
+      },
+      "internet": {
+        "tab": "Viễn thông",
+        "issue": "Thiếu dịch vụ viễn thông",
+        "clear": "Chưa phát hiện vấn đề viễn thông",
+        "evidence": "Hộ gia đình và công trình nhận được {{value}} lượng đặt hàng"
+      },
+      "high_water": {
+        "tab": "Nước cao áp",
+        "issue": "Thiếu nước cao áp",
+        "clear": "Chưa phát hiện vấn đề cấp nước cao áp",
+        "evidence": "Công trình nhận được {{value}} lượng đặt hàng"
+      },
+      "high_electricity": {
+        "tab": "Điện cao thế",
+        "issue": "Thiếu điện cao thế",
+        "clear": "Chưa phát hiện vấn đề cấp điện cao thế",
+        "evidence": "Công trình nhận được {{value}} lượng đặt hàng"
+      },
+      "upkeep": {
+        "tab": "Duy tu công trình",
+        "issue": "Tòa nhà công cộng, đường và đường ray không được duy tu đủ",
+        "clear": "Chưa phát hiện vấn đề duy tu",
+        "evidence": "Mức duy tu nhận được: {{value}} nhu cầu"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "Không còn chỗ trống trong chỉ tiêu tuyển dụng hiện tại",
+        "evidence": "{{count}} người tìm việc"
+      },
+      "unfilled_jobs": {
+        "title": "Vừa có việc làm trống vừa có thất nghiệp",
+        "evidence": "{{count}} người tìm việc · {{vacancies}} chỗ trống (lao động thực tế)"
+      },
+      "public_budget": {
+        "title": "Công trình công cộng bị thu hẹp vì ngân sách",
+        "evidence": "Công trình phải thu hẹp kế hoạch vì ngân sách vận hành: {{count}}"
+      },
+      "education_gap": {
+        "title": "Có người tìm việc chưa học xong giáo dục cơ bản",
+        "evidence": "Người tìm việc thiếu giáo dục cơ bản: {{count}} người"
+      },
+      "school_capacity": {
+        "title": "Thiếu chỗ học giáo dục cơ bản",
+        "evidence": "Đang đi học: {{enrolled}} người · Chưa được đi học: {{waiting}} người / Chỉ tiêu: {{capacity}} người"
+      },
+      "immigrant_education_gap": {
+        "title": "Trong số người tìm việc thiếu giáo dục cơ bản có người nhập cư",
+        "evidence": "Người nhập cư tìm việc thuộc diện này: {{count}} người"
+      },
+      "specialists": {
+        "title": "Có công trình không thể hoạt động vì thiếu nhân lực chuyên môn",
+        "evidence": "Công trình thiếu nhân lực trình độ cao: {{count}}"
+      },
+      "household_unemployment": {
+        "title": "Có hộ gia đình có người trưởng thành thất nghiệp",
+        "evidence": "Hộ có người trưởng thành thất nghiệp: {{count}} hộ"
+      },
+      "security_response": {
+        "title": "Cảnh sát không ngăn được hết thiệt hại",
+        "evidence": "Thiệt hại do tội phạm trong 1 tháng gần nhất: {{count}} vụ",
+        "evidence_week": "Thiệt hại do tội phạm trong 1 tuần gần nhất: {{count}} vụ"
+      },
+      "no_police": {
+        "title": "Không có đồn cảnh sát nào đang hoạt động"
+      },
+      "police_staff": {
+        "title": "Đồn cảnh sát đang thiếu người",
+        "evidence": "Đồn cảnh sát thiếu người: {{count}}"
+      },
+      "police_budget": {
+        "title": "Ngân sách cảnh sát không đủ",
+        "evidence": "Đồn cảnh sát thiếu ngân sách: {{count}}"
+      },
+      "police_inputs": {
+        "title": "Đồn cảnh sát thiếu vật tư",
+        "evidence": "Đồn cảnh sát thiếu vật tư: {{count}}"
+      },
+      "unemployment_pressure": {
+        "title": "Thất nghiệp đang làm an ninh xấu đi",
+        "evidence": "Người trưởng thành thất nghiệp: {{count}} người"
+      },
+      "citizen_criminality": {
+        "title": "Có công dân có xu hướng phạm tội",
+        "evidence": "Công dân có xu hướng phạm tội: {{count}} người"
+      },
+      "children_in_poverty": {
+        "title": "Có trẻ em lớn lên trong hộ gia đình không đủ chi phí sinh hoạt",
+        "evidence": "Trẻ em trong hộ không đủ chi phí sinh hoạt: {{count}} người"
+      },
+      "children_in_crime_zones": {
+        "title": "Có trẻ em lớn lên trong khu vực có tội phạm",
+        "evidence": "Trẻ em ở khu vực có tội phạm trong 1 tháng gần nhất: {{count}} người",
+        "evidence_week": "Trẻ em ở khu vực có tội phạm trong 1 tuần gần nhất: {{count}} người"
+      },
+      "service_no_facility": {
+        "title": "Không có công trình cung cấp",
+        "title_named": "Không có: {{suppliers}}"
+      },
+      "service_facility_limited": {
+        "title": "Có công trình không hoạt động được: {{kinds}}",
+        "evidence": "Công trình trên thực tế không vận hành được: {{count}}"
+      },
+      "repair_budget_exhausted": {
+        "title": "Ngân sách sửa chữa đã cạn, lượng đặt hàng duy tu bị cắt giảm",
+        "evidence": "Chi sửa chữa {{expense}} / ngân sách {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "Có hộ gia đình và công trình nằm ngoài phạm vi cung cấp",
+        "evidence": "Ngoài phạm vi của mọi công trình: {{count}} hộ, {{facilities}} công trình",
+        "title_named": "Có hộ gia đình và công trình nằm ngoài phạm vi cung cấp của: {{suppliers}}"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}} không mua được {{product_name}}",
+        "evidence": "Nhận được {{received}} trên nhu cầu {{demand}}"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}} đang thiếu người",
+        "evidence": "Có {{total_labor}} trên {{quota}} lao động cần thiết (lao động thực tế)"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}} không tuyển được nhân lực chuyên môn"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}} phải thu hẹp kế hoạch vì thiếu ngân sách"
+      },
+      "facility_inactive": {
+        "title": "{{facility}} không hoạt động"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}} chưa được nối vào mạng lưới {{product_name}}"
+      },
+      "slum_sanitation": {
+        "title": "Có hộ gia đình sống trong khu ổ chuột",
+        "evidence": "Hộ gia đình sống trong khu ổ chuột: {{count}} hộ"
+      },
+      "service_shortage": {
+        "title": "Hộ gia đình không nhận đủ {{product_name}}",
+        "evidence": "Hộ gia đình nhận được {{percent}}% mức chuẩn"
+      },
+      "tourism_no_attraction": {
+        "title": "Không có điểm du lịch"
+      },
+      "tourism_no_gateway": {
+        "title": "Không có cửa ngõ để khách du lịch đến"
+      },
+      "tourism_no_trade_hub": {
+        "title": "Không có đầu mối xuất nhập khẩu để chi trả chi phí đi lại"
+      },
+      "tourists_without_lodging": {
+        "title": "Có khách du lịch không tìm được chỗ ở",
+        "evidence": "Khách du lịch đang chờ chỗ ở: {{count}} người"
+      },
+      "tourism_lodging_costly": {
+        "title": "Giá lưu trú cao so với chi phí chuyến đi",
+        "evidence": "Lượng khách du lịch mới đăng ký bằng {{percent}}% mức bình thường"
+      },
+      "tourists_dissatisfied": {
+        "title": "Mức hài lòng của khách du lịch thấp",
+        "evidence": "Khách mới đăng ký bằng {{percent}}% mức bình thường · {{count}} người không hài lòng và đã về nước"
+      },
+      "tourism_experience_short": {
+        "title": "Khách du lịch chưa nhận đủ trải nghiệm du lịch",
+        "evidence": "Mức đáp ứng trải nghiệm du lịch: {{percent}}%"
+      },
+      "tourism_leisure_short": {
+        "title": "Khách du lịch chưa nhận đủ vui chơi giải trí",
+        "evidence": "Mức đáp ứng vui chơi giải trí: {{percent}}%"
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "Tạo việc làm tại công trình công lập"
+      },
+      "population": {
+        "title": "Trục xuất công dân để giảm dân số"
+      },
+      "budget": {
+        "title": "Phân bổ ngân sách vận hành"
+      },
+      "education": {
+        "title": "Xây thêm trường học"
+      },
+      "higher_education": {
+        "title": "Đào tạo nhân lực chuyên môn bằng giáo dục đại học"
+      },
+      "welfare": {
+        "title": "Tăng trợ cấp và hỗ trợ sinh hoạt"
+      },
+      "employment": {
+        "title": "Xem điều kiện tuyển dụng trong thống kê việc làm"
+      },
+      "police": {
+        "title": "Xây đồn cảnh sát"
+      },
+      "facilities": {
+        "title": "Kiểm tra tình trạng công trình"
+      },
+      "immigration_skills": {
+        "title": "Xem lại yêu cầu kỹ năng đối với người nhập cư"
+      },
+      "immigration_limit": {
+        "title": "Hạn chế tiếp nhận người nhập cư"
+      },
+      "criminality": {
+        "title": "Kiểm tra xu hướng phạm tội của công dân"
+      },
+      "service_facility": {
+        "title": "Xây công trình cung cấp",
+        "title_named": "Xây: {{suppliers}}",
+        "title_tourism_no_attraction": "Xây điểm du lịch",
+        "title_tourism_no_gateway": "Xây cảng biển hoặc sân bay"
+      },
+      "parcel": {
+        "title": "Chuẩn bị lô đất lớn hơn"
+      },
+      "transit": {
+        "title": "Xem lại tần suất chuyến và đường ray của giao thông công cộng"
+      },
+      "entity_detail": {
+        "title": "Mở chi tiết"
+      }
+    },
+    "selectorTitle": "Bạn muốn điều tra điều gì?",
+    "eventsTitle": "Điều đang xảy ra",
+    "causeTitle": "Nguyên nhân",
+    "adviceTitle": "Gợi ý giải pháp",
+    "needsAttention": "Có thể cải thiện",
+    "values": {
+      "money": "{{value}} /hộ/ngày",
+      "per_thousand": "{{value}} vụ trên 1.000 người (1 tháng gần nhất)",
+      "per_thousand_week": "{{value}} vụ trên 1.000 người (1 tuần gần nhất)"
+    },
+    "collapse": "Thu gọn",
+    "investigate": {
+      "crime": "Điều tra nguyên nhân tội phạm",
+      "unemployment": "Điều tra nguyên nhân thất nghiệp",
+      "income": "Điều tra nguyên nhân thu nhập thấp",
+      "water": "Điều tra nguyên nhân thiếu nước",
+      "electricity": "Điều tra nguyên nhân thiếu điện",
+      "internet": "Điều tra nguyên nhân thiếu viễn thông",
+      "upkeep": "Điều tra nguyên nhân thiếu duy tu công trình",
+      "high_water": "Điều tra nguyên nhân thiếu nước cao áp",
+      "high_electricity": "Điều tra nguyên nhân thiếu điện cao thế",
+      "facility": "Điều tra nguyên nhân tại công trình này"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "Chỉ số",
+    "problems": {
+      "resource_runway": "Tài nguyên “{{name}}” sẽ cạn kiệt sau khoảng {{remaining_epochs}} kỳ nữa",
+      "resource_depleted": "Tài nguyên “{{name}}” đã cạn kiệt",
+      "facility_inoperative": "Công trình công cộng “{{name}}” không vận hành được",
+      "facility_inoperative_labor": "Công trình công cộng “{{name}}” không vận hành được vì thiếu lao động",
+      "facility_inoperative_material": "Công trình công cộng “{{name}}” không vận hành được vì thiếu nguyên vật liệu",
+      "facility_inoperative_high_skill": "Công trình công cộng “{{name}}” phải thu hẹp hoạt động vì thiếu nhân lực chuyên môn",
+      "facility_inoperative_budget": "Công trình công cộng “{{name}}” phải thu hẹp hoạt động vì thiếu ngân sách",
+      "education_low_enrollment": "Cơ sở giáo dục “{{name}}” hoạt động dưới công suất vì ít học sinh ({{enrolled}} người theo học / chỉ tiêu {{max_students}} người)",
+      "infra_facility_down": "Công trình hạ tầng “{{name}}” đang ngừng hoạt động",
+      "infra_disconnected": "{{count}} công trình chưa được nối vào mạng lưới hạ tầng",
+      "rail_capacity_exceeded": "Số chuyến tàu vượt công suất đường ray trên {{count}} đường ray",
+      "collapse": "{{count}} tòa nhà/con đường đã sập",
+      "collapse_with_deaths": "{{count}} tòa nhà/con đường đã sập, {{deaths}} người thiệt mạng",
+      "deaths_traffic": "{{count}} người thiệt mạng vì tai nạn giao thông",
+      "tenant_blocked_by_parcel_size": "Không thể xây tòa nhà cho “{{tenant_name}}” tại khu vực “{{zone_name}}” (cần {{required}} m2, lô đất tối đa {{max_capacity}} m2)",
+      "unknown": "Đã xảy ra sự cố nghiêm trọng",
+      "sanitation": "Vệ sinh đang xấu đi ở {{count}} hộ gia đình"
+    },
+    "facilitiesTitle": "Công trình không hoạt động được",
+    "otherProblemsTitle": "Vấn đề khác",
+    "facility": {
+      "title": "{{facility}} không hoạt động được",
+      "evidence": "Sản lượng đạt {{percent}}% kế hoạch"
+    }
+  }
+}

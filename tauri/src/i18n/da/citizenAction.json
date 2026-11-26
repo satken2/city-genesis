@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Giv et navn",
+      "message": "Skriv det navn, du vil give {{name}}.",
+      "inputLabel": "Nyt navn",
+      "confirm": "Giv navnet"
+    },
+    "reward": {
+      "label": "Giv en dusør",
+      "message": "Giv {{name}} og husstanden en dusør fra kommunekassen.\nKommunens likvide midler: {{available}}",
+      "confirm": "Giv"
+    },
+    "expel": {
+      "label": "Ønsk held og lykke uden for byen",
+      "message": "Vil du forvise {{name}} fra byen?",
+      "confirm": "Forvis",
+      "results": {
+        "0": "{{name}} pakkede sine ting og forlod stille og roligt byen. Ingen kom for at sige farvel.",
+        "1": "{{name}} krydsede bygrænsen og råbte: \"Her sætter jeg aldrig mine ben igen!\"",
+        "2": "{{name}} er høfligt blevet fulgt ud over bygrænsen. Vi ønsker held og lykke uden for byen."
+      }
+    },
+    "donation": {
+      "label": "Bed om et bidrag",
+      "message": "Bed {{name}} og husstanden om et bidrag til byen.\nHusstandens likvide midler: {{available}}",
+      "confirm": "Bed om bidrag"
+    },
+    "relocate": {
+      "label": "Foreslå en ny bolig",
+      "message": "Vil du sætte {{name}} og husstanden ud af deres nuværende bolig?\nHusstanden leder efter en ny bolig i næste epoke.",
+      "confirm": "Sæt ud",
+      "results": {
+        "0": "{{name}} og familien er blevet smidt ud af deres hjem. Møblerne står stablet op ved vejkanten.",
+        "1": "Låsene er blevet skiftet i hjemmet hos {{name}}. Familien er begyndt at lede efter et nyt sted at bo.",
+        "2": "{{name}} og familien har fået tilbudt en ny bolig. Den gamle kan de ikke vende tilbage til."
+      }
+    }
+  }
+}

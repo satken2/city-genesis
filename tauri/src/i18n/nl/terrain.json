@@ -1,0 +1,23 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Wachten op gegevens uit de terreineditor…"
+  },
+  "groundCover": {
+    "label": "Bodembedekking",
+    "hint": "Wijzigt de kleur en textuur van de grond in het spel en de kleuren van 2D-kaarten. Dit heeft geen invloed op de simulatie.",
+    "1": "Grasland",
+    "2": "Woestijn",
+    "3": "Weelderige weide",
+    "4": "Sneeuwvlakte",
+    "5": "Halfdroog land",
+    "6": "Raster"
+  },
+  "climate": {
+    "label": "Klimaat",
+    "hint": "Neemt de maandelijkse temperatuur, neerslag, zonneschijn en weerkansen over uit een voorinstelling. Pas de details aan bij “Klimaatinstellingen” in de scenariomaker."
+  },
+  "assetPack": {
+    "label": "Assetpakket",
+    "standard": "Standaard"
+  }
+}

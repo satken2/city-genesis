@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Vær",
+    "choose": "Velg vær",
+    "loading": "Sjekker været …",
+    "unknown": "Ukjent",
+    "automatic": "{{weather}} (automatisk)",
+    "failed": "Kunne ikke endre været",
+    "names": {
+      "clear": "Klarvær",
+      "high_clouds": "Tynne skyer",
+      "fair": "Lettskyet",
+      "broken_clouds": "Delvis skyet",
+      "overcast": "Overskyet",
+      "rain_clouds": "Regnskyer",
+      "fog": "Tåke",
+      "drizzle": "Yr",
+      "rain": "Regn",
+      "heavy_rain": "Kraftig regn",
+      "light_snow": "Lett snø",
+      "snow": "Snø",
+      "blizzard": "Snøstorm"
+    },
+    "epochClimate": "Epokens klima",
+    "temperature": "Temperatur",
+    "precipitation": "Nedbør",
+    "sunlight": "Solinnstråling",
+    "windSpeed": "Vindstyrke"
+  }
+}

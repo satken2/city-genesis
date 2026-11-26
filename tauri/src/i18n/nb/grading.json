@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Type",
+    "kind": {
+      "land": "Planering av land",
+      "shore": "Utfylling i sjø"
+    },
+    "baseHeight": "Referansehøyde",
+    "targetHeight": "Målhøyde",
+    "cutVolume": "Skjæringsvolum",
+    "fillVolume": "Fyllvolum",
+    "quayLength": "Kailengde",
+    "quayArea": "Kaifrontareal",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Høyde (avvik fra referansen)",
+    "seaLevelHeight": "Høyde (over havet)",
+    "baseNote": {
+      "frontage": "0 er veibanen på veien som grenser til området ({{value}} m)",
+      "terrain_mean": "0 er områdets nåværende gjennomsnittshøyde ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "Området har ugyldig form. Tegn det uten at kantene krysser hverandre.",
+      "outside_city": "Området strekker seg utenfor byen.",
+      "too_large": "Området er for stort (grense: {{limit}} km²).",
+      "on_water": "Et område som bare ligger i sjøen, kan ikke opparbeides. Tegn det slik at det når inn på land.",
+      "no_land_overlap": "Tegn området slik at det overlapper land (ellers blir det liggende en stripe sjø mellom land og området).",
+      "overlaps_parcel": "Området overlapper en eksisterende parsell.",
+      "overlaps_path": "Området overlapper en vei, et spor eller en annen trasé.",
+      "overlaps_water": "Området berører en elv eller innsjø.",
+      "overlaps_quay_band": "Området overlapper kaien på utfylt land.",
+      "invalid_height_offset": "Høyden er utenfor tillatt område (maks. ±{{offsetLimit}} m fra referansehøyden).",
+      "below_sea_level": "Høyden kan ikke settes under havnivå.",
+      "too_narrow": "Området er for smalt – det blir ingenting igjen å fylle innenfor kaien.",
+      "no_work": "Bakken har allerede målhøyden, så det trengs ikke noe arbeid.",
+      "insufficient_funds": "Du har ikke nok midler til å bestille dette."
+    },
+    "confirm": "Bekreft",
+    "confirming": "Bekrefter …",
+    "cancel": "Avbryt",
+    "confirmFailed": "Kunne ikke bestille grunnarbeidet."
+  }
+}

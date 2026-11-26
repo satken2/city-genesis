@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Bydel nr. {{id}}",
+    "color": "Bydelsfarge",
+    "colorUpdateFailed": "Kunne ikke oppdatere bydelsfargen",
+    "basicInfo": "Grunninformasjon",
+    "area": "Areal",
+    "zonePopulation": "Bosatte",
+    "daytimePopulation": "Dagbefolkning",
+    "spaceAmount": "Arealbruk",
+    "slotStarvationTitle": "Ventende leietakere får ikke plass",
+    "slotStarvationWarning": "«{{tenant}}» trenger minst {{required}} m2 gulvareal i én bygning, men det største som kan bygges på parsellene i denne bydelen, er {{max}} m2. Sørg for en større parsell.",
+    "restrictions": "Byggeregulering",
+    "restrictionUpdateFailed": "Kunne ikke oppdatere reguleringen for bydelen",
+    "restrictionRequired": "Bebyggelsesprosent, utnyttelsesgrad og høyde kan ikke stå tomme",
+    "mergeConfirm": "«{{source}}» slås sammen med «{{target}}». Bydelen som slås inn, forsvinner, og reguleringen for den går tapt.",
+    "mergeAction": "Slå sammen",
+    "mergeFailed": "Kunne ikke slå sammen bydelene (bydeler som ikke grenser til hverandre, kan ikke slås sammen)",
+    "mergeNoRequest": "Ingen bydel er valgt for sammenslåing",
+    "edit": {
+      "toolHeading": "Handling",
+      "toolCreate": "Opprett ny bydel",
+      "toolExpand": "Utvid bydel",
+      "toolExpandZone": "Utvid {{name}}",
+      "modeHeading": "Utvalgsmetode",
+      "modeBlock": "Hele kvartal",
+      "modeRoad": "Gateside",
+      "hint": {
+        "create": {
+          "block": "Hold inne Ctrl og dra over kvartaler omgitt av gater; kvartalene du maler, blir en ny bydel sammen med parsellene i dem. Dra for å flytte kartet, rull for å zoome.",
+          "road": "Hold inne Ctrl og dra over den ene siden av en gate (halve kjørebanen eller parsellene langs den); den siden av gaten blir en ny bydel sammen med parsellene. Dra for å flytte kartet, rull for å zoome."
+        },
+        "expand": {
+          "block": "Hold musepekeren over en bydel, hold inne Ctrl og dra over kvartaler for å legge dem til i bydelen sammen med parsellene i dem. Dra for å flytte kartet, rull for å zoome.",
+          "road": "Hold musepekeren over en bydel, hold inne Ctrl og dra over den ene siden av en gate (halve kjørebanen eller parsellene langs den) for å legge den siden til i bydelen sammen med parsellene. Dra for å flytte kartet, rull for å zoome."
+        }
+      },
+      "failed": "Kunne ikke endre bydelen."
+    }
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Definições",
+    "groups": {
+      "general": "Geral",
+      "display": "Ecrã",
+      "sound": "Som",
+      "system": "Sistema",
+      "about": "Acerca de",
+      "developer": "Definições de programador"
+    },
+    "swagger": {
+      "label": "Swagger (documentação da API)",
+      "description": "Abre a especificação da API do simulador central no navegador predefinido",
+      "action": "Abrir no navegador"
+    },
+    "currencyUnit": {
+      "label": "Unidade monetária",
+      "description": "Unidade apresentada junto dos montantes. Se ficar em branco, segue a língua de apresentação."
+    },
+    "fontSize": {
+      "label": "Tamanho do texto",
+      "large": "Grande",
+      "medium": "Médio",
+      "small": "Pequeno",
+      "custom": "Personalizado",
+      "preview": "Tamanho atual"
+    },
+    "monitor": {
+      "label": "Monitor",
+      "prev": "Monitor anterior",
+      "next": "Monitor seguinte"
+    },
+    "graphicMonitor": {
+      "label": "Monitor da vista 3D"
+    },
+    "multiDisplay": {
+      "label": "Modo de vários monitores",
+      "description": "Mostra as janelas num monitor diferente daquele onde está o ecrã de jogo",
+      "on": "Ativado",
+      "off": "Desativado"
+    },
+    "popupMonitor": {
+      "label": "Monitor das janelas"
+    },
+    "hintbar": {
+      "label": "Barra de dicas",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "description": "Barra no topo do ecrã que mostra dicas de utilização"
+    },
+    "citizenVoice": {
+      "label": "Voz dos cidadãos",
+      "show": "Mostrar",
+      "hide": "Ocultar",
+      "description": "Cartão no canto superior direito do ecrã que mostra, à vez, comentários dos moradores"
+    },
+    "language": {
+      "label": "Língua",
+      "description": "Língua da interface. É independente da língua do jogo guardado.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Volume",
+      "master": "Volume geral",
+      "bgm": "Música",
+      "sfx": "Efeitos sonoros"
+    },
+    "compute": {
+      "label": "Aceleração por GPU",
+      "comingSoon": "Brevemente",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU ativa",
+      "statusInactive": "CPU ativa",
+      "restartRequired": "O programa principal será reiniciado depois de alterar esta definição",
+      "restarting": "A reiniciar…",
+      "restartFailed": "Não foi possível reiniciar",
+      "restartUnavailable": "Definições guardadas. As alterações entram em vigor da próxima vez que o jogo for iniciado",
+      "confirmRestart": "Mudar o modo de cálculo para {{mode}}? O programa principal será reiniciado.",
+      "restartAction": "Reiniciar"
+    },
+    "windowReset": {
+      "label": "Posição e tamanho das janelas",
+      "action": "Repor"
+    },
+    "credits": {
+      "label": "Créditos",
+      "description": "Atribuições dos recursos e do software usados neste jogo",
+      "action": "Ver"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Novo jogo",
+    "overwriteSave": "Guardar por cima",
+    "saveAs": "Guardar como",
+    "load": "Carregar",
+    "quitGame": "Sair do jogo",
+    "returnToTop": "Voltar ao menu principal",
+    "loading": "A carregar…",
+    "shuttingDown": "A encerrar…",
+    "saveFailed": "Não foi possível guardar",
+    "loadFailed": "Não foi possível carregar",
+    "confirmNewGame": "Os dados atuais serão perdidos. Pretende iniciar um novo jogo?",
+    "confirmQuitGame": "Pretende sair do jogo? O progresso atual não é guardado automaticamente.",
+    "confirmReturnToTop": "Pretende voltar ao menu principal? O progresso atual não é guardado automaticamente.",
+    "confirm": "Sim",
+    "cancel": "Não",
+    "saveAsScenario": "Guardar como cenário",
+    "saveAsNewScenario": "Guardar como outro cenário",
+    "overwriteScenario": "Guardar cenário por cima",
+    "backToGame": "Voltar ao jogo",
+    "saveName": "Nome do jogo guardado",
+    "confirmOverwrite": "Pretende guardar por cima de «{{name}}»?",
+    "confirmOverwriteScenario": "Pretende guardar por cima do cenário «{{name}}»?"
+  },
+  "saveList": {
+    "noSaves": "Não há jogos guardados",
+    "currentSave": "Dados atuais",
+    "population": "População",
+    "inGameDate": "Data",
+    "savedAt": "Guardado em",
+    "loadButton": "Carregar",
+    "deleteButton": "Eliminar",
+    "confirmLoad": "Pretende carregar este jogo guardado?",
+    "confirmDelete": "Pretende eliminar este jogo guardado? Esta ação não pode ser anulada.",
+    "loading": "A carregar…",
+    "loadFailed": "Não foi possível carregar",
+    "deleteFailed": "Não foi possível eliminar",
+    "openFolderButton": "Abrir pasta dos jogos guardados",
+    "scenario": "Cenário",
+    "autosaveName": "{{name}} (guardado automaticamente ao sair)"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "mapNavigation": {
+    "title": "Stad verkennen",
+    "openSidebar": "Zijbalk openen",
+    "closeSidebar": "Zijbalk sluiten",
+    "back": "Terug",
+    "search": "Plaats zoeken",
+    "origin": "Vertrekpunt zoeken",
+    "destination": "Bestemming zoeken",
+    "clear": "Wissen",
+    "searching": "Zoeken…",
+    "error": "Geen verbinding. Laad opnieuw en probeer het nog eens.",
+    "noResults": "Geen plaatsen gevonden",
+    "mode": "Vervoerswijze",
+    "pedestrian": "Lopen en OV",
+    "automobile": "Auto",
+    "pickOrigin": "Vertrekpunt op de kaart kiezen",
+    "pickDestination": "Bestemming op de kaart kiezen",
+    "swap": "Omwisselen",
+    "cancel": "Annuleren",
+    "directions": "Route hierheen",
+    "intro": "Zoek naar voorzieningen, stations, wijken of wegen, of kies een plek op de kaart.",
+    "chooseOrigin": "Zoek een vertrekpunt of kies er een op de kaart.",
+    "routing": "Route zoeken…",
+    "showRoute": "Hele route tonen",
+    "mapPoint": "Punt op de kaart",
+    "minutes": "ca. {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Schatting op basis van het wegennet uit routeberekening #{{epoch}}. Stippellijnen geven looptrajecten en aansluitingen op wegen aan.",
+    "busy": "De simulatie loopt. Na afloop wordt dit bijgewerkt.",
+    "not_ready": "Nog geen routegegevens. Voer in deze stad een simulatie uit om routes te zien.",
+    "unreachable": "Er is geen route tussen deze twee plekken gevonden.",
+    "no_access": "Bij de gekozen plek is geen bruikbare weg gevonden.",
+    "geometry_unavailable": "Het traject van het openbaar vervoer voor deze route is niet beschikbaar.",
+    "place_missing": "De gekozen plek is verwijderd. Kies opnieuw.",
+    "kind": {
+      "agent": "Voorziening",
+      "zone": "Wijk",
+      "stop": "Halte",
+      "station": "Station",
+      "point": "Punt",
+      "road": "Weg"
+    },
+    "leg": {
+      "walk": "Lopen",
+      "drive": "Auto",
+      "transit": "Openbaar vervoer",
+      "conveyor": "Personenvervoersysteem",
+      "access": "Aansluiting op de weg",
+      "turn": "Keren op kruispunt"
+    },
+    "picking": {
+      "origin": "Klik op de kaart op je vertrekpunt.",
+      "destination": "Klik op de kaart op je bestemming."
+    },
+    "pins": {
+      "tab": "Spelden",
+      "hint": "Klik op de kaart om een speld in de gekozen kleur te plaatsen. Klik met rechts op een speld om hem te verwijderen.",
+      "list": "Lijst met spelden",
+      "remove": "Speld verwijderen"
+    }
+  }
+}

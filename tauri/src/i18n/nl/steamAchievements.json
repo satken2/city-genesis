@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Volgende",
+    "close": "Sluiten",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "De eerste steen",
+        "description": "Voltooi je eerste gebouw. Hier begint de geschiedenis van je stad."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Een stad die de zee op gaat",
+        "description": "Voltooi je eerste offshore windpark of offshore olieplatform. De industrie van je stad trekt de zee op."
+      },
+      "RAIL_LINES_1": {
+        "name": "Instappen, deuren sluiten!",
+        "description": "Open een spoorlijn"
+      },
+      "RAIL_LINES_20": {
+        "name": "Spoorwegimperium",
+        "description": "Exploiteer 20 spoorlijnen in één stad. Die lijnenkaart mag gezien worden."
+      },
+      "BUS_LINES_1": {
+        "name": "De bus rijdt voortaan hier",
+        "description": "Open een buslijn"
+      },
+      "BUS_LINES_20": {
+        "name": "Overal met de bus",
+        "description": "Exploiteer 20 buslijnen in één stad"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Forenzen boven de stad",
+        "description": "Open een monoraillijn. Zie de vertrouwde straten eens van iets hoger."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Stad in de lucht",
+        "description": "Exploiteer 20 monoraillijnen in één stad"
+      },
+      "LRT_LINES_1": {
+        "name": "De tram komt naar de stad",
+        "description": "Open een LRT-lijn"
+      },
+      "LRT_LINES_20": {
+        "name": "Tramstad",
+        "description": "Exploiteer 20 LRT-lijnen in één stad"
+      },
+      "POPULATION_10K": {
+        "name": "Thuis voor 10.000",
+        "description": "Bereik een bevolking van 10.000"
+      },
+      "POPULATION_100K": {
+        "name": "Bruisende provinciestad",
+        "description": "Bereik een bevolking van 100.000"
+      },
+      "POPULATION_500K": {
+        "name": "Bij de grote steden",
+        "description": "Bereik een bevolking van 500.000"
+      },
+      "POPULATION_1M": {
+        "name": "Miljoenenstad",
+        "description": "Bereik een bevolking van 1.000.000. Een metropool met een miljoen levens om voor te zorgen."
+      },
+      "FLOORS_5": {
+        "name": "Een stad die de hoogte in gaat",
+        "description": "Laat een particulier gebouw van 5 of meer verdiepingen opleveren"
+      },
+      "FLOORS_10": {
+        "name": "Op weg naar hoogbouw",
+        "description": "Laat een particulier gebouw van 10 of meer verdiepingen opleveren. Wat zijn liften toch fijn."
+      },
+      "FLOORS_20": {
+        "name": "Een skyline krijgt vorm",
+        "description": "Laat een particulier gebouw van 20 of meer verdiepingen opleveren"
+      },
+      "FLOORS_40": {
+        "name": "Wolkenkrabber",
+        "description": "Laat een particulier gebouw van 40 of meer verdiepingen opleveren. Een nieuw symbool voor je stad."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Industrie voor de gezondheid",
+        "description": "Laat een farmaceutische fabriek in je stad in bedrijf gaan. Zorg vanuit hier voor de gezondheid van mensen."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Siliciumstad",
+        "description": "Laat een halfgeleiderfabriek in je stad in bedrijf gaan. Kleine chips, grote industrie."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Stad van precisie",
+        "description": "Laat een fabriek voor precisie-instrumenten in je stad in bedrijf gaan. Vakmanschap wordt de kracht van je stad."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Nieuw thuis voor software",
+        "description": "Laat een softwarebedrijf in je stad de deuren openen. Een plek waar nieuwe ideeën groeien."
+      },
+      "TOURISTS_1": {
+        "name": "Welkom in onze stad",
+        "description": "Ontvang voor het eerst een toerist die in je stad verblijft"
+      },
+      "TOURISTS_1K": {
+        "name": "Een reis waard",
+        "description": "Laat 1.000 toeristen tegelijk in je stad verblijven"
+      },
+      "TOURISTS_10K": {
+        "name": "De wereld komt op bezoek",
+        "description": "Laat 10.000 toeristen tegelijk in je stad verblijven"
+      },
+      "YEARS_10": {
+        "name": "Tien jaar met de stad",
+        "description": "Speel 10 jaar in één stad. Er valt nog genoeg te bouwen."
+      },
+      "YEARS_100": {
+        "name": "Eeuwstad",
+        "description": "Speel 100 jaar in één stad. Zie je stad een hele eeuw doorkomen."
+      },
+      "YEARS_500": {
+        "name": "Een stad die geschiedenis schrijft",
+        "description": "Speel 500 jaar in één stad. Generaties komen en gaan, de stad blijft."
+      },
+      "YEARS_1000": {
+        "name": "Millenniumstad",
+        "description": "Speel 1.000 jaar in één stad. Bouw een stad met duizend jaar geschiedenis."
+      },
+      "YEARS_10000": {
+        "name": "Eeuwige stad",
+        "description": "Speel 10.000 jaar in één stad. Dat is een flinke ambtstermijn, burgemeester."
+      }
+    }
+  }
+}

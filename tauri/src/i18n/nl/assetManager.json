@@ -1,0 +1,22 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Gebouwen",
+      "paths": "Tracés",
+      "vehicles": "Voertuigen",
+      "props": "Decorobjecten"
+    },
+    "additional": "Extra modellen",
+    "loading": "Modellen laden uit de 3D-weergave…",
+    "noModel": "Geen model",
+    "noImage": "Geen afbeelding",
+    "weight": "Gewicht",
+    "applyNote": "Gewijzigde gewichten worden toegepast wanneer je de volgende keer een spel start of laadt.",
+    "preview": {
+      "hint": "Sleep om te draaien / scrol om te zoomen",
+      "zoomIn": "Inzoomen",
+      "zoomOut": "Uitzoomen",
+      "reset": "Herstellen"
+    }
+  }
+}

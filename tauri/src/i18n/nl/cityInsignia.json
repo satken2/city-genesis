@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Wapen",
+    "flag": "Stadsvlag",
+    "motif": "Motief",
+    "fieldColor": "Achtergrondkleur",
+    "motifColor": "Motiefkleur",
+    "pattern": "Patroon",
+    "accentColor": "Accentkleur",
+    "placement": "Positie van het wapen",
+    "loadImage": "Afbeelding laden",
+    "randomize": "Willekeurig",
+    "apply": "Toepassen",
+    "imageLoadFailed": "De afbeelding kon niet worden geladen.",
+    "placements": {
+      "center": "Midden",
+      "canton": "Linksboven",
+      "none": "Geen"
+    },
+    "motifs": {
+      "wave": "Golf",
+      "mountain": "Berg",
+      "star": "Ster",
+      "tree": "Boom",
+      "sun": "Zon",
+      "moon": "Maan",
+      "flower": "Bloem",
+      "leaf": "Blad",
+      "bird": "Vogel",
+      "fish": "Vis",
+      "anchor": "Anker",
+      "gear": "Tandwiel",
+      "tower": "Kasteel",
+      "bridge": "Brug",
+      "key": "Sleutel",
+      "crown": "Kroon",
+      "snowflake": "Sneeuwvlok",
+      "flame": "Vlam",
+      "diamond": "Ruit",
+      "cross": "Kruis"
+    },
+    "patterns": {
+      "plain": "Effen",
+      "bicolor": "Tweekleurig horizontaal",
+      "triband": "Driekleur verticaal",
+      "diagonal": "Diagonaal gedeeld",
+      "border": "Rand",
+      "bands": "Banen boven en onder"
+    }
+  }
+}

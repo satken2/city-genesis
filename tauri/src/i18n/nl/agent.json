@@ -1,0 +1,212 @@
+{
+  "agent": {
+    "back": "Terug",
+    "editAppearance": "Uiterlijk wijzigen",
+    "relocateCityHall": "Stadhuis verplaatsen",
+    "publicFacility": "Openbare voorziening",
+    "underAcquisition": "Grondverwerving in onderhandeling",
+    "publicFacilityPanel": {
+      "title": "Openbare/gemeentelijke voorziening"
+    },
+    "abandon": "Opgeven",
+    "abandonHint": "Stop het onderhoud en laat het gebouw zonder herstel vervallen",
+    "statusSince": {
+      "founded": "Opgericht",
+      "householdFormed": "Huishouden gevormd",
+      "arrived": "Aangekomen",
+      "opened": "Geopend",
+      "schoolOpened": "Geopend",
+      "completed": "Opgeleverd",
+      "operatingSince": "In bedrijf sinds",
+      "resumed": "Hervat",
+      "paused": "Gepauzeerd",
+      "suspended": "Gesloten",
+      "schoolClosed": "Gesloten",
+      "constructionStarted": "Bouw gestart",
+      "demolitionScheduled": "Sloop besloten",
+      "demolitionStarted": "Sloop gestart",
+      "demolished": "Gesloopt",
+      "collapsed": "Ingestort",
+      "burnedDown": "Afgebrand",
+      "default": "Status sinds"
+    },
+    "reserves": "Liquide middelen",
+    "revenues": "Inkomsten",
+    "expenses": "Uitgaven",
+    "zone": "Wijk",
+    "building": "Gebouw",
+    "rent": "Huur",
+    "floorOccupancy": "Vloerbezetting",
+    "tenants": "Huurders",
+    "guests": "Gasten",
+    "tabBasicInfo": "Basisgegevens",
+    "utilizationTarget": "Doelbezettingsgraad",
+    "currentUtilization": "Huidige bezettingsgraad",
+    "constructionSpeed": "Bouwsnelheid",
+    "constructionCostPerEpoch": "Bouwkosten per tijdvak",
+    "remainingConstruction": "Resterende bouwtijd",
+    "remainingEpochs": "ca. {{n}} tijdvakken",
+    "tabBuildingInfo": "Gebouwgegevens",
+    "tabCargoInfo": "Goederenoverslag",
+    "tabTradeInfo": "Vraag, aanbod en handel",
+    "tabTourismInfo": "Toerisme",
+    "tabEmploymentInfo": "Werkgelegenheid",
+    "action": {
+      "purchase": "Aankopen",
+      "bulldoze": "Slopen",
+      "cancelBulldoze": "Sloop annuleren",
+      "pause": "Pauzeren",
+      "resume": "Hervatten",
+      "delete": "Verwijderen",
+      "repair": "Herstellen",
+      "rebuild": "Herbouwen",
+      "edit": "Bewerken",
+      "startConstruction": "Bouw starten",
+      "stopConstruction": "Bouwstart uitstellen",
+      "cancelAbandon": "Opgeven annuleren",
+      "explode": "Opblazen",
+      "explodeConfirm": "Dit gebouw opblazen en het laten lijken op een ongeluk?\nHet gebouw stort meteen in en iedereen die erin woont of werkt, komt om. De publieke opinie zal flink verslechteren en dit kan niet ongedaan worden gemaakt.",
+      "explodeTitle": "Gebouw opblazen",
+      "explodeConfirmAction": "Opblazen"
+    },
+    "pendingWarning": "Dit gebouw is nog gepland. Geef opdracht om de bouw te starten.",
+    "alerts": {
+      "diagnoseHint": "Klik om de oorzaak te achterhalen",
+      "title": "Waarschuwingen",
+      "constructionShortage": {
+        "title": "Tekort aan bouwdiensten",
+        "description": "Het bouwbudget is ontoereikend, waardoor de bouw vertraging oploopt."
+      },
+      "onFire": {
+        "title": "Brand!",
+        "description": "Er is brand uitgebroken in het gebouw."
+      },
+      "accidentalFire": {
+        "title": "Binnenbrandje",
+        "description": "Er brak per ongeluk brand uit in het gebouw, maar die bleef beperkt."
+      },
+      "infraDisconnected": {
+        "title": "Niet aangesloten op infrastructuurnet",
+        "description": "Er is geen infrastructuurtracé aangesloten op het aansluitpunt van deze voorziening. Zolang die niet op het net is aangesloten, kan ze niets leveren of ontvangen."
+      },
+      "capacityTight": {
+        "title": "Bijna vol",
+        "description": "Deze voorziening draait op 90% of meer van haar capaciteit. Extra vraag kan ze nauwelijks nog aan."
+      },
+      "nonconforming": {
+        "title": "Voldoet niet aan voorschriften",
+        "description": "Dit gebouw voldoet niet aan de bouwvoorschriften van zijn perceel. Het wordt niet hersteld en wordt gesloopt zodra het in verval raakt."
+      },
+      "crime": {
+        "title": "Misdrijf gepleegd",
+        "description": "Er is een misdrijf gepleegd in dit gebouw."
+      },
+      "crimeSign": {
+        "title": "Tekenen van criminaliteit",
+        "description": "Bij dit gebouw zijn tekenen van criminaliteit waargenomen. Let op een verslechterende openbare veiligheid."
+      },
+      "laborShortage": {
+        "title": "Personeelstekort",
+        "description": "Er zijn te weinig werknemers, waardoor productie en dienstverlening achterblijven bij de planning."
+      },
+      "materialShortage": {
+        "title": "Grondstoffentekort",
+        "description": "Er worden te weinig grondstoffen ingekocht, waardoor productie en dienstverlening achterblijven bij de planning."
+      },
+      "highSkillShortage": {
+        "title": "Tekort aan vakkrachten",
+        "description": "Er zijn niet genoeg hoogopgeleide krachten, dus de productie is teruggeschroefd tot wat het aanwezige personeel aankan."
+      },
+      "budgetCapped": {
+        "title": "Budgettekort",
+        "description": "Het toegewezen budget ligt ver onder het benodigde bedrag, dus de bedrijfsvoering is ingeperkt. Herzie de budgetverdeling."
+      },
+      "facilityWarning": {
+        "title": "Openbare voorziening werkt niet",
+        "description": "Deze voorziening levert veel minder diensten dan gepland. Controleer de werving van personeel en de inkoop van grondstoffen."
+      },
+      "sanitationWarning": {
+        "title": "Verslechterende hygiëne",
+        "description": "De hygiëne op het bouwterrein van dit gebouw is ernstig verslechterd, wat de huishoudens die er wonen treft. Verbeter de aanvoer van riolering en afvalverwerking."
+      },
+      "infraWarning": {
+        "title": "Infrastructuurvoorziening stilgelegd of ingestort",
+        "description": "Deze voorziening ligt stil of is ingestort, wat de infrastructuurlevering verstoort. Controleer de staat van de voorziening en de leveringsroutes."
+      },
+      "farFromRoad": {
+        "title": "Ver van de weg",
+        "description": "De dichtstbijzijnde weg ligt op ongeveer {{distance}} m afstand. Dat is een flinke handicap voor bevoorrading, woon-werkverkeer en winkelen; overweeg een weg tot dichter bij dit gebouw door te trekken."
+      },
+      "noRoadAccess": {
+        "title": "Geen wegaansluiting",
+        "description": "Er is geen weg waarop dit gebouw kan aansluiten. Dat is een flinke handicap voor bevoorrading, woon-werkverkeer en winkelen; leg in de buurt een weg aan."
+      }
+    },
+    "infra": {
+      "title": "Infrastructuuraansluiting",
+      "connected": "Aangesloten",
+      "disconnected": "Niet aangesloten",
+      "received": "Ontvangen"
+    },
+    "tabConstructionInfo": "Bouwwerkzaamheden",
+    "tabEducationInfo": "Onderwijs",
+    "education": {
+      "totalStudents": "Ingeschreven leerlingen",
+      "totalCapacity": "Totale capaciteit",
+      "statusTitle": "Inschrijvingen",
+      "enrolled": "Ingeschreven",
+      "vacant": "Vrije plaatsen",
+      "noCapacity": "Geen capaciteit",
+      "countLabel": "Aantal",
+      "enrollmentBySkill": "Inschrijvingen per vaardigheid",
+      "settingsTitle": "Toelatingsquota",
+      "settingsHint": "Stel per vaardigheid een verdeelgewicht in. De totale capaciteit wordt naar verhouding van de gewichten verdeeld.",
+      "skillHeader": "Vaardigheid",
+      "weightHeader": "Gewicht",
+      "previewHeader": "Capaciteit",
+      "save": "Opslaan",
+      "saving": "Opslaan…",
+      "saveFailed": "Opslaan mislukt",
+      "sumMustBePositive": "Het totaal van de quota moet minstens 1 zijn",
+      "invalidWeight": "Gewichten moeten gehele getallen van 0 of hoger zijn",
+      "studentsList": "Leerlingenlijst",
+      "noStudents": "Geen leerlingen",
+      "showMore": "Meer tonen ({{count}})"
+    }
+  },
+  "agentList": {
+    "filterType": "Type",
+    "filterVariant": "Variant",
+    "filterZone": "Wijk",
+    "allVariants": "Alle varianten",
+    "allZones": "Alle wijken",
+    "resultCount": "{{count}} resultaten",
+    "capped": "(van {{total}} in totaal)",
+    "loading": "Laden…",
+    "noResults": "Geen economische actoren gevonden",
+    "colStatus": "Status",
+    "colVariant": "Variant",
+    "colName": "Naam",
+    "colProduct": "Product",
+    "colPrice": "Prijs",
+    "colProduction": "Productie",
+    "colStock": "Voorraad",
+    "colSold": "Verkocht",
+    "colWage": "Loontarief",
+    "colEmployment": "Werkgelegenheid",
+    "colUtilization": "Bezettingsgraad",
+    "colBdType": "Gebouwtype",
+    "colDurability": "Duurzaamheid",
+    "colRent": "Huur",
+    "colFloors": "Verdiepingen",
+    "colFloorArea": "Vloeroppervlak",
+    "colOccupancy": "Bezetting",
+    "colFamilyType": "Type huishouden",
+    "colDiscretionaryIncome": "Besteedbaar inkomen",
+    "colSatisNutrition": "Voeding",
+    "colSatisHealthcare": "Zorg",
+    "colSatisLeisure": "Vrije tijd",
+    "colSatisResidential": "Wonen",
+    "colAutomobile": "Auto"
+  }
+}

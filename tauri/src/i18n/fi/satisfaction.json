@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "Uupunut",
+    "unhappy": "Tyytymätön",
+    "neutral": "Neutraali",
+    "happy": "Tyytyväinen",
+    "delighted": "Erittäin tyytyväinen",
+    "zero": "Ei lainkaan tyytyväinen"
+  }
+}

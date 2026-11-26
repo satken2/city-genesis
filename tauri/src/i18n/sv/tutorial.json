@@ -1,0 +1,756 @@
+{
+  "tutorial": {
+    "startButton": "Börja",
+    "controls": {
+      "title": "Grunderna",
+      "description": "Lär dig vad du som borgmästare strävar efter och hur spelet går till: först planerar du, sedan låter du tiden gå. När du har sett vad informationen på skärmen betyder, vad knapparna gör och hur kameran styrs, får du på riktigt förlänga en väg, anlägga ett nytt bostadsområde och förse det med bostäder, el och vatten.",
+      "step1": {
+        "title": "Bygg en stad som borgmästare",
+        "role": "I City Genesis låter du en stad växa som dess borgmästare. Du planerar vägar och anläggningar och bestämmer hur marken ska användas, vilka skatter som gäller och hur mycket pengar den offentliga servicen får. Ditt jobb är att skapa förutsättningar för invånarnas liv och företagens verksamhet. Tryck på ”Nästa” för att läsa vidare.",
+        "goal": "Målet är en stad där invånarna kan leva ett gott och tryggt liv. Skapa fler bostäder och jobb och se till att el, vatten och vård når fram. Det kostar också pengar att bygga ut staden. Väg invånarnas vardag mot stadens ekonomi när du bestämmer vad som ska byggas ut.",
+        "epoch": "I det här spelet går tiden fram en månad i taget. Först bestämmer du budget och byggplaner, och när du är redo trycker du på ”Start”. Då går tiden, byggena fortskrider och invånare och företag lever och verkar. Sedan tittar du på resultatet och planerar nästa steg. Datumet står still tills du trycker på ”Start”, så ta god tid på dig.",
+        "epoch_week": "I det här spelet går tiden fram en vecka i taget. Först bestämmer du budget och byggplaner, och när du är redo trycker du på ”Start”. Då går tiden, byggena fortskrider och invånare och företag lever och verkar. Sedan tittar du på resultatet och planerar nästa steg. Datumet står still tills du trycker på ”Start”, så ta god tid på dig."
+      },
+      "step2": {
+        "title": "Läs av staden i cockpiten",
+        "tools": "Cockpiten längst ned på skärmen är platsen där du ser hur staden mår och funderar på vad du ska göra härnäst. Under ”Visning” kan du leta upp brister och problemområden med hjälp av färger. Under ”Karta” ser du hur platserna i staden ligger i förhållande till varandra. Det hjälper dig att hitta rätt även när staden växer.",
+        "tracking": "Med ”Medborgarlista” kan du söka efter invånare på namn och gå tillbaka till invånare du vill följa, för att se hur de lever och pendlar. Lägg till någon i bevakningen från medborgarens detaljer, så kan du öppna personens information härifrån. Använd den när du vill förstå de enskilda liv som stadens siffror inte visar.",
+        "bulldozer": "Med ”Bulldozer” tar du bort tomma tomter och avbryter planerade byggnader och vägar. Tryck på knappen, klicka på det du vill ta bort i 3D-vyn och tryck på knappen igen när du är klar. Vill du riva en färdig byggnad eller väg öppnar du dess detaljer och väljer rivning.",
+        "services": "Mätarna med blixt, vattendroppe och fartyg visar hur mycket marginal som finns kvar i el, vatten och kapaciteten för import och export. Ju fullare de är, desto mer har efterfrågan eller hanterad volym ökat och desto mindre marginal återstår. Tryck på dem för att se offentliga anläggningar och handelsterminaler. Kontrollera om du behöver fler anläggningar innan du bygger ut staden.",
+        "score": "”Poäng” är ett samlat mått på hur nöjda invånarna är med livet i staden. Ju högre, desto bättre är staden att bo i. Bostäder, jobb, vård och en god boendemiljö höjer poängen. Om den sjunker, leta efter vad invånarna har problem med.",
+        "budget": "”Budget” visar nästa månads beräknade utgifter i förhållande till förra månadens intäkter. När mätaren slår åt höger är utgifterna större än intäkterna. När den i stället slår åt vänster har du pengar över. Kontrollera den innan du låter tiden gå.",
+        "budget_week": "”Budget” visar nästa veckas beräknade utgifter i förhållande till förra veckans intäkter. När mätaren slår åt höger är utgifterna större än intäkterna. När den i stället slår åt vänster har du pengar över. Kontrollera den innan du låter tiden gå.",
+        "budgetChanges": "Fler väg- och anläggningsbyggen, högre drift i anläggningarna och snabbare byggtakt kräver mer pengar och får budgetmätaren att stiga. Sänker du driften eller byggtakten minskar de beräknade utgifterna. Ökar skatteintäkterna sjunker mätaren även om utgifterna är desamma.",
+        "budgetPlanning": "Står mätaren lågt har du pengar att lägga på staden. Fundera på att investera i service som saknas eller i anläggningar som snart behövs.",
+        "date": "Datumet visar hur långt tiden i staden har kommit. Använd det för att följa hur byggena fortskrider och hur staden förändras med årstiderna. Medan du planerar står datumet still, och det uppdateras när du låter tiden gå med ”Start”.",
+        "climate": "Panelen med temperatur, nederbörd, solsken och vind visar månadens genomsnittliga klimat. Förhållandena påverkar hur effektivt jordbruk, vindkraft och solkraft producerar. Om skörden eller elproduktionen är låg är det värt att kontrollera klimatet också.",
+        "climate_week": "Panelen med temperatur, nederbörd, solsken och vind visar veckans genomsnittliga klimat. Förhållandena påverkar hur effektivt jordbruk, vindkraft och solkraft producerar. Om skörden eller elproduktionen är låg är det värt att kontrollera klimatet också.",
+        "climateEffects": "Svagt solsken sänker solkraftens effekt och svag vind sänker vindkraftens. Jordbruket påverkas också av temperatur och regnmängd. Tryck på klimatpanelen för att se hur månadens förhållanden påverkar varje anläggnings produktionseffektivitet. Planera dina anläggningar med tanke på att försörjningen varierar med årstiderna.",
+        "climateEffects_week": "Svagt solsken sänker solkraftens effekt och svag vind sänker vindkraftens. Jordbruket påverkas också av temperatur och regnmängd. Tryck på klimatpanelen för att se hur veckans förhållanden påverkar varje anläggnings produktionseffektivitet. Planera dina anläggningar med tanke på att försörjningen varierar med årstiderna.",
+        "notifications": "Siffran på ”Aviseringar” visar hur många varningar och påminnelser som är värda att titta på just nu. En röd siffra som blinkar betyder att stadens funktioner störs och att problemet bör åtgärdas snart. En gul siffra är en påminnelse, till exempel om att förbereda för tillväxt eller om problem som tar tid att rätta till. Tryck först på knappen och läs vad det gäller.",
+        "notificationActions": "När en avisering gäller en viss anläggning eller stadsdel kan du trycka på raden för att undersöka den närmare. Åtgärda orsaken – anslut en kraftledning som saknas, eller se till att en anläggning som saknar råvaror kan få tag på dem. Aviseringar om pågående problem försvinner när orsaken är åtgärdad. Kontrollera resultatet månaden efter att du har agerat."
+      },
+      "step3": {
+        "title": "Byt visning för att hitta problem",
+        "open": "Det är svårt att se elbrist eller trafikstockningar bara genom att titta på staden. Med ”Visning” kan du få fram den information du behöver på kartan. Tryck på ”Visning” i cockpiten för att öppna panelen.",
+        "tabs": "Med de lodräta flikarna väljer du vad du vill undersöka, till exempel byggnader, vägar, tomter eller stadsdelar. Blir det svårläst när informationen överlappar kan du dölja det du inte behöver. Tryck på ”Nästa” för att se hur visningen används.",
+        "modes": "Med knapparna på varje flik väljer du vilken information objekten färgas efter. Leta upp vägar med trängsel eller byggnader med problem och använd dem som ledtrådar till vad du ska göra. Det du vill undersöka närmare kan du klicka på i 3D-vyn. Tryck på ”Nästa”."
+      },
+      "step4": {
+        "title": "Lär känna verktygen för stadsbyggande",
+        "grading": "Här går vi igenom knapparna till vänster uppifrån och ned. ”Markarbeten” använder du för att jämna ut sluttningar som är svåra att bygga på eller fylla ut havet och få mer användbar mark. När du vill ha fler bostäder och arbetsplatser men marken inte räcker ger det staden utrymme att växa.",
+        "road": "”Vägar, järnväg och infrastruktur” skapar stråken som människor, varor, el och vatten färdas längs. Knyt ihop bostäder och arbetsplatser med vägar, förbind avlägsna platser med järnväg och koppla ihop anläggningar med kraftledningar och vattenledningar. Näten bär upp invånarnas resor, företagens handel och försörjningen av el och vatten.",
+        "land": "”Tomter” förbereder byggplatser för byggnader. Det räcker inte med mark – det byggs inget utan tomter. Både fler bostäder och stora anläggningar kräver byggplatser som är tillräckligt stora.",
+        "landDevelopment": "Tomterna kan användas av staden för egna byggen, men det är också där privata bostäder och företag växer fram. Privata byggnader uppförs utifrån efterfrågan och stadsdelens byggregler. När du vill ha fler bostäder eller arbetsplatser, kontrollera att det finns tillräckligt med lediga tomter.",
+        "district": "Med ”Stadsdelar” hanterar du delar av staden som en helhet. Du kan ge olika områden olika inriktning, till exempel ett bostadsområde eller ett område för fabriker. Eftersom du kan begränsa vilka byggnadstyper som får uppföras i varje stadsdel kan du ge hela området en lämplig inriktning.",
+        "districtRules": "I stadsdelens detaljer bestämmer du vilka byggnadstyper som får uppföras. Använd det efter vilken sorts stad du vill skapa, till exempel för att hålla fabriker borta från bostadsområden. Du kan också jämföra befolkning och levnadsförhållanden mellan stadsdelar för att se var det behövs insatser.",
+        "construction": "Med ”Bygg” planerar du byggnader som staden behöver. Du kan bygga bostäder, arbetsplatser, sjukhus, skolor, kraftverk med mera. Använd det för att skapa fler bostäder och jobb eller fylla luckor i vård, utbildning, el och annan service.",
+        "transport": "”Kollektivtrafik” hjälper invånarna att resa med buss och tåg. Du bestämmer linjer och hållplatser och justerar biljettpris och avgångsintervall. Knyt ihop bostäder med arbetsplatser och skolor för att göra pendlingen lättare.",
+        "propPlacement": "Med ”Placera dekorobjekt” sätter du ut träd, stenar och annat för att forma stadsbilden. Använd det när du vill ge gatorna lite grönska eller pynta terrängen.",
+        "cityDevelopment": "”Automatisk stadsutveckling” planerar vägar och tomter över ett stort område på en gång. Måla området du vill exploatera på kartan och välj en typ av gatunät, så förbereds vägar och tomter i ett svep. Använd det när du anlägger ett nytt bostadsområde eller en ny stadskärna från grunden.",
+        "constructionProjects": "I ”Byggprojekt” ser du alla planerade och pågående byggen samlat. Se vilka byggen som går framåt och var kostnaderna uppstår, och bestäm vilka du vill driva vidare.",
+        "regulation": "I ”Regler” bestämmer du villkoren för att bo och arbeta i staden, som hastighetsgränser, arbetstid, invandring och social trygghet. Fundera på om du prioriterar trygghet, tid att njuta av livet eller tillväxt, och justera efter läget.",
+        "stat": "”Statistik” hjälper dig att utvärdera resultatet av ditt stadsbyggande. I diagram ser du hur befolkning, inkomster, pendling, invånarnas nöjdhet, ekonomins storlek och prisnivån förändras. När du har ändrat policyer eller anläggningar, kontrollera om livet blir bättre och vad som fortfarande saknas. Det var knapparna till vänster."
+      },
+      "step5": {
+        "title": "Genomför planerna och se resultatet",
+        "flow": "När du har sett hur staden mår och planerat byggen och budget låter du tiden gå med ”Start” i cockpiten. Byggena fortskrider, invånarna arbetar, företagen producerar, och stadens ekonomi och poäng förändras. Det kan ta flera månader innan en plan ger effekt.",
+        "execute": "När tiden har gått, titta på resultatet och aviseringarna. Har det uppstått problem tar du hand om dem i nästa plan och låter sedan tiden gå igen. Staden växer genom att du upprepar ”planera, låt tiden gå, se resultatet”. Du behöver inte trycka på ”Start” nu. Tryck på ”Nästa” för att gå vidare till kamerastyrningen."
+      },
+      "step6": {
+        "title": "Flytta kameran",
+        "description": "Så här styr du kameran: dra med vänster musknapp för att flytta vyn, dra med höger musknapp för att rotera, W/A/S/D (eller piltangenterna) för att förflytta dig, Q/E för att rotera, R/F för att ändra höjden och mushjulet för att zooma. Prova fritt och tryck sedan på ”Nästa”."
+      },
+      "step7": {
+        "title": "Flygläge och filmläge",
+        "description": "Kameran har två speciallägen. ”Flygläge” startar du med Shift+F: åk framåt i blickriktningen med W/A/S/D, se dig omkring med musen och stig eller sjunk med R/F. Med Esc lämnar du läget. ”Filmläge” startar du med knappen uppe till vänster på skärmen, och då kan du åka runt staden och betrakta den. Se dig omkring med musen, växla mellan kretsande och förflyttning med Shift, pausa med Space, spela baklänges med Backspace och avsluta med Esc. I båda lägena döljs panelerna på skärmen och kommer tillbaka när du trycker på Esc. När du har provat, avsluta båda lägena och tryck på ”Nästa”."
+      },
+      "step8": {
+        "title": "Se stadens gräns",
+        "description": "Nu har vi flyttat kameran till stadens östra kant. Det du kan använda som stad är den här rektangeln, där detaljerad terräng finns, och kameran kan inte heller lämna den. Det var allt om skärmen och styrningen. Nu ska vi anlägga ett nytt bostadsområde på riktigt. Tryck på ”Nästa”."
+      },
+      "step9": {
+        "title": "Förläng vägen",
+        "description": "Nu ska du bygga ett bostadsområde där nya invånare kan flytta in. Bostäder och arbetsplatser är till ingen nytta om de inte är förbundna med vägar – då kan människor inte ta sig fram och varor kommer inte fram. Börja med att förlänga stadens öst-västliga gata västerut, så att det blir en väg in till bostadsområdet. Tryck på ”Vägar, järnväg och infrastruktur” i ikonpanelen för att öppna byggpanelen.",
+        "confirm": "Marken längs en väg delas in i tomter när vägen är färdigställd. Under ”Tomter längs vägen när den är klar” i byggpanelen kan du välja tomternas storlek för vägens vänstra och högra sida. Välj efter vilka byggnader du vill locka hit: mindre tomter passar bostäder, större passar fabriker och jordbruk. Det här ska bli ett bostadsområde, så låt inställningen vara som den är. Tryck på ”Bekräfta” i byggpanelen för att spara och tryck sedan på ”Nästa”."
+      },
+      "step10": {
+        "title": "Färdigställ vägen",
+        "description": "Vägen har fortfarande statusen ”Bygge planerat”. En planerad väg kan inte användas – först när bygget är klart kan människor och bilar ta sig fram. Tryck på ”Start” i cockpiten 2–3 gånger för att låta tiden gå och vänta tills vägen är färdig. Bygget kostar pengar varje månad så länge det pågår.",
+        "description_week": "Vägen har fortfarande statusen ”Bygge planerat”. En planerad väg kan inte användas – först när bygget är klart kan människor och bilar ta sig fram. Tryck på ”Start” i cockpiten 2–3 gånger för att låta tiden gå och vänta tills vägen är färdig. Bygget kostar pengar varje vecka så länge det pågår."
+      },
+      "step11": {
+        "title": "Tomterna är klara",
+        "description": "Vägen är färdig och tomter har skapats längs den. Byggnader kan bara uppföras på tomter, och eftersom tomten ligger mot en väg kan människor och varor komma och gå. Vill du lägga till tomter längs en befintlig väg gör du det med ”Tomter” i ikonpanelen."
+      },
+      "step12": {
+        "title": "Skapa en stadsdel",
+        "description": "Innan något byggs ska du bestämma vad den här gatan ska bli. Utan en inriktning kan det dyka upp en fabrik alldeles intill bostäderna. Inriktningen för olika platser bestäms per stadsdel. Stadsdelar tilldelas väg för väg, och en tomt hör till samma stadsdel som vägen den ligger mot. Tryck på ”Stadsdelar” i ikonpanelen för att öppna fönstret ”Redigera stadsdelar”. Där ser du att hela staden just nu är en enda stadsdel.",
+        "create": "Välj markeringssättet ”Gatusida”. Byt verktyg till ”Skapa ny stadsdel”, håll ned Ctrl och dra längs vägen du förlängde. Båda sidorna av vägen du målar, och tomterna som ligger mot den, blir en ny stadsdel."
+      },
+      "step13": {
+        "title": "Stadsdelen är skapad",
+        "description": "Den nya gatan är nu en egen stadsdel, skild från stadskärnan. Du kan följa befolkning och priser per stadsdel och bestämma vilka byggnader som får uppföras där, så att varje område kan utvecklas på det sätt som passar det. När du har tittat färdigt, stäng fönstret ”Redigera stadsdelar”."
+      },
+      "step14": {
+        "title": "Öppna stadsdelens detaljer",
+        "description": "Nu ska vi göra den nya stadsdelen till ett bostadsområde. Visa stadsdelarna med ikonen längst ned till vänster på skärmen och klicka på etiketten för stadsdelen du nyss skapade för att öppna dess detaljer."
+      },
+      "step15": {
+        "title": "Gör det till ett bostadsområde",
+        "description": "Med byggreglerna längre ned i panelen väljer du vilka byggnader som får uppföras på stadsdelens tomter. Här vill vi ha ett lugnt bostadsområde, så klicka på alla byggnader utom ”Flerbostadshus” och ”Villa” för att stänga av dem."
+      },
+      "step16": {
+        "title": "Kontrollera en tomt",
+        "description": "Reglerna du bestämmer för en stadsdel gäller alla tomter i den. Klicka på tomten med den gula markören för att öppna tomtens detaljer."
+      },
+      "step17": {
+        "title": "Reglerna gäller",
+        "description": "Längre ned i tomtpanelen ser du att stadsdelens regel, som bara tillåter ”Flerbostadshus” och ”Villa”, gäller här. Nu kan bara bostäder byggas längs den här gatan. Du behöver inte ställa in tomterna en och en – när stadsdelen har en inriktning följer hela gatan den."
+      },
+      "step18": {
+        "title": "Bygg bostäder",
+        "description": "Nu är det dags att skapa bostäder. Normalt bygger den privata sektorn bostäder automatiskt när folk vill bo här, men om staden bygger allmännyttiga bostäder kan en bostadsbrist åtgärdas snabbt. Här bygger vi ett allmännyttigt flerbostadshus. Tryck på ”Bygg” i ikonpanelen.",
+        "select": "Välj ”Flerbostadshus” i kategorin ”Bostäder”, klicka på valfri tomt i den nya stadsdelen för att välja byggplats och tryck på ”Bekräfta”."
+      },
+      "step19": {
+        "title": "Färdigställ bostäderna",
+        "description": "Precis som vägar går byggnader inte att bo i bara för att de är planerade. Ett flerbostadshus tar mer än ett halvår att bygga. Tryck på ”Start” för att låta tiden gå och vänta tills det är färdigt."
+      },
+      "step20": {
+        "title": "Kontrollera att elen når fram",
+        "description": "Det räcker inte med bostäder – utan el och vatten fungerar inte vardagen. Staden har ännu varken kraftverk eller vattenförsörjning. Klicka på flerbostadshuset med den gula markören, där stadens invånare bor, för att öppna detaljerna. Välj en av hyresgästerna på fliken ”Byggnad” och öppna sedan fliken ”Utbud, efterfrågan och handel”. Där ser du att den erhållna mängden el är 0."
+      },
+      "step21": {
+        "title": "Bygg ett solkraftverk",
+        "description": "För att leverera el behövs först ett kraftverk som producerar den. Bygg ett ”Solkraftverk” på tomten med den gula markören. Normalt tar det tid att bygga färdigt, men eftersom det här är en handledning hoppar vi över byggtiden."
+      },
+      "step22": {
+        "title": "Bygg en transformatorstation",
+        "description": "Högspänningselen från ett kraftverk kan inte användas av hushållen som den är. En transformatorstation omvandlar den till el som hushållen kan använda och fördelar den till byggnaderna runt omkring som är anslutna via väg. Bygg en ”Transformatorstation” på tomten med den gula markören nära flerbostadshuset."
+      },
+      "step23": {
+        "title": "Anslut med en kraftledning",
+        "description": "Även om kraftverket och transformatorstationen ligger långt ifrån varandra kopplas de ihop så länge elen har en väg att färdas. Öppna ”Vägar, järnväg och infrastruktur” i ikonpanelen, välj ”Kraftledning” under ”El” och dra en ledning från solkraftverkets anslutningspunkt till transformatorstationens anslutningspunkt. Drar du en rak linje mellan punkterna räcker det med en enda ledning."
+      },
+      "step24": {
+        "title": "Kontrollera elförsörjningen",
+        "description": "När allt är anslutet, kontrollera att elen verkligen flödar. Tryck på ”Start” för att låta tiden gå, klicka på transformatorstationen för att öppna detaljerna och kontrollera på fliken ”Utbud, efterfrågan och handel” att den mottagna mängden högspänningsel inte är 0. Det kan ta några månader innan kraftverket kommer igång och elen når fram."
+      },
+      "step25": {
+        "title": "Elen har nått hemmen",
+        "description": "Öppna flerbostadshusets detaljer och sedan en hyresgästs flik ”Utbud, efterfrågan och handel”, precis som första gången, och kontrollera att den erhållna mängden el inte längre är 0. Det kan behövas ytterligare en eller två månader innan elen når hushållen. Kraftverket producerar, kraftledningen transporterar och transformatorstationen fördelar – först när alla tre hänger ihop når elen hemmen."
+      },
+      "step26": {
+        "title": "Hitta en vattentäkt",
+        "description": "Nu är det vattnets tur. Kranvattnet är grundvatten som pumpas upp och skickas ut i staden. Ta först reda på var det går att pumpa upp vatten. Tryck på ”Visning” i cockpiten för att öppna visningspanelen.",
+        "show": "Välj ”Naturresurser” bland de lodräta flikarna och byt till ”Synlig”. Vattentäkterna visas i ljusblått på kartan. Klicka på vattentäkten med den gula markören för att öppna dess detaljer."
+      },
+      "step27": {
+        "title": "Bygg en grundvattenpump",
+        "description": "En grundvattenpump pumpar upp vatten ur marken och måste därför byggas där det finns en vattentäkt. Den behöver också el och personal för att gå, och det är därför vi drog fram elen först. Bygg en ”Grundvattenpump” på tomten med den gula markören ovanpå vattentäkten. Eftersom det här är en handledning hoppar vi över byggtiden."
+      },
+      "step28": {
+        "title": "Bygg en vattenpumpstation",
+        "description": "Uppumpat vatten kan inte fördelas till hushållen som det är. Precis som transformatorstationen fördelar el levererar en vattenpumpstation vatten till byggnaderna runt omkring som är anslutna via väg. Bygg en ”Vattenpumpstation” på tomten med den gula markören nära flerbostadshuset."
+      },
+      "step29": {
+        "title": "Anslut med en vattenledning",
+        "description": "Det behövs en ledning som för vattnet från grundvattenpumpen till vattenpumpstationen. Öppna ”Vägar, järnväg och infrastruktur” i ikonpanelen, välj ”Vattenledning” under ”Vatten” och dra ledningen från grundvattenpumpens anslutningspunkt till vattenpumpstationens anslutningspunkt. Dra den i en vid båge runt östra sidan så att den inte korsar vägarna och kraftledningen."
+      },
+      "step30": {
+        "title": "Kontrollera vattenförsörjningen",
+        "description": "Tryck på ”Start” för att låta tiden gå, klicka på vattenpumpstationen för att öppna detaljerna och kontrollera på fliken ”Utbud, efterfrågan och handel” att den mottagna mängden högtrycksvatten inte är 0. Det kan ta några månader innan grundvattenpumpen får personal och vattnet når fram."
+      },
+      "step31": {
+        "title": "Grunderna är på plats",
+        "description": "Vattnet har nått vattenpumpstationen, så hemmen runt omkring kan nu använda kranvatten. Dra vägar, förbered tomter, bestäm stadsdelens inriktning, bygg bostäder och se till att el och vatten når fram – så ser grunderna i stadsbyggandet ut. Tryck på ”Nästa” för att avsluta handledningen om grunderna."
+      }
+    },
+    "scenario4": {
+      "title": "Bygg en järnväg",
+      "description": "Vi vill knyta ihop bostadsområdet och arbetsplatserna med järnväg, men längs den planerade sträckan ligger privata byggnader och ett offentligt sjukhus. I den här handledningen lär du dig om markförvärv och rivning av offentliga anläggningar, upphöjda spår ovanför vägar, att bygga plattformar, stationsbyggnader och depåer, att justera kurvor och lutning samt allt från elförsörjning till att öppna en linje.",
+      "step1": {
+        "title": "Bygg upphöjda plattformar",
+        "description": "Öppna ”Vägar, järnväg och infrastruktur” → ”Järnväg” och bygg ”Upphöjd sidoplattform” på stadens västra sida och ”Dubbelspår med sidoplattformar” på den östra. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta. Båda ska ligga på 6 m höjd.",
+        "open": "Öppna ”Vägar, järnväg och infrastruktur” → ”Järnväg” och bygg ”Upphöjd sidoplattform” på stadens västra sida och ”Dubbelspår med sidoplattformar” på den östra. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta. Båda ska ligga på 6 m höjd.",
+        "variant": "Öppna ”Vägar, järnväg och infrastruktur” → ”Järnväg” och bygg ”Upphöjd sidoplattform” på stadens västra sida och ”Dubbelspår med sidoplattformar” på den östra. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta. Båda ska ligga på 6 m höjd.",
+        "start": "Öppna ”Vägar, järnväg och infrastruktur” → ”Järnväg” och bygg ”Upphöjd sidoplattform” på stadens västra sida och ”Dubbelspår med sidoplattformar” på den östra. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta. Båda ska ligga på 6 m höjd.",
+        "end": "Öppna ”Vägar, järnväg och infrastruktur” → ”Järnväg” och bygg ”Upphöjd sidoplattform” på stadens västra sida och ”Dubbelspår med sidoplattformar” på den östra. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta. Båda ska ligga på 6 m höjd.",
+        "confirm": "Öppna ”Vägar, järnväg och infrastruktur” → ”Järnväg” och bygg ”Upphöjd sidoplattform” på stadens västra sida och ”Dubbelspår med sidoplattformar” på den östra. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta. Båda ska ligga på 6 m höjd.",
+        "town": "Bygg ”Upphöjd sidoplattform” på västra sidan. Vänsterklicka på start- och slutpunkten i cirklarna på 6 m höjd, högerklicka för att bestämma formen och bekräfta.",
+        "new": "Bygg nu den östra sidan. Tryck på ”Tillbaka” i panelen för att återgå till typlistan och välj ”Dubbelspår med sidoplattformar” under ”Järnväg”. Vänsterklicka på start- och slutpunkten i cirklarna på 6 m höjd, högerklicka för att bestämma formen och bekräfta. Om du har stängt panelen kan du öppna den igen via ”Vägar, järnväg och infrastruktur”.",
+        "east": "Bygg nu den östra sidan. Tryck på ”Tillbaka” i panelen för att återgå till typlistan och välj ”Dubbelspår med sidoplattformar” under ”Järnväg”. Vänsterklicka på start- och slutpunkten i cirklarna på 6 m höjd, högerklicka för att bestämma formen och bekräfta. Om du har stängt panelen kan du öppna den igen via ”Vägar, järnväg och infrastruktur”."
+      },
+      "step2": {
+        "title": "Bygg stationsbyggnader och entréer",
+        "description": "Välj ”Enkel stationsbyggnad” och förbind de två markörerna på västra respektive östra sidan, så att en kort gång leder tvärs över plattformen. Entréerna placeras precis på båda sidor om plattformen. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta.",
+        "open": "Välj ”Enkel stationsbyggnad” och förbind de två markörerna på västra respektive östra sidan, så att en kort gång leder tvärs över plattformen. Entréerna placeras precis på båda sidor om plattformen. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta.",
+        "variant": "Välj ”Enkel stationsbyggnad” och förbind de två markörerna på västra respektive östra sidan, så att en kort gång leder tvärs över plattformen. Entréerna placeras precis på båda sidor om plattformen. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta.",
+        "start": "Välj ”Enkel stationsbyggnad” och förbind de två markörerna på västra respektive östra sidan, så att en kort gång leder tvärs över plattformen. Entréerna placeras precis på båda sidor om plattformen. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta.",
+        "end": "Välj ”Enkel stationsbyggnad” och förbind de två markörerna på västra respektive östra sidan, så att en kort gång leder tvärs över plattformen. Entréerna placeras precis på båda sidor om plattformen. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta.",
+        "confirm": "Välj ”Enkel stationsbyggnad” och förbind de två markörerna på västra respektive östra sidan, så att en kort gång leder tvärs över plattformen. Entréerna placeras precis på båda sidor om plattformen. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta.",
+        "town": "Välj ”Enkel stationsbyggnad” och förbind de två markörerna på västra respektive östra sidan, så att en kort gång leder tvärs över plattformen. Entréerna placeras precis på båda sidor om plattformen. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta.",
+        "new": "Välj ”Enkel stationsbyggnad” och förbind de två markörerna på västra respektive östra sidan, så att en kort gång leder tvärs över plattformen. Entréerna placeras precis på båda sidor om plattformen. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta.",
+        "east": "Välj ”Enkel stationsbyggnad” och förbind de två markörerna på västra respektive östra sidan, så att en kort gång leder tvärs över plattformen. Entréerna placeras precis på båda sidor om plattformen. Vänsterklicka på start- och slutpunkten i cirklarna, högerklicka för att bestämma formen och bekräfta."
+      },
+      "step3": {
+        "title": "Planera delsträckan som kräver markförvärv",
+        "description": "Välj ”Dubbelspår” och dra en rak linje på 6 m höjd från den västra plattformens östra ände till huvudgatans västra ände. Sträckan går över byggnader, så markförvärv krävs. Bekräfta planen och tryck på ”Nästa”. Byggtiden hoppas inte över på den här delsträckan.",
+        "open": "Välj ”Dubbelspår” och dra en rak linje på 6 m höjd från den västra plattformens östra ände till huvudgatans västra ände. Sträckan går över byggnader, så markförvärv krävs. Bekräfta planen och tryck på ”Nästa”. Byggtiden hoppas inte över på den här delsträckan.",
+        "variant": "Välj ”Dubbelspår” och dra en rak linje på 6 m höjd från den västra plattformens östra ände till huvudgatans västra ände. Sträckan går över byggnader, så markförvärv krävs. Bekräfta planen och tryck på ”Nästa”. Byggtiden hoppas inte över på den här delsträckan.",
+        "start": "Välj ”Dubbelspår” och dra en rak linje på 6 m höjd från den västra plattformens östra ände till huvudgatans västra ände. Sträckan går över byggnader, så markförvärv krävs. Bekräfta planen och tryck på ”Nästa”. Byggtiden hoppas inte över på den här delsträckan.",
+        "end": "Välj ”Dubbelspår” och dra en rak linje på 6 m höjd från den västra plattformens östra ände till huvudgatans västra ände. Sträckan går över byggnader, så markförvärv krävs. Bekräfta planen och tryck på ”Nästa”. Byggtiden hoppas inte över på den här delsträckan.",
+        "confirm": "Välj ”Dubbelspår” och dra en rak linje på 6 m höjd från den västra plattformens östra ände till huvudgatans västra ände. Sträckan går över byggnader, så markförvärv krävs. Bekräfta planen och tryck på ”Nästa”. Byggtiden hoppas inte över på den här delsträckan.",
+        "town": "Välj ”Dubbelspår” och dra en rak linje på 6 m höjd från den västra plattformens östra ände till huvudgatans västra ände. Sträckan går över byggnader, så markförvärv krävs. Bekräfta planen och tryck på ”Nästa”. Byggtiden hoppas inte över på den här delsträckan.",
+        "new": "Välj ”Dubbelspår” och dra en rak linje på 6 m höjd från den västra plattformens östra ände till huvudgatans västra ände. Sträckan går över byggnader, så markförvärv krävs. Bekräfta planen och tryck på ”Nästa”. Byggtiden hoppas inte över på den här delsträckan.",
+        "east": "Välj ”Dubbelspår” och dra en rak linje på 6 m höjd från den västra plattformens östra ände till huvudgatans västra ände. Sträckan går över byggnader, så markförvärv krävs. Bekräfta planen och tryck på ”Nästa”. Byggtiden hoppas inte över på den här delsträckan."
+      },
+      "step4": {
+        "title": "Beordra rivning av sjukhuset",
+        "description": "För privata byggnader startar förhandlingar om markförvärv automatiskt, men sjukhuset är en offentlig anläggning som tillhör staden. Det rivs inte automatiskt och hindrar byggstarten för spåret. Klicka på sjukhuset och tryck på ”Riv” bland knapparna högst upp. När det står ”Rivning planerad” trycker du på ”Nästa”.",
+        "open": "För privata byggnader startar förhandlingar om markförvärv automatiskt, men sjukhuset är en offentlig anläggning som tillhör staden. Det rivs inte automatiskt och hindrar byggstarten för spåret. Klicka på sjukhuset och tryck på ”Riv” bland knapparna högst upp. När det står ”Rivning planerad” trycker du på ”Nästa”.",
+        "variant": "För privata byggnader startar förhandlingar om markförvärv automatiskt, men sjukhuset är en offentlig anläggning som tillhör staden. Det rivs inte automatiskt och hindrar byggstarten för spåret. Klicka på sjukhuset och tryck på ”Riv” bland knapparna högst upp. När det står ”Rivning planerad” trycker du på ”Nästa”.",
+        "start": "För privata byggnader startar förhandlingar om markförvärv automatiskt, men sjukhuset är en offentlig anläggning som tillhör staden. Det rivs inte automatiskt och hindrar byggstarten för spåret. Klicka på sjukhuset och tryck på ”Riv” bland knapparna högst upp. När det står ”Rivning planerad” trycker du på ”Nästa”.",
+        "end": "För privata byggnader startar förhandlingar om markförvärv automatiskt, men sjukhuset är en offentlig anläggning som tillhör staden. Det rivs inte automatiskt och hindrar byggstarten för spåret. Klicka på sjukhuset och tryck på ”Riv” bland knapparna högst upp. När det står ”Rivning planerad” trycker du på ”Nästa”.",
+        "confirm": "För privata byggnader startar förhandlingar om markförvärv automatiskt, men sjukhuset är en offentlig anläggning som tillhör staden. Det rivs inte automatiskt och hindrar byggstarten för spåret. Klicka på sjukhuset och tryck på ”Riv” bland knapparna högst upp. När det står ”Rivning planerad” trycker du på ”Nästa”.",
+        "town": "För privata byggnader startar förhandlingar om markförvärv automatiskt, men sjukhuset är en offentlig anläggning som tillhör staden. Det rivs inte automatiskt och hindrar byggstarten för spåret. Klicka på sjukhuset och tryck på ”Riv” bland knapparna högst upp. När det står ”Rivning planerad” trycker du på ”Nästa”.",
+        "new": "För privata byggnader startar förhandlingar om markförvärv automatiskt, men sjukhuset är en offentlig anläggning som tillhör staden. Det rivs inte automatiskt och hindrar byggstarten för spåret. Klicka på sjukhuset och tryck på ”Riv” bland knapparna högst upp. När det står ”Rivning planerad” trycker du på ”Nästa”.",
+        "east": "För privata byggnader startar förhandlingar om markförvärv automatiskt, men sjukhuset är en offentlig anläggning som tillhör staden. Det rivs inte automatiskt och hindrar byggstarten för spåret. Klicka på sjukhuset och tryck på ”Riv” bland knapparna högst upp. När det står ”Rivning planerad” trycker du på ”Nästa”."
+      },
+      "step5": {
+        "title": "Vänta tills delsträckan är klar",
+        "description": "Låt tiden gå och vänta tills den privata marken är förvärvad, sjukhuset rivet och spårbygget klart. Det tar några månader. Här hoppas byggtiden inte över, så du ser hur spåret blir färdigt genom ett vanligt bygge.",
+        "open": "Låt tiden gå och vänta tills den privata marken är förvärvad, sjukhuset rivet och spårbygget klart. Det tar några månader. Här hoppas byggtiden inte över, så du ser hur spåret blir färdigt genom ett vanligt bygge.",
+        "variant": "Låt tiden gå och vänta tills den privata marken är förvärvad, sjukhuset rivet och spårbygget klart. Det tar några månader. Här hoppas byggtiden inte över, så du ser hur spåret blir färdigt genom ett vanligt bygge.",
+        "start": "Låt tiden gå och vänta tills den privata marken är förvärvad, sjukhuset rivet och spårbygget klart. Det tar några månader. Här hoppas byggtiden inte över, så du ser hur spåret blir färdigt genom ett vanligt bygge.",
+        "end": "Låt tiden gå och vänta tills den privata marken är förvärvad, sjukhuset rivet och spårbygget klart. Det tar några månader. Här hoppas byggtiden inte över, så du ser hur spåret blir färdigt genom ett vanligt bygge.",
+        "confirm": "Låt tiden gå och vänta tills den privata marken är förvärvad, sjukhuset rivet och spårbygget klart. Det tar några månader. Här hoppas byggtiden inte över, så du ser hur spåret blir färdigt genom ett vanligt bygge.",
+        "town": "Låt tiden gå och vänta tills den privata marken är förvärvad, sjukhuset rivet och spårbygget klart. Det tar några månader. Här hoppas byggtiden inte över, så du ser hur spåret blir färdigt genom ett vanligt bygge.",
+        "new": "Låt tiden gå och vänta tills den privata marken är förvärvad, sjukhuset rivet och spårbygget klart. Det tar några månader. Här hoppas byggtiden inte över, så du ser hur spåret blir färdigt genom ett vanligt bygge.",
+        "east": "Låt tiden gå och vänta tills den privata marken är förvärvad, sjukhuset rivet och spårbygget klart. Det tar några månader. Här hoppas byggtiden inte över, så du ser hur spåret blir färdigt genom ett vanligt bygge."
+      },
+      "step6": {
+        "title": "Lägg spår rakt ovanför huvudgatan",
+        "description": "Lägg ”Dubbelspår” på 6 m höjd från huvudgatans västra ände till dess östra ände. Om spåret följer vägens mitt hamnar det inte över de privata tomterna längs gatan, och du slipper markförvärv. Viker spåret av från vägen och går över byggnader krävs markförvärv eller rivning av offentliga anläggningar.",
+        "open": "Lägg ”Dubbelspår” på 6 m höjd från huvudgatans västra ände till dess östra ände. Om spåret följer vägens mitt hamnar det inte över de privata tomterna längs gatan, och du slipper markförvärv. Viker spåret av från vägen och går över byggnader krävs markförvärv eller rivning av offentliga anläggningar.",
+        "variant": "Lägg ”Dubbelspår” på 6 m höjd från huvudgatans västra ände till dess östra ände. Om spåret följer vägens mitt hamnar det inte över de privata tomterna längs gatan, och du slipper markförvärv. Viker spåret av från vägen och går över byggnader krävs markförvärv eller rivning av offentliga anläggningar.",
+        "start": "Lägg ”Dubbelspår” på 6 m höjd från huvudgatans västra ände till dess östra ände. Om spåret följer vägens mitt hamnar det inte över de privata tomterna längs gatan, och du slipper markförvärv. Viker spåret av från vägen och går över byggnader krävs markförvärv eller rivning av offentliga anläggningar.",
+        "end": "Lägg ”Dubbelspår” på 6 m höjd från huvudgatans västra ände till dess östra ände. Om spåret följer vägens mitt hamnar det inte över de privata tomterna längs gatan, och du slipper markförvärv. Viker spåret av från vägen och går över byggnader krävs markförvärv eller rivning av offentliga anläggningar.",
+        "confirm": "Lägg ”Dubbelspår” på 6 m höjd från huvudgatans västra ände till dess östra ände. Om spåret följer vägens mitt hamnar det inte över de privata tomterna längs gatan, och du slipper markförvärv. Viker spåret av från vägen och går över byggnader krävs markförvärv eller rivning av offentliga anläggningar.",
+        "town": "Lägg ”Dubbelspår” på 6 m höjd från huvudgatans västra ände till dess östra ände. Om spåret följer vägens mitt hamnar det inte över de privata tomterna längs gatan, och du slipper markförvärv. Viker spåret av från vägen och går över byggnader krävs markförvärv eller rivning av offentliga anläggningar.",
+        "new": "Lägg ”Dubbelspår” på 6 m höjd från huvudgatans västra ände till dess östra ände. Om spåret följer vägens mitt hamnar det inte över de privata tomterna längs gatan, och du slipper markförvärv. Viker spåret av från vägen och går över byggnader krävs markförvärv eller rivning av offentliga anläggningar.",
+        "east": "Lägg till sist ”Dubbelspår” på 6 m höjd från huvudgatans östra ände till den östra plattformens västra ände. När de två plattformarna är sammankopplade hoppar ”Nästa” över byggtiden."
+      },
+      "step7": {
+        "title": "Bygg depån",
+        "description": "Välj ”Järnvägsdepå” i byggpanelen och bygg den på den gula tomten norr om staden. Placera den själv även här. ”Nästa” hoppar över depåns byggtid och gör den klar.",
+        "open": "Välj ”Järnvägsdepå” i byggpanelen och bygg den på den gula tomten norr om staden. Placera den själv även här. ”Nästa” hoppar över depåns byggtid och gör den klar.",
+        "variant": "Välj ”Järnvägsdepå” i byggpanelen och bygg den på den gula tomten norr om staden. Placera den själv även här. ”Nästa” hoppar över depåns byggtid och gör den klar.",
+        "start": "Välj ”Järnvägsdepå” i byggpanelen och bygg den på den gula tomten norr om staden. Placera den själv även här. ”Nästa” hoppar över depåns byggtid och gör den klar.",
+        "end": "Välj ”Järnvägsdepå” i byggpanelen och bygg den på den gula tomten norr om staden. Placera den själv även här. ”Nästa” hoppar över depåns byggtid och gör den klar.",
+        "confirm": "Välj ”Järnvägsdepå” i byggpanelen och bygg den på den gula tomten norr om staden. Placera den själv även här. ”Nästa” hoppar över depåns byggtid och gör den klar.",
+        "town": "Välj ”Järnvägsdepå” i byggpanelen och bygg den på den gula tomten norr om staden. Placera den själv även här. ”Nästa” hoppar över depåns byggtid och gör den klar.",
+        "new": "Välj ”Järnvägsdepå” i byggpanelen och bygg den på den gula tomten norr om staden. Placera den själv även här. ”Nästa” hoppar över depåns byggtid och gör den klar.",
+        "east": "Välj ”Järnvägsdepå” i byggpanelen och bygg den på den gula tomten norr om staden. Placera den själv även här. ”Nästa” hoppar över depåns byggtid och gör den klar."
+      },
+      "step8": {
+        "title": "Justera kurva och lutning och anslut till huvudspåret",
+        "description": "Använd ”Järnvägsspår” och dra en bred båge österut från depåns östra anslutningspunkt i marknivå, via markören i nordost och fram till anslutningen till huvudspåret på 6 m höjd. Använd de gula mellanpunkterna som riktmärken så att du håller dig inom gränserna för kurvradie och lutning. När du har bekräftat formen med högerklick kan du justera den genom att dra i hörnpunkter och kontrollpunkter.",
+        "open": "Använd ”Järnvägsspår” och dra en bred båge österut från depåns östra anslutningspunkt i marknivå, via markören i nordost och fram till anslutningen till huvudspåret på 6 m höjd. Använd de gula mellanpunkterna som riktmärken så att du håller dig inom gränserna för kurvradie och lutning. När du har bekräftat formen med högerklick kan du justera den genom att dra i hörnpunkter och kontrollpunkter.",
+        "variant": "Använd ”Järnvägsspår” och dra en bred båge österut från depåns östra anslutningspunkt i marknivå, via markören i nordost och fram till anslutningen till huvudspåret på 6 m höjd. Använd de gula mellanpunkterna som riktmärken så att du håller dig inom gränserna för kurvradie och lutning. När du har bekräftat formen med högerklick kan du justera den genom att dra i hörnpunkter och kontrollpunkter.",
+        "start": "Använd ”Järnvägsspår” och dra en bred båge österut från depåns östra anslutningspunkt i marknivå, via markören i nordost och fram till anslutningen till huvudspåret på 6 m höjd. Använd de gula mellanpunkterna som riktmärken så att du håller dig inom gränserna för kurvradie och lutning. När du har bekräftat formen med högerklick kan du justera den genom att dra i hörnpunkter och kontrollpunkter.",
+        "end": "Använd ”Järnvägsspår” och dra en bred båge österut från depåns östra anslutningspunkt i marknivå, via markören i nordost och fram till anslutningen till huvudspåret på 6 m höjd. Använd de gula mellanpunkterna som riktmärken så att du håller dig inom gränserna för kurvradie och lutning. När du har bekräftat formen med högerklick kan du justera den genom att dra i hörnpunkter och kontrollpunkter.",
+        "confirm": "Använd ”Järnvägsspår” och dra en bred båge österut från depåns östra anslutningspunkt i marknivå, via markören i nordost och fram till anslutningen till huvudspåret på 6 m höjd. Använd de gula mellanpunkterna som riktmärken så att du håller dig inom gränserna för kurvradie och lutning. När du har bekräftat formen med högerklick kan du justera den genom att dra i hörnpunkter och kontrollpunkter.",
+        "town": "Använd ”Järnvägsspår” och dra en bred båge österut från depåns östra anslutningspunkt i marknivå, via markören i nordost och fram till anslutningen till huvudspåret på 6 m höjd. Använd de gula mellanpunkterna som riktmärken så att du håller dig inom gränserna för kurvradie och lutning. När du har bekräftat formen med högerklick kan du justera den genom att dra i hörnpunkter och kontrollpunkter.",
+        "new": "Använd ”Järnvägsspår” och dra en bred båge österut från depåns östra anslutningspunkt i marknivå, via markören i nordost och fram till anslutningen till huvudspåret på 6 m höjd. Använd de gula mellanpunkterna som riktmärken så att du håller dig inom gränserna för kurvradie och lutning. När du har bekräftat formen med högerklick kan du justera den genom att dra i hörnpunkter och kontrollpunkter.",
+        "east": "Använd ”Järnvägsspår” och dra en bred båge österut från depåns östra anslutningspunkt i marknivå, via markören i nordost och fram till anslutningen till huvudspåret på 6 m höjd. Använd de gula mellanpunkterna som riktmärken så att du håller dig inom gränserna för kurvradie och lutning. När du har bekräftat formen med högerklick kan du justera den genom att dra i hörnpunkter och kontrollpunkter."
+      },
+      "step9": {
+        "title": "Mata depån med el från kraftverket",
+        "description": "För att kunna köra eltåg måste du dra en kraftledning från kraftverket. Använd ”Kraftledning” och förbind kraftverkets anslutningspunkt med den gemensamma anslutningspunkten på depåns östra sida. Bekräfta sedan.",
+        "open": "För att kunna köra eltåg måste du dra en kraftledning från kraftverket. Använd ”Kraftledning” och förbind kraftverkets anslutningspunkt med den gemensamma anslutningspunkten på depåns östra sida. Bekräfta sedan.",
+        "variant": "För att kunna köra eltåg måste du dra en kraftledning från kraftverket. Använd ”Kraftledning” och förbind kraftverkets anslutningspunkt med den gemensamma anslutningspunkten på depåns östra sida. Bekräfta sedan.",
+        "start": "För att kunna köra eltåg måste du dra en kraftledning från kraftverket. Använd ”Kraftledning” och förbind kraftverkets anslutningspunkt med den gemensamma anslutningspunkten på depåns östra sida. Bekräfta sedan.",
+        "end": "För att kunna köra eltåg måste du dra en kraftledning från kraftverket. Använd ”Kraftledning” och förbind kraftverkets anslutningspunkt med den gemensamma anslutningspunkten på depåns östra sida. Bekräfta sedan.",
+        "confirm": "För att kunna köra eltåg måste du dra en kraftledning från kraftverket. Använd ”Kraftledning” och förbind kraftverkets anslutningspunkt med den gemensamma anslutningspunkten på depåns östra sida. Bekräfta sedan.",
+        "town": "För att kunna köra eltåg måste du dra en kraftledning från kraftverket. Använd ”Kraftledning” och förbind kraftverkets anslutningspunkt med den gemensamma anslutningspunkten på depåns östra sida. Bekräfta sedan.",
+        "new": "För att kunna köra eltåg måste du dra en kraftledning från kraftverket. Använd ”Kraftledning” och förbind kraftverkets anslutningspunkt med den gemensamma anslutningspunkten på depåns östra sida. Bekräfta sedan.",
+        "east": "För att kunna köra eltåg måste du dra en kraftledning från kraftverket. Använd ”Kraftledning” och förbind kraftverkets anslutningspunkt med den gemensamma anslutningspunkten på depåns östra sida. Bekräfta sedan."
+      },
+      "step10": {
+        "title": "Öppna järnvägslinjen",
+        "description": "Öppna ”Kollektivtrafik” → ”+ Ny linje” och välj ”Regionaltågslinje”. Placera hållplatser på den västra och den östra upphöjda plattformen och klicka sedan på den första hållplatsen för att sluta slingan. Ställ in biljettpriset på 0 och målintervallet för avgångar på 5 minuter och bekräfta.",
+        "open": "Öppna ”Kollektivtrafik” → ”+ Ny linje” och välj ”Regionaltågslinje”. Placera hållplatser på den västra och den östra upphöjda plattformen och klicka sedan på den första hållplatsen för att sluta slingan. Ställ in biljettpriset på 0 och målintervallet för avgångar på 5 minuter och bekräfta.",
+        "variant": "Öppna ”Kollektivtrafik” → ”+ Ny linje” och välj ”Regionaltågslinje”. Placera hållplatser på den västra och den östra upphöjda plattformen och klicka sedan på den första hållplatsen för att sluta slingan. Ställ in biljettpriset på 0 och målintervallet för avgångar på 5 minuter och bekräfta.",
+        "start": "Öppna ”Kollektivtrafik” → ”+ Ny linje” och välj ”Regionaltågslinje”. Placera hållplatser på den västra och den östra upphöjda plattformen och klicka sedan på den första hållplatsen för att sluta slingan. Ställ in biljettpriset på 0 och målintervallet för avgångar på 5 minuter och bekräfta.",
+        "end": "Öppna ”Kollektivtrafik” → ”+ Ny linje” och välj ”Regionaltågslinje”. Placera hållplatser på den västra och den östra upphöjda plattformen och klicka sedan på den första hållplatsen för att sluta slingan. Ställ in biljettpriset på 0 och målintervallet för avgångar på 5 minuter och bekräfta.",
+        "confirm": "Öppna ”Kollektivtrafik” → ”+ Ny linje” och välj ”Regionaltågslinje”. Placera hållplatser på den västra och den östra upphöjda plattformen och klicka sedan på den första hållplatsen för att sluta slingan. Ställ in biljettpriset på 0 och målintervallet för avgångar på 5 minuter och bekräfta.",
+        "town": "Öppna ”Kollektivtrafik” → ”+ Ny linje” och välj ”Regionaltågslinje”. Placera hållplatser på den västra och den östra upphöjda plattformen och klicka sedan på den första hållplatsen för att sluta slingan. Ställ in biljettpriset på 0 och målintervallet för avgångar på 5 minuter och bekräfta.",
+        "new": "Öppna ”Kollektivtrafik” → ”+ Ny linje” och välj ”Regionaltågslinje”. Placera hållplatser på den västra och den östra upphöjda plattformen och klicka sedan på den första hållplatsen för att sluta slingan. Ställ in biljettpriset på 0 och målintervallet för avgångar på 5 minuter och bekräfta.",
+        "east": "Öppna ”Kollektivtrafik” → ”+ Ny linje” och välj ”Regionaltågslinje”. Placera hållplatser på den västra och den östra upphöjda plattformen och klicka sedan på den första hållplatsen för att sluta slingan. Ställ in biljettpriset på 0 och målintervallet för avgångar på 5 minuter och bekräfta."
+      },
+      "step11": {
+        "title": "Kontrollera fordon och trafik",
+        "description": "Låt tiden gå och kontrollera linjens kapacitet och avgångsintervall i kollektivtrafikens översikt. Det tar några månader innan depån har skaffat fordon. När linjen har kapacitet är den öppnad. Invånarna väljer resväg med promenader inräknade, så på en kort sträcka mellan stationerna kanske det inte finns några passagerare än.",
+        "open": "Låt tiden gå och kontrollera linjens kapacitet och avgångsintervall i kollektivtrafikens översikt. Det tar några månader innan depån har skaffat fordon. När linjen har kapacitet är den öppnad. Invånarna väljer resväg med promenader inräknade, så på en kort sträcka mellan stationerna kanske det inte finns några passagerare än.",
+        "variant": "Låt tiden gå och kontrollera linjens kapacitet och avgångsintervall i kollektivtrafikens översikt. Det tar några månader innan depån har skaffat fordon. När linjen har kapacitet är den öppnad. Invånarna väljer resväg med promenader inräknade, så på en kort sträcka mellan stationerna kanske det inte finns några passagerare än.",
+        "start": "Låt tiden gå och kontrollera linjens kapacitet och avgångsintervall i kollektivtrafikens översikt. Det tar några månader innan depån har skaffat fordon. När linjen har kapacitet är den öppnad. Invånarna väljer resväg med promenader inräknade, så på en kort sträcka mellan stationerna kanske det inte finns några passagerare än.",
+        "end": "Låt tiden gå och kontrollera linjens kapacitet och avgångsintervall i kollektivtrafikens översikt. Det tar några månader innan depån har skaffat fordon. När linjen har kapacitet är den öppnad. Invånarna väljer resväg med promenader inräknade, så på en kort sträcka mellan stationerna kanske det inte finns några passagerare än.",
+        "confirm": "Låt tiden gå och kontrollera linjens kapacitet och avgångsintervall i kollektivtrafikens översikt. Det tar några månader innan depån har skaffat fordon. När linjen har kapacitet är den öppnad. Invånarna väljer resväg med promenader inräknade, så på en kort sträcka mellan stationerna kanske det inte finns några passagerare än.",
+        "town": "Låt tiden gå och kontrollera linjens kapacitet och avgångsintervall i kollektivtrafikens översikt. Det tar några månader innan depån har skaffat fordon. När linjen har kapacitet är den öppnad. Invånarna väljer resväg med promenader inräknade, så på en kort sträcka mellan stationerna kanske det inte finns några passagerare än.",
+        "new": "Låt tiden gå och kontrollera linjens kapacitet och avgångsintervall i kollektivtrafikens översikt. Det tar några månader innan depån har skaffat fordon. När linjen har kapacitet är den öppnad. Invånarna väljer resväg med promenader inräknade, så på en kort sträcka mellan stationerna kanske det inte finns några passagerare än.",
+        "east": "Låt tiden gå och kontrollera linjens kapacitet och avgångsintervall i kollektivtrafikens översikt. Det tar några månader innan depån har skaffat fordon. När linjen har kapacitet är den öppnad. Invånarna väljer resväg med promenader inräknade, så på en kort sträcka mellan stationerna kanske det inte finns några passagerare än."
+      },
+      "step12": {
+        "title": "Sammanfattning av järnvägsbygget",
+        "description": "Kameran har flyttats till den västra stationen. Titta på tågen som stannar vid plattformen. Du har byggt plattformar, stationsbyggnader, huvudspår, en depå med anslutningsspår, elförsörjning och en linje. Du har gått igenom förvärv av privat mark och rivning av en offentlig anläggning, och på sträckan rakt ovanför vägen slapp du markförvärv. Använd även metoden att justera linjeföringen med koll på kurvradie och lutning i dina kommande järnvägsbyggen.",
+        "open": "Kameran har flyttats till den västra stationen. Titta på tågen som stannar vid plattformen. Du har byggt plattformar, stationsbyggnader, huvudspår, en depå med anslutningsspår, elförsörjning och en linje. Du har gått igenom förvärv av privat mark och rivning av en offentlig anläggning, och på sträckan rakt ovanför vägen slapp du markförvärv. Använd även metoden att justera linjeföringen med koll på kurvradie och lutning i dina kommande järnvägsbyggen.",
+        "variant": "Kameran har flyttats till den västra stationen. Titta på tågen som stannar vid plattformen. Du har byggt plattformar, stationsbyggnader, huvudspår, en depå med anslutningsspår, elförsörjning och en linje. Du har gått igenom förvärv av privat mark och rivning av en offentlig anläggning, och på sträckan rakt ovanför vägen slapp du markförvärv. Använd även metoden att justera linjeföringen med koll på kurvradie och lutning i dina kommande järnvägsbyggen.",
+        "start": "Kameran har flyttats till den västra stationen. Titta på tågen som stannar vid plattformen. Du har byggt plattformar, stationsbyggnader, huvudspår, en depå med anslutningsspår, elförsörjning och en linje. Du har gått igenom förvärv av privat mark och rivning av en offentlig anläggning, och på sträckan rakt ovanför vägen slapp du markförvärv. Använd även metoden att justera linjeföringen med koll på kurvradie och lutning i dina kommande järnvägsbyggen.",
+        "end": "Kameran har flyttats till den västra stationen. Titta på tågen som stannar vid plattformen. Du har byggt plattformar, stationsbyggnader, huvudspår, en depå med anslutningsspår, elförsörjning och en linje. Du har gått igenom förvärv av privat mark och rivning av en offentlig anläggning, och på sträckan rakt ovanför vägen slapp du markförvärv. Använd även metoden att justera linjeföringen med koll på kurvradie och lutning i dina kommande järnvägsbyggen.",
+        "confirm": "Kameran har flyttats till den västra stationen. Titta på tågen som stannar vid plattformen. Du har byggt plattformar, stationsbyggnader, huvudspår, en depå med anslutningsspår, elförsörjning och en linje. Du har gått igenom förvärv av privat mark och rivning av en offentlig anläggning, och på sträckan rakt ovanför vägen slapp du markförvärv. Använd även metoden att justera linjeföringen med koll på kurvradie och lutning i dina kommande järnvägsbyggen.",
+        "town": "Kameran har flyttats till den västra stationen. Titta på tågen som stannar vid plattformen. Du har byggt plattformar, stationsbyggnader, huvudspår, en depå med anslutningsspår, elförsörjning och en linje. Du har gått igenom förvärv av privat mark och rivning av en offentlig anläggning, och på sträckan rakt ovanför vägen slapp du markförvärv. Använd även metoden att justera linjeföringen med koll på kurvradie och lutning i dina kommande järnvägsbyggen.",
+        "new": "Kameran har flyttats till den västra stationen. Titta på tågen som stannar vid plattformen. Du har byggt plattformar, stationsbyggnader, huvudspår, en depå med anslutningsspår, elförsörjning och en linje. Du har gått igenom förvärv av privat mark och rivning av en offentlig anläggning, och på sträckan rakt ovanför vägen slapp du markförvärv. Använd även metoden att justera linjeföringen med koll på kurvradie och lutning i dina kommande järnvägsbyggen.",
+        "east": "Kameran har flyttats till den västra stationen. Titta på tågen som stannar vid plattformen. Du har byggt plattformar, stationsbyggnader, huvudspår, en depå med anslutningsspår, elförsörjning och en linje. Du har gått igenom förvärv av privat mark och rivning av en offentlig anläggning, och på sträckan rakt ovanför vägen slapp du markförvärv. Använd även metoden att justera linjeföringen med koll på kurvradie och lutning i dina kommande järnvägsbyggen."
+      }
+    },
+    "complete": {
+      "title": "Handledningen är klar",
+      "description": "Grattis! Nu är handledningen klar. Tryck på ”Avsluta” för att stänga guiden och fortsätta spela fritt i den här staden.",
+      "button": "Avsluta"
+    },
+    "nextButton": "Nästa",
+    "checking": "Kontrollerar…",
+    "failed": "Villkoret är inte uppfyllt. Försök igen.",
+    "completed": "Handledningen är klar! Bra jobbat.",
+    "stepProgress": "Steg {{current}}/{{total}}",
+    "guide": {
+      "openRoad": "Tryck på vägikonen för att öppna byggpanelen.",
+      "selectRoad": "Välj den tvåfiliga vägen i marknivå under ”Gator”. Bara tillåtna typer går att välja.",
+      "placeStart": "Vänsterklicka inuti den ljusblå cirkeln för att placera vägens startpunkt.",
+      "placeEnd": "Vänsterklicka inuti den gula cirkeln för att placera vägens slutpunkt.",
+      "finalizeRoad": "Högerklicka i 3D-vyn för att bestämma vägens form.",
+      "confirmRoad": "Tryck på ”Bekräfta” i byggpanelen för att spara och tryck sedan på ”Nästa”.",
+      "failed": "Förberedelsen eller kommunikationen misslyckades. Om det inte hjälper att försöka igen kan du avsluta och starta handledningen i en ny stad.",
+      "retry": "Försök igen",
+      "placementRequired": "Placera med den typ och på den plats som guiden visar.",
+      "preparing": "Förbereder handledningens startläge.",
+      "finishFailed": "Det gick inte att avsluta handledningen. Försök igen."
+    },
+    "trade": {
+      "title": "Börja med internationell handel",
+      "description": "En lokal fabrik vill hitta kunder utomlands. I den här handledningen lär du dig att exportera livsmedel via en hamn och att importera varor med godståg från grannlandet.",
+      "step1": {
+        "description": "För att kunna exportera livsmedlen som produceras på ön behövs en exportkaj. Bygg en ”Containerterminal” på tomten vid kusten med den gula markören. Eftersom det här är en handledning hoppas byggtiden över.",
+        "title": "Bygg en containerhamn"
+      },
+      "step2": {
+        "description": "Det tar några månader innan fabrikens produktion och transporter kommer i gång, så låt tiden gå och titta på hamnens exportresultat. Stäng detaljerna för containerterminalen och öppna dem igen, så kan du se import- och exportresultaten under ”Godshantering”.",
+        "title": "Kontrollera livsmedelsexporten"
+      },
+      "step3": {
+        "description": "Nu har du en plats för import och export med fartyg. Bygg härnäst en plats för import och export med järnväg. Bygg en ”Internationell godsstation” på tomten längs vägen med den gula markören. Vid den östra gränsen finns ett spår som leder in i grannlandet och en godsstation vid gränsen.",
+        "title": "Bygg en internationell godsstation"
+      },
+      "step4": {
+        "open": "Öppna ”Vägar, järnväg och infrastruktur” i ikonpanelen och välj ”Containerlastplattform” under ”Järnväg”.",
+        "place": "Lägg en plattform norr om den internationella godsstationen, parallellt med stationen. Vänsterklicka inuti den ljusblå cirkeln (väster) för att placera startpunkten och inuti den gula cirkeln (öster) för att placera slutpunkten, och högerklicka sedan i 3D-vyn för att bestämma formen. Ändra ”Plattformens sida” till ”Insida” och kontrollera att plattformen hamnar på stationsbyggnadens sida (södra sidan) innan du bekräftar. När du är klar trycker du på ”Nästa”.",
+        "title": "Bygg en plattform bredvid stationen"
+      },
+      "step5": {
+        "description": "Tryck på ”Tillbaka” för att återgå till listan och välj ”Järnvägsspår”. Lägg spår från plattformens östra ände till den västra änden av spåret som kommer in från gränsgodsstationen utanför staden.",
+        "title": "Lägg spår fram till gränsen"
+      },
+      "step6": {
+        "title": "Bygg depån",
+        "description": "Bygg en ”Järnvägsdepå” på tomten längs spåret med den gula markören. När du trycker på ”Nästa” hoppas byggtiden över, eftersom det här är en handledning, och depån blir klar."
+      },
+      "step7": {
+        "title": "Anslut depån till huvudspåret",
+        "description": "Lägg ett anslutningsspår från anslutningspunkten i depåns östra ände till huvudspåret. Låt det ansluta till huvudspåret i en flack vinkel österut i stället för i rät vinkel. När du är klar trycker du på ”Nästa”."
+      },
+      "step8": {
+        "description": "Öppna ”Vägar, järnväg och infrastruktur” i ikonpanelen och använd ”Kraftledning” under ”El” för att förbinda anslutningspunkten på solkraftverket öster om staden med depåns anslutningspunkt.",
+        "title": "Mata depån med el"
+      },
+      "step9": {
+        "description": "Tryck på ”+ Ny linje” under ”Kollektivtrafik” och välj ”Internationell godslinje” som typ. Placera hållplatser på plattformarna vid den internationella godsstationen och gränsgodsstationen, klicka på den första hållplatsen för att sluta slingan och öppna linjen. Tågen kan inte mötas på enkelspår, så ställ in målintervallet för avgångar på 45 minuter, så att ett tågsätt hinner köra fram och tillbaka.",
+        "title": "Öppna den internationella godslinjen"
+      },
+      "step10": {
+        "description": "Låt tiden gå och kontrollera att godståg börjar trafikera den internationella godslinjen. Det tar några månader innan depån har anställt personal, köpt in material och tagit fram fordon.",
+        "title": "Kör godstågen"
+      }
+    },
+    "highway": {
+      "title": "Bygg en motorväg",
+      "description": "När staden växer behövs en ny väg för bilarna. I den här handledningen lär du dig att bygga en motorväg som korsar en vanlig väg på en viadukt och att ansluta dem med ramper till en trafikplats.",
+      "step1": {
+        "title": "Korsa på viadukt",
+        "open": "Den vanliga vägen i mitten ska korsas av en upphöjd motorväg. Öppna ”Vägar, järnväg och infrastruktur” i ikonpanelen och välj ”Tvåfilig motorväg” under ”Motorvägar”.",
+        "start": "Vänsterklicka inuti den ljusblå cirkeln för att placera motorvägens startpunkt. Startpunkten fäster vid ett viaduktläge 7 m över marken.",
+        "end": "Vänsterklicka inuti den gula cirkeln för att placera slutpunkten. Den fäster vid samma höjd, 7 m, på andra sidan den vanliga vägen.",
+        "confirm": "Tryck på ”Bekräfta” i byggpanelen för att spara och tryck sedan på ”Nästa”. Eftersom det här är en handledning hoppas byggtiden över och motorvägen blir klar direkt."
+      },
+      "step2": {
+        "title": "Namnge motorvägen",
+        "description": "Du kan ge vägar namn för att hålla ordning på dem. Högst upp i detaljfönstret för motorvägen du byggde står vägtillhörigheten just nu som ”Ingen (namnlös väg)”. Ge den valfritt namn."
+      },
+      "step3": {
+        "title": "Bygg en ramp",
+        "description": "Bygg en ramp som ansluter till den vanliga vägen. Välj ”Ramp” som vägtyp och dra en ramp i en mjuk kurva från den gula markören på skärmen fram till motorvägen."
+      },
+      "step4": {
+        "title": "Kontrollera trafikplatsen",
+        "description": "Klicka på ”IC1” som visas vid rampen för att öppna trafikplatsens detaljpanel. Kontrollera att den vanliga vägen och motorvägen är anslutna till varandra."
+      }
+    },
+    "mining": {
+      "title": "Utvinn naturresurser",
+      "description": "Under ön finns värdefulla resurser, men det finns inget sätt att frakta ut dem. I den här handledningen lär du dig att bygga upp en gruva, en godsjärnväg och en hamn, och följer hela kedjan från brytning och transport av malm till export utomlands.",
+      "step1": {
+        "description": "Slå på visningen av naturresurser och öppna detaljpanelen för malmfyndigheten i sydost.",
+        "title": "Undersök malmfyndigheten"
+      },
+      "step2": {
+        "description": "Bygg en ”Gruva” på den gula tomten ovanpå malmfyndigheten i sydost. Eftersom det här är en handledning hoppas byggtiden över.",
+        "title": "Bygg en gruva"
+      },
+      "step3": {
+        "description": "Bygg en ”Malmlastningsstation” på den stora befintliga tomten sydost om gruvan. På lastningsstationen lastas malmen som bryts i gruvan på tågen.",
+        "title": "Bygg en lastningsstation bredvid gruvan"
+      },
+      "step4": {
+        "description": "Bygg en ”Malmlossningsstation” på den stora befintliga tomten söder om hamnen. På lossningsstationen lossas malmen som tågen har fraktat dit, så att den kan föras vidare.",
+        "title": "Bygg en lossningsstation nära hamnen"
+      },
+      "step5": {
+        "description": "Bygg en ”Bulkhamn” på den gula tomten vid kusten.",
+        "title": "Bygg en bulkhamn"
+      },
+      "step6": {
+        "open": "Välj ”Malmlastplattform” under ”Järnväg” och förbind de två markörerna sydväst om lastningsstationen och de två söder om lossningsstationen. Vänd båda plattformarna mot respektive anläggning.",
+        "loading": "Välj ”Malmlastplattform” under ”Järnväg” och förbind de två markörerna sydväst om lastningsstationen och de två söder om lossningsstationen. Vänd båda plattformarna mot respektive anläggning.",
+        "unloading": "Välj ”Malmlastplattform” under ”Järnväg” och förbind de två markörerna sydväst om lastningsstationen och de två söder om lossningsstationen. Vänd båda plattformarna mot respektive anläggning.",
+        "title": "Bygg en plattform bredvid stationen"
+      },
+      "step7": {
+        "town": "Lägg godsspår från hamnplattformens östra ände, via södra sidan av vägens mittpunkt, till bergsplattformens nordvästra ände. Spåret är inte anslutet än, så du får lägga det själv. Använd kurvor för att rikta in färdriktningen, ställ in ”Följ terrängen” på ”Följ inte” för sträckan uppför berget och justera formen tills de röda varningarna för lutning och kurvradie försvinner. Lägg till mellanpunkter så att varje delsträcka är högst 500 m.",
+        "climb": "Lägg godsspår från hamnplattformens östra ände, via södra sidan av vägens mittpunkt, till bergsplattformens nordvästra ände. Spåret är inte anslutet än, så du får lägga det själv. Använd kurvor för att rikta in färdriktningen, ställ in ”Följ terrängen” på ”Följ inte” för sträckan uppför berget och justera formen tills de röda varningarna för lutning och kurvradie försvinner. Lägg till mellanpunkter så att varje delsträcka är högst 500 m.",
+        "title": "Förbind de två stationerna med spår"
+      },
+      "step8": {
+        "title": "Bygg depån",
+        "description": "Bygg en ”Järnvägsdepå” på den befintliga tomten sydväst om hamnen. Vänd den så att ett spår kan dras från anslutningspunkten i den östra änden till hamnplattformen."
+      },
+      "step9": {
+        "title": "Anslut depån till huvudspåret",
+        "description": "Lägg ett anslutningsspår från depåns östra anslutningspunkt i marknivå till hamnplattformens västra ände. Låt det ansluta mjukt i en flack vinkel."
+      },
+      "step10": {
+        "description": "Dra en kraftledning från anslutningspunkten på det befintliga solkraftverket till den gemensamma anslutningspunkten i depåns östra ände.",
+        "title": "Mata depån med el"
+      },
+      "step11": {
+        "description": "Välj ”Kollektivtrafik” → ”Ny linje” → ”Malmtransportlinje”, placera hållplatser på malmplattformarna vid berget och vid hamnen och klicka på den första hållplatsen för att sluta slingan. Tågen kan inte mötas på enkelspår, så ställ in målintervallet för avgångar på 45 minuter, så att ett tågsätt hinner köra fram och tillbaka, och bekräfta.",
+        "title": "Öppna malmtransportlinjen"
+      },
+      "step12": {
+        "description": "Låt tiden gå och sätt i gång brytning, lastning, järnvägstransport, lossning och export. Det tar några månader att skaffa fordon och få i gång transporterna.",
+        "title": "Låt tiden gå"
+      },
+      "step13": {
+        "description": "Låt tiden gå och kontrollera mottagen och exporterad malm i detaljerna för bulkhamnen vid kusten. Det tar några månader att skaffa fordon och att bryta och transportera malm.",
+        "title": "Kontrollera malmexporten"
+      }
+    },
+    "tourism": {
+      "title": "Utveckla turismen",
+      "description": "Det saknas både hamn och boende för att ta emot resenärer till öns ruiner, och det finns ingen busslinje för turister. I den här handledningen lär du dig att bygga ett hotell och en passagerarterminal, lägga upp en busslinje och kontrollera turisternas ankomst, restaurangens försäljning och hur bussen används.",
+      "step1": {
+        "description": "Bygg ett ”Turisthotell” på tomten med den gula markören väster om de antika ruinerna. Eftersom det här är en handledning hoppas byggtiden över.",
+        "title": "Bygg ett hotell vid ruinerna"
+      },
+      "step2": {
+        "description": "Det behövs en hamn för att ta emot turister. Bygg en ”Kryssningsterminal” på den markerade tomten i hamnen.",
+        "title": "Bygg en passagerarterminal"
+      },
+      "step3": {
+        "description": "Turisterna har inga egna bilar, så du behöver ordna kollektivtrafik. Välj ”Kollektivtrafik” → ”Ny linje” och välj ”Busslinje”. Placera hållplatser på vägarna vid de gula markörerna i ordningen hamnen → bostäderna → ruinerna → bostäderna, och klicka till sist på hållplatsen vid hamnen för att sluta slingan. Ställ in biljettpriset på 0 och målintervallet för avgångar på 1 minut och bekräfta.",
+        "title": "Lägg upp en busslinje mellan hamnen och ruinerna"
+      },
+      "step4": {
+        "description": "Låt tiden gå och ta emot turister. Det tar några månader innan anläggningarna är i drift och bussarna är anskaffade.",
+        "title": "Låt tiden gå"
+      },
+      "step5": {
+        "description": "Kontrollera försäljningen på restaurangen vid ruinerna och antalet passagerare på busslinjen du skapade. Steget är klart när turister har anlänt, restaurangens försäljning har ökat jämfört med starten och bussen används. Låt tiden gå ytterligare vid behov.",
+        "title": "Kontrollera försäljning och busspassagerare"
+      }
+    },
+    "intro": {
+      "controls": "Som nyvald borgmästare får du i uppdrag att bygga en stad där invånarna kan leva tryggt. Här finns ännu inga bostäder för nya invånare, och inte heller el eller vatten som vardagen kräver. I den här handledningen lär du dig först borgmästarens roll, hur du låter tiden gå, hur du läser av stadens tillstånd och hur knappar och kamera fungerar. Sedan går du igenom hela stadsbyggandet: att förbereda vägar och tomter, bestämma inriktning för en stadsdel, bygga bostäder och leverera el och vatten.",
+      "scenario4": "Vi vill knyta ihop bostadsområdet och arbetsplatserna med järnväg, men längs den planerade sträckan ligger privata byggnader och ett offentligt sjukhus. I den här handledningen lär du dig om markförvärv och rivning av offentliga anläggningar, upphöjda spår ovanför vägar, att bygga plattformar, stationsbyggnader och depåer, att justera kurvor och lutning samt allt från elförsörjning till att öppna en linje.",
+      "trade": "Den lokala livsmedelsfabriken vill gärna sälja sina varor även utomlands. Staden vill också kunna ta in varor den behöver från andra länder. I den här handledningen lär du dig att exportera livsmedel via en hamn och att importera varor med godståg från grannlandet.",
+      "highway": "När staden växer blir det fler fordon som fraktar människor och varor. För att inte all genomfartstrafik ska hamna på de vanliga vägarna vill staden redan nu ordna en alternativ väg. I den här handledningen lär du dig att bygga en motorväg som korsar en vanlig väg på en viadukt och att ansluta dem med ramper till en trafikplats.",
+      "mining": "Under den här ön finns värdefulla resurser. Men det finns inget sätt att frakta dem från berget till hamnen, så öns näringsliv kan inte dra nytta av rikedomen. I den här handledningen lär du dig att bygga upp en gruva, en godsjärnväg och en hamn, och följer hela kedjan från brytning och transport av malm till export utomlands.",
+      "tourism": "Öborna önskar att fler fick se de antika ruinerna inne på ön. Men det finns varken hamn eller boende för resenärer, och ingen busslinje från hamnen in till staden. I den här handledningen lär du dig att bygga ett hotell och en passagerarterminal, lägga upp en busslinje och kontrollera turisternas ankomst, restaurangens försäljning och hur bussen används.",
+      "heading": "En vädjan till borgmästaren",
+      "windowTitle": "Handledning",
+      "marine": "Den här staden vid viken har ännu varken hamn eller oljeanläggningar. I den här handledningen fyller du ut havet och bygger en tankerkaj, slår en hängbro över vikens mynning, pumpar upp råolja ur ett oljefält under havsbotten och skickar den i en rörledning för export, och knyter ihop en ö utanför kusten med staden med färja."
+    },
+    "marine": {
+      "title": "Utveckla havet",
+      "description": "Den här staden vid viken har ännu varken hamn eller oljeanläggningar. I den här handledningen fyller du ut havet och bygger en tankerkaj, slår en hängbro över vikens mynning, pumpar upp råolja ur ett oljefält under havsbotten och skickar den i en rörledning för export, och knyter ihop en ö utanför kusten med staden med färja.",
+      "step1": {
+        "title": "Planera en utfyllnad",
+        "description": "En hamn behöver en kaj där stora fartyg kan lägga till och mark att bygga anläggningarna på. Fyll ut havet längst in i viken för att skapa mark för en hamn. Tryck på ikonen ”Markarbeten”, vänsterklicka på de fyra gula markörerna i tur och ordning för att rita området och högerklicka för att sluta det. Kontrollera att kostnadsberäkningen gäller ”Utfyllnad” och bekräfta arbetet."
+      },
+      "step2": {
+        "title": "Gör klart den utfyllda marken",
+        "description": "Låt tiden gå minst en månad med ”Start” och tryck sedan på ”Nästa”. I den här lektionen finns inga byggföretag som kan utföra arbetet, så ”Nästa” hoppar över utfyllnadens byggtid. När den är klar har havet blivit mark, och kanten mot havet har blivit en kaj där fartyg kan lägga till."
+      },
+      "step3": {
+        "title": "Dra en väg ut på den utfyllda marken",
+        "description": "Även om du bygger en hamn eller en oljeterminal på den utfyllda marken kan ingen komma dit och arbeta, och inga varor kan fraktas, så länge den saknar väganslutning. Dra en väg från änden av stadens väg ut på den utfyllda marken. I den här lektionen blir vägen klar så snart du bekräftar den. Tryck på ”Vägar, järnväg och infrastruktur” i ikonpanelen för att öppna byggpanelen."
+      },
+      "step4": {
+        "title": "Bygg tankerkajen",
+        "description": "Tankfartygen som fraktar råolja är stora, så en hamn kan bara byggas där vattnet framför kajen är tillräckligt djupt. Vid kajen på den utfyllda marken är vattnet djupt, så den passar bra för en hamn. Tryck på byggnadsikonen, välj ”Tankerkaj” i kategorin ”Hamnar”, vänsterklicka inuti den gula cirkeln på kajen för att bestämma platsen och tryck på ”Bekräfta” i byggpanelen. När en hamn byggs dras automatiskt en anslutande farled ut till den stora farleden till havs, så att fartyg kan komma och gå. I den här lektionen hoppas byggtiden över."
+      },
+      "step5": {
+        "title": "Slå en hängbro över vikens mynning",
+        "description": "Motorvägen tar slut på båda sidor om vikens mynning. Mynningen är hela 1,6 km bred, för bred för en vanlig bro på rader av brostöd, så förbind sidorna med en hängbro som klarar ett långt spann i ett enda svep. Under bron går farleden för stora fartyg, så bron måste ligga så högt att fartygen inte slår i. Motorvägens ändar på båda stränderna ligger redan på den höjden. Öppna ”Vägar, järnväg och infrastruktur” i ikonpanelen, välj ”Fyrfilig hängbro” under ”Motorvägar” och dra den från den norra änden (ljusblå cirkel) till den södra änden (gul cirkel). Högerklicka för att bestämma formen, tryck på ”Bekräfta” i byggpanelen och tryck sedan på ”Nästa”."
+      },
+      "step6": {
+        "title": "Leta efter oljefältet under havsbotten",
+        "description": "Nu ska du använda havets resurser. Innan du bygger en oljeterminal behöver du kontrollera att det finns ett oljefält under havsbotten i närheten. Tryck på ”Visning” i cockpiten för att öppna visningspanelen.",
+        "show": "Välj ”Naturresurser” bland flikarna i kolumnen och växla till ”Visa”. Nu syns ett oljefält som breder ut sig under vikens botten. Klicka på oljefältet vid den gula markören för att öppna detaljerna."
+      },
+      "step7": {
+        "title": "Bygg oljeterminalen",
+        "description": "Råoljan som pumpas upp ur oljefältet under havsbotten skickas i en rörledning till en oljeterminal på land och säljs därifrån på marknaden. Oljeterminalen byggs vid kajen, där rörledningen kan dras in. Tryck på byggnadsikonen, välj ”Mottagningsterminal för olja” i kategorin ”Hamnar”, vänsterklicka inuti den gula cirkeln på kajen för att bestämma platsen och tryck på ”Bekräfta” i byggpanelen. I den här lektionen hoppas byggtiden över."
+      },
+      "step8": {
+        "title": "Bygg oljeplattformen",
+        "description": "Oljeplattformen som pumpar upp råolja måste byggas i havet rakt ovanför oljefältet. Tryck på byggnadsikonen, välj ”Oljeplattform till havs” i kategorin ”Jordbruk och naturresurser”, vänsterklicka inuti den gula cirkeln på havet för att bestämma platsen och tryck på ”Bekräfta” i byggpanelen. I den här lektionen hoppas byggtiden över."
+      },
+      "step9": {
+        "title": "Förbind dem med en rörledning",
+        "description": "Skicka råoljan som plattformen pumpar upp till oljeterminalen genom en rörledning på havsbotten. Öppna ”Vägar, järnväg och infrastruktur” i ikonpanelen, välj ”Oljeledning på havsbotten” under ”Olja” och dra en linje från plattformens anslutningspunkt till oljeterminalens anslutningspunkt. Bekräfta och tryck sedan på ”Nästa”, så blir rörledningen klar direkt."
+      },
+      "step10": {
+        "title": "Exportera råoljan",
+        "description": "Oljeterminalen säljer råoljan den tar emot på marknaden, och tankerkajen köper den och exporterar den utomlands med fartyg. Det tar några månader innan det finns personal och oljan börjar säljas. Låt tiden gå några månader med ”Start” och tryck sedan på ”Nästa”. Om inget har exporterats än får du låta tiden gå lite till och trycka igen."
+      },
+      "step11": {
+        "title": "Bygg en färjebrygga",
+        "description": "Ön ute till havs har inget sätt att ta sig till staden. Öppna en färjeförbindelse så att öns invånare kan resa in till staden. Bygg först en färjebrygga vid stadens strand. Öppna ”Vägar, järnväg och infrastruktur” i ikonpanelen, välj ”Färjebrygga” under ”Farleder” och dra den från stranden (ljusblå cirkel) ut över havet (gul cirkel). Högerklicka för att bestämma formen, tryck på ”Bekräfta” i byggpanelen och tryck sedan på ”Nästa”."
+      },
+      "step12": {
+        "title": "Dra färjeleden",
+        "description": "Dra nu den led som färjan ska följa från öns brygga till stadens brygga. En farled kan inte gå över land, så gå runt öns norra sida, under hängbron vid vikens mynning och in i viken, och vänsterklicka längs vägen för att placera punkter. Välj ”Färjeled” under ”Farleder”, förbind spetsen av öns brygga med spetsen av stadens brygga, bekräfta och tryck sedan på ”Nästa”."
+      },
+      "step13": {
+        "title": "Öppna färjelinjen",
+        "description": "Till sist skapar du färjelinjen som trafikerar leden. Välj ”Kollektivtrafik” → ”Ny linje” → ”Färjelinje”, placera hållplatser vid öns brygga och stadens brygga, klicka på den första hållplatsen för att sluta slingan och bekräfta. När linjen finns är handledningen klar. För att färjorna faktiskt ska gå behövs också en underhållsdocka som hyr ut fartygen."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Starta spelet",
+    "nowLoading": "Läser in…",
+    "startError": "Det gick inte att starta. Försök igen.",
+    "todaysTips": "Dagens tips",
+    "gotIt": "Stäng",
+    "items": {
+      "tip1": {
+        "title": "Pengar måste rulla",
+        "description": "Stadens byggkostnader och lönerna i de offentliga anläggningarna blir inkomster för företag och hushåll, och de inkomsterna håller i gång handeln och nästa produktionsomgång. Att bara driva in skatt får inte ekonomin att snurra. Fördela budget till de tjänster och reparationer som behövs, så att pengarna går tillbaka ut i staden."
+      },
+      "tip2": {
+        "title": "Den långa kampen för tryggheten",
+        "description": "Medborgare som växer upp i en otrygg miljö har kvar en större benägenhet att begå brott även som vuxna. Fortsätt både med polisens arbete och med att förbättra miljön som barnen växer upp i. Att förbättra tryggheten på djupet tar minst en generation."
+      },
+      "tip3": {
+        "title": "Ur vägen!",
+        "description": "Räddningstjänsten gör bara nytta när den kommer fram. Även om det finns en brandstation sprider sig skadorna om den ligger för långt bort eller om vägarna dit är köbelagda. Se över både budgeten, var stationerna ligger och vägarna fram till olycksplatserna."
+      },
+      "tip5": {
+        "title": "En brant väg",
+        "description": "Vägar i branta sluttningar kräver mer arbete än på plan mark. Den kortaste sträckan på kartan är inte alltid den billigaste. Jämför terrängen med kostnadsberäkningarna och fundera på om en liten omväg är bättre."
+      },
+      "tip6": {
+        "title": "Planera i tid",
+        "description": "När befolkningen och antalet fabriker växer ökar också efterfrågan på el och vatten. Börjar du bygga först när det blir brist får du vänta tills anläggningen är klar. Kontrollera att det finns kapacitet över innan du exploaterar en ny stadsdel."
+      },
+      "tip7": {
+        "title": "Skynda långsamt",
+        "description": "Högre hastighetsgränser ger snabbare resor men ökar risken för olyckor. Skarpa kurvor kräver också försiktighet. Där det sker många olyckor bör du se över vägens utformning och hastighetsgränsen."
+      },
+      "tip8": {
+        "title": "En investering i framtiden",
+        "description": "Personalbristen på sjukhus och avancerade fabriker löses inte bara genom att befolkningen växer. Ordna universitetsinriktningar och utbildningsplatser som tar fram den högkvalificerade arbetskraft som behövs, och räkna med tiden det tar innan studenterna tar examen."
+      },
+      "tip9": {
+        "title": "Byggt för att hålla",
+        "description": "Om du slarvar med reparationerna förfaller byggnader och vägar, och till slut kan de rasa. Bränder och ras försämrar också medborgarnas stämning, så det är riskabelt att lägga hela budgeten på nybyggen. Spara pengar till reparationer av befintliga anläggningar och till räddningstjänsten."
+      },
+      "tip10": {
+        "title": "Storbrand",
+        "description": "När byggnaderna står tätt sprider sig en brand i en byggnad lätt till grannarna. Utöver en bra räddningstjänst skyddar du staden genom att lämna utrymme mellan byggnaderna."
+      },
+      "tip11": {
+        "title": "Gräv på",
+        "description": "Kontrollera hur resurserna är fördelade innan du väljer plats för gruvor och oljefält. Ju mer du utvinner, desto mindre finns kvar. En stad som lever på gruvdrift behöver också tänka på jobb och skatteintäkter för tiden när fyndigheterna är slut."
+      },
+      "tip12": {
+        "title": "Stadens kassako",
+        "description": "När borgmästaren bygger bostäder eller kommersiella byggnader ger hyresgästerna hyresintäkter. Tomma lokaler ger inga intäkter, så kontrollera vilka användningar som efterfrågas, hur mycket som står tomt i närheten och hur läget är."
+      },
+      "tip13": {
+        "title": "Skattmasen kommer",
+        "description": "Skattesatserna påverkar inte bara stadens intäkter utan också företagens kostnader och lönsamhet. Du kan använda dem i näringspolitiken, till exempel genom att sänka skatten för branscher du vill få att växa. Även när skatteintäkterna inte räcker bör du se hur det går för varje bransch innan du höjer skatten rakt över."
+      },
+      "tip14": {
+        "title": "Ha alltid en plan B",
+        "description": "När olyckor eller katastrofer slår ut kraftverk eller kraftledningar sprider sig effekterna till fabriker och invånare som är beroende av el. Ordna reserver för viktig infrastruktur, både anläggningar som levererar och vägar som leveranserna tar, så att ett enda fel inte stoppar hela staden."
+      },
+      "tip15": {
+        "title": "På jakt efter ett hem",
+        "description": "Om du lämnar obebyggd mark i stadens centrum orörd kan människor som har förlorat sina hem samlas där, och då uppstår lätt en slum. Ordna bostäder med överkomliga hyror, så flyttar invånarna dit efter hand och slummen krymper av sig själv."
+      },
+      "tip16": {
+        "title": "Industrikluster",
+        "description": "När liknande branscher och de som tillverkar deras råvaror ligger nära varandra blir läget gynnsammare för produktion. Fundera på att samla närliggande branscher i stället för att sprida ut fabrikerna över hela staden. Tänk dock på buller och luftföroreningar nära bostadsområden."
+      },
+      "tip17": {
+        "title": "Jobba dygnet runt",
+        "description": "Om du förlänger arbetstiden i regelpanelen kan samma antal människor stå för mer produktion. Samtidigt blir hälsan och fritiden lidande, och nöjeskonsumtionen minskar. Ägnar man för mycket tid åt att tjäna pengar finns ingen tid kvar att göra av med dem."
+      },
+      "tip18": {
+        "title": "Pendlingshelvetet",
+        "description": "Långa pendlingstider minskar fritiden, och då minskar också konsumtionen av till exempel nöjen. Se över avståndet mellan bostäder och arbetsplatser och köerna längs pendlingsvägarna. Även det livligaste nöjeskvarteret är bara utsikt genom bilrutan för medborgare som bara hinner hem och sova."
+      },
+      "tip19": {
+        "title": "Framsynthet",
+        "description": "Långa tåg kan bara användas om de får plats vid plattformarna på linjens alla stationer. Tänk på plattformslängden redan när du bygger stationerna, så att det finns marginal när resenärerna blir fler. Att förlänga en enda station hjälper inte om de andra är för korta."
+      },
+      "tip20": {
+        "title": "Sopa under mattan",
+        "description": "Vägar under jord ger varken buller eller luftföroreningar och kan därför skydda boendemiljön i bostadsområden. Vissa problem går faktiskt att gräva ner."
+      },
+      "tip21": {
+        "title": "I skuggan av framstegen",
+        "description": "Höga hus kastar skugga norrut och försämrar boendemiljön i grannskapet. Tänk på byggnadernas höjd och avstånden mellan dem. Även terräng som berg ger skugga. Stadens framtid kan vara ljus, men vid husfoten kan det vara becksvart."
+      },
+      "tip22": {
+        "title": "Busskort framför bilnycklar",
+        "description": "När kollektivtrafiken gör det lätt att ta sig till jobbet, skolan och affärerna väljer hushållen oftare ett liv utan bil. Pengarna som sparas på att inte äga en bil kan läggas på annan konsumtion."
+      },
+      "tip23": {
+        "title": "Frakt av luft",
+        "description": "Bussar ökar trafiken på vägarna även när de går tomma. Kör du för många turer kan åtgärderna mot köer få motsatt effekt. Titta på antalet passagerare och avgångsintervallet och fundera på hur många turer som behövs."
+      },
+      "tip24": {
+        "title": "Mullvadar betalar ingen markhyra",
+        "description": "Tunnlar som ligger tillräckligt djupt kan dras utan att marken ovanför behöver förvärvas. På grunda delsträckor krävs markförvärv, så kontrollera djupet och kostnadsberäkningen. Om förhandlingarna går trögt kan du gräva lite djupare."
+      },
+      "tip25": {
+        "title": "Pendling i luften",
+        "description": "Även där berg och branta sluttningar gör det svårt att dra vägar kan du ordna kollektivtrafik med linbana. Ordna också vägar till stationerna och byten till annan trafik. Är det för krångligt att färdas på marken kan du alltid låta medborgarna hänga i luften."
+      },
+      "tip26": {
+        "title": "Köer på elnätet",
+        "description": "Även om det finns produktionskapacitet över kommer elen inte fram om kraftledningarna har för liten kapacitet. Innan du bygger fler kraftverk bör du kontrollera anslutningarna och överföringskapaciteten fram till stadsdelen med brist. En klen ledning på vägen kan begränsa försörjningen för hela staden."
+      },
+      "tip27": {
+        "title": "En olyckshändelse",
+        "description": "Du kan spränga en byggnad som står i vägen för utvecklingen och få det att se ut som en olycka. Men medborgarnas stämning blir avsevärt sämre. När du vill frigöra mark bör du väga kostnaden för att förvärva och riva mot de spår som ett hårdhänt tillvägagångssätt lämnar i staden."
+      },
+      "tip28": {
+        "title": "Ut på havet",
+        "description": "Räcker inte marken till kan du skapa ny mark genom utfyllnad. Där det finns resurser under havsbotten kan du också bygga oljeplattformar."
+      },
+      "tip29": {
+        "title": "Rödljushelvetet",
+        "description": "Ju fler korsningar med trafikljus, desto mer väntetid vid rödljus läggs på varje resa. Undvik för många korsningar på huvudleder. Korsar du gatorna alltför noggrant kan solen gå ner innan någon har sett grönt."
+      },
+      "tip30": {
+        "title": "Fri sikt",
+        "description": "Ju högre en radiomast står och ju högre den är, desto större område kan den täcka. Kontrollera om berg eller andra hinder ligger mellan masten och platserna utan täckning. En blockerad signal tar sig inte igenom berget hur mycket du än vill öka effekten."
+      },
+      "tip31": {
+        "title": "Havets gåvor",
+        "description": "Även en stad utan vattentäkter i närheten kan få vatten från en avsaltningsanläggning vid kusten. Men den behöver el för att gå. Efter jakten på vatten kommer jakten på el."
+      },
+      "tip32": {
+        "title": "Brottsförebyggande på annat sätt",
+        "description": "Arbetslöshet är en av orsakerna till sämre trygghet. Det räcker inte med mer polis – medborgarna behöver också arbetsplatser. När arbetslösheten är hög bör du kontrollera antalet lediga jobb, vilken kompetens som krävs och om invånarna kan ta sig till arbetsplatserna."
+      },
+      "tip33": {
+        "title": "Räkningen till framtiden",
+        "description": "Både byggnader och vägar fortsätter att kosta i reparationer efter att de är färdiga. Bygger du ut för mycket bara för att du har råd med byggkostnaden kan framtidens budget slukas av underhåll. Framtidens borgmästare är också du."
+      },
+      "tip34": {
+        "title": "Pumpa inte för mycket",
+        "description": "Vattentäkter fylls på med tiden, men om du pumpar mer än vad som fylls på sjunker mängden som finns kvar. Säkra fler vattentäkter innan efterfrågan växer. Fler pumpar ger inte mer vatten."
+      },
+      "tip35": {
+        "title": "Ett bittert misstag",
+        "description": "Vägar och byggnader är inte lätta att flytta när bygget väl har börjat. Kontrollera riktning, anslutningar och marken som blir över runt omkring innan du bekräftar bygget. Fast en väg som råkade bli krokig kan med tiden bli en del av stadens karaktär."
+      },
+      "tip36": {
+        "title": "Övervakningssamhället",
+        "description": "Klicka på en fotgängare eller en bil för att lägga till medborgaren i din bevakningslista. Använd den när du vill följa livet för en invånare som väcker ditt intresse. Utöver statistiken för hela staden kan du också se staden genom en enda människas vardag."
+      },
+      "tip37": {
+        "title": "Baskraft",
+        "description": "Hur mycket el sol- och vindkraften ger beror på vädret. Om du bara utgår från vad som levereras en solig dag kan det bli brist när vädret slår om. Kombinera med kraftkällor som är mindre väderberoende, som värmekraft eller kärnkraft."
+      },
+      "tip38": {
+        "title": "Hellre för stort än för litet",
+        "description": "Vissa byggnader går inte att bygga på små tomter. Har du en anläggning du vill bygga bör du kontrollera hur mycket yta den behöver innan du delar upp tomterna. Även om det finns mark över får en stor byggnad inte plats om allt är småtomter."
+      },
+      "tip39": {
+        "title": "Den tjänsten kostar",
+        "description": "Offentlig service som avloppsrening, avfallshantering, telekommunikation och sjukvård kan vara gratis från början. Om du sätter en avgift får användarna stå för en del av driftkostnaderna. Om priset ska vara snällt mot medborgarna eller rejält tilltaget är upp till borgmästaren."
+      },
+      "tip40": {
+        "title": "Klipp och klistra-staden",
+        "description": "När borgmästaren bygger kan befintliga byggnader kopieras. Om du behåller typ och antal våningar och bygger på en tomt där originalet får plats blir byggkostnaden lägre. Stadsbilden blir enformig, men plånboken gillar utsikten."
+      },
+      "tip41": {
+        "title": "Är hyran allt som räknas?",
+        "description": "När invånarna väljer var de ska flytta jämför de hyran, hur besvärligt det blir att pendla till jobb och skola och att handla, bostadens kvalitet och boendemiljön. Buller, luftföroreningar, trygghet och solljus spelar också roll. Billiga men opraktiska bostäder väljs sällan, och även praktiska bostäder behöver en hyra som hushållet har råd med och tillräckligt med utrymme för att kunna flytta in."
+      },
+      "tip42": {
+        "title": "Grundstött är för sent",
+        "description": "Stora hamnar som containerhamnar, bulkhamnar och tankerhamnar behöver tillräckligt vattendjup. Kuster där havsbotten sluttar brant har nära till djupt vatten och passar bra för hamnar. Även vid en flack kust med långgrunt vatten kan du bygga en hamn om du fyller ut land ända ut till det djupa vattnet."
+      },
+      "tip43": {
+        "title": "Bara en liten stund",
+        "description": "När gatuparkeringen ökar sjunker hastigheten för passerande bilar, och trafikolyckor blir vanligare. Bygg parkeringar så att bilarna som svämmar över på gatorna får någonstans att stå. Tanken ”bara en liten stund” kan få hela staden att stå still."
+      },
+      "tip44": {
+        "title": "Avskuren från omvärlden",
+        "description": "Du kan bygga även på platser långt från vägar, men ju längre det är till vägen, desto sämre blir tillgängligheten. Fabriker och butiker får längre tid för att skaffa varor, och för bostäder blir pendling och inköp mer betungande. Bygg längs vägarna eller dra en väg ända fram till byggnaden."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Välj en tomt för att planera en byggnad. Det tar en stund från att byggnaden planeras tills den är färdigställd.",
+    "parcelCreation": "Öppna hjulmenyn med Ctrl och välj hur du vill skapa, klicka sedan i 3D-vyn för att ange vad det gäller. Justera måtten i panelen och bekräfta.",
+    "transitCreation": "Vänsterklicka för att placera hållplatser i tur och ordning, och klicka på den första hållplatsen för att sluta slingan. Dra i en delsträcka för att lägga till en via-punkt, dra i en punkt för att flytta den och högerklicka för att ta bort den. För trafik fram och tillbaka placerar du även hållplatserna för returresan. Klicka på en placerad hållplats igen, eller släpp en hållplats på en annan hållplats, så stannar linjen där en gång till.",
+    "transitManagement": "Lista över kollektivtrafikens linjer. Här kan du justera biljettpriser och avgångsintervall samt skapa och ta bort linjer. Biljettpriset påverkar invånarnas val av resväg. Är det för högt minskar antalet resenärer och fler skaffar bil.",
+    "pathConstruction": "Bygg vägar och spår. Klicka på terrängen i 3D-vyn: vänsterklicka för att lägga till hörnpunkter, högerklicka för att bestämma formen och dra i hörnpunkterna för att flytta dem. Håll ned Ctrl för att öppna inställningsmenyn (kurva/rak och fästning). Med tangenterna 3/4 ändrar du höjden för bank och skärning.",
+    "pathConstructionElevated": "Bygg vägar och spår. Klicka på terrängen i 3D-vyn: vänsterklicka för att lägga till hörnpunkter, högerklicka för att bestämma formen och dra i hörnpunkterna för att flytta dem. Håll ned Ctrl för att öppna inställningsmenyn (kurva/rak och fästning). Med PageUp/PageDown eller tangenterna 1/2 ändrar du höjden, och med 3/4 höjden för bank och skärning.",
+    "districtEdit": "Skapa, utvidga och slå ihop ”stadsdelar”, som är enheten för regler och statistik. Håll ned Ctrl i 3D-vyn för att byta verktyg. Skapa: vänsterklicka på en väg för att skapa en ny stadsdel i den färg som visas (färgen byts varje gång du väljer verktyget). Utvidga: högerklicka för att välja stadsdelen som ska utvidgas och vänsterklicka sedan på vägar för att ta in dem i den. Slå ihop: högerklicka för att välja stadsdelen som de andra ska slås ihop med och vänsterklicka sedan på stadsdelen du vill slå ihop, så öppnas en bekräftelsepanel. Den valda stadsdelens färg och namn visas bredvid muspekaren. Tryck på knappen igen för att avsluta.",
+    "bulldozer": "Bulldozerläge. Vänsterklicka för att ta bort tomma tomter, planerade byggnader, planerade vägar och dekorobjekt i terrängen (dekorobjekt som placerats över ett område tas bort som hela området efter bekräftelse). Tryck på knappen igen för att avsluta.",
+    "bulldozerInstant": "Bulldozerläge. Vänsterklicka för att omedelbart ta bort byggnader, vägar, tomma tomter och dekorobjekt i terrängen utan bekräftelse. Byggnader försvinner tillsammans med hyresgäster och medborgare, och terrängen återställs inte (stadshuset, gränskontrollen och kollektivtrafikens delsträckor kan inte tas bort; bara dekorobjekt som placerats över ett område tas bort som hela området efter bekräftelse). Tryck på knappen igen för att avsluta.",
+    "cityBudget": "Bestäm hur pengarna från skatter och verksamheter ska fördelas under nästa period. När stadsförvaltningen köper in material för vägbyggen eller drift av offentliga anläggningar kan den bara köpa inom den budget som bestäms här. Om budgeten inte räcker kan personal på offentliga anläggningar också sägas upp.",
+    "resourceEdit": "Skapa ett område med naturresurser. Välj typ av resurs och klicka sedan på terrängen. Vänsterklicka för att lägga till en hörnpunkt, klicka på en kant för att infoga en hörnpunkt och högerklicka för att ta bort en hörnpunkt. Dra för att flytta en hörnpunkt.",
+    "grading": "Vänsterklicka för att placera hörnpunkter och högerklicka för att bestämma området."
+  }
+}

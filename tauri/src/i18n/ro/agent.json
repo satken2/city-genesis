@@ -1,0 +1,212 @@
+{
+  "agent": {
+    "back": "Înapoi",
+    "editAppearance": "Schimbă aspectul",
+    "relocateCityHall": "Mută primăria",
+    "publicFacility": "Facilitate publică",
+    "underAcquisition": "Negocieri de achiziție în curs",
+    "publicFacilityPanel": {
+      "title": "Facilitate publică / municipală"
+    },
+    "abandon": "Abandonează",
+    "abandonHint": "Renunță la întreținere: nu se mai fac reparații, iar clădirea se degradează în timp",
+    "statusSince": {
+      "founded": "Data înființării",
+      "householdFormed": "Data formării gospodăriei",
+      "arrived": "Data sosirii",
+      "opened": "Data deschiderii",
+      "schoolOpened": "Data deschiderii școlii",
+      "completed": "Data finalizării",
+      "operatingSince": "În funcțiune din",
+      "resumed": "Data reluării",
+      "paused": "Data opririi",
+      "suspended": "Data suspendării activității",
+      "schoolClosed": "Data închiderii școlii",
+      "constructionStarted": "Data începerii lucrărilor",
+      "demolitionScheduled": "Data deciziei de demolare",
+      "demolitionStarted": "Data începerii demolării",
+      "demolished": "Data încheierii demolării",
+      "collapsed": "Data prăbușirii",
+      "burnedDown": "Data distrugerii prin incendiu",
+      "default": "Data schimbării stării"
+    },
+    "reserves": "Lichidități",
+    "revenues": "Venituri",
+    "expenses": "Cheltuieli",
+    "zone": "Cartier",
+    "building": "Clădire",
+    "rent": "Chirie",
+    "floorOccupancy": "Suprafață ocupată",
+    "tenants": "Chiriași",
+    "guests": "Oaspeți cazați",
+    "tabBasicInfo": "Informații de bază",
+    "utilizationTarget": "Grad de utilizare țintă",
+    "currentUtilization": "Grad de utilizare actual",
+    "constructionSpeed": "Viteza construcției",
+    "constructionCostPerEpoch": "Cost de construcție pe epocă",
+    "remainingConstruction": "Timp rămas până la finalizare",
+    "remainingEpochs": "~{{n}} epoci",
+    "tabBuildingInfo": "Clădire",
+    "tabCargoInfo": "Manipularea mărfurilor",
+    "tabTradeInfo": "Cerere, ofertă și tranzacții",
+    "tabTourismInfo": "Turism",
+    "tabEmploymentInfo": "Locuri de muncă",
+    "action": {
+      "purchase": "Cumpără",
+      "bulldoze": "Dărâmă",
+      "cancelBulldoze": "Anulează dărâmarea",
+      "pause": "Oprește temporar",
+      "resume": "Reia",
+      "delete": "Șterge",
+      "repair": "Repară",
+      "rebuild": "Reconstruiește",
+      "edit": "Editează",
+      "startConstruction": "Începe lucrările",
+      "stopConstruction": "Amână",
+      "cancelAbandon": "Anulează abandonarea",
+      "explode": "Aruncă în aer",
+      "explodeConfirm": "Arunci în aer această clădire, făcând totul să pară un accident?\nClădirea se prăbușește imediat, iar toți cei care locuiesc sau lucrează în ea mor. Opinia publică va avea mult de suferit, iar acțiunea nu poate fi anulată.",
+      "explodeTitle": "Aruncarea în aer a clădirii",
+      "explodeConfirmAction": "Aruncă în aer"
+    },
+    "pendingWarning": "Această clădire este doar planificată. Dă ordinul de începere a lucrărilor.",
+    "alerts": {
+      "diagnoseHint": "Apasă pentru a diagnostica cauza",
+      "title": "Alerte",
+      "constructionShortage": {
+        "title": "Servicii de construcții insuficiente",
+        "description": "Bugetul pentru construcții este insuficient, așa că lucrările întârzie."
+      },
+      "onFire": {
+        "title": "Incendiu!",
+        "description": "În clădire a izbucnit un incendiu."
+      },
+      "accidentalFire": {
+        "title": "Incendiu accidental (minor)",
+        "description": "În clădire a izbucnit accidental un incendiu, dar a rămas de mică amploare."
+      },
+      "infraDisconnected": {
+        "title": "Neconectat la rețeaua de infrastructură",
+        "description": "Niciun traseu de infrastructură nu este conectat la punctul de racord al acestei facilități. Până la conectarea la rețea, nu poate furniza și nu poate primi nimic."
+      },
+      "capacityTight": {
+        "title": "Capacitate aproape epuizată",
+        "description": "Volumul gestionat a ajuns la cel puțin 90% din capacitatea facilității. Aproape că nu mai poate face față unei cereri suplimentare."
+      },
+      "nonconforming": {
+        "title": "Neconform cu reglementările",
+        "description": "Clădirea nu respectă reglementările parcelei. Nu va fi reparată și va fi demolată când se degradează."
+      },
+      "crime": {
+        "title": "Infracțiune",
+        "description": "În această clădire s-a comis o infracțiune."
+      },
+      "crimeSign": {
+        "title": "Semne de infracționalitate",
+        "description": "În această clădire s-au observat semne de infracționalitate. Fii atent la deteriorarea siguranței publice."
+      },
+      "laborShortage": {
+        "title": "Lipsă de forță de muncă",
+        "description": "Nu sunt destui angajați, așa că producția și serviciile sunt sub nivelul planificat."
+      },
+      "materialShortage": {
+        "title": "Lipsă de materii prime",
+        "description": "Aprovizionarea cu materii prime este insuficientă, așa că producția și serviciile sunt sub nivelul planificat."
+      },
+      "highSkillShortage": {
+        "title": "Lipsă de specialiști",
+        "description": "Nu sunt destui angajați cu calificare înaltă, așa că producția a fost redusă la cât poate duce personalul existent."
+      },
+      "budgetCapped": {
+        "title": "Buget insuficient",
+        "description": "Bugetul alocat este mult sub suma necesară, așa că activitatea a fost redusă. Revizuiește alocarea bugetului."
+      },
+      "facilityWarning": {
+        "title": "Facilitate publică nefuncțională",
+        "description": "Serviciile furnizate de această facilitate sunt mult sub țintă. Verifică forța de muncă și aprovizionarea cu materii prime."
+      },
+      "sanitationWarning": {
+        "title": "Igienă deteriorată",
+        "description": "Igiena pe amplasamentul acestei clădiri s-a deteriorat grav și afectează gospodăriile care locuiesc aici. Îmbunătățește furnizarea serviciilor de canalizare și de tratare a deșeurilor."
+      },
+      "infraWarning": {
+        "title": "Facilitate de infrastructură oprită sau prăbușită",
+        "description": "Oprirea sau prăbușirea acestei facilități afectează furnizarea prin infrastructură. Verifică starea facilității și traseele de alimentare."
+      },
+      "farFromRoad": {
+        "title": "Departe de drum",
+        "description": "Cel mai apropiat drum este la aproximativ {{distance}} m. Aprovizionarea, naveta și cumpărăturile sunt mult îngreunate, așa că ia în calcul prelungirea unui drum până aproape de clădire."
+      },
+      "noRoadAccess": {
+        "title": "Niciun drum la care să se conecteze",
+        "description": "Clădirea nu are niciun drum la care să se poată conecta. Aprovizionarea, naveta și cumpărăturile sunt mult îngreunate, așa că construiește un drum în apropiere."
+      }
+    },
+    "infra": {
+      "title": "Conectare la infrastructură",
+      "connected": "Conectat",
+      "disconnected": "Neconectat",
+      "received": "Cantitate primită"
+    },
+    "tabConstructionInfo": "Lucrări de construcție",
+    "tabEducationInfo": "Educație",
+    "education": {
+      "totalStudents": "Elevi înscriși",
+      "totalCapacity": "Capacitate totală",
+      "statusTitle": "Situația înscrierilor",
+      "enrolled": "Înscriși",
+      "vacant": "Locuri libere",
+      "noCapacity": "Fără locuri",
+      "countLabel": "Număr",
+      "enrollmentBySkill": "Înscrieri pe calificări",
+      "settingsTitle": "Repartizarea locurilor",
+      "settingsHint": "Setează ponderea fiecărei calificări. Capacitatea totală se împarte proporțional cu ponderile.",
+      "skillHeader": "Calificare",
+      "weightHeader": "Pondere",
+      "previewHeader": "Locuri",
+      "save": "Salvează",
+      "saving": "Se salvează…",
+      "saveFailed": "Salvarea a eșuat",
+      "sumMustBePositive": "Totalul locurilor trebuie să fie cel puțin 1",
+      "invalidWeight": "Ponderile trebuie să fie numere întregi mai mari sau egale cu 0",
+      "studentsList": "Lista elevilor",
+      "noStudents": "Niciun elev",
+      "showMore": "Arată mai mulți ({{count}})"
+    }
+  },
+  "agentList": {
+    "filterType": "Tip",
+    "filterVariant": "Variantă",
+    "filterZone": "Cartier",
+    "allVariants": "Toate variantele",
+    "allZones": "Toate cartierele",
+    "resultCount": "Rezultate: {{count}}",
+    "capped": "(din {{total}} în total)",
+    "loading": "Se încarcă…",
+    "noResults": "Niciun agent economic corespunzător",
+    "colStatus": "Stare",
+    "colVariant": "Variantă",
+    "colName": "Nume",
+    "colProduct": "Produs",
+    "colPrice": "Preț",
+    "colProduction": "Producție",
+    "colStock": "Stoc",
+    "colSold": "Vândut",
+    "colWage": "Salariu unitar",
+    "colEmployment": "Angajați",
+    "colUtilization": "Grad de utilizare",
+    "colBdType": "Tip clădire",
+    "colDurability": "Durabilitate",
+    "colRent": "Chirie",
+    "colFloors": "Etaje",
+    "colFloorArea": "Suprafață",
+    "colOccupancy": "Grad de ocupare",
+    "colFamilyType": "Tip gospodărie",
+    "colDiscretionaryIncome": "Venit disponibil",
+    "colSatisNutrition": "Nutriție",
+    "colSatisHealthcare": "Sănătate",
+    "colSatisLeisure": "Divertisment",
+    "colSatisResidential": "Locuință",
+    "colAutomobile": "Mașină"
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Znak",
+    "flag": "Městská vlajka",
+    "motif": "Motiv",
+    "fieldColor": "Barva pole",
+    "motifColor": "Barva motivu",
+    "pattern": "Vzor",
+    "accentColor": "Doplňková barva",
+    "placement": "Umístění znaku",
+    "loadImage": "Načíst obrázek",
+    "randomize": "Náhodně",
+    "apply": "Použít",
+    "imageLoadFailed": "Obrázek se nepodařilo načíst.",
+    "placements": {
+      "center": "Uprostřed",
+      "canton": "Vlevo nahoře",
+      "none": "Bez znaku"
+    },
+    "motifs": {
+      "wave": "Vlna",
+      "mountain": "Hora",
+      "star": "Hvězda",
+      "tree": "Strom",
+      "sun": "Slunce",
+      "moon": "Měsíc",
+      "flower": "Květina",
+      "leaf": "List",
+      "bird": "Pták",
+      "fish": "Ryba",
+      "anchor": "Kotva",
+      "gear": "Ozubené kolo",
+      "tower": "Hrad",
+      "bridge": "Most",
+      "key": "Klíč",
+      "crown": "Koruna",
+      "snowflake": "Sněhová vločka",
+      "flame": "Plamen",
+      "diamond": "Kosočtverec",
+      "cross": "Kříž"
+    },
+    "patterns": {
+      "plain": "Jednobarevný",
+      "bicolor": "Dvě barvy nad sebou",
+      "triband": "Tři svislé pruhy",
+      "diagonal": "Šikmé dělení",
+      "border": "Lem",
+      "bands": "Pruhy nahoře a dole"
+    }
+  }
+}

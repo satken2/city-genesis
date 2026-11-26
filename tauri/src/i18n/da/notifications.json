@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Byens meddelelser",
+    "empty": "Der er ingen problemer, der kræver handling lige nu",
+    "loadFailed": "Meddelelserne kunne ikke hentes",
+    "types": {
+      "resource_runway": "Ressourcen »{{name}}« forventes at være udtømt om ca. {{remaining_epochs}} epoker",
+      "resource_depleted": "Ressourcen »{{name}}« er udtømt",
+      "facility_inoperative": "Det offentlige anlæg »{{name}}« er ude af drift",
+      "facility_inoperative_labor": "Det offentlige anlæg »{{name}}« er ude af drift på grund af mangel på arbejdskraft",
+      "facility_inoperative_material": "Det offentlige anlæg »{{name}}« er ude af drift på grund af mangel på råvarer",
+      "facility_inoperative_high_skill": "Det offentlige anlæg »{{name}}« kører med nedsat kapacitet på grund af mangel på specialiseret personale",
+      "facility_inoperative_budget": "Det offentlige anlæg »{{name}}« kører med nedsat kapacitet på grund af for lille budget",
+      "education_low_enrollment": "Uddannelsesinstitutionen »{{name}}« er underudnyttet, fordi der er for få studerende ({{enrolled}} indskrevne af {{max_students}} pladser)",
+      "infra_facility_down": "Infrastrukturanlægget »{{name}}« er ude af drift",
+      "infra_disconnected": "{{count}} anlæg er ikke tilsluttet infrastrukturnettet",
+      "rail_capacity_exceeded": "Antallet af togafgange overstiger sporkapaciteten på {{count}} sporstrækninger",
+      "collapse": "{{count}} bygninger/veje er kollapset",
+      "collapse_with_deaths": "{{count}} bygninger/veje er kollapset, og {{deaths}} personer er omkommet",
+      "deaths_traffic": "{{count}} personer er omkommet i trafikulykker",
+      "tenant_blocked_by_parcel_size": "Der kan ikke opføres en bygning til »{{tenant_name}}« i bydelen »{{zone_name}}« (kræver {{required}} m2, største mulige {{max_capacity}} m2). Der er brug for en større parcel",
+      "unknown": "Der er sket en alvorlig hændelse",
+      "sanitation": "Hygiejnen bliver værre for {{count}} husstande. Forbedr kloak- og affaldshåndteringen."
+    }
+  }
+}

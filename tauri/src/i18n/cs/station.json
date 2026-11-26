@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Stanice",
+    "name": "Název stanice",
+    "ridership": "Počet nástupů",
+    "platforms": "Seznam nástupišť",
+    "noPlatforms": "K této stanici nepatří žádná nástupiště (patří k ní nástupiště, která protíná čára)",
+    "lines": "Obsluhující linky",
+    "noLines": "Tuto stanici neobsluhuje žádná linka",
+    "stops": "Počet nástupů podle zastávek",
+    "noStops": "V této stanici nejsou žádné zastávky",
+    "lineRunning": "V provozu",
+    "lineSuspended": "Mimo provoz",
+    "houseEnds": "Umístění budov",
+    "houseEnds_both": "Oba konce",
+    "houseEnds_start": "Počátek",
+    "houseEnds_end": "Konec",
+    "passageMode": "Umístění spojovací chodby",
+    "passageMode_elevated": "Nad zemí",
+    "passageMode_ground": "Na úrovni terénu",
+    "passageMode_underground": "Pod zemí"
+  }
+}

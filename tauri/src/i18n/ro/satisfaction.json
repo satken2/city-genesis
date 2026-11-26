@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "Epuizat",
+    "unhappy": "Nemulțumit",
+    "neutral": "Neutru",
+    "happy": "Mulțumit",
+    "delighted": "Încântat",
+    "zero": "Satisfacție zero"
+  }
+}

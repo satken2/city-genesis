@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} tuổi",
+    "male": "Nam",
+    "female": "Nữ",
+    "single": "Độc thân",
+    "married": "Đã kết hôn",
+    "household": "Hộ gia đình",
+    "employer": "Nơi làm việc",
+    "unemployed": "Không có việc làm",
+    "school": "Nơi học",
+    "notEnrolled": "Không đi học",
+    "major": "Kỹ năng chuyên ngành",
+    "higherEducation": "Giáo dục đại học",
+    "graduated": "Đã tốt nghiệp",
+    "notGraduated": "Chưa tốt nghiệp",
+    "skills": "Kỹ năng",
+    "criminality": "Khuynh hướng phạm tội",
+    "commuteTime": "Thời gian đi làm",
+    "automobile": "Ô tô",
+    "automobileOwned": "Có",
+    "automobileNone": "Không",
+    "householdStatus": "Tình hình hộ gia đình"
+  },
+  "household": {
+    "title": "Thông tin hộ gia đình",
+    "familyType": "Loại hộ",
+    "familySingle": "Độc thân",
+    "familyCouple": "Cặp đôi",
+    "familyFamily": "Gia đình",
+    "familySenior": "Người cao tuổi",
+    "hasAutomobile": "Có ô tô",
+    "noAutomobile": "Không có ô tô",
+    "discretionaryIncome": "Thu nhập khả dụng",
+    "livingStandard": "Mức sống",
+    "livingStandardLevel": {
+      "0": "Bần cùng",
+      "1": "Nghèo",
+      "2": "Trung lưu",
+      "3": "Khá giả"
+    },
+    "satisNutrition": "Mức đáp ứng dinh dưỡng",
+    "satisHealthcare": "Mức đáp ứng y tế",
+    "satisLeisure": "Giải trí và nghỉ ngơi",
+    "satisTourism": "Mức đáp ứng du lịch",
+    "tourist": "Khách du lịch",
+    "partySize": "Số người",
+    "members": "Thành viên trong hộ"
+  },
+  "education": {
+    "people": "người"
+  }
+}

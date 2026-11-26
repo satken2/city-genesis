@@ -1,0 +1,22 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Byggnader",
+      "paths": "Sträckningar",
+      "vehicles": "Fordon",
+      "props": "Dekorobjekt"
+    },
+    "additional": "Extra modeller",
+    "loading": "Läser in modeller från 3D-vyn…",
+    "noModel": "Ingen modell",
+    "noImage": "Ingen bild",
+    "weight": "Vikt",
+    "applyNote": "Ändrade vikter gäller nästa gång du startar eller läser in ett spel.",
+    "preview": {
+      "hint": "Dra för att rotera / scrolla för att zooma",
+      "zoomIn": "Zooma in",
+      "zoomOut": "Zooma ut",
+      "reset": "Återställ"
+    }
+  }
+}

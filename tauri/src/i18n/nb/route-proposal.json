@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Foreslå trasé",
+    "mode": "Høydemodus",
+    "fixed": "Behold høyden på punktene",
+    "adjust": "Juster høyden på mellompunktene",
+    "help": "Tilgjengelig når formen er fastsatt. Start- og sluttpunkt og XZ-posisjonen til punktene ligger fast.",
+    "searching": "Søker …",
+    "cancel": "Avbryt",
+    "undo": "Angre forslaget",
+    "notFound": "Fant ingen trasé.",
+    "failed": "Kunne ikke foreslå trasé."
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Structura etajelor",
+    "parking": "Parcare",
+    "type": "Tip clădire",
+    "durability": "Durabilitate",
+    "floors": "Etaje",
+    "floorsValue": "{{floors}} etaje (suprafață {{area, number}} m²)",
+    "heightLabel": "Înălțime: {{value}} m",
+    "baseAreaLabel": "Suprafață construită: {{area, number}} m²",
+    "underMaintenance": "În reparații",
+    "parkingCapacity": "Capacitate de parcare",
+    "parkingCapacityValue": "Locuri: {{capacity}}",
+    "parkingDay": "Ziua",
+    "parkingNight": "Noaptea",
+    "parkingUsage": "{{used}} / {{capacity}} locuri"
+  },
+  "building_appearance": {
+    "variantLabel": "Aspect {{index}}",
+    "layoutHint": "Trage un card pe amplasament pentru a-l plasa / Trage pentru a muta / Shift+tragere pentru a roti / Tasta Delete pentru a șterge",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Șterge corpul selectat",
+    "apply": "Aplică",
+    "saveFailed": "Salvarea aspectului a eșuat",
+    "noSubbuildings": "Pentru acest tip de clădire nu sunt definite corpuri secundare"
+  }
+}

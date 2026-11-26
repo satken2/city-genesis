@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} ani",
+    "male": "Bărbat",
+    "female": "Femeie",
+    "single": "Necăsătorit(ă)",
+    "married": "Căsătorit(ă)",
+    "household": "Gospodărie",
+    "employer": "Loc de muncă",
+    "unemployed": "Fără ocupație",
+    "school": "Școală",
+    "notEnrolled": "Nu merge la școală",
+    "major": "Specializare",
+    "higherEducation": "Studii superioare",
+    "graduated": "Absolvite",
+    "notGraduated": "Neabsolvite",
+    "skills": "Calificări",
+    "criminality": "Înclinație spre infracționalitate",
+    "commuteTime": "Durata navetei",
+    "automobile": "Mașină",
+    "automobileOwned": "Da",
+    "automobileNone": "Nu",
+    "householdStatus": "Situația gospodăriei"
+  },
+  "household": {
+    "title": "Gospodărie",
+    "familyType": "Tip gospodărie",
+    "familySingle": "Persoană singură",
+    "familyCouple": "Cuplu",
+    "familyFamily": "Familie",
+    "familySenior": "Vârstnici",
+    "hasAutomobile": "Are mașină",
+    "noAutomobile": "Fără mașină",
+    "discretionaryIncome": "Venit disponibil",
+    "livingStandard": "Nivel de trai",
+    "livingStandardLevel": {
+      "0": "Sărăcie extremă",
+      "1": "Sărăcie",
+      "2": "Clasa de mijloc",
+      "3": "Prosperitate"
+    },
+    "satisNutrition": "Nutriție",
+    "satisHealthcare": "Sănătate",
+    "satisLeisure": "Divertisment și timp liber",
+    "satisTourism": "Turism",
+    "tourist": "Turiști",
+    "partySize": "Număr de persoane",
+    "members": "Membrii gospodăriei"
+  },
+  "education": {
+    "people": "pers."
+  }
+}

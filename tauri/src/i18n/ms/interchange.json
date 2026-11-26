@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Persimpangan bertingkat",
+      "jct": "Persimpangan lebuh raya"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "Jalan asal",
+      "to": "Jalan tujuan",
+      "road": "{{type}} #{{id}}",
+      "none": "Tiada pasangan jalan yang bersambung.",
+      "direction": {
+        "n": "Utara",
+        "ne": "Timur laut",
+        "e": "Timur",
+        "se": "Tenggara",
+        "s": "Selatan",
+        "sw": "Barat daya",
+        "w": "Barat",
+        "nw": "Barat laut"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

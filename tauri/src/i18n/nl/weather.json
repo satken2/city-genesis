@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Weer",
+    "choose": "Weer kiezen",
+    "loading": "Weer wordt opgehaald…",
+    "unknown": "Onbekend",
+    "automatic": "{{weather}} (automatisch)",
+    "failed": "Kan het weer niet wijzigen",
+    "names": {
+      "clear": "Onbewolkt",
+      "high_clouds": "Sluierbewolking",
+      "fair": "Zonnig",
+      "broken_clouds": "Opklaringen",
+      "overcast": "Bewolkt",
+      "rain_clouds": "Regenwolken",
+      "fog": "Mist",
+      "drizzle": "Motregen",
+      "rain": "Regen",
+      "heavy_rain": "Zware regen",
+      "light_snow": "Lichte sneeuw",
+      "snow": "Sneeuw",
+      "blizzard": "Sneeuwstorm"
+    },
+    "epochClimate": "Klimaat van dit tijdvak",
+    "temperature": "Temperatuur",
+    "precipitation": "Neerslag",
+    "sunlight": "Zonintensiteit",
+    "windSpeed": "Windsnelheid"
+  }
+}

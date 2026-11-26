@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Etagefordeling",
+    "parking": "Parkering",
+    "type": "Bygningstype",
+    "durability": "Holdbarhed",
+    "floors": "Etager",
+    "floorsValue": "{{floors}} etager (etageareal {{area, number}} m²)",
+    "heightLabel": "Højde: {{value}} m",
+    "baseAreaLabel": "Bebygget areal: {{area, number}} m²",
+    "underMaintenance": "Under reparation",
+    "parkingCapacity": "Parkeringskapacitet",
+    "parkingCapacityValue": "{{capacity}} biler",
+    "parkingDay": "Dag",
+    "parkingNight": "Nat",
+    "parkingUsage": "{{used}} / {{capacity}} biler"
+  },
+  "building_appearance": {
+    "variantLabel": "Udseende {{index}}",
+    "layoutHint": "Træk et kort ind på grunden for at placere / træk for at flytte / Shift+træk for at rotere / Delete for at fjerne",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Fjern valgt bygning",
+    "apply": "Anvend",
+    "saveFailed": "Kunne ikke gemme udseendet",
+    "noSubbuildings": "Der er ikke defineret nogen delbygninger for denne bygningstype"
+  }
+}

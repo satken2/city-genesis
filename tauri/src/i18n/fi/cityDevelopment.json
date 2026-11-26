@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritmi",
+    "roadVariants": "Tietyypit",
+    "patterns": {
+      "grid_1": "Ruutukaava 1",
+      "grid_2": "Ruutukaava 2",
+      "sprawl_1": "Hajarakenne 1",
+      "sprawl_2": "Hajarakenne 2",
+      "sprawl_3": "Hajarakenne 3",
+      "planned_city_1": "Suunniteltu kaupunki 1",
+      "split_1": "Jako 1"
+    },
+    "spacing": "Teiden väli",
+    "blockLength": "Korttelin pituus",
+    "splitHint": "Ota alueeseen mukaan kokonaisia teiden rajaamia kortteleita. Korttelin pitkän sivun suuntaiset tiet vedetään ”Teiden väli” -asetuksen välein ja poikittaiset tiet ”Korttelin pituus” -asetuksen välein.",
+    "createParcels": "Luo tontit",
+    "parcelArea": "Tontin pinta-ala",
+    "hint": "Maalaa kehitettävä alue pitämällä Ctrl-näppäintä pohjassa ja vetämällä hiiren vasemmalla painikkeella. Vedä vasemmalla painikkeella siirtääksesi karttaa ja zoomaa rullalla.",
+    "clear": "Tyhjennä",
+    "preview": "Esikatselu",
+    "previewing": "Lasketaan…",
+    "create": "Vahvista",
+    "creating": "Luodaan…",
+    "previewed": "Alueen {{area}} maastoa tasoitetaan hieman, ja suunniteltavissa on teitä {{roads}} ja tontteja {{parcels}} (hylätty {{rejected}} tietä)",
+    "created": "Maasto tasoitettiin ja suunniteltiin teitä {{roads}} ja tontteja {{parcels}} (hylätty {{rejected}} tietä)"
+  }
+}

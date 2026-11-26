@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Vereiste vaardigheid",
+    "wage": "Loontarief",
+    "quota": "Benodigde arbeid",
+    "totalLabor": "Ingehuurde arbeid",
+    "employees": "Werknemers",
+    "hired": "In dienst",
+    "vacant": "Vacant",
+    "noQuota": "Geen arbeid nodig",
+    "noEmployees": "Geen werknemers",
+    "statusTitle": "Werkgelegenheid"
+  }
+}

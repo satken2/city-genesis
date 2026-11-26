@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Vezetés",
+    "car": "Autó",
+    "rail": "Vasútvonalak",
+    "running": "Közlekedő járművek",
+    "standard": "Személyautó",
+    "commercial": "Haszonjármű",
+    "truck": "Teherautó",
+    "finishEditing": "A vezetés előtt fejezd be a szerkesztést.",
+    "noLines": "Nincs üzemelő vasútvonal, amelyre fel lehetne szállni.",
+    "pickRail": "Kattints a kiválasztott vonal egyik vágányára.",
+    "pickRoad": "Kattints egy üzemelő útra.",
+    "pickVehicle": "Kattints egy haladó autóra, buszra vagy vonatra (húzással mozgathatod a térképet).",
+    "clickStart": "Válaszd ki a kiindulási pontot (húzással mozgathatod a térképet)",
+    "startSelected": "Kiindulási pont kiválasztva. Indulás a nyíl irányába.",
+    "reverse": "Irány megfordítása",
+    "start": "Indulás",
+    "back": "Vissza",
+    "close": "Kilépés (Esc)",
+    "invalidStart": "Innen nem lehet indulni. Válassz járható utat vagy a kiválasztott vonal egyik vágányát.",
+    "invalidVehicle": "Nem sikerült járművet kiválasztani. Kattints egy haladó autóra, buszra vagy vonatra.",
+    "notReady": "Ebbe az irányba nem lehet elindulni, vagy még töltődik a környezet. Válts irányt vagy helyet, vagy várj egy kicsit, és próbáld újra."
+  }
+}

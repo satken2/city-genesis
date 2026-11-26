@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritm",
+    "roadVariants": "Vägtyper",
+    "patterns": {
+      "grid_1": "Rutnät 1",
+      "grid_2": "Rutnät 2",
+      "sprawl_1": "Utspridd 1",
+      "sprawl_2": "Utspridd 2",
+      "sprawl_3": "Utspridd 3",
+      "planned_city_1": "Planerad stad 1",
+      "split_1": "Uppdelning 1"
+    },
+    "spacing": "Vägavstånd",
+    "blockLength": "Kvarterslängd",
+    "splitHint": "Ta med hela kvarter som omges av vägar i området. Vägar parallella med kvarterets långsida dras med ”Vägavstånd” mellan sig, och vägar vinkelräta mot dem med ”Kvarterslängd”.",
+    "createParcels": "Skapa tomter",
+    "parcelArea": "Tomtyta",
+    "hint": "Håll Ctrl och dra med vänster musknapp för att måla området som ska bebyggas. Dra med vänster musknapp för att flytta kartan och använd hjulet för att zooma.",
+    "clear": "Rensa",
+    "preview": "Förhandsgranska",
+    "previewing": "Beräknar…",
+    "create": "Bekräfta",
+    "creating": "Skapar…",
+    "previewed": "Terrängen inom {{area}} jämnas till lite, och {{roads}} vägar och {{parcels}} tomter kan planeras ({{rejected}} vägar förkastade)",
+    "created": "Terrängen jämnades till och {{roads}} vägar och {{parcels}} tomter planerades ({{rejected}} vägar förkastade)"
+  }
+}

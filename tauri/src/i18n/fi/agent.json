@@ -1,0 +1,212 @@
+{
+  "agent": {
+    "back": "Takaisin",
+    "editAppearance": "Muuta ulkoasua",
+    "relocateCityHall": "Siirrä kaupungintalo",
+    "publicFacility": "Julkinen laitos",
+    "underAcquisition": "Maanhankintaneuvottelut käynnissä",
+    "publicFacilityPanel": {
+      "title": "Julkinen laitos"
+    },
+    "abandon": "Hylkää",
+    "abandonHint": "Lopeta ylläpito ja anna rakennuksen rapistua ilman korjauksia",
+    "statusSince": {
+      "founded": "Perustettu",
+      "householdFormed": "Kotitalous perustettu",
+      "arrived": "Saapunut",
+      "opened": "Avattu",
+      "schoolOpened": "Koulu avattu",
+      "completed": "Valmistunut",
+      "operatingSince": "Toiminnassa alkaen",
+      "resumed": "Jatkettu",
+      "paused": "Pysäytetty",
+      "suspended": "Toiminta keskeytetty",
+      "schoolClosed": "Opetus keskeytetty",
+      "constructionStarted": "Rakentaminen aloitettu",
+      "demolitionScheduled": "Purku päätetty",
+      "demolitionStarted": "Purku aloitettu",
+      "demolished": "Purettu",
+      "collapsed": "Sortunut",
+      "burnedDown": "Palanut",
+      "default": "Tila muuttunut"
+    },
+    "reserves": "Rahavarat",
+    "revenues": "Tulot",
+    "expenses": "Menot",
+    "zone": "Kaupunginosa",
+    "building": "Rakennus",
+    "rent": "Vuokra",
+    "floorOccupancy": "Käytetty lattiapinta-ala",
+    "tenants": "Vuokralaiset",
+    "guests": "Majoittujat",
+    "tabBasicInfo": "Perustiedot",
+    "utilizationTarget": "Käyttöastetavoite",
+    "currentUtilization": "Nykyinen käyttöaste",
+    "constructionSpeed": "Rakennusnopeus",
+    "constructionCostPerEpoch": "Rakennuskustannus / kausi",
+    "remainingConstruction": "Rakennusaikaa jäljellä",
+    "remainingEpochs": "n. {{n}} kautta",
+    "tabBuildingInfo": "Rakennustiedot",
+    "tabCargoInfo": "Lastinkäsittely",
+    "tabTradeInfo": "Kysyntä, tarjonta ja kauppa",
+    "tabTourismInfo": "Matkailu",
+    "tabEmploymentInfo": "Työllisyys",
+    "action": {
+      "purchase": "Osta",
+      "bulldoze": "Raivaa",
+      "cancelBulldoze": "Peru raivaus",
+      "pause": "Pysäytä",
+      "resume": "Jatka",
+      "delete": "Poista",
+      "repair": "Korjaa",
+      "rebuild": "Rakenna uudelleen",
+      "edit": "Muokkaa",
+      "startConstruction": "Aloita rakentaminen",
+      "stopConstruction": "Lykkää",
+      "cancelAbandon": "Peru hylkäys",
+      "explode": "Räjäytä",
+      "explodeConfirm": "Räjäytetäänkö tämä rakennus ja lavastetaan onnettomuudeksi?\nRakennus sortuu heti, ja kaikki siellä asuvat ja työskentelevät kuolevat. Kansalaismielipide heikkenee pahasti, eikä toimintoa voi perua.",
+      "explodeTitle": "Rakennuksen räjäytys",
+      "explodeConfirmAction": "Räjäytä"
+    },
+    "pendingWarning": "Tämä rakennus on suunnitteilla. Anna käsky aloittaa rakentaminen.",
+    "alerts": {
+      "diagnoseHint": "Napsauta selvittääksesi syyn",
+      "title": "Hälytykset",
+      "constructionShortage": {
+        "title": "Rakennuspalveluista on pulaa",
+        "description": "Rakennusbudjetti ei riitä, joten rakennustyöt viivästyvät."
+      },
+      "onFire": {
+        "title": "Tulipalo!",
+        "description": "Rakennuksessa on syttynyt tulipalo."
+      },
+      "accidentalFire": {
+        "title": "Tulenalku (pieni)",
+        "description": "Rakennuksessa syttyi tulipalo, mutta se saatiin pysymään pienenä."
+      },
+      "infraDisconnected": {
+        "title": "Ei yhteyttä infraverkkoon",
+        "description": "Tämän laitoksen liitäntäpisteeseen ei ole liitetty infraväylää. Laitos ei voi toimittaa eikä vastaanottaa mitään ennen kuin se liitetään verkkoon."
+      },
+      "capacityTight": {
+        "title": "Kapasiteetti lähes täynnä",
+        "description": "Laitos käsittelee vähintään 90 % kapasiteetistaan. Lisäkysyntään se pystyy tuskin vastaamaan."
+      },
+      "nonconforming": {
+        "title": "Ei täytä määräyksiä",
+        "description": "Rakennus ei täytä tonttinsa määräyksiä. Sitä ei korjata, ja se puretaan, kun se rapistuu."
+      },
+      "crime": {
+        "title": "Rikos",
+        "description": "Tässä rakennuksessa on tapahtunut rikos."
+      },
+      "crimeSign": {
+        "title": "Merkkejä rikollisuudesta",
+        "description": "Tässä rakennuksessa on havaittu merkkejä rikollisuudesta. Varaudu yleisen turvallisuuden heikkenemiseen."
+      },
+      "laborShortage": {
+        "title": "Työvoimapula",
+        "description": "Työntekijöitä on liian vähän, joten tuotanto ja palvelut jäävät suunnitellusta."
+      },
+      "materialShortage": {
+        "title": "Raaka-ainepula",
+        "description": "Raaka-aineita ei saada hankittua tarpeeksi, joten tuotanto ja palvelut jäävät suunnitellusta."
+      },
+      "highSkillShortage": {
+        "title": "Pula osaajista",
+        "description": "Tarvittavia korkean osaamisen työntekijöitä ei ole tarpeeksi, joten tuotantoa on vähennetty siihen, mihin nykyinen henkilöstö riittää."
+      },
+      "budgetCapped": {
+        "title": "Budjetti ei riitä",
+        "description": "Myönnetty budjetti jää selvästi tarvittavasta, joten toimintaa on supistettu. Tarkista budjetin jako."
+      },
+      "facilityWarning": {
+        "title": "Julkinen laitos ei toimi",
+        "description": "Laitoksen palvelutuotanto jää selvästi tavoitteesta. Tarkista työvoiman ja raaka-aineiden saatavuus."
+      },
+      "sanitationWarning": {
+        "title": "Hygieniatilanne heikkenee",
+        "description": "Hygieniatilanne on heikentynyt vakavasti tämän rakennuksen rakennuspaikalla, ja se vaikuttaa asukkaiden kotitalouksiin. Paranna jätevedenpuhdistusta ja jätehuoltoa."
+      },
+      "infraWarning": {
+        "title": "Infralaitos pysähtynyt tai sortunut",
+        "description": "Laitoksen pysähtyminen tai sortuminen haittaa infran toimituksia. Tarkista laitoksen tila ja toimitusyhteydet."
+      },
+      "farFromRoad": {
+        "title": "Kaukana tiestä",
+        "description": "Lähimpään tiehen on noin {{distance}} m. Tavarahankinnat, työmatkat ja ostosmatkat kärsivät pahasti, joten harkitse tien jatkamista lähemmäs."
+      },
+      "noRoadAccess": {
+        "title": "Ei tieyhteyttä",
+        "description": "Rakennukselle ei ole tietä, johon se voisi liittyä. Tavarahankinnat, työmatkat ja ostosmatkat kärsivät pahasti, joten rakenna tie lähelle."
+      }
+    },
+    "infra": {
+      "title": "Infraliitäntä",
+      "connected": "Liitetty",
+      "disconnected": "Ei liitetty",
+      "received": "Vastaanotettu"
+    },
+    "tabConstructionInfo": "Rakennustyö",
+    "tabEducationInfo": "Koulutus",
+    "education": {
+      "totalStudents": "Oppilaita",
+      "totalCapacity": "Oppilaspaikkoja yhteensä",
+      "statusTitle": "Oppilastilanne",
+      "enrolled": "Kirjoilla",
+      "vacant": "Vapaita paikkoja",
+      "noCapacity": "Ei oppilaspaikkoja",
+      "countLabel": "Määrä",
+      "enrollmentBySkill": "Oppilaat osaamisaloittain",
+      "settingsTitle": "Oppilaspaikkojen jako",
+      "settingsHint": "Aseta painotus kullekin osaamisalalle. Oppilaspaikat jaetaan painotusten suhteessa.",
+      "skillHeader": "Osaaminen",
+      "weightHeader": "Painotus",
+      "previewHeader": "Paikat",
+      "save": "Tallenna",
+      "saving": "Tallennetaan…",
+      "saveFailed": "Tallennus epäonnistui",
+      "sumMustBePositive": "Paikkojen summan on oltava vähintään 1",
+      "invalidWeight": "Painotuksen on oltava kokonaisluku 0 tai suurempi",
+      "studentsList": "Oppilasluettelo",
+      "noStudents": "Ei oppilaita",
+      "showMore": "Näytä lisää ({{count}})"
+    }
+  },
+  "agentList": {
+    "filterType": "Tyyppi",
+    "filterVariant": "Muunnelma",
+    "filterZone": "Kaupunginosa",
+    "allVariants": "Kaikki muunnelmat",
+    "allZones": "Kaikki kaupunginosat",
+    "resultCount": "{{count}} tulosta",
+    "capped": "(yhteensä {{total}})",
+    "loading": "Ladataan…",
+    "noResults": "Ei vastaavia taloustoimijoita",
+    "colStatus": "Tila",
+    "colVariant": "Muunnelma",
+    "colName": "Nimi",
+    "colProduct": "Tuote",
+    "colPrice": "Hinta",
+    "colProduction": "Tuotanto",
+    "colStock": "Varasto",
+    "colSold": "Myyty",
+    "colWage": "Palkka",
+    "colEmployment": "Työntekijät",
+    "colUtilization": "Käyttöaste",
+    "colBdType": "Rakennustyyppi",
+    "colDurability": "Kunto",
+    "colRent": "Vuokra",
+    "colFloors": "Kerroksia",
+    "colFloorArea": "Lattiapinta-ala",
+    "colOccupancy": "Täyttöaste",
+    "colFamilyType": "Kotitaloustyyppi",
+    "colDiscretionaryIncome": "Käytettävissä olevat tulot",
+    "colSatisNutrition": "Ravitsemus",
+    "colSatisHealthcare": "Terveydenhuolto",
+    "colSatisLeisure": "Vapaa-aika",
+    "colSatisResidential": "Asuminen",
+    "colAutomobile": "Auto"
+  }
+}

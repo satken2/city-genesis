@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Stemă",
+    "flag": "Drapelul orașului",
+    "motif": "Motiv",
+    "fieldColor": "Culoarea fondului",
+    "motifColor": "Culoarea motivului",
+    "pattern": "Model de fond",
+    "accentColor": "Culoare de accent",
+    "placement": "Poziția stemei",
+    "loadImage": "Încarcă o imagine",
+    "randomize": "Aleatoriu",
+    "apply": "Aplică",
+    "imageLoadFailed": "Imaginea nu a putut fi încărcată.",
+    "placements": {
+      "center": "Centru",
+      "canton": "Stânga sus",
+      "none": "Fără"
+    },
+    "motifs": {
+      "wave": "Val",
+      "mountain": "Munte",
+      "star": "Stea",
+      "tree": "Copac",
+      "sun": "Soare",
+      "moon": "Lună",
+      "flower": "Floare",
+      "leaf": "Frunză",
+      "bird": "Pasăre",
+      "fish": "Pește",
+      "anchor": "Ancoră",
+      "gear": "Roată dințată",
+      "tower": "Castel",
+      "bridge": "Pod",
+      "key": "Cheie",
+      "crown": "Coroană",
+      "snowflake": "Fulg de nea",
+      "flame": "Flacără",
+      "diamond": "Romb",
+      "cross": "Cruce"
+    },
+    "patterns": {
+      "plain": "Uni",
+      "bicolor": "Bicolor",
+      "triband": "Tricolor vertical",
+      "diagonal": "Împărțire în diagonală",
+      "border": "Bordură",
+      "bands": "Benzi sus și jos"
+    }
+  }
+}

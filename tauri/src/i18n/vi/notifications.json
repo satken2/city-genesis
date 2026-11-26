@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Thông báo của thành phố",
+    "empty": "Hiện không có vấn đề nào cần xử lý",
+    "loadFailed": "Không tải được thông báo",
+    "types": {
+      "resource_runway": "Tài nguyên “{{name}}” dự kiến sẽ cạn kiệt sau khoảng {{remaining_epochs}} kỳ",
+      "resource_depleted": "Tài nguyên “{{name}}” đã cạn kiệt",
+      "facility_inoperative": "Công trình công cộng “{{name}}” không vận hành được",
+      "facility_inoperative_labor": "Công trình công cộng “{{name}}” không vận hành được do thiếu lao động",
+      "facility_inoperative_material": "Công trình công cộng “{{name}}” không vận hành được do thiếu nguyên liệu",
+      "facility_inoperative_high_skill": "Công trình công cộng “{{name}}” đang thu hẹp hoạt động do thiếu nhân lực chuyên môn",
+      "facility_inoperative_budget": "Công trình công cộng “{{name}}” đang thu hẹp hoạt động do thiếu ngân sách",
+      "education_low_enrollment": "Cơ sở giáo dục “{{name}}” hoạt động thấp vì ít người theo học ({{enrolled}}/{{max_students}} chỗ)",
+      "infra_facility_down": "Công trình hạ tầng “{{name}}” đang ngừng hoạt động",
+      "infra_disconnected": "{{count}} công trình chưa nối vào mạng lưới hạ tầng",
+      "rail_capacity_exceeded": "Số chuyến tàu vượt quá sức chứa đường ray trên {{count}} đoạn",
+      "collapse": "{{count}} tòa nhà/đường đã bị sập",
+      "collapse_with_deaths": "{{count}} tòa nhà/đường đã bị sập, làm {{deaths}} người chết",
+      "deaths_traffic": "{{count}} người đã chết vì tai nạn giao thông",
+      "tenant_blocked_by_parcel_size": "Không thể xây tòa nhà cho “{{tenant_name}}” vào ở khu vực “{{zone_name}}” (cần {{required}} m2, lô đất tối đa {{max_capacity}} m2). Cần lô đất lớn hơn",
+      "unknown": "Đã xảy ra sự việc nghiêm trọng",
+      "sanitation": "Vệ sinh của {{count}} hộ gia đình đang xấu đi. Hãy cải thiện xử lý nước thải và rác thải."
+    }
+  }
+}

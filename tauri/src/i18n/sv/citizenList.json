@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Sök medborgare",
+    "tabTracking": "Bevakningslista",
+    "name": "Namn",
+    "age": "Ålder",
+    "ageSeparator": "till",
+    "search": "Sök",
+    "noResults": "Inga medborgare matchar.",
+    "truncated": "Visar {{shown, number}} av {{total, number}} matchande medborgare."
+  }
+}

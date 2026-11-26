@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Kurniakan nama",
+      "message": "Masukkan nama yang ingin dikurniakan kepada {{name}}.",
+      "inputLabel": "Nama baharu",
+      "confirm": "Kurniakan"
+    },
+    "reward": {
+      "label": "Beri ganjaran",
+      "message": "Berikan ganjaran daripada dana bandar kepada isi rumah {{name}}.\nWang tunai bandar: {{available}}",
+      "confirm": "Beri"
+    },
+    "expel": {
+      "label": "Doakan kejayaan mereka di luar bandar",
+      "message": "Usir {{name}} dari bandar?",
+      "confirm": "Usir",
+      "results": {
+        "0": "{{name}} mengemas barang dan meninggalkan bandar secara senyap. Tiada siapa pun yang datang menghantar.",
+        "1": "{{name}} melintasi sempadan bandar sambil menjerit, “Jangan harap saya datang lagi!”",
+        "2": "{{name}} telah diiringi dengan penuh hormat hingga ke luar sempadan bandar. Kami doakan kejayaan mereka di tempat lain."
+      }
+    },
+    "donation": {
+      "label": "Minta derma",
+      "message": "Minta isi rumah {{name}} menderma kepada bandar.\nWang tunai isi rumah: {{available}}",
+      "confirm": "Minta"
+    },
+    "relocate": {
+      "label": "Cadangkan kediaman baharu",
+      "message": "Usir isi rumah {{name}} dari kediaman semasa?\nMereka akan mencari kediaman baharu pada epok seterusnya.",
+      "confirm": "Usir keluar",
+      "results": {
+        "0": "Keluarga {{name}} telah dihalau dari rumah mereka. Perabot mereka bertimbun di tepi jalan.",
+        "1": "Kunci rumah {{name}} telah ditukar. Keluarga itu sudah mula mencari tempat tinggal baharu.",
+        "2": "Keluarga {{name}} telah dicadangkan kediaman baharu. Mereka tidak boleh pulang ke rumah lama lagi."
+      }
+    }
+  }
+}

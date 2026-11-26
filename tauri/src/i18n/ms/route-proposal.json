@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Cadangan rute",
+    "mode": "Mod ketinggian",
+    "fixed": "Kekalkan ketinggian titik laluan",
+    "adjust": "Laraskan ketinggian titik laluan perantaraan",
+    "help": "Boleh dicadangkan selepas bentuk dimuktamadkan. Titik mula, titik akhir dan kedudukan XZ titik laluan kekal tetap.",
+    "searching": "Mencari…",
+    "cancel": "Batal",
+    "undo": "Kembali sebelum cadangan",
+    "notFound": "Rute tidak ditemui.",
+    "failed": "Gagal mencadangkan rute."
+  }
+}

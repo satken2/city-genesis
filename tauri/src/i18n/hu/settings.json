@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Beállítások",
+    "groups": {
+      "general": "Általános",
+      "display": "Kijelző",
+      "sound": "Hang",
+      "system": "Rendszer",
+      "about": "Névjegy",
+      "developer": "Fejlesztői beállítások"
+    },
+    "swagger": {
+      "label": "Swagger (API-dokumentáció)",
+      "description": "A szimulációs mag API-jának leírása az alapértelmezett böngészőben",
+      "action": "Megnyitás böngészőben"
+    },
+    "currencyUnit": {
+      "label": "Pénznem",
+      "description": "A pénzösszegek mellett megjelenő egység. Üresen hagyva a megjelenítési nyelvhez igazodik."
+    },
+    "fontSize": {
+      "label": "Betűméret",
+      "large": "Nagy",
+      "medium": "Közepes",
+      "small": "Kicsi",
+      "custom": "Egyéni",
+      "preview": "Jelenlegi méret"
+    },
+    "monitor": {
+      "label": "Kijelző",
+      "prev": "Előző kijelző",
+      "next": "Következő kijelző"
+    },
+    "graphicMonitor": {
+      "label": "A 3D nézet kijelzője"
+    },
+    "multiDisplay": {
+      "label": "Többkijelzős mód",
+      "description": "Az ablakokat a játékképernyőtől eltérő kijelzőn jeleníti meg",
+      "on": "Be",
+      "off": "Ki"
+    },
+    "popupMonitor": {
+      "label": "Az ablakok kijelzője"
+    },
+    "hintbar": {
+      "label": "Tippsáv",
+      "show": "Megjelenítés",
+      "hide": "Elrejtés",
+      "description": "A képernyő tetején kezelési tippeket megjelenítő sáv"
+    },
+    "citizenVoice": {
+      "label": "A polgárok hangja",
+      "show": "Megjelenítés",
+      "hide": "Elrejtés",
+      "description": "A képernyő jobb felső sarkában a lakosok megszólalásait sorban megjelenítő kártya"
+    },
+    "language": {
+      "label": "Nyelv",
+      "description": "A felhasználói felület megjelenítési nyelve. Ez független a mentés nyelvétől.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Hangerő",
+      "master": "Fő hangerő",
+      "bgm": "Zene",
+      "sfx": "Hangeffektusok"
+    },
+    "compute": {
+      "label": "GPU-gyorsítás",
+      "comingSoon": "Hamarosan",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU aktív",
+      "statusInactive": "CPU aktív",
+      "restartRequired": "A beállítás módosítása után a fő program újraindul",
+      "restarting": "Újraindítás…",
+      "restartFailed": "Nem sikerült az újraindítás",
+      "restartUnavailable": "A beállítás mentve. A változás a játék következő indításakor lép életbe",
+      "confirmRestart": "Átváltasz erre a számítási módra: {{mode}}? A fő program újraindul.",
+      "restartAction": "Újraindítás"
+    },
+    "windowReset": {
+      "label": "Ablakok helyzete és mérete",
+      "action": "Visszaállítás"
+    },
+    "credits": {
+      "label": "Közreműködők",
+      "description": "A játékban felhasznált tartalmak és szoftverek jogi közleményei",
+      "action": "Megtekintés"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Új játék",
+    "overwriteSave": "Mentés felülírása",
+    "saveAs": "Mentés másként",
+    "load": "Betöltés",
+    "quitGame": "Kilépés a játékból",
+    "returnToTop": "Vissza a főmenübe",
+    "loading": "Betöltés…",
+    "shuttingDown": "Leállítás…",
+    "saveFailed": "Nem sikerült a mentés",
+    "loadFailed": "Nem sikerült a betöltés",
+    "confirmNewGame": "A jelenlegi adatok elvesznek. Új játékot kezdesz?",
+    "confirmQuitGame": "Biztosan kilépsz? A jelenlegi állás nem mentődik automatikusan.",
+    "confirmReturnToTop": "Visszatérsz a főmenübe? A jelenlegi állás nem mentődik automatikusan.",
+    "confirm": "Igen",
+    "cancel": "Nem",
+    "saveAsScenario": "Mentés forgatókönyvként",
+    "saveAsNewScenario": "Mentés másik forgatókönyvként",
+    "overwriteScenario": "Forgatókönyv felülírása",
+    "backToGame": "Vissza a játékba",
+    "saveName": "Mentés neve",
+    "confirmOverwrite": "Felülírod ezt a mentést: „{{name}}”?",
+    "confirmOverwriteScenario": "Felülírod ezt a forgatókönyvet: „{{name}}”?"
+  },
+  "saveList": {
+    "noSaves": "Nincs mentés",
+    "currentSave": "Jelenlegi adatok",
+    "population": "Népesség",
+    "inGameDate": "Dátum",
+    "savedAt": "Mentés ideje",
+    "loadButton": "Betöltés",
+    "deleteButton": "Törlés",
+    "confirmLoad": "Betöltöd ezt a mentést?",
+    "confirmDelete": "Törlöd ezt a mentést? A művelet nem vonható vissza.",
+    "loading": "Betöltés…",
+    "loadFailed": "Nem sikerült a betöltés",
+    "deleteFailed": "Nem sikerült a törlés",
+    "openFolderButton": "Mentési mappa megnyitása",
+    "scenario": "Forgatókönyv",
+    "autosaveName": "{{name}} (automatikus mentés kilépéskor)"
+  }
+}

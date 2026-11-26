@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Požadovaná kvalifikace",
+    "wage": "Mzdová sazba",
+    "quota": "Potřebná pracovní síla",
+    "totalLabor": "Zaměstnaná pracovní síla",
+    "employees": "Seznam zaměstnanců",
+    "hired": "Obsazeno",
+    "vacant": "Neobsazeno",
+    "noQuota": "Pracovní síla není potřeba",
+    "noEmployees": "Žádní zaměstnanci",
+    "statusTitle": "Stav zaměstnanosti"
+  }
+}

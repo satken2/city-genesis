@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Status bekalan",
+    "selected": "Dipilih",
+    "providers": "Pembekal {{product}}",
+    "executing": "Maklumat bekalan tidak dapat dimuatkan semasa simulasi sedang berjalan.",
+    "fetchError": "Maklumat bekalan tidak dapat dimuatkan.",
+    "activeCount": "Aktif {{active}} / {{count}}",
+    "production": "Pengeluaran terakhir: {{amount}} {{unit}}",
+    "resourceRemaining": "Baki sumber yang boleh digunakan: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Tersedia",
+      "unknown": "Belum ditentukan",
+      "missing": "Tiada",
+      "inactive": "Tidak aktif",
+      "partial": "Sebahagian bermasalah",
+      "limited": "Terhad / terhenti",
+      "disconnected": "Tidak bersambung",
+      "supply_shortage": "Mungkin kekurangan bekalan",
+      "capacity_limited": "Mungkin terhad oleh kapasiti"
+    },
+    "facilities": {
+      "401": "Stesen jana kuasa",
+      "402": "Kemudahan pengambilan air",
+      "403": "Pembekal minyak mentah",
+      "404": "Stesen kargo",
+      "405": "Pembekal bijih",
+      "406": "Lorong kapal besar (laut lepas)",
+      "501": "Depoh kereta api",
+      "502": "Depoh bas",
+      "503": "Depoh LRT",
+      "504": "Depoh monorel",
+      "505": "Limbungan penyelenggaraan"
+    },
+    "consumers": {
+      "401": "Pengguna elektrik",
+      "402": "Stesen pam air",
+      "403": "Pengguna minyak mentah",
+      "404": "Pengguna kargo",
+      "405": "Pengguna bijih",
+      "406": "Pelabuhan",
+      "501": "Laluan kereta api",
+      "502": "Laluan bas",
+      "503": "Laluan LRT",
+      "504": "Laluan monorel",
+      "505": "Laluan feri"
+    }
+  }
+}

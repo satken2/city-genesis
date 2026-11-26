@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Пропозиція",
+    "product": "Товар",
+    "amount": "Обсяг пропозиції",
+    "price": "Ціна пропозиції",
+    "soldAmount": "Продано",
+    "profitRate": "Рентабельність",
+    "utilization": "Завантаженість"
+  },
+  "tourismSupply": {
+    "title": "Прийом туристів",
+    "touristCapacity": "Місткість для туристів",
+    "persons": "{{value}} ос.",
+    "218": {
+      "price": "Вхідна плата",
+      "amount": "Місткість (сумарно)",
+      "soldAmount": "Відвідувачі (сумарно)"
+    },
+    "219": {
+      "price": "Вартість проїзду",
+      "amount": "Пасажиромісткість (сумарно)",
+      "soldAmount": "Пасажири (сумарно)"
+    }
+  },
+  "demand": {
+    "product": "Товар",
+    "demandAmount": "Попит",
+    "receivedAmount": "Отримано",
+    "acquiredAmount": "Запаси"
+  },
+  "cargo": {
+    "title": "Вантажні операції",
+    "description": "Цей пункт імпортує товари з-поза регіону для ринків міста, а також викуповує надлишки міської продукції й експортує їх за межі регіону.",
+    "capacity": "Пропускна здатність",
+    "perPeriod": "/міс.",
+    "perPeriod_week": "/тиж.",
+    "materialCapacity": "Обмеження за отриманою сировиною",
+    "areaCapacity": "Обмеження за площею",
+    "importHandled": "Оброблено імпорту",
+    "exportHandled": "Оброблено експорту",
+    "utilization": "Завантаженість",
+    "importSectionTitle": "Імпорт",
+    "exportSectionTitle": "Експорт",
+    "handledImport": "Продано",
+    "handledExport": "Викуплено",
+    "allocation": "Виділено",
+    "priceImport": "Ціна продажу",
+    "priceExport": "Ціна викупу",
+    "lost": "Втрачені продажі",
+    "noProducts": "Немає товарів в обробці"
+  }
+}

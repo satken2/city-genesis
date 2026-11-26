@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Thuật toán",
+    "roadVariants": "Loại đường",
+    "patterns": {
+      "grid_1": "Bàn cờ 1",
+      "grid_2": "Bàn cờ 2",
+      "sprawl_1": "Tự phát 1",
+      "sprawl_2": "Tự phát 2",
+      "sprawl_3": "Tự phát 3",
+      "planned_city_1": "Đô thị quy hoạch 1",
+      "split_1": "Chia nhỏ 1"
+    },
+    "spacing": "Khoảng cách đường",
+    "blockLength": "Chiều dài ô phố",
+    "splitHint": "Hãy đưa toàn bộ ô phố được bao quanh bởi đường vào phạm vi. Đường song song với cạnh dài của ô phố được vẽ cách nhau theo “Khoảng cách đường”, còn đường vuông góc được vẽ cách nhau theo “Chiều dài ô phố”.",
+    "createParcels": "Tạo lô đất",
+    "parcelArea": "Diện tích lô đất",
+    "hint": "Giữ Ctrl và kéo chuột trái để tô phạm vi cần phát triển. Kéo chuột trái để di chuyển bản đồ, cuộn chuột để phóng to/thu nhỏ.",
+    "clear": "Xóa",
+    "preview": "Xem trước",
+    "previewing": "Đang tính toán…",
+    "create": "Xác nhận",
+    "creating": "Đang tạo…",
+    "previewed": "Có thể san nhẹ địa hình trong phạm vi {{area}} và lên kế hoạch {{roads}} đoạn đường, {{parcels}} lô đất (loại bỏ {{rejected}} đoạn)",
+    "created": "Đã san địa hình và lên kế hoạch {{roads}} đoạn đường, {{parcels}} lô đất (loại bỏ {{rejected}} đoạn)"
+  }
+}

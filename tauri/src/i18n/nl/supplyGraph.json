@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Voorzieningsketen",
+    "selected": "Geselecteerd",
+    "providers": "Leveranciers – {{product}}",
+    "executing": "Tijdens de simulatie is de voorzieningsinformatie niet beschikbaar.",
+    "fetchError": "Kan de voorzieningsinformatie niet laden.",
+    "activeCount": "Actief {{active}}/{{count}}",
+    "production": "Laatste productie: {{amount}} {{unit}}",
+    "resourceRemaining": "Bereikbare voorraad: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Beschikbaar",
+      "unknown": "Onbepaald",
+      "missing": "Ontbreekt",
+      "inactive": "Inactief",
+      "partial": "Deels problemen",
+      "limited": "Tekort/gestopt",
+      "disconnected": "Niet aangesloten",
+      "supply_shortage": "Mogelijk aanbodtekort",
+      "capacity_limited": "Mogelijk capaciteitstekort"
+    },
+    "facilities": {
+      "401": "Energiecentrales",
+      "402": "Waterwinningen",
+      "403": "Ruwe-olieleveranciers",
+      "404": "Goederenstations",
+      "405": "Ertsleveranciers",
+      "406": "Zeevaartroutes (open zee)",
+      "501": "Spoordepots",
+      "502": "Busremises",
+      "503": "LRT-depots",
+      "504": "Monoraildepots",
+      "505": "Onderhoudsdok"
+    },
+    "consumers": {
+      "401": "Stroomafnemers",
+      "402": "Waterpompen",
+      "403": "Ruwe-olieafnemers",
+      "404": "Vrachtafnemers",
+      "405": "Ertsafnemers",
+      "406": "Havens",
+      "501": "Spoorlijnen",
+      "502": "Buslijnen",
+      "503": "LRT-lijnen",
+      "504": "Monoraillijnen",
+      "505": "Veerdiensten"
+    }
+  }
+}

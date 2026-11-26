@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Wegmeubilair",
+    "streetlight_type": "Straatverlichting",
+    "fence_type": "Hekken",
+    "street_tree_type": "Straatbomen",
+    "utility_mode": "Bekabeling",
+    "none": "Geen",
+    "standard": "Standaard",
+    "overhead": "Bovengronds",
+    "underground": "Ondergronds",
+    "apply": "Toepassen",
+    "bench_type": "Bankjes",
+    "bin_type": "Afvalbakken",
+    "planter_type": "Plantenbakken",
+    "advert_type": "Reclame"
+  }
+}

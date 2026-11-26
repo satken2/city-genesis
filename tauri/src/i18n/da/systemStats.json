@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Simuleringsbelastning",
+      "heading": "Beregningstid for seneste epoke ({{days}} dage)",
+      "noData": "Ingen måledata",
+      "note": "Når flere epoker køres i træk, vises tallet for den sidste. Antal operationer er et skøn over antallet af kombinationer i de vigtigste sammenligninger, beregnet ud fra byens størrelse.",
+      "colGroup": "Proces",
+      "colTime": "Tid",
+      "colWorkload": "Operationer",
+      "workloadHint": "Skønnet antal kombinationer i de vigtigste sammenligninger (antal elementer). Hold musen over en værdi for at se fordelingen.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Varemarked",
+      "realestate": "Ejendomsmarked",
+      "labor": "Arbejdsmarked",
+      "building_spawn": "Bygningsetablering",
+      "agent_spawn": "Aktøretablering",
+      "routing": "Borgernes rutesøgning",
+      "transit": "Rutesøgning i kollektiv trafik",
+      "environment": "Bomiljø",
+      "other": "Andet"
+    },
+    "workload": {
+      "market": "Købere {{demanders}} × sælgere {{suppliers}} (ganget pr. vare og lagt sammen)",
+      "realestate": "Husstande, der overvejer at flytte {{movers}} × bygninger med boliger {{housing}}",
+      "labor": "Jobsøgende {{seekers}} × arbejdsgivere {{employers}}",
+      "building_spawn": "Kandidatparceller {{parcels}} × bygningstyper × etageantal × etageanvendelser",
+      "agent_spawn": "Varer × bydele {{zones}} × bydele {{zones}}",
+      "routing": "2 transportformer × bydele {{zones}} × bydele {{zones}} × 3 kandidatruter × tracéer {{paths}}",
+      "transit": "Stoppesteder {{stops}} × knudepunkter {{nodes}}",
+      "environment": "Gitter {{width}} × {{height}} × solpositioner"
+    },
+    "entities": {
+      "colMetric": "Element",
+      "colCount": "Antal",
+      "title": "Antal enheder",
+      "agents": "Aktører",
+      "households": "Husstande",
+      "businesses": "Virksomheder",
+      "publicFacilities": "Offentlige anlæg",
+      "buildings": "Bygninger",
+      "citizens": "Borgere",
+      "population": "Befolkning",
+      "zones": "Bydele",
+      "parcels": "Parceller",
+      "paths": "Tracéer",
+      "roads": "Veje",
+      "tracks": "Spor",
+      "infra": "Infrastrukturnet",
+      "nodes": "Knudepunkter"
+    },
+    "approximation": {
+      "title": "Tilnærmelse i simuleringen",
+      "intro": "Der kommer indstillinger, der forenkler beregningerne for store byer. De kan endnu ikke ændres.",
+      "warning": "Det kan påvirke spillets balance. Det kan ikke fortrydes",
+      "irreversible": "Ændringer fra tilnærmelsen bliver i de følgende epoker. En aktiveret tilnærmelse kan hverken slås fra eller gøres mindre grov.",
+      "undecided": "Ikke fastlagt",
+      "candidates": "kandidater maks.",
+      "epochs": "epoker mellem gennemgange",
+      "off": "Fra",
+      "on": "Til",
+      "goods": {
+        "label": "Købskandidater",
+        "description": "Begræns antallet af leverandører, der sammenlignes på pris og afstand."
+      },
+      "jobs": {
+        "label": "Jobkandidater",
+        "description": "Begræns antallet af arbejdspladser, der sammenlignes på løn og transportforhold."
+      },
+      "housing": {
+        "label": "Boligkandidater",
+        "description": "Begræns antallet af boliger, der sammenlignes på husleje og beliggenhed."
+      },
+      "interval": {
+        "label": "Interval for faste beslutninger",
+        "description": "Gennemgå valg af indkøbssted, job og bolig sjældnere."
+      },
+      "aggregation": {
+        "label": "Beregn ens borgere og husstande samlet",
+        "description": "Behandl nogle beslutninger samlet for borgere og husstande med lignende forhold."
+      }
+    },
+    "status": {
+      "title": "Systemstatus",
+      "gpuDisabled": "GPU-acceleration: Fra",
+      "coreSimulator": "Kernesimulator",
+      "currentMemory": "Aktuelt hukommelsesforbrug: {{value}}",
+      "peakMemory": "Højeste hukommelsesforbrug siden start: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Aktuelt VRAM-forbrug: {{value}}",
+      "usageTooltip": "Hele pc'en {{pc}} / Dette spil {{game}} / Installeret {{total}}",
+      "legendPc": "Hele pc'en",
+      "legendGame": "Dette spil"
+    }
+  }
+}

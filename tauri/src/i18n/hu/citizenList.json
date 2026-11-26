@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Polgárok keresése",
+    "tabTracking": "Követési lista",
+    "name": "Név",
+    "age": "Életkor",
+    "ageSeparator": "–",
+    "search": "Keresés",
+    "noResults": "Nincs a feltételeknek megfelelő polgár.",
+    "truncated": "A feltételeknek megfelelő {{total, number}} polgár közül {{shown, number}} látható."
+  }
+}

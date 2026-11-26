@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Vaakuna",
+    "flag": "Kaupungin lippu",
+    "motif": "Kuvio",
+    "fieldColor": "Pohjaväri",
+    "motifColor": "Kuvion väri",
+    "pattern": "Pohjakuvio",
+    "accentColor": "Korostusväri",
+    "placement": "Vaakunan sijainti",
+    "loadImage": "Lataa kuva",
+    "randomize": "Satunnainen",
+    "apply": "Käytä",
+    "imageLoadFailed": "Kuvaa ei voitu ladata.",
+    "placements": {
+      "center": "Keskellä",
+      "canton": "Vasen yläkulma",
+      "none": "Ei mitään"
+    },
+    "motifs": {
+      "wave": "Aalto",
+      "mountain": "Vuori",
+      "star": "Tähti",
+      "tree": "Puu",
+      "sun": "Aurinko",
+      "moon": "Kuu",
+      "flower": "Kukka",
+      "leaf": "Lehti",
+      "bird": "Lintu",
+      "fish": "Kala",
+      "anchor": "Ankkuri",
+      "gear": "Hammasratas",
+      "tower": "Linna",
+      "bridge": "Silta",
+      "key": "Avain",
+      "crown": "Kruunu",
+      "snowflake": "Lumihiutale",
+      "flame": "Liekki",
+      "diamond": "Vinoneliö",
+      "cross": "Risti"
+    },
+    "patterns": {
+      "plain": "Yksivärinen",
+      "bicolor": "Kaksivärinen vaaka",
+      "triband": "Pystykolmijako",
+      "diagonal": "Vinojako",
+      "border": "Reunus",
+      "bands": "Ylä- ja alaraita"
+    }
+  }
+}

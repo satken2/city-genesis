@@ -1,0 +1,23 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Odotetaan tietoja maastoeditorista…"
+  },
+  "groundCover": {
+    "label": "Maanpinta",
+    "hint": "Vaihtaa pelin maanpinnan värin ja pintakuvion sekä 2D-karttojen värit. Ei vaikuta simulaatioon.",
+    "1": "Ruohikko",
+    "2": "Aavikko",
+    "3": "Rehevä niitty",
+    "4": "Lumikenttä",
+    "5": "Kuiva maa",
+    "6": "Ruudukko"
+  },
+  "climate": {
+    "label": "Ilmasto",
+    "hint": "Kopioi esiasetuksesta kuukausittaiset lämpötilat, sademäärät, auringonpaisteen ja säätyyppien osuudet. Yksityiskohtia voi muokata skenaarion luontitilan kohdassa ”Ilmastoasetukset”."
+  },
+  "assetPack": {
+    "label": "Sisältöpaketti",
+    "standard": "Vakio"
+  }
+}

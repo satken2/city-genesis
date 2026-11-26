@@ -1,0 +1,756 @@
+{
+  "tutorial": {
+    "startButton": "Start",
+    "controls": {
+      "title": "Grundlæggende styring",
+      "description": "Lær, hvad du som borgmester arbejder hen imod, og hvordan du planlægger, før tiden går. Når du har set, hvad oplysningerne på skærmen betyder, hvad knapperne gør, og hvordan du styrer kameraet, forlænger du en vej, anlægger et nyt boligområde og sørger for boliger, el og vand.",
+      "step1": {
+        "title": "Byg en by som borgmester",
+        "role": "I City Genesis får du en by til at vokse som dens borgmester. Du planlægger veje og anlæg, bestemmer, hvordan jorden bruges, og fastsætter skatter og budgetter til offentlig service. Din opgave er at skabe gode rammer for indbyggernes liv og virksomhedernes aktiviteter. Tryk på »Næste« for at læse videre.",
+        "goal": "Målet er en by, hvor indbyggerne kan leve et godt og trygt liv. Skab flere boliger og job, og sørg for el, vand, sundhedsvæsen og meget mere. Det koster også penge at udvide byen, så hold øje med både indbyggernes hverdag og kommunens økonomi, når du beslutter, hvad der skal forbedres.",
+        "epoch": "I dette spil går tiden én måned ad gangen. Først lægger du budgetter og byggeplaner, og når du er klar, trykker du på »Start«. Så går tiden, byggeriet skrider frem, og indbyggere og virksomheder går til og fra – og ud fra resultatet planlægger du næste skridt. Datoen står stille, indtil du trykker på »Start«, så du kan tænke dig godt om.",
+        "epoch_week": "I dette spil går tiden én uge ad gangen. Først lægger du budgetter og byggeplaner, og når du er klar, trykker du på »Start«. Så går tiden, byggeriet skrider frem, og indbyggere og virksomheder går til og fra – og ud fra resultatet planlægger du næste skridt. Datoen står stille, indtil du trykker på »Start«, så du kan tænke dig godt om."
+      },
+      "step2": {
+        "title": "Aflæs byen i cockpittet",
+        "tools": "Cockpittet nederst på skærmen er stedet, hvor du tjekker byens tilstand og beslutter, hvad du skal gøre nu. Under »Visning« kan du finde mangler og problemområder ved hjælp af farver. Under »Kort« ser du, hvordan byens steder ligger i forhold til hinanden – en god hjælp til at finde rundt, når byen vokser.",
+        "tracking": "Med »Borgerliste« kan du søge efter indbyggere ved navn og vende tilbage til dem, du gerne vil følge, og se deres hverdag og pendling. Tilføj en person til dem, du følger, fra borgerens detaljer, så kan du åbne vedkommendes oplysninger herfra. Brug den, når du vil se det enkelte menneskes liv bag tallene for hele byen.",
+        "bulldozer": "»Bulldozer« bruges til at fjerne tomme parceller og annullere planlagte bygninger og veje. Tryk på knappen, klik på det, der skal fjernes, i 3D-visningen, og tryk på knappen igen, når du er færdig. Vil du fjerne en færdig bygning eller vej, så åbn dens detaljer, og vælg »Riv ned«.",
+        "services": "Målerne med lyn, vanddråbe og skib viser, hvor meget luft der er i kapaciteten for el, vand og import/eksport. Jo fyldigere de er, jo tættere er efterspørgslen eller mængden på grænsen. Klik på dem for at se de offentlige anlæg og handelsknudepunkterne, og tjek, om der skal flere anlæg til, før du udvider byen.",
+        "score": "»Score« samler, hvor tilfredse indbyggerne er med livet i byen. Jo højere, jo bedre er byen at bo i. Boliger, job, sundhedsvæsen og gode levevilkår trækker den op. Falder den, så find ud af, hvad indbyggerne har problemer med.",
+        "budget": "»Budget« viser næste måneds forventede udgifter i forhold til sidste måneds indtægter. Når måleren slår ud til højre, er udgifterne større end indtægterne. Slår den ud til venstre, er der penge til overs. Tjek den, før du lader tiden gå.",
+        "budget_week": "»Budget« viser næste uges forventede udgifter i forhold til sidste uges indtægter. Når måleren slår ud til højre, er udgifterne større end indtægterne. Slår den ud til venstre, er der penge til overs. Tjek den, før du lader tiden gå.",
+        "budgetChanges": "Mere byggeri af veje og anlæg, højere drift af anlæggene eller hurtigere byggeri koster flere penge og får budgetmåleren til at stige. Sætter du driften eller byggetempoet ned, falder de forventede udgifter. Stiger skatteindtægterne, falder måleren, selv om udgifterne er de samme.",
+        "budgetPlanning": "Står måleren lavt, er der penge til at bruge på byen. Overvej at investere i service, der mangler, eller i anlæg, der snart bliver brug for.",
+        "date": "Datoen viser, hvor langt byens tid er nået. Brug den til at følge byggeriet og årstidernes skiften. Den står stille, mens du planlægger, og opdateres, når du lader tiden gå med »Start«.",
+        "climate": "Panelet med temperatur, nedbør, solskin og vind viser månedens gennemsnitlige klima. Forholdene påvirker, hvor effektivt landbrug, vindkraft og solenergi producerer. Er høsten eller elproduktionen lav, så tjek også klimaet.",
+        "climate_week": "Panelet med temperatur, nedbør, solskin og vind viser ugens gennemsnitlige klima. Forholdene påvirker, hvor effektivt landbrug, vindkraft og solenergi producerer. Er høsten eller elproduktionen lav, så tjek også klimaet.",
+        "climateEffects": "Svagt solskin sænker produktionen fra solceller, og svag vind sænker produktionen fra vindmøller. Landbruget påvirkes også af temperatur og nedbør. Klik på klimapanelet for at se, hvordan månedens forhold påvirker hvert anlægs produktivitet. Tag højde for, at forsyningen svinger med årstiderne, når du planlægger dine anlæg.",
+        "climateEffects_week": "Svagt solskin sænker produktionen fra solceller, og svag vind sænker produktionen fra vindmøller. Landbruget påvirkes også af temperatur og nedbør. Klik på klimapanelet for at se, hvordan ugens forhold påvirker hvert anlægs produktivitet. Tag højde for, at forsyningen svinger med årstiderne, når du planlægger dine anlæg.",
+        "notifications": "Tallet på »Notifikationer« er antallet af advarsler og påmindelser, du bør se på nu. Et rødt tal og en blinkende knap betyder, at byens funktioner er ramt, og at problemet bør løses hurtigt. Gule tal er påmindelser, fx om at forberede vækst eller om problemer, der tager tid at forbedre. Tryk først på knappen for at læse dem.",
+        "notificationActions": "Når en notifikation peger på et anlæg eller en bydel, kan du klikke på rækken for at se nærmere. Løs problemet ud fra årsagen: Tilslut en manglende elledning, eller sørg for, at et anlæg, der mangler råvarer, kan få dem. Notifikationer om vedvarende problemer forsvinder, når årsagen er løst. Tjek resultatet næste måned, når du har grebet ind."
+      },
+      "step3": {
+        "title": "Skift visning for at finde problemer",
+        "open": "Strømmangel og trafikpropper er svære at få øje på bare ved at se på byen. Brug »Visning« til at få de oplysninger, du har brug for, frem på kortet. Tryk på »Visning« i cockpittet for at åbne panelet.",
+        "tabs": "Med de lodrette faner vælger du, hvad du vil undersøge, fx bygninger, veje, parceller eller bydele. Bliver det uoverskueligt, fordi oplysningerne ligger oven i hinanden, kan du også skjule det, du ikke har brug for. Tryk på »Næste« for at se, hvordan visningerne bruges.",
+        "modes": "Med knapperne i hver fane vælger du, hvilke oplysninger der bestemmer farverne. Find veje med meget trafik eller bygninger med problemer, og brug dem som fingerpeg om, hvad du skal gøre. Klik på noget i 3D-visningen for at undersøge det nærmere. Tryk på »Næste«."
+      },
+      "step4": {
+        "title": "Lær dine byggeværktøjer at kende",
+        "grading": "Her gennemgår vi knapperne til venstre oppefra og ned. »Jordarbejde« bruges til at planere skråninger, der er svære at bygge på, eller til at skabe nyt land ved at fylde havet op. Når du gerne vil have flere boliger eller arbejdspladser, men mangler jord, giver det byen plads til at vokse.",
+        "road": "»Veje, jernbane og infrastruktur« anlægger de forbindelser, som mennesker, varer, el og vand bevæger sig ad. Forbind boliger og arbejdspladser med veje, knyt fjerne steder sammen med jernbane, og forbind anlæg med elledninger og vandledninger. Netværkene bærer indbyggernes transport, virksomhedernes handel og forsyningen af el og vand.",
+        "land": "»Parceller« klargør byggegrunde til bygninger. Jord alene er ikke nok til, at der bliver bygget. Både flere boliger og store anlæg kræver byggegrunde, der er store nok til dem.",
+        "landDevelopment": "Når du har klargjort parceller, kan kommunen bygge på dem, og private boliger og virksomheder kan vokse frem. Private bygninger opføres ud fra efterspørgslen og bydelens byggebestemmelser. Vil du have flere boliger eller job, så tjek, at der er nok ledige parceller.",
+        "district": "»Bydele« bruges til at styre dele af byen som en samlet helhed. Du kan give hvert område sin egen retning, fx et boligkvarter eller et område til fabrikker. Hver bydel kan begrænse, hvilke typer bygninger der må opføres, så hele området udvikler sig i den retning, der passer til det.",
+        "districtRules": "I bydelens detaljer bestemmer du, hvilke typer bygninger der må opføres. Brug det til at forme den by, du vil skabe – fx så der ikke kommer fabrikker ind mellem boligerne. Du kan også sammenligne befolkning og levevilkår mellem bydelene og se, hvor der er brug for en indsats.",
+        "construction": "»Byggeri« bruges til at planlægge de bygninger, kommunen har brug for. Du kan bygge boliger, arbejdspladser, hospitaler, skoler, kraftværker og meget mere. Brug det til at skaffe flere boliger og job eller til at dække byens mangel på sundhedsvæsen, uddannelse, el og anden service.",
+        "transport": "»Kollektiv trafik« hjælper indbyggerne med at komme rundt med bus og tog. Du fastlægger linjer og stoppesteder og justerer billetpriser og afgangsintervaller. Forbind boliger med arbejdspladser og skoler, så turen til arbejde og skole bliver lettere.",
+        "propPlacement": "»Dekorationsobjekter« bruges til at sætte træer, sten og lignende ud og forskønne byens udseende. Brug det, når du vil give gaderne lidt grønt eller pynte på terrænet.",
+        "cityDevelopment": "»Automatisk byudvikling« planlægger veje og parceller over et stort område på én gang. Mal det område, du vil udvikle, på kortet, og vælg en gadeplan, så bliver veje og parceller klargjort i ét hug. Brug det, når du skal anlægge et nyt boligområde eller en ny bydel fra bunden.",
+        "constructionProjects": "Under »Byggeprojekter« ser du samlet alle planlagte og igangværende byggerier. Se, hvilke projekter der skrider frem, og hvor pengene går hen, og beslut, hvilke du vil fremme.",
+        "regulation": "Under »Bestemmelser« fastsætter du reglerne for at bo og arbejde i byen, fx hastighedsgrænser, arbejdstid, modtagelse af tilflyttere og social sikring. Overvej, om du vil prioritere sikkerhed, fritid eller byens vækst, og justér efter situationen.",
+        "stat": "»Statistik« bruges til at se resultatet af dit arbejde. Her kan du følge udviklingen i befolkning, indkomst, pendling, indbyggernes tilfredshed, økonomiens størrelse, priser og meget mere i grafer. Når du har ændret politik eller anlæg, så tjek, om hverdagen bliver bedre, og hvad der stadig mangler. Det var knapperne til venstre."
+      },
+      "step5": {
+        "title": "Sæt planerne i gang, og se resultatet",
+        "flow": "Når du har tjekket byen og planlagt byggeri og budgetter, lader du tiden gå med »Start« i cockpittet. Byggeriet skrider frem, indbyggerne arbejder, virksomhederne producerer, og kommunens økonomi og score ændrer sig. Nogle planer tager flere måneder om at vise deres virkning.",
+        "execute": "Når tiden er gået, så se på resultaterne og notifikationerne. Er der problemer, så tag fat på dem i næste plan, og lad tiden gå igen. Byen vokser, når du gentager »planlæg, lad tiden gå, se resultatet«. Du behøver ikke trykke på »Start« her. Tryk på »Næste« for at gå videre til kamerastyringen."
+      },
+      "step6": {
+        "title": "Flyt kameraet",
+        "description": "Sådan styrer du kameraet: Træk med venstre museknap for at flytte visningen og med højre for at dreje. W/A/S/D (eller piletasterne) flytter, Q/E drejer, R/F ændrer højden, og musehjulet zoomer. Prøv dig frem, og tryk så på »Næste«."
+      },
+      "step7": {
+        "title": "Flyvetilstand og filmtilstand",
+        "description": "Kameraet har to særlige tilstande. »Flyvetilstand« starter du med Shift+F: Bevæg dig i synsretningen med W/A/S/D, se dig omkring med musen, og stig eller dyk med R/F. Tryk på Esc for at forlade den. »Filmtilstand« starter du med knappen øverst til venstre på skærmen, og så kan du kredse rundt om byen og nyde udsigten. Se dig omkring med musen; Shift skifter mellem kredsning og kørsel, Space sætter på pause, Backspace kører baglæns, og Esc afslutter. Mens en af tilstandene er aktiv, er panelerne på skærmen skjult, og de kommer tilbage, når du trykker på Esc. Når du har prøvet dem, så afslut begge tilstande, og tryk på »Næste«."
+      },
+      "step8": {
+        "title": "Se byens grænse",
+        "description": "Vi har flyttet kameraet til byens østlige kant. Det område, du kan bruge til byen, er dette rektangel, hvor der findes detaljeret terræn, og kameraet kan heller ikke komme uden for det. Det var alt om skærmen og styringen. Nu skal du anlægge et rigtigt nyt boligområde. Tryk på »Næste«."
+      },
+      "step9": {
+        "title": "Forlæng vejen",
+        "description": "Nu skal du anlægge et boligområde, der kan tage imod nye indbyggere. Boliger og arbejdspladser er ingenting værd uden veje imellem dem: Folk kan ikke komme frem og tilbage, og varerne kan ikke nå frem. Forlæng først byens øst-vest-gående gade mod vest, så der bliver vej ind til det nye kvarter. Tryk på »Veje, jernbane og infrastruktur« i ikonpanelet for at åbne byggepanelet.",
+        "confirm": "Jorden langs en vej bliver delt op i parceller, når vejen er færdig. Under »Parceller langs vejen ved færdiggørelse« i byggepanelet kan du vælge parcellernes størrelse for hver side af vejen. Vælg ud fra, hvilke bygninger du gerne vil have: Små parceller passer til boliger, store til fabrikker og landbrug. Denne vej skal føre til et boligområde, så lad indstillingen være. Tryk på »Bekræft« i byggepanelet for at gemme vejen, og tryk derefter på »Næste«."
+      },
+      "step10": {
+        "title": "Gør vejen færdig",
+        "description": "Vejen står stadig som »Byggeri planlagt«. En planlagt vej kan ikke bruges endnu – folk og biler kan først køre på den, når arbejdet er færdigt. Tryk på »Start« i cockpittet 2–3 gange for at lade tiden gå, og vent på, at den bliver færdig. Byggeriet koster penge hver måned, så længe det står på.",
+        "description_week": "Vejen står stadig som »Byggeri planlagt«. En planlagt vej kan ikke bruges endnu – folk og biler kan først køre på den, når arbejdet er færdigt. Tryk på »Start« i cockpittet 2–3 gange for at lade tiden gå, og vent på, at den bliver færdig. Byggeriet koster penge hver uge, så længe det står på."
+      },
+      "step11": {
+        "title": "Parcellerne er klar",
+        "description": "Vejen er færdig, og der er opstået parceller langs den. Bygninger kan kun opføres på parceller, og når en parcel ligger ud til en vej, kan folk og varer komme til og fra. Vil du tilføje parceller langs en eksisterende vej, kan du gøre det med »Parceller« i ikonpanelet."
+      },
+      "step12": {
+        "title": "Opret en bydel",
+        "description": "Før der bygges, så beslut, hvad denne gade skal udvikle sig til. Uden en plan kan der dukke en fabrik op lige ved siden af boligerne. Den slags retningslinjer fastlægges pr. »Bydel«. Bydele tildeles vej for vej, og en parcel hører til den bydel, som vejen ud for den tilhører. Tryk på »Bydele« i ikonpanelet for at åbne vinduet »Rediger bydele«: Lige nu er hele byen én bydel.",
+        "create": "Brug valgmetoden »Vejside«. Skift værktøjet til »Opret ny bydel«, hold Ctrl nede, og træk hen ad den vej, du har forlænget. Begge sider af den vej, du maler, og parcellerne ud til den bliver til en ny bydel."
+      },
+      "step13": {
+        "title": "Bydelen er oprettet",
+        "description": "Den nye gade er nu skilt ud fra bymidten som sin egen bydel. Du kan følge befolkning og priser pr. bydel og bestemme, hvilke bygninger der må opføres, så hvert område kan udvikle sig på den måde, der passer til det. Luk vinduet »Rediger bydele«, når du har set det."
+      },
+      "step14": {
+        "title": "Åbn bydelens detaljer",
+        "description": "Nu skal den nye bydel gøres til et boligområde. Vis bydelene med ikonet nederst til venstre på skærmen, og klik på navnet på den bydel, du lige har oprettet, for at åbne dens detaljer."
+      },
+      "step15": {
+        "title": "Gør den til et boligområde",
+        "description": "Med byggebestemmelserne nederst i panelet vælger du, hvilke bygninger der må opføres på bydelens parceller. Her skal være et roligt sted at bo, så klik på alle bygninger undtagen »Etageboliger« og »Enfamiliehuse« for at slå dem fra."
+      },
+      "step16": {
+        "title": "Tjek en parcel",
+        "description": "Bydelens bestemmelser gælder for alle dens parceller. Klik på parcellen med den gule markør for at åbne dens detaljer."
+      },
+      "step17": {
+        "title": "Bestemmelserne er overført",
+        "description": "Nederst i parcelpanelet kan du se bydelens bestemmelse, som kun tillader »Etageboliger« og »Enfamiliehuse«. Nu kan der kun bygges boliger på denne gade. I stedet for at indstille parcellerne én ad gangen kan du give bydelen en retning, så hele gaden følger den."
+      },
+      "step18": {
+        "title": "Byg boliger",
+        "description": "Nu skal der skaffes boliger. Normalt bygger private boliger af sig selv, når folk gerne vil bo her, men almene boliger opført af kommunen kan hurtigt afhjælpe mangel på boliger. Her skal du bygge en almen etageboligblok. Tryk på »Byggeri« i ikonpanelet.",
+        "select": "Vælg »Etageboligblok« i kategorien »Bolig«, klik på en vilkårlig parcel i den nye bydel som byggegrund, og tryk på »Bekræft«."
+      },
+      "step19": {
+        "title": "Gør boligerne færdige",
+        "description": "Ligesom veje kan bygninger ikke bebos, bare fordi de er planlagt. En etageboligblok tager mere end et halvt år at bygge. Tryk på »Start« for at lade tiden gå, og vent på, at den bliver færdig."
+      },
+      "step20": {
+        "title": "Tjek, om der er el",
+        "description": "En bolig er ikke nok til et liv – folk har også brug for el og vand. Byen har endnu hverken kraftværk eller vandforsyning. Klik på etageboligblokken med den gule markør, hvor byens folk bor, for at åbne dens detaljer. Vælg en af lejerne under fanen »Bygning«, og åbn så fanen »Udbud, efterspørgsel og handel«: Her kan du se, at den opnåede mængde el er 0."
+      },
+      "step21": {
+        "title": "Byg et solcelleanlæg",
+        "description": "For at levere el skal du først have et kraftværk, der producerer den. Byg et »Solcellepark« på parcellen med den gule markør. Normalt tager det tid at bygge, men da det er en tutorial, springes byggetiden over."
+      },
+      "step22": {
+        "title": "Byg en transformerstation",
+        "description": "Højspændingsstrømmen fra et kraftværk kan ikke bruges direkte i husstandene. En transformerstation omdanner den til strøm, som boligerne kan bruge, og fordeler den til de omkringliggende bygninger, der er forbundet med vej. Byg en »Transformerstation« på parcellen med den gule markør ved etageboligblokken."
+      },
+      "step23": {
+        "title": "Forbind med en elledning",
+        "description": "Selv om kraftværket og transformerstationen ligger langt fra hinanden, kan de forbindes, hvis strømmen har en vej at løbe ad. Åbn »Veje, jernbane og infrastruktur« i ikonpanelet, vælg »Elledning« under »El«, og træk en ledning fra solcelleanlæggets tilslutningspunkt til transformerstationens tilslutningspunkt. Forbinder du punkterne i en lige linje, klares det med én ledning."
+      },
+      "step24": {
+        "title": "Bekræft elforsyningen",
+        "description": "Når forbindelsen er lavet, så tjek, at strømmen faktisk løber. Tryk på »Start« for at lade tiden gå, klik på transformerstationen for at åbne dens detaljer, og tjek under fanen »Udbud, efterspørgsel og handel«, at den modtagne mængde højspænding ikke er 0. Det kan tage et par måneder, før kraftværket kommer i gang, og strømmen når frem."
+      },
+      "step25": {
+        "title": "Strømmen er nået ud til boligerne",
+        "description": "Åbn ligesom før en lejers fane »Udbud, efterspørgsel og handel« fra etageboligblokkens detaljer, og tjek, at den opnåede mængde el ikke længere er 0. Det kan tage endnu en måned eller to, før strømmen når ud til husstandene. Producér den på et kraftværk, før den gennem elledninger, og fordel den fra en transformerstation – først når alle tre er forbundet, når strømmen ud til boligerne."
+      },
+      "step26": {
+        "title": "Find en vandkilde",
+        "description": "Nu er det vandets tur. Vandet i hanerne er grundvand, der pumpes op og sendes ud til byen. Find først ud af, hvor der kan pumpes vand op. Tryk på »Visning« i cockpittet for at åbne visningspanelet.",
+        "show": "Vælg »Naturressourcer« blandt de lodrette faner, og skift til »Vis«. Vandkilder vises med lyseblåt på kortet. Klik på vandkilden med den gule markør for at åbne dens detaljer."
+      },
+      "step27": {
+        "title": "Byg en grundvandspumpe",
+        "description": "En grundvandspumpe henter vand op fra undergrunden og skal derfor bygges, hvor der er en vandkilde. Den skal også bruge el og arbejdskraft for at køre, og derfor fik vi strømmen frem først. Byg en »Grundvandspumpe« på parcellen med den gule markør oven på vandkilden. Da det er en tutorial, springes byggetiden over."
+      },
+      "step28": {
+        "title": "Byg et vandværk",
+        "description": "Oppumpet vand kan ikke leveres direkte til husstandene. Ligesom en transformerstation fordeler el, fordeler et vandværk vand til de omkringliggende bygninger, der er forbundet med vej. Byg et »Vandværk« på parcellen med den gule markør ved etageboligblokken."
+      },
+      "step29": {
+        "title": "Forbind med en vandledning",
+        "description": "Der skal en ledning til at føre vandet fra grundvandspumpen til vandværket. Åbn »Veje, jernbane og infrastruktur« i ikonpanelet, vælg »Vandledning« under »Vand«, og læg den fra grundvandspumpens tilslutningspunkt til vandværkets tilslutningspunkt. Tag en stor omvej mod øst, så den ikke kommer i vejen for vejene og elledningen."
+      },
+      "step30": {
+        "title": "Bekræft vandforsyningen",
+        "description": "Tryk på »Start« for at lade tiden gå, klik på vandværket for at åbne dets detaljer, og tjek under fanen »Udbud, efterspørgsel og handel«, at den modtagne mængde råvand ikke er 0. Det kan tage et par måneder, før der kommer arbejdere til grundvandspumpen, og vandet når frem."
+      },
+      "step31": {
+        "title": "Grundstenene er lagt",
+        "description": "Vandet er nået frem til vandværket, så boligerne omkring det kan nu bruge vand fra hanen. Anlæg veje, klargør parceller, giv bydelene en retning, byg boliger, og før el og vand frem – det er den grundlæggende gang i at bygge en by. Tryk på »Næste« for at afslutte tutorialen om grundlæggende styring."
+      }
+    },
+    "scenario4": {
+      "title": "Byg en jernbane",
+      "description": "Vi vil gerne forbinde boligkvarteret og arbejdspladserne med jernbane, men på det planlagte tracé står der private bygninger og et offentligt hospital. I denne tutorial lærer du om arealerhvervelse, fjernelse af offentlige anlæg, højbane over veje, opførelse af perroner, stationsbygninger og depot, justering af kurver og stigninger samt elforsyning og åbning af en linje.",
+      "step1": {
+        "title": "Placer højbaneperroner",
+        "description": "Åbn »Veje, jernbane og infrastruktur« → »Jernbane«, og byg en »Højbaneperron af høj standard (sideperroner)« i byens vestlige del og en »Dobbeltsporet perron (sideperroner)« i den østlige del. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft. Begge skal ligge i 6 m højde.",
+        "open": "Åbn »Veje, jernbane og infrastruktur« → »Jernbane«, og byg en »Højbaneperron af høj standard (sideperroner)« i byens vestlige del og en »Dobbeltsporet perron (sideperroner)« i den østlige del. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft. Begge skal ligge i 6 m højde.",
+        "variant": "Åbn »Veje, jernbane og infrastruktur« → »Jernbane«, og byg en »Højbaneperron af høj standard (sideperroner)« i byens vestlige del og en »Dobbeltsporet perron (sideperroner)« i den østlige del. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft. Begge skal ligge i 6 m højde.",
+        "start": "Åbn »Veje, jernbane og infrastruktur« → »Jernbane«, og byg en »Højbaneperron af høj standard (sideperroner)« i byens vestlige del og en »Dobbeltsporet perron (sideperroner)« i den østlige del. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft. Begge skal ligge i 6 m højde.",
+        "end": "Åbn »Veje, jernbane og infrastruktur« → »Jernbane«, og byg en »Højbaneperron af høj standard (sideperroner)« i byens vestlige del og en »Dobbeltsporet perron (sideperroner)« i den østlige del. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft. Begge skal ligge i 6 m højde.",
+        "confirm": "Åbn »Veje, jernbane og infrastruktur« → »Jernbane«, og byg en »Højbaneperron af høj standard (sideperroner)« i byens vestlige del og en »Dobbeltsporet perron (sideperroner)« i den østlige del. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft. Begge skal ligge i 6 m højde.",
+        "town": "Anlæg den vestlige »Højbaneperron af høj standard (sideperroner)«. Venstreklik i 6 m højde på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft.",
+        "new": "Nu er det den østlige side. Tryk på »Tilbage« i panelet for at vende tilbage til listen over typer, og vælg »Dobbeltsporet perron (sideperroner)« under »Jernbane«. Venstreklik i 6 m højde på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft. Har du lukket panelet, kan du åbne det igen via »Veje, jernbane og infrastruktur«.",
+        "east": "Nu er det den østlige side. Tryk på »Tilbage« i panelet for at vende tilbage til listen over typer, og vælg »Dobbeltsporet perron (sideperroner)« under »Jernbane«. Venstreklik i 6 m højde på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft. Har du lukket panelet, kan du åbne det igen via »Veje, jernbane og infrastruktur«."
+      },
+      "step2": {
+        "title": "Byg stationsbygninger og indgange",
+        "description": "Vælg »Enkel stationsbygning«, og forbind de to markører i vest og de to i øst, så der bliver en kort gang på tværs af hver perron. Indgangene placeres lige på begge sider af perronen. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft.",
+        "open": "Vælg »Enkel stationsbygning«, og forbind de to markører i vest og de to i øst, så der bliver en kort gang på tværs af hver perron. Indgangene placeres lige på begge sider af perronen. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft.",
+        "variant": "Vælg »Enkel stationsbygning«, og forbind de to markører i vest og de to i øst, så der bliver en kort gang på tværs af hver perron. Indgangene placeres lige på begge sider af perronen. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft.",
+        "start": "Vælg »Enkel stationsbygning«, og forbind de to markører i vest og de to i øst, så der bliver en kort gang på tværs af hver perron. Indgangene placeres lige på begge sider af perronen. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft.",
+        "end": "Vælg »Enkel stationsbygning«, og forbind de to markører i vest og de to i øst, så der bliver en kort gang på tværs af hver perron. Indgangene placeres lige på begge sider af perronen. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft.",
+        "confirm": "Vælg »Enkel stationsbygning«, og forbind de to markører i vest og de to i øst, så der bliver en kort gang på tværs af hver perron. Indgangene placeres lige på begge sider af perronen. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft.",
+        "town": "Vælg »Enkel stationsbygning«, og forbind de to markører i vest og de to i øst, så der bliver en kort gang på tværs af hver perron. Indgangene placeres lige på begge sider af perronen. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft.",
+        "new": "Vælg »Enkel stationsbygning«, og forbind de to markører i vest og de to i øst, så der bliver en kort gang på tværs af hver perron. Indgangene placeres lige på begge sider af perronen. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft.",
+        "east": "Vælg »Enkel stationsbygning«, og forbind de to markører i vest og de to i øst, så der bliver en kort gang på tværs af hver perron. Indgangene placeres lige på begge sider af perronen. Venstreklik på cirklernes start- og slutpunkt, højreklik for at fastlægge formen, og bekræft."
+      },
+      "step3": {
+        "title": "Planlæg strækningen med arealerhvervelse",
+        "description": "Vælg »Dobbeltspor«, og læg et lige spor i 6 m højde fra den vestlige perrons østende til hovedvejens vestende. Sporet går hen over bygninger, så det kræver arealerhvervelse. Bekræft planen, og tryk på »Næste«. Byggetiden springes ikke over på denne strækning.",
+        "open": "Vælg »Dobbeltspor«, og læg et lige spor i 6 m højde fra den vestlige perrons østende til hovedvejens vestende. Sporet går hen over bygninger, så det kræver arealerhvervelse. Bekræft planen, og tryk på »Næste«. Byggetiden springes ikke over på denne strækning.",
+        "variant": "Vælg »Dobbeltspor«, og læg et lige spor i 6 m højde fra den vestlige perrons østende til hovedvejens vestende. Sporet går hen over bygninger, så det kræver arealerhvervelse. Bekræft planen, og tryk på »Næste«. Byggetiden springes ikke over på denne strækning.",
+        "start": "Vælg »Dobbeltspor«, og læg et lige spor i 6 m højde fra den vestlige perrons østende til hovedvejens vestende. Sporet går hen over bygninger, så det kræver arealerhvervelse. Bekræft planen, og tryk på »Næste«. Byggetiden springes ikke over på denne strækning.",
+        "end": "Vælg »Dobbeltspor«, og læg et lige spor i 6 m højde fra den vestlige perrons østende til hovedvejens vestende. Sporet går hen over bygninger, så det kræver arealerhvervelse. Bekræft planen, og tryk på »Næste«. Byggetiden springes ikke over på denne strækning.",
+        "confirm": "Vælg »Dobbeltspor«, og læg et lige spor i 6 m højde fra den vestlige perrons østende til hovedvejens vestende. Sporet går hen over bygninger, så det kræver arealerhvervelse. Bekræft planen, og tryk på »Næste«. Byggetiden springes ikke over på denne strækning.",
+        "town": "Vælg »Dobbeltspor«, og læg et lige spor i 6 m højde fra den vestlige perrons østende til hovedvejens vestende. Sporet går hen over bygninger, så det kræver arealerhvervelse. Bekræft planen, og tryk på »Næste«. Byggetiden springes ikke over på denne strækning.",
+        "new": "Vælg »Dobbeltspor«, og læg et lige spor i 6 m højde fra den vestlige perrons østende til hovedvejens vestende. Sporet går hen over bygninger, så det kræver arealerhvervelse. Bekræft planen, og tryk på »Næste«. Byggetiden springes ikke over på denne strækning.",
+        "east": "Vælg »Dobbeltspor«, og læg et lige spor i 6 m højde fra den vestlige perrons østende til hovedvejens vestende. Sporet går hen over bygninger, så det kræver arealerhvervelse. Bekræft planen, og tryk på »Næste«. Byggetiden springes ikke over på denne strækning."
+      },
+      "step4": {
+        "title": "Beordr hospitalet revet ned",
+        "description": "På private grunde går forhandlingerne om opkøb i gang automatisk, men hospitalet er et kommunalt offentligt anlæg. Det fjernes ikke automatisk og forhindrer byggestart på sporet. Klik på hospitalet, og tryk på »Riv ned« blandt knapperne øverst. Når der står »Nedrivning planlagt«, trykker du på »Næste«.",
+        "open": "På private grunde går forhandlingerne om opkøb i gang automatisk, men hospitalet er et kommunalt offentligt anlæg. Det fjernes ikke automatisk og forhindrer byggestart på sporet. Klik på hospitalet, og tryk på »Riv ned« blandt knapperne øverst. Når der står »Nedrivning planlagt«, trykker du på »Næste«.",
+        "variant": "På private grunde går forhandlingerne om opkøb i gang automatisk, men hospitalet er et kommunalt offentligt anlæg. Det fjernes ikke automatisk og forhindrer byggestart på sporet. Klik på hospitalet, og tryk på »Riv ned« blandt knapperne øverst. Når der står »Nedrivning planlagt«, trykker du på »Næste«.",
+        "start": "På private grunde går forhandlingerne om opkøb i gang automatisk, men hospitalet er et kommunalt offentligt anlæg. Det fjernes ikke automatisk og forhindrer byggestart på sporet. Klik på hospitalet, og tryk på »Riv ned« blandt knapperne øverst. Når der står »Nedrivning planlagt«, trykker du på »Næste«.",
+        "end": "På private grunde går forhandlingerne om opkøb i gang automatisk, men hospitalet er et kommunalt offentligt anlæg. Det fjernes ikke automatisk og forhindrer byggestart på sporet. Klik på hospitalet, og tryk på »Riv ned« blandt knapperne øverst. Når der står »Nedrivning planlagt«, trykker du på »Næste«.",
+        "confirm": "På private grunde går forhandlingerne om opkøb i gang automatisk, men hospitalet er et kommunalt offentligt anlæg. Det fjernes ikke automatisk og forhindrer byggestart på sporet. Klik på hospitalet, og tryk på »Riv ned« blandt knapperne øverst. Når der står »Nedrivning planlagt«, trykker du på »Næste«.",
+        "town": "På private grunde går forhandlingerne om opkøb i gang automatisk, men hospitalet er et kommunalt offentligt anlæg. Det fjernes ikke automatisk og forhindrer byggestart på sporet. Klik på hospitalet, og tryk på »Riv ned« blandt knapperne øverst. Når der står »Nedrivning planlagt«, trykker du på »Næste«.",
+        "new": "På private grunde går forhandlingerne om opkøb i gang automatisk, men hospitalet er et kommunalt offentligt anlæg. Det fjernes ikke automatisk og forhindrer byggestart på sporet. Klik på hospitalet, og tryk på »Riv ned« blandt knapperne øverst. Når der står »Nedrivning planlagt«, trykker du på »Næste«.",
+        "east": "På private grunde går forhandlingerne om opkøb i gang automatisk, men hospitalet er et kommunalt offentligt anlæg. Det fjernes ikke automatisk og forhindrer byggestart på sporet. Klik på hospitalet, og tryk på »Riv ned« blandt knapperne øverst. Når der står »Nedrivning planlagt«, trykker du på »Næste«."
+      },
+      "step5": {
+        "title": "Vent på, at strækningen bliver færdig",
+        "description": "Lad tiden gå, og vent på opkøbet af de private grunde, nedrivningen af hospitalet og færdiggørelsen af sporarbejdet. Det tager flere måneder. Her springes byggetiden ikke over – du ser sporet blive færdigt ved almindeligt byggeri.",
+        "open": "Lad tiden gå, og vent på opkøbet af de private grunde, nedrivningen af hospitalet og færdiggørelsen af sporarbejdet. Det tager flere måneder. Her springes byggetiden ikke over – du ser sporet blive færdigt ved almindeligt byggeri.",
+        "variant": "Lad tiden gå, og vent på opkøbet af de private grunde, nedrivningen af hospitalet og færdiggørelsen af sporarbejdet. Det tager flere måneder. Her springes byggetiden ikke over – du ser sporet blive færdigt ved almindeligt byggeri.",
+        "start": "Lad tiden gå, og vent på opkøbet af de private grunde, nedrivningen af hospitalet og færdiggørelsen af sporarbejdet. Det tager flere måneder. Her springes byggetiden ikke over – du ser sporet blive færdigt ved almindeligt byggeri.",
+        "end": "Lad tiden gå, og vent på opkøbet af de private grunde, nedrivningen af hospitalet og færdiggørelsen af sporarbejdet. Det tager flere måneder. Her springes byggetiden ikke over – du ser sporet blive færdigt ved almindeligt byggeri.",
+        "confirm": "Lad tiden gå, og vent på opkøbet af de private grunde, nedrivningen af hospitalet og færdiggørelsen af sporarbejdet. Det tager flere måneder. Her springes byggetiden ikke over – du ser sporet blive færdigt ved almindeligt byggeri.",
+        "town": "Lad tiden gå, og vent på opkøbet af de private grunde, nedrivningen af hospitalet og færdiggørelsen af sporarbejdet. Det tager flere måneder. Her springes byggetiden ikke over – du ser sporet blive færdigt ved almindeligt byggeri.",
+        "new": "Lad tiden gå, og vent på opkøbet af de private grunde, nedrivningen af hospitalet og færdiggørelsen af sporarbejdet. Det tager flere måneder. Her springes byggetiden ikke over – du ser sporet blive færdigt ved almindeligt byggeri.",
+        "east": "Lad tiden gå, og vent på opkøbet af de private grunde, nedrivningen af hospitalet og færdiggørelsen af sporarbejdet. Det tager flere måneder. Her springes byggetiden ikke over – du ser sporet blive færdigt ved almindeligt byggeri."
+      },
+      "step6": {
+        "title": "Læg spor lige over hovedvejen",
+        "description": "Læg »Dobbeltspor« i 6 m højde fra hovedvejens vestende til dens østende. Følger du vejens midte, rører sporet ikke de private parceller langs vejen, og du undgår arealerhvervelse. Kommer du væk fra vejen og ind over bygninger, kræver det opkøb eller fjernelse af offentlige anlæg.",
+        "open": "Læg »Dobbeltspor« i 6 m højde fra hovedvejens vestende til dens østende. Følger du vejens midte, rører sporet ikke de private parceller langs vejen, og du undgår arealerhvervelse. Kommer du væk fra vejen og ind over bygninger, kræver det opkøb eller fjernelse af offentlige anlæg.",
+        "variant": "Læg »Dobbeltspor« i 6 m højde fra hovedvejens vestende til dens østende. Følger du vejens midte, rører sporet ikke de private parceller langs vejen, og du undgår arealerhvervelse. Kommer du væk fra vejen og ind over bygninger, kræver det opkøb eller fjernelse af offentlige anlæg.",
+        "start": "Læg »Dobbeltspor« i 6 m højde fra hovedvejens vestende til dens østende. Følger du vejens midte, rører sporet ikke de private parceller langs vejen, og du undgår arealerhvervelse. Kommer du væk fra vejen og ind over bygninger, kræver det opkøb eller fjernelse af offentlige anlæg.",
+        "end": "Læg »Dobbeltspor« i 6 m højde fra hovedvejens vestende til dens østende. Følger du vejens midte, rører sporet ikke de private parceller langs vejen, og du undgår arealerhvervelse. Kommer du væk fra vejen og ind over bygninger, kræver det opkøb eller fjernelse af offentlige anlæg.",
+        "confirm": "Læg »Dobbeltspor« i 6 m højde fra hovedvejens vestende til dens østende. Følger du vejens midte, rører sporet ikke de private parceller langs vejen, og du undgår arealerhvervelse. Kommer du væk fra vejen og ind over bygninger, kræver det opkøb eller fjernelse af offentlige anlæg.",
+        "town": "Læg »Dobbeltspor« i 6 m højde fra hovedvejens vestende til dens østende. Følger du vejens midte, rører sporet ikke de private parceller langs vejen, og du undgår arealerhvervelse. Kommer du væk fra vejen og ind over bygninger, kræver det opkøb eller fjernelse af offentlige anlæg.",
+        "new": "Læg »Dobbeltspor« i 6 m højde fra hovedvejens vestende til dens østende. Følger du vejens midte, rører sporet ikke de private parceller langs vejen, og du undgår arealerhvervelse. Kommer du væk fra vejen og ind over bygninger, kræver det opkøb eller fjernelse af offentlige anlæg.",
+        "east": "Til sidst lægger du »Dobbeltspor« i 6 m højde fra hovedvejens østende til den østlige perrons vestende. Når de to perroner er forbundet, springer »Næste« byggetiden over."
+      },
+      "step7": {
+        "title": "Byg depotet",
+        "description": "Vælg »Togdepot« i byggepanelet, og byg det på den gule parcel nord for byen. Også her placerer du det selv. »Næste« springer depotets byggetid over og gør det færdigt.",
+        "open": "Vælg »Togdepot« i byggepanelet, og byg det på den gule parcel nord for byen. Også her placerer du det selv. »Næste« springer depotets byggetid over og gør det færdigt.",
+        "variant": "Vælg »Togdepot« i byggepanelet, og byg det på den gule parcel nord for byen. Også her placerer du det selv. »Næste« springer depotets byggetid over og gør det færdigt.",
+        "start": "Vælg »Togdepot« i byggepanelet, og byg det på den gule parcel nord for byen. Også her placerer du det selv. »Næste« springer depotets byggetid over og gør det færdigt.",
+        "end": "Vælg »Togdepot« i byggepanelet, og byg det på den gule parcel nord for byen. Også her placerer du det selv. »Næste« springer depotets byggetid over og gør det færdigt.",
+        "confirm": "Vælg »Togdepot« i byggepanelet, og byg det på den gule parcel nord for byen. Også her placerer du det selv. »Næste« springer depotets byggetid over og gør det færdigt.",
+        "town": "Vælg »Togdepot« i byggepanelet, og byg det på den gule parcel nord for byen. Også her placerer du det selv. »Næste« springer depotets byggetid over og gør det færdigt.",
+        "new": "Vælg »Togdepot« i byggepanelet, og byg det på den gule parcel nord for byen. Også her placerer du det selv. »Næste« springer depotets byggetid over og gør det færdigt.",
+        "east": "Vælg »Togdepot« i byggepanelet, og byg det på den gule parcel nord for byen. Også her placerer du det selv. »Næste« springer depotets byggetid over og gør det færdigt."
+      },
+      "step8": {
+        "title": "Tilpas kurver og stigning, og tilslut hovedsporet",
+        "description": "Vælg »Jernbanespor«, og læg en bred bue mod øst fra tilslutningspunktet i terrænniveau på depotets østside, forbi markøren i nordøst og frem til sammenløbspunktet på hovedsporet i 6 m højde. Brug de gule mellempunkter som rettesnor, så du holder dig inden for grænserne for kurveradius og stigning. Når du har fastlagt formen med højreklik, kan du justere den ved at trække i knudepunkter og kontrolpunkter.",
+        "open": "Vælg »Jernbanespor«, og læg en bred bue mod øst fra tilslutningspunktet i terrænniveau på depotets østside, forbi markøren i nordøst og frem til sammenløbspunktet på hovedsporet i 6 m højde. Brug de gule mellempunkter som rettesnor, så du holder dig inden for grænserne for kurveradius og stigning. Når du har fastlagt formen med højreklik, kan du justere den ved at trække i knudepunkter og kontrolpunkter.",
+        "variant": "Vælg »Jernbanespor«, og læg en bred bue mod øst fra tilslutningspunktet i terrænniveau på depotets østside, forbi markøren i nordøst og frem til sammenløbspunktet på hovedsporet i 6 m højde. Brug de gule mellempunkter som rettesnor, så du holder dig inden for grænserne for kurveradius og stigning. Når du har fastlagt formen med højreklik, kan du justere den ved at trække i knudepunkter og kontrolpunkter.",
+        "start": "Vælg »Jernbanespor«, og læg en bred bue mod øst fra tilslutningspunktet i terrænniveau på depotets østside, forbi markøren i nordøst og frem til sammenløbspunktet på hovedsporet i 6 m højde. Brug de gule mellempunkter som rettesnor, så du holder dig inden for grænserne for kurveradius og stigning. Når du har fastlagt formen med højreklik, kan du justere den ved at trække i knudepunkter og kontrolpunkter.",
+        "end": "Vælg »Jernbanespor«, og læg en bred bue mod øst fra tilslutningspunktet i terrænniveau på depotets østside, forbi markøren i nordøst og frem til sammenløbspunktet på hovedsporet i 6 m højde. Brug de gule mellempunkter som rettesnor, så du holder dig inden for grænserne for kurveradius og stigning. Når du har fastlagt formen med højreklik, kan du justere den ved at trække i knudepunkter og kontrolpunkter.",
+        "confirm": "Vælg »Jernbanespor«, og læg en bred bue mod øst fra tilslutningspunktet i terrænniveau på depotets østside, forbi markøren i nordøst og frem til sammenløbspunktet på hovedsporet i 6 m højde. Brug de gule mellempunkter som rettesnor, så du holder dig inden for grænserne for kurveradius og stigning. Når du har fastlagt formen med højreklik, kan du justere den ved at trække i knudepunkter og kontrolpunkter.",
+        "town": "Vælg »Jernbanespor«, og læg en bred bue mod øst fra tilslutningspunktet i terrænniveau på depotets østside, forbi markøren i nordøst og frem til sammenløbspunktet på hovedsporet i 6 m højde. Brug de gule mellempunkter som rettesnor, så du holder dig inden for grænserne for kurveradius og stigning. Når du har fastlagt formen med højreklik, kan du justere den ved at trække i knudepunkter og kontrolpunkter.",
+        "new": "Vælg »Jernbanespor«, og læg en bred bue mod øst fra tilslutningspunktet i terrænniveau på depotets østside, forbi markøren i nordøst og frem til sammenløbspunktet på hovedsporet i 6 m højde. Brug de gule mellempunkter som rettesnor, så du holder dig inden for grænserne for kurveradius og stigning. Når du har fastlagt formen med højreklik, kan du justere den ved at trække i knudepunkter og kontrolpunkter.",
+        "east": "Vælg »Jernbanespor«, og læg en bred bue mod øst fra tilslutningspunktet i terrænniveau på depotets østside, forbi markøren i nordøst og frem til sammenløbspunktet på hovedsporet i 6 m højde. Brug de gule mellempunkter som rettesnor, så du holder dig inden for grænserne for kurveradius og stigning. Når du har fastlagt formen med højreklik, kan du justere den ved at trække i knudepunkter og kontrolpunkter."
+      },
+      "step9": {
+        "title": "Før strøm fra kraftværket til depotet",
+        "description": "For at køre med eltog skal der trækkes en elledning fra kraftværket. Vælg »Elledning«, forbind kraftværkets tilslutningspunkt med det fælles tilslutningspunkt på depotets østside, og bekræft.",
+        "open": "For at køre med eltog skal der trækkes en elledning fra kraftværket. Vælg »Elledning«, forbind kraftværkets tilslutningspunkt med det fælles tilslutningspunkt på depotets østside, og bekræft.",
+        "variant": "For at køre med eltog skal der trækkes en elledning fra kraftværket. Vælg »Elledning«, forbind kraftværkets tilslutningspunkt med det fælles tilslutningspunkt på depotets østside, og bekræft.",
+        "start": "For at køre med eltog skal der trækkes en elledning fra kraftværket. Vælg »Elledning«, forbind kraftværkets tilslutningspunkt med det fælles tilslutningspunkt på depotets østside, og bekræft.",
+        "end": "For at køre med eltog skal der trækkes en elledning fra kraftværket. Vælg »Elledning«, forbind kraftværkets tilslutningspunkt med det fælles tilslutningspunkt på depotets østside, og bekræft.",
+        "confirm": "For at køre med eltog skal der trækkes en elledning fra kraftværket. Vælg »Elledning«, forbind kraftværkets tilslutningspunkt med det fælles tilslutningspunkt på depotets østside, og bekræft.",
+        "town": "For at køre med eltog skal der trækkes en elledning fra kraftværket. Vælg »Elledning«, forbind kraftværkets tilslutningspunkt med det fælles tilslutningspunkt på depotets østside, og bekræft.",
+        "new": "For at køre med eltog skal der trækkes en elledning fra kraftværket. Vælg »Elledning«, forbind kraftværkets tilslutningspunkt med det fælles tilslutningspunkt på depotets østside, og bekræft.",
+        "east": "For at køre med eltog skal der trækkes en elledning fra kraftværket. Vælg »Elledning«, forbind kraftværkets tilslutningspunkt med det fælles tilslutningspunkt på depotets østside, og bekræft."
+      },
+      "step10": {
+        "title": "Åbn jernbanelinjen",
+        "description": "Vælg »Regionaltogslinje« under »Kollektiv trafik« → »+ Ny linje«. Placer stoppesteder på den vestlige og den østlige højbaneperron, og klik på det første stoppested for at lukke sløjfen. Bekræft med billetpris 0 og et ønsket afgangsinterval på 5 minutter.",
+        "open": "Vælg »Regionaltogslinje« under »Kollektiv trafik« → »+ Ny linje«. Placer stoppesteder på den vestlige og den østlige højbaneperron, og klik på det første stoppested for at lukke sløjfen. Bekræft med billetpris 0 og et ønsket afgangsinterval på 5 minutter.",
+        "variant": "Vælg »Regionaltogslinje« under »Kollektiv trafik« → »+ Ny linje«. Placer stoppesteder på den vestlige og den østlige højbaneperron, og klik på det første stoppested for at lukke sløjfen. Bekræft med billetpris 0 og et ønsket afgangsinterval på 5 minutter.",
+        "start": "Vælg »Regionaltogslinje« under »Kollektiv trafik« → »+ Ny linje«. Placer stoppesteder på den vestlige og den østlige højbaneperron, og klik på det første stoppested for at lukke sløjfen. Bekræft med billetpris 0 og et ønsket afgangsinterval på 5 minutter.",
+        "end": "Vælg »Regionaltogslinje« under »Kollektiv trafik« → »+ Ny linje«. Placer stoppesteder på den vestlige og den østlige højbaneperron, og klik på det første stoppested for at lukke sløjfen. Bekræft med billetpris 0 og et ønsket afgangsinterval på 5 minutter.",
+        "confirm": "Vælg »Regionaltogslinje« under »Kollektiv trafik« → »+ Ny linje«. Placer stoppesteder på den vestlige og den østlige højbaneperron, og klik på det første stoppested for at lukke sløjfen. Bekræft med billetpris 0 og et ønsket afgangsinterval på 5 minutter.",
+        "town": "Vælg »Regionaltogslinje« under »Kollektiv trafik« → »+ Ny linje«. Placer stoppesteder på den vestlige og den østlige højbaneperron, og klik på det første stoppested for at lukke sløjfen. Bekræft med billetpris 0 og et ønsket afgangsinterval på 5 minutter.",
+        "new": "Vælg »Regionaltogslinje« under »Kollektiv trafik« → »+ Ny linje«. Placer stoppesteder på den vestlige og den østlige højbaneperron, og klik på det første stoppested for at lukke sløjfen. Bekræft med billetpris 0 og et ønsket afgangsinterval på 5 minutter.",
+        "east": "Vælg »Regionaltogslinje« under »Kollektiv trafik« → »+ Ny linje«. Placer stoppesteder på den vestlige og den østlige højbaneperron, og klik på det første stoppested for at lukke sløjfen. Bekræft med billetpris 0 og et ønsket afgangsinterval på 5 minutter."
+      },
+      "step11": {
+        "title": "Tjek materiel og drift",
+        "description": "Lad tiden gå, og tjek linjens kapacitet og afgangsinterval i oversigten over kollektiv trafik. Det tager flere måneder, før depotet har skaffet materiel. Når linjen har kapacitet, er den åbnet. Indbyggerne sammenligner også med at gå, når de vælger rute, så på en kort strækning mellem stationerne er der måske endnu ingen passagerer.",
+        "open": "Lad tiden gå, og tjek linjens kapacitet og afgangsinterval i oversigten over kollektiv trafik. Det tager flere måneder, før depotet har skaffet materiel. Når linjen har kapacitet, er den åbnet. Indbyggerne sammenligner også med at gå, når de vælger rute, så på en kort strækning mellem stationerne er der måske endnu ingen passagerer.",
+        "variant": "Lad tiden gå, og tjek linjens kapacitet og afgangsinterval i oversigten over kollektiv trafik. Det tager flere måneder, før depotet har skaffet materiel. Når linjen har kapacitet, er den åbnet. Indbyggerne sammenligner også med at gå, når de vælger rute, så på en kort strækning mellem stationerne er der måske endnu ingen passagerer.",
+        "start": "Lad tiden gå, og tjek linjens kapacitet og afgangsinterval i oversigten over kollektiv trafik. Det tager flere måneder, før depotet har skaffet materiel. Når linjen har kapacitet, er den åbnet. Indbyggerne sammenligner også med at gå, når de vælger rute, så på en kort strækning mellem stationerne er der måske endnu ingen passagerer.",
+        "end": "Lad tiden gå, og tjek linjens kapacitet og afgangsinterval i oversigten over kollektiv trafik. Det tager flere måneder, før depotet har skaffet materiel. Når linjen har kapacitet, er den åbnet. Indbyggerne sammenligner også med at gå, når de vælger rute, så på en kort strækning mellem stationerne er der måske endnu ingen passagerer.",
+        "confirm": "Lad tiden gå, og tjek linjens kapacitet og afgangsinterval i oversigten over kollektiv trafik. Det tager flere måneder, før depotet har skaffet materiel. Når linjen har kapacitet, er den åbnet. Indbyggerne sammenligner også med at gå, når de vælger rute, så på en kort strækning mellem stationerne er der måske endnu ingen passagerer.",
+        "town": "Lad tiden gå, og tjek linjens kapacitet og afgangsinterval i oversigten over kollektiv trafik. Det tager flere måneder, før depotet har skaffet materiel. Når linjen har kapacitet, er den åbnet. Indbyggerne sammenligner også med at gå, når de vælger rute, så på en kort strækning mellem stationerne er der måske endnu ingen passagerer.",
+        "new": "Lad tiden gå, og tjek linjens kapacitet og afgangsinterval i oversigten over kollektiv trafik. Det tager flere måneder, før depotet har skaffet materiel. Når linjen har kapacitet, er den åbnet. Indbyggerne sammenligner også med at gå, når de vælger rute, så på en kort strækning mellem stationerne er der måske endnu ingen passagerer.",
+        "east": "Lad tiden gå, og tjek linjens kapacitet og afgangsinterval i oversigten over kollektiv trafik. Det tager flere måneder, før depotet har skaffet materiel. Når linjen har kapacitet, er den åbnet. Indbyggerne sammenligner også med at gå, når de vælger rute, så på en kort strækning mellem stationerne er der måske endnu ingen passagerer."
+      },
+      "step12": {
+        "title": "Status på jernbanebyggeriet",
+        "description": "Kameraet er flyttet hen til den vestlige station. Se togene holde ved perronen. Du har anlagt perroner, stationsbygninger, hovedspor, depot med tilslutningsspor, elforsyning og en linje. Du har prøvet arealerhvervelse af private grunde og fjernelse af et offentligt anlæg, og på strækningen lige over vejen undgik du opkøb. Brug også det, du har lært om at justere linjeføringen efter kurveradius og stigning, når du bygger andre jernbaner.",
+        "open": "Kameraet er flyttet hen til den vestlige station. Se togene holde ved perronen. Du har anlagt perroner, stationsbygninger, hovedspor, depot med tilslutningsspor, elforsyning og en linje. Du har prøvet arealerhvervelse af private grunde og fjernelse af et offentligt anlæg, og på strækningen lige over vejen undgik du opkøb. Brug også det, du har lært om at justere linjeføringen efter kurveradius og stigning, når du bygger andre jernbaner.",
+        "variant": "Kameraet er flyttet hen til den vestlige station. Se togene holde ved perronen. Du har anlagt perroner, stationsbygninger, hovedspor, depot med tilslutningsspor, elforsyning og en linje. Du har prøvet arealerhvervelse af private grunde og fjernelse af et offentligt anlæg, og på strækningen lige over vejen undgik du opkøb. Brug også det, du har lært om at justere linjeføringen efter kurveradius og stigning, når du bygger andre jernbaner.",
+        "start": "Kameraet er flyttet hen til den vestlige station. Se togene holde ved perronen. Du har anlagt perroner, stationsbygninger, hovedspor, depot med tilslutningsspor, elforsyning og en linje. Du har prøvet arealerhvervelse af private grunde og fjernelse af et offentligt anlæg, og på strækningen lige over vejen undgik du opkøb. Brug også det, du har lært om at justere linjeføringen efter kurveradius og stigning, når du bygger andre jernbaner.",
+        "end": "Kameraet er flyttet hen til den vestlige station. Se togene holde ved perronen. Du har anlagt perroner, stationsbygninger, hovedspor, depot med tilslutningsspor, elforsyning og en linje. Du har prøvet arealerhvervelse af private grunde og fjernelse af et offentligt anlæg, og på strækningen lige over vejen undgik du opkøb. Brug også det, du har lært om at justere linjeføringen efter kurveradius og stigning, når du bygger andre jernbaner.",
+        "confirm": "Kameraet er flyttet hen til den vestlige station. Se togene holde ved perronen. Du har anlagt perroner, stationsbygninger, hovedspor, depot med tilslutningsspor, elforsyning og en linje. Du har prøvet arealerhvervelse af private grunde og fjernelse af et offentligt anlæg, og på strækningen lige over vejen undgik du opkøb. Brug også det, du har lært om at justere linjeføringen efter kurveradius og stigning, når du bygger andre jernbaner.",
+        "town": "Kameraet er flyttet hen til den vestlige station. Se togene holde ved perronen. Du har anlagt perroner, stationsbygninger, hovedspor, depot med tilslutningsspor, elforsyning og en linje. Du har prøvet arealerhvervelse af private grunde og fjernelse af et offentligt anlæg, og på strækningen lige over vejen undgik du opkøb. Brug også det, du har lært om at justere linjeføringen efter kurveradius og stigning, når du bygger andre jernbaner.",
+        "new": "Kameraet er flyttet hen til den vestlige station. Se togene holde ved perronen. Du har anlagt perroner, stationsbygninger, hovedspor, depot med tilslutningsspor, elforsyning og en linje. Du har prøvet arealerhvervelse af private grunde og fjernelse af et offentligt anlæg, og på strækningen lige over vejen undgik du opkøb. Brug også det, du har lært om at justere linjeføringen efter kurveradius og stigning, når du bygger andre jernbaner.",
+        "east": "Kameraet er flyttet hen til den vestlige station. Se togene holde ved perronen. Du har anlagt perroner, stationsbygninger, hovedspor, depot med tilslutningsspor, elforsyning og en linje. Du har prøvet arealerhvervelse af private grunde og fjernelse af et offentligt anlæg, og på strækningen lige over vejen undgik du opkøb. Brug også det, du har lært om at justere linjeføringen efter kurveradius og stigning, når du bygger andre jernbaner."
+      }
+    },
+    "complete": {
+      "title": "Tutorial gennemført",
+      "description": "Tillykke! Du har gennemført tutorialen. Tryk på »Afslut« for at lukke vejledningen og fortsætte frit med denne by.",
+      "button": "Afslut"
+    },
+    "nextButton": "Næste",
+    "checking": "Kontrollerer…",
+    "failed": "Betingelsen er ikke opfyldt. Prøv igen.",
+    "completed": "Tutorial gennemført! Godt klaret.",
+    "stepProgress": "Trin {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Tryk på vejikonet for at åbne byggepanelet.",
+      "selectRoad": "Vælg den 2-sporede vej i terrænniveau under »Gade«. Kun de tilladte typer kan vælges.",
+      "placeStart": "Venstreklik inde i den lyseblå cirkel for at placere vejens startpunkt.",
+      "placeEnd": "Venstreklik inde i den gule cirkel for at placere vejens slutpunkt.",
+      "finalizeRoad": "Højreklik i 3D-visningen for at fastlægge vejens form.",
+      "confirmRoad": "Tryk på »Bekræft« i byggepanelet for at gemme, og tryk derefter på »Næste«.",
+      "failed": "Forberedelsen eller kommunikationen mislykkedes. Hvis det ikke hjælper at prøve igen, så afslut og start tutorialen i en ny by.",
+      "retry": "Prøv igen",
+      "placementRequired": "Placer den type og på de positioner, vejledningen viser.",
+      "preparing": "Gør tutorialens udgangspunkt klar.",
+      "finishFailed": "Tutorialen kunne ikke afsluttes. Prøv igen."
+    },
+    "trade": {
+      "title": "Kom i gang med international handel",
+      "description": "En lokal fabrik vil gerne sælge til udlandet. I denne tutorial lærer du at eksportere fødevarer fra en havn og importere varer med godstog fra nabolandet.",
+      "step1": {
+        "description": "Der skal bruges en eksportkaj for at sende øens fødevarer til udlandet. Byg en »Containerhavn« på parcellen med den gule markør ved kysten. Da det er en tutorial, springes byggetiden over.",
+        "title": "Byg en containerhavn"
+      },
+      "step2": {
+        "description": "Det tager nogle måneder, før fabrikkens produktion og transport kommer i gang, så lad tiden gå, og se på havnens eksport. Luk containerhavnens detaljer, og åbn dem igen – så kan du se import og eksport under »Godshåndtering«.",
+        "title": "Tjek eksporten af fødevarer"
+      },
+      "step3": {
+        "description": "Nu har du et sted til import og eksport med skib. Byg nu et sted til import og eksport med tog. Byg en »International godsterminal« på parcellen med den gule markør langs vejen. Ved den østlige grænse er der et spor ind i nabolandet og en grænsegodsterminal.",
+        "title": "Byg en international godsterminal"
+      },
+      "step4": {
+        "open": "Åbn »Veje, jernbane og infrastruktur« i ikonpanelet, og vælg »Containerperron« under »Jernbane«.",
+        "place": "Læg en perron nord for den internationale godsterminal, parallelt med den. Venstreklik inde i den lyseblå cirkel (vest) for at placere startpunktet og inde i den gule cirkel (øst) for at placere slutpunktet, og højreklik i 3D-visningen for at fastlægge formen. Skift »Perronside« til »Indvendig«, og tjek, at perronen ligger på stationsbygningens side (sydsiden), før du bekræfter. Tryk på »Næste«, når du er færdig.",
+        "title": "Byg en perron ved siden af stationen"
+      },
+      "step5": {
+        "description": "Tryk på »Tilbage« for at gå tilbage til listen, vælg »Jernbanespor«, og læg spor fra perronens østende til vestenden af det spor, der kommer fra grænsegodsterminalen uden for byen.",
+        "title": "Læg spor til grænsen"
+      },
+      "step6": {
+        "title": "Byg et depot",
+        "description": "Byg et »Togdepot« på parcellen med den gule markør langs sporet. Når du trykker på »Næste«, springes byggetiden over, da det er en tutorial, og depotet bliver færdigt."
+      },
+      "step7": {
+        "title": "Forbind depotet med hovedsporet",
+        "description": "Læg et tilslutningsspor fra tilslutningspunktet i depotets østende til hovedsporet. Lad sporet løbe ind på hovedsporet i en flad vinkel mod øst i stedet for i en ret vinkel. Tryk på »Næste«, når du er færdig."
+      },
+      "step8": {
+        "description": "Åbn »Veje, jernbane og infrastruktur« i ikonpanelet, og brug »Elledning« under »El« til at forbinde solcelleanlæggets tilslutningspunkt øst for byen med depotets tilslutningspunkt.",
+        "title": "Før strøm til depotet"
+      },
+      "step9": {
+        "description": "Tryk på »+ Ny linje« under »Kollektiv trafik«, og vælg »International godslinje« som type. Placer stoppesteder på perronerne ved den internationale godsterminal og grænsegodsterminalen, klik på det første stoppested for at lukke sløjfen, og åbn linjen. Togene kan ikke krydse hinanden på enkeltsporet, så sæt det ønskede afgangsinterval til 45 minutter, så ét togsæt kan nå frem og tilbage.",
+        "title": "Åbn den internationale godslinje"
+      },
+      "step10": {
+        "description": "Lad tiden gå, og se godstogene begynde at køre på den internationale godslinje. Det tager nogle måneder, før depotet har ansat personale, købt materialer og gjort materiellet klar.",
+        "title": "Sæt godstogene i drift"
+      }
+    },
+    "highway": {
+      "title": "Byg en motorvej",
+      "description": "Byen får brug for en ny vej til bilerne, når den vokser. I denne tutorial lærer du at bygge en motorvej på højbane hen over en almindelig vej og forbinde dem med ramper, så der opstår et motorvejskryds.",
+      "step1": {
+        "title": "Kryds vejen på højbane",
+        "open": "Den almindelige vej i midten skal krydses af en motorvej på højbane. Åbn »Veje, jernbane og infrastruktur« i ikonpanelet, og vælg »Tosporet motorvej« under »Motorvej«.",
+        "start": "Venstreklik inde i den lyseblå cirkel for at placere motorvejens startpunkt. Det fastgøres til en højbane i 7 m højde.",
+        "end": "Venstreklik inde i den gule cirkel for at placere slutpunktet. Det fastgøres i samme højde, 7 m, på den anden side af den almindelige vej.",
+        "confirm": "Tryk på »Bekræft« i byggepanelet for at gemme, og tryk derefter på »Næste«. Da det er en tutorial, springes byggetiden over, og motorvejen bliver færdig med det samme."
+      },
+      "step2": {
+        "title": "Giv motorvejen et navn",
+        "description": "Du kan give veje navne og holde styr på dem på den måde. Øverst i detaljevinduet for den motorvej, du har bygget, står den vej, den hører til, lige nu som »Ingen (navnløs vej)«. Giv den et navn efter eget valg."
+      },
+      "step3": {
+        "title": "Byg en rampe",
+        "description": "Byg en rampe, der forbinder til den almindelige vej. Vælg »Rampe« som vejtype, og forbind en jævnt buet rampe fra den gule markør på skærmen til motorvejen."
+      },
+      "step4": {
+        "title": "Tjek motorvejskrydset",
+        "description": "Klik på »IC1«, som vises ved rampen, for at åbne detaljepanelet for motorvejskrydset. Tjek, at den almindelige vej og motorvejen er forbundet."
+      }
+    },
+    "mining": {
+      "title": "Udvind råstoffer",
+      "description": "Under øen ligger værdifulde råstoffer, men der er ingen måde at få dem fragtet væk på. I denne tutorial lærer du at anlægge en mine, en godsbane og en havn og følger malmen hele vejen fra udvinding og transport til eksport.",
+      "step1": {
+        "description": "Slå visning af naturressourcer til, og åbn detaljepanelet for malmforekomsten i sydøst.",
+        "title": "Undersøg malmforekomsten"
+      },
+      "step2": {
+        "description": "Byg en »Mine« på den gule parcel oven på malmforekomsten i sydøst. Da det er en tutorial, springes byggetiden over.",
+        "title": "Byg en mine"
+      },
+      "step3": {
+        "description": "Byg en »Malmlæssestation« på den store eksisterende parcel sydøst for minen. På malmlæssestationen bliver malmen fra minen læsset på togene.",
+        "title": "Byg en læssestation ved minen"
+      },
+      "step4": {
+        "description": "Byg en »Malmlossestation« på den store eksisterende parcel syd for havnen. På malmlossestationen bliver malmen, som togene har bragt, losset og ført videre.",
+        "title": "Byg en lossestation nær havnen"
+      },
+      "step5": {
+        "description": "Byg en »Bulkhavn« på den gule parcel ved kysten.",
+        "title": "Byg en bulkhavn"
+      },
+      "step6": {
+        "open": "Vælg »Malmperron« under »Jernbane«, og forbind de to markører sydvest for læssestationen og de to markører syd for lossestationen. Vend begge perroner mod deres anlæg.",
+        "loading": "Vælg »Malmperron« under »Jernbane«, og forbind de to markører sydvest for læssestationen og de to markører syd for lossestationen. Vend begge perroner mod deres anlæg.",
+        "unloading": "Vælg »Malmperron« under »Jernbane«, og forbind de to markører sydvest for læssestationen og de to markører syd for lossestationen. Vend begge perroner mod deres anlæg.",
+        "title": "Byg perroner ved siden af stationerne"
+      },
+      "step7": {
+        "town": "Læg et godsspor fra havneperronens østende, syd om vejens mellempunkt, til bjergperronens nordvestende. Sporet er ikke forbundet endnu, så du skal selv anlægge det. Brug kurver til at rette køreretningen ind, sæt »Følg terræn« til »Følg ikke« på stigningen op ad bjerget, og juster formen, til der ikke er flere røde overtrædelser af stigning eller kurveradius. Tilføj mellempunkter, så hver strækning højst er 500 m.",
+        "climb": "Læg et godsspor fra havneperronens østende, syd om vejens mellempunkt, til bjergperronens nordvestende. Sporet er ikke forbundet endnu, så du skal selv anlægge det. Brug kurver til at rette køreretningen ind, sæt »Følg terræn« til »Følg ikke« på stigningen op ad bjerget, og juster formen, til der ikke er flere røde overtrædelser af stigning eller kurveradius. Tilføj mellempunkter, så hver strækning højst er 500 m.",
+        "title": "Forbind de to stationer med spor"
+      },
+      "step8": {
+        "title": "Byg et depot",
+        "description": "Byg et »Togdepot« på den eksisterende parcel sydvest for havnen. Vend det, så der kan føres et spor fra tilslutningspunktet i østenden til havneperronen."
+      },
+      "step9": {
+        "title": "Forbind depotet med hovedsporet",
+        "description": "Læg et tilslutningsspor fra tilslutningspunktet i terrænniveau i depotets østende til havneperronens vestende. Lad det løbe jævnt ind i en flad vinkel."
+      },
+      "step10": {
+        "description": "Træk en elledning fra det eksisterende solcelleanlægs tilslutningspunkt til det fælles tilslutningspunkt i depotets østende.",
+        "title": "Før strøm til depotet"
+      },
+      "step11": {
+        "description": "Vælg »Kollektiv trafik« → »+ Ny linje« → »Malmlinje«, placer stoppesteder på malmperronerne ved bjerget og ved havnen, og klik på det første stoppested for at lukke sløjfen. Togene kan ikke krydse hinanden på enkeltsporet, så sæt det ønskede afgangsinterval til 45 minutter, så ét togsæt kan nå frem og tilbage, og bekræft.",
+        "title": "Åbn malmtransportlinjen"
+      },
+      "step12": {
+        "description": "Lad tiden gå, og få udvinding, lastning, togtransport, losning og eksport i gang. Det tager nogle måneder at skaffe materiel og få transporten op at køre.",
+        "title": "Lad tiden gå"
+      },
+      "step13": {
+        "description": "Lad tiden gå, og tjek modtagelse og eksport af malm i detaljerne for bulkhavnen ved kysten. Det tager flere måneder at skaffe materiel og få udvinding og transport i gang.",
+        "title": "Tjek eksporten af malm"
+      }
+    },
+    "tourism": {
+      "title": "Udvikl turismen",
+      "description": "Der er hverken havn eller overnatning til rejsende, der vil se øens ruiner, og der er heller ingen buslinje for turister. I denne tutorial lærer du at bygge et hotel og en krydstogtterminal, oprette en buslinje og tjekke turisternes ankomst, restaurantens omsætning og brugen af bussen.",
+      "step1": {
+        "description": "Byg et »Ferieresort« på parcellen med den gule markør vest for oldtidsruinerne. Da det er en tutorial, springes byggetiden over.",
+        "title": "Byg et hotel ved ruinerne"
+      },
+      "step2": {
+        "description": "Der skal være en havn til at tage imod turister. Byg en »Krydstogtterminal« på parcellen med havnemarkøren.",
+        "title": "Byg en krydstogtterminal"
+      },
+      "step3": {
+        "description": "Turister har ikke egen bil, så der skal være kollektiv trafik. Vælg »Buslinje« under »Kollektiv trafik« → »+ Ny linje«. Placer stoppesteder på vejene ved de gule markører i rækkefølgen havn → boliger → ruiner → boliger, og klik til sidst på havnens stoppested for at lukke sløjfen. Sæt billetprisen til 0 og det ønskede afgangsinterval til 1 minut, og bekræft.",
+        "title": "Opret en buslinje mellem havnen og ruinerne"
+      },
+      "step4": {
+        "description": "Lad tiden gå, og tag imod turisterne. Det tager nogle måneder, før anlæggene er i drift, og busserne er skaffet.",
+        "title": "Lad tiden gå"
+      },
+      "step5": {
+        "description": "Tjek omsætningen i restauranten ved ruinerne og passagererne på den buslinje, du har oprettet. Trinnet er klaret, når turisterne er ankommet, restaurantens omsætning er højere end ved start, og bussen bliver brugt. Lad om nødvendigt tiden gå lidt endnu.",
+        "title": "Tjek omsætning og buspassagerer"
+      }
+    },
+    "intro": {
+      "controls": "Som nyvalgt borgmester beder vi dig skabe en by, hvor indbyggerne kan leve trygt. Byen har endnu hverken boliger til nye indbyggere eller den el og det vand, man ikke kan undvære i hverdagen. I denne tutorial lærer du først om borgmesterens rolle, hvordan tiden går, hvordan du aflæser byens tilstand, og hvordan knapper og kamera betjenes. Derefter følger du hele forløbet: Du anlægger veje og parceller, fastlægger en retning for en bydel, bygger boliger og sørger for el og vand.",
+      "scenario4": "Vi vil gerne forbinde boligkvarteret og arbejdspladserne med jernbane, men på det planlagte tracé står der private bygninger og et offentligt hospital. I denne tutorial lærer du om arealerhvervelse, fjernelse af offentlige anlæg, højbane over veje, opførelse af perroner, stationsbygninger og depot, justering af kurver og stigninger samt elforsyning og åbning af en linje.",
+      "trade": "En lokal fødevarefabrik har spurgt, om den kan få hjælp til også at sælge sine varer i udlandet. Byen vil samtidig gerne have en vej til at hente de varer hjem fra udlandet, som den har brug for. I denne tutorial lærer du at eksportere fødevarer fra en havn og importere varer med godstog fra nabolandet.",
+      "highway": "Når byen vokser, kommer der også flere biler, der fragter folk og varer. For at den gennemkørende trafik ikke skal havne på de almindelige veje, vil byen gerne have en alternativ rute klar i god tid. I denne tutorial lærer du at bygge en motorvej på højbane hen over en almindelig vej og forbinde dem med ramper, så der opstår et motorvejskryds.",
+      "mining": "Under øen ligger værdifulde råstoffer. Men der er ingen måde at fragte dem fra bjerget til havnen, så øens erhvervsliv kan ikke få glæde af dem. I denne tutorial lærer du at anlægge en mine, en godsbane og en havn og følger malmen hele vejen fra udvinding og transport til eksport.",
+      "tourism": "Øboerne ønsker, at flere skal se oldtidsruinerne inde i landet. Men der er hverken havn eller overnatning til de rejsende, og der går endnu ingen buslinje fra havnen til byen. I denne tutorial lærer du at bygge et hotel og en krydstogtterminal, oprette en buslinje og tjekke turisternes ankomst, restaurantens omsætning og brugen af bussen.",
+      "heading": "En bøn til borgmesteren",
+      "windowTitle": "Tutorial",
+      "marine": "Byen ved bugten har endnu hverken havn eller olieanlæg. I denne tutorial følger du hele forløbet: Du skaber nyt land ved opfyldning og bygger en tankskibshavn, slår en hængebro over bugtens munding, pumper råolie op fra et oliefelt under havbunden og sender den gennem en rørledning til eksport og forbinder en ø ud for kysten med byen med færge."
+    },
+    "marine": {
+      "title": "Tag havet i brug",
+      "description": "Byen ved bugten har endnu hverken havn eller olieanlæg. I denne tutorial følger du hele forløbet: Du skaber nyt land ved opfyldning og bygger en tankskibshavn, slår en hængebro over bugtens munding, pumper råolie op fra et oliefelt under havbunden og sender den gennem en rørledning til eksport og forbinder en ø ud for kysten med byen med færge.",
+      "step1": {
+        "title": "Planlæg en opfyldning",
+        "description": "En havn kræver en kaj, hvor store skibe kan lægge til, og land til anlæggene. Fyld havet op inderst i bugten, så der bliver land til en havn. Tryk på ikonet for jordarbejde, venstreklik på de fire gule markører i rækkefølge for at tegne området, og højreklik for at lukke det. Tjek, at overslaget er af typen »Opfyldning«, og bekræft arbejdet."
+      },
+      "step2": {
+        "title": "Gør det opfyldte land færdigt",
+        "description": "Lad tiden gå mindst én måned med »Start«, og tryk derefter på »Næste«. Der er ingen entreprenører i denne lektion, så »Næste« springer resten af byggetiden for opfyldningen over. Når den er færdig, er havet blevet til land, og kanten ud mod havet er blevet en kaj, hvor skibe kan lægge til."
+      },
+      "step3": {
+        "title": "Byg en vej ud til det opfyldte land",
+        "description": "Bygger du en havn eller en olieterminal på det opfyldte land uden vejforbindelse, kan folk ikke komme på arbejde, og varer kan ikke fragtes. Byg en vej fra enden af byens vej ud på det opfyldte land. I denne lektion bliver vejen færdig, så snart du bekræfter den. Tryk på »Veje, jernbane og infrastruktur« i ikonpanelet for at åbne byggepanelet."
+      },
+      "step4": {
+        "title": "Byg tankskibshavnen",
+        "description": "Tankskibe med råolie er store, så en havn kan kun bygges, hvor havet foran kajen er dybt nok. Foran kajen ved det opfyldte land er havet dybt, så den egner sig til en havn. Tryk på bygningsikonet, vælg »Tankskibshavn« i kategorien »Havne«, venstreklik inde i den gule cirkel på kajen for at vælge placeringen, og tryk på »Bekræft« i byggepanelet. Når havnen er bygget, trækkes der automatisk en forbindelsesrute ud til den store skibsrute på åbent hav, så skibene kan sejle ind og ud. I denne lektion springes byggetiden over."
+      },
+      "step5": {
+        "title": "Slå en hængebro over bugtens munding",
+        "description": "Motorvejen er afbrudt på begge sider af indsejlingen til bugten. Mundingen er hele 1,6 km bred – for bred til en almindelig bro på rækker af bropiller – så forbind den med en hængebro, der kan klare en lang strækning i ét spænd. Under broen går sejlruten for store skibe, så broen skal ligge højt nok til, at de kan passere. Motorvejens ender på begge sider er allerede lagt i den højde. Åbn »Veje, jernbane og infrastruktur« i ikonpanelet, vælg »Firesporet hængebro« under »Motorvej«, og træk den fra den nordlige ende (lyseblå cirkel) til den sydlige ende (gul cirkel). Højreklik for at fastlægge formen, tryk på »Bekræft« i byggepanelet, og tryk derefter på »Næste«."
+      },
+      "step6": {
+        "title": "Find oliefeltet under havbunden",
+        "description": "Nu skal havets ressourcer i brug. Før du bygger en olieterminal, skal du tjekke, om der er et oliefelt under havbunden i nærheden. Tryk på »Visning« i cockpittet for at åbne visningspanelet.",
+        "show": "Vælg »Naturressourcer« blandt de lodrette faner, og skift til »Vis«. Nu kan du se et oliefelt brede sig under havbunden i bugten. Klik på oliefeltet ved den gule markør for at åbne detaljerne."
+      },
+      "step7": {
+        "title": "Byg olieterminalen",
+        "description": "Råolien, der pumpes op fra oliefeltet under havbunden, sendes gennem en rørledning til olieterminalen på land og sælges derfra. Olieterminalen bygges ud mod kajen, hvor rørledningen kan føres ind. Tryk på bygningsikonet, vælg »Modtageterminal for olierørledning« i kategorien »Havne«, venstreklik inde i den gule cirkel på kajen for at vælge placeringen, og tryk på »Bekræft« i byggepanelet. I denne lektion springes byggetiden over."
+      },
+      "step8": {
+        "title": "Byg olieplatformen",
+        "description": "Olieplatformen, der pumper råolien op, skal stå i havet lige over oliefeltet. Tryk på bygningsikonet, vælg »Offshore-olieplatform« i kategorien »Landbrug og råstoffer«, venstreklik inde i den gule cirkel på havet for at vælge placeringen, og tryk på »Bekræft« i byggepanelet. I denne lektion springes byggetiden over."
+      },
+      "step9": {
+        "title": "Forbind dem med en rørledning",
+        "description": "Send råolien fra platformen til olieterminalen gennem en rørledning på havbunden. Åbn »Veje, jernbane og infrastruktur« i ikonpanelet, vælg »Olierørledning på havbunden« under »Olie«, og træk en linje fra platformens tilslutningspunkt til olieterminalens tilslutningspunkt. Når du har bekræftet og trykker på »Næste«, bliver rørledningen færdig med det samme."
+      },
+      "step10": {
+        "title": "Eksportér råolien",
+        "description": "Olieterminalen sælger den råolie, den modtager, på markedet, og tankskibshavnen køber den og eksporterer den med skib. Der går nogle måneder, før der er kommet arbejdskraft, og olien begynder at blive solgt. Lad tiden gå nogle måneder med »Start«, og tryk derefter på »Næste«. Er der endnu ikke eksporteret noget, så lad tiden gå lidt længere, og tryk igen."
+      },
+      "step11": {
+        "title": "Byg et færgeleje",
+        "description": "Øen ude i havet har ingen forbindelse til byen. Åbn en færgefart, så øens indbyggere kan komme til byen. Først bygger du et færgeleje ved byens kyst. Åbn »Veje, jernbane og infrastruktur« i ikonpanelet, vælg »Færgeleje« under »Sejlrute«, og træk det fra land (lyseblå cirkel) ud over havet (gul cirkel). Højreklik for at fastlægge formen, tryk på »Bekræft« i byggepanelet, og tryk derefter på »Næste«."
+      },
+      "step12": {
+        "title": "Træk færgeruten",
+        "description": "Træk derefter den sejlrute, færgen skal følge, fra øens færgeleje til byens færgeleje. En sejlrute kan ikke gå over land, så før den nord om øen, under hængebroen ved bugtens munding og ind i bugten, og venstreklik undervejs for at sætte punkter. Vælg »Færgerute« under »Sejlrute«, forbind spidsen af øens færgeleje med spidsen af byens færgeleje, bekræft, og tryk derefter på »Næste«."
+      },
+      "step13": {
+        "title": "Åbn færgelinjen",
+        "description": "Til sidst opretter du den færgelinje, der sejler på ruten. Vælg »Kollektiv trafik« → »+ Ny linje« → »Færgelinje«, placer stoppesteder ved øens og byens færgeleje, klik på det første stoppested for at lukke sløjfen, og bekræft. Når linjen er oprettet, er tutorialen gennemført. For rent faktisk at sejle med skibe skal der også være en vedligeholdelsesdok, der udlejer dem."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Start spillet",
+    "nowLoading": "Indlæser…",
+    "startError": "Spillet kunne ikke startes. Prøv igen.",
+    "todaysTips": "Dagens tip",
+    "gotIt": "Luk",
+    "items": {
+      "tip1": {
+        "title": "Pengene går rundt",
+        "description": "Kommunens udgifter til byggeri og lønninger i offentlige anlæg bliver til indtægter for virksomheder og husstande og holder gang i indkøb og ny produktion. Økonomien kører ikke bare ved at opkræve skat. Fordel budgettet til den service og de reparationer, der er brug for, og send pengene tilbage ud i byen."
+      },
+      "tip2": {
+        "title": "Den lange kamp for trygheden",
+        "description": "Borgere, der vokser op i utrygge omgivelser, har også som voksne lettere ved at begå kriminalitet. Hold fast i både politiindsatsen og forbedringen af de miljøer, børnene vokser op i. Det tager mindst en generation at gøre byen tryg fra bunden."
+      },
+      "tip3": {
+        "title": "Gør plads!",
+        "description": "Brandvæsenet gør først nytte, når det når frem. Selv med en brandstation breder skaderne sig, hvis den ligger for langt væk, eller vejene derhen er proppede. Se ikke kun på budgettet, men også på stationernes placering og vejene frem til brandstedet."
+      },
+      "tip5": {
+        "title": "Op ad bakke",
+        "description": "Veje på stejle skråninger kræver mere arbejde end på flad grund. Den korteste vej på kortet er ikke altid den billigste. Sammenlign terrænet og overslaget over byggeomkostningerne, og overvej også en lille omvej."
+      },
+      "tip6": {
+        "title": "Planlæg i god tid",
+        "description": "Når der kommer flere indbyggere og fabrikker, stiger efterspørgslen efter el og vand også. Begynder du først at bygge, når der opstår mangel, må du vente, til anlægget står færdigt. Tjek, om der er kapacitet nok, før du udvikler en ny bydel."
+      },
+      "tip7": {
+        "title": "Hastværk er lastværk",
+        "description": "Højere hastighedsgrænser gør turen hurtigere, men øger risikoen for ulykker. Skarpe sving kræver også opmærksomhed. Hvor der sker mange ulykker, bør du se på vejens forløb og hastighedsgrænsen."
+      },
+      "tip8": {
+        "title": "En investering i fremtiden",
+        "description": "Manglen på personale på hospitaler og avancerede fabrikker løses ikke bare ved at få flere indbyggere. Opret de uddannelsesretninger og studiepladser på universitetet, der kan uddanne de specialister, der er brug for, og regn med den tid, det tager, før de er færdiguddannede."
+      },
+      "tip9": {
+        "title": "Bygget til at holde",
+        "description": "Forsømte reparationer får bygninger og veje til at forfalde og kan ende med, at de styrter sammen. Brande og sammenstyrtninger skader også borgernes stemning, så det er risikabelt kun at bruge budgettet på nybyggeri. Sæt også penge af til reparation af eksisterende anlæg og til brandvæsenet."
+      },
+      "tip10": {
+        "title": "Storbrand",
+        "description": "Når bygninger ligger tæt, spreder en brand i én bygning sig let til naboerne. Ud over et godt brandberedskab beskytter det også byen at holde afstand mellem bygningerne."
+      },
+      "tip11": {
+        "title": "Grav løs",
+        "description": "Tjek, hvor råstofferne ligger, før du vælger placering til miner og oliefelter. Jo mere du udvinder, jo mindre er der tilbage. En by, der lever af minedrift, må også tænke på arbejdspladser og skatteindtægter, når forekomsterne er opbrugt."
+      },
+      "tip12": {
+        "title": "Pengetræet",
+        "description": "Når borgmesteren bygger bolig- eller erhvervsbygninger, får kommunen husleje fra lejerne. Tomme lokaler giver ingen indtægt, så tjek, hvilke anvendelser der er efterspørgsel på, hvor meget der står tomt i nærheden, og hvordan beliggenheden er."
+      },
+      "tip13": {
+        "title": "Skatteopkræveren banker på",
+        "description": "Skattesatserne påvirker ikke kun kommunens indtægter, men også virksomhedernes udgifter og indtjening. Du kan bruge dem i erhvervspolitikken, for eksempel ved at lette skatten for brancher, du vil styrke. Selv når skatteindtægterne ikke slår til, bør du se på situationen i hver branche, før du hæver skatten over hele linjen."
+      },
+      "tip14": {
+        "title": "Hav altid en plan B",
+        "description": "Når ulykker eller katastrofer sætter kraftværker eller elledninger ud af drift, rammer det også de fabrikker og indbyggere, der er afhængige af strøm. Sørg for reserver i vigtig infrastruktur – både i de anlæg, der leverer, og i de forbindelser, der fører det frem – så ét nedbrud ikke lammer hele byen."
+      },
+      "tip15": {
+        "title": "Et sted at bo",
+        "description": "Lader du ubebyggede grunde i bymidten ligge hen, samles folk, der har mistet deres bolig, let dér, og der opstår et slumkvarter. Byg boliger med en husleje, de har råd til, så flytter indbyggerne efterhånden derhen, og slumkvarteret skrumper af sig selv."
+      },
+      "tip16": {
+        "title": "Erhvervsklynger",
+        "description": "Når virksomheder i samme branche eller deres råvareleverandører ligger tæt på hinanden, bliver placeringen bedre for produktionen. Saml beslægtede brancher i stedet for at sprede fabrikker ud over hele byen. Men vær opmærksom på støj og luftforurening tæt på boligområder."
+      },
+      "tip17": {
+        "title": "Knokl døgnet rundt",
+        "description": "Forlænger du arbejdstiden i panelet »Bestemmelser«, kan den samme arbejdsstyrke holde mere produktion i gang. Til gengæld lider helbred og fritid, og forbruget af underholdning falder. Bruger man for meget tid på at tjene penge, er der ingen tid til at bruge dem."
+      },
+      "tip18": {
+        "title": "Spis, pendl, sov, gentag",
+        "description": "Lang transporttid til arbejde betyder mindre fritid og mindre forbrug af underholdning og lignende. Se på afstanden mellem bolig og arbejdsplads og på trængslen undervejs. Det fine forretningskvarter er bare udsigt fra vinduet for borgere, der kun kommer hjem for at sove."
+      },
+      "tip19": {
+        "title": "Rettidig omhu",
+        "description": "Lange tog kan kun bruges, hvis de kan være ved perronerne på alle linjens stationer. Tænk på perronlængden allerede, når du bygger stationerne, så du er klar til flere passagerer. Det hjælper ikke at forlænge én station, hvis de andre stadig er for korte."
+      },
+      "tip20": {
+        "title": "Ned under jorden med det",
+        "description": "Veje under jorden giver hverken støj eller luftforurening og kan beskytte bomiljøet i boligområder. Nogle problemer kan faktisk løses ved at grave dem ned."
+      },
+      "tip21": {
+        "title": "I skyggen af højhusene",
+        "description": "Høje bygninger kaster skygge mod nord og forringer bomiljøet hos naboerne. Hold øje med bygningernes højde og afstanden mellem dem. Også terræn som bjerge giver skygge. Byens fremtid kan godt være lys, selv om der er bælgmørkt nede på gaden."
+      },
+      "tip22": {
+        "title": "Pendlerkort frem for bilnøgler",
+        "description": "Når kollektiv trafik gør det nemt at komme til arbejde, skole og butikker, vælger husstandene lettere et liv uden bil. Pengene, de sparer på bilen, kan de bruge på andet forbrug."
+      },
+      "tip23": {
+        "title": "Vi kører med luft",
+        "description": "Busser giver trafik på vejene, også uden passagerer. Kører der for mange, kan det gøre trængslen værre i stedet for bedre. Se på passagertal og afgangsinterval, og overvej, hvor mange afgange der er brug for."
+      },
+      "tip24": {
+        "title": "Muldvarpe betaler ikke grundleje",
+        "description": "Tunneler, der ligger dybt nok, kan føres igennem uden at opkøbe grunden ovenover. Lavere strækninger kræver stadig arealerhvervelse, så tjek dybde og overslag. Går forhandlingerne i hårdknude, så grav dybere."
+      },
+      "tip25": {
+        "title": "Pendling i luften",
+        "description": "Selv hvor bjerge og stejle skråninger gør det svært at anlægge veje, kan en svævebane sørge for kollektiv trafik. Sørg også for veje til stationerne og omstigning til anden trafik. Er det for besværligt at komme frem på jorden, kan du jo lade borgerne hænge i luften."
+      },
+      "tip26": {
+        "title": "Kø på elnettet",
+        "description": "Selv med rigelig produktionskapacitet når strømmen ikke frem, hvis elledningerne ikke kan bære nok. Før du bygger flere kraftværker, så tjek forbindelsen og overføringskapaciteten frem til den bydel, der mangler strøm. Én for tynd ledning undervejs kan begrænse forsyningen til hele byen."
+      },
+      "tip27": {
+        "title": "Et beklageligt uheld",
+        "description": "Du kan sprænge en bygning, der står i vejen for udviklingen, i luften og få det til at ligne en ulykke. Men borgernes stemning bliver markant dårligere. Når du vil rydde en grund, så sammenlign udgiften til at opkøbe og rive ned med de spor, en hårdhændet metode efterlader i byen."
+      },
+      "tip28": {
+        "title": "Ud på havet",
+        "description": "Mangler du land, kan du skabe nye grunde ved opfyldning. Hvor der er ressourcer under havbunden, kan du også bygge olieplatforme."
+      },
+      "tip29": {
+        "title": "Rødt, rødt, rødt",
+        "description": "Jo flere kryds med lyskurve, jo mere ventetid ved rødt lys hober sig op på turen. Undgå for mange kryds på hovedvejene. Laver du et pertentligt gadenet med kryds overalt, kan solen gå ned, før nogen når at se grønt lys."
+      },
+      "tip30": {
+        "title": "Frit udsyn",
+        "description": "En sendemast dækker et større område, jo højere den er, og jo højere den står. Tjek, om der er bjerge eller andre forhindringer mellem masten og de steder, signalet ikke når. Et blokeret signal kommer ikke igennem, bare fordi man skruer op for viljestyrken."
+      },
+      "tip31": {
+        "title": "Havets gave",
+        "description": "Selv en by uden vandkilder i nærheden kan få vand fra et afsaltningsanlæg ved kysten. Men det kræver strøm at drive. Når du har fundet vand, skal du finde strøm."
+      },
+      "tip32": {
+        "title": "Forebyggelse med job",
+        "description": "Arbejdsløshed er en af de ting, der gør byen mere utryg. Det handler ikke kun om flere betjente – borgerne skal også have steder at arbejde. Er arbejdsløsheden høj, så tjek antallet af ledige stillinger, de kvalifikationer, der efterspørges, og om folk kan komme frem til arbejdspladserne."
+      },
+      "tip33": {
+        "title": "Regningen sendes til fremtiden",
+        "description": "Både bygninger og veje koster penge til reparationer, længe efter de er bygget. Udvider du for meget, bare fordi du har råd til at bygge, bliver fremtidens budgetter ædt op af driftsudgifter. Fremtidens borgmester er også dig."
+      },
+      "tip34": {
+        "title": "Pump ikke for meget",
+        "description": "Vandkilder fyldes op igen med tiden, men pumper du mere op, end der kommer til, falder reserverne. Sikr dig andre vandkilder, før efterspørgslen stiger. Flere pumper giver ikke mere vand."
+      },
+      "tip35": {
+        "title": "Øv, en bommert",
+        "description": "Veje og bygninger kan ikke uden videre flyttes, når byggeriet er gået i gang. Tjek retning, forbindelser og den grund, der bliver tilovers omkring dem, før du bekræfter. Men en vej, der ved et uheld blev skæv, bliver måske en del af byens charme, når man har vænnet sig til den."
+      },
+      "tip36": {
+        "title": "Overvågningssamfundet",
+        "description": "Klik på en fodgænger eller en bil for at føje en borger til din sporingsliste. Brug det, når du vil følge med i en bestemt indbyggers liv. Du kan se byen gennem ét menneskes hverdag og ikke kun gennem statistik for hele byen."
+      },
+      "tip37": {
+        "title": "Grundlast",
+        "description": "Sol- og vindkraftens produktion afhænger af vejret. Planlægger du kun ud fra forsyningen på solskinsdage, kan du komme til at mangle strøm, når vejret skifter. Kombinér med energikilder, der er mindre afhængige af vejret, som termiske kraftværker eller atomkraft."
+      },
+      "tip38": {
+        "title": "Stort kan rumme småt",
+        "description": "Nogle bygninger kan ikke bygges på små parceller. Har du et anlæg, du gerne vil bygge, så tjek, hvor meget plads det kræver, før du deler grunden op. Selv med masser af ledig jord er der ikke plads til store bygninger, hvis det hele er små parceller."
+      },
+      "tip39": {
+        "title": "Den service koster",
+        "description": "Offentlig service som spildevandsrensning, affaldshåndtering, kommunikation og sundhed kan være gratis fra start. Sætter du en pris, betaler brugerne en del af driftsudgifterne. Om priserne skal være venlige over for borgerne eller ret selvsikre, er op til borgmesteren."
+      },
+      "tip40": {
+        "title": "Kopiér, indsæt, by",
+        "description": "Når borgmesteren bygger, kan en eksisterende bygning kopieres. Behold type og antal etager, og byg på en parcel, hvor originalen kan være, så holder du byggeomkostningerne nede. Gadebilledet bliver lidt ensformigt, men det er godt for pengepungen."
+      },
+      "tip41": {
+        "title": "Handler boligvalg kun om huslejen?",
+        "description": "Indbyggerne sammenligner husleje, turen til arbejde, skole og butikker, boligens kvalitet og bomiljøet, når de vælger, hvor de vil flytte hen. Støj, luftforurening, tryghed og sollys betyder også noget. En billig, men upraktisk bolig bliver sjældent valgt, og selv en praktisk bolig skal have en husleje, husstanden har råd til, og plads nok til at flytte ind."
+      },
+      "tip42": {
+        "title": "Bedre dybt end på grund",
+        "description": "Store havne som containerhavne, bulkhavne og tankskibshavne kræver tilstrækkelig vanddybde. Kyster, hvor havbunden falder stejlt, har dybt vand tæt på og egner sig godt til havne. Selv ved en flad kyst med lavt vand langt ud kan du bygge en havn, hvis du fylder op helt ud til det dybe vand."
+      },
+      "tip43": {
+        "title": "Jeg holder her bare lige…",
+        "description": "Mange parkerede biler på gaden sænker trafikkens hastighed og øger risikoen for ulykker. Byg parkeringspladser, så bilerne på gaden får et andet sted at holde. Det, der skulle være »Jeg holder her bare lige…«, kan ende med at holde hele byen tilbage."
+      },
+      "tip44": {
+        "title": "Afskåret fra vejen",
+        "description": "Du kan godt bygge væk fra vejene, men jo længere en bygning ligger fra vejen, jo dårligere bliver adgangen. Fabrikker og butikker skal bruge længere tid på at få varer frem, og for boliger bliver turen til arbejde og indkøb tungere. Byg langs vejene, eller før en vej helt hen til bygningen."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Vælg en parcel for at planlægge en bygning. Der går et stykke tid, fra en bygning er planlagt, til den står færdig.",
+    "parcelCreation": "Tryk på Ctrl for at åbne hjulmenuen og vælge en oprettelsesmetode, og klik derefter i 3D-visningen for at vælge målet. Juster målene i panelet, og bekræft.",
+    "transitCreation": "Venstreklik for at placere stoppesteder i rækkefølge, og klik på det første stoppested for at lukke sløjfen. Træk i en strækning for at tilføje et viapunkt, træk i et punkt for at flytte det, og højreklik for at slette. Ved kørsel frem og tilbage skal du også placere stoppestederne på tilbagevejen. Klik igen på et placeret stoppested, eller træk et stoppested oven på et andet, for at stoppe der igen.",
+    "transitManagement": "Oversigt over linjerne i den kollektive trafik. Her kan du justere billetpriser og afgangsintervaller samt oprette og slette linjer. Billetprisen påvirker indbyggernes valg af rute. Er den for høj, falder antallet af passagerer, og flere anskaffer bil.",
+    "pathConstruction": "Byg veje og spor. Klik på terrænet i 3D-visningen: Venstreklik tilføjer knudepunkter, højreklik fastlægger formen, og knudepunkter kan flyttes ved at trække i dem. Hold Ctrl nede for at åbne indstillingsmenuen (kurve/lige og fastgørelse). Med tasterne 3/4 ændrer du højden på dæmning/afgravning.",
+    "pathConstructionElevated": "Byg veje og spor. Klik på terrænet i 3D-visningen: Venstreklik tilføjer knudepunkter, højreklik fastlægger formen, og knudepunkter kan flyttes ved at trække i dem. Hold Ctrl nede for at åbne indstillingsmenuen (kurve/lige og fastgørelse). Med PageUp/PageDown eller tasterne 1/2 ændrer du højden, og med 3/4 højden på dæmning/afgravning.",
+    "districtEdit": "Opret, udvid og sammenlæg »bydele«, som er enheden for bestemmelser og statistik. Hold Ctrl nede i 3D-visningen for at skifte værktøj. Opret: Venstreklik på en vej for at oprette en ny bydel i den viste farve (farven skifter, hver gang du vælger værktøjet). Udvid: Højreklik for at vælge den bydel, der skal udvides, og venstreklik på veje for at lægge dem ind under den. Sammenlæg: Højreklik for at vælge den bydel, der skal lægges sammen med, og venstreklik på den bydel, der skal indlemmes, så åbnes et bekræftelsespanel. Den valgte bydels farve og navn vises ved siden af musemarkøren. Tryk på knappen igen for at afslutte.",
+    "bulldozer": "Bulldozertilstand. Venstreklik for at fjerne ubebyggede parceller, planlagte bygninger, planlagte veje og dekorationsobjekter i terrænet (dekorationsobjekter spredt over et område fjernes samlet efter bekræftelse). Tryk på knappen igen for at afslutte.",
+    "bulldozerInstant": "Bulldozertilstand. Venstreklik for straks at slette bygninger, veje, ubebyggede parceller og dekorationsobjekter i terrænet uden bekræftelse. Bygninger forsvinder sammen med lejere og borgere, og terrænet bliver ikke genskabt (rådhuset, grænseovergangen og strækninger med kollektiv trafik kan ikke slettes; kun dekorationsobjekter spredt over et område fjernes samlet efter bekræftelse). Tryk på knappen igen for at afslutte.",
+    "cityBudget": "Bestem, hvordan midlerne fra skatter og forretningsdrift skal fordeles i den næste periode. Når kommunen køber materialer til vejbyggeri, drift af offentlige anlæg og lignende, kan den kun købe inden for det budget, der fastsættes her. Slår budgettet ikke til, kan medarbejdere i offentlige anlæg også blive afskediget.",
+    "resourceEdit": "Opret et område med naturressourcer. Vælg en ressourcetype, og klik på terrænet. Venstreklik tilføjer et knudepunkt, klik på en kant indsætter et knudepunkt, og højreklik sletter et knudepunkt. Træk i et knudepunkt for at flytte det.",
+    "grading": "Venstreklik for at placere knudepunkter, og højreklik for at fastlægge området."
+  }
+}

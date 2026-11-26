@@ -1,0 +1,63 @@
+{
+  "mapNavigation": {
+    "title": "Explorar a cidade",
+    "openSidebar": "Abrir barra lateral",
+    "closeSidebar": "Fechar barra lateral",
+    "back": "Voltar",
+    "search": "Pesquisar um local",
+    "origin": "Pesquisar ponto de partida",
+    "destination": "Pesquisar destino",
+    "clear": "Limpar",
+    "searching": "A pesquisar…",
+    "error": "Não é possível estabelecer ligação. Recarregue e tente novamente.",
+    "noResults": "Nenhum local encontrado",
+    "mode": "Meio de deslocação",
+    "pedestrian": "A pé e transportes públicos",
+    "automobile": "Automóvel",
+    "pickOrigin": "Escolher partida no mapa",
+    "pickDestination": "Escolher destino no mapa",
+    "swap": "Trocar",
+    "cancel": "Cancelar",
+    "directions": "Como chegar aqui",
+    "intro": "Pesquise instalações, estações, bairros ou estradas, ou selecione um local no mapa.",
+    "chooseOrigin": "Pesquise um ponto de partida ou escolha-o no mapa.",
+    "routing": "A procurar um percurso…",
+    "showRoute": "Mostrar percurso completo",
+    "mapPoint": "Ponto no mapa",
+    "minutes": "Cerca de {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Estimativa baseada na rede viária do cálculo de percursos #{{epoch}}. As linhas tracejadas indicam troços a pé e ligações às estradas.",
+    "busy": "Simulação em curso. Os resultados serão atualizados quando terminar.",
+    "not_ready": "Ainda não há dados de percursos. Execute uma simulação nesta cidade para os poder ver.",
+    "unreachable": "Não foi encontrado nenhum percurso entre estes dois locais.",
+    "no_access": "Não foi encontrada nenhuma estrada acessível perto do local selecionado.",
+    "geometry_unavailable": "Não é possível obter o traçado dos transportes públicos deste percurso.",
+    "place_missing": "O local selecionado foi removido. Selecione-o novamente.",
+    "kind": {
+      "agent": "Instalação",
+      "zone": "Bairro",
+      "stop": "Paragem",
+      "station": "Estação",
+      "point": "Ponto",
+      "road": "Estrada"
+    },
+    "leg": {
+      "walk": "A pé",
+      "drive": "Automóvel",
+      "transit": "Transportes públicos",
+      "conveyor": "Transporte de pessoas",
+      "access": "Ligação à estrada",
+      "turn": "Inversão de marcha no cruzamento"
+    },
+    "picking": {
+      "origin": "Clique no ponto de partida no mapa.",
+      "destination": "Clique no destino no mapa."
+    },
+    "pins": {
+      "tab": "Pinos",
+      "hint": "Clique no mapa para colocar um pino da cor escolhida. Clique com o botão direito num pino para o remover.",
+      "list": "Lista de pinos",
+      "remove": "Remover pino"
+    }
+  }
+}

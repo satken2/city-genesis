@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} vuotta",
+    "male": "Mies",
+    "female": "Nainen",
+    "single": "Naimaton",
+    "married": "Naimisissa",
+    "household": "Kotitalous",
+    "employer": "Työpaikka",
+    "unemployed": "Työtön",
+    "school": "Oppilaitos",
+    "notEnrolled": "Ei opiskele",
+    "major": "Opiskeltava ala",
+    "higherEducation": "Korkea-asteen koulutus",
+    "graduated": "Suoritettu",
+    "notGraduated": "Kesken",
+    "skills": "Osaaminen",
+    "criminality": "Rikostaipumus",
+    "commuteTime": "Työmatka-aika",
+    "automobile": "Auto",
+    "automobileOwned": "On",
+    "automobileNone": "Ei ole",
+    "householdStatus": "Kotitalouden tilanne"
+  },
+  "household": {
+    "title": "Kotitalous",
+    "familyType": "Kotitaloustyyppi",
+    "familySingle": "Yksin asuva",
+    "familyCouple": "Pariskunta",
+    "familyFamily": "Perhe",
+    "familySenior": "Ikääntyneet",
+    "hasAutomobile": "Auto käytössä",
+    "noAutomobile": "Ei autoa",
+    "discretionaryIncome": "Käytettävissä olevat tulot",
+    "livingStandard": "Elintaso",
+    "livingStandardLevel": {
+      "0": "Äärimmäisen köyhä",
+      "1": "Köyhä",
+      "2": "Keskiluokkainen",
+      "3": "Varakas"
+    },
+    "satisNutrition": "Ravitsemus",
+    "satisHealthcare": "Terveydenhuolto",
+    "satisLeisure": "Vapaa-aika",
+    "satisTourism": "Matkailu",
+    "tourist": "Matkailijat",
+    "partySize": "Seurueen koko",
+    "members": "Jäsenet"
+  },
+  "education": {
+    "people": "henkeä"
+  }
+}

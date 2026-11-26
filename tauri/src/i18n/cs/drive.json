@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Projížďka",
+    "car": "Automobil",
+    "rail": "Železniční linky",
+    "running": "Jedoucí vozidla",
+    "standard": "Osobní auto",
+    "commercial": "Užitkové vozidlo",
+    "truck": "Nákladní auto",
+    "finishEditing": "Před zahájením projížďky ukončete úpravy.",
+    "noLines": "Není k dispozici žádná železniční linka v provozu, kterou by šlo jet.",
+    "pickRail": "Klikněte na kolej vybrané linky.",
+    "pickRoad": "Klikněte na silnici v provozu.",
+    "pickVehicle": "Klikněte na jedoucí auto, autobus nebo vlak (tažením posunete mapu).",
+    "clickStart": "Vyberte výchozí místo (tažením posunete mapu)",
+    "startSelected": "Výchozí místo je vybráno. Vyrazí se ve směru šipky.",
+    "reverse": "Obrátit směr jízdy",
+    "start": "Vyrazit",
+    "back": "Zpět",
+    "close": "Ukončit (Esc)",
+    "invalidStart": "Zde nelze začít. Vyberte sjízdnou silnici nebo kolej vybrané linky.",
+    "invalidVehicle": "Vozidlo se nepodařilo vybrat. Klikněte na jedoucí auto, autobus nebo vlak.",
+    "notReady": "Tímto směrem nelze vyrazit, nebo se načítá okolí. Změňte směr či místo, nebo chvíli počkejte a zkuste to znovu."
+  }
+}

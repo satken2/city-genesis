@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Gợi ý lộ trình",
+    "mode": "Chế độ cao độ",
+    "fixed": "Giữ cố định cao độ các điểm chỉ định",
+    "adjust": "Điều chỉnh cao độ các điểm chỉ định trung gian",
+    "help": "Dùng được sau khi chốt hình dạng. Điểm đầu, điểm cuối và tọa độ XZ của các điểm chỉ định được giữ cố định.",
+    "searching": "Đang tìm…",
+    "cancel": "Hủy",
+    "undo": "Quay về trước khi gợi ý",
+    "notFound": "Không tìm thấy lộ trình.",
+    "failed": "Không thể gợi ý lộ trình."
+  }
+}

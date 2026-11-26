@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Rijden",
+    "car": "Auto",
+    "rail": "Spoorlijnen",
+    "running": "Rijdende voertuigen",
+    "standard": "Personenauto",
+    "commercial": "Bedrijfswagen",
+    "truck": "Vrachtwagen",
+    "finishEditing": "Rond het bewerken af voordat je gaat rijden.",
+    "noLines": "Er zijn geen spoorlijnen in dienst om mee te rijden.",
+    "pickRail": "Klik op een spoor van de gekozen lijn.",
+    "pickRoad": "Klik op een weg die in gebruik is.",
+    "pickVehicle": "Klik op een rijdende auto, bus of trein (slepen om de kaart te verschuiven).",
+    "clickStart": "Kies een startpositie (slepen om de kaart te verschuiven)",
+    "startSelected": "Startpositie gekozen. Je vertrekt in de richting van de pijl.",
+    "reverse": "Rijrichting omkeren",
+    "start": "Vertrekken",
+    "back": "Terug",
+    "close": "Stoppen (Esc)",
+    "invalidStart": "Hier kun je niet starten. Kies een berijdbare weg of een spoor van de gekozen lijn.",
+    "invalidVehicle": "Geen voertuig geselecteerd. Klik op een rijdende auto, bus of trein.",
+    "notReady": "In deze richting kun je niet vertrekken, of de omgeving wordt nog geladen. Kies een andere richting of positie, of wacht even en probeer het opnieuw."
+  }
+}

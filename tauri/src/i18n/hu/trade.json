@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Kínálati adatok",
+    "product": "Kínált termék",
+    "amount": "Kínált mennyiség",
+    "price": "Kínálati ár",
+    "soldAmount": "Eladott mennyiség",
+    "profitRate": "Haszonkulcs",
+    "utilization": "Kihasználtság"
+  },
+  "tourismSupply": {
+    "title": "Turisták fogadása",
+    "touristCapacity": "Turista-fogadóképesség",
+    "persons": "{{value}} fő",
+    "218": {
+      "price": "Belépődíj",
+      "amount": "Látogatói keret (összesen)",
+      "soldAmount": "Látogatók (összesen)"
+    },
+    "219": {
+      "price": "Viteldíj",
+      "amount": "Szállítási keret (összesen)",
+      "soldAmount": "Utasok (összesen)"
+    }
+  },
+  "demand": {
+    "product": "Termék",
+    "demandAmount": "Kereslet",
+    "receivedAmount": "Megszerzett",
+    "acquiredAmount": "Készlet"
+  },
+  "cargo": {
+    "title": "Rakodási adatok",
+    "description": "Ez a csomópont a régión kívülről importált árukkal látja el a város piacait, és felvásárolja a város termelési többletét, hogy a régión kívülre exportálja.",
+    "capacity": "Kezelési kapacitás",
+    "perPeriod": "/hó",
+    "perPeriod_week": "/hét",
+    "materialCapacity": "Alapanyag szerinti korlát",
+    "areaCapacity": "Alapterület szerinti korlát",
+    "importHandled": "Kezelt import",
+    "exportHandled": "Kezelt export",
+    "utilization": "Kihasználtság",
+    "importSectionTitle": "Import",
+    "exportSectionTitle": "Export",
+    "handledImport": "Eladott",
+    "handledExport": "Felvásárolt",
+    "allocation": "Kiosztott",
+    "priceImport": "Eladási egységár",
+    "priceExport": "Felvásárlási egységár",
+    "lost": "Elmaradt eladás",
+    "noProducts": "Nincs kezelt termék"
+  }
+}

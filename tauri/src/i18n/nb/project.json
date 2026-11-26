@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Byggeprosjekt",
+    "none": "(Ingen tagg)",
+    "createNew": "+ Ny tagg …",
+    "newPlaceholder": "Skriv inn et taggnavn",
+    "add": "Legg til",
+    "cancel": "Avbryt",
+    "saveFailed": "Kunne ikke lagre taggen",
+    "showObject": "Vis i 3D-visningen",
+    "hideObject": "Skjul i 3D-visningen"
+  },
+  "constructionProjects": {
+    "all": "Alle",
+    "empty": "Ingen byggearbeider ennå. Velg en tagg når du plasserer noe fra et byggepanel, eller legg til en fra detaljpanelet til et offentlig anlegg eller en vei som er planlagt eller under bygging. Da kan du se arbeidene samlet per prosjekt.",
+    "loadFailed": "Kunne ikke hente byggeprosjektene",
+    "totalCost": "Byggekostnad (anslått)",
+    "duration": "Byggetid (gjenstår)",
+    "progress": "Fremdrift",
+    "progressValue": "{{done}} / {{total}} ferdig",
+    "monthsValue": "{{value}} mnd.",
+    "stalled": "Står stille",
+    "stalledWarning": "Byggearbeider som står stille fordi byggehastigheten er 0: {{count}} (ikke tatt med i den samlede byggetiden).",
+    "done": "Ferdig",
+    "unnamed": "#{{id}}",
+    "showAll": "Vis alt igjen ({{count}})",
+    "showTag": "Vis dette prosjektet i 3D-visningen",
+    "hideTag": "Skjul dette prosjektet i 3D-visningen",
+    "showObject": "Vis i 3D-visningen",
+    "hideObject": "Skjul i 3D-visningen",
+    "deleteTag": "Slett taggen",
+    "confirmDeleteTag": "Vil du slette taggen «{{tag}}»? Den fjernes fra tilhørende bygninger og veier (selve byggearbeidene blir værende).",
+    "columns": {
+      "name": "Objekt",
+      "status": "Status",
+      "cost": "Gjenstående kostnad",
+      "remaining": "Gjenstående tid"
+    }
+  }
+}

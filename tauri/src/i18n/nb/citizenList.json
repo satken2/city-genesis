@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Søk etter innbyggere",
+    "tabTracking": "Følgeliste",
+    "name": "Navn",
+    "age": "Alder",
+    "ageSeparator": "–",
+    "search": "Søk",
+    "noResults": "Ingen innbyggere samsvarer.",
+    "truncated": "Viser {{shown, number}} av {{total, number}} innbyggere som samsvarer."
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Tipo",
+    "kind": {
+      "land": "Nivelamento do terreno",
+      "shore": "Aterro"
+    },
+    "baseHeight": "Altura de referência",
+    "targetHeight": "Altura pretendida",
+    "cutVolume": "Volume de escavação",
+    "fillVolume": "Volume de aterro",
+    "quayLength": "Comprimento do cais",
+    "quayArea": "Área da face do cais",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Altura (diferença em relação à referência)",
+    "seaLevelHeight": "Altura (acima do nível do mar)",
+    "baseNote": {
+      "frontage": "0 é a cota do pavimento da estrada confinante ({{value}} m)",
+      "terrain_mean": "0 é a altura média atual da área ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "A forma da área é inválida. Desenhe-a sem lados que se cruzem.",
+      "outside_city": "A área sai dos limites da cidade.",
+      "too_large": "A área é demasiado grande (limite: {{limit}} km²).",
+      "on_water": "Não é possível fazer terraplenagem numa área só sobre o mar. Desenhe-a de modo a abranger terra.",
+      "no_land_overlap": "Desenhe a área sobreposta à terra (caso contrário, fica uma faixa de mar entre a costa e a área).",
+      "overlaps_parcel": "A área sobrepõe-se a um lote existente.",
+      "overlaps_path": "A área sobrepõe-se a um traçado (estrada, via férrea, etc.).",
+      "overlaps_water": "A área abrange um rio ou um lago.",
+      "overlaps_quay_band": "A área abrange o cais de um aterro.",
+      "invalid_height_offset": "A altura está fora dos limites (até ±{{offsetLimit}} m em relação à altura de referência).",
+      "below_sea_level": "A altura não pode ficar abaixo do nível do mar.",
+      "too_narrow": "A área é demasiado estreita: não sobra nada para aterrar dentro do cais.",
+      "no_work": "O terreno já está à altura pretendida; não é necessária nenhuma obra.",
+      "insufficient_funds": "Não é possível fazer a encomenda por falta de fundos."
+    },
+    "confirm": "Confirmar",
+    "confirming": "A confirmar…",
+    "cancel": "Cancelar",
+    "confirmFailed": "Não foi possível encomendar a terraplenagem."
+  }
+}

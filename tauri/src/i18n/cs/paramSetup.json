@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Nastavení parametrů hry",
+    "description": "Obecně doporučujeme ponechat výchozí hodnoty. Upravte je jen tehdy, pokud chcete hru přizpůsobit.",
+    "skip": "Přeskočit",
+    "start": "Spustit hru",
+    "apply": "Použít a zavřít",
+    "close": "Zavřít",
+    "loading": "Načítání…",
+    "reload": "Znovu načíst",
+    "reloadHint": "Po dokončení inicializace backendu znovu načtěte, aby se zobrazily aktuální hodnoty.",
+    "fetchError": "Parametry se nepodařilo načíst",
+    "category": {
+      "population": "Obyvatelstvo a přistěhovalectví",
+      "citizen": "Život občanů",
+      "economy": "Ekonomika",
+      "labor": "Práce a mzdy",
+      "education": "Vzdělávání",
+      "construction": "Stavebnictví a nemovitosti",
+      "environment": "Životní prostředí",
+      "traffic": "Doprava",
+      "general": "Obecné",
+      "pathfind": "Doprava a trasy",
+      "building": "Budovy a výstavba",
+      "disaster": "Katastrofy a bezpečnost",
+      "slum": "Slumy",
+      "production": "Výroba a zásoby",
+      "zone": "Čtvrti a parcely",
+      "financial": "Finance"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Zhuštění města",
+        "desc": "Podlahová plocha, kterou využívají byty a zařízení, se touto hodnotou vydělí, aby se na malou mapu vešla ekonomická aktivita velkoměsta. Změna po postavení byť jediné silnice nebo budovy město rozbije, proto ji nastavte dřív, než cokoli postavíte."
+      },
+      "TFR_TARGET": {
+        "label": "Cílová úhrnná plodnost (TFR)",
+        "desc": "Porodnost, o kterou domácnosti usilují. Čím vyšší, tím častěji se rodí děti."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Sňatečnost",
+        "desc": "Koeficient základní pravděpodobnosti, že občan uzavře sňatek. Čím vyšší, tím víc sňatků."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Minimální věk pro porod",
+        "desc": "Nejnižší věk, kdy se může narodit dítě. Pod tímto věkem k porodům nedochází."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Maximální věk pro porod",
+        "desc": "Nejvyšší věk, kdy se může narodit dítě. Nad tímto věkem k porodům nedochází."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Podíl manželských párů mezi přistěhovalci",
+        "desc": "Pravděpodobnost, že přistěhovalá domácnost je manželský pár."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Podíl s 1. dítětem (přistěhovalci)",
+        "desc": "Pravděpodobnost, že přistěhovalá domácnost při vzniku má 1 dítě."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Podíl s 2. dítětem (přistěhovalci)",
+        "desc": "Pravděpodobnost, že přistěhovalá domácnost při vzniku má 2 děti."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Podíl s 3. dítětem (přistěhovalci)",
+        "desc": "Pravděpodobnost, že přistěhovalá domácnost při vzniku má 3 děti."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Minimální věk dospělých přistěhovalců",
+        "desc": "Nejnižší věk dospělých, kteří se do města přistěhují."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Maximální věk dospělých přistěhovalců",
+        "desc": "Nejvyšší věk dospělých, kteří se do města přistěhují."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Koeficient délky života",
+        "desc": "Koeficient maximální délky života občanů. Při 1,08 je horní hranice zhruba 100 let, při 1,06 zhruba 150 let.",
+        "graphX": "Věk",
+        "graphY": "Roční pravděpodobnost úmrtí (zdraví 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Obytná plocha jednočlenné domácnosti (m²)",
+        "desc": "Minimální obytná plocha, kterou potřebuje jednočlenná domácnost."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Plocha navíc pro manžela/manželku (m²)",
+        "desc": "Obytná plocha, kterou manželská domácnost potřebuje navíc oproti jednotlivci."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Plocha navíc na dítě (m²)",
+        "desc": "O kolik se obytná plocha zvětší s každým dítětem."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Podíl nájmu na příjmu (max.)",
+        "desc": "Maximální podíl příjmu domácnosti, který může jít na nájem. Hodnota 0,3 znamená až 30 % příjmu."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Váha doby cesty při výběru bydlení",
+        "desc": "Jak velkou zátěž při výběru bydlení představuje každá minuta cesty tam a zpět do práce, do školy a na nákup, vyjádřeno jako násobek průměrné mzdy ve městě. 1 = ocenění přesně mzdou. Čím vyšší, tím spíš se volí bydlení blízko pracovišť a obchodů."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Průměrná mzda (výchozí)",
+        "desc": "Referenční průměrná mzda na začátku simulace."
+      },
+      "AVERAGE_RENT": {
+        "label": "Průměrný nájem (výchozí)",
+        "desc": "Referenční průměrný nájem na začátku simulace (za den a m²)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Podíl dividend úměrný majetku",
+        "desc": "Podíl dividend, který se rozděluje úměrně hotovosti domácností. Zbytek se dělí rovným dílem mezi všechny domácnosti. 0 = vše rovným dílem, 1 = vše úměrně hotovosti."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Míra odpisů zařízení",
+        "desc": "Míra, jakou se kapitál z investic do zařízení odepisuje každou epochu."
+      },
+      "WORK_HOURS": {
+        "label": "Denní pracovní doba (h)",
+        "desc": "Standardní počet hodin, které občan denně odpracuje."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Věk zahájení základního vzdělávání",
+        "desc": "Věk, kdy děti nastupují do základního vzdělávání (obdoba základní školy)."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Věk ukončení základního vzdělávání",
+        "desc": "Věk, kdy základní vzdělávání končí (obdoba maturity)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Věk absolvování VŠ a osamostatnění",
+        "desc": "Věk, kdy občan dokončí vysokoškolské vzdělání a osamostatní se od domácnosti."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Minimální věk pro práci",
+        "desc": "Občané mladší než tento věk nehledají práci a nezapočítávají se do míry nezaměstnanosti."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Maximální počet podlaží",
+        "desc": "Horní hranice počtu podlaží budov, které automaticky staví soukromý sektor."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Koeficient penalizace podlaží",
+        "desc": "Koeficient nákladové penalizace výškové výstavby. Čím vyšší, tím menší penalizace vysokých budov.",
+        "graphX": "Podlaží",
+        "graphY": "Násobek stavebních nákladů"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Poměr efektivity zbourání",
+        "desc": "Kolikrát efektivnější je zbourání oproti nové výstavbě (násobek)."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Základní roční pravděpodobnost zřícení",
+        "desc": "Základní pravděpodobnost, že se budova s životností 0,5 během jednoho roku zřítí."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Weibullův parametr tvaru pro zřícení",
+        "desc": "Čím vyšší, tím prudčeji roste pravděpodobnost zřícení v blízkosti projektované životnosti."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Poměr nákladů na opravy",
+        "desc": "Náklady na opravy vyjádřené jako podíl nákladů na novou výstavbu."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Násobek stárnutí bez údržby",
+        "desc": "Jak rychle stárne budova nebo liniová stavba, která nedostává vůbec žádnou běžnou údržbu, vyjádřeno jako násobek stárnutí při plné údržbě. Podle podílu chybějící údržby se mění lineárně od 1 do této hodnoty."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Základní roční pravděpodobnost zahájení oprav",
+        "desc": "Základní roční pravděpodobnost, že budova určená k opravě se skutečně začne opravovat."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Počáteční dluh za výstavbu (na m²)",
+        "desc": "Počáteční dluh za výstavbu na 1 m² celkové podlahové plochy budovy (záporné rezervy)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Koeficient hluku silniční dopravy",
+        "desc": "Jak silně se intenzita silniční dopravy promítá do teplotní mapy hluku. Čím vyšší, tím hlučnější okolí silnic."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Koeficient hluku chodců",
+        "desc": "Jak silně se intenzita pěšího provozu promítá do teplotní mapy hluku."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Práh hluku chodců",
+        "desc": "K hluku přispívá jen ta část pěšího provozu, která tuto hodnotu překračuje."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Útlumová vzdálenost hluku (m)",
+        "desc": "Hluk slábne s druhou mocninou vzdálenosti a navíc klesá na 1/e na každých tolik metrů (stínění budovami, pohlcování vzduchem a terénem). Čím nižší, tím víc zůstává u zdroje."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Koeficient znečištění ovzduší silniční dopravou",
+        "desc": "Jak silně se intenzita silniční dopravy promítá do teplotní mapy znečištění ovzduší."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Útlumová vzdálenost znečištění ovzduší (m)",
+        "desc": "Znečištění ovzduší a zápach slábnou s druhou mocninou vzdálenosti a navíc klesají na 1/e na každých tolik metrů (rozptyl a usazování). Čím nižší, tím víc zůstávají u zdroje."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Váha nezaměstnanosti pro kriminalitu",
+        "desc": "Jak silně se míra nezaměstnanosti promítá do teplotní mapy bezpečnosti. Čím vyšší, tím příměji vede nezaměstnanost ke zhoršení bezpečnosti."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Dosah šíření kriminality (m)",
+        "desc": "Poloměr Gaussova rozmazání teplotní mapy bezpečnosti."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Rychlost chůze (km/h)",
+        "desc": "Rychlost pohybu chodců. Používá se při výpočtu nákladů trasy."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Rozjezdová dráha vozidel (m)",
+        "desc": "Vzdálenost, na které vozidla zrychlují. Ovlivňuje výpočet rychlosti na krátkých silnicích."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Denní provozní doba silnic (h)",
+        "desc": "Počet hodin denně, kdy je silnice v provozu. Používá se k přepočtu intenzity dopravy."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Práh nasycení bonusu silniční dopravy",
+        "desc": "Při intenzitě silniční dopravy od této hodnoty dostávají maloobchody maximální dopravní bonus."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Práh nasycení bonusu pěšího provozu",
+        "desc": "Při intenzitě pěšího provozu od této hodnoty dostávají maloobchody maximální bonus za chodce."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Načítání…",
+    "noScenarios": "Nejsou k dispozici žádné scénáře",
+    "starting": "Spouštění…",
+    "startFailed": "Spuštění se nezdařilo",
+    "confirmTitle": "Potvrzení nastavení hry",
+    "confirmStartTitle": "Spustit hru?",
+    "unsavedChangesWarning": "Po spuštění přijdete o neuložené změny v aktuální hře.",
+    "startSettingsHeading": "Nastavení města",
+    "cityNameLabel": "Název města",
+    "insigniaLabel": "Znak a vlajka města",
+    "languageLabel": "Jazyk města",
+    "languageNote": "*Později nelze změnit",
+    "simulationDaysLabel": "Počet dní simulace",
+    "simulationDaysNote": "*Později nelze změnit",
+    "daysOption": "{{days}} dní",
+    "startButton": "Spustit",
+    "backButton": "Zpět",
+    "cleared": "Dokončeno",
+    "tutorialBadge": "Tutoriál",
+    "sectionDebug": "Ladění",
+    "sectionTutorials": "Tutoriály",
+    "sectionScenarios": "Scénáře",
+    "detailPlaceholder": "Vyberte scénář ze seznamu vlevo.",
+    "detailMapSizeLabel": "Velikost mapy",
+    "detailUnknown": "Neznámé",
+    "detailObjectiveLabel": "Podmínky splnění",
+    "detailCreditsLabel": "Autoři a zdroje",
+    "detailNoObjective": "Bez podmínek splnění",
+    "detailNoDescription": "Tento scénář nemá popis.",
+    "tutorialObjective": "Dokončit všechny kroky tutoriálu.",
+    "startScenarioButton": "Spustit tento scénář",
+    "tabSelect": "Vybrat scénář",
+    "tabBrowse": "Hledat scénáře",
+    "tabTerrain": "Vybrat terén",
+    "relocalizeNote": "Tento scénář byl vytvořen v jazyce: {{from}}. Pokud ho spustíte v jazyce {{to}}, názvy čtvrtí, zařízení, obyvatel, stanic a dalšího se přejmenují do jazyka {{to}}.",
+    "developmentNotice": {
+      "heading": "Tato hra je zkušební verze ve vývoji",
+      "subheading": "Před hraním si prosím přečtěte",
+      "text": "Ekonomické parametry a logika se stále ladí, takže se může stát, že vaše město nebude růst, jak má. Nezaměstnanost může stoupnout a město se může i zhroutit, ale v žádném případě to není vaše chyba. Těšte se na další aktualizace. Přidejte si hru do seznamu přání a počkejte na oficiální vydání."
+    }
+  }
+}

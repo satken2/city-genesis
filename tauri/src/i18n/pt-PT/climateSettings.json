@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Definições do clima",
+    "name": "Nome do clima",
+    "probabilities": "Frequência mensal de cada tipo de tempo",
+    "probabilityHint": "Arraste as fronteiras entre as cores para a esquerda ou para a direita. Nos campos numéricos abaixo também pode definir tipos de tempo com 0%.",
+    "month": "Mês {{month}}",
+    "preset": "Predefinição de clima",
+    "current": "Definições atuais",
+    "chartHint": "Selecione uma série na legenda e arraste os pontos mensais para cima ou para baixo.",
+    "averageHint": "A temperatura, a precipitação e a insolação são médias mensais. Os valores reais de cada época variam em torno destas médias.",
+    "apply": "Aplicar",
+    "chart": "Climograma mensal"
+  }
+}

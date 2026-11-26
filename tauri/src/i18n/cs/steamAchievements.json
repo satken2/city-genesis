@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Další",
+    "close": "Zavřít",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "První krok k městu",
+        "description": "Dokončete první budovu. Tady začínají dějiny vašeho města."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Město, které míří na moře",
+        "description": "Dokončete první pobřežní větrnou elektrárnu na moři nebo ropnou plošinu. Průmysl vašeho města vyráží na moře."
+      },
+      "RAIL_LINES_1": {
+        "name": "Všichni nastupovat!",
+        "description": "Zprovozněte železniční linku"
+      },
+      "RAIL_LINES_20": {
+        "name": "Železniční království",
+        "description": "Provozujte v jednom městě 20 železničních linek. Taková mapa linek stojí za podívanou."
+      },
+      "BUS_LINES_1": {
+        "name": "Autobus přijíždí",
+        "description": "Zprovozněte autobusovou linku"
+      },
+      "BUS_LINES_20": {
+        "name": "Autobusem kamkoli",
+        "description": "Provozujte v jednom městě 20 autobusových linek"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Do práce nad střechami",
+        "description": "Zprovozněte linku monorailu. Známé ulice teď uvidíte z trochu větší výšky."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Město v oblacích",
+        "description": "Provozujte v jednom městě 20 linek monorailu"
+      },
+      "LRT_LINES_1": {
+        "name": "Tramvaj přijíždí do města",
+        "description": "Zprovozněte linku LRT"
+      },
+      "LRT_LINES_20": {
+        "name": "Město tramvají",
+        "description": "Provozujte v jednom městě 20 linek LRT"
+      },
+      "POPULATION_10K": {
+        "name": "Domov pro 10 000",
+        "description": "Dosáhněte počtu 10 000 obyvatel"
+      },
+      "POPULATION_100K": {
+        "name": "Rušné krajské město",
+        "description": "Dosáhněte počtu 100 000 obyvatel"
+      },
+      "POPULATION_500K": {
+        "name": "Mezi velkoměsty",
+        "description": "Dosáhněte počtu 500 000 obyvatel"
+      },
+      "POPULATION_1M": {
+        "name": "Milionové město",
+        "description": "Dosáhněte počtu 1 000 000 obyvatel. Metropole, která nese milion životních příběhů."
+      },
+      "FLOORS_5": {
+        "name": "Město roste vzhůru",
+        "description": "Nechte dokončit soukromou budovu s nejméně 5 podlažími"
+      },
+      "FLOORS_10": {
+        "name": "První výšková stavba",
+        "description": "Nechte dokončit soukromou budovu s nejméně 10 podlažími. Chvála výtahům."
+      },
+      "FLOORS_20": {
+        "name": "Panorama mrakodrapů",
+        "description": "Nechte dokončit soukromou budovu s nejméně 20 podlažími"
+      },
+      "FLOORS_40": {
+        "name": "Mrakodrap",
+        "description": "Nechte dokončit soukromou budovu s nejméně 40 podlažími. Nový symbol vašeho města."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Průmysl pro zdraví",
+        "description": "Ve vašem městě zahájí provoz farmaceutická továrna. Odsud se začne pečovat o zdraví lidí."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Křemíkové město",
+        "description": "Ve vašem městě zahájí provoz továrna na polovodiče. Z malých čipů velký průmysl."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Město přesné práce",
+        "description": "Ve vašem městě zahájí provoz továrna na přesné přístroje. Spolehlivá technika se stává silou města."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Nový domov softwaru",
+        "description": "Ve vašem městě zahájí činnost softwarová firma. Místo, kde mohou růst nové nápady."
+      },
+      "TOURISTS_1": {
+        "name": "Vítejte v našem městě",
+        "description": "Ve vašem městě poprvé pobývá turista"
+      },
+      "TOURISTS_1K": {
+        "name": "Město, kam se jezdí",
+        "description": "Ve vašem městě pobývá najednou 1 000 turistů"
+      },
+      "TOURISTS_10K": {
+        "name": "Celý svět na návštěvě",
+        "description": "Ve vašem městě pobývá najednou 10 000 turistů"
+      },
+      "YEARS_10": {
+        "name": "Deset let s městem",
+        "description": "Hrajte v jednom městě 10 let. Budování města pokračuje."
+      },
+      "YEARS_100": {
+        "name": "Stoleté město",
+        "description": "Hrajte v jednom městě 100 let. Doprovoďte své město celým stoletím."
+      },
+      "YEARS_500": {
+        "name": "Město, které píše dějiny",
+        "description": "Hrajte v jednom městě 500 let. Generace se střídají, město zůstává."
+      },
+      "YEARS_1000": {
+        "name": "Tisícileté město",
+        "description": "Hrajte v jednom městě 1 000 let. Vybudujte město s tisíciletou historií."
+      },
+      "YEARS_10000": {
+        "name": "Věčné město",
+        "description": "Hrajte v jednom městě 10 000 let. To už je pořádně dlouhé volební období, starosto."
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Loại",
+    "kind": {
+      "land": "San nền đất liền",
+      "shore": "Lấn biển"
+    },
+    "baseHeight": "Độ cao chuẩn",
+    "targetHeight": "Độ cao mục tiêu",
+    "cutVolume": "Khối lượng đào",
+    "fillVolume": "Khối lượng đắp",
+    "quayLength": "Chiều dài bờ kè",
+    "quayArea": "Diện tích bờ kè",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Độ cao (chênh lệch so với chuẩn)",
+    "seaLevelHeight": "Độ cao (so với mực nước biển)",
+    "baseNote": {
+      "frontage": "0 là cao độ mặt đường tiếp giáp ({{value}} m)",
+      "terrain_mean": "0 là độ cao trung bình hiện tại của phạm vi ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "Hình dạng phạm vi không hợp lệ. Hãy vẽ sao cho các cạnh không cắt nhau.",
+      "outside_city": "Phạm vi tràn ra ngoài thành phố.",
+      "too_large": "Phạm vi quá rộng (tối đa {{limit}} km²).",
+      "on_water": "Không thể san lấp mặt bằng phạm vi chỉ nằm trên biển. Hãy vẽ sao cho chạm tới đất liền.",
+      "no_land_overlap": "Hãy vẽ phạm vi chồng lên đất liền (nếu không sẽ còn một dải biển giữa bờ và phạm vi).",
+      "overlaps_parcel": "Chồng lên lô đất hiện có.",
+      "overlaps_path": "Chồng lên đường dẫn như đường hoặc đường ray.",
+      "overlaps_water": "Chạm vào sông hoặc hồ.",
+      "overlaps_quay_band": "Chồng lên bờ kè của đất lấn biển.",
+      "invalid_height_offset": "Độ cao đã chỉ định nằm ngoài giới hạn (tối đa ±{{offsetLimit}} m so với độ cao chuẩn).",
+      "below_sea_level": "Không thể thấp hơn mực nước biển.",
+      "too_narrow": "Phạm vi quá hẹp, không còn phần nào bên trong bờ kè để san lấp.",
+      "no_work": "Mặt đất đã ở độ cao mục tiêu, không cần thi công.",
+      "insufficient_funds": "Không đủ tiền để đặt hàng."
+    },
+    "confirm": "Xác nhận",
+    "confirming": "Đang xác nhận…",
+    "cancel": "Hủy",
+    "confirmFailed": "Đặt hàng san lấp mặt bằng thất bại."
+  }
+}

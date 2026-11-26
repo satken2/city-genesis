@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "ตั้งค่า",
+    "groups": {
+      "general": "ทั่วไป",
+      "display": "หน้าจอ",
+      "sound": "เสียง",
+      "system": "ระบบ",
+      "about": "ข้อมูล",
+      "developer": "ตั้งค่าสำหรับนักพัฒนา"
+    },
+    "swagger": {
+      "label": "Swagger (เอกสาร API)",
+      "description": "แสดงข้อกำหนด API ของตัวจำลองหลักในเบราว์เซอร์เริ่มต้น",
+      "action": "เปิดในเบราว์เซอร์"
+    },
+    "currencyUnit": {
+      "label": "หน่วยเงิน",
+      "description": "หน่วยที่แสดงต่อท้ายจำนวนเงิน หากเว้นว่างจะใช้ตามภาษาที่แสดง"
+    },
+    "fontSize": {
+      "label": "ขนาดตัวอักษร",
+      "large": "ใหญ่",
+      "medium": "กลาง",
+      "small": "เล็ก",
+      "custom": "กำหนดเอง",
+      "preview": "ขนาดปัจจุบัน"
+    },
+    "monitor": {
+      "label": "จอแสดงผล",
+      "prev": "จอก่อนหน้า",
+      "next": "จอถัดไป"
+    },
+    "graphicMonitor": {
+      "label": "จอที่แสดงมุมมอง 3D"
+    },
+    "multiDisplay": {
+      "label": "โหมดหลายจอ",
+      "description": "แสดงหน้าต่างต่างๆ บนจออื่น",
+      "on": "ใช้",
+      "off": "ไม่ใช้"
+    },
+    "popupMonitor": {
+      "label": "จอที่แสดงหน้าต่าง"
+    },
+    "hintbar": {
+      "label": "แถบคำแนะนำ",
+      "show": "แสดง",
+      "hide": "ไม่แสดง",
+      "description": "แถบที่ด้านบนของหน้าจอซึ่งแสดงคำแนะนำการใช้งาน"
+    },
+    "citizenVoice": {
+      "label": "เสียงชาวเมือง",
+      "show": "แสดง",
+      "hide": "ไม่แสดง",
+      "description": "การ์ดที่มุมขวาบนของหน้าจอซึ่งแสดงคำพูดของชาวเมืองทีละคน"
+    },
+    "language": {
+      "label": "ภาษา",
+      "description": "ภาษาที่ใช้แสดง UI ซึ่งแยกจากภาษาของไฟล์เซฟ",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "ระดับเสียง",
+      "master": "ระดับเสียงหลัก",
+      "bgm": "BGM",
+      "sfx": "เสียงประกอบ"
+    },
+    "compute": {
+      "label": "การเร่งความเร็วด้วย GPU",
+      "comingSoon": "เร็วๆ นี้",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "ใช้ GPU อยู่",
+      "statusInactive": "ใช้ CPU อยู่",
+      "restartRequired": "โปรแกรมหลักจะรีสตาร์ทหลังเปลี่ยนการตั้งค่า",
+      "restarting": "กำลังรีสตาร์ท...",
+      "restartFailed": "รีสตาร์ทไม่สำเร็จ",
+      "restartUnavailable": "บันทึกการตั้งค่าแล้ว การเปลี่ยนแปลงจะมีผลเมื่อเปิดเกมครั้งถัดไป",
+      "confirmRestart": "ต้องการเปลี่ยนการประมวลผลเป็น {{mode}} และรีสตาร์ทโปรแกรมหลักหรือไม่",
+      "restartAction": "รีสตาร์ท"
+    },
+    "windowReset": {
+      "label": "ตำแหน่งและขนาดหน้าต่าง",
+      "action": "รีเซ็ต"
+    },
+    "credits": {
+      "label": "เครดิต",
+      "description": "การแสดงสิทธิ์ของสื่อและซอฟต์แวร์ที่เกมนี้ใช้",
+      "action": "แสดง"
+    }
+  },
+  "saveLoad": {
+    "newGame": "เกมใหม่",
+    "overwriteSave": "บันทึกทับ",
+    "saveAs": "บันทึกเป็นชื่อใหม่",
+    "load": "โหลด",
+    "quitGame": "ออกจากเกม",
+    "returnToTop": "กลับสู่เมนูหลัก",
+    "loading": "กำลังโหลด...",
+    "shuttingDown": "กำลังปิด...",
+    "saveFailed": "บันทึกไม่สำเร็จ",
+    "loadFailed": "โหลดไม่สำเร็จ",
+    "confirmNewGame": "ข้อมูลปัจจุบันจะหายไป ต้องการเริ่มเกมใหม่หรือไม่",
+    "confirmQuitGame": "ต้องการออกจากเกมหรือไม่ ความคืบหน้าปัจจุบันจะไม่ถูกบันทึกอัตโนมัติ",
+    "confirmReturnToTop": "ต้องการกลับสู่เมนูหลักหรือไม่ ความคืบหน้าปัจจุบันจะไม่ถูกบันทึกอัตโนมัติ",
+    "confirm": "ใช่",
+    "cancel": "ไม่",
+    "saveAsScenario": "บันทึกเป็นฉาก",
+    "saveAsNewScenario": "บันทึกเป็นฉากใหม่",
+    "overwriteScenario": "บันทึกทับ",
+    "backToGame": "กลับสู่เกม",
+    "saveName": "ชื่อไฟล์เซฟ",
+    "confirmOverwrite": "ต้องการบันทึกทับ “{{name}}” หรือไม่",
+    "confirmOverwriteScenario": "ต้องการบันทึกทับฉาก “{{name}}” หรือไม่"
+  },
+  "saveList": {
+    "noSaves": "ไม่มีไฟล์เซฟ",
+    "currentSave": "ข้อมูลปัจจุบัน",
+    "population": "ประชากร",
+    "inGameDate": "วันที่",
+    "savedAt": "วันเวลาที่บันทึก",
+    "loadButton": "โหลด",
+    "deleteButton": "ลบ",
+    "confirmLoad": "ต้องการโหลดไฟล์เซฟนี้หรือไม่",
+    "confirmDelete": "ต้องการลบไฟล์เซฟนี้หรือไม่ การดำเนินการนี้ย้อนกลับไม่ได้",
+    "loading": "กำลังโหลด...",
+    "loadFailed": "โหลดไม่สำเร็จ",
+    "deleteFailed": "ลบไม่สำเร็จ",
+    "openFolderButton": "เปิดโฟลเดอร์ไฟล์เซฟ",
+    "scenario": "ฉาก",
+    "autosaveName": "{{name}} (บันทึกอัตโนมัติเมื่อออก)"
+  }
+}

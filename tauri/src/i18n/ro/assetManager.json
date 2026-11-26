@@ -1,0 +1,22 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Clădiri",
+      "paths": "Trasee",
+      "vehicles": "Vehicule",
+      "props": "Elemente decorative"
+    },
+    "additional": "Modele suplimentare",
+    "loading": "Se încarcă modelele din vederea 3D…",
+    "noModel": "Fără model",
+    "noImage": "Fără imagine",
+    "weight": "Pondere",
+    "applyNote": "Modificările ponderilor se aplică data viitoare când începi sau încarci un joc.",
+    "preview": {
+      "hint": "Trage pentru a roti / Rotița mouse-ului pentru zoom",
+      "zoomIn": "Mărește",
+      "zoomOut": "Micșorează",
+      "reset": "Resetează"
+    }
+  }
+}

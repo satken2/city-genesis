@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Tovább",
+    "close": "Bezárás",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "Az első lépés",
+        "description": "Fejezd be az első épületet. Itt kezdődik a város története."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Irány a tenger",
+        "description": "Fejezd be az első tengeri szélerőművet vagy tengeri olajfúró platformot. A város ipara kihajózik a nyílt vízre."
+      },
+      "RAIL_LINES_1": {
+        "name": "Indul a vonat!",
+        "description": "Indíts el egy vasútvonalat"
+      },
+      "RAIL_LINES_20": {
+        "name": "Vasútbirodalom",
+        "description": "Üzemeltess 20 vasútvonalat egyetlen városban. A hálózati térkép már igazán sokat mutat."
+      },
+      "BUS_LINES_1": {
+        "name": "Megjött a busz",
+        "description": "Indíts el egy buszvonalat"
+      },
+      "BUS_LINES_20": {
+        "name": "Busszal bárhová",
+        "description": "Üzemeltess 20 buszvonalat egyetlen városban"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Ingázás a háztetők felett",
+        "description": "Indíts el egy monorailvonalat. Az ismerős utcák kicsit magasabbról."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Város a magasban",
+        "description": "Üzemeltess 20 monorailvonalat egyetlen városban"
+      },
+      "LRT_LINES_1": {
+        "name": "Megjött a villamos",
+        "description": "Indíts el egy LRT-vonalat"
+      },
+      "LRT_LINES_20": {
+        "name": "A villamosok városa",
+        "description": "Üzemeltess 20 LRT-vonalat egyetlen városban"
+      },
+      "POPULATION_10K": {
+        "name": "Tízezrek otthona",
+        "description": "Érd el a 10 000 fős népességet"
+      },
+      "POPULATION_100K": {
+        "name": "Pezsgő vidéki város",
+        "description": "Érd el a 100 000 fős népességet"
+      },
+      "POPULATION_500K": {
+        "name": "A nagyvárosok között",
+        "description": "Érd el az 500 000 fős népességet"
+      },
+      "POPULATION_1M": {
+        "name": "Milliós város",
+        "description": "Érd el az 1 000 000 fős népességet. Egy nagyváros, amely millió életet tart el."
+      },
+      "FLOORS_5": {
+        "name": "A város felfelé nő",
+        "description": "Készüljön el egy legalább 5 szintes magánépület"
+      },
+      "FLOORS_10": {
+        "name": "Az első magasház",
+        "description": "Készüljön el egy legalább 10 szintes magánépület. Hála a liftnek!"
+      },
+      "FLOORS_20": {
+        "name": "Kirajzolódik a látkép",
+        "description": "Készüljön el egy legalább 20 szintes magánépület"
+      },
+      "FLOORS_40": {
+        "name": "Felhőkarcoló",
+        "description": "Készüljön el egy legalább 40 szintes magánépület. A város új jelképe."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Az egészség ipara",
+        "description": "Kezdje meg működését egy gyógyszergyár a városban. Innen indul az emberek egészségének szolgálata."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Szilíciumváros",
+        "description": "Kezdje meg működését egy félvezetőgyár a városban. Apró chipek, hatalmas iparág."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "A precizitás városa",
+        "description": "Kezdje meg működését egy precíziósműszer-gyár a városban. A szaktudás a város erejévé válik."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "A szoftver új hazája",
+        "description": "Nyisson irodát egy szoftvercég a városban. Legyen hely, ahol az új ötletek szárba szökkennek."
+      },
+      "TOURISTS_1": {
+        "name": "Isten hozott nálunk!",
+        "description": "Szálljon meg először turista a városban"
+      },
+      "TOURISTS_1K": {
+        "name": "Megéri az utat",
+        "description": "Tartózkodjon egyszerre 1000 turista a városban"
+      },
+      "TOURISTS_10K": {
+        "name": "A világ hozzánk jár",
+        "description": "Tartózkodjon egyszerre 10 000 turista a városban"
+      },
+      "YEARS_10": {
+        "name": "Tíz év a várossal",
+        "description": "Játssz 10 évet egyetlen városban. A városépítés még sokáig folytatódik."
+      },
+      "YEARS_100": {
+        "name": "Százéves város",
+        "description": "Játssz 100 évet egyetlen városban. Kísérd végig a város egy teljes évszázadát."
+      },
+      "YEARS_500": {
+        "name": "Történelmet író város",
+        "description": "Játssz 500 évet egyetlen városban. Nemzedékek jönnek és mennek, a város marad."
+      },
+      "YEARS_1000": {
+        "name": "Ezeréves város",
+        "description": "Játssz 1000 évet egyetlen városban. Építs ezeréves múltú várost."
+      },
+      "YEARS_10000": {
+        "name": "Az örök város",
+        "description": "Játssz 10 000 évet egyetlen városban. Ez aztán hosszú hivatali idő, polgármester."
+      }
+    }
+  }
+}

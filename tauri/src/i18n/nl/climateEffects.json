@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "Gemiddeld klimaat deze maand",
+    "currentClimate_week": "Gemiddeld klimaat deze week",
+    "title": "Productie-efficiëntie van voorzieningen per klimaat",
+    "facility": "Voorziening",
+    "factor": "Productie-efficiëntie"
+  }
+}

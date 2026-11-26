@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Облаштування дороги",
+    "streetlight_type": "Ліхтарі",
+    "fence_type": "Огорожі",
+    "street_tree_type": "Дерева вздовж вулиці",
+    "utility_mode": "Прокладання комунікацій",
+    "none": "Немає",
+    "standard": "Стандартно",
+    "overhead": "Повітряне",
+    "underground": "Підземне",
+    "apply": "Застосувати",
+    "bench_type": "Лавки",
+    "bin_type": "Смітники",
+    "planter_type": "Квітники",
+    "advert_type": "Реклама"
+  }
+}

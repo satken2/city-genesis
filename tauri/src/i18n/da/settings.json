@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Indstillinger",
+    "groups": {
+      "general": "Generelt",
+      "display": "Skærm",
+      "sound": "Lyd",
+      "system": "System",
+      "about": "Om",
+      "developer": "Udviklerindstillinger"
+    },
+    "swagger": {
+      "label": "Swagger (API-dokumentation)",
+      "description": "Vis kernesimulatorens API i din standardbrowser",
+      "action": "Åbn i browser"
+    },
+    "currencyUnit": {
+      "label": "Valutaenhed",
+      "description": "Den enhed, der vises ved beløb. Lad feltet stå tomt for at følge visningssproget."
+    },
+    "fontSize": {
+      "label": "Tekststørrelse",
+      "large": "Stor",
+      "medium": "Mellem",
+      "small": "Lille",
+      "custom": "Brugerdefineret",
+      "preview": "Nuværende størrelse"
+    },
+    "monitor": {
+      "label": "Skærm",
+      "prev": "Forrige skærm",
+      "next": "Næste skærm"
+    },
+    "graphicMonitor": {
+      "label": "Skærm til 3D-visning"
+    },
+    "multiDisplay": {
+      "label": "Flere skærme",
+      "description": "Viser vinduerne på en anden skærm end spillet",
+      "on": "Til",
+      "off": "Fra"
+    },
+    "popupMonitor": {
+      "label": "Skærm til vinduer"
+    },
+    "hintbar": {
+      "label": "Tipbjælke",
+      "show": "Vis",
+      "hide": "Skjul",
+      "description": "Bjælke øverst på skærmen med tip om betjening"
+    },
+    "citizenVoice": {
+      "label": "Borgernes stemmer",
+      "show": "Vis",
+      "hide": "Skjul",
+      "description": "Kort øverst til højre på skærmen, der viser borgernes bemærkninger på skift"
+    },
+    "language": {
+      "label": "Sprog",
+      "description": "Brugerfladens visningssprog. Det er uafhængigt af sproget i dine gemte spil.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Lydstyrke",
+      "master": "Samlet lydstyrke",
+      "bgm": "Musik",
+      "sfx": "Lydeffekter"
+    },
+    "compute": {
+      "label": "GPU-acceleration",
+      "comingSoon": "Kommer snart",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU aktiv",
+      "statusInactive": "CPU aktiv",
+      "restartRequired": "Hovedprogrammet genstartes, når indstillingen ændres",
+      "restarting": "Genstarter…",
+      "restartFailed": "Genstart mislykkedes",
+      "restartUnavailable": "Indstillingen er gemt. Ændringen træder i kraft, næste gang spillet startes",
+      "confirmRestart": "Vil du skifte beregning til {{mode}}? Hovedprogrammet genstartes.",
+      "restartAction": "Genstart"
+    },
+    "windowReset": {
+      "label": "Vinduernes placering og størrelse",
+      "action": "Nulstil"
+    },
+    "credits": {
+      "label": "Kreditering",
+      "description": "Rettighedsoplysninger for de materialer og programmer, spillet bruger",
+      "action": "Vis"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Nyt spil",
+    "overwriteSave": "Gem (overskriv)",
+    "saveAs": "Gem som",
+    "load": "Indlæs",
+    "quitGame": "Afslut spil",
+    "returnToTop": "Tilbage til hovedmenuen",
+    "loading": "Indlæser…",
+    "shuttingDown": "Lukker ned…",
+    "saveFailed": "Kunne ikke gemme",
+    "loadFailed": "Kunne ikke indlæse",
+    "confirmNewGame": "De nuværende data går tabt. Vil du starte et nyt spil?",
+    "confirmQuitGame": "Vil du afslutte spillet? Dine fremskridt gemmes ikke automatisk.",
+    "confirmReturnToTop": "Vil du gå tilbage til hovedmenuen? Dine fremskridt gemmes ikke automatisk.",
+    "confirm": "Ja",
+    "cancel": "Nej",
+    "saveAsScenario": "Gem som scenarie",
+    "saveAsNewScenario": "Gem som et andet scenarie",
+    "overwriteScenario": "Gem (overskriv)",
+    "backToGame": "Tilbage til spillet",
+    "saveName": "Navn på gemt spil",
+    "confirmOverwrite": "Vil du overskrive det gemte spil »{{name}}«?",
+    "confirmOverwriteScenario": "Vil du overskrive scenariet »{{name}}«?"
+  },
+  "saveList": {
+    "noSaves": "Der er ingen gemte spil",
+    "currentSave": "Nuværende data",
+    "population": "Befolkning",
+    "inGameDate": "Dato",
+    "savedAt": "Gemt",
+    "loadButton": "Indlæs",
+    "deleteButton": "Slet",
+    "confirmLoad": "Vil du indlæse dette gemte spil?",
+    "confirmDelete": "Vil du slette dette gemte spil? Det kan ikke fortrydes.",
+    "loading": "Indlæser…",
+    "loadFailed": "Kunne ikke indlæse",
+    "deleteFailed": "Kunne ikke slette",
+    "openFolderButton": "Vis mappens placering",
+    "scenario": "Scenarie",
+    "autosaveName": "{{name}} (automatisk gemt ved afslutning)"
+  }
+}

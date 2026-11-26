@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Tievarusteet",
+    "streetlight_type": "Katuvalot",
+    "fence_type": "Aidat",
+    "street_tree_type": "Katupuut",
+    "utility_mode": "Johtojen sijoitus",
+    "none": "Ei mitään",
+    "standard": "Vakio",
+    "overhead": "Ilmajohdot",
+    "underground": "Maakaapelit",
+    "apply": "Käytä",
+    "bench_type": "Penkit",
+    "bin_type": "Roska-astiat",
+    "planter_type": "Istutukset",
+    "advert_type": "Mainokset"
+  }
+}

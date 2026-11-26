@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Σύνθεση ορόφων",
+    "parking": "Στάθμευση",
+    "type": "Τύπος κτιρίου",
+    "durability": "Αντοχή",
+    "floors": "Όροφοι",
+    "floorsValue": "Όροφοι: {{floors}} (εμβαδόν ορόφων {{area, number}} ㎡)",
+    "heightLabel": "Ύψος: {{value}} m",
+    "baseAreaLabel": "Εμβαδόν κάλυψης: {{area, number}} ㎡",
+    "underMaintenance": "Υπό επισκευή",
+    "parkingCapacity": "Χωρητικότητα στάθμευσης",
+    "parkingCapacityValue": "{{capacity}} θέσεις",
+    "parkingDay": "Ημέρα",
+    "parkingNight": "Νύχτα",
+    "parkingUsage": "{{used}} / {{capacity}} θέσεις"
+  },
+  "building_appearance": {
+    "variantLabel": "Εμφάνιση {{index}}",
+    "layoutHint": "Σύρετε μια κάρτα στην έκταση για τοποθέτηση / σύρετε για μετακίνηση / Shift+σύρσιμο για περιστροφή / πλήκτρο Delete για διαγραφή",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Αφαίρεση επιλεγμένου κτίσματος",
+    "apply": "Εφαρμογή",
+    "saveFailed": "Η αποθήκευση της εμφάνισης απέτυχε",
+    "noSubbuildings": "Δεν έχουν οριστεί βοηθητικά κτίσματα για αυτόν τον τύπο κτιρίου"
+  }
+}

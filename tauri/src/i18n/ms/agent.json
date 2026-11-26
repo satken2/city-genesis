@@ -1,0 +1,212 @@
+{
+  "agent": {
+    "back": "Kembali",
+    "editAppearance": "Tukar rupa",
+    "relocateCityHall": "Pindahkan Dewan Bandaran",
+    "publicFacility": "Kemudahan awam",
+    "underAcquisition": "Rundingan pengambilan tanah",
+    "publicFacilityPanel": {
+      "title": "Kemudahan awam"
+    },
+    "abandon": "Tinggalkan",
+    "abandonHint": "Hentikan penyelenggaraan dan biarkan bangunan usang tanpa dibaiki",
+    "statusSince": {
+      "founded": "Tarikh ditubuhkan",
+      "householdFormed": "Tarikh isi rumah dibentuk",
+      "arrived": "Tarikh tiba",
+      "opened": "Tarikh dibuka",
+      "schoolOpened": "Tarikh sekolah dibuka",
+      "completed": "Tarikh siap dibina",
+      "operatingSince": "Tarikh mula beroperasi",
+      "resumed": "Tarikh disambung semula",
+      "paused": "Tarikh dihentikan",
+      "suspended": "Tarikh ditutup sementara",
+      "schoolClosed": "Tarikh sekolah ditutup",
+      "constructionStarted": "Tarikh mula pembinaan",
+      "demolitionScheduled": "Tarikh perobohan diputuskan",
+      "demolitionStarted": "Tarikh perobohan bermula",
+      "demolished": "Tarikh perobohan selesai",
+      "collapsed": "Tarikh runtuh",
+      "burnedDown": "Tarikh terbakar",
+      "default": "Tarikh status berubah"
+    },
+    "reserves": "Wang tunai",
+    "revenues": "Pendapatan",
+    "expenses": "Perbelanjaan",
+    "zone": "Daerah",
+    "building": "Bangunan didiami",
+    "rent": "Sewa",
+    "floorOccupancy": "Ruang lantai digunakan",
+    "tenants": "Penyewa",
+    "guests": "Tetamu",
+    "tabBasicInfo": "Maklumat asas",
+    "utilizationTarget": "Sasaran kadar penggunaan",
+    "currentUtilization": "Kadar penggunaan semasa",
+    "constructionSpeed": "Kelajuan pembinaan",
+    "constructionCostPerEpoch": "Kos pembinaan setiap epok",
+    "remainingConstruction": "Baki tempoh pembinaan",
+    "remainingEpochs": "Kira-kira {{n}} epok",
+    "tabBuildingInfo": "Maklumat bangunan",
+    "tabCargoInfo": "Kendalian kargo",
+    "tabTradeInfo": "Permintaan, penawaran dan dagangan",
+    "tabTourismInfo": "Pelancongan",
+    "tabEmploymentInfo": "Pekerjaan",
+    "action": {
+      "purchase": "Beli",
+      "bulldoze": "Robohkan",
+      "cancelBulldoze": "Batal perobohan",
+      "pause": "Jeda",
+      "resume": "Sambung semula",
+      "delete": "Padam",
+      "repair": "Baiki",
+      "rebuild": "Bina semula",
+      "edit": "Edit",
+      "startConstruction": "Mula pembinaan",
+      "stopConstruction": "Tangguh",
+      "cancelAbandon": "Batal tinggalkan",
+      "explode": "Letupkan",
+      "explodeConfirm": "Letupkan bangunan ini dan jadikan ia seolah-olah kemalangan?\nBangunan akan runtuh serta-merta dan semua penghuni serta pekerja di dalamnya akan terkorban. Sentimen warga kota akan merosot teruk dan tindakan ini tidak boleh dibuat asal.",
+      "explodeTitle": "Letupkan bangunan",
+      "explodeConfirmAction": "Letupkan"
+    },
+    "pendingWarning": "Bangunan ini masih dalam perancangan. Arahkan mula pembinaan.",
+    "alerts": {
+      "diagnoseHint": "Klik untuk mendiagnosis punca",
+      "title": "Amaran",
+      "constructionShortage": {
+        "title": "Kekurangan perkhidmatan pembinaan",
+        "description": "Kerja pembinaan tertangguh kerana belanjawan pembinaan tidak mencukupi."
+      },
+      "onFire": {
+        "title": "Kebakaran!",
+        "description": "Kebakaran sedang berlaku di bangunan ini."
+      },
+      "accidentalFire": {
+        "title": "Kebakaran tidak sengaja (kecil)",
+        "description": "Kebakaran tidak sengaja berlaku di bangunan ini tetapi berjaya dikawal pada skala kecil."
+      },
+      "infraDisconnected": {
+        "title": "Tidak bersambung ke rangkaian infrastruktur",
+        "description": "Tiada jajaran infrastruktur yang bersambung ke titik sambungan kemudahan ini. Bekalan tidak boleh dihantar atau diterima sehingga ia disambungkan ke rangkaian."
+      },
+      "capacityTight": {
+        "title": "Kapasiti hampir penuh",
+        "description": "Jumlah yang dikendalikan telah mencapai 90% atau lebih daripada kapasiti kemudahan ini. Ia hampir tidak mampu memenuhi permintaan tambahan."
+      },
+      "nonconforming": {
+        "title": "Tidak mematuhi peraturan bangunan",
+        "description": "Bangunan ini tidak mematuhi peraturan bangunan lotnya. Ia tidak akan dibaiki dan akan dirobohkan apabila sudah usang."
+      },
+      "crime": {
+        "title": "Jenayah berlaku",
+        "description": "Satu jenayah telah berlaku di bangunan ini."
+      },
+      "crimeSign": {
+        "title": "Tanda-tanda jenayah",
+        "description": "Tanda-tanda jenayah dikesan di bangunan ini. Awasi kemerosotan keselamatan awam."
+      },
+      "laborShortage": {
+        "title": "Kekurangan tenaga kerja",
+        "description": "Pekerja tidak mencukupi, jadi pengeluaran dan perkhidmatan di bawah paras yang dirancang."
+      },
+      "materialShortage": {
+        "title": "Kekurangan bahan mentah",
+        "description": "Perolehan bahan mentah tidak mencukupi, jadi pengeluaran dan perkhidmatan di bawah paras yang dirancang."
+      },
+      "highSkillShortage": {
+        "title": "Kekurangan tenaga pakar",
+        "description": "Tenaga berkemahiran tinggi yang diperlukan tidak mencukupi, jadi pengeluaran dikurangkan setakat yang mampu dikendalikan oleh pekerja sedia ada."
+      },
+      "budgetCapped": {
+        "title": "Kekurangan belanjawan",
+        "description": "Belanjawan yang diperuntukkan jauh di bawah jumlah yang diperlukan, jadi operasi dikecilkan. Semak semula peruntukan belanjawan."
+      },
+      "facilityWarning": {
+        "title": "Kemudahan awam tidak dapat beroperasi",
+        "description": "Perkhidmatan yang dibekalkan oleh kemudahan ini jauh di bawah sasaran. Semak perolehan tenaga kerja dan bahan mentahnya."
+      },
+      "sanitationWarning": {
+        "title": "Kebersihan semakin teruk",
+        "description": "Tahap kebersihan di tapak bangunan ini telah merosot dengan teruk dan menjejaskan isi rumah yang tinggal di sini. Tingkatkan bekalan rawatan kumbahan dan sisa."
+      },
+      "infraWarning": {
+        "title": "Kemudahan infrastruktur terhenti atau runtuh",
+        "description": "Kemudahan ini terhenti atau runtuh, sekali gus menjejaskan bekalan infrastruktur. Semak keadaan kemudahan dan laluan bekalannya."
+      },
+      "farFromRoad": {
+        "title": "Jauh dari jalan",
+        "description": "Jalan terdekat berada kira-kira {{distance}} m dari sini. Akses untuk bekalan, perjalanan ke tempat kerja dan membeli-belah sangat terjejas, jadi pertimbangkan untuk memanjangkan jalan ke dekat bangunan ini."
+      },
+      "noRoadAccess": {
+        "title": "Tiada jalan untuk disambungkan",
+        "description": "Bangunan ini tidak mempunyai jalan untuk disambungkan. Akses untuk bekalan, perjalanan ke tempat kerja dan membeli-belah sangat terjejas, jadi bina jalan berdekatan."
+      }
+    },
+    "infra": {
+      "title": "Sambungan infrastruktur",
+      "connected": "Bersambung",
+      "disconnected": "Tidak bersambung",
+      "received": "Jumlah diterima"
+    },
+    "tabConstructionInfo": "Kerja pembinaan",
+    "tabEducationInfo": "Pendidikan",
+    "education": {
+      "totalStudents": "Pelajar berdaftar",
+      "totalCapacity": "Jumlah kapasiti",
+      "statusTitle": "Status pendaftaran",
+      "enrolled": "Berdaftar",
+      "vacant": "Tempat kosong",
+      "noCapacity": "Tiada kapasiti",
+      "countLabel": "Bilangan",
+      "enrollmentBySkill": "Pendaftaran mengikut kemahiran",
+      "settingsTitle": "Tetapan kuota kemasukan",
+      "settingsHint": "Tetapkan pemberat peruntukan bagi setiap kemahiran. Jumlah kapasiti dibahagikan mengikut nisbah pemberat.",
+      "skillHeader": "Kemahiran",
+      "weightHeader": "Pemberat",
+      "previewHeader": "Kapasiti",
+      "save": "Simpan",
+      "saving": "Menyimpan...",
+      "saveFailed": "Gagal menyimpan",
+      "sumMustBePositive": "Jumlah kuota mestilah sekurang-kurangnya 1",
+      "invalidWeight": "Pemberat mestilah integer 0 atau lebih",
+      "studentsList": "Senarai pelajar",
+      "noStudents": "Tiada pelajar",
+      "showMore": "Tunjuk lagi ({{count}} orang)"
+    }
+  },
+  "agentList": {
+    "filterType": "Jenis",
+    "filterVariant": "Varian",
+    "filterZone": "Daerah",
+    "allVariants": "Semua varian",
+    "allZones": "Semua daerah",
+    "resultCount": "{{count}} hasil",
+    "capped": "(daripada {{total}} kesemuanya)",
+    "loading": "Memuatkan...",
+    "noResults": "Tiada entiti ekonomi yang sepadan",
+    "colStatus": "Status",
+    "colVariant": "Varian",
+    "colName": "Nama",
+    "colProduct": "Produk",
+    "colPrice": "Harga",
+    "colProduction": "Pengeluaran",
+    "colStock": "Stok",
+    "colSold": "Jualan",
+    "colWage": "Kadar gaji",
+    "colEmployment": "Pekerjaan",
+    "colUtilization": "Kadar penggunaan",
+    "colBdType": "Jenis bangunan",
+    "colDurability": "Ketahanan",
+    "colRent": "Sewa",
+    "colFloors": "Bil. tingkat",
+    "colFloorArea": "Keluasan lantai",
+    "colOccupancy": "Kadar penghunian",
+    "colFamilyType": "Jenis isi rumah",
+    "colDiscretionaryIncome": "Pendapatan boleh guna",
+    "colSatisNutrition": "Pemakanan",
+    "colSatisHealthcare": "Kesihatan",
+    "colSatisLeisure": "Hiburan dan riadah",
+    "colSatisResidential": "Kediaman",
+    "colAutomobile": "Kereta sendiri"
+  }
+}

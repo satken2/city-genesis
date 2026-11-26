@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Spilparametre",
+    "description": "Standardværdierne anbefales som udgangspunkt. Juster kun, hvis du vil ændre noget.",
+    "skip": "Spring over",
+    "start": "Start spil",
+    "apply": "Anvend og luk",
+    "close": "Luk",
+    "loading": "Indlæser…",
+    "reload": "Genindlæs",
+    "reloadHint": "Genindlæs, når backenden er færdig med at starte op, for at få de nyeste værdier.",
+    "fetchError": "Parametrene kunne ikke hentes",
+    "category": {
+      "population": "Befolkning og tilflytning",
+      "citizen": "Borgernes hverdag",
+      "economy": "Økonomi",
+      "labor": "Arbejde og løn",
+      "education": "Uddannelse",
+      "construction": "Byggeri og fast ejendom",
+      "environment": "Miljø",
+      "traffic": "Trafik",
+      "general": "Generelt",
+      "pathfind": "Trafik og ruter",
+      "building": "Bygninger og byggeri",
+      "disaster": "Katastrofer og tryghed",
+      "slum": "Slumkvarterer",
+      "production": "Produktion og lager",
+      "zone": "Bydele og parceller",
+      "financial": "Finans"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Byfortætning",
+        "desc": "Det etageareal, boliger og anlæg bruger, divideres med denne værdi, så et lille kort kan rumme en storbys økonomiske aktivitet. Ændrer du den, efter at du har bygget bare én vej eller bygning, går byen i stykker – så bestem den, før du bygger noget."
+      },
+      "TFR_TARGET": {
+        "label": "Mål for samlet fertilitet (TFR)",
+        "desc": "Den fertilitet, husstandene sigter mod. Jo højere, desto flere fødsler."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Ægteskabsrate",
+        "desc": "Koefficient for den grundlæggende sandsynlighed for, at borgere gifter sig. Jo højere, desto flere ægteskaber."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Laveste alder for fødsel",
+        "desc": "Den laveste alder, hvor der kan fødes børn. Under denne alder sker der ingen fødsler."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Højeste alder for fødsel",
+        "desc": "Den højeste alder, hvor der kan fødes børn. Over denne alder sker der ingen fødsler."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Andel gifte tilflytterhusstande",
+        "desc": "Sandsynligheden for, at en tilflytterhusstand er et ægtepar, når den flytter til byen."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Andel med 1. barn (tilflyttere)",
+        "desc": "Sandsynligheden for, at en tilflytterhusstand etableres med 1 barn."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Andel med 2. barn (tilflyttere)",
+        "desc": "Sandsynligheden for, at en tilflytterhusstand etableres med 2 børn."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Andel med 3. barn (tilflyttere)",
+        "desc": "Sandsynligheden for, at en tilflytterhusstand etableres med 3 børn."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Laveste alder for voksne tilflyttere",
+        "desc": "Den laveste alder for voksne, der flytter til byen."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Højeste alder for voksne tilflyttere",
+        "desc": "Den højeste alder for voksne, der flytter til byen."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Levetidsfaktor",
+        "desc": "Faktor for borgernes maksimale levetid. Med 1,08 bliver grænsen ca. 100 år, med 1,06 ca. 150 år.",
+        "graphX": "Alder",
+        "graphY": "Årlig dødssandsynlighed (helbred 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Boligareal for enlige (m²)",
+        "desc": "Det mindste boligareal, en enlig husstand har brug for."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Ekstra areal til ægtefælle (m²)",
+        "desc": "Det ekstra boligareal, et ægtepar skal bruge i forhold til en enlig."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Ekstra areal pr. barn (m²)",
+        "desc": "Det boligareal, der lægges til for hvert barn i husstanden."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Husleje i forhold til indkomst (maks.)",
+        "desc": "Den største andel af husstandens indkomst, der kan gå til husleje. 0,3 betyder op til 30 % af indkomsten."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Vægt af rejsetid ved boligvalg",
+        "desc": "Når en husstand vælger bolig: hvor tungt hvert minut på ture frem og tilbage til arbejde, skole og indkøb vejer, som et multiplum af byens gennemsnitsløn. 1 svarer til lønnen. Jo højere, desto oftere vælges boliger tæt på arbejdspladser og butikker."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Gennemsnitsløn (udgangspunkt)",
+        "desc": "Den gennemsnitlige referenceløn ved simulationens start."
+      },
+      "AVERAGE_RENT": {
+        "label": "Gennemsnitlig husleje (udgangspunkt)",
+        "desc": "Den gennemsnitlige referencehusleje ved simulationens start (pr. dag pr. m²)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Formuebestemt andel af udbytte",
+        "desc": "Den andel af udbyttet, der fordeles i forhold til husstandenes likvide midler. Resten fordeles ligeligt mellem alle husstande. 0 = alt ligeligt, 1 = alt i forhold til de likvide midler."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Afskrivningsrate for udstyr",
+        "desc": "Den rate, som kapitalbeholdningen fra investeringer i udstyr afskrives med hver epoke."
+      },
+      "WORK_HOURS": {
+        "label": "Daglig arbejdstid (t)",
+        "desc": "Det normale antal timer, en borger arbejder om dagen."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Skolestartsalder",
+        "desc": "Den alder, hvor børn begynder i grundskolen."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Alder ved afsluttet skolegang",
+        "desc": "Den alder, hvor den grundlæggende skolegang slutter (svarer til studentereksamen)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Alder ved kandidateksamen og udflytning",
+        "desc": "Den alder, hvor en borger afslutter en videregående uddannelse og flytter hjemmefra."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Laveste erhvervsaktive alder",
+        "desc": "Borgere under denne alder søger ikke job og tæller ikke med i ledighedsstatistikken."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Maks. antal etager",
+        "desc": "Det højeste antal etager i bygninger, som den private sektor opfører automatisk."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Etagestraffaktor",
+        "desc": "Koefficient for den ekstra byggeomkostning ved højhuse. Jo højere, desto mindre straf for høje bygninger.",
+        "graphX": "Etager",
+        "graphY": "Faktor på byggeomkostning"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Effektivitet ved nedrivning",
+        "desc": "Hvor meget mere effektivt nedrivning er end nybyggeri (faktor)."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Årlig grundsandsynlighed for kollaps",
+        "desc": "Den årlige grundsandsynlighed for, at en bygning med holdbarhed 0,5 styrter sammen."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Weibull-formparameter for kollaps",
+        "desc": "Jo højere, desto brattere stiger risikoen for kollaps omkring den forventede levetid."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Reparationsomkostning",
+        "desc": "Reparationsomkostningen som andel af omkostningen ved nybyggeri."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Ældningsfaktor uden daglig drift",
+        "desc": "Hvor hurtigt en bygning eller et tracé ældes uden nogen daglig drift, som et multiplum af ældningen med fuld drift. Den ændrer sig lineært fra 1 til denne værdi efter den andel af driften, der ikke blev leveret."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Årlig grundsandsynlighed for reparation",
+        "desc": "Den årlige grundsandsynlighed for, at en bygning, der trænger til reparation, faktisk bliver repareret."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Startgæld fra byggeri (pr. m²)",
+        "desc": "Startgælden fra byggeriet pr. m² samlet etageareal (negative reserver)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Støjkoefficient for vejtrafik",
+        "desc": "Hvor meget vejtrafikken bidrager til støjkortet. Jo højere, desto mere støj langs vejene."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Støjkoefficient for fodgængere",
+        "desc": "Hvor meget fodgængertrafikken bidrager til støjkortet."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Støjtærskel for fodgængere",
+        "desc": "Kun den del af fodgængertrafikken, der ligger over denne værdi, bidrager til støj."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Dæmpningsafstand for støj (m)",
+        "desc": "Støj aftager med kvadratet på afstanden og falder desuden til 1/e for hver gang denne afstand (afskærmning fra bygninger, absorption i luft og jord). Jo lavere, desto tættere på kilden bliver støjen."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Luftforureningskoefficient for vejtrafik",
+        "desc": "Hvor meget vejtrafikken bidrager til luftforureningskortet."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Dæmpningsafstand for luftforurening (m)",
+        "desc": "Luftforurening og lugt aftager med kvadratet på afstanden og falder desuden til 1/e for hver gang denne afstand (spredning og nedfald). Jo lavere, desto tættere på kilden bliver forureningen."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Ledighedens vægt for kriminalitet",
+        "desc": "Hvor stærkt ledigheden påvirker kriminalitetskortet. Jo højere, desto mere direkte fører ledighed til ringere tryghed."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Spredning af kriminalitet (m)",
+        "desc": "Radius for den gaussiske udjævning af kriminalitetskortet."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Ganghastighed (km/h)",
+        "desc": "Fodgængeres hastighed. Bruges til at beregne omkostningen ved rutesøgning."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Accelerationsstrækning for biler (m)",
+        "desc": "Den strækning, en bil bruger på at accelerere. Påvirker hastighedsberegningen på korte veje."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Vejens daglige driftstimer (t)",
+        "desc": "Antal timer om dagen, vejen er i brug. Bruges til at omregne trafikmængden."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Mætningstærskel for vejtrafikbonus",
+        "desc": "Ved vejtrafik på eller over denne værdi får butikker den største trafikbonus."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Mætningstærskel for fodgængerbonus",
+        "desc": "Ved fodgængertrafik på eller over denne værdi får butikker den største fodgængerbonus."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Indlæser…",
+    "noScenarios": "Der er ingen tilgængelige scenarier",
+    "starting": "Starter…",
+    "startFailed": "Kunne ikke starte",
+    "confirmTitle": "Bekræft spilindstillinger",
+    "confirmStartTitle": "Vil du starte spillet?",
+    "unsavedChangesWarning": "Hvis du starter, mister du ikke-gemte ændringer i dit nuværende spil.",
+    "startSettingsHeading": "Byens indstillinger",
+    "cityNameLabel": "Byens navn",
+    "insigniaLabel": "Byvåben og byflag",
+    "languageLabel": "Byens sprog",
+    "languageNote": "*Kan ikke ændres senere",
+    "simulationDaysLabel": "Simulationsdage",
+    "simulationDaysNote": "*Kan ikke ændres senere",
+    "daysOption": "{{days}} dage",
+    "startButton": "Start",
+    "backButton": "Tilbage",
+    "cleared": "Gennemført",
+    "tutorialBadge": "Tutorial",
+    "sectionDebug": "Fejlfinding",
+    "sectionTutorials": "Tutorials",
+    "sectionScenarios": "Scenarier",
+    "detailPlaceholder": "Vælg et scenarie på listen til venstre.",
+    "detailMapSizeLabel": "Kortstørrelse",
+    "detailUnknown": "Ukendt",
+    "detailObjectiveLabel": "Mål",
+    "detailCreditsLabel": "Kreditering",
+    "detailNoObjective": "Ingen mål",
+    "detailNoDescription": "Dette scenarie har ingen beskrivelse.",
+    "tutorialObjective": "Gennemfør alle trin i tutorialen.",
+    "startScenarioButton": "Start dette scenarie",
+    "tabSelect": "Vælg scenarie",
+    "tabBrowse": "Find scenarier",
+    "tabTerrain": "Vælg terræn",
+    "relocalizeNote": "Dette scenarie er lavet på {{from}}. Starter du på {{to}}, får bydele, anlæg, indbyggere, stationer og andet nye navne på {{to}}.",
+    "developmentNotice": {
+      "heading": "Dette spil er en testversion under udvikling",
+      "subheading": "Læs dette, før du spiller",
+      "text": "Økonomiens parametre og logik er stadig ved at blive finjusteret, så din by vokser måske ikke, som den skal. Ledigheden kan stige, og byen kan endda bryde sammen – men det er aldrig din skyld. Hold øje med kommende opdateringer! Sæt spillet på din ønskeliste, og glæd dig til den officielle udgivelse."
+    }
+  }
+}

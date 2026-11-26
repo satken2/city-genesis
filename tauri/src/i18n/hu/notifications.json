@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Városi értesítések",
+    "empty": "Jelenleg nincs beavatkozást igénylő probléma",
+    "loadFailed": "Nem sikerült betölteni az értesítéseket",
+    "types": {
+      "resource_runway": "„{{name}}” nyersanyag várhatóan kb. {{remaining_epochs}} korszak múlva kimerül",
+      "resource_depleted": "„{{name}}” nyersanyag kimerült",
+      "facility_inoperative": "„{{name}}” közlétesítmény nem működik",
+      "facility_inoperative_labor": "„{{name}}” közlétesítmény munkaerőhiány miatt nem működik",
+      "facility_inoperative_material": "„{{name}}” közlétesítmény alapanyaghiány miatt nem működik",
+      "facility_inoperative_high_skill": "„{{name}}” közlétesítmény szakemberhiány miatt csökkentett kapacitással működik",
+      "facility_inoperative_budget": "„{{name}}” közlétesítmény forráshiány miatt csökkentett kapacitással működik",
+      "education_low_enrollment": "„{{name}}” oktatási intézmény kihasználatlan, kevés a diák ({{enrolled}} beiratkozott / {{max_students}} férőhely)",
+      "infra_facility_down": "„{{name}}” infrastrukturális létesítmény leállt",
+      "infra_disconnected": "{{count}} létesítmény nincs bekötve az infrastruktúra-hálózatba",
+      "rail_capacity_exceeded": "{{count}} vágányszakaszon a vonatok száma meghaladja a pálya kapacitását",
+      "collapse": "{{count}} épület vagy út összeomlott",
+      "collapse_with_deaths": "{{count}} épület vagy út összeomlott, {{deaths}} ember meghalt",
+      "deaths_traffic": "{{count}} ember halt meg közlekedési balesetben",
+      "tenant_blocked_by_parcel_size": "„{{zone_name}}” kerületben nem építhető épület „{{tenant_name}}” számára (szükséges: {{required}} m2, a telken legfeljebb {{max_capacity}} m2). Nagyobb telek kell",
+      "unknown": "Súlyos esemény történt",
+      "sanitation": "{{count}} háztartásban romlanak a higiéniai viszonyok. Fejleszd a szennyvíz- és hulladékkezelést."
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Stavební projekt",
+    "none": "(bez štítku)",
+    "createNew": "+ Nový štítek…",
+    "newPlaceholder": "Zadejte název štítku",
+    "add": "Přidat",
+    "cancel": "Zrušit",
+    "saveFailed": "Štítek se nepodařilo uložit",
+    "showObject": "Zobrazit ve 3D zobrazení",
+    "hideObject": "Skrýt ve 3D zobrazení"
+  },
+  "constructionProjects": {
+    "all": "Vše",
+    "empty": "Zatím žádné stavby. Zvolte štítek při umisťování ve stavebním panelu nebo ho přidejte v panelu podrobností plánovaného či rozestavěného veřejného zařízení nebo silnice. Stavby se pak seskupí do projektů.",
+    "loadFailed": "Stavební projekty se nepodařilo načíst",
+    "totalCost": "Stavební náklady (odhad)",
+    "duration": "Zbývající doba výstavby",
+    "progress": "Postup",
+    "progressValue": "Dokončeno {{done}} / {{total}}",
+    "monthsValue": "{{value}} měs.",
+    "stalled": "Bez postupu",
+    "stalledWarning": "Stavby s nulovou rychlostí výstavby nepostupují (nezapočítávají se do doby výstavby). Počet: {{count}}.",
+    "done": "Dokončeno",
+    "unnamed": "#{{id}}",
+    "showAll": "Znovu zobrazit vše ({{count}})",
+    "showTag": "Zobrazit tento projekt ve 3D zobrazení",
+    "hideTag": "Skrýt tento projekt ve 3D zobrazení",
+    "showObject": "Zobrazit ve 3D zobrazení",
+    "hideObject": "Skrýt ve 3D zobrazení",
+    "deleteTag": "Smazat štítek",
+    "confirmDeleteTag": "Smazat štítek „{{tag}}“? Štítek se odebere z příslušných budov a silnic (samotné stavby zůstanou).",
+    "columns": {
+      "name": "Objekt",
+      "status": "Stav",
+      "cost": "Zbývající náklady",
+      "remaining": "Zbývající doba"
+    }
+  }
+}

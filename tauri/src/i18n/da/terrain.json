@@ -1,0 +1,23 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Venter på data fra terrænredigeringen…"
+  },
+  "groundCover": {
+    "label": "Jordoverflade",
+    "hint": "Skifter jordens farve og tekstur i spillet og farverne på 2D-kort. Det påvirker ikke simuleringen.",
+    "1": "Græsland",
+    "2": "Ørken",
+    "3": "Frodig eng",
+    "4": "Snemark",
+    "5": "Tørt land",
+    "6": "Gitter"
+  },
+  "climate": {
+    "label": "Klima",
+    "hint": "Kopierer månedlig temperatur, nedbør, solskin og vejrsandsynligheder fra en skabelon. Detaljerne kan redigeres under »Klimaindstillinger« i scenarieeditoren."
+  },
+  "assetPack": {
+    "label": "Assetpakke",
+    "standard": "Standard"
+  }
+}

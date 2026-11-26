@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Tổng quan",
+    "tabActivity": "Hoạt động",
+    "follow": "Theo bằng camera",
+    "unfollow": "Dừng theo bằng camera",
+    "track": "Thêm vào danh sách theo dõi",
+    "trackRandom": "Theo dõi ngẫu nhiên một người",
+    "noUntrackedCitizens": "Không còn công dân nào chưa được theo dõi.",
+    "trackRandomError": "Không thể theo dõi công dân.",
+    "untrack": "Bỏ khỏi danh sách theo dõi",
+    "home": "Nơi ở",
+    "mobility": "Phương tiện đi lại",
+    "mode": {
+      "automobile": "Ô tô",
+      "pedestrian": "Đi bộ và giao thông công cộng"
+    },
+    "visits": "Nơi đến",
+    "visitKind": {
+      "home": "Nhà",
+      "work": "Nơi làm việc",
+      "school": "Trường học",
+      "shop": "Mua sắm"
+    },
+    "legs": {
+      "walk": "Đi bộ",
+      "drive": "Ô tô",
+      "transit": "Giao thông công cộng",
+      "conveyor": "Thiết bị chở người"
+    },
+    "trip": "Một chiều {{minutes}} phút · {{route}}",
+    "noRoute": "Không có lộ trình",
+    "noVisits": "Không có nơi nào để đi.",
+    "status": {
+      "not_ready": "Sẽ hiển thị sau khi chạy mô phỏng.",
+      "busy": "Không thể hiển thị trong khi đang mô phỏng.",
+      "no_home": "Đang chờ nhà ở nên chưa có ghi nhận hoạt động.",
+      "missing": "Công dân này không còn sống ở thành phố.",
+      "error": "Không thể tải."
+    },
+    "empty": "Chưa theo dõi công dân nào.",
+    "pickFailed": {
+      "not_ready": "Hãy chạy mô phỏng để có thể nhấp vào xe hoặc người đi bộ và xem đó là công dân nào.",
+      "busy": "Không thể hiển thị công dân trong khi đang mô phỏng.",
+      "none": "Không tìm thấy công dân trên chiếc xe hoặc người đi bộ này.",
+      "missing": "Công dân này không còn sống ở thành phố.",
+      "no_home": "Công dân này đang chờ nhà ở.",
+      "error": "Không thể hiển thị công dân."
+    }
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Eritasoliittymä",
+      "jct": "Moottoritieristeys"
+    },
+    "fallbackName": {
+      "ic": "Liittymä #{{id}}",
+      "jct": "Risteys #{{id}}"
+    },
+    "connections": {
+      "from": "Lähtevä tie",
+      "to": "Saapuva tie",
+      "road": "{{type}} #{{id}}",
+      "none": "Toisiinsa liittyviä tiepareja ei ole.",
+      "direction": {
+        "n": "Pohjoinen",
+        "ne": "Koillinen",
+        "e": "Itä",
+        "se": "Kaakko",
+        "s": "Etelä",
+        "sw": "Lounas",
+        "w": "Länsi",
+        "nw": "Luode"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

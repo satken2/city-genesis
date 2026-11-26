@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Čtvrť č. {{id}}",
+    "color": "Barva čtvrti",
+    "colorUpdateFailed": "Barvu čtvrti se nepodařilo změnit",
+    "basicInfo": "Základní informace",
+    "area": "Rozloha",
+    "zonePopulation": "Počet obyvatel",
+    "daytimePopulation": "Denní populace",
+    "spaceAmount": "Obsazenost podlahové plochy",
+    "slotStarvationTitle": "Čekající nájemce nelze umístit",
+    "slotStarvationWarning": "Nájemce „{{tenant}}“ potřebuje v jedné budově alespoň {{required}} m2 podlahové plochy, ale na parcelách v této čtvrti lze postavit nejvýše {{max}} m2. Připravte větší parcelu.",
+    "restrictions": "Stavební regulace",
+    "restrictionUpdateFailed": "Regulace čtvrti se nepodařilo změnit",
+    "restrictionRequired": "Zastavěnost, koeficient podlažních ploch a výška nesmějí být prázdné",
+    "mergeConfirm": "Čtvrť „{{source}}“ bude sloučena se čtvrtí „{{target}}“. Původní čtvrť zanikne a její regulace budou ztraceny.",
+    "mergeAction": "Sloučit",
+    "mergeFailed": "Čtvrti se nepodařilo sloučit (nesousedící čtvrti nelze sloučit)",
+    "mergeNoRequest": "Není vybrána žádná čtvrť ke sloučení",
+    "edit": {
+      "toolHeading": "Úprava",
+      "toolCreate": "Vytvořit novou čtvrť",
+      "toolExpand": "Rozšířit čtvrť",
+      "toolExpandZone": "Rozšířit čtvrť {{name}}",
+      "modeHeading": "Způsob výběru",
+      "modeBlock": "Celý blok",
+      "modeRoad": "Strana ulice",
+      "hint": {
+        "create": {
+          "block": "Podržte Ctrl a táhněte přes bloky ohraničené silnicemi. Vybarvené bloky se i s parcelami stanou novou čtvrtí. Tažením posunete mapu, kolečkem ji přiblížíte či oddálíte.",
+          "road": "Podržte Ctrl a táhněte přes jednu stranu ulice (polovinu vozovky nebo přilehlé parcely). Tato strana ulice se i s parcelami stane novou čtvrtí. Tažením posunete mapu, kolečkem ji přiblížíte či oddálíte."
+        },
+        "expand": {
+          "block": "Najeďte myší na čtvrť, podržte Ctrl a táhněte přes bloky. Bloky se i s parcelami připojí k této čtvrti. Tažením posunete mapu, kolečkem ji přiblížíte či oddálíte.",
+          "road": "Najeďte myší na čtvrť, podržte Ctrl a táhněte přes jednu stranu ulice (polovinu vozovky nebo přilehlé parcely). Tato strana ulice se i s parcelami připojí k této čtvrti. Tažením posunete mapu, kolečkem ji přiblížíte či oddálíte."
+        }
+      },
+      "failed": "Čtvrť se nepodařilo změnit."
+    }
+  }
+}

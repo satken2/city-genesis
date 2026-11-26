@@ -2,8 +2,8 @@
  * Shared display language definitions. Manage UI language codes (i18next) and BCP47 number/date formatting
  * locales together. Add languages only through SUPPORTED_LANGUAGES and INTL_LOCALES here. Codes must match
  * src/i18n/<code>/ directories. Chinese uses script rather than region because Simplified/Traditional vocabulary
- * differs. Spanish has separate Latin American (es-419) and Spain (es-ES) resources. The first-launch language detection in
- * src-tauri/src/settings.rs and steam.rs also lists these codes.
+ * differs. Spanish (es-419 / es-ES) and Portuguese (pt-BR / pt-PT) have separate regional resources. The first-launch
+ * language detection in src-tauri/src/settings.rs and steam.rs also lists these codes.
  */
 
 /** Supported UI language codes. Settings/new-game choices follow this order. */
@@ -24,6 +24,21 @@ export const SUPPORTED_LANGUAGES = [
   "it",
   "id",
   "ar",
+  "pt-PT",
+  "uk",
+  "th",
+  "vi",
+  "ms",
+  "nl",
+  "sv",
+  "nb",
+  "da",
+  "fi",
+  "cs",
+  "hu",
+  "ro",
+  "bg",
+  "el",
 ] as const;
 
 export type SupportedLanguage = (typeof SUPPORTED_LANGUAGES)[number];
@@ -50,6 +65,21 @@ const INTL_LOCALES: Record<SupportedLanguage, string> = {
   it: "it-IT",
   id: "id-ID",
   ar: "ar-EG-u-nu-latn",
+  "pt-PT": "pt-PT",
+  uk: "uk-UA",
+  th: "th-TH",
+  vi: "vi-VN",
+  ms: "ms-MY",
+  nl: "nl-NL",
+  sv: "sv-SE",
+  nb: "nb-NO",
+  da: "da-DK",
+  fi: "fi-FI",
+  cs: "cs-CZ",
+  hu: "hu-HU",
+  ro: "ro-RO",
+  bg: "bg-BG",
+  el: "el-GR",
 };
 
 /** Languages written right to left. Every WebView follows this for the document direction when the language changes. */
@@ -80,22 +110,22 @@ export function isSupportedLanguage(value: unknown): value is SupportedLanguage 
 const TRADITIONAL_CHINESE_REGIONS = ["tw", "hk", "mo"];
 
 /**
- * Map a BCP 47 tag (ja-JP, zh-Hant-HK, ...) to a supported language by its primary subtag. Chinese is split by
- * script, so infer the script from the region when the tag has no script subtag. Spain selects es-ES,
- * while other Spanish tags retain the Latin American default. Same rule as
- * language_from_locale_tag in src-tauri/src/settings.rs.
+ * Map a BCP 47 tag (ja-JP, zh-Hant-HK, ...) to a supported language by its primary subtag. A language with regional
+ * resources picks the code whose region appears in the tag, else the first code of that language in
+ * SUPPORTED_LANGUAGES (es-MX → es-419, pt-AO → pt-BR). Chinese is split by script, so infer the script from the region
+ * when the tag has no script subtag. Same rule as language_from_locale_tag in src-tauri/src/settings.rs.
  */
 export function languageFromLocaleTag(tag: string): SupportedLanguage | undefined {
   const subtags = tag.toLowerCase().split(/[-_]/);
   const primary = subtags[0];
-  if (primary === "es") return subtags.slice(1).includes("es") ? "es-ES" : "es-419";
   if (primary === "zh") {
     const traditional =
       subtags.includes("hant") ||
       (!subtags.includes("hans") && subtags.some((subtag) => TRADITIONAL_CHINESE_REGIONS.includes(subtag)));
     return traditional ? "zh-Hant" : "zh-Hans";
   }
-  return SUPPORTED_LANGUAGES.find((code) => code.split("-")[0] === primary);
+  const candidates = SUPPORTED_LANGUAGES.filter((code) => code.split("-")[0] === primary);
+  return candidates.find((code) => subtags.slice(1).includes(code.split("-")[1]?.toLowerCase())) ?? candidates[0];
 }
 
 /**

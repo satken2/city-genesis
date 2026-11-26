@@ -1,0 +1,756 @@
+{
+  "tutorial": {
+    "startButton": "Începe",
+    "controls": {
+      "title": "Comenzi de bază",
+      "description": "Află ce fel de oraș urmărești să construiești ca primar și cum se joacă: întâi planifici, apoi dai timpul înainte. După ce afli ce înseamnă informațiile de pe ecran, ce face fiecare buton și cum se mișcă camera, vei prelungi un drum, vei crea un cartier rezidențial nou și îi vei asigura locuințe, curent și apă.",
+      "step1": {
+        "title": "Începe să construiești orașul ca primar",
+        "role": "În City Genesis îți dezvolți orașul ca primar. Planifici construcția drumurilor și a facilităților, hotărăști cum se folosește terenul, stabilești impozitele și bugetele pentru serviciile publice. Treaba primarului este să creeze condițiile în care locuitorii și firmele pot trăi și lucra. Apasă „Următorul” pentru a continua.",
+        "goal": "Ținta ta este un oraș în care locuitorii trăiesc bine și în siguranță. Asigură locuințe și locuri de muncă, adu curent, apă, îngrijire medicală și altele. Ca să extinzi orașul ai nevoie și de bani. Gândește-te ce să îmbunătățești ținând cont atât de viața locuitorilor, cât și de finanțele orașului.",
+        "epoch": "În acest joc timpul avansează câte o lună. Mai întâi stabilești bugetele și planurile de construcție, iar când ești gata, apeși „Start”. Atunci timpul avansează, lucrările și activitatea locuitorilor și a firmelor merg înainte, iar tu analizezi rezultatele și faci planul următor. Data nu se schimbă până nu apeși „Start”, așa că poți să te gândești în liniște.",
+        "epoch_week": "În acest joc timpul avansează câte o săptămână. Mai întâi stabilești bugetele și planurile de construcție, iar când ești gata, apeși „Start”. Atunci timpul avansează, lucrările și activitatea locuitorilor și a firmelor merg înainte, iar tu analizezi rezultatele și faci planul următor. Data nu se schimbă până nu apeși „Start”, așa că poți să te gândești în liniște."
+      },
+      "step2": {
+        "title": "Află starea orașului din cockpit",
+        "tools": "Cockpitul din partea de jos a ecranului e locul în care verifici starea orașului și te gândești la pasul următor. Cu „Afișare” găsești, colorate pe hartă, locurile unde ceva lipsește sau e o problemă. Cu „Hartă” vezi cum sunt așezate lucrurile în tot orașul. Chiar și când orașul crește, te ajută să găsești locurile de care ai nevoie.",
+        "tracking": "„Lista cetățenilor” te ajută să cauți locuitori după nume sau alte criterii și să revii mai târziu la viața și naveta celor care te interesează. Dacă adaugi pe cineva la urmărire din detaliile cetățeanului, îi poți deschide informațiile de aici. Folosește-o când vrei să cunoști viața fiecărui om, pe care cifrele generale ale orașului nu o arată.",
+        "bulldozer": "„Buldozerul” șterge parcelele libere și anulează clădirile sau drumurile planificate. Apasă butonul, fă clic pe obiect în vederea 3D, iar când termini, apasă din nou butonul ca să-l dezactivezi. Ca să înlături o clădire sau un drum deja finalizat, deschide detaliile lui și alege dărâmarea.",
+        "services": "Indicatoarele cu fulger, picătură și navă arată câtă rezervă de capacitate mai ai la curent, la apă și la import-export. Cu cât se apropie de maxim, cu atât cererea sau volumul operat crește și rezerva scade. Apasă pe ele ca să vezi facilitățile publice și punctele de import-export. Înainte să extinzi orașul, verifică dacă nu trebuie să construiești facilități noi.",
+        "score": "„Scorul” arată, pe ansamblu, cât de mulțumiți sunt locuitorii de viața în oraș. Cu cât e mai mare, cu atât orașul e mai plăcut de locuit. Îl îmbunătățești asigurând locuințe, locuri de muncă, îngrijire medicală și un mediu de viață bun. Când scade, caută ce le lipsește locuitorilor.",
+        "budget": "„Bugetul” arată cheltuielile estimate pentru luna următoare față de veniturile din luna trecută. Când acul indicatorului se duce spre dreapta, cheltuielile depășesc veniturile. Când se duce spre stânga, rămân bani în plus. Verifică-l înainte să dai timpul înainte.",
+        "budget_week": "„Bugetul” arată cheltuielile estimate pentru săptămâna următoare față de veniturile din săptămâna trecută. Când acul indicatorului se duce spre dreapta, cheltuielile depășesc veniturile. Când se duce spre stânga, rămân bani în plus. Verifică-l înainte să dai timpul înainte.",
+        "budgetChanges": "Dacă pornești mai multe lucrări la drumuri și facilități sau mărești nivelul de funcționare al facilităților ori ritmul lucrărilor, ai nevoie de mai mulți bani și indicatorul bugetului urcă. Reducând funcționarea sau ritmul lucrărilor, scazi cheltuielile estimate. Dacă veniturile din impozite cresc, aceleași cheltuieli coboară indicatorul.",
+        "budgetPlanning": "Dacă indicatorul e jos, ai bani de cheltuit pentru oraș. Gândește-te să investești în serviciile care lipsesc sau în facilitățile de care vei avea nevoie.",
+        "date": "Data arată cât de departe a ajuns timpul în oraș. Folosește-o ca reper pentru progresul construcțiilor și schimbările de sezon. Cât timp planifici, data stă pe loc; se actualizează când dai timpul înainte cu „Start”.",
+        "climate": "Panourile cu temperatură, precipitații, însorire și viteza vântului arată clima medie a lunii curente. De aceste condiții depinde randamentul agriculturii și al producției de energie eoliană și solară. Când recoltele sau producția de energie sunt mici, verifică și clima.",
+        "climate_week": "Panourile cu temperatură, precipitații, însorire și viteza vântului arată clima medie a săptămânii curente. De aceste condiții depinde randamentul agriculturii și al producției de energie eoliană și solară. Când recoltele sau producția de energie sunt mici, verifică și clima.",
+        "climateEffects": "Când e puțin soare, scade producția centralelor solare; când bate puțin vântul, scade producția celor eoliene. Agricultura depinde și de temperatură și de cantitatea de ploaie. Apasă pe panoul climei ca să vezi cum influențează condițiile din luna aceasta randamentul fiecărei facilități. Ține cont că oferta variază cu anotimpurile când îți dezvolți facilitățile.",
+        "climateEffects_week": "Când e puțin soare, scade producția centralelor solare; când bate puțin vântul, scade producția celor eoliene. Agricultura depinde și de temperatură și de cantitatea de ploaie. Apasă pe panoul climei ca să vezi cum influențează condițiile din săptămâna aceasta randamentul fiecărei facilități. Ține cont că oferta variază cu anotimpurile când îți dezvolți facilitățile.",
+        "notifications": "Cifra de la „Notificări” arată câte avertismente și atenționări merită verificate acum. Cifra roșie care clipește semnalează probleme care afectează funcționarea orașului și trebuie rezolvate repede. Cifra galbenă înseamnă atenționări, de pildă pregătiri pentru creștere sau probleme care se rezolvă în timp. Apasă mai întâi butonul și citește ce scrie.",
+        "notificationActions": "Dacă o notificare se referă la o facilitate sau la un cartier, apasă pe rândul respectiv pentru detalii. Rezolvă problema după cauză: conectează linia electrică dacă lipsește legătura sau asigură aprovizionarea dacă unei facilități îi lipsesc materialele. Notificările despre probleme persistente dispar când cauza e înlăturată. După ce intervii, verifică rezultatele de luna următoare."
+      },
+      "step3": {
+        "title": "Schimbă afișarea ca să găsești probleme",
+        "open": "Doar privind orașul e greu să-ți dai seama de lipsa de curent sau de aglomerația din trafic. Folosește „Afișare” ca să vezi pe hartă informațiile care te interesează. Apasă „Afișare” în cockpit ca să deschizi panoul.",
+        "tabs": "Din filele verticale alegi ce vrei să analizezi: clădiri, drumuri, parcele, cartiere și altele. Dacă informațiile se suprapun și nu se mai vede bine, poți ascunde ce nu-ți trebuie. Apasă „Următorul” ca să vezi cum se folosește afișarea.",
+        "modes": "Cu butoanele din fiecare filă alegi după ce informație se colorează obiectele. Caută drumurile aglomerate sau clădirile cu probleme și folosește-le ca indicii pentru soluții. Pe obiectele pe care vrei să le studiezi poți face clic în vederea 3D. Apasă „Următorul”."
+      },
+      "step4": {
+        "title": "Cunoaște uneltele de construcție",
+        "grading": "Iată butoanele din stânga ecranului, de sus în jos. „Terasamente” nivelează pantele pe care e greu de construit sau umple marea pentru a câștiga teren. Când vrei mai multe locuințe și locuri de muncă, dar nu ai teren, îi dă orașului loc să crească.",
+        "road": "„Drumuri, căi ferate și infrastructură” creează căile pe care ajung oamenii, mărfurile, curentul și apa. Drumurile leagă locuințele de locurile de muncă, căile ferate leagă locurile îndepărtate, iar liniile electrice și conductele de apă leagă facilitățile între ele. Le folosești pentru deplasările locuitorilor, comerțul firmelor și alimentarea cu curent și apă.",
+        "land": "„Parcele” pregătește amplasamente pentru clădiri. Doar existența terenului nu e de ajuns ca să apară clădiri. Fie că vrei mai multe locuințe, fie că vrei o facilitate mare, ai nevoie de un amplasament de mărimea potrivită.",
+        "landDevelopment": "Parcelele pregătite pot fi folosite de oraș pentru propriile clădiri, dar sunt și locul în care cresc locuințele și firmele private. Clădirile private apar în funcție de cerere și de reglementările de construcție ale cartierului. Când vrei mai multe locuințe sau locuri de muncă, verifică dacă ai destule parcele libere.",
+        "district": "„Cartiere” îți permite să gestionezi o parte a orașului ca un întreg. Poți avea politici diferite pentru fiecare zonă, de exemplu una mai ales rezidențială și alta în care vrei să aduni fabricile. Pentru fiecare cartier poți limita tipurile de clădiri permise, ca să stabilești o politică de construcție potrivită pentru toată zona.",
+        "districtRules": "În detaliile cartierului alegi ce tipuri de clădiri pot fi construite. Folosește-le după cum vrei să crească orașul, de exemplu ca să nu apară fabrici printre locuințe. Poți compara și populația și condițiile de viață din fiecare cartier, ca să vezi unde e nevoie de sprijin.",
+        "construction": "„Construcție” îți permite să planifici clădirile de care orașul are nevoie. Poți construi locuințe, locuri de muncă, spitale, școli, centrale electrice și altele. Folosește-l ca să mărești numărul de locuințe și de locuri de muncă sau ca să acoperi serviciile care lipsesc, precum sănătatea, educația ori energia.",
+        "transport": "„Transport public” sprijină deplasarea locuitorilor cu autobuzul sau trenul. Stabilești linii și stații și ajustezi tarifele și intervalul între curse. Folosește-l ca să legi locuințele de locurile de muncă și de școli și să ușurezi naveta.",
+        "propPlacement": "„Amplasare elemente decorative” îți permite să pui copaci, stânci și altele pentru a înfrumuseța peisajul. Folosește-l când vrei să adaugi verdeață pe străzi sau să decorezi relieful.",
+        "cityDevelopment": "„Dezvoltare automată a orașului” planifică dintr-odată drumuri și parcele pe o suprafață mare. Colorezi pe hartă zona pe care vrei s-o dezvolți, alegi tipul de urbanism și primești drumurile și parcelele într-o singură operație. Folosește-o când deschizi de la zero un cartier rezidențial sau o zonă urbană nouă.",
+        "constructionProjects": "În „Proiecte de construcție” vezi la un loc lucrările planificate și cele în curs. Uită-te care lucrări avansează și unde se duc banii, apoi hotărăște ce lucrări continui.",
+        "regulation": "„Reglementări” e locul în care stabilești regulile de viață și de muncă din oraș. Poți seta limita de viteză, programul de lucru, primirea imigranților, protecția socială și altele. Gândește-te ce contează mai mult – siguranța, confortul vieții sau creșterea orașului – și ajustează după situație.",
+        "stat": "„Statistici” îți arată rezultatele. Vezi în grafice cum evoluează populația, veniturile, naveta, mulțumirea locuitorilor, mărimea economiei, prețurile și altele. După ce schimbi politici sau facilități, verifică dacă viața oamenilor s-a îmbunătățit și ce mai lipsește. Acestea sunt butoanele din stânga."
+      },
+      "step5": {
+        "title": "Pune planul în aplicare și verifică rezultatele",
+        "flow": "După ce ai verificat starea orașului și te-ai gândit la construcțiile și la împărțirea bugetului, dai timpul înainte cu „Start” din cockpit. Lucrările avansează, locuitorii muncesc, firmele produc, iar bilanțul orașului și scorul se schimbă. Uneori durează câteva luni până se vede efectul planului.",
+        "execute": "După ce dai timpul înainte, verifică rezultatele și notificările. Dacă ceva nu merge, rezolvă în planul următor și dă iar timpul înainte. Orașul crește repetând „planifică → avansează → verifică rezultatele”. Acum nu trebuie să apeși „Start”. Apasă „Următorul” ca să treci la controlul camerei."
+      },
+      "step6": {
+        "title": "Mișcă camera",
+        "description": "Camera se controlează așa: tragere cu stânga pentru a muta vederea, tragere cu dreapta pentru rotire, W, A, S, D (sau săgețile) pentru deplasare, Q și E pentru rotire, R și F pentru înălțime, rotița mouse-ului pentru zoom. Încearcă cât vrei, apoi apasă „Următorul”."
+      },
+      "step7": {
+        "title": "Modul zbor și modul foto",
+        "description": "Camera are două moduri speciale. În „modul zbor” intri cu Shift+F: W, A, S, D te duc în direcția în care privești, cu mouse-ul te uiți în jur, iar cu R și F urci și cobori. Ieși cu Esc. „Modul foto” pornește din butonul din stânga sus și te plimbă în jurul orașului: cu mouse-ul te uiți în jur, Shift comută între rotire și deplasare, Space pune pauză, Backspace redă invers, iar Esc încheie. În ambele moduri panourile de pe ecran se ascund și reapar când ieși cu Esc. După ce le-ai încercat, ieși din ambele moduri și apasă „Următorul”."
+      },
+      "step8": {
+        "title": "Vezi limitele orașului",
+        "description": "Am mutat camera la marginea de est a orașului. Pentru oraș poți folosi doar suprafața din interiorul acestui pătrat, unde relieful este generat în detaliu. Nici camera nu poate ieși dincolo de această limită. Cu asta am terminat explicațiile despre ecran și comenzi. Acum hai să creăm un cartier rezidențial nou. Apasă „Următorul”."
+      },
+      "step9": {
+        "title": "Prelungește drumul",
+        "description": "Acum vei crea efectiv un cartier rezidențial pentru noii locuitori. Fără drumuri care să le lege, locuințele și locurile de muncă nu folosesc la nimic: oamenii nu pot circula, iar mărfurile nu ajung. Mai întâi prelungește spre vest strada est-vest a orașului, ca să deschizi drumul spre noul cartier. Apasă „Drumuri, căi ferate și infrastructură” pe panoul cu pictograme ca să deschizi panoul de construcție.",
+        "confirm": "Terenul de-a lungul drumului se împarte în parcele când drumul e finalizat. În panoul de construcție, la „Parcele de-a lungul drumului create la finalizare”, poți alege mărimea parcelelor separat pentru partea stângă și cea dreaptă. Alege după tipul de clădiri pe care le vrei: parcele mai mici pentru locuințe, parcele mari pentru fabrici sau ferme. De data asta faci un cartier rezidențial, așa că lasă setarea cum e. Apasă „Confirmă” în panoul de construcție ca să salvezi, apoi apasă butonul „Următorul”."
+      },
+      "step10": {
+        "title": "Finalizează drumul",
+        "description": "Drumul este încă în starea „Construcție planificată”. Un drum doar planificat nu poate fi folosit: oamenii și mașinile circulă pe el abia după terminarea lucrărilor. Apasă de 2–3 ori „Start” în cockpit ca să dai timpul înainte și așteaptă finalizarea. Pe durata lucrărilor plătești costuri de construcție în fiecare lună.",
+        "description_week": "Drumul este încă în starea „Construcție planificată”. Un drum doar planificat nu poate fi folosit: oamenii și mașinile circulă pe el abia după terminarea lucrărilor. Apasă de 2–3 ori „Start” în cockpit ca să dai timpul înainte și așteaptă finalizarea. Pe durata lucrărilor plătești costuri de construcție în fiecare săptămână."
+      },
+      "step11": {
+        "title": "Au apărut parcelele",
+        "description": "Drumul e gata, iar de-a lungul lui au apărut parcele. Clădirile se pot construi doar pe parcele, iar pentru că parcelele dau în drum, oamenii și mărfurile pot intra și ieși. Dacă vrei să adaugi parcele de-a lungul unui drum existent, le poți crea din „Parcele” pe panoul cu pictograme."
+      },
+      "step12": {
+        "title": "Creează un cartier",
+        "description": "Înainte de a construi, hotărăște ce vrei să devină strada aceasta. Fără o politică, s-ar putea ridica o fabrică chiar lângă locuințe. Politicile pentru fiecare zonă se stabilesc la nivel de „cartier”. Cartierele se atribuie pe drumuri, iar o parcelă aparține cartierului drumului la care dă. Apasă „Cartiere” pe panoul cu pictograme ca să deschizi fereastra de editare a cartierelor: vei vedea că acum tot orașul e un singur cartier.",
+        "create": "Alege modul de selecție „Pe latură de stradă”. Comută unealta pe „Creează un cartier nou”, ține apăsat Ctrl și trage de-a lungul drumului pe care l-ai prelungit. Ambele laturi ale drumului colorat, împreună cu parcelele care dau în el, devin un cartier nou."
+      },
+      "step13": {
+        "title": "Cartierul a fost separat",
+        "description": "Noua stradă a fost separată într-un cartier diferit de centrul orașului. Pentru fiecare cartier poți urmări populația și prețurile sau poți stabili ce clădiri se pot construi, așa că poți dezvolta orașul potrivit fiecărui loc. După ce te-ai uitat, închide fereastra de editare a cartierelor."
+      },
+      "step14": {
+        "title": "Deschide detaliile cartierului",
+        "description": "Acum setează noul cartier ca zonă rezidențială. Afișează cartierele cu pictograma din stânga jos a ecranului, fă clic pe eticheta cartierului creat adineauri și deschide detaliile lui."
+      },
+      "step15": {
+        "title": "Fă din el un cartier rezidențial",
+        "description": "În reglementările de construcție din partea de jos a panoului alegi ce clădiri pot fi ridicate pe parcelele cartierului. Aici vrei o zonă rezidențială liniștită, așa că fă clic pe toate clădirile în afară de „Bloc de locuințe” și „Casă individuală” ca să le dezactivezi."
+      },
+      "step16": {
+        "title": "Verifică parcelele",
+        "description": "Reglementările stabilite pentru cartier se aplică tuturor parcelelor din el. Fă clic pe parcela cu marcaj galben ca să-i deschizi detaliile."
+      },
+      "step17": {
+        "title": "Reglementarea a fost aplicată",
+        "description": "În partea de jos a panoului parcelei vezi reglementarea cartierului, care permite doar „Bloc de locuințe” și „Casă individuală”. Acum pe parcelele acestei străzi se pot construi doar locuințe. Nu trebuie să setezi parcelele una câte una: dacă stabilești politica la nivel de cartier, toată strada o urmează."
+      },
+      "step18": {
+        "title": "Construiește locuințe",
+        "description": "E momentul să asiguri locuințe. De obicei, locuințele sunt construite automat de sectorul privat când există oameni care vor să locuiască aici, dar dacă orașul construiește locuințe publice, lipsa e acoperită imediat. Aici vei construi un bloc de locuințe public. Apasă „Construcție” pe panoul cu pictograme.",
+        "select": "Din categoria „Rezidențial” alege „Bloc de locuințe”, fă clic pe orice parcelă din noul cartier ca să o alegi drept amplasament și apasă „Confirmă”."
+      },
+      "step19": {
+        "title": "Finalizează locuințele",
+        "description": "Ca și drumurile, clădirile doar planificate nu pot fi încă locuite. Un bloc de locuințe are nevoie de peste jumătate de an până la finalizare. Dă timpul înainte cu „Start” și așteaptă să fie gata."
+      },
+      "step20": {
+        "title": "Verifică dacă ajunge curentul",
+        "description": "Locuința singură nu ajunge: fără curent și apă nu se poate trăi. Orașul nu are încă nici centrală electrică, nici alimentare cu apă. Fă clic pe blocul de locuințe cu marcaj galben, unde locuiesc oamenii orașului, ca să-i deschizi detaliile. Alege unul dintre chiriași în fila „Informații despre clădire”, apoi deschide fila „Cerere, ofertă și tranzacții”: vei vedea că la energie electrică cantitatea obținută este 0."
+      },
+      "step21": {
+        "title": "Construiește o centrală solară",
+        "description": "Ca să aduci curent, ai nevoie mai întâi de o centrală care să-l producă. Construiește o „Centrală solară” pe parcela cu marcaj galben. În mod normal construcția durează, dar fiind tutorial, durata lucrărilor e sărită și centrala e gata imediat."
+      },
+      "step22": {
+        "title": "Construiește o stație de transformare",
+        "description": "Curentul de înaltă tensiune produs de centrală nu poate fi folosit așa cum e în locuințe. Stația de transformare îl transformă în curent pentru consumatorii casnici și îl distribuie clădirilor din jur legate prin drumuri. Construiește o „Stație de transformare” pe parcela cu marcaj galben de lângă blocul de locuințe."
+      },
+      "step23": {
+        "title": "Leagă-le cu o linie electrică",
+        "description": "Chiar dacă centrala și stația de transformare sunt departe una de alta, le leagă o cale pe care circulă curentul. Deschide „Drumuri, căi ferate și infrastructură” de pe panoul cu pictograme, alege „Linie electrică” din „Electricitate” și trage o linie de la punctul de racord al centralei solare până la punctul de racord al stației de transformare. Dacă legi punctele în linie dreaptă, o tragi dintr-o singură bucată."
+      },
+      "step24": {
+        "title": "Verifică alimentarea cu energie",
+        "description": "După ce le-ai legat, verifică dacă trece într-adevăr curentul. Dă timpul înainte cu „Start”, fă clic pe stația de transformare ca să-i deschizi detaliile și verifică în fila „Cerere, ofertă și tranzacții” că la „Electricitate de înaltă tensiune” cantitatea primită nu este 0. Pot trece câteva luni până când centrala pornește și curentul ajunge."
+      },
+      "step25": {
+        "title": "Curentul a ajuns în locuințe",
+        "description": "Din detaliile blocului de locuințe, deschide ca la început fila „Cerere, ofertă și tranzacții” a unui chiriaș și verifică dacă la „Electricitate” cantitatea obținută nu mai este 0. Uneori trebuie să mai avansezi 1–2 luni până ajunge curentul în locuințe. Centrala îl produce, linia electrică îl transportă, stația de transformare îl distribuie: abia când toate trei sunt legate, curentul ajunge în case."
+      },
+      "step26": {
+        "title": "Caută o sursă de apă",
+        "description": "Urmează apa. Apa de la robinet este apă subterană pompată la suprafață și trimisă în oraș. Mai întâi află unde se poate pompa apă. Apasă „Afișare” în cockpit ca să deschizi panoul de afișare.",
+        "show": "Din filele verticale alege „Resurse naturale” și comută pe „Afișează”. Sursele de apă apar pe hartă cu albastru deschis. Fă clic pe sursa de apă cu marcaj galben ca să-i deschizi detaliile."
+      },
+      "step27": {
+        "title": "Construiește o pompă de apă subterană",
+        "description": "Pompa de apă subterană scoate apa din pământ, așa că trebuie construită acolo unde există o sursă de apă. Ca să funcționeze are nevoie și de curent și de muncitori – de aceea am adus întâi curentul. Construiește o „Pompă de apă subterană” pe parcela cu marcaj galben de deasupra sursei de apă. Fiind tutorial, durata lucrărilor e sărită."
+      },
+      "step28": {
+        "title": "Construiește o stație de pompare a apei",
+        "description": "Apa pompată nu poate fi distribuită așa cum e locuințelor. Așa cum stația de transformare distribuie curentul, stația de pompare a apei duce apa la clădirile din jur legate prin drumuri. Construiește o „Stație de pompare a apei” pe parcela cu marcaj galben de lângă blocul de locuințe."
+      },
+      "step29": {
+        "title": "Leagă-le cu o conductă de apă",
+        "description": "Ai nevoie de o conductă care să ducă apa de la pompa de apă subterană la stația de pompare. Deschide „Drumuri, căi ferate și infrastructură” de pe panoul cu pictograme, alege „Conductă de aducțiune” din „Apă” și trage conducta de la punctul de racord al pompei de apă subterană până la punctul de racord al stației de pompare. Ca să nu intre în conflict cu drumurile și linia electrică, ocolește larg prin partea de est."
+      },
+      "step30": {
+        "title": "Verifică alimentarea cu apă",
+        "description": "Dă timpul înainte cu „Start”, fă clic pe stația de pompare a apei ca să-i deschizi detaliile și verifică în fila „Cerere, ofertă și tranzacții” că la „Apă de înaltă presiune” cantitatea primită nu este 0. Pot trece câteva luni până se strâng muncitori la pompa de apă subterană și ajunge apa."
+      },
+      "step31": {
+        "title": "Ai învățat bazele construirii orașului",
+        "description": "Apa a ajuns la stația de pompare, așa că și locuințele din jur au acum apă curentă. Tragi drumuri, pregătești parcele, stabilești politica cartierului, construiești locuințe și aduci curent și apă: acesta e fluxul de bază al construirii orașului. Apasă „Următorul” ca să închei tutorialul de comenzi de bază."
+      }
+    },
+    "scenario4": {
+      "title": "Construiește o cale ferată",
+      "description": "Vrem să legăm cartierul de locuințe de zona cu locuri de muncă printr-o cale ferată, dar pe traseul planificat se află clădiri private și un spital public. În acest tutorial vei învăța achiziția de terenuri și demolarea facilităților publice, construcția pe viaduct deasupra drumului, construirea peroanelor, a clădirilor stațiilor și a depoului, ajustarea curbelor și a pantelor, iar la final alimentarea cu energie și deschiderea liniei.",
+      "step1": {
+        "title": "Amplasează peroanele înălțate",
+        "description": "Din „Drumuri, căi ferate și infrastructură” → „Căi ferate”, construiește „Peron pe viaduct (lateral)” în vestul orașului și „Peron de cale dublă (lateral)” în estul orașului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă. Ambele se construiesc la 6 m înălțime.",
+        "open": "Din „Drumuri, căi ferate și infrastructură” → „Căi ferate”, construiește „Peron pe viaduct (lateral)” în vestul orașului și „Peron de cale dublă (lateral)” în estul orașului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă. Ambele se construiesc la 6 m înălțime.",
+        "variant": "Din „Drumuri, căi ferate și infrastructură” → „Căi ferate”, construiește „Peron pe viaduct (lateral)” în vestul orașului și „Peron de cale dublă (lateral)” în estul orașului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă. Ambele se construiesc la 6 m înălțime.",
+        "start": "Din „Drumuri, căi ferate și infrastructură” → „Căi ferate”, construiește „Peron pe viaduct (lateral)” în vestul orașului și „Peron de cale dublă (lateral)” în estul orașului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă. Ambele se construiesc la 6 m înălțime.",
+        "end": "Din „Drumuri, căi ferate și infrastructură” → „Căi ferate”, construiește „Peron pe viaduct (lateral)” în vestul orașului și „Peron de cale dublă (lateral)” în estul orașului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă. Ambele se construiesc la 6 m înălțime.",
+        "confirm": "Din „Drumuri, căi ferate și infrastructură” → „Căi ferate”, construiește „Peron pe viaduct (lateral)” în vestul orașului și „Peron de cale dublă (lateral)” în estul orașului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă. Ambele se construiesc la 6 m înălțime.",
+        "town": "Construiește „Peron pe viaduct (lateral)” în vest, la 6 m înălțime. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă.",
+        "new": "Acum construiește peronul din est. Apasă pe „Înapoi” în panou ca să revii la lista de tipuri și alege „Peron de cale dublă (lateral)” din „Căi ferate”. La 6 m înălțime, fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă. Dacă ai închis panoul, îl poți redeschide din „Drumuri, căi ferate și infrastructură”.",
+        "east": "Acum construiește peronul din est. Apasă pe „Înapoi” în panou ca să revii la lista de tipuri și alege „Peron de cale dublă (lateral)” din „Căi ferate”. La 6 m înălțime, fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă. Dacă ai închis panoul, îl poți redeschide din „Drumuri, căi ferate și infrastructură”."
+      },
+      "step2": {
+        "title": "Construiește clădirile stațiilor și intrările",
+        "description": "Alege „Clădire de stație simplă” și unește cele două marcaje din vest, apoi cele două din est, cu câte un pasaj scurt care traversează peronul. Intrările se pun imediat de o parte și de alta a peronului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă.",
+        "open": "Alege „Clădire de stație simplă” și unește cele două marcaje din vest, apoi cele două din est, cu câte un pasaj scurt care traversează peronul. Intrările se pun imediat de o parte și de alta a peronului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă.",
+        "variant": "Alege „Clădire de stație simplă” și unește cele două marcaje din vest, apoi cele două din est, cu câte un pasaj scurt care traversează peronul. Intrările se pun imediat de o parte și de alta a peronului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă.",
+        "start": "Alege „Clădire de stație simplă” și unește cele două marcaje din vest, apoi cele două din est, cu câte un pasaj scurt care traversează peronul. Intrările se pun imediat de o parte și de alta a peronului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă.",
+        "end": "Alege „Clădire de stație simplă” și unește cele două marcaje din vest, apoi cele două din est, cu câte un pasaj scurt care traversează peronul. Intrările se pun imediat de o parte și de alta a peronului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă.",
+        "confirm": "Alege „Clădire de stație simplă” și unește cele două marcaje din vest, apoi cele două din est, cu câte un pasaj scurt care traversează peronul. Intrările se pun imediat de o parte și de alta a peronului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă.",
+        "town": "Alege „Clădire de stație simplă” și unește cele două marcaje din vest, apoi cele două din est, cu câte un pasaj scurt care traversează peronul. Intrările se pun imediat de o parte și de alta a peronului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă.",
+        "new": "Alege „Clădire de stație simplă” și unește cele două marcaje din vest, apoi cele două din est, cu câte un pasaj scurt care traversează peronul. Intrările se pun imediat de o parte și de alta a peronului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă.",
+        "east": "Alege „Clădire de stație simplă” și unește cele două marcaje din vest, apoi cele două din est, cu câte un pasaj scurt care traversează peronul. Intrările se pun imediat de o parte și de alta a peronului. Fă clic stânga pe punctul de început și pe cel de sfârșit marcate cu cercuri, apoi clic dreapta ca să fixezi forma și confirmă."
+      },
+      "step3": {
+        "title": "Planifică tronsonul cu achiziție de terenuri",
+        "description": "Alege „Cale ferată dublă” și trasează o linie dreaptă, la 6 m înălțime, de la capătul estic al peronului de vest până la capătul vestic al drumului principal. Tronsonul trece peste clădiri, așa că necesită achiziție de terenuri. Confirmă planul și apasă pe „Următorul”. Pentru acest tronson, durata lucrărilor nu se omite.",
+        "open": "Alege „Cale ferată dublă” și trasează o linie dreaptă, la 6 m înălțime, de la capătul estic al peronului de vest până la capătul vestic al drumului principal. Tronsonul trece peste clădiri, așa că necesită achiziție de terenuri. Confirmă planul și apasă pe „Următorul”. Pentru acest tronson, durata lucrărilor nu se omite.",
+        "variant": "Alege „Cale ferată dublă” și trasează o linie dreaptă, la 6 m înălțime, de la capătul estic al peronului de vest până la capătul vestic al drumului principal. Tronsonul trece peste clădiri, așa că necesită achiziție de terenuri. Confirmă planul și apasă pe „Următorul”. Pentru acest tronson, durata lucrărilor nu se omite.",
+        "start": "Alege „Cale ferată dublă” și trasează o linie dreaptă, la 6 m înălțime, de la capătul estic al peronului de vest până la capătul vestic al drumului principal. Tronsonul trece peste clădiri, așa că necesită achiziție de terenuri. Confirmă planul și apasă pe „Următorul”. Pentru acest tronson, durata lucrărilor nu se omite.",
+        "end": "Alege „Cale ferată dublă” și trasează o linie dreaptă, la 6 m înălțime, de la capătul estic al peronului de vest până la capătul vestic al drumului principal. Tronsonul trece peste clădiri, așa că necesită achiziție de terenuri. Confirmă planul și apasă pe „Următorul”. Pentru acest tronson, durata lucrărilor nu se omite.",
+        "confirm": "Alege „Cale ferată dublă” și trasează o linie dreaptă, la 6 m înălțime, de la capătul estic al peronului de vest până la capătul vestic al drumului principal. Tronsonul trece peste clădiri, așa că necesită achiziție de terenuri. Confirmă planul și apasă pe „Următorul”. Pentru acest tronson, durata lucrărilor nu se omite.",
+        "town": "Alege „Cale ferată dublă” și trasează o linie dreaptă, la 6 m înălțime, de la capătul estic al peronului de vest până la capătul vestic al drumului principal. Tronsonul trece peste clădiri, așa că necesită achiziție de terenuri. Confirmă planul și apasă pe „Următorul”. Pentru acest tronson, durata lucrărilor nu se omite.",
+        "new": "Alege „Cale ferată dublă” și trasează o linie dreaptă, la 6 m înălțime, de la capătul estic al peronului de vest până la capătul vestic al drumului principal. Tronsonul trece peste clădiri, așa că necesită achiziție de terenuri. Confirmă planul și apasă pe „Următorul”. Pentru acest tronson, durata lucrărilor nu se omite.",
+        "east": "Alege „Cale ferată dublă” și trasează o linie dreaptă, la 6 m înălțime, de la capătul estic al peronului de vest până la capătul vestic al drumului principal. Tronsonul trece peste clădiri, așa că necesită achiziție de terenuri. Confirmă planul și apasă pe „Următorul”. Pentru acest tronson, durata lucrărilor nu se omite."
+      },
+      "step4": {
+        "title": "Dispune dărâmarea spitalului",
+        "description": "Pe terenurile clădirilor private, negocierile de cumpărare încep automat, dar spitalul, fiind o facilitate publică a orașului, nu este îndepărtat automat și împiedică începerea lucrărilor la calea ferată. Fă clic pe spital și apasă pe „Dărâmă” dintre butoanele de sus. Când apare „Demolare planificată”, apasă pe „Următorul”.",
+        "open": "Pe terenurile clădirilor private, negocierile de cumpărare încep automat, dar spitalul, fiind o facilitate publică a orașului, nu este îndepărtat automat și împiedică începerea lucrărilor la calea ferată. Fă clic pe spital și apasă pe „Dărâmă” dintre butoanele de sus. Când apare „Demolare planificată”, apasă pe „Următorul”.",
+        "variant": "Pe terenurile clădirilor private, negocierile de cumpărare încep automat, dar spitalul, fiind o facilitate publică a orașului, nu este îndepărtat automat și împiedică începerea lucrărilor la calea ferată. Fă clic pe spital și apasă pe „Dărâmă” dintre butoanele de sus. Când apare „Demolare planificată”, apasă pe „Următorul”.",
+        "start": "Pe terenurile clădirilor private, negocierile de cumpărare încep automat, dar spitalul, fiind o facilitate publică a orașului, nu este îndepărtat automat și împiedică începerea lucrărilor la calea ferată. Fă clic pe spital și apasă pe „Dărâmă” dintre butoanele de sus. Când apare „Demolare planificată”, apasă pe „Următorul”.",
+        "end": "Pe terenurile clădirilor private, negocierile de cumpărare încep automat, dar spitalul, fiind o facilitate publică a orașului, nu este îndepărtat automat și împiedică începerea lucrărilor la calea ferată. Fă clic pe spital și apasă pe „Dărâmă” dintre butoanele de sus. Când apare „Demolare planificată”, apasă pe „Următorul”.",
+        "confirm": "Pe terenurile clădirilor private, negocierile de cumpărare încep automat, dar spitalul, fiind o facilitate publică a orașului, nu este îndepărtat automat și împiedică începerea lucrărilor la calea ferată. Fă clic pe spital și apasă pe „Dărâmă” dintre butoanele de sus. Când apare „Demolare planificată”, apasă pe „Următorul”.",
+        "town": "Pe terenurile clădirilor private, negocierile de cumpărare încep automat, dar spitalul, fiind o facilitate publică a orașului, nu este îndepărtat automat și împiedică începerea lucrărilor la calea ferată. Fă clic pe spital și apasă pe „Dărâmă” dintre butoanele de sus. Când apare „Demolare planificată”, apasă pe „Următorul”.",
+        "new": "Pe terenurile clădirilor private, negocierile de cumpărare încep automat, dar spitalul, fiind o facilitate publică a orașului, nu este îndepărtat automat și împiedică începerea lucrărilor la calea ferată. Fă clic pe spital și apasă pe „Dărâmă” dintre butoanele de sus. Când apare „Demolare planificată”, apasă pe „Următorul”.",
+        "east": "Pe terenurile clădirilor private, negocierile de cumpărare încep automat, dar spitalul, fiind o facilitate publică a orașului, nu este îndepărtat automat și împiedică începerea lucrărilor la calea ferată. Fă clic pe spital și apasă pe „Dărâmă” dintre butoanele de sus. Când apare „Demolare planificată”, apasă pe „Următorul”."
+      },
+      "step5": {
+        "title": "Așteaptă finalizarea tronsonului cu achiziție",
+        "description": "Avansează timpul și așteaptă cumpărarea terenurilor private, îndepărtarea spitalului și finalizarea lucrărilor la calea ferată. Va dura câteva luni. Pe acest tronson durata lucrărilor nu se omite, ca să vezi cum se finalizează calea ferată prin lucrări obișnuite.",
+        "open": "Avansează timpul și așteaptă cumpărarea terenurilor private, îndepărtarea spitalului și finalizarea lucrărilor la calea ferată. Va dura câteva luni. Pe acest tronson durata lucrărilor nu se omite, ca să vezi cum se finalizează calea ferată prin lucrări obișnuite.",
+        "variant": "Avansează timpul și așteaptă cumpărarea terenurilor private, îndepărtarea spitalului și finalizarea lucrărilor la calea ferată. Va dura câteva luni. Pe acest tronson durata lucrărilor nu se omite, ca să vezi cum se finalizează calea ferată prin lucrări obișnuite.",
+        "start": "Avansează timpul și așteaptă cumpărarea terenurilor private, îndepărtarea spitalului și finalizarea lucrărilor la calea ferată. Va dura câteva luni. Pe acest tronson durata lucrărilor nu se omite, ca să vezi cum se finalizează calea ferată prin lucrări obișnuite.",
+        "end": "Avansează timpul și așteaptă cumpărarea terenurilor private, îndepărtarea spitalului și finalizarea lucrărilor la calea ferată. Va dura câteva luni. Pe acest tronson durata lucrărilor nu se omite, ca să vezi cum se finalizează calea ferată prin lucrări obișnuite.",
+        "confirm": "Avansează timpul și așteaptă cumpărarea terenurilor private, îndepărtarea spitalului și finalizarea lucrărilor la calea ferată. Va dura câteva luni. Pe acest tronson durata lucrărilor nu se omite, ca să vezi cum se finalizează calea ferată prin lucrări obișnuite.",
+        "town": "Avansează timpul și așteaptă cumpărarea terenurilor private, îndepărtarea spitalului și finalizarea lucrărilor la calea ferată. Va dura câteva luni. Pe acest tronson durata lucrărilor nu se omite, ca să vezi cum se finalizează calea ferată prin lucrări obișnuite.",
+        "new": "Avansează timpul și așteaptă cumpărarea terenurilor private, îndepărtarea spitalului și finalizarea lucrărilor la calea ferată. Va dura câteva luni. Pe acest tronson durata lucrărilor nu se omite, ca să vezi cum se finalizează calea ferată prin lucrări obișnuite.",
+        "east": "Avansează timpul și așteaptă cumpărarea terenurilor private, îndepărtarea spitalului și finalizarea lucrărilor la calea ferată. Va dura câteva luni. Pe acest tronson durata lucrărilor nu se omite, ca să vezi cum se finalizează calea ferată prin lucrări obișnuite."
+      },
+      "step6": {
+        "title": "Pune calea ferată chiar deasupra drumului principal",
+        "description": "Cu „Cale ferată dublă”, construiește linia la 6 m înălțime de la capătul vestic până la capătul estic al drumului principal. Dacă o duci pe deasupra axului drumului, nu atinge parcelele private de pe margini și eviți achiziția de terenuri. Dacă ieși de pe drum și treci peste clădiri, vor fi necesare achiziții sau demolarea unor facilități publice.",
+        "open": "Cu „Cale ferată dublă”, construiește linia la 6 m înălțime de la capătul vestic până la capătul estic al drumului principal. Dacă o duci pe deasupra axului drumului, nu atinge parcelele private de pe margini și eviți achiziția de terenuri. Dacă ieși de pe drum și treci peste clădiri, vor fi necesare achiziții sau demolarea unor facilități publice.",
+        "variant": "Cu „Cale ferată dublă”, construiește linia la 6 m înălțime de la capătul vestic până la capătul estic al drumului principal. Dacă o duci pe deasupra axului drumului, nu atinge parcelele private de pe margini și eviți achiziția de terenuri. Dacă ieși de pe drum și treci peste clădiri, vor fi necesare achiziții sau demolarea unor facilități publice.",
+        "start": "Cu „Cale ferată dublă”, construiește linia la 6 m înălțime de la capătul vestic până la capătul estic al drumului principal. Dacă o duci pe deasupra axului drumului, nu atinge parcelele private de pe margini și eviți achiziția de terenuri. Dacă ieși de pe drum și treci peste clădiri, vor fi necesare achiziții sau demolarea unor facilități publice.",
+        "end": "Cu „Cale ferată dublă”, construiește linia la 6 m înălțime de la capătul vestic până la capătul estic al drumului principal. Dacă o duci pe deasupra axului drumului, nu atinge parcelele private de pe margini și eviți achiziția de terenuri. Dacă ieși de pe drum și treci peste clădiri, vor fi necesare achiziții sau demolarea unor facilități publice.",
+        "confirm": "Cu „Cale ferată dublă”, construiește linia la 6 m înălțime de la capătul vestic până la capătul estic al drumului principal. Dacă o duci pe deasupra axului drumului, nu atinge parcelele private de pe margini și eviți achiziția de terenuri. Dacă ieși de pe drum și treci peste clădiri, vor fi necesare achiziții sau demolarea unor facilități publice.",
+        "town": "Cu „Cale ferată dublă”, construiește linia la 6 m înălțime de la capătul vestic până la capătul estic al drumului principal. Dacă o duci pe deasupra axului drumului, nu atinge parcelele private de pe margini și eviți achiziția de terenuri. Dacă ieși de pe drum și treci peste clădiri, vor fi necesare achiziții sau demolarea unor facilități publice.",
+        "new": "Cu „Cale ferată dublă”, construiește linia la 6 m înălțime de la capătul vestic până la capătul estic al drumului principal. Dacă o duci pe deasupra axului drumului, nu atinge parcelele private de pe margini și eviți achiziția de terenuri. Dacă ieși de pe drum și treci peste clădiri, vor fi necesare achiziții sau demolarea unor facilități publice.",
+        "east": "În final, construiește „Cale ferată dublă” la 6 m înălțime de la capătul estic al drumului principal până la capătul vestic al peronului de est. După ce cele două peroane sunt legate, apasă pe „Următorul” ca să omiți durata lucrărilor."
+      },
+      "step7": {
+        "title": "Construiește depoul",
+        "description": "În panoul de construcție, alege „Depou feroviar” și construiește-l pe parcela galbenă din nordul orașului. Și pe acesta îl amplasezi singur. Apasă pe „Următorul” ca să omiți durata lucrărilor și să finalizezi depoul.",
+        "open": "În panoul de construcție, alege „Depou feroviar” și construiește-l pe parcela galbenă din nordul orașului. Și pe acesta îl amplasezi singur. Apasă pe „Următorul” ca să omiți durata lucrărilor și să finalizezi depoul.",
+        "variant": "În panoul de construcție, alege „Depou feroviar” și construiește-l pe parcela galbenă din nordul orașului. Și pe acesta îl amplasezi singur. Apasă pe „Următorul” ca să omiți durata lucrărilor și să finalizezi depoul.",
+        "start": "În panoul de construcție, alege „Depou feroviar” și construiește-l pe parcela galbenă din nordul orașului. Și pe acesta îl amplasezi singur. Apasă pe „Următorul” ca să omiți durata lucrărilor și să finalizezi depoul.",
+        "end": "În panoul de construcție, alege „Depou feroviar” și construiește-l pe parcela galbenă din nordul orașului. Și pe acesta îl amplasezi singur. Apasă pe „Următorul” ca să omiți durata lucrărilor și să finalizezi depoul.",
+        "confirm": "În panoul de construcție, alege „Depou feroviar” și construiește-l pe parcela galbenă din nordul orașului. Și pe acesta îl amplasezi singur. Apasă pe „Următorul” ca să omiți durata lucrărilor și să finalizezi depoul.",
+        "town": "În panoul de construcție, alege „Depou feroviar” și construiește-l pe parcela galbenă din nordul orașului. Și pe acesta îl amplasezi singur. Apasă pe „Următorul” ca să omiți durata lucrărilor și să finalizezi depoul.",
+        "new": "În panoul de construcție, alege „Depou feroviar” și construiește-l pe parcela galbenă din nordul orașului. Și pe acesta îl amplasezi singur. Apasă pe „Următorul” ca să omiți durata lucrărilor și să finalizezi depoul.",
+        "east": "În panoul de construcție, alege „Depou feroviar” și construiește-l pe parcela galbenă din nordul orașului. Și pe acesta îl amplasezi singur. Apasă pe „Următorul” ca să omiți durata lucrărilor și să finalizezi depoul."
+      },
+      "step8": {
+        "title": "Ajustează curbele și pantele și leagă-te de calea principală",
+        "description": "Cu „Cale ferată simplă”, pornește din punctul de racord de la sol din estul depoului, fă o buclă largă spre est, treci prin marcajul din nord-est și leagă-te de punctul de joncțiune al căii principale, aflat la 6 m înălțime. Ca să nu depășești limitele de curbură și de pantă, folosește punctele intermediare galbene drept reper. După ce fixezi forma cu clic dreapta, o poți ajusta trăgând de vârfuri și de punctele de control.",
+        "open": "Cu „Cale ferată simplă”, pornește din punctul de racord de la sol din estul depoului, fă o buclă largă spre est, treci prin marcajul din nord-est și leagă-te de punctul de joncțiune al căii principale, aflat la 6 m înălțime. Ca să nu depășești limitele de curbură și de pantă, folosește punctele intermediare galbene drept reper. După ce fixezi forma cu clic dreapta, o poți ajusta trăgând de vârfuri și de punctele de control.",
+        "variant": "Cu „Cale ferată simplă”, pornește din punctul de racord de la sol din estul depoului, fă o buclă largă spre est, treci prin marcajul din nord-est și leagă-te de punctul de joncțiune al căii principale, aflat la 6 m înălțime. Ca să nu depășești limitele de curbură și de pantă, folosește punctele intermediare galbene drept reper. După ce fixezi forma cu clic dreapta, o poți ajusta trăgând de vârfuri și de punctele de control.",
+        "start": "Cu „Cale ferată simplă”, pornește din punctul de racord de la sol din estul depoului, fă o buclă largă spre est, treci prin marcajul din nord-est și leagă-te de punctul de joncțiune al căii principale, aflat la 6 m înălțime. Ca să nu depășești limitele de curbură și de pantă, folosește punctele intermediare galbene drept reper. După ce fixezi forma cu clic dreapta, o poți ajusta trăgând de vârfuri și de punctele de control.",
+        "end": "Cu „Cale ferată simplă”, pornește din punctul de racord de la sol din estul depoului, fă o buclă largă spre est, treci prin marcajul din nord-est și leagă-te de punctul de joncțiune al căii principale, aflat la 6 m înălțime. Ca să nu depășești limitele de curbură și de pantă, folosește punctele intermediare galbene drept reper. După ce fixezi forma cu clic dreapta, o poți ajusta trăgând de vârfuri și de punctele de control.",
+        "confirm": "Cu „Cale ferată simplă”, pornește din punctul de racord de la sol din estul depoului, fă o buclă largă spre est, treci prin marcajul din nord-est și leagă-te de punctul de joncțiune al căii principale, aflat la 6 m înălțime. Ca să nu depășești limitele de curbură și de pantă, folosește punctele intermediare galbene drept reper. După ce fixezi forma cu clic dreapta, o poți ajusta trăgând de vârfuri și de punctele de control.",
+        "town": "Cu „Cale ferată simplă”, pornește din punctul de racord de la sol din estul depoului, fă o buclă largă spre est, treci prin marcajul din nord-est și leagă-te de punctul de joncțiune al căii principale, aflat la 6 m înălțime. Ca să nu depășești limitele de curbură și de pantă, folosește punctele intermediare galbene drept reper. După ce fixezi forma cu clic dreapta, o poți ajusta trăgând de vârfuri și de punctele de control.",
+        "new": "Cu „Cale ferată simplă”, pornește din punctul de racord de la sol din estul depoului, fă o buclă largă spre est, treci prin marcajul din nord-est și leagă-te de punctul de joncțiune al căii principale, aflat la 6 m înălțime. Ca să nu depășești limitele de curbură și de pantă, folosește punctele intermediare galbene drept reper. După ce fixezi forma cu clic dreapta, o poți ajusta trăgând de vârfuri și de punctele de control.",
+        "east": "Cu „Cale ferată simplă”, pornește din punctul de racord de la sol din estul depoului, fă o buclă largă spre est, treci prin marcajul din nord-est și leagă-te de punctul de joncțiune al căii principale, aflat la 6 m înălțime. Ca să nu depășești limitele de curbură și de pantă, folosește punctele intermediare galbene drept reper. După ce fixezi forma cu clic dreapta, o poți ajusta trăgând de vârfuri și de punctele de control."
+      },
+      "step9": {
+        "title": "Adu curent la depou de la centrala existentă",
+        "description": "Ca să circule trenuri electrice, trebuie să tragi o linie electrică de la centrală. Cu „Linie electrică”, leagă punctul de racord al centralei de punctul de racord comun din estul depoului și confirmă.",
+        "open": "Ca să circule trenuri electrice, trebuie să tragi o linie electrică de la centrală. Cu „Linie electrică”, leagă punctul de racord al centralei de punctul de racord comun din estul depoului și confirmă.",
+        "variant": "Ca să circule trenuri electrice, trebuie să tragi o linie electrică de la centrală. Cu „Linie electrică”, leagă punctul de racord al centralei de punctul de racord comun din estul depoului și confirmă.",
+        "start": "Ca să circule trenuri electrice, trebuie să tragi o linie electrică de la centrală. Cu „Linie electrică”, leagă punctul de racord al centralei de punctul de racord comun din estul depoului și confirmă.",
+        "end": "Ca să circule trenuri electrice, trebuie să tragi o linie electrică de la centrală. Cu „Linie electrică”, leagă punctul de racord al centralei de punctul de racord comun din estul depoului și confirmă.",
+        "confirm": "Ca să circule trenuri electrice, trebuie să tragi o linie electrică de la centrală. Cu „Linie electrică”, leagă punctul de racord al centralei de punctul de racord comun din estul depoului și confirmă.",
+        "town": "Ca să circule trenuri electrice, trebuie să tragi o linie electrică de la centrală. Cu „Linie electrică”, leagă punctul de racord al centralei de punctul de racord comun din estul depoului și confirmă.",
+        "new": "Ca să circule trenuri electrice, trebuie să tragi o linie electrică de la centrală. Cu „Linie electrică”, leagă punctul de racord al centralei de punctul de racord comun din estul depoului și confirmă.",
+        "east": "Ca să circule trenuri electrice, trebuie să tragi o linie electrică de la centrală. Cu „Linie electrică”, leagă punctul de racord al centralei de punctul de racord comun din estul depoului și confirmă."
+      },
+      "step10": {
+        "title": "Deschide linia feroviară",
+        "description": "Din „Transport public” → „＋ Linie nouă”, alege „Linie feroviară regională”. Pune stații pe peroanele înălțate din vest și din est, apoi fă clic pe prima stație ca să închizi circuitul. Setează tariful la 0 și intervalul țintă între curse la 5 minute, apoi confirmă.",
+        "open": "Din „Transport public” → „＋ Linie nouă”, alege „Linie feroviară regională”. Pune stații pe peroanele înălțate din vest și din est, apoi fă clic pe prima stație ca să închizi circuitul. Setează tariful la 0 și intervalul țintă între curse la 5 minute, apoi confirmă.",
+        "variant": "Din „Transport public” → „＋ Linie nouă”, alege „Linie feroviară regională”. Pune stații pe peroanele înălțate din vest și din est, apoi fă clic pe prima stație ca să închizi circuitul. Setează tariful la 0 și intervalul țintă între curse la 5 minute, apoi confirmă.",
+        "start": "Din „Transport public” → „＋ Linie nouă”, alege „Linie feroviară regională”. Pune stații pe peroanele înălțate din vest și din est, apoi fă clic pe prima stație ca să închizi circuitul. Setează tariful la 0 și intervalul țintă între curse la 5 minute, apoi confirmă.",
+        "end": "Din „Transport public” → „＋ Linie nouă”, alege „Linie feroviară regională”. Pune stații pe peroanele înălțate din vest și din est, apoi fă clic pe prima stație ca să închizi circuitul. Setează tariful la 0 și intervalul țintă între curse la 5 minute, apoi confirmă.",
+        "confirm": "Din „Transport public” → „＋ Linie nouă”, alege „Linie feroviară regională”. Pune stații pe peroanele înălțate din vest și din est, apoi fă clic pe prima stație ca să închizi circuitul. Setează tariful la 0 și intervalul țintă între curse la 5 minute, apoi confirmă.",
+        "town": "Din „Transport public” → „＋ Linie nouă”, alege „Linie feroviară regională”. Pune stații pe peroanele înălțate din vest și din est, apoi fă clic pe prima stație ca să închizi circuitul. Setează tariful la 0 și intervalul țintă între curse la 5 minute, apoi confirmă.",
+        "new": "Din „Transport public” → „＋ Linie nouă”, alege „Linie feroviară regională”. Pune stații pe peroanele înălțate din vest și din est, apoi fă clic pe prima stație ca să închizi circuitul. Setează tariful la 0 și intervalul țintă între curse la 5 minute, apoi confirmă.",
+        "east": "Din „Transport public” → „＋ Linie nouă”, alege „Linie feroviară regională”. Pune stații pe peroanele înălțate din vest și din est, apoi fă clic pe prima stație ca să închizi circuitul. Setează tariful la 0 și intervalul țintă între curse la 5 minute, apoi confirmă."
+      },
+      "step11": {
+        "title": "Verifică garniturile și circulația",
+        "description": "Avansează timpul și verifică, în ecranul de administrare a transportului public, capacitatea de transport și intervalul între curse ale liniei. Depoul are nevoie de câteva luni ca să procure garniturile. Când apare capacitate de transport, linia este deschisă. Locuitorii își aleg itinerariul luând în calcul și mersul pe jos, așa că, pe o distanță scurtă între stații, s-ar putea să nu existe încă pasageri.",
+        "open": "Avansează timpul și verifică, în ecranul de administrare a transportului public, capacitatea de transport și intervalul între curse ale liniei. Depoul are nevoie de câteva luni ca să procure garniturile. Când apare capacitate de transport, linia este deschisă. Locuitorii își aleg itinerariul luând în calcul și mersul pe jos, așa că, pe o distanță scurtă între stații, s-ar putea să nu existe încă pasageri.",
+        "variant": "Avansează timpul și verifică, în ecranul de administrare a transportului public, capacitatea de transport și intervalul între curse ale liniei. Depoul are nevoie de câteva luni ca să procure garniturile. Când apare capacitate de transport, linia este deschisă. Locuitorii își aleg itinerariul luând în calcul și mersul pe jos, așa că, pe o distanță scurtă între stații, s-ar putea să nu existe încă pasageri.",
+        "start": "Avansează timpul și verifică, în ecranul de administrare a transportului public, capacitatea de transport și intervalul între curse ale liniei. Depoul are nevoie de câteva luni ca să procure garniturile. Când apare capacitate de transport, linia este deschisă. Locuitorii își aleg itinerariul luând în calcul și mersul pe jos, așa că, pe o distanță scurtă între stații, s-ar putea să nu existe încă pasageri.",
+        "end": "Avansează timpul și verifică, în ecranul de administrare a transportului public, capacitatea de transport și intervalul între curse ale liniei. Depoul are nevoie de câteva luni ca să procure garniturile. Când apare capacitate de transport, linia este deschisă. Locuitorii își aleg itinerariul luând în calcul și mersul pe jos, așa că, pe o distanță scurtă între stații, s-ar putea să nu existe încă pasageri.",
+        "confirm": "Avansează timpul și verifică, în ecranul de administrare a transportului public, capacitatea de transport și intervalul între curse ale liniei. Depoul are nevoie de câteva luni ca să procure garniturile. Când apare capacitate de transport, linia este deschisă. Locuitorii își aleg itinerariul luând în calcul și mersul pe jos, așa că, pe o distanță scurtă între stații, s-ar putea să nu existe încă pasageri.",
+        "town": "Avansează timpul și verifică, în ecranul de administrare a transportului public, capacitatea de transport și intervalul între curse ale liniei. Depoul are nevoie de câteva luni ca să procure garniturile. Când apare capacitate de transport, linia este deschisă. Locuitorii își aleg itinerariul luând în calcul și mersul pe jos, așa că, pe o distanță scurtă între stații, s-ar putea să nu existe încă pasageri.",
+        "new": "Avansează timpul și verifică, în ecranul de administrare a transportului public, capacitatea de transport și intervalul între curse ale liniei. Depoul are nevoie de câteva luni ca să procure garniturile. Când apare capacitate de transport, linia este deschisă. Locuitorii își aleg itinerariul luând în calcul și mersul pe jos, așa că, pe o distanță scurtă între stații, s-ar putea să nu existe încă pasageri.",
+        "east": "Avansează timpul și verifică, în ecranul de administrare a transportului public, capacitatea de transport și intervalul între curse ale liniei. Depoul are nevoie de câteva luni ca să procure garniturile. Când apare capacitate de transport, linia este deschisă. Locuitorii își aleg itinerariul luând în calcul și mersul pe jos, așa că, pe o distanță scurtă între stații, s-ar putea să nu existe încă pasageri."
+      },
+      "step12": {
+        "title": "Recapitulare: construcția căii ferate",
+        "description": "Am mutat camera la stația din vest. Uită-te la trenurile care opresc la peron. Ai construit peroanele, clădirile stațiilor, calea principală, depoul cu linia de racord, alimentarea cu energie și ai configurat linia. Ai trecut prin achiziția terenurilor private și prin demolarea unei facilități publice, iar pe tronsonul de deasupra drumului ai evitat achiziția. Folosește și la alte căi ferate metoda de a ajusta traseul urmărind raza curbelor și pantele.",
+        "open": "Am mutat camera la stația din vest. Uită-te la trenurile care opresc la peron. Ai construit peroanele, clădirile stațiilor, calea principală, depoul cu linia de racord, alimentarea cu energie și ai configurat linia. Ai trecut prin achiziția terenurilor private și prin demolarea unei facilități publice, iar pe tronsonul de deasupra drumului ai evitat achiziția. Folosește și la alte căi ferate metoda de a ajusta traseul urmărind raza curbelor și pantele.",
+        "variant": "Am mutat camera la stația din vest. Uită-te la trenurile care opresc la peron. Ai construit peroanele, clădirile stațiilor, calea principală, depoul cu linia de racord, alimentarea cu energie și ai configurat linia. Ai trecut prin achiziția terenurilor private și prin demolarea unei facilități publice, iar pe tronsonul de deasupra drumului ai evitat achiziția. Folosește și la alte căi ferate metoda de a ajusta traseul urmărind raza curbelor și pantele.",
+        "start": "Am mutat camera la stația din vest. Uită-te la trenurile care opresc la peron. Ai construit peroanele, clădirile stațiilor, calea principală, depoul cu linia de racord, alimentarea cu energie și ai configurat linia. Ai trecut prin achiziția terenurilor private și prin demolarea unei facilități publice, iar pe tronsonul de deasupra drumului ai evitat achiziția. Folosește și la alte căi ferate metoda de a ajusta traseul urmărind raza curbelor și pantele.",
+        "end": "Am mutat camera la stația din vest. Uită-te la trenurile care opresc la peron. Ai construit peroanele, clădirile stațiilor, calea principală, depoul cu linia de racord, alimentarea cu energie și ai configurat linia. Ai trecut prin achiziția terenurilor private și prin demolarea unei facilități publice, iar pe tronsonul de deasupra drumului ai evitat achiziția. Folosește și la alte căi ferate metoda de a ajusta traseul urmărind raza curbelor și pantele.",
+        "confirm": "Am mutat camera la stația din vest. Uită-te la trenurile care opresc la peron. Ai construit peroanele, clădirile stațiilor, calea principală, depoul cu linia de racord, alimentarea cu energie și ai configurat linia. Ai trecut prin achiziția terenurilor private și prin demolarea unei facilități publice, iar pe tronsonul de deasupra drumului ai evitat achiziția. Folosește și la alte căi ferate metoda de a ajusta traseul urmărind raza curbelor și pantele.",
+        "town": "Am mutat camera la stația din vest. Uită-te la trenurile care opresc la peron. Ai construit peroanele, clădirile stațiilor, calea principală, depoul cu linia de racord, alimentarea cu energie și ai configurat linia. Ai trecut prin achiziția terenurilor private și prin demolarea unei facilități publice, iar pe tronsonul de deasupra drumului ai evitat achiziția. Folosește și la alte căi ferate metoda de a ajusta traseul urmărind raza curbelor și pantele.",
+        "new": "Am mutat camera la stația din vest. Uită-te la trenurile care opresc la peron. Ai construit peroanele, clădirile stațiilor, calea principală, depoul cu linia de racord, alimentarea cu energie și ai configurat linia. Ai trecut prin achiziția terenurilor private și prin demolarea unei facilități publice, iar pe tronsonul de deasupra drumului ai evitat achiziția. Folosește și la alte căi ferate metoda de a ajusta traseul urmărind raza curbelor și pantele.",
+        "east": "Am mutat camera la stația din vest. Uită-te la trenurile care opresc la peron. Ai construit peroanele, clădirile stațiilor, calea principală, depoul cu linia de racord, alimentarea cu energie și ai configurat linia. Ai trecut prin achiziția terenurilor private și prin demolarea unei facilități publice, iar pe tronsonul de deasupra drumului ai evitat achiziția. Folosește și la alte căi ferate metoda de a ajusta traseul urmărind raza curbelor și pantele."
+      }
+    },
+    "complete": {
+      "title": "Tutorial finalizat",
+      "description": "Felicitări! Ai terminat tutorialul. Apasă pe „Încheie” ca să închizi ghidul și să joci liber mai departe în acest oraș.",
+      "button": "Încheie"
+    },
+    "nextButton": "Următorul",
+    "checking": "Se verifică…",
+    "failed": "Condiția nu este îndeplinită. Încearcă din nou.",
+    "completed": "Tutorial finalizat! Bravo!",
+    "stepProgress": "Pasul {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Apasă pe pictograma de drum ca să deschizi panoul de construcție.",
+      "selectRoad": "Alege drumul de suprafață cu 2 benzi din „Străzi”. Poți selecta doar tipurile permise.",
+      "placeStart": "Fă clic stânga în interiorul cercului bleu ca să pui începutul drumului.",
+      "placeEnd": "Fă clic stânga în interiorul cercului galben ca să pui capătul drumului.",
+      "finalizeRoad": "Fă clic dreapta în vizualizarea 3D ca să fixezi forma drumului.",
+      "confirmRoad": "Apasă pe „Confirmă” în panoul de construcție ca să salvezi, apoi apasă pe butonul „Următorul”.",
+      "failed": "Pregătirea sau comunicarea a eșuat. Dacă problema persistă după ce reîncerci, ieși și începe tutorialul într-un oraș nou.",
+      "retry": "Reîncearcă",
+      "placementRequired": "Amplasează tipul indicat de ghid, în pozițiile indicate.",
+      "preparing": "Se pregătește starea inițială a tutorialului.",
+      "finishFailed": "Tutorialul nu a putut fi încheiat. Încearcă din nou."
+    },
+    "trade": {
+      "title": "Pornește comerțul internațional",
+      "description": "O fabrică locală vrea să-și vândă produsele peste hotare. În acest tutorial vei învăța cum să exporți alimente printr-un port și cum să imporți mărfuri pe o cale ferată de marfă legată de țara vecină.",
+      "step1": {
+        "description": "Ca să exporți alimentele produse pe această insulă, ai nevoie de un terminal de export. Construiește „Terminal de containere” pe parcela de pe coastă marcată cu galben. Fiind un tutorial, durata lucrărilor se omite.",
+        "title": "Construiește un port de containere"
+      },
+      "step2": {
+        "description": "Producția și transportul fabricii au nevoie de câteva luni ca să pornească, așa că avansează timpul și urmărește rezultatele exportului din port. Închide o dată detaliile terminalului de containere și redeschide-le: în „Operațiuni de marfă” poți vedea rezultatele de import și export.",
+        "title": "Verifică exportul de alimente"
+      },
+      "step3": {
+        "description": "Acum ai un loc de unde poți face import și export pe mare. Urmează un loc pentru import și export pe calea ferată. Construiește „Gară internațională de marfă” pe parcela de lângă drum marcată cu galben. La granița de est există o cale ferată care duce în țara vecină și o gară de marfă de frontieră.",
+        "title": "Construiește o gară internațională de marfă"
+      },
+      "step4": {
+        "open": "Deschide „Drumuri, căi ferate și infrastructură” din panoul de pictograme și alege „Peron pentru containere” din „Căi ferate”.",
+        "place": "Construiește peronul la nord de gara internațională de marfă, paralel cu aceasta. Fă clic stânga în cercul bleu (vest) pentru început și în cercul galben (est) pentru capăt, apoi clic dreapta în vizualizarea 3D ca să fixezi forma. Comută „Partea peronului” pe „Interior” și verifică dacă peronul se află spre clădirea gării (spre sud) înainte să confirmi. Când ai terminat, apasă pe butonul „Următorul”.",
+        "title": "Construiește un peron lângă gară"
+      },
+      "step5": {
+        "description": "Apasă pe „Înapoi” ca să revii la listă, alege „Cale ferată simplă” și construiește linia de la capătul estic al peronului până la capătul vestic al căii ferate care vine de la gara de marfă de frontieră, din afara orașului.",
+        "title": "Construiește calea ferată până la graniță"
+      },
+      "step6": {
+        "title": "Construiește depoul",
+        "description": "Construiește „Depou feroviar” pe parcela de lângă calea ferată marcată cu galben. Când apeși pe „Următorul”, fiind un tutorial, durata lucrărilor se omite și depoul se finalizează."
+      },
+      "step7": {
+        "title": "Leagă depoul de calea principală",
+        "description": "Construiește o linie de racord de la punctul de racord din capătul estic al depoului până la calea principală. Nu o lega în unghi drept, ci sub un unghi mic, în direcția est. Când ai terminat, apasă pe butonul „Următorul”."
+      },
+      "step8": {
+        "description": "Deschide „Drumuri, căi ferate și infrastructură” din panoul de pictograme și, cu „Linie electrică” din „Electricitate”, leagă punctul de racord al centralei solare din estul orașului de punctul de racord al depoului.",
+        "title": "Adu curent la depou"
+      },
+      "step9": {
+        "description": "În „Transport public”, apasă pe „＋ Linie nouă” și alege tipul „Linie internațională de marfă”. Pune stații pe peroanele gării internaționale de marfă și ale gării de marfă de frontieră, apoi fă clic pe prima stație ca să închizi circuitul și deschide linia. Pe o cale simplă trenurile nu se pot încrucișa, așa că setează intervalul țintă între curse la 45 de minute, cât îi trebuie unei garnituri pentru un drum dus-întors.",
+        "title": "Deschide linia internațională de marfă"
+      },
+      "step10": {
+        "description": "Avansează timpul și verifică dacă trenurile de marfă încep să circule pe linia internațională de marfă. Depoul are nevoie de câteva luni ca să angajeze personal, să cumpere materiale și să pregătească garniturile.",
+        "title": "Pune în circulație trenurile de marfă"
+      }
+    },
+    "highway": {
+      "title": "Construiește o autostradă",
+      "description": "Pe măsură ce orașul se dezvoltă, mașinile au nevoie de o nouă rută. În acest tutorial vei învăța cum să construiești o autostradă pe viaduct peste un drum obișnuit și cum s-o legi de el cu bretele, formând un nod rutier.",
+      "step1": {
+        "title": "Treci pe viaduct peste drum",
+        "open": "Drumul obișnuit din centru va fi traversat de o autostradă pe viaduct. Deschide „Drumuri, căi ferate și infrastructură” din panoul de pictograme și alege „Autostradă cu 2 benzi” din „Autostrăzi”.",
+        "start": "Fă clic stânga în interiorul cercului bleu ca să pui începutul autostrăzii. Punctul se fixează automat pe viaduct, la 7 m înălțime.",
+        "end": "Fă clic stânga în interiorul cercului galben ca să pui capătul. Se fixează automat la aceeași înălțime de 7 m, de cealaltă parte a drumului obișnuit.",
+        "confirm": "Apasă pe „Confirmă” în panoul de construcție ca să salvezi, apoi apasă pe butonul „Următorul”. Fiind un tutorial, durata lucrărilor se omite și autostrada se finalizează imediat."
+      },
+      "step2": {
+        "title": "Dă un nume autostrăzii",
+        "description": "Drumurilor le poți da nume, ca să le gestionezi mai ușor. În partea de sus a ferestrei de detalii a autostrăzii construite, la drumul de care aparține scrie acum „Niciunul (drum fără nume)”, așa că dă-i ce nume vrei."
+      },
+      "step3": {
+        "title": "Construiește o bretea",
+        "description": "Construiește o bretea care să facă legătura cu drumul obișnuit. Alege „Bretea” ca tip de drum și leagă de autostradă o bretea cu o curbă lină, pornind de la marcajul galben de pe ecran."
+      },
+      "step4": {
+        "title": "Verifică nodul rutier",
+        "description": "Fă clic pe „IC1”, afișat lângă bretea, ca să deschizi panoul de detalii al nodului rutier. Verifică dacă drumul obișnuit și autostrada sunt legate."
+      }
+    },
+    "mining": {
+      "title": "Exploatează resursele",
+      "description": "Sub insulă zac resurse prețioase, dar nu există niciun mijloc de a le scoate de acolo. În acest tutorial vei învăța să pregătești o mină, o cale ferată de marfă și un port, ca să extragi minereul, să-l transporți și să-l exporți peste hotare.",
+      "step1": {
+        "description": "Activează afișarea resurselor naturale și deschide panoul de detalii al zăcământului de minereu din sud-est.",
+        "title": "Examinează zăcământul"
+      },
+      "step2": {
+        "description": "Construiește „Mină” pe parcela galbenă de deasupra zăcământului din sud-est. Fiind un tutorial, durata lucrărilor se omite.",
+        "title": "Construiește o mină"
+      },
+      "step3": {
+        "description": "Construiește „Gară de încărcare a minereului” pe parcela mare existentă din sud-estul minei. În gara de încărcare, minereul extras din mină este încărcat în trenuri.",
+        "title": "Construiește o gară de încărcare lângă mină"
+      },
+      "step4": {
+        "description": "Construiește „Gară de descărcare a minereului” pe parcela mare existentă din sudul portului. În gara de descărcare, minereul adus cu trenul este descărcat și dus mai departe.",
+        "title": "Construiește o gară de descărcare lângă port"
+      },
+      "step5": {
+        "description": "Construiește „Port pentru mărfuri în vrac” pe parcela galbenă de pe coastă.",
+        "title": "Construiește un port pentru mărfuri în vrac"
+      },
+      "step6": {
+        "open": "Alege „Peron pentru minereu” din „Căi ferate” și unește cele două marcaje din sud-vestul gării de încărcare, apoi cele două din sudul gării de descărcare. Orientează fiecare peron spre facilitatea lui.",
+        "loading": "Alege „Peron pentru minereu” din „Căi ferate” și unește cele două marcaje din sud-vestul gării de încărcare, apoi cele două din sudul gării de descărcare. Orientează fiecare peron spre facilitatea lui.",
+        "unloading": "Alege „Peron pentru minereu” din „Căi ferate” și unește cele două marcaje din sud-vestul gării de încărcare, apoi cele două din sudul gării de descărcare. Orientează fiecare peron spre facilitatea lui.",
+        "title": "Construiește un peron lângă gară"
+      },
+      "step7": {
+        "town": "Construiește o cale ferată de marfă de la capătul estic al peronului din port, pe la sud de punctul intermediar al drumului, până la capătul nord-vestic al peronului de lângă munte. Calea nu este încă legată, așa că trebuie s-o construiești singur. Aliniază direcția de mers cu ajutorul curbelor, iar pe tronsonul care urcă muntele setează „Urmărește terenul” pe „Nu urmări” și ajustează forma până nu mai rămâne nicio încălcare roșie de pantă sau de curbură. Adaugă puncte intermediare, astfel încât fiecare tronson să aibă cel mult 500 m.",
+        "climb": "Construiește o cale ferată de marfă de la capătul estic al peronului din port, pe la sud de punctul intermediar al drumului, până la capătul nord-vestic al peronului de lângă munte. Calea nu este încă legată, așa că trebuie s-o construiești singur. Aliniază direcția de mers cu ajutorul curbelor, iar pe tronsonul care urcă muntele setează „Urmărește terenul” pe „Nu urmări” și ajustează forma până nu mai rămâne nicio încălcare roșie de pantă sau de curbură. Adaugă puncte intermediare, astfel încât fiecare tronson să aibă cel mult 500 m.",
+        "title": "Leagă cele două stații cu o cale ferată"
+      },
+      "step8": {
+        "title": "Construiește depoul",
+        "description": "Construiește „Depou feroviar” pe parcela existentă din sud-vestul portului. Orientează-l astfel încât să poți duce o linie de racord de la punctul de racord din capătul lui estic până la peronul din port."
+      },
+      "step9": {
+        "title": "Leagă depoul de calea principală",
+        "description": "Construiește o linie de racord de la punctul de racord de la sol din capătul estic al depoului până la capătul vestic al peronului din port. Fă joncțiunea lin, sub un unghi mic."
+      },
+      "step10": {
+        "description": "Construiește o linie electrică de la punctul de racord al centralei solare existente până la punctul de racord comun din capătul estic al depoului.",
+        "title": "Adu curent la depou"
+      },
+      "step11": {
+        "description": "Din „Transport public” → „Linie nouă” → „Linie de transport de minereu”, pune stații pe peroanele de marfă pentru minereu de lângă munte și din port, apoi fă clic pe prima stație ca să închizi circuitul. Pe o cale simplă trenurile nu se pot încrucișa, așa că setează intervalul țintă între curse la 45 de minute, cât îi trebuie unei garnituri pentru un drum dus-întors, și confirmă.",
+        "title": "Deschide linia de transport de minereu"
+      },
+      "step12": {
+        "description": "Avansează timpul ca să pornească extracția, încărcarea, transportul feroviar, descărcarea și exportul. Procurarea garniturilor și pornirea transportului durează câteva luni.",
+        "title": "Avansează timpul"
+      },
+      "step13": {
+        "description": "Avansează timpul și verifică, în detaliile portului pentru mărfuri în vrac de pe coastă, minereul primit și exportat. Procurarea garniturilor, extracția și transportul durează câteva luni.",
+        "title": "Verifică exportul de minereu"
+      }
+    },
+    "tourism": {
+      "title": "Dezvoltă turismul",
+      "description": "Pe insulă nu există un port și cazare pentru turiștii care vin la ruine și nici o linie de autobuz pentru ei. În acest tutorial vei învăța să construiești un hotel și un terminal de croazieră, să creezi o linie de autobuz și să verifici sosirea turiștilor, vânzările restaurantului și folosirea autobuzului.",
+      "step1": {
+        "description": "Construiește „Hotel turistic” pe parcela marcată cu galben din vestul ruinelor antice. Fiind un tutorial, durata lucrărilor se omite.",
+        "title": "Construiește un hotel lângă ruine"
+      },
+      "step2": {
+        "description": "Ca să primești turiști, ai nevoie de un port. Construiește „Terminal de croazieră” pe parcela marcată din port.",
+        "title": "Construiește un terminal de croazieră"
+      },
+      "step3": {
+        "description": "Turiștii nu au mașini proprii, așa că trebuie să organizezi transportul public. Din „Transport public” → „Linie nouă”, alege „Linie de autobuz”. Pe drumurile cu marcaje galbene, pune stații în ordinea port → în fața locuințelor → în fața ruinelor → în fața locuințelor, apoi fă clic pe stația din port ca să închizi circuitul. Setează tariful la 0 și intervalul țintă între curse la 1 minut, apoi confirmă.",
+        "title": "Creează o linie de autobuz între port și ruine"
+      },
+      "step4": {
+        "description": "Avansează timpul ca să primești turiști. Pornirea facilităților și procurarea autobuzelor durează câteva luni.",
+        "title": "Avansează timpul"
+      },
+      "step5": {
+        "description": "Verifică vânzările restaurantului de lângă ruine și pasagerii liniei de autobuz pe care ai creat-o. Pasul este îndeplinit când au sosit turiști, vânzările restaurantului au crescut față de început și autobuzul are pasageri. Dacă e nevoie, avansează timpul în continuare.",
+        "title": "Verifică vânzările și pasagerii autobuzului"
+      }
+    },
+    "intro": {
+      "controls": "Ca nou primar, ți se cere să construiești un oraș în care locuitorii să trăiască liniștiți. Orașul acesta nu are încă locuințe pentru noii veniți și nici curent electric sau apă, de care viața de zi cu zi nu se poate lipsi. În acest tutorial vei învăța rolul de primar, cum să avansezi timpul, cum să citești starea orașului și cum să folosești butoanele și camera, apoi vei parcurge etapele construirii orașului: pregătirea drumurilor și a parcelelor, stabilirea direcției unui cartier, construirea locuințelor și aducerea curentului și a apei.",
+      "scenario4": "Vrem să legăm cartierul de locuințe de zona cu locuri de muncă printr-o cale ferată, dar pe traseul planificat se află clădiri private și un spital public. În acest tutorial vei învăța achiziția de terenuri și demolarea facilităților publice, construcția pe viaduct deasupra drumului, construirea peroanelor, a clădirilor stațiilor și a depoului, ajustarea curbelor și a pantelor, iar la final alimentarea cu energie și deschiderea liniei.",
+      "trade": "O fabrică locală de alimente ți-a cerut ajutorul ca să-și vândă produsele și peste hotare. Ar fi bine ca orașul să aibă și o cale de a aduce din străinătate mărfurile de care are nevoie. În acest tutorial vei învăța cum să exporți alimente printr-un port și cum să imporți mărfuri pe o cale ferată de marfă legată de țara vecină.",
+      "highway": "Pe măsură ce orașul se dezvoltă, vor fi tot mai multe mașini care transportă oameni și mărfuri. Ca nu cumva și traficul de tranzit să se înghesuie pe drumurile obișnuite, ar fi bine să pregătești de pe acum o altă rută. În acest tutorial vei învăța cum să construiești o autostradă pe viaduct peste un drum obișnuit și cum s-o legi de el cu bretele, formând un nod rutier.",
+      "mining": "Sub această insulă zac resurse prețioase. Dar nu există niciun mijloc de a le transporta de la munte la port, iar insula nu le poate pune în folosul industriei sale. În acest tutorial vei învăța să pregătești o mină, o cale ferată de marfă și un port, ca să extragi minereul, să-l transporți și să-l exporți peste hotare.",
+      "tourism": "Locuitorii insulei vor ca tot mai mulți oameni să le vadă ruinele antice din interior. Dar nu există un port și cazare pentru turiști și nici o linie de autobuz de la port spre oraș. În acest tutorial vei învăța să construiești un hotel și un terminal de croazieră, să creezi o linie de autobuz și să verifici sosirea turiștilor, vânzările restaurantului și folosirea autobuzului.",
+      "heading": "O rugăminte pentru primar",
+      "windowTitle": "Tutorial",
+      "marine": "Acest oraș de la malul golfului nu are încă nici port, nici instalații petroliere. În acest tutorial vei învăța să câștigi teren din mare și să construiești o dană pentru petroliere, să arunci un pod suspendat peste gura golfului, să trimiți printr-o conductă petrolieră spre export țițeiul extras dintr-un zăcământ submarin și să legi o insulă din larg de oraș cu un feribot."
+    },
+    "marine": {
+      "title": "Valorifică marea",
+      "description": "Acest oraș de la malul golfului nu are încă nici port, nici instalații petroliere. În acest tutorial vei învăța să câștigi teren din mare și să construiești o dană pentru petroliere, să arunci un pod suspendat peste gura golfului, să trimiți printr-o conductă petrolieră spre export țițeiul extras dintr-un zăcământ submarin și să legi o insulă din larg de oraș cu un feribot.",
+      "step1": {
+        "title": "Planifică lucrările de umplere",
+        "description": "Un port are nevoie de un cheu la care să poată acosta navele mari și de teren pentru facilități. Umple marea din fundul golfului ca să creezi teren pentru port. Apasă pe pictograma „Terasamente”, fă clic stânga pe rând pe cele 4 marcaje galbene ca să desenezi zona și închide-o cu clic dreapta. Verifică dacă tipul din deviz este „Umplere” și confirmă lucrarea."
+      },
+      "step2": {
+        "title": "Finalizează terenul câștigat din mare",
+        "description": "Avansează timpul cel puțin o lună cu „Start”, apoi apasă pe „Următorul”. În acest tutorial nu există firme de construcții, așa că „Următorul” omite durata lucrărilor de umplere. După finalizare, locul unde era mare devine uscat, iar marginea dinspre mare devine un cheu la care pot acosta navele."
+      },
+      "step3": {
+        "title": "Construiește un drum până pe terenul câștigat din mare",
+        "description": "Chiar dacă pe terenul câștigat din mare construiești un port sau un terminal petrolier, fără o legătură rutieră oamenii nu pot veni la muncă, iar mărfurile nu pot fi transportate. Construiește un drum de la capătul drumului din oraș până pe terenul câștigat din mare. În acest tutorial, drumul se finalizează imediat ce îl confirmi. Apasă pe „Drumuri, căi ferate și infrastructură” din panoul de pictograme ca să deschizi panoul de construcție."
+      },
+      "step4": {
+        "title": "Construiește dana pentru petroliere",
+        "description": "Petrolierele care transportă țiței sunt nave mari, așa că un port se poate construi doar acolo unde marea din fața cheiului este suficient de adâncă. Cheiul terenului câștigat din mare are în față ape adânci, deci e potrivit pentru port. Apasă pe pictograma de clădiri, alege „Dană pentru petroliere” din categoria „Porturi”, fă clic stânga în cercul galben de pe cheu ca să stabilești locul și apasă pe „Confirmă” în panoul de construcție. Când construiești un port, se trasează automat o rută de legătură până la culoarul navelor mari din larg, ca navele să poată intra și ieși. În acest tutorial durata lucrărilor se omite."
+      },
+      "step5": {
+        "title": "Aruncă un pod suspendat peste gura golfului",
+        "description": "Autostrada se întrerupe pe ambele maluri ale gurii golfului. Gura golfului are 1,6 km lățime, prea mult pentru un pod obișnuit pe șiruri de pile, așa că leag-o cu un pod suspendat, care poate trece o distanță mare dintr-o singură deschidere. Pe sub pod trece culoarul navelor mari, deci podul trebuie să fie destul de înalt ca navele să nu-l lovească. Capetele autostrăzii de pe cele două maluri sunt deja la această înălțime. Deschide „Drumuri, căi ferate și infrastructură” din panoul de pictograme, alege „Pod suspendat cu 4 benzi” din „Autostrăzi” și trasează-l de la capătul nordic (cercul bleu) până la capătul sudic (cercul galben). Fixează forma cu clic dreapta, apasă pe „Confirmă” în panoul de construcție, apoi apasă pe „Următorul”."
+      },
+      "step6": {
+        "title": "Caută zăcământul de petrol submarin",
+        "description": "Acum vei folosi resursele mării. Înainte să construiești un terminal petrolier, verifică dacă pe fundul mării din apropiere există un zăcământ de petrol. Apasă pe „Afișare” în cockpit ca să deschizi panoul de afișare.",
+        "show": "Alege „Resurse naturale” din filele verticale și comută pe „Vizibil”. Vei vedea un zăcământ de petrol întins sub fundul golfului. Fă clic pe zăcământul din dreptul marcajului galben ca să-i deschizi detaliile."
+      },
+      "step7": {
+        "title": "Construiește terminalul petrolier",
+        "description": "Țițeiul extras din zăcământul submarin este trimis printr-o conductă petrolieră la terminalul petrolier de pe țărm și de acolo ajunge pe piață. Terminalul se construiește la cheu, acolo unde poate intra conducta. Apasă pe pictograma de clădiri, alege „Terminal de conducte petroliere” din categoria „Porturi”, fă clic stânga în cercul galben de pe cheu ca să stabilești locul și apasă pe „Confirmă” în panoul de construcție. În acest tutorial durata lucrărilor se omite."
+      },
+      "step8": {
+        "title": "Construiește platforma petrolieră",
+        "description": "Platforma petrolieră care extrage țițeiul trebuie construită pe mare, chiar deasupra zăcământului. Apasă pe pictograma de clădiri, alege „Platformă petrolieră offshore” din categoria „Agricultură și resurse”, fă clic stânga în cercul galben de pe mare ca să stabilești locul și apasă pe „Confirmă” în panoul de construcție. În acest tutorial durata lucrărilor se omite."
+      },
+      "step9": {
+        "title": "Leagă-le cu o conductă petrolieră",
+        "description": "Trimite țițeiul extras de platformă la terminalul petrolier printr-o conductă petrolieră submarină. Deschide „Drumuri, căi ferate și infrastructură” din panoul de pictograme, alege „Conductă petrolieră submarină” din „Petrol” și trasează-o de la punctul de racord al platformei până la punctul de racord al terminalului. După ce confirmi, apasă pe „Următorul”, iar conducta se finalizează imediat."
+      },
+      "step10": {
+        "title": "Exportă țițeiul",
+        "description": "Terminalul petrolier vinde pe piață țițeiul primit, iar dana pentru petroliere îl cumpără și îl exportă cu nave peste hotare. Până se strâng lucrători și țițeiul începe să se vândă trec câteva luni. Avansează timpul câteva luni cu „Start”, apoi apasă pe „Următorul”. Dacă încă nu s-a exportat nimic, mai avansează puțin și apasă din nou."
+      },
+      "step11": {
+        "title": "Construiește un debarcader de feribot",
+        "description": "Insula din larg nu are cum să ajungă la oraș. Deschide o linie de feribot, ca locuitorii insulei să poată face naveta spre oraș. Mai întâi construiește un debarcader de feribot pe malul orașului. Deschide „Drumuri, căi ferate și infrastructură” din panoul de pictograme, alege „Debarcader de feribot” din „Rute navale” și trasează-l de pe mal (cercul bleu) spre mare (cercul galben). Fixează forma cu clic dreapta, apasă pe „Confirmă” în panoul de construcție, apoi apasă pe „Următorul”."
+      },
+      "step12": {
+        "title": "Trasează ruta feribotului",
+        "description": "Apoi trasează ruta pe care va naviga feribotul, de la debarcaderul insulei până la debarcaderul orașului. Ruta nu poate trece peste uscat, așa că ocolește insula prin nord, treci pe sub podul suspendat de la gura golfului și intră în golf, punând puncte cu clic stânga pe parcurs. Alege „Rută de feribot” din „Rute navale”, leagă vârful debarcaderului insulei de vârful debarcaderului orașului, confirmă, apoi apasă pe „Următorul”."
+      },
+      "step13": {
+        "title": "Deschide linia de feribot",
+        "description": "În final, creează linia de feribot care circulă pe această rută. Din „Transport public” → „Linie nouă” → „Linie de feribot”, pune stații la debarcaderul insulei și la cel al orașului, fă clic pe prima stație ca să închizi circuitul și confirmă. Odată creată linia, tutorialul este încheiat. Ca navele să circule efectiv, ai nevoie și de un doc de întreținere, care le închiriază."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Începe jocul",
+    "nowLoading": "Se încarcă…",
+    "startError": "Jocul nu a putut porni. Încearcă din nou.",
+    "todaysTips": "Sfatul zilei",
+    "gotIt": "Închide",
+    "items": {
+      "tip1": {
+        "title": "Banii circulă",
+        "description": "Cheltuielile orașului pentru lucrări și salariile din facilitățile publice devin venituri pentru firme și gospodării și susțin cumpărăturile și producția următoare. Doar din strânsul impozitelor economia nu se pune în mișcare. Alocă buget serviciilor necesare și reparațiilor și întoarce banii în oraș."
+      },
+      "tip2": {
+        "title": "O bătălie de durată",
+        "description": "Cetățenii care cresc într-un mediu nesigur păstrează și ca adulți o înclinație mai mare spre infracțiuni. Continuă să combați infracționalitatea prin poliție și să îmbunătățești mediul în care cresc copiii. Ca să îmbunătățești siguranța publică din temelii, ai nevoie de cel puțin o generație."
+      },
+      "tip3": {
+        "title": "Faceți loc!",
+        "description": "Pompierii sunt de folos doar dacă ajung la fața locului. Chiar dacă ai o stație de pompieri, dacă e prea departe sau drumurile până acolo sunt aglomerate, pagubele se extind. Pe lângă buget, verifică și amplasarea stațiilor și drumurile de acces."
+      },
+      "tip5": {
+        "title": "Un drum anevoios",
+        "description": "Drumurile pe pante abrupte cer lucrări mai grele decât pe teren plat. Cea mai scurtă distanță de pe hartă nu e neapărat traseul cel mai ieftin. Compară relieful cu devizul de construcție și ia în calcul și un mic ocol."
+      },
+      "tip6": {
+        "title": "Planifică din timp",
+        "description": "Mai mulți locuitori și mai multe fabrici înseamnă o cerere mai mare de curent și apă. Dacă începi să construiești abia după ce apare lipsa, va trebui să aștepți până la finalizare. Înainte să dezvolți un cartier nou, verifică și rezerva de capacitate."
+      },
+      "tip7": {
+        "title": "Graba strică treaba",
+        "description": "Dacă ridici limita de viteză, deplasările devin mai rapide, dar crește și riscul de accidente. Ai grijă și la curbele strânse. Acolo unde se produc multe accidente, revizuiește forma drumului și limita de viteză."
+      },
+      "tip8": {
+        "title": "Investiție în viitor",
+        "description": "Lipsa de personal din spitale și din fabricile avansate nu se rezolvă doar prin creșterea populației. Organizează la universitate specializările și locurile necesare pentru a forma specialiști în domeniile căutate și ține cont în plan de timpul până la absolvire."
+      },
+      "tip9": {
+        "title": "Făcut să dureze",
+        "description": "Dacă neglijezi reparațiile, clădirile și drumurile se degradează și pot ajunge să se prăbușească. Incendiile și prăbușirile strică și starea de spirit a cetățenilor, așa că e riscant să cheltui tot bugetul pe construcții noi. Păstrează bani și pentru repararea facilităților existente și pentru pompieri."
+      },
+      "tip10": {
+        "title": "Marele incendiu",
+        "description": "Când clădirile sunt înghesuite, focul de la una se întinde ușor la vecine. Pe lângă pompieri, și distanța dintre clădiri contribuie la prevenirea dezastrelor."
+      },
+      "tip11": {
+        "title": "Sapă, sapă, sapă",
+        "description": "Alege amplasamentul minelor și al exploatărilor de petrol după ce verifici distribuția resurselor. Cu cât extragi mai mult, cu atât rezervele scad. Un oraș care trăiește din minerit trebuie să se gândească și la locurile de muncă și la veniturile din impozite de după epuizarea zăcămintelor."
+      },
+      "tip12": {
+        "title": "Găina cu ouă de aur",
+        "description": "Dacă primarul construiește clădiri de locuințe sau comerciale, încasează chirie de la chiriași. Spațiile goale nu aduc venit, așa că verifică ce destinații sunt căutate, câte spații libere sunt în jur și cum e amplasamentul."
+      },
+      "tip13": {
+        "title": "Stoarce-i bine",
+        "description": "Nivelul impozitelor influențează nu doar veniturile orașului, ci și costurile și rentabilitatea firmelor. Îl poți folosi și ca politică industrială, de exemplu reducând impozitele pentru ramurile pe care vrei să le dezvolți. Chiar și când veniturile din impozite nu ajung, uită-te la situația fiecărei ramuri înainte să crești impozitele tuturor la fel."
+      },
+      "tip14": {
+        "title": "Plan de rezervă",
+        "description": "Când un accident sau un dezastru oprește o centrală sau o linie electrică, efectele se extind la fabricile care folosesc curent și la viața cetățenilor. Pentru infrastructura importantă, pregătește rezerve atât pentru facilitățile care produc, cât și pentru traseele de distribuție, ca o singură avarie să nu oprească tot orașul."
+      },
+      "tip15": {
+        "title": "În căutarea unui cămin",
+        "description": "Dacă lași terenuri virane în centrul orașului, oamenii rămași fără locuință se adună acolo și se formează ușor o mahala. Dacă oferi locuințe cu chirii accesibile, locuitorii se mută treptat acolo, iar mahalaua se micșorează de la sine."
+      },
+      "tip16": {
+        "title": "Clustere industriale",
+        "description": "Când industriile de același fel sau cele care le produc materiile prime se grupează, locul devine avantajos pentru producție. În loc să împrăștii fabricile prin tot orașul, gândește-te să grupezi industriile înrudite. Totuși, lângă zonele de locuințe, ai grijă la zgomot și la poluarea aerului."
+      },
+      "tip17": {
+        "title": "Muncă 24 din 24",
+        "description": "Dacă prelungești programul de lucru din panoul „Reglementări”, același număr de oameni poate susține o producție mai mare. În schimb, sănătatea și timpul liber au de suferit, iar consumul pentru divertisment scade. Dacă petreci prea mult timp câștigând bani, nu mai ai timp să-i cheltui."
+      },
+      "tip18": {
+        "title": "Iadul navetei",
+        "description": "O navetă lungă reduce timpul liber și consumul pentru divertisment. Verifică distanța dintre locuințe și locurile de muncă și aglomerația de pe drum. Pentru cetățenii care ajung acasă doar ca să doarmă, cartierul tău plin de viață e doar un peisaj văzut pe geam."
+      },
+      "tip19": {
+        "title": "Viziune de viitor",
+        "description": "Trenurile lungi pot circula doar dacă încap la peroanele tuturor stațiilor de pe linie. Ca să fii pregătit pentru mai mulți călători, gândește-te la lungimea peroanelor încă de la construcția stațiilor. Dacă lungești o singură stație, iar celelalte rămân scurte, limitarea rămâne."
+      },
+      "tip20": {
+        "title": "Sub preș",
+        "description": "Drumurile subterane nu produc zgomot și nici poluare a aerului, așa că sunt o soluție pentru a proteja condițiile de locuire din cartierele rezidențiale. Unele probleme chiar se rezolvă dacă le îngropi."
+      },
+      "tip21": {
+        "title": "La umbra zgârie-norilor",
+        "description": "Clădirile înalte aruncă umbră spre nord și înrăutățesc condițiile de locuire din vecinătate. Ai grijă și la înălțimea clădirilor și la distanța dintre ele. Și relieful, de pildă munții, face umbră. Viitorul orașului poate fi luminos, dar la picioarele lui poate fi beznă."
+      },
+      "tip22": {
+        "title": "Abonamentul în locul mașinii",
+        "description": "Când transportul public face ușor accesibile locurile de muncă, școlile și magazinele, gospodăriile aleg mai ușor o viață fără mașină. Banii economisiți pe întreținerea mașinii pot merge spre alte cumpărături."
+      },
+      "tip23": {
+        "title": "Transport de aer",
+        "description": "Autobuzele contribuie la trafic chiar și fără niciun pasager. Dacă mărești prea mult frecvența, măsurile anti-aglomerație pot avea efectul opus. Uită-te la numărul de pasageri și la intervalul între curse ca să stabilești câte curse sunt necesare."
+      },
+      "tip24": {
+        "title": "Cârtițele nu plătesc chirie",
+        "description": "Tunelurile suficient de adânci pot trece fără să cumperi terenul de deasupra. Pe tronsoanele de mică adâncime e nevoie de achiziție, așa că verifică adâncimea și devizul. Dacă negocierile se complică, sapă mai adânc."
+      },
+      "tip25": {
+        "title": "Navetă suspendată",
+        "description": "Chiar și acolo unde munții sau pantele abrupte fac dificilă construcția drumurilor, o telecabină poate asigura transportul public. Amenajează și drumurile până la stații și corespondențele. Dacă deplasarea pe sol e prea grea, îți poți lăsa oricând cetățenii atârnați în aer."
+      },
+      "tip26": {
+        "title": "Ambuteiaj electric",
+        "description": "Chiar dacă ai rezervă de producție, curentul nu ajunge dacă liniile electrice nu au destulă capacitate. Înainte să construiești alte centrale, verifică legăturile și capacitatea de transport până la cartierul unde lipsește curentul. O linie subțire de pe traseu poate limita alimentarea întregului oraș."
+      },
+      "tip27": {
+        "title": "Accident nefericit",
+        "description": "Poți arunca în aer o clădire care îți stă în calea dezvoltării, mascând totul drept accident. Însă starea de spirit a cetățenilor se va înrăutăți serios. Când vrei să eliberezi un teren, cântărește costul cumpărării și demolării față de urmele pe care le lasă în oraș metodele forțate."
+      },
+      "tip28": {
+        "title": "Spre larg!",
+        "description": "Dacă nu ai destul uscat, poți crea terenuri noi umplând marea. Acolo unde există resurse pe fundul mării, poți construi și platforme petroliere."
+      },
+      "tip29": {
+        "title": "Infernul semafoarelor",
+        "description": "Cu cât sunt mai multe intersecții cu semafor, cu atât se adună mai mult timp de așteptare la roșu. Pe drumurile principale, evită să înmulțești intersecțiile. Dacă îți încrucișezi drumurile prea meticulos, se poate lăsa seara fără ca locuitorii să fi prins vreodată verdele."
+      },
+      "tip30": {
+        "title": "Vizibilitate excelentă",
+        "description": "Un turn de radiocomunicații acoperă mai ușor o zonă largă dacă e înalt și construit pe un loc înalt. Verifică dacă între turn și locurile fără semnal nu se află munți sau alte obstacole. Undele blocate nu trec prin munte doar pentru că pui mai mult suflet în putere."
+      },
+      "tip31": {
+        "title": "Darul mării",
+        "description": "Chiar și un oraș fără surse de apă în apropiere poate fi alimentat cu apă de o stație de desalinizare de pe coastă. Însă pentru funcționare are nevoie de curent. După ce ai găsit apă, urmează să cauți curent."
+      },
+      "tip32": {
+        "title": "Altă cale împotriva infracțiunilor",
+        "description": "Șomajul este unul dintre factorii care înrăutățesc siguranța publică. Pe lângă mai mulți polițiști, cetățenii au nevoie și de locuri de muncă. Când sunt mulți șomeri, verifică numărul de posturi libere, calificările cerute și dacă oamenii pot ajunge la locul de muncă."
+      },
+      "tip33": {
+        "title": "Problema primarului de mâine",
+        "description": "Atât clădirile, cât și drumurile necesită reparații și după finalizare. Dacă te extinzi prea mult doar pentru că îți permiți costul construcției, bugetele viitoare vor fi înghițite de întreținere. Primarul de mâine tot tu ești."
+      },
+      "tip34": {
+        "title": "Nu pompa prea mult",
+        "description": "Sursele de apă se refac în timp, dar dacă pompezi mai mult decât se refac, rezerva scade. Asigură-ți și alte surse înainte să crească cererea. Mai multe pompe nu înseamnă mai multă apă."
+      },
+      "tip35": {
+        "title": "Gafă de neiertat",
+        "description": "Drumurile și clădirile nu se mută ușor după ce începe construcția. Înainte să confirmi, verifică orientarea, legăturile și terenul care rămâne în jur. Dar și un drum strâmb din neatenție devine, cu timpul, parte din personalitatea orașului."
+      },
+      "tip36": {
+        "title": "Societatea supravegherii",
+        "description": "Dacă dai clic pe un pieton sau pe o mașină, poți adăuga cetățeanul în lista de urmărire. Folosește-o când vrei să vezi viața unui locuitor care te interesează. Pe lângă statisticile întregului oraș, poți privi orașul și prin viața unui singur om."
+      },
+      "tip37": {
+        "title": "Energie de bază",
+        "description": "Producția centralelor solare și eoliene depinde de vreme. Dacă te bazezi doar pe producția din zilele cu vreme bună, poți rămâne fără curent când se schimbă vremea. Combină-le cu surse mai puțin dependente de vreme, cum ar fi centralele termice sau nucleare."
+      },
+      "tip38": {
+        "title": "Ce e mare ține loc și de mic",
+        "description": "Unele clădiri nu se pot construi pe parcele mici. Dacă vrei să construiești o anumită facilitate, verifică suprafața necesară înainte să împarți parcelele. Chiar dacă ai teren din belșug, clădirile mari nu încap dacă e numai în parcele mici."
+      },
+      "tip39": {
+        "title": "Serviciul ăsta costă",
+        "description": "Serviciile publice precum epurarea apelor uzate, gestionarea deșeurilor, comunicațiile și asistența medicală pot fi gratuite în mod implicit. Dacă stabilești tarife, utilizatorii vor suporta o parte din costurile de funcționare. Prețuri prietenoase cu cetățenii sau etichete îndrăznețe? Decizia e a primarului."
+      },
+      "tip40": {
+        "title": "Oraș copy-paste",
+        "description": "Când construiești o clădire ca primar, poți copia una existentă. Dacă nu schimbi tipul și numărul de etaje și o construiești pe o parcelă în care încape clădirea originală, costul construcției scade. Străzile vor arăta uniform, dar portofelul tău se va bucura."
+      },
+      "tip41": {
+        "title": "Doar chiria contează la alegerea locuinței?",
+        "description": "Când aleg unde să se mute, locuitorii compară chiria, efortul de a ajunge la muncă, la școală și la cumpărături, calitatea locuinței și condițiile de locuire. Contează și zgomotul, poluarea aerului, siguranța publică și lumina naturală. O locuință ieftină, dar incomodă, e aleasă mai rar, iar una comodă trebuie să aibă și o chirie pe măsura bugetului familiei și destul spațiu pentru gospodărie."
+      },
+      "tip42": {
+        "title": "După eșuare e prea târziu",
+        "description": "Porturile mari, cum ar fi cele de containere, de mărfuri în vrac sau pentru petroliere, au nevoie de ape suficient de adânci. Coastele unde fundul mării coboară abrupt sunt aproape de ape adânci și se potrivesc pentru porturi. Chiar și pe o coastă plată, cu ape puțin adânci până departe în larg, poți construi un port dacă extinzi uscatul prin umplere până la ape adânci."
+      },
+      "tip43": {
+        "title": "Doar un minut…",
+        "description": "Când parcarea pe stradă se înmulțește, viteza traficului scade și accidentele se produc mai ușor. Construiește parcări, ca mașinile revărsate pe stradă să aibă unde sta. Un singur „doar un minut…” poate bloca tot orașul."
+      },
+      "tip44": {
+        "title": "Izolat pe uscat",
+        "description": "Poți construi și departe de drum, dar cu cât distanța până la drum e mai mare, cu atât accesul e mai dezavantajos. Fabricile și magazinele se aprovizionează mai greu, iar pentru locuințe crește efortul navetei și al cumpărăturilor. Construiește clădirile de-a lungul drumurilor sau prelungește drumul până lângă ele."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Selectează o parcelă ca să planifici o clădire. De la planificare până la finalizarea construcției trece ceva timp.",
+    "parcelCreation": "Ține apăsat Ctrl ca să deschizi meniul radial și să alegi metoda de creare, apoi fă clic în vizualizarea 3D ca să indici ținta. Ajustează dimensiunile în panou și confirmă.",
+    "transitCreation": "Fă clic stânga ca să pui stațiile în ordine, apoi fă clic pe prima stație ca să închizi circuitul. Trage de un tronson ca să adaugi un punct de trecere, trage de un punct ca să-l muți, clic dreapta ca să-l ștergi. Pentru o linie dus-întors, pune și stațiile de la întoarcere. Dacă faci din nou clic pe o stație deja pusă sau suprapui o stație peste alta, linia va opri din nou acolo.",
+    "transitManagement": "Lista liniilor de transport public. Poți ajusta tarifele și intervalul între curse și poți crea sau șterge linii. Tarifele influențează itinerariul ales de locuitori. Dacă sunt prea mari, scade numărul de călători și crește numărul de mașini personale.",
+    "pathConstruction": "Construiește drumuri și căi ferate. Fă clic pe teren în vizualizarea 3D: clic stânga adaugă un vârf, clic dreapta fixează forma, iar vârfurile se pot muta prin tragere. Ține apăsat Ctrl ca să deschizi meniul de setări (curbă/dreaptă, fixare automată). Cu tastele 3/4 schimbi înălțimea rambleului/debleului.",
+    "pathConstructionElevated": "Construiește drumuri și căi ferate. Fă clic pe teren în vizualizarea 3D: clic stânga adaugă un vârf, clic dreapta fixează forma, iar vârfurile se pot muta prin tragere. Ține apăsat Ctrl ca să deschizi meniul de setări (curbă/dreaptă, fixare automată). Cu PageUp/PageDown sau tastele 1/2 schimbi înălțimea, iar cu tastele 3/4 înălțimea rambleului/debleului.",
+    "districtEdit": "Creează, extinde și unește „cartiere”, unitățile pentru reglementări și statistici. În vizualizarea 3D, ține apăsat Ctrl ca să schimbi instrumentul. Instrumentul de creare: fă clic stânga pe un drum ca să creezi un cartier nou în culoarea afișată (culoarea se schimbă de fiecare dată când alegi instrumentul). Instrumentul de extindere: alege cu clic dreapta cartierul de extins, apoi fă clic stânga pe drumuri ca să le incluzi în el. Instrumentul de unire: alege cu clic dreapta cartierul în care se face unirea, apoi fă clic stânga pe cartierul de unit ca să se deschidă panoul de confirmare. Culoarea și numele cartierului selectat apar lângă cursorul mouse-ului. Apasă din nou butonul ca să ieși.",
+    "bulldozer": "Modul buldozer. Fă clic stânga ca să ștergi parcele libere, clădiri planificate, drumuri planificate și elemente decorative de teren (elementele decorative plasate pe o zonă se șterg cu toată zona, după confirmare). Apasă din nou butonul ca să ieși.",
+    "bulldozerInstant": "Modul buldozer. Clic stânga șterge imediat, fără confirmare, clădiri, drumuri, parcele libere și elemente decorative de teren. Clădirile dispar împreună cu facilitățile și cetățenii din ele, iar terenul nu revine la forma inițială (primăria, punctul de trecere a frontierei și tronsoanele de transport public nu pot fi șterse; doar elementele decorative plasate pe o zonă se șterg cu toată zona, după confirmare). Apasă din nou butonul ca să ieși.",
+    "cityBudget": "Stabilește cum vor fi repartizați în perioada următoare banii câștigați din impozite și din activitățile proprii. Când municipalitatea cumpără bunuri pentru construcția drumurilor sau pentru funcționarea facilităților publice, poate cumpăra doar în limita bugetului stabilit aici. De asemenea, dacă bugetul nu ajunge, personalul facilităților publice poate fi concediat.",
+    "resourceEdit": "Creează o zonă de resurse naturale. Alege tipul resursei, apoi fă clic pe teren. Clic stânga adaugă un vârf, clic pe o latură inserează un vârf, iar clic dreapta șterge un vârf. Trage de un vârf ca să-l muți.",
+    "grading": "Fă clic stânga ca să pui vârfuri și clic dreapta ca să fixezi zona."
+  }
+}

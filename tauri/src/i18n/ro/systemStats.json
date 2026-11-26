@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Încărcarea simulării",
+      "heading": "Timpul de calcul al ultimei epoci (zile: {{days}})",
+      "noData": "Nu există măsurători",
+      "note": "Dacă rulezi mai multe epoci la rând, se afișează valoarea ultimei epoci. Numărul de operații este o estimare a combinațiilor din principalele comparații, calculată după mărimea orașului.",
+      "colGroup": "Proces",
+      "colTime": "Timp",
+      "colWorkload": "Nr. operații",
+      "workloadHint": "Estimarea numărului de combinații din principalele comparații (elemente de tablou). Treci cu mouse-ul peste o valoare pentru detalii.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Piața bunurilor",
+      "realestate": "Piața imobiliară",
+      "labor": "Piața muncii",
+      "building_spawn": "Apariția clădirilor",
+      "agent_spawn": "Apariția agenților economici",
+      "routing": "Itinerariile cetățenilor",
+      "transit": "Itinerariile în transportul public",
+      "environment": "Condiții de locuire",
+      "other": "Altele"
+    },
+    "workload": {
+      "market": "Cumpărători {{demanders}} × vânzători {{suppliers}} (înmulțit pe fiecare produs și însumat)",
+      "realestate": "Gospodării care vor să se mute {{movers}} × clădiri cu locuințe {{housing}}",
+      "labor": "Persoane în căutarea unui loc de muncă {{seekers}} × angajatori {{employers}}",
+      "building_spawn": "Parcele candidate {{parcels}} × tipuri de clădiri × număr de etaje × destinații ale etajelor",
+      "agent_spawn": "Produse × cartiere {{zones}} × cartiere {{zones}}",
+      "routing": "2 moduri de deplasare × cartiere {{zones}} × cartiere {{zones}} × 3 itinerarii candidate × trasee {{paths}}",
+      "transit": "Stații {{stops}} × noduri {{nodes}}",
+      "environment": "Grilă {{width}} × {{height}} × poziții ale soarelui"
+    },
+    "entities": {
+      "colMetric": "Indicator",
+      "colCount": "Număr",
+      "title": "Număr de entități",
+      "agents": "Agenți economici",
+      "households": "Gospodării",
+      "businesses": "Unități economice",
+      "publicFacilities": "Facilități publice",
+      "buildings": "Clădiri",
+      "citizens": "Cetățeni",
+      "population": "Populație",
+      "zones": "Cartiere",
+      "parcels": "Parcele",
+      "paths": "Trasee",
+      "roads": "Drumuri",
+      "tracks": "Căi ferate",
+      "infra": "Rețele de infrastructură",
+      "nodes": "Noduri"
+    },
+    "approximation": {
+      "title": "Aproximarea simulării",
+      "intro": "Pentru orașele mari vor fi adăugate setări care simplifică calculele. Momentan nu pot fi modificate.",
+      "warning": "Poate afecta echilibrul jocului. Nu poate fi anulat",
+      "irreversible": "Schimbările produse de aproximare rămân și în epocile următoare. O aproximare activată nu mai poate fi dezactivată sau redusă.",
+      "undecided": "Nestabilit",
+      "candidates": "candidați (max.)",
+      "epochs": "epoci între reevaluări",
+      "off": "Dezactivat",
+      "on": "Activat",
+      "goods": {
+        "label": "Furnizori candidați la cumpărare",
+        "description": "Limitează numărul de furnizori comparați după preț și distanță."
+      },
+      "jobs": {
+        "label": "Locuri de muncă candidate",
+        "description": "Limitează numărul de angajatori comparați după salariu și condițiile de navetă."
+      },
+      "housing": {
+        "label": "Locuințe candidate",
+        "description": "Limitează numărul de locuințe comparate după chirie și amplasare."
+      },
+      "interval": {
+        "label": "Intervalul deciziilor periodice",
+        "description": "Reevaluează mai rar locurile de cumpărături, locurile de muncă și locuințele."
+      },
+      "aggregation": {
+        "label": "Calcul grupat pentru cetățeni și gospodării similare",
+        "description": "Unele decizii ale cetățenilor sau gospodăriilor aflate în situații similare se iau în grup."
+      }
+    },
+    "status": {
+      "title": "Starea sistemului",
+      "gpuDisabled": "Accelerare GPU: dezactivată",
+      "coreSimulator": "Simulatorul de bază",
+      "currentMemory": "Memorie folosită acum: {{value}}",
+      "peakMemory": "Memorie maximă folosită de la pornire: {{value}}",
+      "graphic": "3D",
+      "currentVram": "VRAM folosită acum: {{value}}",
+      "usageTooltip": "Tot PC-ul {{pc}} / Acest joc {{game}} / Instalată {{total}}",
+      "legendPc": "Tot PC-ul",
+      "legendGame": "Acest joc"
+    }
+  }
+}

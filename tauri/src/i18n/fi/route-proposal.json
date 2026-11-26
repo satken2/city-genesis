@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Ehdota reittiä",
+    "mode": "Korkeustila",
+    "fixed": "Säilytä reittipisteiden korkeudet",
+    "adjust": "Säädä välipisteiden korkeuksia",
+    "help": "Käytettävissä, kun muoto on vahvistettu. Päätepisteet ja reittipisteiden XZ-sijainnit pysyvät ennallaan.",
+    "searching": "Haetaan…",
+    "cancel": "Peruuta",
+    "undo": "Kumoa ehdotus",
+    "notFound": "Reittiä ei löytynyt.",
+    "failed": "Reittiehdotus epäonnistui."
+  }
+}

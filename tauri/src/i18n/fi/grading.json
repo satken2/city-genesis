@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Tyyppi",
+    "kind": {
+      "land": "Maantasaus",
+      "shore": "Täyttö"
+    },
+    "baseHeight": "Peruskorkeus",
+    "targetHeight": "Tavoitekorkeus",
+    "cutVolume": "Leikkausmäärä",
+    "fillVolume": "Täyttömäärä",
+    "quayLength": "Laiturin pituus",
+    "quayArea": "Laiturimuurin pinta-ala",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Korkeus (ero peruskorkeuteen)",
+    "seaLevelHeight": "Korkeus (merenpinnasta)",
+    "baseNote": {
+      "frontage": "0 on viereisen tien pinnan korkeus ({{value}} m)",
+      "terrain_mean": "0 on alueen nykyinen keskikorkeus ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "Alueen muoto on virheellinen. Piirrä se niin, etteivät reunat risteä.",
+      "outside_city": "Alue ulottuu kaupungin ulkopuolelle.",
+      "too_large": "Alue on liian suuri (raja {{limit}} km²).",
+      "on_water": "Kokonaan meren päällä olevalle alueelle ei voi tehdä maanrakennusta. Piirrä alue niin, että se ulottuu maalle.",
+      "no_land_overlap": "Piirrä alue niin, että se menee maan päälle (muuten rannan ja alueen väliin jää kaistale merta).",
+      "overlaps_parcel": "Alue menee olemassa olevan tontin päälle.",
+      "overlaps_path": "Alue menee tien, raiteen tai muun väylän päälle.",
+      "overlaps_water": "Alue ulottuu jokeen tai järveen.",
+      "overlaps_quay_band": "Alue menee täyttömaan laiturimuurin päälle.",
+      "invalid_height_offset": "Korkeus on sallitun alueen ulkopuolella (enintään ±{{offsetLimit}} m peruskorkeudesta).",
+      "below_sea_level": "Korkeutta ei voi asettaa merenpinnan alapuolelle.",
+      "too_narrow": "Alue on liian kapea; laiturimuurin sisäpuolelle ei jää täytettävää.",
+      "no_work": "Maa on jo tavoitekorkeudessa, joten töitä ei tarvita.",
+      "insufficient_funds": "Varat eivät riitä tilaukseen."
+    },
+    "confirm": "Vahvista",
+    "confirming": "Vahvistetaan…",
+    "cancel": "Peruuta",
+    "confirmFailed": "Maanrakennustyön tilaus epäonnistui."
+  }
+}

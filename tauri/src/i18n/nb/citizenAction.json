@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Gi et navn",
+      "message": "Skriv inn navnet du vil gi {{name}}.",
+      "inputLabel": "Nytt navn",
+      "confirm": "Gi navn"
+    },
+    "reward": {
+      "label": "Gi en belønning",
+      "message": "Gi husholdningen til {{name}} en belønning fra kommunens midler.\nKommunens likvide midler: {{available}}",
+      "confirm": "Gi"
+    },
+    "expel": {
+      "label": "Ønsk lykke til videre",
+      "message": "Vil du utvise {{name}} fra byen?",
+      "confirm": "Utvis",
+      "results": {
+        "0": "{{name}} pakket sakene sine og forlot byen i all stillhet. Ingen kom for å ta farvel.",
+        "1": "{{name}} krysset bygrensen og ropte: «Hit kommer jeg aldri tilbake!»",
+        "2": "{{name}} er høflig fulgt ut over bygrensen. Vi ønsker lykke til videre."
+      }
+    },
+    "donation": {
+      "label": "Be om en gave",
+      "message": "Be husholdningen til {{name}} om en gave til kommunen.\nHusholdningens likvide midler: {{available}}",
+      "confirm": "Be om gave"
+    },
+    "relocate": {
+      "label": "Foreslå en ny bolig",
+      "message": "Vil du kaste ut husholdningen til {{name}} fra boligen deres?\nHusholdningen ser etter en ny bolig i neste epoke.",
+      "confirm": "Kast ut",
+      "results": {
+        "0": "Familien til {{name}} er kastet ut av hjemmet sitt. Møblene står stablet langs veien.",
+        "1": "Låsene i hjemmet til {{name}} er byttet. Familien har begynt å lete etter et nytt sted å bo.",
+        "2": "Familien til {{name}} har fått forslag om en ny bolig. Til det gamle hjemmet kan de ikke vende tilbake."
+      }
+    }
+  }
+}

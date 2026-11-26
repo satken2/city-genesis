@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritmus",
+    "roadVariants": "Typy silnic",
+    "patterns": {
+      "grid_1": "Pravoúhlá síť 1",
+      "grid_2": "Pravoúhlá síť 2",
+      "sprawl_1": "Živelná zástavba 1",
+      "sprawl_2": "Živelná zástavba 2",
+      "sprawl_3": "Živelná zástavba 3",
+      "planned_city_1": "Plánované město 1",
+      "split_1": "Rozdělení 1"
+    },
+    "spacing": "Rozestup silnic",
+    "blockLength": "Délka bloku",
+    "splitHint": "Do oblasti zahrňte celé bloky ohraničené silnicemi. Silnice rovnoběžné s delší stranou bloku se vedou v rozestupu podle hodnoty „Rozestup silnic“, kolmé silnice podle hodnoty „Délka bloku“.",
+    "createParcels": "Vytvořit parcely",
+    "parcelArea": "Rozloha parcely",
+    "hint": "Podržte Ctrl a tažením levým tlačítkem vyznačte oblast k zástavbě. Tažením levým tlačítkem posunete mapu, kolečkem ji přiblížíte či oddálíte.",
+    "clear": "Vymazat",
+    "preview": "Náhled",
+    "previewing": "Výpočet…",
+    "create": "Potvrdit",
+    "creating": "Vytváření…",
+    "previewed": "V oblasti {{area}} lze mírně srovnat terén a naplánovat úseky silnic: {{roads}}, parcely: {{parcels}} (zamítnuté úseky: {{rejected}})",
+    "created": "Terén byl srovnán a naplánovány byly úseky silnic: {{roads}}, parcely: {{parcels}} (zamítnuté úseky: {{rejected}})"
+  }
+}

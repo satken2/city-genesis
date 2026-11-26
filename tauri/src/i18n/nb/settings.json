@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Innstillinger",
+    "groups": {
+      "general": "Generelt",
+      "display": "Skjerm",
+      "sound": "Lyd",
+      "system": "System",
+      "about": "Om",
+      "developer": "Utviklerinnstillinger"
+    },
+    "swagger": {
+      "label": "Swagger (API-dokumentasjon)",
+      "description": "Viser API-spesifikasjonen til kjernesimulatoren i standardnettleseren",
+      "action": "Åpne i nettleser"
+    },
+    "currencyUnit": {
+      "label": "Valutaenhet",
+      "description": "Enheten som vises ved pengebeløp. La feltet stå tomt for å følge visningsspråket."
+    },
+    "fontSize": {
+      "label": "Tekststørrelse",
+      "large": "Stor",
+      "medium": "Middels",
+      "small": "Liten",
+      "custom": "Egendefinert",
+      "preview": "Nåværende størrelse"
+    },
+    "monitor": {
+      "label": "Skjerm",
+      "prev": "Forrige skjerm",
+      "next": "Neste skjerm"
+    },
+    "graphicMonitor": {
+      "label": "Skjerm for 3D-visning"
+    },
+    "multiDisplay": {
+      "label": "Flerskjermmodus",
+      "description": "Viser vinduene på en annen skjerm enn spillet",
+      "on": "På",
+      "off": "Av"
+    },
+    "popupMonitor": {
+      "label": "Skjerm for vinduer"
+    },
+    "hintbar": {
+      "label": "Tipslinje",
+      "show": "Vis",
+      "hide": "Skjul",
+      "description": "Linje øverst på skjermen som viser tips om hvordan du styrer spillet"
+    },
+    "citizenVoice": {
+      "label": "Innbyggernes stemme",
+      "show": "Vis",
+      "hide": "Skjul",
+      "description": "Kort øverst til høyre på skjermen som viser hva innbyggerne sier, ett utsagn om gangen"
+    },
+    "language": {
+      "label": "Språk",
+      "description": "Visningsspråket i brukergrensesnittet. Dette er noe annet enn språket i det lagrede spillet.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Volum",
+      "master": "Hovedvolum",
+      "bgm": "Musikk",
+      "sfx": "Lydeffekter"
+    },
+    "compute": {
+      "label": "GPU-akselerasjon",
+      "comingSoon": "Kommer snart",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU aktiv",
+      "statusInactive": "CPU aktiv",
+      "restartRequired": "Hovedprogrammet startes på nytt når innstillingen endres",
+      "restarting": "Starter på nytt …",
+      "restartFailed": "Kunne ikke starte på nytt",
+      "restartUnavailable": "Innstillingene er lagret. Endringene trer i kraft neste gang spillet startes",
+      "confirmRestart": "Vil du bytte beregningsmodus til {{mode}}? Hovedprogrammet startes på nytt.",
+      "restartAction": "Start på nytt"
+    },
+    "windowReset": {
+      "label": "Vindusposisjon og -størrelse",
+      "action": "Tilbakestill"
+    },
+    "credits": {
+      "label": "Medvirkende",
+      "description": "Rettighetsinformasjon for materiell og programvare som brukes i spillet",
+      "action": "Vis"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Nytt spill",
+    "overwriteSave": "Overskriv lagring",
+    "saveAs": "Lagre som",
+    "load": "Last inn",
+    "quitGame": "Avslutt spillet",
+    "returnToTop": "Tilbake til hovedmenyen",
+    "loading": "Laster …",
+    "shuttingDown": "Avslutter …",
+    "saveFailed": "Kunne ikke lagre",
+    "loadFailed": "Kunne ikke laste inn",
+    "confirmNewGame": "Nåværende data går tapt. Vil du starte et nytt spill?",
+    "confirmQuitGame": "Vil du avslutte spillet? Fremgangen din lagres ikke automatisk.",
+    "confirmReturnToTop": "Vil du gå tilbake til hovedmenyen? Fremgangen din lagres ikke automatisk.",
+    "confirm": "Ja",
+    "cancel": "Nei",
+    "saveAsScenario": "Lagre som scenario",
+    "saveAsNewScenario": "Lagre som nytt scenario",
+    "overwriteScenario": "Overskriv scenario",
+    "backToGame": "Tilbake til spillet",
+    "saveName": "Navn på lagring",
+    "confirmOverwrite": "Vil du overskrive lagringen «{{name}}»?",
+    "confirmOverwriteScenario": "Vil du overskrive scenarioet «{{name}}»?"
+  },
+  "saveList": {
+    "noSaves": "Ingen lagrede spill",
+    "currentSave": "Nåværende data",
+    "population": "Befolkning",
+    "inGameDate": "Dato",
+    "savedAt": "Lagret",
+    "loadButton": "Last inn",
+    "deleteButton": "Slett",
+    "confirmLoad": "Vil du laste inn dette lagrede spillet?",
+    "confirmDelete": "Vil du slette dette lagrede spillet? Dette kan ikke angres.",
+    "loading": "Laster …",
+    "loadFailed": "Kunne ikke laste inn",
+    "deleteFailed": "Kunne ikke slette",
+    "openFolderButton": "Vis mappeplassering",
+    "scenario": "Scenario",
+    "autosaveName": "{{name}} (autolagring ved avslutning)"
+  }
+}

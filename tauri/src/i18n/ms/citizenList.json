@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Cari warga kota",
+    "tabTracking": "Senarai jejakan",
+    "name": "Nama",
+    "age": "Umur",
+    "ageSeparator": "hingga",
+    "search": "Cari",
+    "noResults": "Tiada warga kota yang sepadan.",
+    "truncated": "Memaparkan {{shown, number}} daripada {{total, number}} warga kota yang sepadan."
+  }
+}

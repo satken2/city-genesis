@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "A játék az alábbi forrásanyagokat használja. A szerzők és a források nevét, a licencek nevét és a licencek által előírt feltüntetési szövegeket eredeti formájukban közöljük.",
+    "empty": "Nincsenek tételek.",
+    "requiredText": "Előírt feltüntetés",
+    "categories": {
+      "bgm": "Zene",
+      "sfx": "Hangeffektek",
+      "image": "Képek és ikonok",
+      "font": "Betűtípusok",
+      "model": "3D-modellek",
+      "texture": "Textúrák"
+    }
+  }
+}

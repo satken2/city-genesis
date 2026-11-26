@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Station",
+    "name": "Stationsnaam",
+    "ridership": "Aantal instappers",
+    "platforms": "Perrons",
+    "noPlatforms": "Er horen geen perrons bij dit station (perrons die de lijn kruist, horen erbij)",
+    "lines": "Lijnen die hier stoppen",
+    "noLines": "Er stoppen hier geen lijnen",
+    "stops": "Instappers per halte",
+    "noStops": "Er zijn geen haltes bij dit station",
+    "lineRunning": "In dienst",
+    "lineSuspended": "Buiten dienst",
+    "houseEnds": "Plaats van stationsgebouwen",
+    "houseEnds_both": "Beide uiteinden",
+    "houseEnds_start": "Begin",
+    "houseEnds_end": "Eind",
+    "passageMode": "Plaats van de verbindingsgang",
+    "passageMode_elevated": "Bovengronds (loopbrug)",
+    "passageMode_ground": "Op maaiveld",
+    "passageMode_underground": "Ondergronds"
+  }
+}

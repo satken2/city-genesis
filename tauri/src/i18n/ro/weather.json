@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Vreme",
+    "choose": "Alege vremea",
+    "loading": "Se verifică vremea…",
+    "unknown": "Necunoscut",
+    "automatic": "{{weather}} (automat)",
+    "failed": "Vremea nu a putut fi schimbată",
+    "names": {
+      "clear": "Senin",
+      "high_clouds": "Nori subțiri",
+      "fair": "Însorit",
+      "broken_clouds": "Înseninări",
+      "overcast": "Înnorat",
+      "rain_clouds": "Nori de ploaie",
+      "fog": "Ceață",
+      "drizzle": "Burniță",
+      "rain": "Ploaie",
+      "heavy_rain": "Ploaie torențială",
+      "light_snow": "Ninsoare slabă",
+      "snow": "Ninsoare",
+      "blizzard": "Viscol"
+    },
+    "epochClimate": "Clima epocii",
+    "temperature": "Temperatură",
+    "precipitation": "Precipitații",
+    "sunlight": "Insolație",
+    "windSpeed": "Viteza vântului"
+  }
+}

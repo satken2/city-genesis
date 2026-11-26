@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "Gjennomsnittlig klima denne måneden",
+    "currentClimate_week": "Gjennomsnittlig klima denne uken",
+    "title": "Anleggenes produksjonseffektivitet etter klima",
+    "facility": "Anlegg",
+    "factor": "Produksjonseffektivitet"
+  }
+}

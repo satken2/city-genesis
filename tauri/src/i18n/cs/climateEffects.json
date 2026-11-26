@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "Průměrné klima tohoto měsíce",
+    "currentClimate_week": "Průměrné klima tohoto týdne",
+    "title": "Výrobní efektivita zařízení podle klimatu",
+    "facility": "Zařízení",
+    "factor": "Výrobní efektivita"
+  }
+}

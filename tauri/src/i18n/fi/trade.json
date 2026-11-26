@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Tarjontatiedot",
+    "product": "Tarjottava tuote",
+    "amount": "Tarjontamäärä",
+    "price": "Tarjontahinta",
+    "soldAmount": "Myyty määrä",
+    "profitRate": "Kate",
+    "utilization": "Käyttöaste"
+  },
+  "tourismSupply": {
+    "title": "Matkailijoiden vastaanotto",
+    "touristCapacity": "Matkailijoiden vastaanottokyky",
+    "persons": "{{value}} henkeä",
+    "218": {
+      "price": "Pääsymaksu",
+      "amount": "Kävijäkapasiteetti (yhteensä)",
+      "soldAmount": "Kävijät (yhteensä)"
+    },
+    "219": {
+      "price": "Lipun hinta",
+      "amount": "Matkustajakapasiteetti (yhteensä)",
+      "soldAmount": "Matkustajat (yhteensä)"
+    }
+  },
+  "demand": {
+    "product": "Tuote",
+    "demandAmount": "Kysyntä",
+    "receivedAmount": "Saatu",
+    "acquiredAmount": "Varasto"
+  },
+  "cargo": {
+    "title": "Lastinkäsittely",
+    "description": "Tämä keskus tuo tavaroita alueen ulkopuolelta kaupungin markkinoille ja ostaa kaupungin ylijäämätuotannon viedäkseen sen alueen ulkopuolelle.",
+    "capacity": "Käsittelykapasiteetti",
+    "perPeriod": "/kk",
+    "perPeriod_week": "/viikko",
+    "materialCapacity": "Raja raaka-aineiden mukaan",
+    "areaCapacity": "Raja lattia-alan mukaan",
+    "importHandled": "Käsitelty tuonti",
+    "exportHandled": "Käsitelty vienti",
+    "utilization": "Käyttöaste",
+    "importSectionTitle": "Tuonti",
+    "exportSectionTitle": "Vienti",
+    "handledImport": "Myyty",
+    "handledExport": "Ostettu",
+    "allocation": "Kiintiö",
+    "priceImport": "Myyntihinta",
+    "priceExport": "Ostohinta",
+    "lost": "Menetetty myynti",
+    "noProducts": "Ei käsiteltäviä tuotteita"
+  }
+}

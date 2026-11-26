@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Dự án xây dựng",
+    "none": "(Không có thẻ)",
+    "createNew": "+ Thẻ mới…",
+    "newPlaceholder": "Nhập tên thẻ",
+    "add": "Thêm",
+    "cancel": "Hủy",
+    "saveFailed": "Không thể lưu thẻ",
+    "showObject": "Hiện trong chế độ xem 3D",
+    "hideObject": "Ẩn trong chế độ xem 3D"
+  },
+  "constructionProjects": {
+    "all": "Tất cả",
+    "empty": "Chưa có công trình nào. Hãy chọn thẻ khi đặt từ bảng xây dựng, hoặc gắn thẻ từ bảng chi tiết của công trình công cộng hay con đường chưa khởi công hoặc đang xây, để xem gộp theo từng dự án.",
+    "loadFailed": "Không thể tải danh sách dự án xây dựng",
+    "totalCost": "Chi phí xây dựng (dự kiến)",
+    "duration": "Thời gian thi công (còn lại)",
+    "progress": "Tiến độ",
+    "progressValue": "Đã xong {{done}} / {{total}}",
+    "monthsValue": "{{value}} tháng",
+    "stalled": "Không tiến triển",
+    "stalledWarning": "{{count}} công trình không tiến triển vì tốc độ xây dựng bằng 0 (không tính vào tổng thời gian thi công).",
+    "done": "Hoàn thành",
+    "unnamed": "#{{id}}",
+    "showAll": "Hiện lại tất cả ({{count}})",
+    "showTag": "Hiện dự án này trong chế độ xem 3D",
+    "hideTag": "Ẩn dự án này trong chế độ xem 3D",
+    "showObject": "Hiện trong chế độ xem 3D",
+    "hideObject": "Ẩn trong chế độ xem 3D",
+    "deleteTag": "Xóa thẻ",
+    "confirmDeleteTag": "Xóa thẻ “{{tag}}”? Thẻ sẽ được gỡ khỏi các tòa nhà và con đường liên quan (bản thân công trình vẫn giữ nguyên).",
+    "columns": {
+      "name": "Đối tượng",
+      "status": "Trạng thái",
+      "cost": "Chi phí còn lại",
+      "remaining": "Thời gian còn lại"
+    }
+  }
+}

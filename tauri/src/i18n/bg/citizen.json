@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} г.",
+    "male": "Мъж",
+    "female": "Жена",
+    "single": "Без брак",
+    "married": "В брак",
+    "household": "Домакинство",
+    "employer": "Работодател",
+    "unemployed": "Без работа",
+    "school": "Учебно заведение",
+    "notEnrolled": "Не учи",
+    "major": "Специалност",
+    "higherEducation": "Висше образование",
+    "graduated": "Завършено",
+    "notGraduated": "Незавършено",
+    "skills": "Квалификации",
+    "criminality": "Склонност към престъпления",
+    "commuteTime": "Време за път до работа",
+    "automobile": "Автомобил",
+    "automobileOwned": "Има",
+    "automobileNone": "Няма",
+    "householdStatus": "Положение на домакинството"
+  },
+  "household": {
+    "title": "Домакинство",
+    "familyType": "Тип домакинство",
+    "familySingle": "Едночленно",
+    "familyCouple": "Двойка",
+    "familyFamily": "Семейство",
+    "familySenior": "Възрастни",
+    "hasAutomobile": "Има автомобил",
+    "noAutomobile": "Няма автомобил",
+    "discretionaryIncome": "Разполагаем доход",
+    "livingStandard": "Стандарт на живот",
+    "livingStandardLevel": {
+      "0": "Крайна бедност",
+      "1": "Бедност",
+      "2": "Средна класа",
+      "3": "Заможност"
+    },
+    "satisNutrition": "Хранене",
+    "satisHealthcare": "Здравеопазване",
+    "satisLeisure": "Развлечения и отдих",
+    "satisTourism": "Туризъм",
+    "tourist": "Туристи",
+    "partySize": "Брой хора",
+    "members": "Членове на домакинството"
+  },
+  "education": {
+    "people": "души"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Várakozás a terepszerkesztő adataira…"
+  },
+  "groundCover": {
+    "label": "Talajborítás",
+    "hint": "Megváltoztatja a talaj színét és textúráját a játékban, valamint a 2D-s térképek színeit. A szimulációt nem befolyásolja.",
+    "1": "Füves puszta",
+    "2": "Sivatag",
+    "3": "Dús rét",
+    "4": "Hómező",
+    "5": "Félszáraz vidék",
+    "6": "Rács"
+  },
+  "climate": {
+    "label": "Éghajlat",
+    "hint": "Átmásolja egy sablon havi hőmérsékleti, csapadék-, napsütés- és időjárási adatait. A részletek forgatókönyv-készítő módban, az „Éghajlati beállítások” ablakban szerkeszthetők."
+  },
+  "assetPack": {
+    "label": "Eszközcsomag",
+    "standard": "Normál"
+  }
+}

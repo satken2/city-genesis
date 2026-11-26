@@ -1,0 +1,23 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Väntar på data från terrängredigeraren…"
+  },
+  "groundCover": {
+    "label": "Marktyp",
+    "hint": "Ändrar markens färg och textur i spelet samt färgerna i 2D-kartor. Påverkar inte simuleringen.",
+    "1": "Gräsmark",
+    "2": "Öken",
+    "3": "Frodig äng",
+    "4": "Snöfält",
+    "5": "Torrmark",
+    "6": "Rutnät"
+  },
+  "climate": {
+    "label": "Klimat",
+    "hint": "Kopierar månadsvis temperatur, nederbörd, solsken och väderfördelning från en förinställning. Detaljerna kan du redigera i ”Klimatinställningar” i scenarioläget."
+  },
+  "assetPack": {
+    "label": "Resurspaket",
+    "standard": "Standard"
+  }
+}

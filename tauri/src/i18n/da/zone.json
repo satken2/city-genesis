@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Bydel #{{id}}",
+    "color": "Bydelens farve",
+    "colorUpdateFailed": "Bydelens farve kunne ikke opdateres",
+    "basicInfo": "Grundoplysninger",
+    "area": "Areal",
+    "zonePopulation": "Indbyggere",
+    "daytimePopulation": "Dagbefolkning",
+    "spaceAmount": "Udlejet etageareal",
+    "slotStarvationTitle": "Ventende lejere kan ikke få plads",
+    "slotStarvationWarning": "»{{tenant}}« skal bruge mindst {{required}} m2 etageareal i én bygning, men det største, der kan bygges i denne bydel, er {{max}} m2. Sørg for en større parcel.",
+    "restrictions": "Byggebestemmelser",
+    "restrictionUpdateFailed": "Bydelens bestemmelser kunne ikke opdateres",
+    "restrictionRequired": "Bebyggelsesgrad, bebyggelsesprocent og højde må ikke være tomme",
+    "mergeConfirm": "»{{source}}« lægges sammen med »{{target}}«. Den første bydel forsvinder sammen med sine bestemmelser.",
+    "mergeAction": "Læg sammen",
+    "mergeFailed": "Bydelene kunne ikke lægges sammen (kun naboer kan lægges sammen)",
+    "mergeNoRequest": "Der er ikke valgt nogen bydel at lægge sammen",
+    "edit": {
+      "toolHeading": "Handling",
+      "toolCreate": "Opret ny bydel",
+      "toolExpand": "Udvid bydel",
+      "toolExpandZone": "Udvid {{name}}",
+      "modeHeading": "Valgmetode",
+      "modeBlock": "Hele karréer",
+      "modeRoad": "Vejside",
+      "hint": {
+        "create": {
+          "block": "Hold Ctrl nede, og træk hen over karréer omgivet af veje. De malede karréer bliver med deres parceller til en ny bydel. Træk for at flytte kortet, og rul for at zoome.",
+          "road": "Hold Ctrl nede, og træk hen over den ene side af en vej (halvdelen af kørebanen eller parcellerne langs den). Den side af vejen bliver med sine parceller til en ny bydel. Træk for at flytte kortet, og rul for at zoome."
+        },
+        "expand": {
+          "block": "Hold musen over en bydel, hold Ctrl nede, og træk hen over karréer for at føje dem med deres parceller til bydelen. Træk for at flytte kortet, og rul for at zoome.",
+          "road": "Hold musen over en bydel, hold Ctrl nede, og træk hen over den ene side af en vej (halvdelen af kørebanen eller parcellerne langs den) for at føje den side med sine parceller til bydelen. Træk for at flytte kortet, og rul for at zoome."
+        }
+      },
+      "failed": "Bydelen kunne ikke ændres."
+    }
+  }
+}

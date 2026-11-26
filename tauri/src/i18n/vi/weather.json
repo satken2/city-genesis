@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Thời tiết",
+    "choose": "Chọn thời tiết",
+    "loading": "Đang kiểm tra thời tiết…",
+    "unknown": "Không rõ",
+    "automatic": "{{weather}} (tự động)",
+    "failed": "Không thể thay đổi thời tiết",
+    "names": {
+      "clear": "Trời quang",
+      "high_clouds": "Mây mỏng",
+      "fair": "Nắng",
+      "broken_clouds": "Có lúc nắng",
+      "overcast": "Nhiều mây",
+      "rain_clouds": "Mây mưa",
+      "fog": "Sương mù",
+      "drizzle": "Mưa phùn",
+      "rain": "Mưa",
+      "heavy_rain": "Mưa to",
+      "light_snow": "Tuyết nhẹ",
+      "snow": "Tuyết",
+      "blizzard": "Bão tuyết"
+    },
+    "epochClimate": "Khí hậu của kỳ",
+    "temperature": "Nhiệt độ",
+    "precipitation": "Lượng mưa",
+    "sunlight": "Cường độ nắng",
+    "windSpeed": "Tốc độ gió"
+  }
+}

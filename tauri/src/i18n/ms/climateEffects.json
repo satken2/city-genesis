@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "Iklim purata bulan ini",
+    "currentClimate_week": "Iklim purata minggu ini",
+    "title": "Kecekapan pengeluaran kemudahan mengikut iklim",
+    "facility": "Kemudahan",
+    "factor": "Kecekapan pengeluaran"
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Simuleringsbelastning",
+      "heading": "Beräkningstid för senaste epoken ({{days}} dagar)",
+      "noData": "Inga mätdata",
+      "note": "Om flera epoker körs i följd visas värdet för den sista. Antalet operationer är en grov uppskattning av antalet kombinationer i de viktigaste jämförelserna, utifrån stadens storlek.",
+      "colGroup": "Process",
+      "colTime": "Tid",
+      "colWorkload": "Antal operationer",
+      "workloadHint": "Ungefärligt antal kombinationer i de viktigaste jämförelserna (antal element i matriserna). Håll muspekaren över ett värde för att se fördelningen.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Varumarknad",
+      "realestate": "Fastighetsmarknad",
+      "labor": "Arbetsmarknad",
+      "building_spawn": "Byggnaders uppkomst",
+      "agent_spawn": "Aktörers uppkomst",
+      "routing": "Medborgarnas resvägssökning",
+      "transit": "Resvägssökning i kollektivtrafiken",
+      "environment": "Boendemiljö",
+      "other": "Övrigt"
+    },
+    "workload": {
+      "market": "Köpare {{demanders}} × säljare {{suppliers}} (multiplicerat per produkt och summerat)",
+      "realestate": "Hushåll som funderar på att flytta {{movers}} × byggnader med bostäder {{housing}}",
+      "labor": "Arbetssökande {{seekers}} × arbetsgivare {{employers}}",
+      "building_spawn": "Kandidattomter {{parcels}} × byggnadstyper × antal våningar × våningsanvändning",
+      "agent_spawn": "Produkter × stadsdelar {{zones}} × stadsdelar {{zones}}",
+      "routing": "2 färdsätt × stadsdelar {{zones}} × stadsdelar {{zones}} × 3 kandidatresvägar × sträckningar {{paths}}",
+      "transit": "Hållplatser {{stops}} × noder {{nodes}}",
+      "environment": "Rutnät {{width}} × {{height}} × solpositioner"
+    },
+    "entities": {
+      "colMetric": "Post",
+      "colCount": "Antal",
+      "title": "Antal objekt",
+      "agents": "Ekonomiska aktörer",
+      "households": "Hushåll",
+      "businesses": "Verksamheter",
+      "publicFacilities": "Offentliga anläggningar",
+      "buildings": "Byggnader",
+      "citizens": "Medborgare",
+      "population": "Befolkning",
+      "zones": "Stadsdelar",
+      "parcels": "Tomter",
+      "paths": "Sträckningar",
+      "roads": "Vägar",
+      "tracks": "Spår",
+      "infra": "Infrastrukturnät",
+      "nodes": "Noder"
+    },
+    "approximation": {
+      "title": "Förenklad simulering",
+      "intro": "Inställningar som förenklar beräkningarna för stora städer är planerade. De kan inte ändras ännu.",
+      "warning": "Kan påverka spelbalansen. Går inte att ångra",
+      "irreversible": "Förändringar som förenklingen orsakar finns kvar i senare epoker. En förenkling som har aktiverats kan inte stängas av eller minskas.",
+      "undecided": "Ej bestämt",
+      "candidates": "kandidater (max)",
+      "epochs": "epoker mellan omprövningar",
+      "off": "Av",
+      "on": "På",
+      "goods": {
+        "label": "Antal köpkandidater",
+        "description": "Begränsar hur många leverantörer som jämförs efter pris och avstånd."
+      },
+      "jobs": {
+        "label": "Antal jobbkandidater",
+        "description": "Begränsar hur många arbetsgivare som jämförs efter lön och pendling."
+      },
+      "housing": {
+        "label": "Antal bostadskandidater",
+        "description": "Begränsar hur många bostäder som jämförs efter hyra och läge."
+      },
+      "interval": {
+        "label": "Intervall för återkommande beslut",
+        "description": "Gör att val av butiker, jobb och bostad omprövas mer sällan."
+      },
+      "aggregation": {
+        "label": "Beräkna liknande medborgare och hushåll tillsammans",
+        "description": "Vissa beslut fattas gemensamt för medborgare och hushåll i liknande situation."
+      }
+    },
+    "status": {
+      "title": "Systemstatus",
+      "gpuDisabled": "GPU-acceleration: av",
+      "coreSimulator": "Kärnsimulator",
+      "currentMemory": "Aktuell minnesanvändning: {{value}}",
+      "peakMemory": "Högsta minnesanvändning sedan start: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Aktuell VRAM-användning: {{value}}",
+      "usageTooltip": "Hela datorn {{pc}} / Spelet {{game}} / Installerat {{total}}",
+      "legendPc": "Hela datorn",
+      "legendGame": "Spelet"
+    }
+  }
+}

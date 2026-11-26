@@ -1,0 +1,63 @@
+{
+  "mapNavigation": {
+    "title": "Utforsk byen",
+    "openSidebar": "Åpne sidepanelet",
+    "closeSidebar": "Lukk sidepanelet",
+    "back": "Tilbake",
+    "search": "Søk etter sted",
+    "origin": "Søk etter startsted",
+    "destination": "Søk etter reisemål",
+    "clear": "Tøm",
+    "searching": "Søker …",
+    "error": "Får ikke kontakt. Last inn på nytt og prøv igjen.",
+    "noResults": "Fant ingen steder",
+    "mode": "Reisemåte",
+    "pedestrian": "Gange og kollektivt",
+    "automobile": "Bil",
+    "pickOrigin": "Velg startsted på kartet",
+    "pickDestination": "Velg reisemål på kartet",
+    "swap": "Bytt om",
+    "cancel": "Avbryt",
+    "directions": "Veibeskrivelse hit",
+    "intro": "Søk etter anlegg, stasjoner, bydeler eller veier, eller velg et sted på kartet.",
+    "chooseOrigin": "Søk etter et startsted eller velg et på kartet.",
+    "routing": "Finner rute …",
+    "showRoute": "Vis hele ruten",
+    "mapPoint": "Punkt på kartet",
+    "minutes": "Ca. {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Anslag basert på veinettet fra ruteberegning nr. {{epoch}}. Stiplede linjer viser gange og tilkobling til veier.",
+    "busy": "Simuleringen kjører. Resultatene oppdateres når den er ferdig.",
+    "not_ready": "Ingen rutedata ennå. Kjør en simulering i denne byen for å se ruter.",
+    "unreachable": "Fant ingen rute mellom disse to stedene.",
+    "no_access": "Fant ingen tilgjengelig vei nær det valgte stedet.",
+    "geometry_unavailable": "Kollektivtraseen for denne ruten er ikke tilgjengelig.",
+    "place_missing": "Det valgte stedet er fjernet. Velg på nytt.",
+    "kind": {
+      "agent": "Anlegg",
+      "zone": "Bydel",
+      "stop": "Holdeplass",
+      "station": "Stasjon",
+      "point": "Punkt",
+      "road": "Vei"
+    },
+    "leg": {
+      "walk": "Gange",
+      "drive": "Bil",
+      "transit": "Kollektivtransport",
+      "conveyor": "Persontransportanlegg",
+      "access": "Tilkobling til vei",
+      "turn": "Svinging i kryss"
+    },
+    "picking": {
+      "origin": "Klikk på startstedet på kartet.",
+      "destination": "Klikk på reisemålet på kartet."
+    },
+    "pins": {
+      "tab": "Nåler",
+      "hint": "Klikk på kartet for å sette en nål i valgt farge. Høyreklikk på en nål for å fjerne den.",
+      "list": "Liste over nåler",
+      "remove": "Fjern nål"
+    }
+  }
+}

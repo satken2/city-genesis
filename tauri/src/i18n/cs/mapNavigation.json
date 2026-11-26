@@ -1,0 +1,63 @@
+{
+  "mapNavigation": {
+    "title": "Prozkoumat město",
+    "openSidebar": "Otevřít postranní panel",
+    "closeSidebar": "Zavřít postranní panel",
+    "back": "Zpět",
+    "search": "Hledat místo",
+    "origin": "Hledat výchozí místo",
+    "destination": "Hledat cíl",
+    "clear": "Vymazat",
+    "searching": "Hledání…",
+    "error": "Nelze se připojit. Obnovte stránku a zkuste to znovu.",
+    "noResults": "Nebyla nalezena žádná místa",
+    "mode": "Způsob dopravy",
+    "pedestrian": "Pěšky a MHD",
+    "automobile": "Autem",
+    "pickOrigin": "Vybrat start na mapě",
+    "pickDestination": "Vybrat cíl na mapě",
+    "swap": "Prohodit",
+    "cancel": "Zrušit",
+    "directions": "Jak se sem dostat",
+    "intro": "Vyhledejte zařízení, stanici, čtvrť nebo silnici, nebo vyberte místo na mapě.",
+    "chooseOrigin": "Vyhledejte výchozí místo, nebo ho vyberte na mapě.",
+    "routing": "Hledání trasy…",
+    "showRoute": "Zobrazit celou trasu",
+    "mapPoint": "Bod na mapě",
+    "minutes": "cca {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Odhad podle silniční sítě z výpočtu tras č. {{epoch}}. Tečkované čáry znázorňují chůzi a napojení na silnice.",
+    "busy": "Probíhá simulace. Výsledky se po jejím dokončení aktualizují.",
+    "not_ready": "Zatím nejsou k dispozici data o trasách. Zobrazí se po spuštění simulace v tomto městě.",
+    "unreachable": "Mezi těmito dvěma místy nebyla nalezena žádná trasa.",
+    "no_access": "U vybraného místa nebyla nalezena žádná dostupná silnice.",
+    "geometry_unavailable": "Průběh trasy veřejné dopravy pro tuto cestu není k dispozici.",
+    "place_missing": "Vybrané místo bylo odstraněno. Vyberte ho znovu.",
+    "kind": {
+      "agent": "Zařízení",
+      "zone": "Čtvrť",
+      "stop": "Zastávka",
+      "station": "Stanice",
+      "point": "Bod",
+      "road": "Silnice"
+    },
+    "leg": {
+      "walk": "Pěšky",
+      "drive": "Autem",
+      "transit": "Veřejná doprava",
+      "conveyor": "Přeprava osob",
+      "access": "Napojení na silnici",
+      "turn": "Otočení na křižovatce"
+    },
+    "picking": {
+      "origin": "Klikněte na mapě na výchozí místo.",
+      "destination": "Klikněte na mapě na cíl."
+    },
+    "pins": {
+      "tab": "Špendlíky",
+      "hint": "Kliknutím do mapy umístíte špendlík ve zvolené barvě. Kliknutím pravým tlačítkem na špendlík ho odstraníte.",
+      "list": "Seznam špendlíků",
+      "remove": "Odstranit špendlík"
+    }
+  }
+}

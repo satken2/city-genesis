@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Пошук містян",
+    "tabTracking": "Список стеження",
+    "name": "Ім'я",
+    "age": "Вік",
+    "ageSeparator": "–",
+    "search": "Шукати",
+    "noResults": "Немає містян, що відповідають умовам.",
+    "truncated": "Знайдено: {{total, number}}, показано: {{shown, number}}."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Elvárt képzettség",
+    "wage": "Bérráta",
+    "quota": "Szükséges munkaerő",
+    "totalLabor": "Felvett munkaerő",
+    "employees": "Alkalmazottak listája",
+    "hired": "Felvéve",
+    "vacant": "Betöltetlen",
+    "noQuota": "Nincs szükség munkaerőre",
+    "noEmployees": "Nincsenek alkalmazottak",
+    "statusTitle": "Foglalkoztatási helyzet"
+  }
+}

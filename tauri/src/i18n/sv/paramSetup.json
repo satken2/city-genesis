@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Spelparametrar",
+    "description": "Standardvärdena rekommenderas i regel. Ändra bara om du vill anpassa spelet.",
+    "skip": "Hoppa över",
+    "start": "Starta spelet",
+    "apply": "Verkställ och stäng",
+    "close": "Stäng",
+    "loading": "Läser in…",
+    "reload": "Läs in igen",
+    "reloadHint": "Läs in igen när serverdelen har startat klart för att få de senaste värdena.",
+    "fetchError": "Kunde inte hämta parametrarna",
+    "category": {
+      "population": "Befolkning och invandring",
+      "citizen": "Medborgarnas liv",
+      "economy": "Ekonomi",
+      "labor": "Arbete och löner",
+      "education": "Utbildning",
+      "construction": "Byggande och fastigheter",
+      "environment": "Miljö",
+      "traffic": "Trafik",
+      "general": "Allmänt",
+      "pathfind": "Trafik och resvägar",
+      "building": "Byggnader och byggande",
+      "disaster": "Katastrofer och trygghet",
+      "slum": "Slum",
+      "production": "Produktion och lager",
+      "zone": "Stadsdelar och tomter",
+      "financial": "Finans"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Stadens förtätningsfaktor",
+        "desc": "Golvytan som bostäder och anläggningar behöver delas med det här värdet, så att en liten karta kan rymma en storstads ekonomi. Om du ändrar det efter att ha byggt en enda väg eller byggnad går staden sönder, så bestäm det innan du bygger något."
+      },
+      "TFR_TARGET": {
+        "label": "Mål för summerad fruktsamhet (TFR)",
+        "desc": "Den fruktsamhet hushållen siktar på. Ju högre, desto fler barn föds."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Giftermålsfrekvens",
+        "desc": "Koefficient för grundsannolikheten att medborgare gifter sig. Ju högre, desto fler giftermål."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Lägsta ålder för barnafödande",
+        "desc": "Lägsta ålder då barn kan födas. Under den här åldern föds inga barn."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Högsta ålder för barnafödande",
+        "desc": "Högsta ålder då barn kan födas. Över den här åldern föds inga barn."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Andel gifta invandrarhushåll",
+        "desc": "Sannolikheten att ett invandrarhushåll som flyttar till staden är ett gift par."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Andel med ett barn (invandrare)",
+        "desc": "Sannolikheten att ett invandrarhushåll har 1 barn när det uppstår."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Andel med två barn (invandrare)",
+        "desc": "Sannolikheten att ett invandrarhushåll har 2 barn när det uppstår."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Andel med tre barn (invandrare)",
+        "desc": "Sannolikheten att ett invandrarhushåll har 3 barn när det uppstår."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Lägsta ålder för vuxna invandrare",
+        "desc": "Lägsta ålder för vuxna som flyttar in som invandrare."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Högsta ålder för vuxna invandrare",
+        "desc": "Högsta ålder för vuxna som flyttar in som invandrare."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Livslängdsfaktor",
+        "desc": "Faktor för medborgarnas maximala livslängd. Med 1,08 blir taket ungefär 100 år, med 1,06 ungefär 150 år.",
+        "graphX": "Ålder",
+        "graphY": "Årlig dödsrisk (hälsa 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Bostadsyta för enpersonshushåll (m²)",
+        "desc": "Minsta bostadsyta som ett enpersonshushåll behöver."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Extra yta för make/maka (m²)",
+        "desc": "Bostadsyta som ett gift par behöver utöver ett enpersonshushåll."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Extra yta per barn (m²)",
+        "desc": "Bostadsyta som tillkommer för varje barn i hushållet."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Hyra i förhållande till inkomst (max)",
+        "desc": "Största andel av hushållets inkomst som kan gå till hyra. 0,3 betyder upp till 30 % av inkomsten."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Restidens vikt vid val av bostad",
+        "desc": "När hushåll väljer bostad: hur tungt varje minut av resor fram och tillbaka till arbete, skola och affärer väger, som en multipel av stadens genomsnittslön. 1 betyder lika mycket som lönen. Högre värden gynnar bostäder nära arbetsplatser och affärer."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Genomsnittslön (referens)",
+        "desc": "Referensvärde för genomsnittslönen när simuleringen startar."
+      },
+      "AVERAGE_RENT": {
+        "label": "Genomsnittshyra (referens)",
+        "desc": "Referensvärde för genomsnittshyran när simuleringen startar (per dag och m²)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Förmögenhetsbaserad andel av utdelningar",
+        "desc": "Andel av utdelningarna som fördelas i proportion till hushållens likvida medel. Resten delas lika mellan alla hushåll. 0 betyder allt lika, 1 betyder allt i proportion till likvida medel."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Avskrivningstakt för utrustning",
+        "desc": "Hur stor del av kapitalet från utrustningsinvesteringar som skrivs av varje epok."
+      },
+      "WORK_HOURS": {
+        "label": "Arbetstid per dag (h)",
+        "desc": "Normalt antal timmar som en medborgare arbetar per dag."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Ålder vid skolstart",
+        "desc": "Ålder då barn börjar grundläggande utbildning (motsvarar grundskola)."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Ålder när grundutbildningen slutar",
+        "desc": "Ålder då den grundläggande utbildningen avslutas (motsvarar examen från gymnasiet)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Ålder för examen och utflyttning",
+        "desc": "Ålder då en medborgare avslutar högre utbildning och flyttar ut ur hushållet."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Lägsta arbetsålder",
+        "desc": "Medborgare under den här åldern söker inte arbete och räknas inte i arbetslösheten."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Högsta tillåtna antal våningar",
+        "desc": "Övre gräns för antalet våningar i byggnader som privata aktörer bygger automatiskt."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Faktor för våningsstraff",
+        "desc": "Koefficient för kostnadsstraffet vid höghus. Ju högre, desto mindre straff för höga byggnader.",
+        "graphX": "Våningar",
+        "graphY": "Byggkostnadsfaktor"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Rivningens effektivitet",
+        "desc": "Hur mycket effektivare rivning är jämfört med nybyggnation (faktor)."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Grundsannolikhet för ras per år",
+        "desc": "Grundsannolikheten att en byggnad med hållbarhet 0,5 rasar under ett år."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Formparameter (Weibull) för ras",
+        "desc": "Ju högre värde, desto brantare ökar rasrisken när den tekniska livslängden närmar sig."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Reparationskostnad",
+        "desc": "Reparationskostnaden som andel av kostnaden för nybyggnation."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Åldrandefaktor utan underhåll",
+        "desc": "Hur snabbt en byggnad eller sträckning åldras när den inte får något löpande underhåll alls, som en multipel av åldrandet med fullt underhåll. Faktorn ökar linjärt från 1 till det här värdet med den andel underhåll som uteblir."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Grundsannolikhet för reparation per år",
+        "desc": "Grundsannolikheten per år att en byggnad som behöver repareras faktiskt börjar repareras."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Initial byggskuld (per m²)",
+        "desc": "Initial byggskuld per m² total våningsyta (negativa reserver)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Bullerkoefficient för vägtrafik",
+        "desc": "Hur mycket vägtrafiken bidrar till bullerkartan. Ju högre, desto mer buller längs vägarna."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Bullerkoefficient för gångtrafik",
+        "desc": "Hur mycket gångtrafiken bidrar till bullerkartan."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Bullertröskel för gångtrafik",
+        "desc": "Endast den gångtrafik som överstiger det här värdet bidrar till bullret."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Bullrets dämpningsavstånd (m)",
+        "desc": "Buller avtar med kvadraten på avståndet och minskar dessutom till 1/e för varje så här många meter (skärmning från byggnader, absorption i luft och mark). Ju lägre, desto närmare källan stannar bullret."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Luftföroreningskoefficient för vägtrafik",
+        "desc": "Hur mycket vägtrafiken bidrar till kartan över luftföroreningar."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Luftföroreningarnas dämpningsavstånd (m)",
+        "desc": "Luftföroreningar och lukt avtar med kvadraten på avståndet och minskar dessutom till 1/e för varje så här många meter (spridning och nedfall). Ju lägre, desto närmare källan stannar de."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Arbetslöshetens vikt för brottslighet",
+        "desc": "Hur starkt arbetslösheten påverkar brottskartan. Ju högre, desto mer direkt leder arbetslöshet till sämre trygghet."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Brottslighetens spridningsradie (m)",
+        "desc": "Radie för den gaussiska utjämningen av brottskartan."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Gånghastighet (km/h)",
+        "desc": "Fotgängarnas hastighet. Används för att beräkna kostnaden för resvägar."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Fordonens accelerationssträcka (m)",
+        "desc": "Sträckan som fordon behöver för att accelerera. Påverkar hastighetsberäkningen på korta vägar."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Vägarnas aktiva timmar per dag (h)",
+        "desc": "Antal timmar per dag som vägen används. Används för att räkna om trafikvolymer."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Mättnadsgräns för vägtrafikbonus",
+        "desc": "Vid den här vägtrafiken eller mer får butiker största möjliga trafikbonus."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Mättnadsgräns för gångtrafikbonus",
+        "desc": "Vid den här gångtrafiken eller mer får butiker största möjliga bonus för fotgängare."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Läser in…",
+    "noScenarios": "Inga scenarier tillgängliga",
+    "starting": "Startar…",
+    "startFailed": "Det gick inte att starta",
+    "confirmTitle": "Bekräfta spelinställningar",
+    "confirmStartTitle": "Vill du starta spelet?",
+    "unsavedChangesWarning": "Om du startar förlorar du osparade ändringar i ditt nuvarande spel.",
+    "startSettingsHeading": "Stadens inställningar",
+    "cityNameLabel": "Stadens namn",
+    "insigniaLabel": "Vapen och stadsflagga",
+    "languageLabel": "Stadens språk",
+    "languageNote": "*Kan inte ändras senare",
+    "simulationDaysLabel": "Simuleringsdagar",
+    "simulationDaysNote": "*Kan inte ändras senare",
+    "daysOption": "{{days}} dagar",
+    "startButton": "Starta",
+    "backButton": "Tillbaka",
+    "cleared": "Klarad",
+    "tutorialBadge": "Handledning",
+    "sectionDebug": "Felsökning",
+    "sectionTutorials": "Handledningar",
+    "sectionScenarios": "Scenarier",
+    "detailPlaceholder": "Välj ett scenario i listan till vänster.",
+    "detailMapSizeLabel": "Kartstorlek",
+    "detailUnknown": "Okänd",
+    "detailObjectiveLabel": "Villkor för att klara scenariot",
+    "detailCreditsLabel": "Medverkande",
+    "detailNoObjective": "Inga villkor",
+    "detailNoDescription": "Det här scenariot har ingen beskrivning.",
+    "tutorialObjective": "Slutför alla steg i handledningen.",
+    "startScenarioButton": "Starta det här scenariot",
+    "tabSelect": "Välj scenario",
+    "tabBrowse": "Hitta scenarier",
+    "tabTerrain": "Välj terräng",
+    "relocalizeNote": "Scenariot är skapat på {{from}}. Om du startar på {{to}} får stadsdelar, anläggningar, invånare, stationer och annat nya namn på {{to}}.",
+    "developmentNotice": {
+      "heading": "Spelet är en testversion under utveckling",
+      "subheading": "Läs detta innan du spelar",
+      "text": "Ekonomins parametrar och logik finjusteras fortfarande, så din stad kanske inte växer som den ska. Arbetslösheten kan stiga och staden kan till och med gå under, men det är aldrig ditt fel. Håll utkik efter kommande uppdateringar! Lägg till spelet på din önskelista och se fram emot den officiella lanseringen."
+    }
+  }
+}

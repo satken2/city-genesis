@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Forsyningssituasjon",
+    "selected": "Valgt",
+    "providers": "Leverandører – {{product}}",
+    "executing": "Forsyningskartet er ikke tilgjengelig mens simuleringen kjører.",
+    "fetchError": "Kunne ikke hente forsyningssituasjonen.",
+    "activeCount": "I drift {{active}} / {{count}}",
+    "production": "Forrige produksjon: {{amount}} {{unit}}",
+    "resourceRemaining": "Tilgjengelig ressursmengde: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Tilgjengelig",
+      "unknown": "Ikke vurdert",
+      "missing": "Ingen",
+      "inactive": "Ikke i drift",
+      "partial": "Delvis berørt",
+      "limited": "Mangel / stanset",
+      "disconnected": "Ikke tilkoblet",
+      "supply_shortage": "Mulig forsyningsmangel",
+      "capacity_limited": "Mulig kapasitetsbegrensning"
+    },
+    "facilities": {
+      "401": "Kraftverk",
+      "402": "Vanninntak",
+      "403": "Råoljeleverandører",
+      "404": "Godsstasjoner",
+      "405": "Malmleverandører",
+      "406": "Havskipsled (åpent hav)",
+      "501": "Jernbanedepoter",
+      "502": "Bussdepoter",
+      "503": "LRT-depoter",
+      "504": "Monorail-depoter",
+      "505": "Vedlikeholdsdokk"
+    },
+    "consumers": {
+      "401": "Strømbrukere",
+      "402": "Vannpumper",
+      "403": "Råoljebrukere",
+      "404": "Godsbrukere",
+      "405": "Malmbrukere",
+      "406": "Havner",
+      "501": "Jernbanelinjer",
+      "502": "Busslinjer",
+      "503": "LRT-linjer",
+      "504": "Monorail-linjer",
+      "505": "Ferjelinjer"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} ปี",
+    "male": "ชาย",
+    "female": "หญิง",
+    "single": "โสด",
+    "married": "สมรสแล้ว",
+    "household": "ครัวเรือน",
+    "employer": "ที่ทำงาน",
+    "unemployed": "ว่างงาน",
+    "school": "สถานศึกษา",
+    "notEnrolled": "ไม่ได้เรียน",
+    "major": "ทักษะที่เรียนเอก",
+    "higherEducation": "อุดมศึกษา",
+    "graduated": "สำเร็จการศึกษา",
+    "notGraduated": "ยังไม่สำเร็จการศึกษา",
+    "skills": "ทักษะ",
+    "criminality": "แนวโน้มก่ออาชญากรรม",
+    "commuteTime": "เวลาเดินทางไปทำงาน",
+    "automobile": "รถยนต์",
+    "automobileOwned": "มี",
+    "automobileNone": "ไม่มี",
+    "householdStatus": "สถานะครัวเรือน"
+  },
+  "household": {
+    "title": "ข้อมูลครัวเรือน",
+    "familyType": "ประเภทครัวเรือน",
+    "familySingle": "โสด",
+    "familyCouple": "คู่รัก",
+    "familyFamily": "ครอบครัว",
+    "familySenior": "ผู้สูงอายุ",
+    "hasAutomobile": "มีรถยนต์",
+    "noAutomobile": "ไม่มีรถยนต์",
+    "discretionaryIncome": "รายได้ที่ใช้จ่ายได้",
+    "livingStandard": "มาตรฐานการครองชีพ",
+    "livingStandardLevel": {
+      "0": "ยากจนข้นแค้น",
+      "1": "ยากจน",
+      "2": "ชนชั้นกลาง",
+      "3": "มั่งคั่ง"
+    },
+    "satisNutrition": "ความเพียงพอด้านโภชนาการ",
+    "satisHealthcare": "ความเพียงพอด้านการแพทย์",
+    "satisLeisure": "บันเทิงและพักผ่อน",
+    "satisTourism": "ความเพียงพอด้านการท่องเที่ยว",
+    "tourist": "นักท่องเที่ยว",
+    "partySize": "จำนวนคน",
+    "members": "สมาชิกครัวเรือน"
+  },
+  "education": {
+    "people": "คน"
+  }
+}

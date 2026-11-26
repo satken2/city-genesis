@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "ตราประจำเมือง",
+    "flag": "ธงประจำเมือง",
+    "motif": "ลวดลาย",
+    "fieldColor": "สีพื้น",
+    "motifColor": "สีลวดลาย",
+    "pattern": "ลายพื้น",
+    "accentColor": "สีเน้น",
+    "placement": "ตำแหน่งตรา",
+    "loadImage": "โหลดรูปภาพ",
+    "randomize": "สุ่ม",
+    "apply": "ตกลง",
+    "imageLoadFailed": "โหลดรูปภาพไม่สำเร็จ",
+    "placements": {
+      "center": "กลาง",
+      "canton": "มุมซ้ายบน",
+      "none": "ไม่มี"
+    },
+    "motifs": {
+      "wave": "คลื่น",
+      "mountain": "ภูเขา",
+      "star": "ดาว",
+      "tree": "ต้นไม้",
+      "sun": "ดวงอาทิตย์",
+      "moon": "ดวงจันทร์",
+      "flower": "ดอกไม้",
+      "leaf": "ใบไม้",
+      "bird": "นก",
+      "fish": "ปลา",
+      "anchor": "สมอเรือ",
+      "gear": "เฟือง",
+      "tower": "ปราสาท",
+      "bridge": "สะพาน",
+      "key": "กุญแจ",
+      "crown": "มงกุฎ",
+      "snowflake": "เกล็ดหิมะ",
+      "flame": "เปลวไฟ",
+      "diamond": "ข้าวหลามตัด",
+      "cross": "กากบาท"
+    },
+    "patterns": {
+      "plain": "สีพื้น",
+      "bicolor": "สองสีบนล่าง",
+      "triband": "แบ่งสามแนวตั้ง",
+      "diagonal": "แบ่งแนวทแยง",
+      "border": "ขอบ",
+      "bands": "แถบบนล่าง"
+    }
+  }
+}

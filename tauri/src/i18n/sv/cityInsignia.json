@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Stadsvapen",
+    "flag": "Stadsflagga",
+    "motif": "Motiv",
+    "fieldColor": "Bakgrundsfärg",
+    "motifColor": "Motivfärg",
+    "pattern": "Mönster",
+    "accentColor": "Accentfärg",
+    "placement": "Vapnets placering",
+    "loadImage": "Läs in bild",
+    "randomize": "Slumpa",
+    "apply": "Verkställ",
+    "imageLoadFailed": "Det gick inte att läsa in bilden.",
+    "placements": {
+      "center": "Mitten",
+      "canton": "Övre vänstra hörnet",
+      "none": "Ingen"
+    },
+    "motifs": {
+      "wave": "Våg",
+      "mountain": "Berg",
+      "star": "Stjärna",
+      "tree": "Träd",
+      "sun": "Sol",
+      "moon": "Måne",
+      "flower": "Blomma",
+      "leaf": "Löv",
+      "bird": "Fågel",
+      "fish": "Fisk",
+      "anchor": "Ankare",
+      "gear": "Kugghjul",
+      "tower": "Borg",
+      "bridge": "Bro",
+      "key": "Nyckel",
+      "crown": "Krona",
+      "snowflake": "Snöflinga",
+      "flame": "Låga",
+      "diamond": "Romb",
+      "cross": "Kors"
+    },
+    "patterns": {
+      "plain": "Enfärgad",
+      "bicolor": "Tvåfärgad (övre/nedre)",
+      "triband": "Tre lodräta fält",
+      "diagonal": "Diagonalt delad",
+      "border": "Bård",
+      "bands": "Ränder upptill och nedtill"
+    }
+  }
+}

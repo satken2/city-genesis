@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Cơ cấu tầng",
+    "parking": "Đỗ xe",
+    "type": "Loại tòa nhà",
+    "durability": "Độ bền",
+    "floors": "Số tầng",
+    "floorsValue": "{{floors}} tầng (diện tích sàn {{area, number}} ㎡)",
+    "heightLabel": "Chiều cao: {{value}} m",
+    "baseAreaLabel": "Diện tích xây dựng: {{area, number}} ㎡",
+    "underMaintenance": "Đang sửa chữa",
+    "parkingCapacity": "Sức chứa bãi đỗ",
+    "parkingCapacityValue": "{{capacity}} xe",
+    "parkingDay": "Ban ngày",
+    "parkingNight": "Ban đêm",
+    "parkingUsage": "{{used}} / {{capacity}} xe"
+  },
+  "building_appearance": {
+    "variantLabel": "Diện mạo {{index}}",
+    "layoutHint": "Kéo thẻ vào khuôn viên để đặt / kéo để di chuyển / Shift+kéo để xoay / phím Delete để xóa",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Xóa khối nhà đã chọn",
+    "apply": "Áp dụng",
+    "saveFailed": "Không thể lưu diện mạo",
+    "noSubbuildings": "Loại tòa nhà này chưa có khối nhà phụ nào"
+  }
+}

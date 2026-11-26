@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Toimitustilanne",
+    "selected": "Valittu",
+    "providers": "Toimittajat – {{product}}",
+    "executing": "Toimitustilannetta ei voi hakea simulaation aikana.",
+    "fetchError": "Toimitustilanteen haku epäonnistui.",
+    "activeCount": "Toiminnassa {{active}}/{{count}}",
+    "production": "Edellinen tuotanto: {{amount}} {{unit}}",
+    "resourceRemaining": "Käytettävissä oleva varanto: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Käytettävissä",
+      "unknown": "Ei arvioitu",
+      "missing": "Puuttuu",
+      "inactive": "Ei toiminnassa",
+      "partial": "Osittain ongelmia",
+      "limited": "Riittämätön tai pysähtynyt",
+      "disconnected": "Ei yhteyttä",
+      "supply_shortage": "Mahdollinen toimitusvaje",
+      "capacity_limited": "Mahdollinen kapasiteettiraja"
+    },
+    "facilities": {
+      "401": "Voimalaitokset",
+      "402": "Vedenottamot",
+      "403": "Raakaöljyn toimittajat",
+      "404": "Rahtiasemat",
+      "405": "Malmin toimittajat",
+      "406": "Laivaväylät (avomeri)",
+      "501": "Junavarikot",
+      "502": "Bussivarikot",
+      "503": "LRT-varikot",
+      "504": "Monorail-varikot",
+      "505": "Huoltotelakka"
+    },
+    "consumers": {
+      "401": "Sähkön käyttäjät",
+      "402": "Vesipumppaamot",
+      "403": "Raakaöljyn käyttäjät",
+      "404": "Rahdin käyttäjät",
+      "405": "Malmin käyttäjät",
+      "406": "Satamat",
+      "501": "Rautatielinjat",
+      "502": "Bussilinjat",
+      "503": "LRT-linjat",
+      "504": "Monorail-linjat",
+      "505": "Lauttalinjat"
+    }
+  }
+}

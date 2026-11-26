@@ -1,0 +1,756 @@
+{
+  "tutorial": {
+    "startButton": "Começar",
+    "controls": {
+      "title": "Controlos básicos",
+      "description": "Conheça os objetivos do presidente da câmara e a forma de jogar: primeiro planear, depois avançar no tempo. Depois de ver o que significa a informação no ecrã, o que faz cada botão e como se move a câmara, vai prolongar uma estrada para criar um novo bairro residencial e dotá-lo de habitação, eletricidade e água.",
+      "step1": {
+        "title": "Comece a construir a cidade como presidente da câmara",
+        "role": "Em City Genesis, faz crescer uma cidade no papel de presidente da câmara. Planeia a construção de estradas e equipamentos, decide como se usa o solo e define os impostos e o orçamento dos serviços públicos. A sua missão é criar as condições para a vida dos moradores e a atividade das empresas. Clique em «Seguinte» para continuar.",
+        "goal": "O objetivo é uma cidade onde os moradores vivam com prosperidade e segurança. Crie habitação e emprego e leve até eles eletricidade, água, cuidados de saúde e outros serviços. Para fazer crescer a cidade também é preciso dinheiro. Tenha em conta tanto a vida dos moradores como as finanças municipais ao decidir o que melhorar.",
+        "epoch": "Neste jogo, o tempo avança um mês de cada vez. Primeiro defina o orçamento e os planos de construção e, quando estiver pronto, clique em «Iniciar». O tempo avança, as obras progridem e os moradores e as empresas desenvolvem a sua atividade; depois, analise os resultados e prepare o plano seguinte. A data não avança enquanto não clicar em «Iniciar», por isso pense com calma.",
+        "epoch_week": "Neste jogo, o tempo avança uma semana de cada vez. Primeiro defina o orçamento e os planos de construção e, quando estiver pronto, clique em «Iniciar». O tempo avança, as obras progridem e os moradores e as empresas desenvolvem a sua atividade; depois, analise os resultados e prepare o plano seguinte. A data não avança enquanto não clicar em «Iniciar», por isso pense com calma."
+      },
+      "step2": {
+        "title": "Conheça o estado da cidade no painel de comando",
+        "tools": "O painel de comando na parte inferior do ecrã serve para verificar o estado da cidade e decidir o que fazer a seguir. Em «Vista», pode procurar, através de cores, os locais com carências ou problemas. Em «Mapa», vê a posição relativa de toda a cidade. Mesmo quando a cidade crescer, ajuda a encontrar os locais de que precisa.",
+        "tracking": "«Lista de cidadãos» serve para procurar moradores pelo nome, entre outros critérios, e para rever mais tarde a vida e as deslocações dos moradores que lhe interessem. Se adicionar alguém ao seguimento nos detalhes do cidadão, pode abrir a sua informação a partir daqui. Use-a quando quiser conhecer a vida de cada pessoa, que os números da cidade não mostram.",
+        "bulldozer": "«Bulldozer» serve para eliminar lotes vazios ou cancelar edifícios e estradas planeados. Clique no botão, depois clique no alvo na vista 3D e, quando terminar, clique de novo no botão para sair do modo. Para remover um edifício ou uma estrada já concluídos, abra os respetivos detalhes e escolha a demolição.",
+        "services": "Os medidores com um raio, uma gota de água e um navio indicam a margem que ainda resta na capacidade de eletricidade, de abastecimento de água e de importação e exportação. Quanto mais cheios, maior a procura ou o volume movimentado e menor a margem. Clique neles para ver os equipamentos públicos e os pontos de importação e exportação. Antes de expandir a cidade, verifique se precisa de mais equipamentos.",
+        "score": "«Pontuação» é um valor global que mostra até que ponto os moradores estão satisfeitos com a vida na cidade. Quanto mais alta, melhor se vive. Habitação, emprego, cuidados de saúde e um bom ambiente residencial ajudam a melhorá-la. Se descer, procure as dificuldades que os moradores estão a enfrentar.",
+        "budget": "«Orçamento» mostra as despesas previstas para o próximo mês em relação às receitas do mês passado. Quando o ponteiro pende para a direita, as despesas superam as receitas. Quando pende para a esquerda, sobra dinheiro. Verifique-o antes de avançar no tempo.",
+        "budget_week": "«Orçamento» mostra as despesas previstas para a próxima semana em relação às receitas da semana passada. Quando o ponteiro pende para a direita, as despesas superam as receitas. Quando pende para a esquerda, sobra dinheiro. Verifique-o antes de avançar no tempo.",
+        "budgetChanges": "Se aumentar as obras de estradas e equipamentos, ou subir o nível de funcionamento dos equipamentos ou o ritmo das obras, precisa de mais dinheiro e o medidor do orçamento sobe. Baixar o funcionamento ou o ritmo das obras reduz as despesas previstas. Quando a receita fiscal aumenta, o medidor desce mesmo com as mesmas despesas.",
+        "budgetPlanning": "Se o medidor estiver baixo, há margem de dinheiro para gastar na cidade. Pense em investir nos serviços em falta ou nos equipamentos de que vai precisar.",
+        "date": "A data indica até onde avançou o tempo na cidade. Use-a como referência para acompanhar o progresso das obras e as mudanças da cidade ao longo das estações. Enquanto planeia, a data não avança; é atualizada quando avança no tempo com «Iniciar».",
+        "climate": "O painel de temperatura, precipitação, insolação e vento mostra o clima médio deste mês. Estas condições alteram a eficiência da agricultura e da produção de energia eólica e solar. Se a produção agrícola ou elétrica estiver baixa, verifique também o clima.",
+        "climate_week": "O painel de temperatura, precipitação, insolação e vento mostra o clima médio desta semana. Estas condições alteram a eficiência da agricultura e da produção de energia eólica e solar. Se a produção agrícola ou elétrica estiver baixa, verifique também o clima.",
+        "climateEffects": "Com pouco sol, a produção das centrais solares desce; com pouco vento, desce a das eólicas. A temperatura e a chuva também afetam a agricultura. Clique no painel do clima para ver como as condições deste mês afetam a eficiência de produção de cada equipamento. Planeie os equipamentos a contar com as variações sazonais da oferta.",
+        "climateEffects_week": "Com pouco sol, a produção das centrais solares desce; com pouco vento, desce a das eólicas. A temperatura e a chuva também afetam a agricultura. Clique no painel do clima para ver como as condições desta semana afetam a eficiência de produção de cada equipamento. Planeie os equipamentos a contar com as variações sazonais da oferta.",
+        "notifications": "O número em «Notificações» indica quantos avisos e alertas convém ver agora. Um número vermelho a piscar indica problemas que já perturbam o funcionamento da cidade e devem ser resolvidos depressa. Um número amarelo indica alertas, como preparar o crescimento ou problemas que demoram a resolver. Comece por clicar no botão e ver do que se trata.",
+        "notificationActions": "Quando uma notificação indica um equipamento ou um bairro, clique na linha para ver os detalhes. Resolva conforme a causa: ligue a linha elétrica em falta, garanta o aprovisionamento de um equipamento sem matérias-primas, etc. As notificações de problemas persistentes desaparecem quando a causa é resolvida. Depois de agir, verifique os resultados do mês seguinte."
+      },
+      "step3": {
+        "title": "Mude a vista para encontrar problemas",
+        "open": "Só pelo aspeto da cidade, é difícil perceber faltas de eletricidade ou congestionamentos. Use «Vista» para mostrar no mapa a informação que pretende. Clique em «Vista» no painel de comando para abrir o painel.",
+        "tabs": "Nos separadores verticais, escolhe o que quer analisar: edifícios, estradas, lotes, bairros, etc. Quando a informação sobreposta dificultar a leitura, também pode ocultar os elementos de que não precisa. Clique em «Seguinte» para ver como usar a vista.",
+        "modes": "Os botões de cada separador definem a informação usada para colorir os elementos. Procure estradas congestionadas ou edifícios com problemas e use-os como pistas para decidir o que fazer. Para analisar algo em pormenor, clique nele na vista 3D. Clique em «Seguinte»."
+      },
+      "step4": {
+        "title": "Conheça as ferramentas de construção da cidade",
+        "grading": "Vamos apresentar os botões do lado esquerdo do ecrã, de cima para baixo. «Terraplenagem» serve para aplanar encostas onde é difícil construir ou para fazer aterros no mar e ganhar terreno utilizável. Quando quer mais habitação ou locais de trabalho mas falta terreno, abre espaço para a cidade crescer.",
+        "road": "«Estradas, ferrovia e infraestruturas» serve para criar os caminhos por onde passam pessoas, mercadorias, eletricidade e água. Ligue habitações e locais de trabalho com estradas, locais distantes com vias férreas e equipamentos entre si com linhas elétricas e condutas de água. Estas redes suportam as deslocações dos moradores, as trocas das empresas e o abastecimento de eletricidade e água.",
+        "land": "«Lotes» serve para preparar os terrenos dos edifícios. Não basta haver terra para que se construa. Tanto para mais habitação como para receber grandes equipamentos, são precisos terrenos com a dimensão adequada.",
+        "landDevelopment": "Os lotes que preparar podem ser usados pelo município para construir e servem também de espaço para o crescimento de habitação e empresas privadas. Os edifícios privados surgem conforme a procura e os regulamentos de construção do bairro. Quando quiser mais habitação ou emprego, verifique também se há lotes livres suficientes.",
+        "district": "«Bairros» serve para gerir partes da cidade como um conjunto. Pode definir orientações diferentes para cada local, como uma zona sobretudo residencial ou outra onde se concentrem as fábricas. Como cada bairro pode limitar os tipos de edifício permitidos, pode definir uma orientação de construção adequada a toda a zona.",
+        "districtRules": "Nos detalhes do bairro, escolhe os tipos de edifício permitidos. Use-os de acordo com a cidade que quer construir, por exemplo, para evitar fábricas no meio de uma zona residencial. Também pode comparar a população e as condições de vida de cada bairro, o que ajuda a decidir onde é preciso apoio.",
+        "construction": "«Construção» serve para o município planear os edifícios de que precisa. Pode construir habitação, locais de trabalho, hospitais, escolas, centrais elétricas, etc. Use-a para aumentar a habitação e o emprego ou para colmatar falhas nos serviços da cidade, como saúde, educação ou eletricidade.",
+        "transport": "«Transportes públicos» serve para apoiar as deslocações dos moradores de autocarro ou comboio. Pode definir linhas e paragens e ajustar tarifas e intervalos entre passagens. Use-os para ligar as habitações aos locais de trabalho e às escolas e aliviar as deslocações diárias.",
+        "propPlacement": "«Colocar elementos decorativos» serve para embelezar a paisagem com árvores, rochas e outros elementos. Use-o para dar um toque de verde às ruas ou decorar o terreno.",
+        "cityDevelopment": "«Desenvolvimento urbano automático» serve para planear de uma só vez estradas e lotes numa área extensa. Pinte no mapa a área que quer desenvolver e escolha um modelo de malha urbana para preparar estradas e lotes de uma vez. Use-o para abrir de raiz um novo bairro residencial ou uma nova zona urbana.",
+        "constructionProjects": "«Projetos de construção» reúne num só sítio as obras planeadas e em curso. Veja que obras estão a avançar e onde se gasta dinheiro para decidir quais deve fazer avançar.",
+        "regulation": "«Regulamentos» é onde se definem as regras para viver e trabalhar na cidade, como limites de velocidade, horário de trabalho, acolhimento de imigrantes e segurança social. Pense no que privilegia – segurança, qualidade de vida ou crescimento da cidade – e ajuste-as conforme a situação.",
+        "stat": "«Estatísticas» serve para verificar os resultados das suas decisões. Os gráficos mostram a evolução da população, do rendimento, das deslocações, da satisfação dos moradores, da dimensão da economia, dos preços, etc. Depois de mudar políticas ou equipamentos, verifique se a vida está a melhorar e o que ainda falta. E assim terminam os botões do lado esquerdo."
+      },
+      "step5": {
+        "title": "Execute o plano e veja os resultados",
+        "flow": "Depois de verificar o estado da cidade e decidir as obras e a distribuição do orçamento, avance no tempo com «Iniciar» no painel de comando. As obras avançam, os moradores trabalham, as empresas produzem e as contas e a pontuação do município mudam. Alguns planos podem demorar vários meses a produzir efeito.",
+        "execute": "Depois de avançar no tempo, veja os resultados e as notificações. Se houver problemas, resolva-os no plano seguinte e avance de novo. A cidade cresce com a repetição de «planear → avançar → ver os resultados». Aqui não é preciso clicar em «Iniciar». Clique em «Seguinte» para passar aos controlos da câmara."
+      },
+      "step6": {
+        "title": "Mova a câmara",
+        "description": "A câmara controla-se assim: arraste com o botão esquerdo para deslocar a vista, arraste com o botão direito para rodar, use W/A/S/D (ou as setas) para mover, Q/E para rodar, R/F para mudar a altura e a roda do rato para aproximar ou afastar. Experimente à vontade e depois clique em «Seguinte»."
+      },
+      "step7": {
+        "title": "Modo de voo e modo cinema",
+        "description": "A câmara tem dois modos especiais. O «modo de voo» ativa-se com Shift+F: W/A/S/D fazem avançar na direção do olhar, o rato serve para olhar em redor e R/F para subir e descer. Prima Esc para sair. O «modo cinema» começa com o botão no canto superior esquerdo do ecrã e permite contemplar a cidade enquanto a contorna. Olhe em redor com o rato; Shift alterna entre orbitar e deslocar-se, Espaço pausa, Retrocesso inverte o sentido e Esc termina. Em ambos os modos, os painéis do ecrã ficam ocultos e voltam quando sair com Esc. Depois de experimentar, saia dos dois modos e clique em «Seguinte»."
+      },
+      "step8": {
+        "title": "Veja o limite da cidade",
+        "description": "A câmara foi levada para o extremo leste da cidade. A área que pode usar para a cidade é este retângulo onde existe terreno detalhado, e a câmara também não pode sair dele. Terminámos a explicação do ecrã e dos controlos. A seguir, vamos criar mesmo um novo bairro residencial. Clique em «Seguinte»."
+      },
+      "step9": {
+        "title": "Prolongue a estrada",
+        "description": "A partir daqui, vai criar de facto um bairro residencial para receber novos moradores. Sem estradas que os liguem, nem a habitação nem os locais de trabalho servem de nada: as pessoas não circulam e as mercadorias não chegam. Comece por prolongar para oeste a rua que atravessa a vila de leste a oeste, abrindo caminho para o novo bairro. Clique em «Estradas, ferrovia e infraestruturas» no painel de ícones para abrir o painel de construção.",
+        "confirm": "O terreno ao longo de uma estrada é dividido em lotes quando a estrada fica concluída. A dimensão de cada lote escolhe-se para cada lado da estrada em «Lotes junto à estrada criados na conclusão», no painel de construção. Decida conforme os edifícios que quer receber: lotes mais pequenos para habitação, lotes maiores para fábricas ou terrenos agrícolas. Como esta estrada se destina a um bairro residencial, deixe como está. Clique em «Confirmar» no painel de construção para guardar e depois clique em «Seguinte»."
+      },
+      "step10": {
+        "title": "Conclua a estrada",
+        "description": "A estrada ainda está em «Construção planeada». Um plano não basta: só quando a obra termina é que pessoas e veículos podem passar. Clique 2 ou 3 vezes em «Iniciar» no painel de comando para avançar no tempo e aguarde a conclusão. Enquanto a obra decorre, os custos de construção são cobrados todos os meses.",
+        "description_week": "A estrada ainda está em «Construção planeada». Um plano não basta: só quando a obra termina é que pessoas e veículos podem passar. Clique 2 ou 3 vezes em «Iniciar» no painel de comando para avançar no tempo e aguarde a conclusão. Enquanto a obra decorre, os custos de construção são cobrados todas as semanas."
+      },
+      "step11": {
+        "title": "Os lotes estão criados",
+        "description": "A estrada está concluída e foram criados lotes ao longo dela. Os edifícios só podem ser construídos em lotes, e é por o lote dar para a estrada que pessoas e mercadorias podem entrar e sair. Para acrescentar lotes ao longo de uma estrada existente, use «Lotes» no painel de ícones."
+      },
+      "step12": {
+        "title": "Crie um bairro",
+        "description": "Antes de construir, decida em que tipo de lugar quer transformar esta rua. Sem uma orientação definida, pode surgir uma fábrica mesmo ao lado das casas. A orientação de cada local define-se por «Bairro». Os bairros atribuem-se estrada a estrada, e cada lote pertence ao bairro da estrada para a qual dá. Clique em «Bairros» no painel de ícones para abrir a janela «Editar bairros»: vai ver que, para já, toda a vila forma um único bairro.",
+        "create": "Use o modo de seleção «Lado da rua». Mude a ferramenta para «Criar novo bairro», mantenha Ctrl premido e arraste ao longo da estrada que prolongou. Os dois lados da estrada pintada, com os lotes que lhes dão frente, passam a formar um novo bairro."
+      },
+      "step13": {
+        "title": "O bairro foi dividido",
+        "description": "A nova rua ficou separada do centro da vila, como um bairro próprio. Como pode ver a população e os preços de cada bairro e decidir que edifícios se podem lá construir, cada zona pode crescer da forma que mais lhe convém. Depois de verificar, feche a janela «Editar bairros»."
+      },
+      "step14": {
+        "title": "Abra os detalhes do bairro",
+        "description": "Vamos configurar o novo bairro como zona residencial. Mostre os bairros com o ícone no canto inferior esquerdo do ecrã e clique na etiqueta do bairro que acabou de criar para abrir os respetivos detalhes."
+      },
+      "step15": {
+        "title": "Defina-o como residencial",
+        "description": "Nos regulamentos de construção, na parte inferior do painel, escolhe os edifícios que podem ser construídos nos lotes deste bairro. Aqui queremos uma zona residencial tranquila, por isso clique em todos os edifícios exceto «Prédio de apartamentos» e «Moradia» para os desativar."
+      },
+      "step16": {
+        "title": "Verifique um lote",
+        "description": "Os regulamentos definidos no bairro aplicam-se a todos os lotes desse bairro. Clique no lote com o marcador amarelo para abrir os respetivos detalhes."
+      },
+      "step17": {
+        "title": "Os regulamentos foram aplicados",
+        "description": "Na parte inferior do painel do lote, vê-se o regulamento definido no bairro, que só permite «Prédio de apartamentos» e «Moradia». A partir de agora, nos lotes desta rua só se pode construir habitação. Não é preciso configurar lote a lote: basta definir a orientação do bairro para que toda a rua a siga."
+      },
+      "step18": {
+        "title": "Construa habitação",
+        "description": "Chegou a hora de preparar habitação. Normalmente, quando há quem queira viver na cidade, o setor privado constrói habitação automaticamente; mas se o município construir habitação pública, a falta de casas resolve-se logo. Vamos construir aqui um prédio de apartamentos público. Clique em «Construção» no painel de ícones.",
+        "select": "Escolha «Prédio de apartamentos» na categoria «Habitação», clique num lote à sua escolha no novo bairro para definir o local da obra e clique em «Confirmar»."
+      },
+      "step19": {
+        "title": "Conclua a habitação",
+        "description": "Tal como as estradas, os edifícios não podem ser habitados só por estarem planeados. Um prédio de apartamentos demora mais de meio ano a ficar concluído. Avance no tempo com «Iniciar» e aguarde a conclusão."
+      },
+      "step20": {
+        "title": "Verifique se a eletricidade chega",
+        "description": "Ter casa não basta: sem eletricidade nem água não há vida possível. Esta vila ainda não tem central elétrica nem abastecimento de água. Clique no prédio de apartamentos com o marcador amarelo, onde vivem os habitantes da vila, para abrir os detalhes; escolha um dos ocupantes no separador «Edifício» e abra o separador «Oferta, procura e comércio»: vai ver que a «Quantidade obtida» de «Eletricidade» é 0."
+      },
+      "step21": {
+        "title": "Construa uma central solar",
+        "description": "Para levar eletricidade às casas, primeiro é preciso uma central que a produza. Construa uma «Central solar» no lote com o marcador amarelo. Normalmente a obra demora algum tempo, mas, como isto é um tutorial, a duração da obra é ignorada e a central fica logo concluída."
+      },
+      "step22": {
+        "title": "Construa uma subestação",
+        "description": "A eletricidade de alta tensão produzida pela central não pode ser usada diretamente pelas casas. A subestação converte-a em eletricidade de uso doméstico e distribui-a pelos edifícios em redor ligados por estrada. Construa uma «Subestação» no lote com o marcador amarelo, perto do prédio de apartamentos."
+      },
+      "step23": {
+        "title": "Ligue com uma linha elétrica",
+        "description": "Mesmo que a central e a subestação fiquem afastadas, basta um caminho para a eletricidade para ficarem ligadas. Abra «Estradas, ferrovia e infraestruturas» no painel de ícones, escolha «Linha elétrica» em «Eletricidade» e trace uma linha desde o ponto de ligação da central solar até ao ponto de ligação da subestação. Se ligar os pontos em linha reta, basta um único troço."
+      },
+      "step24": {
+        "title": "Verifique o abastecimento de eletricidade",
+        "description": "Depois de ligar, confirme que a eletricidade está mesmo a passar. Avance no tempo com «Iniciar», clique na subestação para abrir os detalhes e, no separador «Oferta, procura e comércio», confirme que a «Quantidade recebida» de «Eletricidade de alta tensão» não é 0. Pode demorar alguns meses até a central arrancar e a eletricidade chegar."
+      },
+      "step25": {
+        "title": "A eletricidade chegou às casas",
+        "description": "Nos detalhes do prédio de apartamentos, abra o separador «Oferta, procura e comércio» de um ocupante, tal como da primeira vez, e confirme que a «Quantidade obtida» de «Eletricidade» já não é 0. Pode ser preciso avançar mais 1 ou 2 meses até a eletricidade chegar às casas. Produzir na central, transportar pela linha elétrica, distribuir na subestação: só com estes três elos ligados é que a eletricidade chega às casas."
+      },
+      "step26": {
+        "title": "Procure uma fonte de água",
+        "description": "Agora, a água. A água da rede é água subterrânea bombeada e enviada para a vila. Comece por descobrir onde é possível bombear água. Clique em «Vista» no painel de comando para abrir o painel de vista.",
+        "show": "Nos separadores verticais, escolha «Recursos naturais» e mude para «Visível». As fontes de água aparecem no mapa a azul-claro. Clique na fonte de água com o marcador amarelo para abrir os detalhes."
+      },
+      "step27": {
+        "title": "Construa uma bomba de água subterrânea",
+        "description": "A bomba de água subterrânea extrai água do subsolo, por isso tem de ser construída onde houver uma fonte de água. Para funcionar, também precisa de eletricidade e de trabalhadores, e foi por isso que tratámos primeiro da eletricidade. Construa uma «Bomba de água subterrânea» no lote com o marcador amarelo, sobre a fonte de água. Como isto é um tutorial, a duração da obra é ignorada."
+      },
+      "step28": {
+        "title": "Construa uma estação elevatória",
+        "description": "A água extraída não pode ser distribuída diretamente às casas. Tal como a subestação distribui a eletricidade, a estação elevatória distribui a água pelos edifícios em redor ligados por estrada. Construa uma «Estação elevatória» no lote com o marcador amarelo, perto do prédio de apartamentos."
+      },
+      "step29": {
+        "title": "Ligue com uma conduta",
+        "description": "É preciso uma conduta para levar a água extraída pela bomba de água subterrânea até à estação elevatória. Abra «Estradas, ferrovia e infraestruturas» no painel de ícones, escolha «Conduta adutora» em «Água» e trace-a desde o ponto de ligação da bomba de água subterrânea até ao ponto de ligação da estação elevatória. Para não interferir com as estradas e a linha elétrica, faça um desvio largo pelo lado leste."
+      },
+      "step30": {
+        "title": "Verifique o abastecimento de água",
+        "description": "Avance no tempo com «Iniciar», clique na estação elevatória para abrir os detalhes e, no separador «Oferta, procura e comércio», confirme que a «Quantidade recebida» de «Água de alta pressão» não é 0. Pode demorar alguns meses até a bomba de água subterrânea reunir trabalhadores e a água chegar."
+      },
+      "step31": {
+        "title": "As bases da cidade estão lançadas",
+        "description": "A água chegou à estação elevatória, por isso as casas em redor já podem usar a água da rede. Traçar estradas, preparar lotes, definir a orientação dos bairros, construir habitação e levar eletricidade e água: este é o processo básico da construção de uma cidade. Clique em «Seguinte» para concluir o tutorial de controlos básicos."
+      }
+    },
+    "scenario4": {
+      "title": "Construir um caminho de ferro",
+      "description": "Queremos ligar a zona residencial às zonas de emprego por caminho de ferro, mas no local previsto há edifícios privados e um hospital público. Neste tutorial vai aprender a adquirir terrenos e a remover equipamentos públicos, a construir em viaduto por cima das estradas, a construir plataformas, edifícios da estação e um depósito, a ajustar curvas e inclinações e a tratar de tudo, desde a alimentação elétrica até à abertura da linha.",
+      "step1": {
+        "title": "Colocar plataformas elevadas",
+        "description": "Em «Estradas, ferrovia e infraestruturas» → «Ferrovia», construa as «Plataformas laterais elevadas» no lado oeste da cidade e as «Plataformas laterais (via dupla)» no lado leste. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme. Ambas ficam a 6 m de altura.",
+        "open": "Em «Estradas, ferrovia e infraestruturas» → «Ferrovia», construa as «Plataformas laterais elevadas» no lado oeste da cidade e as «Plataformas laterais (via dupla)» no lado leste. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme. Ambas ficam a 6 m de altura.",
+        "variant": "Em «Estradas, ferrovia e infraestruturas» → «Ferrovia», construa as «Plataformas laterais elevadas» no lado oeste da cidade e as «Plataformas laterais (via dupla)» no lado leste. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme. Ambas ficam a 6 m de altura.",
+        "start": "Em «Estradas, ferrovia e infraestruturas» → «Ferrovia», construa as «Plataformas laterais elevadas» no lado oeste da cidade e as «Plataformas laterais (via dupla)» no lado leste. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme. Ambas ficam a 6 m de altura.",
+        "end": "Em «Estradas, ferrovia e infraestruturas» → «Ferrovia», construa as «Plataformas laterais elevadas» no lado oeste da cidade e as «Plataformas laterais (via dupla)» no lado leste. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme. Ambas ficam a 6 m de altura.",
+        "confirm": "Em «Estradas, ferrovia e infraestruturas» → «Ferrovia», construa as «Plataformas laterais elevadas» no lado oeste da cidade e as «Plataformas laterais (via dupla)» no lado leste. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme. Ambas ficam a 6 m de altura.",
+        "town": "Construa as «Plataformas laterais elevadas» do lado oeste. A 6 m de altura, clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme.",
+        "new": "Agora o lado leste. Use «Voltar» no painel para regressar à lista de tipos e selecione «Plataformas laterais (via dupla)» em «Ferrovia». A 6 m de altura, clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme. Se fechar o painel, pode reabri-lo em «Estradas, ferrovia e infraestruturas».",
+        "east": "Agora o lado leste. Use «Voltar» no painel para regressar à lista de tipos e selecione «Plataformas laterais (via dupla)» em «Ferrovia». A 6 m de altura, clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme. Se fechar o painel, pode reabri-lo em «Estradas, ferrovia e infraestruturas»."
+      },
+      "step2": {
+        "title": "Construir os edifícios da estação e as entradas",
+        "description": "Selecione «Estação simples» e ligue cada par de marcadores, a oeste e a leste, com uma passagem curta que atravesse a plataforma. As entradas ficam mesmo junto aos dois lados da plataforma. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme.",
+        "open": "Selecione «Estação simples» e ligue cada par de marcadores, a oeste e a leste, com uma passagem curta que atravesse a plataforma. As entradas ficam mesmo junto aos dois lados da plataforma. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme.",
+        "variant": "Selecione «Estação simples» e ligue cada par de marcadores, a oeste e a leste, com uma passagem curta que atravesse a plataforma. As entradas ficam mesmo junto aos dois lados da plataforma. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme.",
+        "start": "Selecione «Estação simples» e ligue cada par de marcadores, a oeste e a leste, com uma passagem curta que atravesse a plataforma. As entradas ficam mesmo junto aos dois lados da plataforma. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme.",
+        "end": "Selecione «Estação simples» e ligue cada par de marcadores, a oeste e a leste, com uma passagem curta que atravesse a plataforma. As entradas ficam mesmo junto aos dois lados da plataforma. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme.",
+        "confirm": "Selecione «Estação simples» e ligue cada par de marcadores, a oeste e a leste, com uma passagem curta que atravesse a plataforma. As entradas ficam mesmo junto aos dois lados da plataforma. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme.",
+        "town": "Selecione «Estação simples» e ligue cada par de marcadores, a oeste e a leste, com uma passagem curta que atravesse a plataforma. As entradas ficam mesmo junto aos dois lados da plataforma. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme.",
+        "new": "Selecione «Estação simples» e ligue cada par de marcadores, a oeste e a leste, com uma passagem curta que atravesse a plataforma. As entradas ficam mesmo junto aos dois lados da plataforma. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme.",
+        "east": "Selecione «Estação simples» e ligue cada par de marcadores, a oeste e a leste, com uma passagem curta que atravesse a plataforma. As entradas ficam mesmo junto aos dois lados da plataforma. Clique com o botão esquerdo nos pontos inicial e final assinalados pelos círculos, clique com o botão direito para definir a forma e confirme."
+      },
+      "step3": {
+        "title": "Planear o troço que exige aquisição de terrenos",
+        "description": "Selecione «Via férrea dupla» e trace uma linha reta a 6 m de altura, desde a extremidade leste da plataforma oeste até à extremidade oeste da estrada principal. Como atravessa edifícios, é necessária a aquisição de terrenos. Confirme o plano e prima «Seguinte». Neste troço, a obra decorre com a duração normal.",
+        "open": "Selecione «Via férrea dupla» e trace uma linha reta a 6 m de altura, desde a extremidade leste da plataforma oeste até à extremidade oeste da estrada principal. Como atravessa edifícios, é necessária a aquisição de terrenos. Confirme o plano e prima «Seguinte». Neste troço, a obra decorre com a duração normal.",
+        "variant": "Selecione «Via férrea dupla» e trace uma linha reta a 6 m de altura, desde a extremidade leste da plataforma oeste até à extremidade oeste da estrada principal. Como atravessa edifícios, é necessária a aquisição de terrenos. Confirme o plano e prima «Seguinte». Neste troço, a obra decorre com a duração normal.",
+        "start": "Selecione «Via férrea dupla» e trace uma linha reta a 6 m de altura, desde a extremidade leste da plataforma oeste até à extremidade oeste da estrada principal. Como atravessa edifícios, é necessária a aquisição de terrenos. Confirme o plano e prima «Seguinte». Neste troço, a obra decorre com a duração normal.",
+        "end": "Selecione «Via férrea dupla» e trace uma linha reta a 6 m de altura, desde a extremidade leste da plataforma oeste até à extremidade oeste da estrada principal. Como atravessa edifícios, é necessária a aquisição de terrenos. Confirme o plano e prima «Seguinte». Neste troço, a obra decorre com a duração normal.",
+        "confirm": "Selecione «Via férrea dupla» e trace uma linha reta a 6 m de altura, desde a extremidade leste da plataforma oeste até à extremidade oeste da estrada principal. Como atravessa edifícios, é necessária a aquisição de terrenos. Confirme o plano e prima «Seguinte». Neste troço, a obra decorre com a duração normal.",
+        "town": "Selecione «Via férrea dupla» e trace uma linha reta a 6 m de altura, desde a extremidade leste da plataforma oeste até à extremidade oeste da estrada principal. Como atravessa edifícios, é necessária a aquisição de terrenos. Confirme o plano e prima «Seguinte». Neste troço, a obra decorre com a duração normal.",
+        "new": "Selecione «Via férrea dupla» e trace uma linha reta a 6 m de altura, desde a extremidade leste da plataforma oeste até à extremidade oeste da estrada principal. Como atravessa edifícios, é necessária a aquisição de terrenos. Confirme o plano e prima «Seguinte». Neste troço, a obra decorre com a duração normal.",
+        "east": "Selecione «Via férrea dupla» e trace uma linha reta a 6 m de altura, desde a extremidade leste da plataforma oeste até à extremidade oeste da estrada principal. Como atravessa edifícios, é necessária a aquisição de terrenos. Confirme o plano e prima «Seguinte». Neste troço, a obra decorre com a duração normal."
+      },
+      "step4": {
+        "title": "Mandar demolir o hospital",
+        "description": "Nos terrenos de edifícios privados, as negociações de compra começam automaticamente, mas o hospital, que é um equipamento público municipal, não é removido automaticamente e está a impedir o início da obra da via férrea. Clique no hospital e prima «Demolir» nos botões da parte superior. Quando aparecer «Demolição planeada», prima «Seguinte».",
+        "open": "Nos terrenos de edifícios privados, as negociações de compra começam automaticamente, mas o hospital, que é um equipamento público municipal, não é removido automaticamente e está a impedir o início da obra da via férrea. Clique no hospital e prima «Demolir» nos botões da parte superior. Quando aparecer «Demolição planeada», prima «Seguinte».",
+        "variant": "Nos terrenos de edifícios privados, as negociações de compra começam automaticamente, mas o hospital, que é um equipamento público municipal, não é removido automaticamente e está a impedir o início da obra da via férrea. Clique no hospital e prima «Demolir» nos botões da parte superior. Quando aparecer «Demolição planeada», prima «Seguinte».",
+        "start": "Nos terrenos de edifícios privados, as negociações de compra começam automaticamente, mas o hospital, que é um equipamento público municipal, não é removido automaticamente e está a impedir o início da obra da via férrea. Clique no hospital e prima «Demolir» nos botões da parte superior. Quando aparecer «Demolição planeada», prima «Seguinte».",
+        "end": "Nos terrenos de edifícios privados, as negociações de compra começam automaticamente, mas o hospital, que é um equipamento público municipal, não é removido automaticamente e está a impedir o início da obra da via férrea. Clique no hospital e prima «Demolir» nos botões da parte superior. Quando aparecer «Demolição planeada», prima «Seguinte».",
+        "confirm": "Nos terrenos de edifícios privados, as negociações de compra começam automaticamente, mas o hospital, que é um equipamento público municipal, não é removido automaticamente e está a impedir o início da obra da via férrea. Clique no hospital e prima «Demolir» nos botões da parte superior. Quando aparecer «Demolição planeada», prima «Seguinte».",
+        "town": "Nos terrenos de edifícios privados, as negociações de compra começam automaticamente, mas o hospital, que é um equipamento público municipal, não é removido automaticamente e está a impedir o início da obra da via férrea. Clique no hospital e prima «Demolir» nos botões da parte superior. Quando aparecer «Demolição planeada», prima «Seguinte».",
+        "new": "Nos terrenos de edifícios privados, as negociações de compra começam automaticamente, mas o hospital, que é um equipamento público municipal, não é removido automaticamente e está a impedir o início da obra da via férrea. Clique no hospital e prima «Demolir» nos botões da parte superior. Quando aparecer «Demolição planeada», prima «Seguinte».",
+        "east": "Nos terrenos de edifícios privados, as negociações de compra começam automaticamente, mas o hospital, que é um equipamento público municipal, não é removido automaticamente e está a impedir o início da obra da via férrea. Clique no hospital e prima «Demolir» nos botões da parte superior. Quando aparecer «Demolição planeada», prima «Seguinte»."
+      },
+      "step5": {
+        "title": "Aguardar a conclusão do troço com aquisição",
+        "description": "Avance o tempo e aguarde a aquisição dos terrenos privados, a demolição do hospital e a conclusão da obra da via férrea. São precisos alguns meses. Neste troço a duração da obra não é saltada: vai confirmar que a via fica concluída através de uma obra normal.",
+        "open": "Avance o tempo e aguarde a aquisição dos terrenos privados, a demolição do hospital e a conclusão da obra da via férrea. São precisos alguns meses. Neste troço a duração da obra não é saltada: vai confirmar que a via fica concluída através de uma obra normal.",
+        "variant": "Avance o tempo e aguarde a aquisição dos terrenos privados, a demolição do hospital e a conclusão da obra da via férrea. São precisos alguns meses. Neste troço a duração da obra não é saltada: vai confirmar que a via fica concluída através de uma obra normal.",
+        "start": "Avance o tempo e aguarde a aquisição dos terrenos privados, a demolição do hospital e a conclusão da obra da via férrea. São precisos alguns meses. Neste troço a duração da obra não é saltada: vai confirmar que a via fica concluída através de uma obra normal.",
+        "end": "Avance o tempo e aguarde a aquisição dos terrenos privados, a demolição do hospital e a conclusão da obra da via férrea. São precisos alguns meses. Neste troço a duração da obra não é saltada: vai confirmar que a via fica concluída através de uma obra normal.",
+        "confirm": "Avance o tempo e aguarde a aquisição dos terrenos privados, a demolição do hospital e a conclusão da obra da via férrea. São precisos alguns meses. Neste troço a duração da obra não é saltada: vai confirmar que a via fica concluída através de uma obra normal.",
+        "town": "Avance o tempo e aguarde a aquisição dos terrenos privados, a demolição do hospital e a conclusão da obra da via férrea. São precisos alguns meses. Neste troço a duração da obra não é saltada: vai confirmar que a via fica concluída através de uma obra normal.",
+        "new": "Avance o tempo e aguarde a aquisição dos terrenos privados, a demolição do hospital e a conclusão da obra da via férrea. São precisos alguns meses. Neste troço a duração da obra não é saltada: vai confirmar que a via fica concluída através de uma obra normal.",
+        "east": "Avance o tempo e aguarde a aquisição dos terrenos privados, a demolição do hospital e a conclusão da obra da via férrea. São precisos alguns meses. Neste troço a duração da obra não é saltada: vai confirmar que a via fica concluída através de uma obra normal."
+      },
+      "step6": {
+        "title": "Construir a via férrea por cima da estrada principal",
+        "description": "Com «Via férrea dupla», construa a via a 6 m de altura, desde a extremidade oeste até à extremidade leste da estrada principal. Se a fizer passar por cima do eixo da estrada, não atravessa os lotes privados ao longo da estrada e evita a aquisição de terrenos. Se se desviar da estrada e atravessar edifícios, será necessária a aquisição de terrenos ou a remoção de equipamentos públicos.",
+        "open": "Com «Via férrea dupla», construa a via a 6 m de altura, desde a extremidade oeste até à extremidade leste da estrada principal. Se a fizer passar por cima do eixo da estrada, não atravessa os lotes privados ao longo da estrada e evita a aquisição de terrenos. Se se desviar da estrada e atravessar edifícios, será necessária a aquisição de terrenos ou a remoção de equipamentos públicos.",
+        "variant": "Com «Via férrea dupla», construa a via a 6 m de altura, desde a extremidade oeste até à extremidade leste da estrada principal. Se a fizer passar por cima do eixo da estrada, não atravessa os lotes privados ao longo da estrada e evita a aquisição de terrenos. Se se desviar da estrada e atravessar edifícios, será necessária a aquisição de terrenos ou a remoção de equipamentos públicos.",
+        "start": "Com «Via férrea dupla», construa a via a 6 m de altura, desde a extremidade oeste até à extremidade leste da estrada principal. Se a fizer passar por cima do eixo da estrada, não atravessa os lotes privados ao longo da estrada e evita a aquisição de terrenos. Se se desviar da estrada e atravessar edifícios, será necessária a aquisição de terrenos ou a remoção de equipamentos públicos.",
+        "end": "Com «Via férrea dupla», construa a via a 6 m de altura, desde a extremidade oeste até à extremidade leste da estrada principal. Se a fizer passar por cima do eixo da estrada, não atravessa os lotes privados ao longo da estrada e evita a aquisição de terrenos. Se se desviar da estrada e atravessar edifícios, será necessária a aquisição de terrenos ou a remoção de equipamentos públicos.",
+        "confirm": "Com «Via férrea dupla», construa a via a 6 m de altura, desde a extremidade oeste até à extremidade leste da estrada principal. Se a fizer passar por cima do eixo da estrada, não atravessa os lotes privados ao longo da estrada e evita a aquisição de terrenos. Se se desviar da estrada e atravessar edifícios, será necessária a aquisição de terrenos ou a remoção de equipamentos públicos.",
+        "town": "Com «Via férrea dupla», construa a via a 6 m de altura, desde a extremidade oeste até à extremidade leste da estrada principal. Se a fizer passar por cima do eixo da estrada, não atravessa os lotes privados ao longo da estrada e evita a aquisição de terrenos. Se se desviar da estrada e atravessar edifícios, será necessária a aquisição de terrenos ou a remoção de equipamentos públicos.",
+        "new": "Com «Via férrea dupla», construa a via a 6 m de altura, desde a extremidade oeste até à extremidade leste da estrada principal. Se a fizer passar por cima do eixo da estrada, não atravessa os lotes privados ao longo da estrada e evita a aquisição de terrenos. Se se desviar da estrada e atravessar edifícios, será necessária a aquisição de terrenos ou a remoção de equipamentos públicos.",
+        "east": "Por fim, construa uma «Via férrea dupla» a 6 m de altura, desde a extremidade leste da estrada principal até à extremidade oeste da plataforma leste. Quando as duas plataformas estiverem ligadas, prima «Seguinte» para saltar a duração da obra."
+      },
+      "step7": {
+        "title": "Construir o depósito",
+        "description": "No painel de construção, selecione «Depósito ferroviário» e construa-o no lote amarelo a norte da cidade. Também aqui a colocação fica a seu cargo. Ao premir «Seguinte», a duração da obra do depósito é saltada e este fica concluído.",
+        "open": "No painel de construção, selecione «Depósito ferroviário» e construa-o no lote amarelo a norte da cidade. Também aqui a colocação fica a seu cargo. Ao premir «Seguinte», a duração da obra do depósito é saltada e este fica concluído.",
+        "variant": "No painel de construção, selecione «Depósito ferroviário» e construa-o no lote amarelo a norte da cidade. Também aqui a colocação fica a seu cargo. Ao premir «Seguinte», a duração da obra do depósito é saltada e este fica concluído.",
+        "start": "No painel de construção, selecione «Depósito ferroviário» e construa-o no lote amarelo a norte da cidade. Também aqui a colocação fica a seu cargo. Ao premir «Seguinte», a duração da obra do depósito é saltada e este fica concluído.",
+        "end": "No painel de construção, selecione «Depósito ferroviário» e construa-o no lote amarelo a norte da cidade. Também aqui a colocação fica a seu cargo. Ao premir «Seguinte», a duração da obra do depósito é saltada e este fica concluído.",
+        "confirm": "No painel de construção, selecione «Depósito ferroviário» e construa-o no lote amarelo a norte da cidade. Também aqui a colocação fica a seu cargo. Ao premir «Seguinte», a duração da obra do depósito é saltada e este fica concluído.",
+        "town": "No painel de construção, selecione «Depósito ferroviário» e construa-o no lote amarelo a norte da cidade. Também aqui a colocação fica a seu cargo. Ao premir «Seguinte», a duração da obra do depósito é saltada e este fica concluído.",
+        "new": "No painel de construção, selecione «Depósito ferroviário» e construa-o no lote amarelo a norte da cidade. Também aqui a colocação fica a seu cargo. Ao premir «Seguinte», a duração da obra do depósito é saltada e este fica concluído.",
+        "east": "No painel de construção, selecione «Depósito ferroviário» e construa-o no lote amarelo a norte da cidade. Também aqui a colocação fica a seu cargo. Ao premir «Seguinte», a duração da obra do depósito é saltada e este fica concluído."
+      },
+      "step8": {
+        "title": "Ajustar curvas e inclinações e ligar à linha principal",
+        "description": "Com «Via férrea simples», parta do ponto de ligação ao nível do solo no lado leste do depósito, faça uma curva larga para leste, passe pelo marcador a nordeste e ligue ao ponto de junção da linha principal, a 6 m de altura. Para não exceder os limites de curvatura e de inclinação, use os pontos intermédios amarelos como referência. Depois de confirmar a forma com o botão direito, pode ajustá-la arrastando os vértices e os pontos de controlo.",
+        "open": "Com «Via férrea simples», parta do ponto de ligação ao nível do solo no lado leste do depósito, faça uma curva larga para leste, passe pelo marcador a nordeste e ligue ao ponto de junção da linha principal, a 6 m de altura. Para não exceder os limites de curvatura e de inclinação, use os pontos intermédios amarelos como referência. Depois de confirmar a forma com o botão direito, pode ajustá-la arrastando os vértices e os pontos de controlo.",
+        "variant": "Com «Via férrea simples», parta do ponto de ligação ao nível do solo no lado leste do depósito, faça uma curva larga para leste, passe pelo marcador a nordeste e ligue ao ponto de junção da linha principal, a 6 m de altura. Para não exceder os limites de curvatura e de inclinação, use os pontos intermédios amarelos como referência. Depois de confirmar a forma com o botão direito, pode ajustá-la arrastando os vértices e os pontos de controlo.",
+        "start": "Com «Via férrea simples», parta do ponto de ligação ao nível do solo no lado leste do depósito, faça uma curva larga para leste, passe pelo marcador a nordeste e ligue ao ponto de junção da linha principal, a 6 m de altura. Para não exceder os limites de curvatura e de inclinação, use os pontos intermédios amarelos como referência. Depois de confirmar a forma com o botão direito, pode ajustá-la arrastando os vértices e os pontos de controlo.",
+        "end": "Com «Via férrea simples», parta do ponto de ligação ao nível do solo no lado leste do depósito, faça uma curva larga para leste, passe pelo marcador a nordeste e ligue ao ponto de junção da linha principal, a 6 m de altura. Para não exceder os limites de curvatura e de inclinação, use os pontos intermédios amarelos como referência. Depois de confirmar a forma com o botão direito, pode ajustá-la arrastando os vértices e os pontos de controlo.",
+        "confirm": "Com «Via férrea simples», parta do ponto de ligação ao nível do solo no lado leste do depósito, faça uma curva larga para leste, passe pelo marcador a nordeste e ligue ao ponto de junção da linha principal, a 6 m de altura. Para não exceder os limites de curvatura e de inclinação, use os pontos intermédios amarelos como referência. Depois de confirmar a forma com o botão direito, pode ajustá-la arrastando os vértices e os pontos de controlo.",
+        "town": "Com «Via férrea simples», parta do ponto de ligação ao nível do solo no lado leste do depósito, faça uma curva larga para leste, passe pelo marcador a nordeste e ligue ao ponto de junção da linha principal, a 6 m de altura. Para não exceder os limites de curvatura e de inclinação, use os pontos intermédios amarelos como referência. Depois de confirmar a forma com o botão direito, pode ajustá-la arrastando os vértices e os pontos de controlo.",
+        "new": "Com «Via férrea simples», parta do ponto de ligação ao nível do solo no lado leste do depósito, faça uma curva larga para leste, passe pelo marcador a nordeste e ligue ao ponto de junção da linha principal, a 6 m de altura. Para não exceder os limites de curvatura e de inclinação, use os pontos intermédios amarelos como referência. Depois de confirmar a forma com o botão direito, pode ajustá-la arrastando os vértices e os pontos de controlo.",
+        "east": "Com «Via férrea simples», parta do ponto de ligação ao nível do solo no lado leste do depósito, faça uma curva larga para leste, passe pelo marcador a nordeste e ligue ao ponto de junção da linha principal, a 6 m de altura. Para não exceder os limites de curvatura e de inclinação, use os pontos intermédios amarelos como referência. Depois de confirmar a forma com o botão direito, pode ajustá-la arrastando os vértices e os pontos de controlo."
+      },
+      "step9": {
+        "title": "Levar eletricidade da central existente ao depósito",
+        "description": "Para pôr os comboios a circular, é preciso ligar uma linha elétrica a partir da central elétrica. Com «Linha elétrica», ligue o ponto de ligação da central ao ponto de ligação partilhado no lado leste do depósito e confirme.",
+        "open": "Para pôr os comboios a circular, é preciso ligar uma linha elétrica a partir da central elétrica. Com «Linha elétrica», ligue o ponto de ligação da central ao ponto de ligação partilhado no lado leste do depósito e confirme.",
+        "variant": "Para pôr os comboios a circular, é preciso ligar uma linha elétrica a partir da central elétrica. Com «Linha elétrica», ligue o ponto de ligação da central ao ponto de ligação partilhado no lado leste do depósito e confirme.",
+        "start": "Para pôr os comboios a circular, é preciso ligar uma linha elétrica a partir da central elétrica. Com «Linha elétrica», ligue o ponto de ligação da central ao ponto de ligação partilhado no lado leste do depósito e confirme.",
+        "end": "Para pôr os comboios a circular, é preciso ligar uma linha elétrica a partir da central elétrica. Com «Linha elétrica», ligue o ponto de ligação da central ao ponto de ligação partilhado no lado leste do depósito e confirme.",
+        "confirm": "Para pôr os comboios a circular, é preciso ligar uma linha elétrica a partir da central elétrica. Com «Linha elétrica», ligue o ponto de ligação da central ao ponto de ligação partilhado no lado leste do depósito e confirme.",
+        "town": "Para pôr os comboios a circular, é preciso ligar uma linha elétrica a partir da central elétrica. Com «Linha elétrica», ligue o ponto de ligação da central ao ponto de ligação partilhado no lado leste do depósito e confirme.",
+        "new": "Para pôr os comboios a circular, é preciso ligar uma linha elétrica a partir da central elétrica. Com «Linha elétrica», ligue o ponto de ligação da central ao ponto de ligação partilhado no lado leste do depósito e confirme.",
+        "east": "Para pôr os comboios a circular, é preciso ligar uma linha elétrica a partir da central elétrica. Com «Linha elétrica», ligue o ponto de ligação da central ao ponto de ligação partilhado no lado leste do depósito e confirme."
+      },
+      "step10": {
+        "title": "Abrir a linha ferroviária",
+        "description": "Em «Transportes públicos» → «+ Criar linha», selecione «Linha ferroviária regional». Coloque paragens nas plataformas elevadas oeste e leste e clique na primeira paragem para fechar o circuito. Confirme com tarifa 0 e intervalo entre passagens pretendido de 5 minutos.",
+        "open": "Em «Transportes públicos» → «+ Criar linha», selecione «Linha ferroviária regional». Coloque paragens nas plataformas elevadas oeste e leste e clique na primeira paragem para fechar o circuito. Confirme com tarifa 0 e intervalo entre passagens pretendido de 5 minutos.",
+        "variant": "Em «Transportes públicos» → «+ Criar linha», selecione «Linha ferroviária regional». Coloque paragens nas plataformas elevadas oeste e leste e clique na primeira paragem para fechar o circuito. Confirme com tarifa 0 e intervalo entre passagens pretendido de 5 minutos.",
+        "start": "Em «Transportes públicos» → «+ Criar linha», selecione «Linha ferroviária regional». Coloque paragens nas plataformas elevadas oeste e leste e clique na primeira paragem para fechar o circuito. Confirme com tarifa 0 e intervalo entre passagens pretendido de 5 minutos.",
+        "end": "Em «Transportes públicos» → «+ Criar linha», selecione «Linha ferroviária regional». Coloque paragens nas plataformas elevadas oeste e leste e clique na primeira paragem para fechar o circuito. Confirme com tarifa 0 e intervalo entre passagens pretendido de 5 minutos.",
+        "confirm": "Em «Transportes públicos» → «+ Criar linha», selecione «Linha ferroviária regional». Coloque paragens nas plataformas elevadas oeste e leste e clique na primeira paragem para fechar o circuito. Confirme com tarifa 0 e intervalo entre passagens pretendido de 5 minutos.",
+        "town": "Em «Transportes públicos» → «+ Criar linha», selecione «Linha ferroviária regional». Coloque paragens nas plataformas elevadas oeste e leste e clique na primeira paragem para fechar o circuito. Confirme com tarifa 0 e intervalo entre passagens pretendido de 5 minutos.",
+        "new": "Em «Transportes públicos» → «+ Criar linha», selecione «Linha ferroviária regional». Coloque paragens nas plataformas elevadas oeste e leste e clique na primeira paragem para fechar o circuito. Confirme com tarifa 0 e intervalo entre passagens pretendido de 5 minutos.",
+        "east": "Em «Transportes públicos» → «+ Criar linha», selecione «Linha ferroviária regional». Coloque paragens nas plataformas elevadas oeste e leste e clique na primeira paragem para fechar o circuito. Confirme com tarifa 0 e intervalo entre passagens pretendido de 5 minutos."
+      },
+      "step11": {
+        "title": "Verificar a aquisição de veículos e o serviço",
+        "description": "Avance o tempo e verifique a capacidade e o intervalo entre passagens da linha no ecrã de gestão dos transportes públicos. O depósito demora alguns meses a adquirir os veículos. A linha fica aberta quando passar a ter capacidade. Como os moradores escolhem o percurso tendo também em conta as deslocações a pé, entre estações tão próximas pode ainda não haver passageiros.",
+        "open": "Avance o tempo e verifique a capacidade e o intervalo entre passagens da linha no ecrã de gestão dos transportes públicos. O depósito demora alguns meses a adquirir os veículos. A linha fica aberta quando passar a ter capacidade. Como os moradores escolhem o percurso tendo também em conta as deslocações a pé, entre estações tão próximas pode ainda não haver passageiros.",
+        "variant": "Avance o tempo e verifique a capacidade e o intervalo entre passagens da linha no ecrã de gestão dos transportes públicos. O depósito demora alguns meses a adquirir os veículos. A linha fica aberta quando passar a ter capacidade. Como os moradores escolhem o percurso tendo também em conta as deslocações a pé, entre estações tão próximas pode ainda não haver passageiros.",
+        "start": "Avance o tempo e verifique a capacidade e o intervalo entre passagens da linha no ecrã de gestão dos transportes públicos. O depósito demora alguns meses a adquirir os veículos. A linha fica aberta quando passar a ter capacidade. Como os moradores escolhem o percurso tendo também em conta as deslocações a pé, entre estações tão próximas pode ainda não haver passageiros.",
+        "end": "Avance o tempo e verifique a capacidade e o intervalo entre passagens da linha no ecrã de gestão dos transportes públicos. O depósito demora alguns meses a adquirir os veículos. A linha fica aberta quando passar a ter capacidade. Como os moradores escolhem o percurso tendo também em conta as deslocações a pé, entre estações tão próximas pode ainda não haver passageiros.",
+        "confirm": "Avance o tempo e verifique a capacidade e o intervalo entre passagens da linha no ecrã de gestão dos transportes públicos. O depósito demora alguns meses a adquirir os veículos. A linha fica aberta quando passar a ter capacidade. Como os moradores escolhem o percurso tendo também em conta as deslocações a pé, entre estações tão próximas pode ainda não haver passageiros.",
+        "town": "Avance o tempo e verifique a capacidade e o intervalo entre passagens da linha no ecrã de gestão dos transportes públicos. O depósito demora alguns meses a adquirir os veículos. A linha fica aberta quando passar a ter capacidade. Como os moradores escolhem o percurso tendo também em conta as deslocações a pé, entre estações tão próximas pode ainda não haver passageiros.",
+        "new": "Avance o tempo e verifique a capacidade e o intervalo entre passagens da linha no ecrã de gestão dos transportes públicos. O depósito demora alguns meses a adquirir os veículos. A linha fica aberta quando passar a ter capacidade. Como os moradores escolhem o percurso tendo também em conta as deslocações a pé, entre estações tão próximas pode ainda não haver passageiros.",
+        "east": "Avance o tempo e verifique a capacidade e o intervalo entre passagens da linha no ecrã de gestão dos transportes públicos. O depósito demora alguns meses a adquirir os veículos. A linha fica aberta quando passar a ter capacidade. Como os moradores escolhem o percurso tendo também em conta as deslocações a pé, entre estações tão próximas pode ainda não haver passageiros."
+      },
+      "step12": {
+        "title": "Rever a construção ferroviária",
+        "description": "A vista foi aproximada da estação oeste. Observe os comboios parados na plataforma. Construiu plataformas, edifícios da estação, a linha principal, o depósito com o ramal de acesso, a alimentação elétrica e a configuração da linha. Passou pela aquisição de terrenos privados e pela remoção de um equipamento público, e evitou a aquisição no troço que aproveita o espaço por cima da estrada. Aplique também noutros projetos ferroviários este método de ajustar o alinhamento da via verificando o raio das curvas e a inclinação.",
+        "open": "A vista foi aproximada da estação oeste. Observe os comboios parados na plataforma. Construiu plataformas, edifícios da estação, a linha principal, o depósito com o ramal de acesso, a alimentação elétrica e a configuração da linha. Passou pela aquisição de terrenos privados e pela remoção de um equipamento público, e evitou a aquisição no troço que aproveita o espaço por cima da estrada. Aplique também noutros projetos ferroviários este método de ajustar o alinhamento da via verificando o raio das curvas e a inclinação.",
+        "variant": "A vista foi aproximada da estação oeste. Observe os comboios parados na plataforma. Construiu plataformas, edifícios da estação, a linha principal, o depósito com o ramal de acesso, a alimentação elétrica e a configuração da linha. Passou pela aquisição de terrenos privados e pela remoção de um equipamento público, e evitou a aquisição no troço que aproveita o espaço por cima da estrada. Aplique também noutros projetos ferroviários este método de ajustar o alinhamento da via verificando o raio das curvas e a inclinação.",
+        "start": "A vista foi aproximada da estação oeste. Observe os comboios parados na plataforma. Construiu plataformas, edifícios da estação, a linha principal, o depósito com o ramal de acesso, a alimentação elétrica e a configuração da linha. Passou pela aquisição de terrenos privados e pela remoção de um equipamento público, e evitou a aquisição no troço que aproveita o espaço por cima da estrada. Aplique também noutros projetos ferroviários este método de ajustar o alinhamento da via verificando o raio das curvas e a inclinação.",
+        "end": "A vista foi aproximada da estação oeste. Observe os comboios parados na plataforma. Construiu plataformas, edifícios da estação, a linha principal, o depósito com o ramal de acesso, a alimentação elétrica e a configuração da linha. Passou pela aquisição de terrenos privados e pela remoção de um equipamento público, e evitou a aquisição no troço que aproveita o espaço por cima da estrada. Aplique também noutros projetos ferroviários este método de ajustar o alinhamento da via verificando o raio das curvas e a inclinação.",
+        "confirm": "A vista foi aproximada da estação oeste. Observe os comboios parados na plataforma. Construiu plataformas, edifícios da estação, a linha principal, o depósito com o ramal de acesso, a alimentação elétrica e a configuração da linha. Passou pela aquisição de terrenos privados e pela remoção de um equipamento público, e evitou a aquisição no troço que aproveita o espaço por cima da estrada. Aplique também noutros projetos ferroviários este método de ajustar o alinhamento da via verificando o raio das curvas e a inclinação.",
+        "town": "A vista foi aproximada da estação oeste. Observe os comboios parados na plataforma. Construiu plataformas, edifícios da estação, a linha principal, o depósito com o ramal de acesso, a alimentação elétrica e a configuração da linha. Passou pela aquisição de terrenos privados e pela remoção de um equipamento público, e evitou a aquisição no troço que aproveita o espaço por cima da estrada. Aplique também noutros projetos ferroviários este método de ajustar o alinhamento da via verificando o raio das curvas e a inclinação.",
+        "new": "A vista foi aproximada da estação oeste. Observe os comboios parados na plataforma. Construiu plataformas, edifícios da estação, a linha principal, o depósito com o ramal de acesso, a alimentação elétrica e a configuração da linha. Passou pela aquisição de terrenos privados e pela remoção de um equipamento público, e evitou a aquisição no troço que aproveita o espaço por cima da estrada. Aplique também noutros projetos ferroviários este método de ajustar o alinhamento da via verificando o raio das curvas e a inclinação.",
+        "east": "A vista foi aproximada da estação oeste. Observe os comboios parados na plataforma. Construiu plataformas, edifícios da estação, a linha principal, o depósito com o ramal de acesso, a alimentação elétrica e a configuração da linha. Passou pela aquisição de terrenos privados e pela remoção de um equipamento público, e evitou a aquisição no troço que aproveita o espaço por cima da estrada. Aplique também noutros projetos ferroviários este método de ajustar o alinhamento da via verificando o raio das curvas e a inclinação."
+      }
+    },
+    "complete": {
+      "title": "Tutorial concluído",
+      "description": "Parabéns! Concluiu o tutorial. Prima «Terminar» para fechar o guia e continuar a jogar livremente nesta cidade.",
+      "button": "Terminar"
+    },
+    "nextButton": "Seguinte",
+    "checking": "A verificar…",
+    "failed": "A condição não foi cumprida. Tente novamente.",
+    "completed": "Tutorial concluído! Bom trabalho.",
+    "stepProgress": "Passo {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Prima o ícone de estrada para abrir o painel de construção.",
+      "selectRoad": "Selecione a estrada de 2 faixas ao nível do solo em «Ruas». Só é possível selecionar os tipos permitidos.",
+      "placeStart": "Clique com o botão esquerdo dentro do círculo azul-claro para colocar o início da estrada.",
+      "placeEnd": "Clique com o botão esquerdo dentro do círculo amarelo para colocar o fim da estrada.",
+      "finalizeRoad": "Clique com o botão direito na vista 3D para definir a forma da estrada.",
+      "confirmRoad": "Prima «Confirmar» no painel de construção para guardar e, em seguida, prima o botão «Seguinte».",
+      "failed": "Falha na preparação ou na comunicação. Se o problema persistir depois de tentar novamente, saia e inicie o tutorial numa cidade nova.",
+      "retry": "Tentar novamente",
+      "placementRequired": "Use o tipo e as posições indicados pelo guia.",
+      "preparing": "A preparar o estado inicial do tutorial.",
+      "finishFailed": "Não foi possível terminar o tutorial. Tente novamente."
+    },
+    "trade": {
+      "title": "Iniciar o comércio internacional",
+      "description": "Uma fábrica local procura mercados no estrangeiro. Neste tutorial vai aprender a exportar alimentos a partir de um porto e a importar mercadorias por uma linha ferroviária de mercadorias ligada ao país vizinho.",
+      "step1": {
+        "description": "É preciso um cais de exportação para exportar os alimentos produzidos nesta ilha. Construa um «Terminal de contentores» no lote costeiro com o marcador amarelo. Como se trata de um tutorial, a duração da obra é saltada.",
+        "title": "Construir um porto de contentores"
+      },
+      "step2": {
+        "description": "A produção e o transporte da fábrica demoram alguns meses a arrancar, por isso avance o tempo e veja os resultados de exportação do porto. Feche os detalhes do terminal de contentores e volte a abri-los para ver as importações e exportações nas informações de movimentação de carga.",
+        "title": "Verificar as exportações de alimentos"
+      },
+      "step3": {
+        "description": "Já tem um local para importar e exportar por navio. Agora vamos criar um local para importar e exportar mercadorias por caminho de ferro. Construa uma «Estação internacional de mercadorias» no lote com o marcador amarelo junto à estrada. Na fronteira leste existe uma via férrea que segue para o país vizinho e uma estação de mercadorias fronteiriça.",
+        "title": "Construir uma estação internacional de mercadorias"
+      },
+      "step4": {
+        "open": "Abra «Estradas, ferrovia e infraestruturas» no painel de ícones e selecione «Plataforma de carga de contentores» em «Ferrovia».",
+        "place": "Construa uma plataforma a norte da estação internacional de mercadorias, paralela à estação. Clique com o botão esquerdo dentro do círculo azul-claro (oeste) para colocar o início e dentro do círculo amarelo (leste) para colocar o fim; depois clique com o botão direito na vista 3D para definir a forma. Mude «Lado da plataforma» para «Interior» e verifique se a plataforma fica do lado do edifício da estação (lado sul) antes de confirmar. Quando terminar, prima o botão «Seguinte».",
+        "title": "Construir uma plataforma ao lado da estação"
+      },
+      "step5": {
+        "description": "Prima «Voltar» para regressar à lista, selecione «Via férrea simples» e construa a via desde a extremidade leste da plataforma até à extremidade oeste da via que vem da estação de mercadorias fronteiriça, fora da cidade.",
+        "title": "Construir a via férrea até à fronteira"
+      },
+      "step6": {
+        "title": "Construir o depósito",
+        "description": "Construa um «Depósito ferroviário» no lote com o marcador amarelo junto à via férrea. Ao premir «Seguinte», como se trata de um tutorial, a duração da obra é saltada e o depósito fica concluído."
+      },
+      "step7": {
+        "title": "Ligar o depósito à linha principal",
+        "description": "Construa um ramal desde o ponto de ligação na extremidade leste do depósito até à linha principal. Faça-o entroncar na linha principal num ângulo suave, em direção a leste, e não em ângulo reto. Quando terminar, prima o botão «Seguinte»."
+      },
+      "step8": {
+        "description": "Abra «Estradas, ferrovia e infraestruturas» no painel de ícones e, com «Linha elétrica» em «Eletricidade», ligue o ponto de ligação da central solar a leste da cidade ao ponto de ligação do depósito.",
+        "title": "Levar eletricidade ao depósito"
+      },
+      "step9": {
+        "description": "Em «Transportes públicos», prima «+ Criar linha» e escolha «Linha internacional de mercadorias» como tipo. Coloque paragens nas plataformas da estação internacional de mercadorias e da estação de mercadorias fronteiriça, clique na primeira paragem para fechar o circuito e abra a linha. Como a via é única e os comboios não se podem cruzar, defina um intervalo entre passagens pretendido de 45 minutos, o tempo que uma composição leva a fazer a viagem de ida e volta.",
+        "title": "Abrir a linha internacional de mercadorias"
+      },
+      "step10": {
+        "description": "Avance o tempo e confirme que os comboios de mercadorias começam a circular na linha internacional de mercadorias. O depósito demora alguns meses a contratar pessoal, comprar materiais e preparar os veículos.",
+        "title": "Pôr os comboios de mercadorias a circular"
+      }
+    },
+    "highway": {
+      "title": "Construir uma autoestrada",
+      "description": "Para preparar o crescimento da cidade, é preciso um novo percurso para os automóveis. Neste tutorial vai aprender a construir uma autoestrada em viaduto por cima de uma estrada comum e a ligá-las com ramais de acesso para criar um nó.",
+      "step1": {
+        "title": "Cruzar em viaduto",
+        "open": "Vai atravessar a estrada comum central com uma autoestrada em viaduto. Abra «Estradas, ferrovia e infraestruturas» no painel de ícones e selecione «Autoestrada de 2 faixas» em «Autoestradas».",
+        "start": "Clique com o botão esquerdo dentro do círculo azul-claro para colocar o início da autoestrada. O ponto inicial ajusta-se automaticamente à posição do viaduto, a 7 m de altura.",
+        "end": "Clique com o botão esquerdo dentro do círculo amarelo para colocar o fim. Ajusta-se automaticamente à mesma altura de 7 m, do outro lado da estrada comum.",
+        "confirm": "Prima «Confirmar» no painel de construção para guardar e, em seguida, prima o botão «Seguinte». Como se trata de um tutorial, a duração da obra é saltada e a autoestrada fica concluída."
+      },
+      "step2": {
+        "title": "Dar um nome à autoestrada",
+        "description": "As estradas podem ser geridas através de um nome. No topo da janela de detalhes da autoestrada que construiu, a estrada a que pertence aparece atualmente como «Nenhuma (rua sem nome)»; dê-lhe o nome que quiser."
+      },
+      "step3": {
+        "title": "Construir um ramal de acesso",
+        "description": "Vamos construir um ramal de acesso para ligar à estrada comum. Selecione «Ramal de acesso» como tipo de estrada e ligue-o à autoestrada em curva suave, a partir da posição do marcador amarelo no ecrã."
+      },
+      "step4": {
+        "title": "Verificar o nó",
+        "description": "Clique em «IC1», apresentado junto ao ramal de acesso, para abrir o painel de detalhes do nó. Confirme que a estrada comum e a autoestrada estão ligadas."
+      }
+    },
+    "mining": {
+      "title": "Extrair recursos",
+      "description": "A ilha guarda recursos valiosos, mas não há forma de os levar para fora. Neste tutorial vai aprender todo o processo: preparar uma mina, uma linha ferroviária de mercadorias e um porto, extrair o minério, transportá-lo e exportá-lo para o estrangeiro.",
+      "step1": {
+        "description": "Ative a apresentação dos recursos naturais e abra o painel de detalhes do filão a sudeste.",
+        "title": "Examinar o filão"
+      },
+      "step2": {
+        "description": "Construa uma «Mina» no lote amarelo sobre o filão a sudeste. Como se trata de um tutorial, a duração da obra é saltada.",
+        "title": "Construir a mina"
+      },
+      "step3": {
+        "description": "Construa uma «Estação de carga de minério» no grande lote existente a sudeste da mina. Na estação de carga de minério, o minério extraído na mina é carregado nos comboios.",
+        "title": "Construir a estação de carga junto à mina"
+      },
+      "step4": {
+        "description": "Construa uma «Estação de descarga de minério» no grande lote existente a sul do porto. Na estação de descarga de minério, o minério trazido pelos comboios é descarregado e encaminhado.",
+        "title": "Construir a estação de descarga perto do porto"
+      },
+      "step5": {
+        "description": "Construa um «Porto de granéis» no lote amarelo junto à costa.",
+        "title": "Construir o porto de granéis"
+      },
+      "step6": {
+        "open": "Em «Ferrovia», selecione «Plataforma de carga de minério» e ligue os dois pares de marcadores: a sudoeste da estação de carga e a sul da estação de descarga. Vire cada plataforma para o respetivo equipamento.",
+        "loading": "Em «Ferrovia», selecione «Plataforma de carga de minério» e ligue os dois pares de marcadores: a sudoeste da estação de carga e a sul da estação de descarga. Vire cada plataforma para o respetivo equipamento.",
+        "unloading": "Em «Ferrovia», selecione «Plataforma de carga de minério» e ligue os dois pares de marcadores: a sudoeste da estação de carga e a sul da estação de descarga. Vire cada plataforma para o respetivo equipamento.",
+        "title": "Construir uma plataforma ao lado da estação"
+      },
+      "step7": {
+        "town": "Construa uma via férrea de mercadorias desde a extremidade leste da plataforma do porto, passando a sul do ponto intermédio da estrada, até à extremidade noroeste da plataforma da montanha. A via ainda não está ligada, por isso tem de a construir. Use curvas para alinhar o sentido de marcha e, no troço que sobe a montanha, defina «Seguir o relevo» como «Não seguir»; ajuste a forma até não haver violações de inclinação ou curvatura assinaladas a vermelho. Acrescente pontos intermédios para que cada troço tenha no máximo 500 m.",
+        "climb": "Construa uma via férrea de mercadorias desde a extremidade leste da plataforma do porto, passando a sul do ponto intermédio da estrada, até à extremidade noroeste da plataforma da montanha. A via ainda não está ligada, por isso tem de a construir. Use curvas para alinhar o sentido de marcha e, no troço que sobe a montanha, defina «Seguir o relevo» como «Não seguir»; ajuste a forma até não haver violações de inclinação ou curvatura assinaladas a vermelho. Acrescente pontos intermédios para que cada troço tenha no máximo 500 m.",
+        "title": "Ligar as duas estações por via férrea"
+      },
+      "step8": {
+        "title": "Construir o depósito",
+        "description": "Construa um «Depósito ferroviário» no lote existente a sudoeste do porto. Oriente-o de forma a poder construir um ramal desde o ponto de ligação na extremidade leste até à plataforma do porto."
+      },
+      "step9": {
+        "title": "Ligar o depósito à linha principal",
+        "description": "Construa um ramal desde o ponto de ligação ao nível do solo na extremidade leste do depósito até à extremidade oeste da plataforma do porto. Faça-o entroncar suavemente, num ângulo pouco acentuado."
+      },
+      "step10": {
+        "description": "Construa uma linha elétrica desde o ponto de ligação da central solar existente até ao ponto de ligação partilhado na extremidade leste do depósito.",
+        "title": "Levar eletricidade ao depósito"
+      },
+      "step11": {
+        "description": "Em «Transportes públicos» → «+ Criar linha» → «Linha de transporte de minério», coloque paragens nas plataformas de minério da montanha e do porto e clique na primeira paragem para fechar o circuito. Como a via é única e os comboios não se podem cruzar, defina um intervalo entre passagens pretendido de 45 minutos, o tempo que uma composição leva a fazer a viagem de ida e volta, e confirme.",
+        "title": "Abrir a linha de transporte de minério"
+      },
+      "step12": {
+        "description": "Avance o tempo para pôr em marcha a extração, a carga, o transporte ferroviário, a descarga e a exportação. A aquisição de veículos e o arranque do transporte demoram alguns meses.",
+        "title": "Avançar o tempo"
+      },
+      "step13": {
+        "description": "Avance o tempo e verifique a receção e a exportação de minério nos detalhes do porto de granéis junto à costa. A aquisição de veículos, a extração e o transporte demoram alguns meses.",
+        "title": "Verificar as exportações de minério"
+      }
+    },
+    "tourism": {
+      "title": "Desenvolver o turismo",
+      "description": "A ilha não tem porto nem alojamento para receber os visitantes das suas ruínas, nem carreiras de autocarro para turistas. Neste tutorial vai aprender a construir um hotel e um terminal de cruzeiros, criar uma carreira de autocarro e verificar a chegada de turistas, as vendas dos restaurantes e a utilização do autocarro.",
+      "step1": {
+        "description": "Construa um «Hotel turístico» no lote com o marcador amarelo a oeste das ruínas antigas. Como se trata de um tutorial, a duração da obra é saltada.",
+        "title": "Construir um hotel junto às ruínas"
+      },
+      "step2": {
+        "description": "É preciso um porto para receber os turistas. Construa um «Terminal de cruzeiros» no lote do porto assinalado com o marcador.",
+        "title": "Construir o terminal de cruzeiros"
+      },
+      "step3": {
+        "description": "Os turistas não têm automóvel próprio, por isso é preciso criar transportes públicos. Em «Transportes públicos» → «+ Criar linha», selecione «Carreira de autocarro». Nas estradas com marcadores amarelos, coloque paragens por esta ordem: porto → zona residencial → ruínas → zona residencial; por fim, clique na paragem do porto para fechar o circuito. Defina a tarifa como 0 e o intervalo entre passagens pretendido como 1 minuto e confirme.",
+        "title": "Criar uma carreira de autocarro entre o porto e as ruínas"
+      },
+      "step4": {
+        "description": "Avance o tempo para receber os turistas. O arranque dos equipamentos e a aquisição dos autocarros demoram alguns meses.",
+        "title": "Avançar o tempo"
+      },
+      "step5": {
+        "description": "Verifique as vendas do restaurante junto às ruínas e os passageiros da carreira de autocarro que criou. O objetivo é cumprido quando os turistas tiverem chegado, as vendas do restaurante forem superiores às do início e o autocarro tiver passageiros. Se for necessário, avance mais o tempo.",
+        "title": "Verificar as vendas e os passageiros do autocarro"
+      }
+    },
+    "intro": {
+      "controls": "Acabou de tomar posse como presidente da câmara e pedimos-lhe que construa uma cidade onde os moradores possam viver com tranquilidade. Esta cidade ainda não tem casas para receber novos moradores, nem a eletricidade e a água indispensáveis ao dia a dia. Neste tutorial vai aprender o papel do presidente da câmara, como avançar o tempo, como interpretar o estado da cidade e como usar os botões e controlar a vista; depois, vai seguir o processo de construção da cidade: preparar estradas e lotes, definir a orientação de um bairro, construir habitações e levar-lhes eletricidade e água.",
+      "scenario4": "Queremos ligar a zona residencial às zonas de emprego por caminho de ferro, mas no local previsto há edifícios privados e um hospital público. Neste tutorial vai aprender a adquirir terrenos e a remover equipamentos públicos, a construir em viaduto por cima das estradas, a construir plataformas, edifícios da estação e um depósito, a ajustar curvas e inclinações e a tratar de tudo, desde a alimentação elétrica até à abertura da linha.",
+      "trade": "Uma fábrica de alimentos local pediu ajuda para vender os seus produtos também no estrangeiro. A cidade também gostaria de ter uma forma de trazer do estrangeiro os produtos de que precisa. Neste tutorial vai aprender a exportar alimentos a partir de um porto e a importar mercadorias por uma linha ferroviária de mercadorias ligada ao país vizinho.",
+      "highway": "À medida que a cidade se desenvolver, vão aumentar os veículos que transportam pessoas e mercadorias. Para que o tráfego de passagem não se concentre todo nas estradas comuns, convém preparar desde já um percurso alternativo. Neste tutorial vai aprender a construir uma autoestrada em viaduto por cima de uma estrada comum e a ligá-las com ramais de acesso para criar um nó.",
+      "mining": "Esta ilha guarda recursos valiosos. No entanto, não há forma de os levar da montanha até ao porto, e esta riqueza continua por aproveitar na indústria da ilha. Neste tutorial vai aprender todo o processo: preparar uma mina, uma linha ferroviária de mercadorias e um porto, extrair o minério, transportá-lo e exportá-lo para o estrangeiro.",
+      "tourism": "Os habitantes da ilha querem mostrar as ruínas antigas do interior a mais visitantes. No entanto, falta um porto e alojamento para receber os viajantes, e ainda não existe uma carreira de autocarro entre o porto e a cidade. Neste tutorial vai aprender a construir um hotel e um terminal de cruzeiros, criar uma carreira de autocarro e verificar a chegada de turistas, as vendas dos restaurantes e a utilização do autocarro.",
+      "heading": "Um pedido ao presidente da câmara",
+      "windowTitle": "Tutorial",
+      "marine": "Esta cidade à beira da baía ainda não tem porto nem instalações petrolíferas. Neste tutorial vai aprender todo o processo: fazer um aterro no mar e construir um terminal petroleiro, lançar uma ponte suspensa sobre a entrada da baía, bombear crude de uma jazida submarina e enviá-lo por oleoduto para exportação e ligar à cidade, por ferry, uma ilha ao largo."
+    },
+    "marine": {
+      "title": "Desenvolver o mar",
+      "description": "Esta cidade à beira da baía ainda não tem porto nem instalações petrolíferas. Neste tutorial vai aprender todo o processo: fazer um aterro no mar e construir um terminal petroleiro, lançar uma ponte suspensa sobre a entrada da baía, bombear crude de uma jazida submarina e enviá-lo por oleoduto para exportação e ligar à cidade, por ferry, uma ilha ao largo.",
+      "step1": {
+        "title": "Planear uma obra de aterro",
+        "description": "Para criar um porto, é preciso um cais onde possam atracar navios grandes e terreno para construir as instalações. Vamos fazer um aterro no mar, ao fundo da baía, para criar o terreno do porto. Prima o ícone de terraplenagem, clique com o botão esquerdo nos 4 marcadores amarelos por ordem para desenhar a área e clique com o botão direito para a fechar. Verifique se o tipo de estimativa é «Aterro» e confirme a obra."
+      },
+      "step2": {
+        "title": "Concluir o aterro",
+        "description": "Avance o tempo pelo menos 1 mês com «Iniciar» e depois prima «Seguinte». Como esta lição não tem empresas de construção, «Seguinte» salta a duração da obra de aterro. Quando terminar, o que era mar passa a ser terra, e a orla virada para o mar torna-se um cais onde os navios podem atracar."
+      },
+      "step3": {
+        "title": "Levar uma estrada até ao aterro",
+        "description": "Mesmo que construa um porto ou um terminal de oleoduto no aterro, sem ligação por estrada ninguém pode ir lá trabalhar e as mercadorias não circulam. Construa uma estrada desde a extremidade da estrada da cidade até ao aterro. Nesta lição, as estradas ficam concluídas logo que são confirmadas. Prima «Estradas, ferrovia e infraestruturas» no painel de ícones para abrir o painel de construção."
+      },
+      "step4": {
+        "title": "Construir o terminal petroleiro",
+        "description": "Os petroleiros que transportam crude são navios grandes, por isso só se pode construir um porto onde o mar em frente ao cais tenha profundidade suficiente. O cais do aterro tem águas profundas à frente, o que o torna adequado para um porto. Prima o ícone de edifícios, selecione «Terminal petroleiro» na categoria «Portos», clique com o botão esquerdo dentro do círculo amarelo sobre o cais para definir o local e prima «Confirmar» no painel de construção. Ao construir um porto, é traçada automaticamente uma rota de ligação até à rota oceânica ao largo, para que os navios possam entrar e sair. Nesta lição, a duração da obra é saltada."
+      },
+      "step5": {
+        "title": "Lançar uma ponte suspensa sobre a entrada da baía",
+        "description": "Nas duas margens da entrada da baía, a autoestrada está interrompida. A entrada da baía tem 1,6 km de largura, demasiado para uma ponte comum assente em pilares, por isso vamos ligá-la com uma ponte suspensa, capaz de vencer grandes distâncias num só vão. Por baixo da ponte passa a rota dos navios de grande porte, por isso tem de ficar a uma altura em que os navios não lhe toquem. As extremidades da autoestrada nas duas margens já estão a essa altura. Abra «Estradas, ferrovia e infraestruturas» no painel de ícones, selecione «Ponte suspensa de 4 faixas» em «Autoestradas» e trace-a desde a extremidade norte (círculo azul-claro) até à extremidade sul (círculo amarelo). Clique com o botão direito para definir a forma, prima «Confirmar» no painel de construção e depois prima «Seguinte»."
+      },
+      "step6": {
+        "title": "Encontrar a jazida de petróleo submarina",
+        "description": "Agora vamos aproveitar os recursos do mar. Antes de construir o terminal de oleoduto, verifique se há uma jazida de petróleo no fundo do mar ali perto. Prima «Vista» no painel de comando para abrir o painel de vista.",
+        "show": "Nos separadores verticais, selecione «Recursos naturais» e mude para «Visível». Vai ver uma jazida de petróleo a estender-se pelo fundo da baía. Clique na jazida junto ao marcador amarelo para abrir os detalhes."
+      },
+      "step7": {
+        "title": "Construir o terminal de oleoduto",
+        "description": "O crude bombeado na jazida submarina é enviado por oleoduto até ao terminal de oleoduto em terra e, a partir daí, colocado no mercado. O terminal de oleoduto constrói-se virado para o cais, por onde o oleoduto pode entrar. Prima o ícone de edifícios, selecione «Terminal de oleoduto» na categoria «Portos», clique com o botão esquerdo dentro do círculo amarelo sobre o cais para definir o local e prima «Confirmar» no painel de construção. Nesta lição, a duração da obra é saltada."
+      },
+      "step8": {
+        "title": "Construir a plataforma petrolífera",
+        "description": "A plataforma petrolífera que bombeia o crude tem de ser construída no mar, mesmo por cima da jazida. Prima o ícone de edifícios, selecione «Plataforma petrolífera marítima» na categoria «Agricultura e recursos», clique com o botão esquerdo dentro do círculo amarelo sobre o mar para definir o local e prima «Confirmar» no painel de construção. Nesta lição, a duração da obra é saltada."
+      },
+      "step9": {
+        "title": "Ligar com um oleoduto",
+        "description": "Vamos enviar o crude bombeado pela plataforma até ao terminal de oleoduto através de um oleoduto submarino. Abra «Estradas, ferrovia e infraestruturas» no painel de ícones, selecione «Oleoduto submarino» em «Petróleo» e trace a linha desde o ponto de ligação da plataforma até ao ponto de ligação do terminal de oleoduto. Depois de confirmar, prima «Seguinte» e o oleoduto fica concluído de imediato."
+      },
+      "step10": {
+        "title": "Exportar o crude",
+        "description": "O terminal de oleoduto vende no mercado o crude que recebe, e o terminal petroleiro compra-o e exporta-o por navio. Demora alguns meses até chegarem trabalhadores e o crude começar a vender-se. Avance alguns meses com «Iniciar» e depois prima «Seguinte». Se ainda não houver exportações, avance mais um pouco e prima novamente."
+      },
+      "step11": {
+        "title": "Construir um cais de ferry",
+        "description": "A ilha ao largo não tem forma de chegar à cidade. Vamos abrir uma ligação de ferry para que os moradores da ilha se possam deslocar à cidade. Primeiro, construa um cais de ferry na margem da cidade. Abra «Estradas, ferrovia e infraestruturas» no painel de ícones, selecione «Cais de ferry» em «Rotas marítimas» e trace-o desde terra (círculo azul-claro) até ao mar (círculo amarelo). Clique com o botão direito para definir a forma, prima «Confirmar» no painel de construção e depois prima «Seguinte»."
+      },
+      "step12": {
+        "title": "Traçar a rota do ferry",
+        "description": "A seguir, trace a rota por onde passa o navio, desde o cais da ilha até ao cais da cidade. As rotas não podem passar por terra, por isso contorne o lado norte da ilha, passe por baixo da ponte suspensa na entrada da baía e entre na baía, clicando com o botão esquerdo pelo caminho para colocar pontos. Selecione «Rota de ferry» em «Rotas marítimas», ligue a ponta do cais da ilha à ponta do cais da cidade, confirme e depois prima «Seguinte»."
+      },
+      "step13": {
+        "title": "Abrir a linha de ferry",
+        "description": "Por fim, crie a linha de ferry que vai operar na rota. Em «Transportes públicos» → «+ Criar linha» → «Linha de ferry», coloque paragens no cais da ilha e no cais da cidade, clique na primeira paragem para fechar o circuito e confirme. Quando a linha estiver criada, este tutorial fica concluído. Para pôr os navios a navegar, também é precisa uma doca de manutenção que os alugue."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Iniciar jogo",
+    "nowLoading": "A carregar…",
+    "startError": "Não foi possível iniciar. Tente novamente.",
+    "todaysTips": "Dica do dia",
+    "gotIt": "Fechar",
+    "items": {
+      "tip1": {
+        "title": "O dinheiro circula",
+        "description": "As despesas municipais com obras e com o pessoal dos equipamentos públicos tornam-se rendimento de empresas e agregados familiares, sustentando as compras e a produção seguinte. Cobrar impostos, por si só, não põe a economia a girar. Distribua orçamento pelos serviços e reparações necessários e devolva o dinheiro à cidade."
+      },
+      "tip2": {
+        "title": "A longa luta pela segurança",
+        "description": "Os cidadãos que crescem num ambiente inseguro mantêm, já adultos, uma maior tendência para cometer crimes. Continue a apostar no policiamento e na melhoria do ambiente em que as crianças crescem. Melhorar a segurança pública pela raiz exige, pelo menos, uma geração."
+      },
+      "tip3": {
+        "title": "Abram alas!",
+        "description": "Os bombeiros só são úteis quando conseguem chegar ao local. Mesmo havendo um quartel de bombeiros, se estiver longe demais ou as estradas pelo caminho estiverem congestionadas, os danos alastram. Além do orçamento, reveja a localização dos quartéis e os acessos aos locais."
+      },
+      "tip5": {
+        "title": "A subida sai cara",
+        "description": "As estradas em encostas íngremes exigem mais trabalho de construção do que em terreno plano. O caminho mais curto no mapa nem sempre é o percurso mais barato. Compare o terreno com as estimativas de custo de construção e considere também um pequeno desvio."
+      },
+      "tip6": {
+        "title": "Planear é preciso",
+        "description": "Mais população e mais fábricas significam mais procura de eletricidade e água. Se só começar a construir quando já houver escassez, terá de esperar pela conclusão. Antes de desenvolver um bairro novo, verifique também se há margem no abastecimento."
+      },
+      "tip7": {
+        "title": "Devagar se vai ao longe",
+        "description": "Aumentar o limite de velocidade torna as deslocações mais rápidas, mas também aumenta o risco de acidentes. As curvas apertadas também exigem cuidado. Onde houver muitos acidentes, reveja o desenho da estrada e o limite de velocidade."
+      },
+      "tip8": {
+        "title": "Investir no futuro",
+        "description": "A falta de pessoal em hospitais e fábricas avançadas não se resolve só com mais população. Defina os cursos universitários e as vagas para formar os profissionais altamente qualificados de que precisa, e planeie contando com o tempo até à conclusão dos cursos."
+      },
+      "tip9": {
+        "title": "Feito para durar",
+        "description": "Descurar as reparações acelera o desgaste de edifícios e estradas e pode levar à sua derrocada. Incêndios e derrocadas também pioram o sentimento dos cidadãos, por isso gastar o orçamento só em obras novas é arriscado. Reserve orçamento para reparar o que já existe e para os bombeiros."
+      },
+      "tip10": {
+        "title": "Grande incêndio",
+        "description": "Com os edifícios muito juntos, o incêndio num só edifício alastra facilmente aos vizinhos. Além dos meios de combate a incêndios, manter espaço entre os edifícios também ajuda a prevenir catástrofes."
+      },
+      "tip11": {
+        "title": "Escavar sem parar",
+        "description": "Antes de escolher o local de minas e poços de petróleo, verifique a distribuição dos recursos. Quanto mais se extrai, mais diminuem as reservas. Uma cidade que depende da exploração mineira tem de pensar nos empregos e nas receitas fiscais para depois do esgotamento."
+      },
+      "tip12": {
+        "title": "A galinha dos ovos de ouro",
+        "description": "Se o presidente da câmara construir edifícios residenciais ou comerciais, recebe as rendas dos inquilinos. Espaços vazios não dão rendimento, por isso verifique os usos procurados, os espaços desocupados nas redondezas e a localização."
+      },
+      "tip13": {
+        "title": "Espremer até à última gota",
+        "description": "As taxas de imposto afetam não só as receitas da cidade, mas também os encargos e a rentabilidade das empresas. Também servem de política industrial, por exemplo aliviando a carga fiscal das indústrias que quer desenvolver. Mesmo quando as receitas não chegam, veja a situação de cada setor antes de aumentar os impostos de forma generalizada."
+      },
+      "tip14": {
+        "title": "Plano B",
+        "description": "Quando um acidente ou uma catástrofe para uma central elétrica ou uma linha elétrica, o impacto alastra às fábricas que usam eletricidade e ao dia a dia dos cidadãos. Nas infraestruturas essenciais, prepare reservas tanto nas instalações que produzem como nos percursos de distribuição, para que uma única avaria não pare a cidade inteira."
+      },
+      "tip15": {
+        "title": "À procura de casa",
+        "description": "Se deixar terrenos vazios ao abandono no centro da cidade, as pessoas que perderam a casa tendem a juntar-se lá e é fácil surgir um bairro de lata. Se disponibilizar habitação com rendas acessíveis, os moradores vão-se mudando aos poucos e o bairro de lata encolhe naturalmente."
+      },
+      "tip16": {
+        "title": "Polos industriais",
+        "description": "Quando indústrias do mesmo setor, ou as que produzem as suas matérias-primas, se concentram perto umas das outras, a localização torna-se mais favorável à produção. Em vez de espalhar fábricas por toda a cidade, pense em agrupar as indústrias relacionadas. Junto às zonas residenciais, porém, tenha atenção ao ruído e à poluição do ar."
+      },
+      "tip17": {
+        "title": "Trabalhar até cair",
+        "description": "Prolongar o horário de trabalho no painel de regulamentos permite sustentar mais produção com o mesmo número de pessoas. Por outro lado, a saúde e o lazer saem prejudicados e o consumo de entretenimento diminui. Quem passa o tempo todo a ganhar dinheiro não tem tempo para o gastar."
+      },
+      "tip18": {
+        "title": "Casa, trabalho, casa",
+        "description": "Deslocações longas para o trabalho reduzem o tempo livre e fazem cair o consumo de entretenimento e afins. Reveja a distância entre casas e empregos e o congestionamento nos percursos. Para quem só chega a casa para dormir, a animada zona comercial da cidade não passa de paisagem vista da janela."
+      },
+      "tip19": {
+        "title": "Visão de futuro",
+        "description": "Os comboios compridos só podem circular se couberem nas plataformas de todas as estações da linha. Para preparar o aumento futuro de passageiros, pense no comprimento das plataformas logo ao construir as estações. Alongar uma só estação não resolve nada se as outras continuarem curtas."
+      },
+      "tip20": {
+        "title": "Longe da vista, longe do coração",
+        "description": "As estradas subterrâneas não produzem ruído nem poluição do ar, o que as torna uma opção para proteger o ambiente residencial das zonas habitacionais. Há problemas que se resolvem enterrando-os."
+      },
+      "tip21": {
+        "title": "À sombra dos arranha-céus",
+        "description": "Os edifícios altos fazem sombra para norte e pioram o ambiente residencial da vizinhança. Tenha atenção à altura e ao espaçamento dos edifícios. O relevo, como as montanhas, também cria sombra. O futuro da cidade pode ser brilhante, mas o chão pode estar às escuras."
+      },
+      "tip22": {
+        "title": "Troque o carro pelo passe",
+        "description": "Quando os transportes públicos facilitam o acesso ao trabalho, à escola e às compras, os agregados familiares optam mais facilmente por viver sem carro. O que poupam em custos com o automóvel pode ir para outros consumos."
+      },
+      "tip23": {
+        "title": "Autocarros fantasma",
+        "description": "Mesmo sem passageiros, os autocarros contam para o tráfego rodoviário. Aumentar demasiado a frequência pode tornar as medidas contra o congestionamento contraproducentes. Veja o número de passageiros e o intervalo entre passagens e pense na frequência necessária."
+      },
+      "tip24": {
+        "title": "As toupeiras não pagam renda",
+        "description": "A partir de uma certa profundidade, os túneis passam sem ser preciso comprar o terreno por cima. Nos troços pouco profundos é necessária a aquisição de terrenos, por isso verifique a profundidade e a estimativa. Se as negociações forem difíceis, escave mais fundo."
+      },
+      "tip25": {
+        "title": "Ir para o trabalho pelos ares",
+        "description": "Mesmo onde montanhas e encostas íngremes dificultam a construção de estradas, um teleférico permite ter transportes públicos. Prepare também os acessos às estações e as ligações a outros transportes. Se andar pelo chão é complicado, pode sempre deixar os cidadãos pendurados."
+      },
+      "tip26": {
+        "title": "Engarrafamento elétrico",
+        "description": "Mesmo com margem na produção, se as linhas elétricas não tiverem capacidade suficiente, a eletricidade não chega ao destino. Antes de construir mais centrais, verifique as ligações e a capacidade de transporte até ao bairro onde falta energia. Uma linha elétrica fraca a meio do caminho pode estar a limitar o abastecimento de toda a cidade."
+      },
+      "tip27": {
+        "title": "Um infeliz acidente",
+        "description": "Pode mandar pelos ares um edifício que estorve o desenvolvimento e fazê-lo passar por um acidente. No entanto, o sentimento dos cidadãos piora muito. Quando quiser libertar terreno, pondere o custo de o comprar e demolir face às marcas que os métodos à força deixam na cidade."
+      },
+      "tip28": {
+        "title": "Ao mar!",
+        "description": "Se faltar terra, pode criar novos terrenos com aterros. Onde houver recursos no fundo do mar, também pode construir plataformas petrolíferas."
+      },
+      "tip29": {
+        "title": "O inferno dos semáforos",
+        "description": "Quanto mais cruzamentos com semáforos houver, mais tempo de espera se acumula nas deslocações. Nas estradas principais, evite multiplicar os cruzamentos. Com ruas cruzadas de forma meticulosa, o dia pode acabar sem que ninguém chegue a ver um sinal verde."
+      },
+      "tip30": {
+        "title": "Vista desimpedida",
+        "description": "Quanto mais alto for o local e mais alta for a torre de telecomunicações, maior é a área que cobre. Verifique se há montanhas ou outros obstáculos entre a torre e os locais sem cobertura. Um sinal bloqueado não se resolve com força de vontade."
+      },
+      "tip31": {
+        "title": "As dádivas do mar",
+        "description": "Mesmo uma cidade sem fontes de água por perto pode ser abastecida por uma central de dessalinização costeira. No entanto, esta precisa de eletricidade para funcionar. Depois de procurar água, é preciso procurar energia."
+      },
+      "tip32": {
+        "title": "Outra forma de combater o crime",
+        "description": "O desemprego é um dos fatores que pioram a segurança pública. Não basta ter mais polícia: os cidadãos também precisam de sítios onde trabalhar. Quando houver muitos desempregados, verifique o número de ofertas de emprego, as qualificações exigidas e se é possível chegar aos locais de trabalho."
+      },
+      "tip33": {
+        "title": "A fatura fica para o futuro",
+        "description": "Tanto os edifícios como as estradas continuam a gerar custos de reparação depois de concluídos. Se expandir demasiado só porque consegue pagar a construção, o orçamento futuro será engolido pela manutenção. Afinal, o futuro presidente da câmara é o atual."
+      },
+      "tip34": {
+        "title": "Não bombeie demais",
+        "description": "As fontes de água recuperam com o tempo, mas, se continuar a captar mais do que recuperam, as reservas diminuem. Garanta outras fontes antes de a procura aumentar. Mais bombas não trazem mais água."
+      },
+      "tip35": {
+        "title": "Um erro imperdoável",
+        "description": "Depois de iniciada a construção, estradas e edifícios não se mudam facilmente de sítio. Antes de confirmar a construção, verifique a orientação, as ligações e o terreno que sobra à volta. Mas uma estrada que ficou torta por descuido, quando o olhar se habitua, passa a ser personalidade da cidade."
+      },
+      "tip36": {
+        "title": "Sociedade vigiada",
+        "description": "Ao clicar num peão ou num automóvel, pode adicionar o cidadão à lista de seguimento. Use-a quando quiser acompanhar a vida de um morador que lhe interesse. Além das estatísticas da cidade inteira, pode observar a cidade a partir da vida de uma só pessoa."
+      },
+      "tip37": {
+        "title": "Energia de base",
+        "description": "A produção das centrais solares e eólicas varia com o estado do tempo. Se se basear apenas no abastecimento dos dias de bom tempo, pode faltar energia quando o tempo mudar. Combine-as com fontes menos dependentes do tempo, como as centrais térmicas ou nucleares."
+      },
+      "tip38": {
+        "title": "Quem pode o mais pode o menos",
+        "description": "Há edifícios que não podem ser construídos em lotes pequenos. Se tiver um equipamento em mente, verifique a área necessária antes de dividir os lotes. Mesmo com terreno de sobra, se só houver lotes pequenos, os edifícios grandes não cabem."
+      },
+      "tip39": {
+        "title": "Este serviço é pago",
+        "description": "Serviços públicos como o tratamento de esgotos e de resíduos, as comunicações e os cuidados de saúde podem ser gratuitos por predefinição. Se definir tarifas, os utilizadores suportam parte dos custos de funcionamento. Preços amigos dos cidadãos ou etiquetas ousadas? A decisão é do presidente da câmara."
+      },
+      "tip40": {
+        "title": "Cidade copiar-colar",
+        "description": "Quando o presidente da câmara constrói um edifício, pode copiar um edifício existente. Mantendo o tipo e o número de pisos e construindo num lote onde caiba o original, reduz os custos de construção. A paisagem urbana fica uniforme, mas a carteira agradece."
+      },
+      "tip41": {
+        "title": "Escolher casa é só pela renda?",
+        "description": "Ao mudar de casa, os moradores comparam a renda, o esforço das deslocações para o trabalho, para a escola e para as compras, a qualidade da habitação e o ambiente residencial. O ruído, a poluição do ar, a segurança pública e a exposição solar também contam. Uma casa barata mas pouco prática dificilmente é escolhida, e mesmo uma casa prática precisa de uma renda à medida do orçamento familiar e de espaço suficiente para lá morar."
+      },
+      "tip42": {
+        "title": "Depois de encalhar, já é tarde",
+        "description": "Os portos grandes, como os portos de contentores, de granéis e de petroleiros, precisam de profundidade suficiente. As costas com o fundo marinho muito inclinado ficam perto de águas profundas e são boas para portos. Mesmo numa costa plana e de águas baixas, pode construir um porto se estender a terra com aterros até águas profundas."
+      },
+      "tip43": {
+        "title": "É só um minuto…",
+        "description": "Quando o estacionamento na via pública aumenta, o trânsito abranda e os acidentes tornam-se mais prováveis. Construa parques de estacionamento para arrumar os carros que transbordam para a rua. Aquele «É só um minuto…» acaba por parar a cidade inteira."
+      },
+      "tip44": {
+        "title": "Isolado em terra firme",
+        "description": "Também é possível construir longe das estradas, mas quanto maior a distância até à estrada, pior é o acesso. Fábricas e lojas demoram mais a abastecer-se, e as habitações ficam com deslocações para o trabalho e para as compras mais penosas. Construa os edifícios junto às estradas ou leve a estrada até junto deles."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Selecione um lote para planear um edifício. Entre o planeamento e a conclusão da construção decorre algum tempo.",
+    "parcelCreation": "Prima Ctrl para abrir o menu circular e escolher o método de criação; depois clique na vista 3D para indicar o alvo. Ajuste as dimensões no painel e confirme.",
+    "transitCreation": "Clique com o botão esquerdo para colocar as paragens por ordem; clique na primeira paragem para fechar o circuito. Arraste um troço para criar um ponto de passagem, arraste um ponto para o mover e clique com o botão direito para o eliminar. Nos serviços de ida e volta, coloque também as paragens do regresso. Clique novamente numa paragem já colocada, ou sobreponha uma paragem a outra, para voltar a parar nesse local.",
+    "transitManagement": "Lista das linhas de transportes públicos. Pode ajustar tarifas e intervalos entre passagens, ou criar e eliminar linhas. As tarifas influenciam a escolha de percurso dos moradores. Tarifas demasiado altas reduzem os utilizadores e aumentam a posse de automóvel.",
+    "pathConstruction": "Construa estradas e vias férreas. Clique no terreno na vista 3D: clique com o botão esquerdo para adicionar vértices e com o botão direito para definir a forma; arraste os vértices para os mover. Mantenha premida a tecla Ctrl para abrir o menu de definições (curva/reta e ajuste automático). Use as teclas 3/4 para alterar a altura do terrapleno/escavação.",
+    "pathConstructionElevated": "Construa estradas e vias férreas. Clique no terreno na vista 3D: clique com o botão esquerdo para adicionar vértices e com o botão direito para definir a forma; arraste os vértices para os mover. Mantenha premida a tecla Ctrl para abrir o menu de definições (curva/reta e ajuste automático). Use PageUp/PageDown ou as teclas 1/2 para alterar a altura, e as teclas 3/4 para alterar a altura do terrapleno/escavação.",
+    "districtEdit": "Pode criar, expandir e fundir «bairros», a unidade dos regulamentos e das estatísticas. Na vista 3D, mantenha premida a tecla Ctrl para mudar de ferramenta. Ferramenta Criar: clique com o botão esquerdo numa estrada para criar um bairro novo com a cor apresentada (a cor muda sempre que seleciona a ferramenta). Ferramenta Expandir: clique com o botão direito para escolher o bairro a expandir e clique com o botão esquerdo nas estradas para as incluir nesse bairro. Ferramenta Fundir: clique com o botão direito para escolher o bairro de destino e clique com o botão esquerdo no bairro a fundir para abrir o painel de confirmação. A cor e o nome do bairro selecionado aparecem junto ao cursor do rato. Prima novamente o botão para sair.",
+    "bulldozer": "Modo bulldozer. Clique com o botão esquerdo para eliminar terrenos vazios, edifícios planeados, estradas planeadas e elementos decorativos do terreno (os elementos decorativos distribuídos por área são eliminados com toda a área, após confirmação). Prima novamente o botão para sair.",
+    "bulldozerInstant": "Modo bulldozer. Clique com o botão esquerdo para eliminar de imediato, sem confirmação, edifícios, estradas, terrenos vazios e elementos decorativos do terreno. Os edifícios desaparecem juntamente com os ocupantes e os cidadãos, e o terreno não é reposto (a Câmara Municipal, os postos fronteiriços e os troços de transportes públicos não podem ser eliminados; só os elementos decorativos distribuídos por área são eliminados com toda a área, após confirmação). Prima novamente o botão para sair.",
+    "cityBudget": "Decida como distribuir pelo período seguinte os fundos obtidos com os impostos e com a exploração de serviços. Quando o Município compra materiais para construir estradas ou gerir equipamentos públicos, só o pode fazer dentro do orçamento aqui definido. Além disso, se o orçamento não chegar, os funcionários dos equipamentos públicos podem ser despedidos.",
+    "resourceEdit": "Crie uma área de recursos naturais. Selecione o tipo de recurso e clique no terreno. Clique com o botão esquerdo para adicionar um vértice, clique numa aresta para inserir um vértice e clique com o botão direito para eliminar um vértice. Arraste um vértice para o mover.",
+    "grading": "Clique com o botão esquerdo para colocar vértices e com o botão direito para definir a área."
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} år",
+    "male": "Mann",
+    "female": "Kvinne",
+    "single": "Enslig",
+    "married": "Gift",
+    "household": "Husholdning",
+    "employer": "Arbeidsgiver",
+    "unemployed": "Arbeidsledig",
+    "school": "Skole",
+    "notEnrolled": "Går ikke på skole",
+    "major": "Fagområde",
+    "higherEducation": "Høyere utdanning",
+    "graduated": "Fullført",
+    "notGraduated": "Ikke fullført",
+    "skills": "Kompetanse",
+    "criminality": "Tilbøyelighet til kriminalitet",
+    "commuteTime": "Reisetid til jobb",
+    "automobile": "Bil",
+    "automobileOwned": "Ja",
+    "automobileNone": "Nei",
+    "householdStatus": "Husholdningens situasjon"
+  },
+  "household": {
+    "title": "Husholdning",
+    "familyType": "Husholdningstype",
+    "familySingle": "Enslig",
+    "familyCouple": "Par",
+    "familyFamily": "Familie",
+    "familySenior": "Eldre",
+    "hasAutomobile": "Har bil",
+    "noAutomobile": "Uten bil",
+    "discretionaryIncome": "Disponibel inntekt",
+    "livingStandard": "Levestandard",
+    "livingStandardLevel": {
+      "0": "Svært fattig",
+      "1": "Fattig",
+      "2": "Middelklasse",
+      "3": "Velstående"
+    },
+    "satisNutrition": "Ernæring",
+    "satisHealthcare": "Helse",
+    "satisLeisure": "Fritid og underholdning",
+    "satisTourism": "Turisme",
+    "tourist": "Turister",
+    "partySize": "Antall personer",
+    "members": "Medlemmer"
+  },
+  "education": {
+    "people": "personer"
+  }
+}

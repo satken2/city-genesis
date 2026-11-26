@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Seguinte",
+    "close": "Fechar",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "Primeiros passos da cidade",
+        "description": "Conclua o seu primeiro edifício. A história da cidade começa aqui."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Uma cidade que se faz ao mar",
+        "description": "Conclua o primeiro parque eólico marítimo ou plataforma petrolífera ao largo. A indústria da cidade lança-se ao mar."
+      },
+      "RAIL_LINES_1": {
+        "name": "Partida!",
+        "description": "Inaugure uma linha ferroviária"
+      },
+      "RAIL_LINES_20": {
+        "name": "Reino ferroviário",
+        "description": "Explore 20 linhas ferroviárias numa só cidade. O mapa da rede já é digno de se ver."
+      },
+      "BUS_LINES_1": {
+        "name": "O autocarro chegou",
+        "description": "Inaugure uma carreira de autocarro"
+      },
+      "BUS_LINES_20": {
+        "name": "De autocarro para todo o lado",
+        "description": "Explore 20 carreiras de autocarro numa só cidade"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "A caminho do trabalho pelo ar",
+        "description": "Inaugure uma linha de monocarril. As ruas de sempre, vistas um pouco mais de cima."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Cidade nas alturas",
+        "description": "Explore 20 linhas de monocarril numa só cidade"
+      },
+      "LRT_LINES_1": {
+        "name": "O elétrico chegou à cidade",
+        "description": "Inaugure uma linha de LRT"
+      },
+      "LRT_LINES_20": {
+        "name": "Capital do elétrico",
+        "description": "Explore 20 linhas de LRT numa só cidade"
+      },
+      "POPULATION_10K": {
+        "name": "Terra de 10 000 almas",
+        "description": "Atinja 10 000 habitantes"
+      },
+      "POPULATION_100K": {
+        "name": "Uma cidade regional cheia de vida",
+        "description": "Atinja 100 000 habitantes"
+      },
+      "POPULATION_500K": {
+        "name": "Entre as grandes cidades",
+        "description": "Atinja 500 000 habitantes"
+      },
+      "POPULATION_1M": {
+        "name": "Cidade milionária",
+        "description": "Atinja 1 000 000 de habitantes. Uma metrópole que sustenta um milhão de vidas."
+      },
+      "FLOORS_5": {
+        "name": "Uma cidade a crescer para cima",
+        "description": "Tenha concluído um edifício privado com 5 ou mais pisos"
+      },
+      "FLOORS_10": {
+        "name": "Rumo aos arranha-céus",
+        "description": "Tenha concluído um edifício privado com 10 ou mais pisos. Ainda bem que há elevadores."
+      },
+      "FLOORS_20": {
+        "name": "Um horizonte que ganha forma",
+        "description": "Tenha concluído um edifício privado com 20 ou mais pisos"
+      },
+      "FLOORS_40": {
+        "name": "Arranha-céus",
+        "description": "Tenha concluído um edifício privado com 40 ou mais pisos. Um novo símbolo para a cidade."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Uma indústria ao serviço da saúde",
+        "description": "Ponha uma fábrica de medicamentos a funcionar na cidade. Daqui sai saúde para muita gente."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Cidade do silício",
+        "description": "Ponha uma fábrica de semicondutores a funcionar na cidade. Pequenos chips, uma grande indústria."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Uma cidade de precisão",
+        "description": "Ponha uma fábrica de instrumentos de precisão a funcionar na cidade. O saber técnico torna-se a força da cidade."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Uma nova casa para o software",
+        "description": "Ponha uma empresa de software a funcionar na cidade. Um lugar onde as novas ideias crescem."
+      },
+      "TOURISTS_1": {
+        "name": "Bem-vindos à nossa cidade",
+        "description": "Receba o primeiro turista alojado na cidade"
+      },
+      "TOURISTS_1K": {
+        "name": "Um destino que vale a viagem",
+        "description": "Tenha 1000 turistas alojados na cidade em simultâneo"
+      },
+      "TOURISTS_10K": {
+        "name": "O mundo vem de visita",
+        "description": "Tenha 10 000 turistas alojados na cidade em simultâneo"
+      },
+      "YEARS_10": {
+        "name": "Dez anos com a cidade",
+        "description": "Jogue 10 anos numa só cidade. E ainda há muito para construir."
+      },
+      "YEARS_100": {
+        "name": "Cidade centenária",
+        "description": "Jogue 100 anos numa só cidade. Acompanhe um século inteiro da sua história."
+      },
+      "YEARS_500": {
+        "name": "Uma cidade que faz história",
+        "description": "Jogue 500 anos numa só cidade. As gerações passam, a cidade continua."
+      },
+      "YEARS_1000": {
+        "name": "Cidade milenar",
+        "description": "Jogue 1000 anos numa só cidade. Construa uma cidade com mil anos de história."
+      },
+      "YEARS_10000": {
+        "name": "Cidade eterna",
+        "description": "Jogue 10 000 anos numa só cidade. Que mandato tão longo, Presidente."
+      }
+    }
+  }
+}

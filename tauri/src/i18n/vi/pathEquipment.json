@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Thiết bị đường",
+    "streetlight_type": "Đèn đường",
+    "fence_type": "Hàng rào",
+    "street_tree_type": "Cây ven đường",
+    "utility_mode": "Cách đi dây",
+    "none": "Không có",
+    "standard": "Tiêu chuẩn",
+    "overhead": "Đi dây nổi",
+    "underground": "Đi dây ngầm",
+    "apply": "Áp dụng",
+    "bench_type": "Ghế băng",
+    "bin_type": "Thùng rác",
+    "planter_type": "Bồn cây",
+    "advert_type": "Quảng cáo"
+  }
+}

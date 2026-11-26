@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Nó de acesso",
+      "jct": "Nó de ligação"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "Estrada de origem",
+      "to": "Estrada de destino",
+      "road": "{{type}} #{{id}}",
+      "none": "Não há pares de estradas ligadas.",
+      "direction": {
+        "n": "Norte",
+        "ne": "Nordeste",
+        "e": "Este",
+        "se": "Sudeste",
+        "s": "Sul",
+        "sw": "Sudoeste",
+        "w": "Oeste",
+        "nw": "Noroeste"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

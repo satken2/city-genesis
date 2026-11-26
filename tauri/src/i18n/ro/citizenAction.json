@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Dă-i un nume",
+      "message": "Introdu noul nume pe care vrei să-l dai cetățeanului {{name}}.",
+      "inputLabel": "Nume nou",
+      "confirm": "Dă numele"
+    },
+    "reward": {
+      "label": "Acordă o recompensă",
+      "message": "Gospodăria din care face parte {{name}} primește o recompensă din fondurile orașului.\nLichiditățile orașului: {{available}}",
+      "confirm": "Acordă"
+    },
+    "expel": {
+      "label": "Urează-i succes în afara orașului",
+      "message": "Expulzezi din oraș cetățeanul {{name}}?",
+      "confirm": "Expulzează",
+      "results": {
+        "0": "{{name}} și-a strâns lucrurile și a plecat în liniște din oraș. Nimeni n-a venit să-și ia rămas-bun.",
+        "1": "{{name}} a trecut granița orașului strigând: „Nu mai calc pe-aici niciodată!”",
+        "2": "Am escortat cu toată politețea cetățeanul {{name}} dincolo de granița orașului. Îi urăm mult succes în altă parte."
+      }
+    },
+    "donation": {
+      "label": "Cere o donație",
+      "message": "Ceri o donație pentru oraș de la gospodăria din care face parte {{name}}.\nLichiditățile gospodăriei: {{available}}",
+      "confirm": "Cere"
+    },
+    "relocate": {
+      "label": "Propune o locuință nouă",
+      "message": "Evacuezi din locuința actuală gospodăria din care face parte {{name}}?\nÎn epoca următoare, gospodăria își va căuta o locuință nouă.",
+      "confirm": "Evacuează",
+      "results": {
+        "0": "{{name}} și familia sa au fost dați afară din casă. Mobila stă grămadă pe marginea drumului.",
+        "1": "Yalele de la casa în care locuia {{name}} au fost schimbate. Familia a început să-și caute o locuință nouă.",
+        "2": "{{name}} și familia sa au primit propunerea unei locuințe noi. La casa veche nu se mai pot întoarce."
+      }
+    }
+  }
+}

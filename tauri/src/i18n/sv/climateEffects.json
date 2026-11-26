@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "Månadens genomsnittliga klimat",
+    "currentClimate_week": "Veckans genomsnittliga klimat",
+    "title": "Anläggningarnas produktionseffektivitet efter klimat",
+    "facility": "Anläggning",
+    "factor": "Produktionseffektivitet"
+  }
+}

@@ -1,0 +1,202 @@
+{
+  "diagnosis": {
+    "refresh": "Újradiagnosztizálás",
+    "note": "A legutóbbi szimuláció eredménye alapján lépésről lépésre visszavezeti a probléma okait. A javítás után futtasd le a következő korszakot az eredmények frissítéséhez.",
+    "noProblem": {
+      "title": "Nem található probléma",
+      "description": "Ennél a gazdasági szereplőnél jelenleg nincs jelentendő zavar."
+    },
+    "target": {
+      "agent": "#{{id}} létesítmény",
+      "path": "#{{id}} nyomvonal",
+      "node": "#{{id}} csatlakozási pont",
+      "nodeAt": "Pont ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": {
+        "title": "A gazdasági szereplő nem található",
+        "description": ""
+      },
+      "cycle": {
+        "title": "Körkörös ok",
+        "description": "Ennek a létesítménynek a zavarát már feljebb vizsgáljuk (kölcsönös függés)."
+      },
+      "depth_limit": {
+        "title": "A vizsgálat itt megáll",
+        "description": "Az okok láncolata túl hosszú, ezért itt abbahagytuk. Diagnosztizáld közvetlenül az érintett létesítményt."
+      },
+      "no_alert": {
+        "title": "Magával a létesítménnyel nincs gond",
+        "description": "Lehet, hogy a kínálatot egyszerűen a létesítmény mérete vagy kihasználtsági célja korlátozza."
+      },
+      "facility_inactive": {
+        "title": "A létesítmény nem üzemel",
+        "description": "Nem termel, mert építés alatt áll, szünetel, összeomlott vagy hasonló állapotban van. Nézd meg a létesítmény adatait."
+      },
+      "producer_ref": {
+        "title": "Beszállító létesítmény",
+        "description": ""
+      },
+      "material_shortage": {
+        "title": "Nem sikerül alapanyagot beszerezni",
+        "description": "A szükséges alapanyagok egy része nem érkezett meg, ezért a termelés elmaradt a tervtől."
+      },
+      "material_unmet": {
+        "title": "Hiány: {{product_name}}",
+        "description": "A szükséges {{demand}} mennyiségből {{received}} érkezett meg ({{ratio}}%)."
+      },
+      "material_unmet_unknown": {
+        "title": "Nem azonosítható a hiányzó alapanyag",
+        "description": "Ez például közvetlenül a kereslet csökkenése után fordulhat elő. Nézd meg a következő korszak eredményét."
+      },
+      "infra_disconnected": {
+        "title": "Nincs bekötve a hálózatba: {{product_name}}",
+        "description": ""
+      },
+      "infra_no_terminal": {
+        "title": "Nincs csatlakozási pont",
+        "description": "A létesítménynek nincs csatlakozási pontja ehhez: {{product_name}}."
+      },
+      "infra_terminal_unconnected": {
+        "title": "A csatlakozási ponthoz egyetlen nyomvonal sem csatlakozik",
+        "description": ""
+      },
+      "infra_link_not_active": {
+        "title": "A bekötő nyomvonal még nem üzemel",
+        "description": "A csatlakozási ponthoz futó {{count}} nyomvonal építés alatt áll, vagy még el sem kezdődött az építése."
+      },
+      "infra_link_incompatible": {
+        "title": "A bekötő nyomvonal nem tudja szállítani: {{product_name}}",
+        "description": "A csatlakozási ponthoz futó nyomvonal típusa nem alkalmas ennek a terméknek a szállítására (például nem villamosított vágány)."
+      },
+      "infra_no_producer": {
+        "title": "Nincs termelő létesítmény a városban: {{product_name}}",
+        "description": ""
+      },
+      "infra_producers_inactive": {
+        "title": "A termelő létesítmények nem üzemelnek: {{product_name}}",
+        "description": "A városban lévő {{count}} termelő létesítmény közül egyik sem üzemel."
+      },
+      "infra_producers_unconnected": {
+        "title": "A termelő létesítmények nincsenek bekötve a hálózatba",
+        "description": "{{count}} termelő létesítmény üzemel, de egyik sincs bekötve a hálózatba ({{product_name}})."
+      },
+      "infra_network_split": {
+        "title": "Ezen a hálózaton nincs termelő létesítmény",
+        "description": "A termelő létesítmények ({{product_name}}, {{producers}} db) egy másik hálózatra csatlakoznak. A két hálózat valahol megszakad, vagy sosem kötötték össze őket."
+      },
+      "infra_link_under_construction": {
+        "title": "Épül egy összekötő nyomvonal",
+        "description": "{{count}} nyomvonal fog csatlakozni ehhez a hálózathoz."
+      },
+      "infra_gap_detected": {
+        "title": "Itt szakad meg a hálózat",
+        "description": "A két hálózat végpontjai mindössze {{distance}} m-re vannak egymástól."
+      },
+      "infra_tap_missing": {
+        "title": "Nincs összekötve a termelő létesítmények hálózatával",
+        "description": ""
+      },
+      "infra_generation_shortage": {
+        "title": "Nem elegendő a termelés: {{product_name}}",
+        "description": "A hálózat termelése {{supply}}, a kereslet {{demand}} ({{producers}} termelő létesítmény)."
+      },
+      "infra_transmission_bottleneck": {
+        "title": "A hálózat kapacitása telített",
+        "description": "{{count}} nyomvonal teljes kapacitással üzemel."
+      },
+      "infra_unexplained": {
+        "title": "A hálózat állapota rendben lévőnek tűnik",
+        "description": "A termelés és a kapcsolatok is elegendők, így a hiány átmeneti lehetett. Nézd meg a következő korszak eredményét."
+      },
+      "market_no_supplier": {
+        "title": "Nincs beszállító a városban: {{product_name}}",
+        "description": "Nincs üzemelő hazai termelő, és import sincs."
+      },
+      "market_supply_insufficient": {
+        "title": "A kínálat elmarad a kereslettől: {{product_name}}",
+        "description": "Kínálat: {{supply}}, a város összes rendelése: {{demand}} ({{producers}} termelő, {{hubs}} importközpont)."
+      },
+      "market_unmatched": {
+        "title": "Nem sikerült a piacon beszerezni: {{product_name}}",
+        "description": "Városi szinten a kínálat ({{supply}}) fedezi a rendeléseket ({{demand}}), de ehhez a létesítményhez nem jutott el. Ennek oka a távolság vagy az ár lehet."
+      },
+      "service_out_of_range": {
+        "title": "A szolgáltatás hatókörén kívül: {{product_name}}",
+        "description": "A létesítmény építési telke egyik szolgáltató létesítmény hatókörébe sem esik ({{product_name}}, {{producers}} db a városban)."
+      },
+      "high_skill_shortage": {
+        "title": "Nem sikerül szakembereket találni",
+        "description": "Nincs elég magasan képzett munkaerő, ezért a termelési tervet a rendelkezésre álló létszámhoz igazították. Magasan képzett munkaerőt az egyetemek képeznek: építs egyetemet, és oszd el a felvételi keretét a szükséges képzettségek között."
+      },
+      "labor_shortage": {
+        "title": "Nincs elég alkalmazott",
+        "description": "A szükséges {{quota}} munkaerőből {{total_labor}} áll rendelkezésre."
+      },
+      "labor_market_tight": {
+        "title": "Nem maradt szabad munkaerő a városban",
+        "description": "A munkanélküliség mindössze {{unemployment_rate}}%, így nincs kit felvenni. Építs több lakást, hogy új lakosokat vonzz."
+      },
+      "labor_unfilled": {
+        "title": "Van álláskereső, mégsem jönnek",
+        "description": "A munkanélküliség {{unemployment_rate}}%. Valószínű ok a hosszú ingázás, az alacsony bér vagy a nem megfelelő képzettség."
+      },
+      "budget_capped": {
+        "title": "Nincs elég költségvetés",
+        "description": "A kiosztott költségvetés jóval elmarad a szükségestől. Vizsgáld felül a költségvetés elosztását."
+      },
+      "construction_shortage": {
+        "title": "Nem sikerül beszerezni: {{product_name}}",
+        "description": ""
+      },
+      "line_paused_route_disconnected": {
+        "title": "Megszakadt az útvonal a megállók között",
+        "description": "A körjáratban egymást követő megállók között nincs a szükséges irányban járható vágány vagy utca. Építsd újra a megszakadt szakaszt, vagy módosítsd az útvonalat. Egyirányú vágányon a visszaforduláshoz fordulj vissza egy mindkét irányban járható vágányon lévő állomáson (például egyetlen nyomvonalként lefektetett kétvágányú pályán), vagy tedd lehetővé az átjutást az ellenirányú vágányra úgy, hogy a vágányokat egyetlen csomópontban egyesíted vagy vágánykapcsolatot építesz, a visszaúti megállókat pedig az ellenirányú peronokra helyezd."
+      },
+      "line_paused_no_underlay": {
+        "title": "A megálló alatt nincs nyomvonal",
+        "description": "Megszűnt a vágány vagy az utca, amelyen a megálló állt."
+      },
+      "line_paused_train_too_long": {
+        "title": "A szerelvény hosszabb a megálló szakaszánál",
+        "description": "Csökkentsd a szerelvényenkénti kocsik számát, vagy hosszabbítsd meg azt a szakaszt, amelyen a megálló van (állomási peron, illetve utca- vagy vágányszakasz)."
+      },
+      "line_no_vehicle_product": {
+        "title": "Ehhez a vonaltípushoz nincs jármű megadva",
+        "description": ""
+      },
+      "line_vehicle_shortage": {
+        "title": "Nem sikerül járműveket beszerezni",
+        "description": "A szükséges {{required}} kocsiból {{received}} sikerült beszerezni."
+      },
+      "line_off_network": {
+        "title": "A vonal nincs rajta egyetlen pályahálózaton sem",
+        "description": "A vonal útvonala nem kapcsolódik egyetlen vágányhoz vagy utcához sem."
+      },
+      "transit_no_depot": {
+        "title": "Nincs járműtelep a városban: {{product_name}}",
+        "description": "Építs járműtelepet, és kösd be a pályahálózatba."
+      },
+      "transit_depots_inactive": {
+        "title": "A járműtelepek nem üzemelnek",
+        "description": "A városban lévő {{count}} járműtelep közül egyik sem üzemel."
+      },
+      "transit_depots_unconnected": {
+        "title": "A járműtelepek nincsenek bekötve a pályahálózatba",
+        "description": "A járműtelepek ({{count}} db) egyike sem kapcsolódik vágányhoz vagy utcához. Vasút esetén építs bekötővágányt a fővonaltól a járműtelep csatlakozási pontjáig."
+      },
+      "transit_depot_other_network": {
+        "title": "A járműtelepek egy másik hálózaton vannak",
+        "description": "{{count}} járműtelep olyan vágányhálózatra csatlakozik, amely nem éri el ezt a vonalat. Kösd össze a hálózatokat, vagy építs járműtelepet erre a hálózatra."
+      },
+      "transit_vehicle_insufficient": {
+        "title": "Nem készül elég jármű",
+        "description": "A hálózat járműtelepei ({{depots}} db) {{supply}} kocsit biztosítanak, a vonalaknak viszont {{demand}} kell."
+      },
+      "transit_unexplained": {
+        "title": "A járműtelepek állapota rendben lévőnek tűnik",
+        "description": "A kínálat és a kapcsolatok is elegendők, így a hiány átmeneti lehetett. Nézd meg a következő korszak eredményét."
+      }
+    }
+  }
+}

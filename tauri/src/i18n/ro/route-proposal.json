@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Propune un itinerariu",
+    "mode": "Mod de înălțime",
+    "fixed": "Păstrează înălțimea punctelor intermediare",
+    "adjust": "Ajustează înălțimea punctelor intermediare",
+    "help": "Disponibil după ce finalizezi forma. Capetele și pozițiile XZ ale punctelor intermediare rămân fixe.",
+    "searching": "Se caută…",
+    "cancel": "Anulează",
+    "undo": "Revino la starea dinainte",
+    "notFound": "Nu s-a găsit niciun itinerariu.",
+    "failed": "Propunerea de itinerariu a eșuat."
+  }
+}

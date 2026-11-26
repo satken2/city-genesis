@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Thông tin cung cấp",
+    "product": "Sản phẩm cung cấp",
+    "amount": "Lượng cung cấp",
+    "price": "Giá cung cấp",
+    "soldAmount": "Lượng đã bán",
+    "profitRate": "Tỷ suất lợi nhuận",
+    "utilization": "Tỷ lệ vận hành"
+  },
+  "tourismSupply": {
+    "title": "Đón khách du lịch",
+    "touristCapacity": "Sức chứa khách du lịch",
+    "persons": "{{value}} người",
+    "218": {
+      "price": "Phí vào cửa",
+      "amount": "Sức đón khách (lượt)",
+      "soldAmount": "Khách tham quan (lượt)"
+    },
+    "219": {
+      "price": "Giá vé",
+      "amount": "Sức chở (lượt)",
+      "soldAmount": "Hành khách (lượt)"
+    }
+  },
+  "demand": {
+    "product": "Hàng hóa",
+    "demandAmount": "Lượng cầu",
+    "receivedAmount": "Lượng nhận được",
+    "acquiredAmount": "Tồn kho"
+  },
+  "cargo": {
+    "title": "Thông tin bốc dỡ hàng",
+    "description": "Cơ sở này nhập khẩu hàng hóa từ bên ngoài để cung cấp cho thị trường trong thành phố, đồng thời thu mua sản phẩm dư thừa của thành phố để xuất khẩu ra bên ngoài.",
+    "capacity": "Năng lực xử lý",
+    "perPeriod": "/tháng",
+    "perPeriod_week": "/tuần",
+    "materialCapacity": "Giới hạn theo nguyên liệu",
+    "areaCapacity": "Giới hạn theo diện tích",
+    "importHandled": "Lượng nhập khẩu xử lý",
+    "exportHandled": "Lượng xuất khẩu xử lý",
+    "utilization": "Tỷ lệ vận hành",
+    "importSectionTitle": "Nhập khẩu",
+    "exportSectionTitle": "Xuất khẩu",
+    "handledImport": "Lượng bán",
+    "handledExport": "Lượng thu mua",
+    "allocation": "Lượng phân bổ",
+    "priceImport": "Đơn giá bán",
+    "priceExport": "Đơn giá thu mua",
+    "lost": "Bỏ lỡ doanh số",
+    "noProducts": "Không có mặt hàng nào"
+  }
+}

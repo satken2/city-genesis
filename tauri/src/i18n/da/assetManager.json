@@ -1,0 +1,22 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Bygninger",
+      "paths": "Tracéer",
+      "vehicles": "Køretøjer",
+      "props": "Dekorationsobjekter"
+    },
+    "additional": "Ekstra modeller",
+    "loading": "Indlæser modeller fra 3D-visningen…",
+    "noModel": "Ingen model",
+    "noImage": "Intet billede",
+    "weight": "Vægt",
+    "applyNote": "Ændrede vægte træder i kraft, næste gang du starter eller indlæser et spil.",
+    "preview": {
+      "hint": "Træk for at rotere / scroll for at zoome",
+      "zoomIn": "Zoom ind",
+      "zoomOut": "Zoom ud",
+      "reset": "Nulstil"
+    }
+  }
+}

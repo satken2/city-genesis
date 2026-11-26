@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} éves",
+    "male": "Férfi",
+    "female": "Nő",
+    "single": "Egyedülálló",
+    "married": "Házas",
+    "household": "Háztartás",
+    "employer": "Munkahely",
+    "unemployed": "Munkanélküli",
+    "school": "Iskola",
+    "notEnrolled": "Nem jár iskolába",
+    "major": "Szakirány",
+    "higherEducation": "Felsőoktatás",
+    "graduated": "Elvégezve",
+    "notGraduated": "Befejezetlen",
+    "skills": "Képzettségek",
+    "criminality": "Bűnözési hajlam",
+    "commuteTime": "Ingázási idő",
+    "automobile": "Autó",
+    "automobileOwned": "Van",
+    "automobileNone": "Nincs",
+    "householdStatus": "A háztartás helyzete"
+  },
+  "household": {
+    "title": "Háztartás adatai",
+    "familyType": "Háztartástípus",
+    "familySingle": "Egyedülálló",
+    "familyCouple": "Pár",
+    "familyFamily": "Család",
+    "familySenior": "Idős",
+    "hasAutomobile": "Van autója",
+    "noAutomobile": "Nincs autója",
+    "discretionaryIncome": "Rendelkezésre álló jövedelem",
+    "livingStandard": "Életszínvonal",
+    "livingStandardLevel": {
+      "0": "Nyomorgó",
+      "1": "Szegény",
+      "2": "Középosztálybeli",
+      "3": "Jómódú"
+    },
+    "satisNutrition": "Táplálkozás",
+    "satisHealthcare": "Egészségügy",
+    "satisLeisure": "Szórakozás, szabadidő",
+    "satisTourism": "Turizmus",
+    "tourist": "Turisták",
+    "partySize": "Létszám",
+    "members": "Háztartástagok"
+  },
+  "education": {
+    "people": "fő"
+  }
+}

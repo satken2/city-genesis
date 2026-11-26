@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Trafikplats",
+      "jct": "Motorvägskorsning"
+    },
+    "fallbackName": {
+      "ic": "TP #{{id}}",
+      "jct": "MVK #{{id}}"
+    },
+    "connections": {
+      "from": "Från väg",
+      "to": "Till väg",
+      "road": "{{type}} #{{id}}",
+      "none": "Inga anslutna vägpar.",
+      "direction": {
+        "n": "Norr",
+        "ne": "Nordost",
+        "e": "Öster",
+        "se": "Sydost",
+        "s": "Söder",
+        "sw": "Sydväst",
+        "w": "Väster",
+        "nw": "Nordväst"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "mapNavigation": {
+    "title": "Khám phá thành phố",
+    "openSidebar": "Mở thanh bên",
+    "closeSidebar": "Đóng thanh bên",
+    "back": "Quay lại",
+    "search": "Tìm địa điểm",
+    "origin": "Tìm điểm xuất phát",
+    "destination": "Tìm điểm đến",
+    "clear": "Xóa",
+    "searching": "Đang tìm…",
+    "error": "Không thể kết nối. Hãy tải lại rồi thử lại.",
+    "noResults": "Không tìm thấy địa điểm",
+    "mode": "Phương tiện di chuyển",
+    "pedestrian": "Đi bộ và giao thông công cộng",
+    "automobile": "Ô tô",
+    "pickOrigin": "Chọn điểm xuất phát trên bản đồ",
+    "pickDestination": "Chọn điểm đến trên bản đồ",
+    "swap": "Đổi chiều",
+    "cancel": "Hủy",
+    "directions": "Chỉ đường đến đây",
+    "intro": "Hãy tìm công trình, nhà ga, khu vực, con đường, hoặc chọn một vị trí trên bản đồ.",
+    "chooseOrigin": "Hãy tìm điểm xuất phát hoặc chọn trên bản đồ.",
+    "routing": "Đang tìm lộ trình…",
+    "showRoute": "Hiển thị toàn bộ lộ trình",
+    "mapPoint": "Vị trí trên bản đồ",
+    "minutes": "Khoảng {{count}} phút",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Ước tính dựa trên mạng lưới đường của lần tính lộ trình #{{epoch}}. Nét chấm biểu thị đi bộ và kết nối tới đường.",
+    "busy": "Đang chạy mô phỏng. Kết quả sẽ cập nhật khi hoàn tất.",
+    "not_ready": "Chưa có dữ liệu lộ trình. Hãy chạy mô phỏng ở thành phố này để xem.",
+    "unreachable": "Không tìm thấy lộ trình nối hai địa điểm này.",
+    "no_access": "Không tìm thấy đường nào dùng được từ địa điểm đã chọn.",
+    "geometry_unavailable": "Không lấy được hình dạng tuyến giao thông công cộng của lộ trình này.",
+    "place_missing": "Địa điểm đã chọn đã bị xóa. Hãy chọn lại.",
+    "kind": {
+      "agent": "Công trình",
+      "zone": "Khu vực",
+      "stop": "Điểm dừng",
+      "station": "Nhà ga",
+      "point": "Vị trí",
+      "road": "Đường"
+    },
+    "leg": {
+      "walk": "Đi bộ",
+      "drive": "Ô tô",
+      "transit": "Giao thông công cộng",
+      "conveyor": "Thiết bị chở người",
+      "access": "Kết nối tới đường",
+      "turn": "Quay đầu tại nút giao"
+    },
+    "picking": {
+      "origin": "Hãy nhấp vào điểm xuất phát trên bản đồ.",
+      "destination": "Hãy nhấp vào điểm đến trên bản đồ."
+    },
+    "pins": {
+      "tab": "Ghim",
+      "hint": "Nhấp vào bản đồ để đặt ghim màu đã chọn. Nhấp chuột phải vào ghim để xóa.",
+      "list": "Danh sách ghim",
+      "remove": "Xóa ghim"
+    }
+  }
+}

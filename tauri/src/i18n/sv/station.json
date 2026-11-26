@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Station",
+    "name": "Stationsnamn",
+    "ridership": "Påstigningar",
+    "platforms": "Plattformar",
+    "noPlatforms": "Inga plattformar hör till stationen (plattformar som linjen korsar hör hit)",
+    "lines": "Linjer som trafikerar stationen",
+    "noLines": "Inga linjer trafikerar stationen",
+    "stops": "Påstigningar per hållplats",
+    "noStops": "Inga hållplatser vid stationen",
+    "lineRunning": "I trafik",
+    "lineSuspended": "Inställd",
+    "houseEnds": "Stationshusens placering",
+    "houseEnds_both": "Båda ändar",
+    "houseEnds_start": "Start",
+    "houseEnds_end": "Slut",
+    "passageMode": "Gångarnas placering",
+    "passageMode_elevated": "Upphöjd",
+    "passageMode_ground": "Marknivå",
+    "passageMode_underground": "Under jord"
+  }
+}

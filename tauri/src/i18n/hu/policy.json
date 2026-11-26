@@ -1,0 +1,323 @@
+{
+  "policy": {
+    "pending": "Szimuláció folyamatban",
+    "noData": "Nincs adat",
+    "actionError": "Nem sikerült megnyitni a műveleti képernyőt.",
+    "indicators": {
+      "unemployment": {
+        "tab": "Munkanélküliség",
+        "issue": "Magas a munkanélküliség",
+        "clear": "Nem található munkanélküliségi probléma",
+        "evidence": "Munkanélküliségi ráta: {{value}}"
+      },
+      "income": {
+        "tab": "Jövedelem",
+        "issue": "Alacsony a háztartások jövedelme",
+        "clear": "Nem található jövedelmi probléma",
+        "evidence": "Átlagos háztartási jövedelem: {{value}}"
+      },
+      "tourism": {
+        "tab": "Turizmus",
+        "issue": "Kevés a turista",
+        "clear": "Nem található turisztikai probléma",
+        "evidence": "Itt tartózkodó turisták: {{value}} fő · befogadóképesség: {{capacity}} fő"
+      },
+      "crime": {
+        "tab": "Bűnözés",
+        "issue": "Bűncselekmények és konfliktusok fordulnak elő",
+        "clear": "Nem található bűnözési probléma",
+        "evidence": "Bűncselekmények okozta kár: {{value}} · konfliktusok: {{incidents}} eset"
+      },
+      "sanitation": {
+        "tab": "Közegészség",
+        "issue": "Higiéniai problémák jelentkeznek",
+        "clear": "Nem található higiéniai probléma",
+        "evidence": "Romló higiéniai állapotú háztartások: {{value}}"
+      },
+      "water": {
+        "tab": "Víz",
+        "issue": "Hiány van vízből",
+        "clear": "Nem található vízellátási probléma",
+        "evidence": "A háztartások és létesítmények rendeléseinek teljesülése: {{value}}"
+      },
+      "electricity": {
+        "tab": "Áram",
+        "issue": "Hiány van áramból",
+        "clear": "Nem található áramellátási probléma",
+        "evidence": "A háztartások és létesítmények rendeléseinek teljesülése: {{value}}"
+      },
+      "internet": {
+        "tab": "Távközlés",
+        "issue": "Hiány van távközlési szolgáltatásból",
+        "clear": "Nem található távközlési ellátási probléma",
+        "evidence": "A háztartások és létesítmények rendeléseinek teljesülése: {{value}}"
+      },
+      "high_water": {
+        "tab": "Nagynyomású víz",
+        "issue": "Hiány van nagynyomású vízből",
+        "clear": "Nem található nagynyomású vízellátási probléma",
+        "evidence": "A létesítmények rendeléseinek teljesülése: {{value}}"
+      },
+      "high_electricity": {
+        "tab": "Nagyfeszültségű áram",
+        "issue": "Hiány van nagyfeszültségű áramból",
+        "clear": "Nem található nagyfeszültségű áramellátási probléma",
+        "evidence": "A létesítmények rendeléseinek teljesülése: {{value}}"
+      },
+      "upkeep": {
+        "tab": "Fenntartás",
+        "issue": "Nem elegendő a középületek, utak és vágányok fenntartása",
+        "clear": "Nem található fenntartási probléma",
+        "evidence": "A szükséges fenntartásból teljesült: {{value}}"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "A jelenlegi munkahelykeretek betelve",
+        "evidence": "Álláskeresők: {{count}} fő"
+      },
+      "unfilled_jobs": {
+        "title": "Betöltetlen állások és munkanélküliség egyszerre",
+        "evidence": "Álláskeresők: {{count}} fő · szabad keret: {{vacancies}} (tényleges munkaerő)"
+      },
+      "public_budget": {
+        "title": "A közlétesítmények a költségvetés miatt visszafogottan működnek",
+        "evidence": "Működési költségvetés miatt csökkentett terv: {{count}} létesítmény"
+      },
+      "education_gap": {
+        "title": "Egyes álláskeresők nem végezték el az alapfokú oktatást",
+        "evidence": "Alapfokú végzettség nélküli álláskeresők: {{count}} fő"
+      },
+      "school_capacity": {
+        "title": "Nincs elég férőhely az alapfokú oktatásban",
+        "evidence": "Iskolába jár: {{enrolled}} fő · nem jár iskolába: {{waiting}} fő / férőhely: {{capacity}} fő"
+      },
+      "immigrant_education_gap": {
+        "title": "Az alapfokú végzettség nélküli álláskeresők között bevándorlók is vannak",
+        "evidence": "Érintett bevándorló álláskeresők: {{count}} fő"
+      },
+      "specialists": {
+        "title": "Egyes létesítmények szakemberhiány miatt nem tudnak működni",
+        "evidence": "Szakemberhiánnyal küzdő létesítmények: {{count}}"
+      },
+      "household_unemployment": {
+        "title": "Egyes háztartásokban munkanélküli felnőtt él",
+        "evidence": "Munkanélküli felnőttet is magukban foglaló háztartások: {{count}}"
+      },
+      "security_response": {
+        "title": "A rendőrség nem tud minden kárt megelőzni",
+        "evidence": "Bűncselekmények az elmúlt hónapban: {{count}} eset",
+        "evidence_week": "Bűncselekmények az elmúlt héten: {{count}} eset"
+      },
+      "no_police": {
+        "title": "Nincs működő rendőrőrs"
+      },
+      "police_staff": {
+        "title": "A rendőrőrsökön munkaerőhiány van",
+        "evidence": "Létszámhiányos rendőrőrsök: {{count}}"
+      },
+      "police_budget": {
+        "title": "Nem elég a rendőrség költségvetése",
+        "evidence": "Forráshiányos rendőrőrsök: {{count}}"
+      },
+      "police_inputs": {
+        "title": "A rendőrőrsökön hiány van felszerelésből",
+        "evidence": "Felszereléshiányos rendőrőrsök: {{count}}"
+      },
+      "unemployment_pressure": {
+        "title": "A munkanélküliség rontja a közbiztonságot",
+        "evidence": "Munkanélküli felnőttek: {{count}} fő"
+      },
+      "citizen_criminality": {
+        "title": "Egyes polgárok hajlamosak a bűnözésre",
+        "evidence": "Bűnözésre hajlamos polgárok: {{count}} fő"
+      },
+      "children_in_poverty": {
+        "title": "Gyerekek nőnek fel a megélhetési költségeket sem fedező háztartásokban",
+        "evidence": "Gyerekek a megélhetési költségeket sem fedező háztartásokban: {{count}} fő"
+      },
+      "children_in_crime_zones": {
+        "title": "Gyerekek nőnek fel olyan kerületekben, ahol bűncselekmények történnek",
+        "evidence": "Gyerekek az elmúlt hónapban bűncselekménnyel érintett kerületekben: {{count}} fő",
+        "evidence_week": "Gyerekek az elmúlt héten bűncselekménnyel érintett kerületekben: {{count}} fő"
+      },
+      "service_no_facility": {
+        "title": "Nincs ellátást biztosító létesítmény",
+        "title_named": "Hiányzik: {{suppliers}}"
+      },
+      "service_facility_limited": {
+        "title": "Nem működő létesítmények: {{kinds}}",
+        "evidence": "Gyakorlatilag nem működő létesítmények: {{count}}"
+      },
+      "repair_budget_exhausted": {
+        "title": "Elfogyott a felújítási keret, ezért csökkentették a fenntartási rendeléseket",
+        "evidence": "Felújítási kiadás: {{expense}} / keret: {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "Háztartások vagy létesítmények esnek az ellátási körzeten kívül",
+        "evidence": "Egyetlen létesítmény körzetébe sem tartozik: {{count}} háztartás, {{facilities}} létesítmény",
+        "title_named": "Háztartások vagy létesítmények esnek az ellátási körzeten kívül (ellátó: {{suppliers}})"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}}: nem tudja beszerezni – {{product_name}}",
+        "evidence": "Szükséges mennyiség: {{demand}}, beérkezett: {{received}}"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}}: munkaerőhiány",
+        "evidence": "Szükséges munkaerő: {{quota}}, biztosított: {{total_labor}} (tényleges munkaerő)"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}}: nem talál szakembereket"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}}: költségvetés hiányában csökkentett terv"
+      },
+      "facility_inactive": {
+        "title": "{{facility}}: nem üzemel"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}}: nincs bekötve a hálózatba – {{product_name}}"
+      },
+      "slum_sanitation": {
+        "title": "Egyes háztartások nyomornegyedben élnek",
+        "evidence": "Nyomornegyedben élő háztartások: {{count}}"
+      },
+      "service_shortage": {
+        "title": "A háztartások nem kapnak eleget ebből: {{product_name}}",
+        "evidence": "A háztartások a referenciamennyiség {{percent}}%-át kapják meg"
+      },
+      "tourism_no_attraction": {
+        "title": "Nincs turisztikai látványosság"
+      },
+      "tourism_no_gateway": {
+        "title": "Nincs kapu, amelyen át a turisták érkezhetnének"
+      },
+      "tourism_no_trade_hub": {
+        "title": "Nincs az utazási költségeket fizető kereskedelmi csomópont"
+      },
+      "tourists_without_lodging": {
+        "title": "Egyes turisták nem találnak szállást",
+        "evidence": "Szállásra váró turisták: {{count}} fő"
+      },
+      "tourism_lodging_costly": {
+        "title": "A szállás drága az utazási kerethez képest",
+        "evidence": "Az új turisták jelentkezése a szokásos {{percent}}%-a"
+      },
+      "tourists_dissatisfied": {
+        "title": "Alacsony a turisták elégedettsége",
+        "evidence": "Új jelentkezések: a szokásos {{percent}}%-a · elégedetlenül hazautazott: {{count}} fő"
+      },
+      "tourism_experience_short": {
+        "title": "A turisták nem kapnak elég turisztikai élményt",
+        "evidence": "Turisztikai élmények teljesülése: {{percent}}%"
+      },
+      "tourism_leisure_short": {
+        "title": "A turisták nem kapnak elég szórakozást és szabadidős lehetőséget",
+        "evidence": "Szórakozás és szabadidő teljesülése: {{percent}}%"
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "Munkahelyteremtés közlétesítményekben"
+      },
+      "population": {
+        "title": "Népességcsökkentés polgárok kiutasításával"
+      },
+      "budget": {
+        "title": "Működési költségvetés elosztása"
+      },
+      "education": {
+        "title": "Több iskola építése"
+      },
+      "higher_education": {
+        "title": "Szakemberképzés a felsőoktatásban"
+      },
+      "welfare": {
+        "title": "Juttatások és létfenntartási támogatás növelése"
+      },
+      "employment": {
+        "title": "Felvételi feltételek vizsgálata a foglalkoztatási statisztikában"
+      },
+      "police": {
+        "title": "Rendőrőrsök építése"
+      },
+      "facilities": {
+        "title": "A létesítmények állapotának ellenőrzése"
+      },
+      "immigration_skills": {
+        "title": "A bevándorlók képzettségi követelményeinek felülvizsgálata"
+      },
+      "immigration_limit": {
+        "title": "A bevándorlás korlátozása"
+      },
+      "criminality": {
+        "title": "A polgárok bűnözési hajlamának ellenőrzése"
+      },
+      "service_facility": {
+        "title": "Ellátást biztosító létesítmény építése",
+        "title_named": "Építés: {{suppliers}}",
+        "title_tourism_no_attraction": "Turisztikai látványosság építése",
+        "title_tourism_no_gateway": "Kikötő vagy repülőtér építése"
+      },
+      "parcel": {
+        "title": "Nagyobb telek kialakítása"
+      },
+      "transit": {
+        "title": "A tömegközlekedés járatsűrűségének és vágányainak felülvizsgálata"
+      },
+      "entity_detail": {
+        "title": "Részletek megnyitása"
+      }
+    },
+    "selectorTitle": "Mit szeretnél megvizsgálni?",
+    "eventsTitle": "Mi történik",
+    "causeTitle": "A háttérben álló ok",
+    "adviceTitle": "Javasolt intézkedések",
+    "needsAttention": "Van mit javítani",
+    "values": {
+      "money": "{{value}} / háztartás / nap",
+      "per_thousand": "1000 lakosra {{value}} eset (elmúlt hónap)",
+      "per_thousand_week": "1000 lakosra {{value}} eset (elmúlt hét)"
+    },
+    "collapse": "Összecsukás",
+    "investigate": {
+      "crime": "A bűnözés okainak vizsgálata",
+      "unemployment": "A munkanélküliség okainak vizsgálata",
+      "income": "Az alacsony jövedelem okainak vizsgálata",
+      "water": "A vízhiány okainak vizsgálata",
+      "electricity": "Az áramhiány okainak vizsgálata",
+      "internet": "A távközlési hiány okainak vizsgálata",
+      "upkeep": "A fenntartási hiány okainak vizsgálata",
+      "high_water": "A nagynyomású víz hiányának vizsgálata",
+      "high_electricity": "A nagyfeszültségű áram hiányának vizsgálata",
+      "facility": "A létesítmény problémáinak vizsgálata"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "Mutatók",
+    "problems": {
+      "resource_runway": "Kb. {{remaining_epochs}} korszak múlva kimerül az erőforrás: „{{name}}”",
+      "resource_depleted": "Kimerült az erőforrás: „{{name}}”",
+      "facility_inoperative": "Nem működik a közlétesítmény: „{{name}}”",
+      "facility_inoperative_labor": "Munkaerőhiány miatt nem működik a közlétesítmény: „{{name}}”",
+      "facility_inoperative_material": "Alapanyaghiány miatt nem működik a közlétesítmény: „{{name}}”",
+      "facility_inoperative_high_skill": "Szakemberhiány miatt csökkentett kapacitással működik a közlétesítmény: „{{name}}”",
+      "facility_inoperative_budget": "Forráshiány miatt csökkentett kapacitással működik a közlétesítmény: „{{name}}”",
+      "education_low_enrollment": "Kevés a diák, alacsony a kihasználtság az oktatási intézményben: „{{name}}” ({{enrolled}} / {{max_students}} fő beiratkozva)",
+      "infra_facility_down": "Leállt az infrastruktúra-létesítmény: „{{name}}”",
+      "infra_disconnected": "{{count}} létesítmény nincs bekötve az infrastruktúra-hálózatba",
+      "rail_capacity_exceeded": "{{count}} vágányon a vonatok száma meghaladja a pálya kapacitását",
+      "collapse": "{{count}} épület vagy út összeomlott",
+      "collapse_with_deaths": "{{count}} épület vagy út összeomlott, {{deaths}} ember meghalt",
+      "deaths_traffic": "Közlekedési balesetben {{count}} ember meghalt",
+      "tenant_blocked_by_parcel_size": "„{{zone_name}}” kerület: nem építhető olyan épület, amelybe „{{tenant_name}}” beköltözhetne (szükséges: {{required}} m2, a telken legfeljebb: {{max_capacity}} m2)",
+      "unknown": "Súlyos esemény történt",
+      "sanitation": "{{count}} háztartásban romlik a higiéniai állapot"
+    },
+    "facilitiesTitle": "Nem működő létesítmények",
+    "otherProblemsTitle": "Egyéb problémák",
+    "facility": {
+      "title": "{{facility}}: nem tud működni",
+      "evidence": "A termelés a terv {{percent}}%-a"
+    }
+  }
+}

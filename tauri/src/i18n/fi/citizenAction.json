@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Anna nimi",
+      "message": "Kirjoita uusi nimi kaupunkilaiselle {{name}}.",
+      "inputLabel": "Uusi nimi",
+      "confirm": "Anna nimi"
+    },
+    "reward": {
+      "label": "Anna palkkio",
+      "message": "Kaupunkilaisen {{name}} kotitalous saa palkkion kaupungin varoista.\nKaupungin rahavarat: {{available}}",
+      "confirm": "Anna"
+    },
+    "expel": {
+      "label": "Toivota onnea uusiin haasteisiin",
+      "message": "Karkotetaanko {{name}} kaupungista?",
+      "confirm": "Karkota",
+      "results": {
+        "0": "{{name}} pakkasi tavaransa ja lähti hiljaa kaupungista. Kukaan ei tullut saattamaan.",
+        "1": "{{name}} ylitti kaupungin rajan huutaen: ”Tänne en enää ikinä palaa!”",
+        "2": "{{name}} saatettiin kohteliaasti kaupungin rajan yli. Toivotamme onnea uusiin haasteisiin."
+      }
+    },
+    "donation": {
+      "label": "Pyydä lahjoitusta",
+      "message": "Pyydä kaupunkilaisen {{name}} kotitaloutta lahjoittamaan kaupungille.\nKotitalouden rahavarat: {{available}}",
+      "confirm": "Pyydä"
+    },
+    "relocate": {
+      "label": "Ehdota uutta kotia",
+      "message": "Häädetäänkö kaupunkilaisen {{name}} kotitalous nykyisestä kodistaan?\nKotitalous etsii uutta kotia seuraavalla kaudella.",
+      "confirm": "Häädä",
+      "results": {
+        "0": "Kaupunkilaisen {{name}} perhe on heitetty ulos kodistaan. Huonekalut on kasattu tien varteen.",
+        "1": "Kaupunkilaisen {{name}} kodin lukot on vaihdettu. Perhe on alkanut etsiä uutta asuntoa.",
+        "2": "Kaupunkilaisen {{name}} perheelle on ehdotettu uutta kotia. Vanhaan ei ole enää paluuta."
+      }
+    }
+  }
+}

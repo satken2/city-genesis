@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Type",
+    "kind": {
+      "land": "Planering af land",
+      "shore": "Opfyldning"
+    },
+    "baseHeight": "Referencehøjde",
+    "targetHeight": "Målhøjde",
+    "cutVolume": "Afgravet volumen",
+    "fillVolume": "Påfyldt volumen",
+    "quayLength": "Kajlængde",
+    "quayArea": "Kajfladens areal",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Højde (forskel fra referencen)",
+    "seaLevelHeight": "Højde (over havet)",
+    "baseNote": {
+      "frontage": "0 er overfladen af den tilstødende vej ({{value}} m)",
+      "terrain_mean": "0 er områdets nuværende gennemsnitshøjde ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "Områdets form er ugyldig. Tegn det, uden at kanterne krydser hinanden.",
+      "outside_city": "Området går ud over byens grænse.",
+      "too_large": "Området er for stort (grænse: {{limit}} km²).",
+      "on_water": "Et område, der kun ligger over havet, kan ikke bearbejdes. Tegn det, så det når ind over land.",
+      "no_land_overlap": "Tegn området, så det overlapper land (ellers bliver der en stribe hav tilbage mellem kysten og området).",
+      "overlaps_parcel": "Området overlapper en eksisterende parcel.",
+      "overlaps_path": "Området overlapper en vej, et spor eller et andet tracé.",
+      "overlaps_water": "Området rører en flod eller sø.",
+      "overlaps_quay_band": "Området overlapper kajen på opfyldt land.",
+      "invalid_height_offset": "Højden er uden for det tilladte interval (højst ±{{offsetLimit}} m fra referencehøjden).",
+      "below_sea_level": "Højden kan ikke sættes under havniveau.",
+      "too_narrow": "Området er for smalt – der er intet tilbage at fylde op inden for kajen.",
+      "no_work": "Terrænet har allerede målhøjden, så der er intet arbejde at udføre.",
+      "insufficient_funds": "Ordren kan ikke afgives, fordi der ikke er midler nok."
+    },
+    "confirm": "Bekræft",
+    "confirming": "Bekræfter…",
+    "cancel": "Annuller",
+    "confirmFailed": "Jordarbejdet kunne ikke bestilles."
+  }
+}

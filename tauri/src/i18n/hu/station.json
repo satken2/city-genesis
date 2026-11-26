@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Állomás",
+    "name": "Állomás neve",
+    "ridership": "Felszállások száma",
+    "platforms": "Peronok",
+    "noPlatforms": "Ehhez az állomáshoz nem tartozik peron (a vonal által keresztezett peronok tartoznak ide)",
+    "lines": "Érintő vonalak",
+    "noLines": "Egyetlen vonal sem érinti ezt az állomást",
+    "stops": "Felszállások megállónként",
+    "noStops": "Ennél az állomásnál nincs megálló",
+    "lineRunning": "Üzemel",
+    "lineSuspended": "Szünetel",
+    "houseEnds": "Az állomásépületek elhelyezése",
+    "houseEnds_both": "Mindkét végen",
+    "houseEnds_start": "Kezdőpont",
+    "houseEnds_end": "Végpont",
+    "passageMode": "Az átjáró elhelyezése",
+    "passageMode_elevated": "Felüljáró",
+    "passageMode_ground": "Felszíni",
+    "passageMode_underground": "Föld alatti"
+  }
+}

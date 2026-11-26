@@ -1,0 +1,22 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Tòa nhà",
+      "paths": "Đường dẫn",
+      "vehicles": "Phương tiện",
+      "props": "Vật trang trí"
+    },
+    "additional": "Mô hình bổ sung",
+    "loading": "Đang tải mô hình từ màn hình 3D…",
+    "noModel": "Không có mô hình",
+    "noImage": "Không có hình ảnh",
+    "weight": "Trọng số",
+    "applyNote": "Thay đổi trọng số sẽ có hiệu lực từ lần bắt đầu hoặc tải trò chơi tiếp theo.",
+    "preview": {
+      "hint": "Kéo để xoay / cuộn chuột để phóng to, thu nhỏ",
+      "zoomIn": "Phóng to",
+      "zoomOut": "Thu nhỏ",
+      "reset": "Đặt lại"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Погода",
+    "choose": "Обрати погоду",
+    "loading": "Перевірка погоди…",
+    "unknown": "Невідомо",
+    "automatic": "{{weather}} (авто)",
+    "failed": "Не вдалося змінити погоду",
+    "names": {
+      "clear": "Ясно",
+      "high_clouds": "Легка хмарність",
+      "fair": "Сонячно",
+      "broken_clouds": "Мінлива хмарність",
+      "overcast": "Похмуро",
+      "rain_clouds": "Дощові хмари",
+      "fog": "Туман",
+      "drizzle": "Мряка",
+      "rain": "Дощ",
+      "heavy_rain": "Злива",
+      "light_snow": "Невеликий сніг",
+      "snow": "Сніг",
+      "blizzard": "Хуртовина"
+    },
+    "epochClimate": "Клімат епохи",
+    "temperature": "Температура",
+    "precipitation": "Опади",
+    "sunlight": "Інтенсивність сонця",
+    "windSpeed": "Швидкість вітру"
+  }
+}

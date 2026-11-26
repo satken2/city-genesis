@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Försörjningsläge",
+    "selected": "Vald",
+    "providers": "Leverantörer av: {{product}}",
+    "executing": "Försörjningsläget kan inte hämtas medan simuleringen körs.",
+    "fetchError": "Kunde inte hämta försörjningsläget.",
+    "activeCount": "I drift {{active}}/{{count}}",
+    "production": "Senaste produktion: {{amount}} {{unit}}",
+    "resourceRemaining": "Tillgänglig resurs kvar: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Tillgänglig",
+      "unknown": "Ej bedömd",
+      "missing": "Saknas",
+      "inactive": "Ur drift",
+      "partial": "Delvis problem",
+      "limited": "Brist/stopp",
+      "disconnected": "Inte ansluten",
+      "supply_shortage": "Möjlig försörjningsbrist",
+      "capacity_limited": "Möjlig kapacitetsgräns"
+    },
+    "facilities": {
+      "401": "Kraftverk",
+      "402": "Vattenintag",
+      "403": "Leverantörer av råolja",
+      "404": "Godsstationer",
+      "405": "Leverantörer av malm",
+      "406": "Farleder för storfartyg (öppet hav)",
+      "501": "Järnvägsdepåer",
+      "502": "Bussdepåer",
+      "503": "LRT-depåer",
+      "504": "Monoraildepåer",
+      "505": "Underhållsdocka"
+    },
+    "consumers": {
+      "401": "Elförbrukare",
+      "402": "Vattenpumpstationer",
+      "403": "Råoljeförbrukare",
+      "404": "Godsanvändare",
+      "405": "Malmförbrukare",
+      "406": "Hamnar",
+      "501": "Järnvägslinjer",
+      "502": "Busslinjer",
+      "503": "LRT-linjer",
+      "504": "Monorailslinjer",
+      "505": "Färjelinjer"
+    }
+  }
+}

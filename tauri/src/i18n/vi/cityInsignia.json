@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Huy hiệu",
+    "flag": "Cờ thành phố",
+    "motif": "Họa tiết",
+    "fieldColor": "Màu nền",
+    "motifColor": "Màu họa tiết",
+    "pattern": "Hoa văn nền",
+    "accentColor": "Màu nhấn",
+    "placement": "Vị trí huy hiệu",
+    "loadImage": "Tải ảnh lên",
+    "randomize": "Ngẫu nhiên",
+    "apply": "Áp dụng",
+    "imageLoadFailed": "Không thể tải ảnh.",
+    "placements": {
+      "center": "Giữa",
+      "canton": "Góc trên bên trái",
+      "none": "Không có"
+    },
+    "motifs": {
+      "wave": "Sóng",
+      "mountain": "Núi",
+      "star": "Ngôi sao",
+      "tree": "Cây",
+      "sun": "Mặt trời",
+      "moon": "Mặt trăng",
+      "flower": "Hoa",
+      "leaf": "Lá",
+      "bird": "Chim",
+      "fish": "Cá",
+      "anchor": "Mỏ neo",
+      "gear": "Bánh răng",
+      "tower": "Lâu đài",
+      "bridge": "Cây cầu",
+      "key": "Chìa khóa",
+      "crown": "Vương miện",
+      "snowflake": "Bông tuyết",
+      "flame": "Ngọn lửa",
+      "diamond": "Hình thoi",
+      "cross": "Chữ thập"
+    },
+    "patterns": {
+      "plain": "Trơn",
+      "bicolor": "Hai màu trên dưới",
+      "triband": "Ba sọc dọc",
+      "diagonal": "Chia chéo",
+      "border": "Viền",
+      "bands": "Dải trên dưới"
+    }
+  }
+}

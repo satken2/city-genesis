@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Típus",
+    "kind": {
+      "land": "Tereprendezés",
+      "shore": "Feltöltés"
+    },
+    "baseHeight": "Alapmagasság",
+    "targetHeight": "Célmagasság",
+    "cutVolume": "Bevágás térfogata",
+    "fillVolume": "Feltöltés térfogata",
+    "quayLength": "Rakpart hossza",
+    "quayArea": "Rakpartfal felülete",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Magasság (eltérés az alaptól)",
+    "seaLevelHeight": "Magasság (tengerszint felett)",
+    "baseNote": {
+      "frontage": "A 0 a határos út burkolatának magassága ({{value}} m)",
+      "terrain_mean": "A 0 a terület jelenlegi átlagmagassága ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "A terület alakja érvénytelen. Rajzold meg úgy, hogy az oldalai ne keresztezzék egymást.",
+      "outside_city": "A terület kilóg a városból.",
+      "too_large": "A terület túl nagy (legfeljebb {{limit}} km²).",
+      "on_water": "Csak tengerre eső területen nem végezhető földmunka. Rajzold meg úgy, hogy elérje a szárazföldet.",
+      "no_land_overlap": "Rajzold meg a területet úgy, hogy átfedje a szárazföldet (különben egy tengersáv marad a part és a terület között).",
+      "overlaps_parcel": "A terület átfed egy meglévő telket.",
+      "overlaps_path": "A terület átfed egy utat, vágányt vagy más nyomvonalat.",
+      "overlaps_water": "A terület folyót vagy tavat érint.",
+      "overlaps_quay_band": "A terület átfedi a feltöltött terület rakpartját.",
+      "invalid_height_offset": "A megadott magasság a tartományon kívül esik (az alapmagasságtól legfeljebb ±{{offsetLimit}} m).",
+      "below_sea_level": "A magasság nem lehet a tengerszint alatt.",
+      "too_narrow": "A terület túl keskeny, a rakparton belül nem marad feltölthető rész.",
+      "no_work": "A talaj már a célmagasságon van, nincs szükség munkára.",
+      "insufficient_funds": "Nincs elég pénz a megrendeléshez."
+    },
+    "confirm": "Jóváhagyás",
+    "confirming": "Jóváhagyás…",
+    "cancel": "Mégse",
+    "confirmFailed": "Nem sikerült megrendelni a földmunkát."
+  }
+}

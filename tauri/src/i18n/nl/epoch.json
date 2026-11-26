@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Huidige datum",
+    "afterDate": "Datum na uitvoering",
+    "epochCount": "Aantal tijdvakken",
+    "message": "Het werk voor deze beurt afronden en de tijd vooruitzetten?",
+    "yes": "Ja",
+    "no": "Nee",
+    "executing": "Simulatie loopt…",
+    "errorSteamLimit": "De verificatie via Steam kon niet worden bevestigd, dus je kunt geen tijdvakken meer uitvoeren. (Zonder verificatie kun je spelen tot een bevolking van {{limit}}.)",
+    "errorAlreadyRunning": "Er wordt al een ander tijdvak uitgevoerd. Probeer het opnieuw als dat klaar is.",
+    "errorFailed": "Tijdvak uitvoeren mislukt: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "(tijdvakken: {{count}})",
+    "sectionConstruction": "Bouwvoortgang",
+    "kindPath": "Weg",
+    "kindBuilding": "Voorziening",
+    "kindProject": "Project",
+    "noItems": "Geen",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Voltooid",
+    "sectionStatistics": "Statistieken",
+    "sectionScore": "Score",
+    "scoreGain": "Pluspunten",
+    "scoreLoss": "Minpunten",
+    "questState": {
+      "completed": "Behaald",
+      "active": "Bezig",
+      "locked": "Vergrendeld",
+      "failed": "Mislukt"
+    },
+    "trendHint": "Trend over de laatste {{count}} tijdvakken: {{trend}}",
+    "trend": {
+      "up": "Stijgend",
+      "flat": "Stabiel",
+      "down": "Dalend",
+      "none": "Te weinig geschiedenis"
+    },
+    "statPopulation": "Bevolking",
+    "statTourists": "Toeristen",
+    "statGdp": "Bbp",
+    "statPrice": "Prijsniveau",
+    "statIncome": "Inkomen",
+    "statUnemployment": "Werkloosheid",
+    "statHealthcare": "Zorg",
+    "statNutrition": "Voeding",
+    "statLeisure": "Vrije tijd",
+    "statFire": "Branden",
+    "statTraffic": "Verkeersongevallen",
+    "statCrime": "Criminaliteit",
+    "questCompleted": "Behaald!",
+    "questFailed": "Termijn verstreken"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Vervoersnetwerk in kaart brengen",
+      "prepare": "Deze periode voorbereiden",
+      "transit": "Openbaar vervoer regelen",
+      "market": "Goederen verhandelen",
+      "production": "Produceren en consumeren",
+      "commute": "Naar werk en school reizen",
+      "growth": "Burgers groeien op",
+      "evaluate": "De stad beoordelen",
+      "immigration": "Immigranten verwelkomen",
+      "labor": "Werk zoeken",
+      "spawn": "Nieuwe winkels en bedrijven openen",
+      "relocate": "Huishoudens verhuizen",
+      "construction": "Gebouwen bouwen",
+      "finance": "Geldstromen verwerken",
+      "plan": "Volgende periode plannen",
+      "incident": "Branden en ongevallen afhandelen",
+      "finalize": "Statistieken samenstellen"
+    }
+  }
+}

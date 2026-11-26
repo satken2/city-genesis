@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Tetapan parameter permainan",
+    "description": "Nilai lalai biasanya disyorkan. Laraskan hanya jika anda mahu mengubahnya.",
+    "skip": "Langkau",
+    "start": "Mula permainan",
+    "apply": "Guna dan tutup",
+    "close": "Tutup",
+    "loading": "Memuatkan...",
+    "reload": "Muat semula",
+    "reloadHint": "Muat semula selepas pemulaan bahagian belakang selesai untuk mendapatkan nilai terkini.",
+    "fetchError": "Gagal mendapatkan parameter",
+    "category": {
+      "population": "Penduduk dan imigran",
+      "citizen": "Kehidupan warga kota",
+      "economy": "Ekonomi",
+      "labor": "Buruh dan gaji",
+      "education": "Pendidikan",
+      "construction": "Pembinaan dan hartanah",
+      "environment": "Alam sekitar",
+      "traffic": "Lalu lintas",
+      "general": "Umum",
+      "pathfind": "Lalu lintas dan rute",
+      "building": "Bangunan dan pembinaan",
+      "disaster": "Bencana dan keselamatan awam",
+      "slum": "Setinggan",
+      "production": "Pengeluaran dan inventori",
+      "zone": "Daerah dan lot",
+      "financial": "Kewangan"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Faktor pemadatan bandar",
+        "desc": "Keluasan lantai yang digunakan oleh kediaman dan kemudahan dibahagikan dengan nilai ini supaya peta kecil boleh menampung aktiviti ekonomi sebuah bandar raya. Mengubahnya selepas membina walaupun satu jalan atau bangunan akan merosakkan bandar, jadi tetapkannya sebelum membina apa-apa."
+      },
+      "TFR_TARGET": {
+        "label": "Sasaran kadar kesuburan jumlah (TFR)",
+        "desc": "Kadar kelahiran yang disasarkan oleh isi rumah. Lebih tinggi, lebih mudah anak dilahirkan."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Kadar perkahwinan",
+        "desc": "Pekali kebarangkalian asas warga kota berkahwin. Lebih tinggi, lebih banyak perkahwinan."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Umur minimum melahirkan anak",
+        "desc": "Umur paling rendah untuk melahirkan anak. Tiada kelahiran di bawah umur ini."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Umur maksimum melahirkan anak",
+        "desc": "Umur paling tinggi untuk melahirkan anak. Tiada kelahiran melebihi umur ini."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Kadar perkahwinan isi rumah imigran",
+        "desc": "Kebarangkalian isi rumah imigran yang masuk ke bandar ialah pasangan suami isteri."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Kadar anak pertama (imigran)",
+        "desc": "Kebarangkalian isi rumah imigran muncul dengan 1 orang anak."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Kadar anak kedua (imigran)",
+        "desc": "Kebarangkalian isi rumah imigran muncul dengan 2 orang anak."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Kadar anak ketiga (imigran)",
+        "desc": "Kebarangkalian isi rumah imigran muncul dengan 3 orang anak."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Umur minimum imigran dewasa",
+        "desc": "Umur paling rendah orang dewasa yang masuk sebagai imigran."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Umur maksimum imigran dewasa",
+        "desc": "Umur paling tinggi orang dewasa yang masuk sebagai imigran."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Faktor jangka hayat",
+        "desc": "Pekali bagi jangka hayat maksimum warga kota. 1.08 menghadkannya kira-kira 100 tahun, 1.06 kira-kira 150 tahun.",
+        "graphX": "Umur",
+        "graphY": "Kebarangkalian kematian tahunan (kesihatan 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Ruang kediaman isi rumah bujang (m²)",
+        "desc": "Keluasan kediaman minimum yang diperlukan oleh isi rumah seorang."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Ruang tambahan untuk pasangan (m²)",
+        "desc": "Keluasan kediaman tambahan yang diperlukan apabila isi rumah mempunyai pasangan."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Ruang tambahan bagi setiap anak (m²)",
+        "desc": "Keluasan kediaman yang bertambah bagi setiap seorang anak."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Nisbah sewa kepada pendapatan (maks.)",
+        "desc": "Bahagian maksimum pendapatan isi rumah yang boleh digunakan untuk sewa. 0.3 bermaksud sehingga 30% pendapatan."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Pemberat masa perjalanan dalam memilih kediaman",
+        "desc": "Semasa memilih kediaman, setiap minit perjalanan pergi balik ke tempat kerja, sekolah dan kedai dikira sebagai beban sebanyak berapa kali ganda gaji purata bandar. 1 bermaksud sama dengan gaji. Lebih tinggi, lebih cenderung memilih kediaman berhampiran tempat kerja dan kedai."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Gaji purata (nilai asas)",
+        "desc": "Gaji purata asas semasa simulasi bermula."
+      },
+      "AVERAGE_RENT": {
+        "label": "Sewa purata (nilai asas)",
+        "desc": "Sewa purata asas semasa simulasi bermula (sehari bagi setiap m²)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Bahagian dividen ikut kekayaan",
+        "desc": "Bahagian dividen yang diagihkan mengikut kadar wang tunai setiap isi rumah. Bakinya dibahagi sama rata kepada semua isi rumah. 0 bermaksud semuanya sama rata, 1 bermaksud semuanya mengikut wang tunai."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Kadar susut nilai peralatan",
+        "desc": "Kadar susut nilai stok modal daripada pelaburan peralatan bagi setiap epok."
+      },
+      "WORK_HOURS": {
+        "label": "Waktu kerja sehari (jam)",
+        "desc": "Bilangan jam standard warga kota bekerja dalam sehari."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Umur mula pendidikan asas",
+        "desc": "Umur kanak-kanak mula menerima pendidikan asas (setara sekolah rendah)."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Umur tamat pendidikan asas",
+        "desc": "Umur pendidikan asas tamat (setara tamat sekolah menengah)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Umur tamat universiti dan berdikari",
+        "desc": "Umur warga kota menamatkan pengajian tinggi dan keluar daripada isi rumah untuk berdikari."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Umur minimum bekerja",
+        "desc": "Warga kota di bawah umur ini tidak mencari kerja dan tidak dikira dalam kadar pengangguran."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Bilangan tingkat maksimum (tingkat)",
+        "desc": "Had bilangan tingkat bangunan yang dibina secara automatik oleh sektor swasta."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Faktor penalti tingkat",
+        "desc": "Pekali penalti kos bagi bangunan tinggi. Lebih tinggi, lebih kecil penalti untuk bangunan tinggi.",
+        "graphX": "Bilangan tingkat",
+        "graphY": "Gandaan kos pembinaan"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Nisbah kecekapan perobohan",
+        "desc": "Sejauh mana perobohan lebih cekap berbanding pembinaan baharu (gandaan)."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Kadar tahunan asas runtuh",
+        "desc": "Kebarangkalian asas bangunan dengan ketahanan 0.5 runtuh dalam setahun."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Parameter bentuk Weibull bagi runtuhan",
+        "desc": "Lebih tinggi, kebarangkalian runtuh meningkat mendadak menjelang tamat jangka hayat reka bentuk."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Nisbah kos pembaikan",
+        "desc": "Kos pembaikan sebagai nisbah kepada kos pembinaan baharu."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Gandaan penuaan tanpa penyelenggaraan",
+        "desc": "Kelajuan bangunan atau jajaran menjadi usang apabila langsung tidak menerima penyelenggaraan harian, dinyatakan sebagai gandaan berbanding penuaan dengan penyelenggaraan penuh. Nilainya berubah secara linear dari 1 hingga nilai ini mengikut bahagian penyelenggaraan yang tidak diterima."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Kebarangkalian tahunan asas mula dibaiki",
+        "desc": "Kebarangkalian asas tahunan bangunan yang layak benar-benar mula dibaiki."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Hutang pembinaan awal (setiap m²)",
+        "desc": "Hutang pembinaan awal bagi setiap m² keluasan lantai kasar bangunan (rizab negatif)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Pekali bunyi bising lalu lintas jalan",
+        "desc": "Sumbangan lalu lintas jalan kepada peta haba bunyi bising. Lebih tinggi, lebih bising di sepanjang jalan."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Pekali bunyi bising pejalan kaki",
+        "desc": "Sumbangan lalu lintas pejalan kaki kepada peta haba bunyi bising."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Ambang bunyi bising pejalan kaki",
+        "desc": "Hanya lalu lintas pejalan kaki yang melebihi nilai ini menyumbang kepada bunyi bising."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Jarak pengecilan bunyi bising (m)",
+        "desc": "Bunyi bising berkurang mengikut kuasa dua jarak dan turut menyusut kepada 1/e bagi setiap jarak ini (halangan bangunan serta serapan udara dan tanah). Lebih rendah, lebih dekat ia kekal dengan sumbernya."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Pekali pencemaran udara lalu lintas jalan",
+        "desc": "Sumbangan lalu lintas jalan kepada peta haba pencemaran udara."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Jarak pengecilan pencemaran udara (m)",
+        "desc": "Pencemaran udara dan bau busuk berkurang mengikut kuasa dua jarak dan turut menyusut kepada 1/e bagi setiap jarak ini (penyebaran dan pemendapan). Lebih rendah, lebih dekat ia kekal dengan sumbernya."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Pemberat pengangguran terhadap jenayah",
+        "desc": "Kesan kadar pengangguran terhadap peta haba jenayah. Lebih tinggi, pengangguran lebih terus menjejaskan keselamatan awam."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Jejari sebaran jenayah (m)",
+        "desc": "Jejari kabur Gaussian bagi peta haba jenayah."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Kelajuan pejalan kaki (km/h)",
+        "desc": "Kelajuan berjalan kaki yang digunakan untuk mengira kos rute."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Jarak pecutan kenderaan (m)",
+        "desc": "Jarak yang diperlukan oleh kenderaan untuk memecut. Mempengaruhi pengiraan kelajuan di jalan pendek."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Waktu aktif jalan sehari (jam)",
+        "desc": "Bilangan jam jalan digunakan dalam sehari. Digunakan untuk menukar isi padu lalu lintas."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Ambang tepu bonus lalu lintas jalan",
+        "desc": "Pada lalu lintas jalan sebanyak nilai ini atau lebih, kedai runcit menerima bonus lalu lintas maksimum."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Ambang tepu bonus pejalan kaki",
+        "desc": "Pada lalu lintas pejalan kaki sebanyak nilai ini atau lebih, kedai runcit menerima bonus pejalan kaki maksimum."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Memuatkan...",
+    "noScenarios": "Tiada senario tersedia",
+    "starting": "Memulakan...",
+    "startFailed": "Gagal dimulakan",
+    "confirmTitle": "Sahkan tetapan permainan",
+    "confirmStartTitle": "Mulakan permainan?",
+    "unsavedChangesWarning": "Jika dimulakan, perubahan yang belum disimpan dalam permainan semasa akan hilang.",
+    "startSettingsHeading": "Tetapan bandar",
+    "cityNameLabel": "Nama bandar",
+    "insigniaLabel": "Lambang dan bendera bandar",
+    "languageLabel": "Bahasa bandar",
+    "languageNote": "*Tidak boleh diubah kemudian",
+    "simulationDaysLabel": "Bilangan hari simulasi",
+    "simulationDaysNote": "*Tidak boleh diubah kemudian",
+    "daysOption": "{{days}} hari",
+    "startButton": "Mula",
+    "backButton": "Kembali",
+    "cleared": "Selesai",
+    "tutorialBadge": "Tutorial",
+    "sectionDebug": "Nyahpepijat",
+    "sectionTutorials": "Tutorial",
+    "sectionScenarios": "Senario",
+    "detailPlaceholder": "Pilih senario daripada senarai di sebelah kiri.",
+    "detailMapSizeLabel": "Saiz peta",
+    "detailUnknown": "Tidak diketahui",
+    "detailObjectiveLabel": "Syarat kejayaan",
+    "detailCreditsLabel": "Kredit",
+    "detailNoObjective": "Tiada syarat kejayaan",
+    "detailNoDescription": "Senario ini tidak mempunyai keterangan.",
+    "tutorialObjective": "Selesaikan semua langkah tutorial.",
+    "startScenarioButton": "Mulakan senario ini",
+    "tabSelect": "Pilih senario",
+    "tabBrowse": "Cari senario",
+    "tabTerrain": "Pilih rupa bumi",
+    "relocalizeNote": "Senario ini dibuat dalam {{from}}. Jika dimulakan dalam {{to}}, nama daerah, kemudahan, penduduk, stesen dan lain-lain akan dinamakan semula dalam {{to}}.",
+    "developmentNotice": {
+      "heading": "Permainan ini ialah versi percubaan yang masih dibangunkan",
+      "subheading": "Sila baca sebelum bermain",
+      "text": "Parameter dan logik ekonomi masih dalam proses penalaan, jadi bandar anda mungkin tidak berkembang seperti sepatutnya. Kadar pengangguran mungkin meningkat dan bandar mungkin runtuh, tetapi itu bukan sama sekali kesalahan cara anda bermain. Nantikan kemas kini akan datang. Tambahkan permainan ini ke senarai hajat anda dan nantikan pelancaran rasminya."
+    }
+  }
+}

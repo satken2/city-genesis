@@ -1,0 +1,63 @@
+{
+  "mapNavigation": {
+    "title": "Városfelfedezés",
+    "openSidebar": "Oldalsáv megnyitása",
+    "closeSidebar": "Oldalsáv bezárása",
+    "back": "Vissza",
+    "search": "Hely keresése",
+    "origin": "Kiindulási pont keresése",
+    "destination": "Úti cél keresése",
+    "clear": "Törlés",
+    "searching": "Keresés…",
+    "error": "Nem sikerült csatlakozni. Töltsd újra az oldalt, és próbáld újra.",
+    "noResults": "Nincs találat",
+    "mode": "Közlekedési mód",
+    "pedestrian": "Gyalog és tömegközlekedéssel",
+    "automobile": "Autóval",
+    "pickOrigin": "Kiindulási pont kiválasztása a térképen",
+    "pickDestination": "Úti cél kiválasztása a térképen",
+    "swap": "Csere",
+    "cancel": "Mégse",
+    "directions": "Útvonal ide",
+    "intro": "Keress létesítményt, állomást, kerületet vagy utat, vagy válassz egy helyet a térképen.",
+    "chooseOrigin": "Keress kiindulási pontot, vagy válassz egyet a térképen.",
+    "routing": "Útvonal keresése…",
+    "showRoute": "Teljes útvonal megjelenítése",
+    "mapPoint": "Pont a térképen",
+    "minutes": "Kb. {{count}} perc",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Becslés az útvonal-számítás (#{{epoch}}) idején érvényes úthálózat alapján. A szaggatott vonalak a gyalogos szakaszokat és az utakhoz való csatlakozást jelölik.",
+    "busy": "Fut a szimuláció. Ha véget ért, frissülnek az eredmények.",
+    "not_ready": "Még nincsenek útvonaladatok. Futtass szimulációt ebben a városban az útvonalak megjelenítéséhez.",
+    "unreachable": "Nincs útvonal a két hely között.",
+    "no_access": "A kiválasztott hely közelében nincs elérhető út.",
+    "geometry_unavailable": "Ennek az útvonalnak a tömegközlekedési nyomvonala nem érhető el.",
+    "place_missing": "A kiválasztott hely megszűnt. Válassz újra.",
+    "kind": {
+      "agent": "Létesítmény",
+      "zone": "Kerület",
+      "stop": "Megálló",
+      "station": "Állomás",
+      "point": "Pont",
+      "road": "Út"
+    },
+    "leg": {
+      "walk": "Gyalog",
+      "drive": "Autóval",
+      "transit": "Tömegközlekedés",
+      "conveyor": "Személyszállító berendezés",
+      "access": "Csatlakozás az úthoz",
+      "turn": "Megfordulás csomópontban"
+    },
+    "picking": {
+      "origin": "Kattints a kiindulási pontra a térképen.",
+      "destination": "Kattints az úti célra a térképen."
+    },
+    "pins": {
+      "tab": "Jelölők",
+      "hint": "Kattints a térképre, hogy a kiválasztott színű jelölőt elhelyezd. Jobb kattintással törölheted a jelölőt.",
+      "list": "Jelölők listája",
+      "remove": "Jelölő törlése"
+    }
+  }
+}

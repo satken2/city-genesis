@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "Kiệt sức",
+    "unhappy": "Không hài lòng",
+    "neutral": "Bình thường",
+    "happy": "Hài lòng",
+    "delighted": "Rất hài lòng",
+    "zero": "Mức hài lòng bằng 0"
+  }
+}

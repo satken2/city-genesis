@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Foreslå rute",
+    "mode": "Højdetilstand",
+    "fixed": "Behold punkternes højde",
+    "adjust": "Juster mellempunkternes højde",
+    "help": "Kan bruges, når formen er fastlagt. Start, slut og punkternes XZ-position ligger fast.",
+    "searching": "Søger…",
+    "cancel": "Annuller",
+    "undo": "Fortryd forslag",
+    "notFound": "Der blev ikke fundet nogen rute.",
+    "failed": "Ruteforslaget mislykkedes."
+  }
+}

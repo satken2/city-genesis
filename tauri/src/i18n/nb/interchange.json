@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Planskilt kryss",
+      "jct": "Motorveikryss"
+    },
+    "fallbackName": {
+      "ic": "Kryss nr. {{id}}",
+      "jct": "Motorveikryss nr. {{id}}"
+    },
+    "connections": {
+      "from": "Fra vei",
+      "to": "Til vei",
+      "road": "{{type}} nr. {{id}}",
+      "none": "Ingen sammenkoblede veipar.",
+      "direction": {
+        "n": "Nord",
+        "ne": "Nordøst",
+        "e": "Øst",
+        "se": "Sørøst",
+        "s": "Sør",
+        "sw": "Sørvest",
+        "w": "Vest",
+        "nw": "Nordvest"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

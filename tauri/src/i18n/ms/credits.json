@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Permainan ini menggunakan bahan-bahan yang disenaraikan di bawah. Nama pengarang, nama sumber, nama lesen dan teks atribusi yang ditetapkan oleh syarat penggunaan dipaparkan seperti asalnya.",
+    "empty": "Tiada entri.",
+    "requiredText": "Atribusi yang ditetapkan",
+    "categories": {
+      "bgm": "Muzik latar",
+      "sfx": "Kesan bunyi",
+      "image": "Imej & ikon",
+      "font": "Fon",
+      "model": "Model 3D",
+      "texture": "Tekstur"
+    }
+  }
+}

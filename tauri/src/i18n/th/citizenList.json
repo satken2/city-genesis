@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "ค้นหาชาวเมือง",
+    "tabTracking": "รายการติดตาม",
+    "name": "ชื่อ",
+    "age": "อายุ",
+    "ageSeparator": "ถึง",
+    "search": "ค้นหา",
+    "noResults": "ไม่มีชาวเมืองที่ตรงเงื่อนไข",
+    "truncated": "แสดง {{shown, number}} คน จากชาวเมืองที่ตรงเงื่อนไข {{total, number}} คน"
+  }
+}

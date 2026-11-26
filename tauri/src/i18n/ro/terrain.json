@@ -1,0 +1,23 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Se așteaptă datele din editorul de teren…"
+  },
+  "groundCover": {
+    "label": "Tipul solului",
+    "hint": "Schimbă culoarea și textura solului în joc, precum și culorile hărților 2D. Nu afectează simularea.",
+    "1": "Pajiște",
+    "2": "Deșert",
+    "3": "Pajiște luxuriantă",
+    "4": "Câmp înzăpezit",
+    "5": "Teren arid",
+    "6": "Grilă"
+  },
+  "climate": {
+    "label": "Climă",
+    "hint": "Copiază dintr-un șablon temperaturile, precipitațiile, însorirea și probabilitățile vremii pentru fiecare lună. Detaliile se pot edita în „Setări climă” din modul de creare a scenariilor."
+  },
+  "assetPack": {
+    "label": "Pachet de conținut",
+    "standard": "Standard"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Ban tên",
+      "message": "Hãy nhập tên bạn muốn ban cho {{name}}.",
+      "inputLabel": "Tên mới",
+      "confirm": "Ban tên"
+    },
+    "reward": {
+      "label": "Trao tiền thưởng",
+      "message": "Trao tiền thưởng từ quỹ thành phố cho hộ của {{name}}.\nTiền mặt của thành phố: {{available}}",
+      "confirm": "Trao"
+    },
+    "expel": {
+      "label": "Chúc may mắn ở phương trời mới",
+      "message": "Trục xuất {{name}} khỏi thành phố?",
+      "confirm": "Trục xuất",
+      "results": {
+        "0": "{{name}} thu dọn hành lý và lặng lẽ rời thành phố. Không một ai ra tiễn.",
+        "1": "{{name}} bước qua ranh giới thành phố, không quên buông lại một câu: “Có mời cũng không thèm quay lại!”",
+        "2": "{{name}} đã được tiễn chu đáo ra khỏi ranh giới thành phố. Kính chúc may mắn ở phương trời mới."
+      }
+    },
+    "donation": {
+      "label": "Xin quyên góp",
+      "message": "Đề nghị hộ của {{name}} quyên góp cho thành phố.\nTiền mặt của hộ: {{available}}",
+      "confirm": "Đề nghị"
+    },
+    "relocate": {
+      "label": "Gợi ý chỗ ở mới",
+      "message": "Buộc hộ của {{name}} dọn khỏi chỗ ở hiện tại?\nHộ này sẽ tìm chỗ ở mới vào kỳ sau.",
+      "confirm": "Buộc dọn đi",
+      "results": {
+        "0": "Gia đình {{name}} đã bị đuổi khỏi nhà. Đồ đạc chất đống bên vệ đường.",
+        "1": "Ổ khóa nhà {{name}} đã bị thay. Cả nhà bắt đầu đi tìm chỗ ở mới.",
+        "2": "Gia đình {{name}} đã được gợi ý một chỗ ở mới. Họ không thể quay về nhà cũ nữa."
+      }
+    }
+  }
+}

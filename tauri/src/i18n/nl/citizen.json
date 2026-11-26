@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} jaar",
+    "male": "Man",
+    "female": "Vrouw",
+    "single": "Alleenstaand",
+    "married": "Getrouwd",
+    "household": "Huishouden",
+    "employer": "Werkgever",
+    "unemployed": "Werkloos",
+    "school": "School",
+    "notEnrolled": "Niet ingeschreven",
+    "major": "Studierichting",
+    "higherEducation": "Hoger onderwijs",
+    "graduated": "Afgerond",
+    "notGraduated": "Niet afgerond",
+    "skills": "Vaardigheden",
+    "criminality": "Neiging tot criminaliteit",
+    "commuteTime": "Reistijd woon-werk",
+    "automobile": "Auto",
+    "automobileOwned": "Ja",
+    "automobileNone": "Nee",
+    "householdStatus": "Situatie huishouden"
+  },
+  "household": {
+    "title": "Huishouden",
+    "familyType": "Type huishouden",
+    "familySingle": "Alleenstaand",
+    "familyCouple": "Stel",
+    "familyFamily": "Gezin",
+    "familySenior": "Senioren",
+    "hasAutomobile": "Heeft auto",
+    "noAutomobile": "Geen auto",
+    "discretionaryIncome": "Besteedbaar inkomen",
+    "livingStandard": "Levensstandaard",
+    "livingStandardLevel": {
+      "0": "Straatarm",
+      "1": "Arm",
+      "2": "Middenklasse",
+      "3": "Welgesteld"
+    },
+    "satisNutrition": "Voeding",
+    "satisHealthcare": "Zorg",
+    "satisLeisure": "Vrije tijd",
+    "satisTourism": "Toerisme",
+    "tourist": "Toeristen",
+    "partySize": "Groepsgrootte",
+    "members": "Leden"
+  },
+  "education": {
+    "people": "personen"
+  }
+}

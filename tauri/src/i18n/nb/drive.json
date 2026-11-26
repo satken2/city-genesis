@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Kjøretur",
+    "car": "Bil",
+    "rail": "Jernbanelinjer",
+    "running": "Kjøretøy i trafikk",
+    "standard": "Personbil",
+    "commercial": "Varebil",
+    "truck": "Lastebil",
+    "finishEditing": "Avslutt redigeringen før du starter en kjøretur.",
+    "noLines": "Det finnes ingen jernbanelinjer i drift som du kan kjøre med.",
+    "pickRail": "Klikk på et spor på den valgte linjen.",
+    "pickRoad": "Klikk på en vei i drift.",
+    "pickVehicle": "Klikk på en bil, buss eller et tog i bevegelse (dra for å flytte kartet).",
+    "clickStart": "Velg startposisjon (dra for å flytte kartet)",
+    "startSelected": "Startposisjon valgt. Turen går i pilens retning.",
+    "reverse": "Snu kjøreretningen",
+    "start": "Kjør",
+    "back": "Tilbake",
+    "close": "Avslutt (Esc)",
+    "invalidStart": "Du kan ikke starte her. Velg en vei som kan kjøres på, eller et spor på den valgte linjen.",
+    "invalidVehicle": "Kunne ikke velge kjøretøyet. Klikk på en bil, buss eller et tog i bevegelse.",
+    "notReady": "Du kan ikke kjøre i denne retningen, eller omgivelsene lastes fortsatt inn. Endre retning eller posisjon, eller vent litt og prøv igjen."
+  }
+}

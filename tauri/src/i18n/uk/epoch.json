@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Поточна дата",
+    "afterDate": "Дата після виконання",
+    "epochCount": "Кількість епох",
+    "message": "Завершити дії цього ходу й перейти далі в часі?",
+    "yes": "Так",
+    "no": "Ні",
+    "executing": "Виконується симуляція...",
+    "errorSteamLimit": "Не вдалося підтвердити автентифікацію Steam, тому виконувати наступні епохи неможливо. (Без автентифікації можна грати, доки населення не перевищить {{limit}}.)",
+    "errorAlreadyRunning": "Уже виконується інша епоха. Спробуйте знову, коли вона завершиться.",
+    "errorFailed": "Не вдалося виконати епоху: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "(епох виконано: {{count}})",
+    "sectionConstruction": "Будівництво",
+    "kindPath": "Дорога",
+    "kindBuilding": "Об'єкт",
+    "kindProject": "Проєкт",
+    "noItems": "Немає",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Завершено",
+    "sectionStatistics": "Статистика",
+    "sectionScore": "Оцінка",
+    "scoreGain": "Бонуси",
+    "scoreLoss": "Штрафи",
+    "questState": {
+      "completed": "Виконано",
+      "active": "Триває",
+      "locked": "Заблоковано",
+      "failed": "Провалено"
+    },
+    "trendHint": "Тенденція за останні епохи ({{count}}): {{trend}}",
+    "trend": {
+      "up": "Зростання",
+      "flat": "Без змін",
+      "down": "Спад",
+      "none": "Замало даних"
+    },
+    "statPopulation": "Населення",
+    "statTourists": "Туристи",
+    "statGdp": "ВВП",
+    "statPrice": "Ціни",
+    "statIncome": "Доходи",
+    "statUnemployment": "Безробіття",
+    "statHealthcare": "Медичне забезпечення",
+    "statNutrition": "Харчування",
+    "statLeisure": "Розваги й дозвілля",
+    "statFire": "Пожежі",
+    "statTraffic": "ДТП",
+    "statCrime": "Злочинність",
+    "questCompleted": "Виконано!",
+    "questFailed": "Термін минув"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Аналізуємо транспортну мережу",
+      "prepare": "Готуємося до нової епохи",
+      "transit": "Організовуємо громадський транспорт",
+      "market": "Торгуємо товарами",
+      "production": "Виробляємо й споживаємо",
+      "commute": "Їдемо на роботу й навчання",
+      "growth": "Містяни дорослішають",
+      "evaluate": "Оцінюємо місто",
+      "immigration": "Приймаємо іммігрантів",
+      "labor": "Шукаємо роботу",
+      "spawn": "Відкриваються нові крамниці й компанії",
+      "relocate": "Переїжджаємо",
+      "construction": "Зводимо будівлі",
+      "finance": "Зводимо фінансовий баланс",
+      "plan": "Плануємо наступну епоху",
+      "incident": "Реагуємо на пожежі й аварії",
+      "finalize": "Підбиваємо статистику"
+    }
+  }
+}

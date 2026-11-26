@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Indeling verdiepingen",
+    "parking": "Parkeren",
+    "type": "Gebouwtype",
+    "durability": "Duurzaamheid",
+    "floors": "Verdiepingen",
+    "floorsValue": "{{floors}} verdiepingen (vloeroppervlak {{area, number}} m²)",
+    "heightLabel": "Hoogte: {{value}} m",
+    "baseAreaLabel": "Bebouwd oppervlak: {{area, number}} m²",
+    "underMaintenance": "Wordt hersteld",
+    "parkingCapacity": "Parkeercapaciteit",
+    "parkingCapacityValue": "{{capacity}} auto's",
+    "parkingDay": "Overdag",
+    "parkingNight": "'s Nachts",
+    "parkingUsage": "{{used}} / {{capacity}} auto's"
+  },
+  "building_appearance": {
+    "variantLabel": "Uiterlijk {{index}}",
+    "layoutHint": "Sleep een kaart naar het bouwterrein om te plaatsen / sleep om te verplaatsen / Shift+slepen om te draaien / Delete-toets om te verwijderen",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Selectie verwijderen",
+    "apply": "Toepassen",
+    "saveFailed": "Uiterlijk opslaan mislukt",
+    "noSubbuildings": "Voor dit gebouwtype zijn geen bijgebouwen gedefinieerd"
+  }
+}

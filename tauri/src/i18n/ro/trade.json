@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Informații despre ofertă",
+    "product": "Produs oferit",
+    "amount": "Cantitate oferită",
+    "price": "Preț de ofertă",
+    "soldAmount": "Cantitate vândută",
+    "profitRate": "Marjă de profit",
+    "utilization": "Grad de utilizare"
+  },
+  "tourismSupply": {
+    "title": "Primirea turiștilor",
+    "touristCapacity": "Capacitate de primire a turiștilor",
+    "persons": "{{value}} pers.",
+    "218": {
+      "price": "Taxă de intrare",
+      "amount": "Locuri pentru vizitatori (total)",
+      "soldAmount": "Vizitatori (total)"
+    },
+    "219": {
+      "price": "Tarif",
+      "amount": "Capacitate de transport (total)",
+      "soldAmount": "Pasageri (total)"
+    }
+  },
+  "demand": {
+    "product": "Produs",
+    "demandAmount": "Cerere",
+    "receivedAmount": "Obținut",
+    "acquiredAmount": "Stoc"
+  },
+  "cargo": {
+    "title": "Operațiuni de marfă",
+    "description": "Acest punct importă mărfuri din afara regiunii pentru piețele orașului și cumpără surplusul de producție al orașului pentru a-l exporta în afara regiunii.",
+    "capacity": "Capacitate de operare",
+    "perPeriod": "/lună",
+    "perPeriod_week": "/săptămână",
+    "materialCapacity": "Limită după materiile primite",
+    "areaCapacity": "Limită după suprafață",
+    "importHandled": "Volum importat",
+    "exportHandled": "Volum exportat",
+    "utilization": "Grad de utilizare",
+    "importSectionTitle": "Import",
+    "exportSectionTitle": "Export",
+    "handledImport": "Vândut",
+    "handledExport": "Cumpărat",
+    "allocation": "Cotă alocată",
+    "priceImport": "Preț de vânzare",
+    "priceExport": "Preț de cumpărare",
+    "lost": "Vânzări pierdute",
+    "noProducts": "Nu se operează niciun produs"
+  }
+}

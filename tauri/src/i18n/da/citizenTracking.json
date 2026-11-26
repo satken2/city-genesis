@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Oversigt",
+    "tabActivity": "Aktivitet",
+    "follow": "Følg med kameraet",
+    "unfollow": "Stop med at følge",
+    "track": "Føj til fulgte borgere",
+    "trackRandom": "Følg en tilfældig borger",
+    "noUntrackedCitizens": "Der er ingen borgere, du ikke allerede følger.",
+    "trackRandomError": "Kunne ikke følge en borger.",
+    "untrack": "Fjern fra fulgte borgere",
+    "home": "Bolig",
+    "mobility": "Transportform",
+    "mode": {
+      "automobile": "Bil",
+      "pedestrian": "Gang og kollektiv trafik"
+    },
+    "visits": "Destinationer",
+    "visitKind": {
+      "home": "Hjem",
+      "work": "Arbejde",
+      "school": "Skole",
+      "shop": "Indkøb"
+    },
+    "legs": {
+      "walk": "Gang",
+      "drive": "Bil",
+      "transit": "Kollektiv trafik",
+      "conveyor": "Persontransportanlæg"
+    },
+    "trip": "Én vej {{minutes}} min. · {{route}}",
+    "noRoute": "Ingen rute",
+    "noVisits": "Har ingen steder at tage hen.",
+    "status": {
+      "not_ready": "Vises, når simulationen har kørt.",
+      "busy": "Kan ikke vises, mens simulationen kører.",
+      "no_home": "Venter på en bolig, så der er ingen registreret aktivitet.",
+      "missing": "Denne borger bor ikke længere i byen.",
+      "error": "Kunne ikke indlæses."
+    },
+    "empty": "Du følger ingen borgere.",
+    "pickFailed": {
+      "not_ready": "Kør simulationen, så kan du klikke på biler og fodgængere og se, hvem de er.",
+      "busy": "Borgere kan ikke vises, mens simulationen kører.",
+      "none": "Kunne ikke finde ud af, hvem der sidder i bilen eller går her.",
+      "missing": "Denne borger bor ikke længere i byen.",
+      "no_home": "Denne borger venter på en bolig.",
+      "error": "Kunne ikke vise borgeren."
+    }
+  }
+}

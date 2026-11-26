@@ -6,7 +6,8 @@ from pathlib import Path
 I18N = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "src", "i18n")
 definition = (Path(I18N).parent / "utils" / "locale.ts").read_text(encoding="utf-8")
 LANGS = re.findall(r'"([^"]+)"', definition.split("export const SUPPORTED_LANGUAGES = [", 1)[1].split("] as const", 1)[0])
-PLURAL_SUFFIXES = {"pl": ("few", "many"), "ru": ("few", "many"), "ar": ("zero", "two", "few", "many")}
+PLURAL_SUFFIXES = {"pl": ("few", "many"), "ru": ("few", "many"), "ar": ("zero", "two", "few", "many"),
+                   "uk": ("few", "many"), "cs": ("few", "many"), "ro": ("few",)}
 PLURAL_KEYS = ("publicServiceTrend.months", "publicServiceTrend.years")
 
 

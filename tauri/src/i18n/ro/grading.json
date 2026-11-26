@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Tip",
+    "kind": {
+      "land": "Nivelarea terenului",
+      "shore": "Umplere"
+    },
+    "baseHeight": "Înălțime de referință",
+    "targetHeight": "Înălțime țintă",
+    "cutVolume": "Volum de săpătură",
+    "fillVolume": "Volum de umplutură",
+    "quayLength": "Lungimea cheiului",
+    "quayArea": "Suprafața frontului de cheu",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Înălțime (față de referință)",
+    "seaLevelHeight": "Înălțime (deasupra nivelului mării)",
+    "baseNote": {
+      "frontage": "0 este nivelul carosabilului drumului alăturat ({{value}} m)",
+      "terrain_mean": "0 este înălțimea medie actuală a zonei ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "Forma zonei nu este validă. Desenează-o fără ca laturile să se intersecteze.",
+      "outside_city": "Zona depășește limitele orașului.",
+      "too_large": "Zona este prea mare (limită: {{limit}} km²).",
+      "on_water": "Nu se pot face terasamente pe o zonă aflată numai pe mare. Desenează zona astfel încât să ajungă la uscat.",
+      "no_land_overlap": "Desenează zona astfel încât să se suprapună cu uscatul (altfel rămâne o fâșie de mare între țărm și zonă).",
+      "overlaps_parcel": "Zona se suprapune cu o parcelă existentă.",
+      "overlaps_path": "Zona se suprapune cu un drum, o cale ferată sau alt traseu.",
+      "overlaps_water": "Zona atinge un râu sau un lac.",
+      "overlaps_quay_band": "Zona se suprapune cu cheiul unui teren câștigat din mare.",
+      "invalid_height_offset": "Înălțimea este în afara intervalului permis (cel mult ±{{offsetLimit}} m față de înălțimea de referință).",
+      "below_sea_level": "Înălțimea nu poate fi sub nivelul mării.",
+      "too_narrow": "Zona este prea îngustă; în interiorul cheiului nu rămâne nimic de umplut.",
+      "no_work": "Terenul este deja la înălțimea țintă, deci nu sunt necesare lucrări.",
+      "insufficient_funds": "Fonduri insuficiente pentru a plasa comanda."
+    },
+    "confirm": "Confirmă",
+    "confirming": "Se confirmă…",
+    "cancel": "Anulează",
+    "confirmFailed": "Comanda de terasamente a eșuat."
+  }
+}

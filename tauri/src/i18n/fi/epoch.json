@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Nykyinen päivämäärä",
+    "afterDate": "Päivämäärä ajon jälkeen",
+    "epochCount": "Kausia",
+    "message": "Lopetetaanko tämän vuoron työt ja siirretäänkö aikaa eteenpäin?",
+    "yes": "Kyllä",
+    "no": "Ei",
+    "executing": "Simulaatio käynnissä…",
+    "errorSteamLimit": "Steam-tunnistautumista ei voitu vahvistaa, joten kausia ei voi ajaa enempää. (Ilman tunnistautumista voit pelata {{limit}} asukkaan väkilukuun asti.)",
+    "errorAlreadyRunning": "Toinen kausi on jo käynnissä. Yritä uudelleen, kun se on päättynyt.",
+    "errorFailed": "Kauden ajo epäonnistui: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} kautta)",
+    "sectionConstruction": "Rakentamisen tilanne",
+    "kindPath": "Tie",
+    "kindBuilding": "Laitos",
+    "kindProject": "Hanke",
+    "noItems": "Ei kohteita",
+    "progressFormat": "{{before}} % → {{after}} %",
+    "completed": "Valmis",
+    "sectionStatistics": "Tilastot",
+    "sectionScore": "Pisteet",
+    "scoreGain": "Lisäpisteet",
+    "scoreLoss": "Miinuspisteet",
+    "questState": {
+      "completed": "Saavutettu",
+      "active": "Käynnissä",
+      "locked": "Lukittu",
+      "failed": "Epäonnistui"
+    },
+    "trendHint": "Kehitys viimeisten {{count}} kauden aikana: {{trend}}",
+    "trend": {
+      "up": "Nouseva",
+      "flat": "Tasainen",
+      "down": "Laskeva",
+      "none": "Historiaa ei ole tarpeeksi"
+    },
+    "statPopulation": "Väkiluku",
+    "statTourists": "Matkailijat",
+    "statGdp": "BKT",
+    "statPrice": "Hintataso",
+    "statIncome": "Tulot",
+    "statUnemployment": "Työttömyys",
+    "statHealthcare": "Terveydenhuolto",
+    "statNutrition": "Ravitsemus",
+    "statLeisure": "Vapaa-aika",
+    "statFire": "Tulipalot",
+    "statTraffic": "Liikenneonnettomuudet",
+    "statCrime": "Rikollisuus",
+    "questCompleted": "Saavutettu!",
+    "questFailed": "Määräaika umpeutui"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Kartoitetaan liikenneverkkoa",
+      "prepare": "Valmistellaan kautta",
+      "transit": "Järjestetään joukkoliikennettä",
+      "market": "Käydään kauppaa",
+      "production": "Tuotetaan ja kulutetaan",
+      "commute": "Kuljetaan töihin ja kouluun",
+      "growth": "Kaupunkilaiset kasvavat",
+      "evaluate": "Arvioidaan kaupunkia",
+      "immigration": "Otetaan vastaan tulomuuttajia",
+      "labor": "Etsitään töitä",
+      "spawn": "Uusia kauppoja ja yrityksiä avataan",
+      "relocate": "Kotitaloudet muuttavat",
+      "construction": "Rakennetaan",
+      "finance": "Selvitetään rahavirtoja",
+      "plan": "Suunnitellaan seuraavaa kautta",
+      "incident": "Hoidetaan tulipaloja ja onnettomuuksia",
+      "finalize": "Kootaan tilastoja"
+    }
+  }
+}

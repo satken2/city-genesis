@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Vejudstyr",
+    "streetlight_type": "Gadelys",
+    "fence_type": "Hegn",
+    "street_tree_type": "Vejtræer",
+    "utility_mode": "Ledningsføring",
+    "none": "Ingen",
+    "standard": "Standard",
+    "overhead": "Luftledninger",
+    "underground": "Jordkabler",
+    "apply": "Anvend",
+    "bench_type": "Bænke",
+    "bin_type": "Skraldespande",
+    "planter_type": "Plantekasser",
+    "advert_type": "Reklamer"
+  }
+}

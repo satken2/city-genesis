@@ -1,0 +1,323 @@
+{
+  "policy": {
+    "pending": "Simulering pågår",
+    "noData": "Ingen data",
+    "actionError": "Kunne ikke åpne handlingsvinduet.",
+    "indicators": {
+      "unemployment": {
+        "tab": "Arbeidsledighet",
+        "issue": "Høy arbeidsledighet",
+        "clear": "Ingen problemer med arbeidsledighet funnet",
+        "evidence": "Arbeidsledighet: {{value}}"
+      },
+      "income": {
+        "tab": "Inntekt",
+        "issue": "Husholdningene har lav inntekt",
+        "clear": "Ingen inntektsproblemer funnet",
+        "evidence": "Gjennomsnittlig husholdningsinntekt: {{value}}"
+      },
+      "tourism": {
+        "tab": "Turisme",
+        "issue": "Få turister kommer på besøk",
+        "clear": "Ingen turismeproblemer funnet",
+        "evidence": "Turister på besøk: {{value}} · kapasitet: {{capacity}}"
+      },
+      "crime": {
+        "tab": "Kriminalitet",
+        "issue": "Det forekommer kriminalitet og bråk",
+        "clear": "Ingen kriminalitetsproblemer funnet",
+        "evidence": "Kriminalitet: {{value}} · bråk: {{incidents}}"
+      },
+      "sanitation": {
+        "tab": "Hygiene",
+        "issue": "Det er problemer med hygienen",
+        "clear": "Ingen hygieneproblemer funnet",
+        "evidence": "Husholdninger med forverret hygiene: {{value}}"
+      },
+      "water": {
+        "tab": "Vann",
+        "issue": "Det er mangel på vann",
+        "clear": "Ingen problemer med vannforsyningen funnet",
+        "evidence": "Levert av husholdningenes og anleggenes bestillinger: {{value}}"
+      },
+      "electricity": {
+        "tab": "Strøm",
+        "issue": "Det er mangel på strøm",
+        "clear": "Ingen problemer med strømforsyningen funnet",
+        "evidence": "Levert av husholdningenes og anleggenes bestillinger: {{value}}"
+      },
+      "internet": {
+        "tab": "Telekom",
+        "issue": "Det er mangel på telekommunikasjon",
+        "clear": "Ingen problemer med telekomforsyningen funnet",
+        "evidence": "Levert av husholdningenes og anleggenes bestillinger: {{value}}"
+      },
+      "high_water": {
+        "tab": "Høytrykksvann",
+        "issue": "Det er mangel på høytrykksvann",
+        "clear": "Ingen problemer med høytrykksvannforsyningen funnet",
+        "evidence": "Levert av anleggenes bestillinger: {{value}}"
+      },
+      "high_electricity": {
+        "tab": "Høyspent",
+        "issue": "Det er mangel på høyspent strøm",
+        "clear": "Ingen problemer med høyspentforsyningen funnet",
+        "evidence": "Levert av anleggenes bestillinger: {{value}}"
+      },
+      "upkeep": {
+        "tab": "Vedlikehold",
+        "issue": "Offentlige bygninger, veier og spor får for lite vedlikehold",
+        "clear": "Ingen vedlikeholdsproblemer funnet",
+        "evidence": "Mottatt vedlikehold av behovet: {{value}}"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "Ingen ledige plasser i dagens arbeidskvoter",
+        "evidence": "Arbeidssøkere: {{count}}"
+      },
+      "unfilled_jobs": {
+        "title": "Ledige stillinger og arbeidsledighet finnes samtidig",
+        "evidence": "Arbeidssøkere: {{count}} · ledige plasser: {{vacancies}} (effektiv arbeidskraft)"
+      },
+      "public_budget": {
+        "title": "Offentlige anlegg begrenses av budsjettet",
+        "evidence": "Anlegg med budsjettbegrenset plan: {{count}}"
+      },
+      "education_gap": {
+        "title": "Noen arbeidssøkere mangler grunnopplæring",
+        "evidence": "Arbeidssøkere uten fullført grunnopplæring: {{count}}"
+      },
+      "school_capacity": {
+        "title": "Grunnopplæringen har for få plasser",
+        "evidence": "Elever: {{enrolled}} · uten skoleplass: {{waiting}} / kapasitet: {{capacity}}"
+      },
+      "immigrant_education_gap": {
+        "title": "Blant arbeidssøkerne uten grunnopplæring er det innflyttere",
+        "evidence": "Innflyttere blant disse arbeidssøkerne: {{count}}"
+      },
+      "specialists": {
+        "title": "Mangel på spesialister hindrer anlegg i å drive",
+        "evidence": "Anlegg som mangler spesialister: {{count}}"
+      },
+      "household_unemployment": {
+        "title": "Noen husholdninger har arbeidsledige voksne",
+        "evidence": "Husholdninger med arbeidsledige voksne: {{count}}"
+      },
+      "security_response": {
+        "title": "Politiet klarer ikke å forhindre all kriminalitet",
+        "evidence": "Kriminalitetstilfeller siste måned: {{count}}",
+        "evidence_week": "Kriminalitetstilfeller siste uke: {{count}}"
+      },
+      "no_police": {
+        "title": "Ingen politistasjoner er i drift"
+      },
+      "police_staff": {
+        "title": "Politistasjonene mangler folk",
+        "evidence": "Underbemannede politistasjoner: {{count}}"
+      },
+      "police_budget": {
+        "title": "Politiets budsjett er for lavt",
+        "evidence": "Politistasjoner med for lite budsjett: {{count}}"
+      },
+      "police_inputs": {
+        "title": "Politistasjonene mangler forsyninger",
+        "evidence": "Politistasjoner med for lite forsyninger: {{count}}"
+      },
+      "unemployment_pressure": {
+        "title": "Arbeidsledighet svekker tryggheten",
+        "evidence": "Arbeidsledige voksne: {{count}}"
+      },
+      "citizen_criminality": {
+        "title": "Noen innbyggere er tilbøyelige til kriminalitet",
+        "evidence": "Innbyggere med kriminelle tilbøyeligheter: {{count}}"
+      },
+      "children_in_poverty": {
+        "title": "Barn vokser opp i husholdninger som ikke dekker levekostnadene",
+        "evidence": "Barn i husholdninger under levekostnadene: {{count}}"
+      },
+      "children_in_crime_zones": {
+        "title": "Barn vokser opp i bydeler med kriminalitet",
+        "evidence": "Barn i bydeler med kriminalitet siste måned: {{count}}",
+        "evidence_week": "Barn i bydeler med kriminalitet siste uke: {{count}}"
+      },
+      "service_no_facility": {
+        "title": "Ingen anlegg leverer denne tjenesten",
+        "title_named": "Mangler {{suppliers}}"
+      },
+      "service_facility_limited": {
+        "title": "Noen anlegg er ute av drift ({{kinds}})",
+        "evidence": "Anlegg som i praksis ikke er i drift: {{count}}"
+      },
+      "repair_budget_exhausted": {
+        "title": "Reparasjonsbudsjettet er brukt opp, og bestillinger av vedlikehold ble kuttet",
+        "evidence": "Reparasjonsutgifter {{expense}} / budsjett {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "Husholdninger eller anlegg ligger utenfor dekningsområdet",
+        "evidence": "Utenfor alle anleggs dekningsområde: {{count}} hush. · {{facilities}} anlegg",
+        "title_named": "Husholdninger eller anlegg ligger utenfor dekningsområdet til {{suppliers}}"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}} får ikke skaffet {{product_name}}",
+        "evidence": "Mottatt {{received}} av nødvendige {{demand}}"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}} mangler arbeidskraft",
+        "evidence": "Sikret {{total_labor}} av nødvendige {{quota}} (effektiv arbeidskraft)"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}} får ikke tak i spesialister"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}} har skalert ned planen på grunn av for lite budsjett"
+      },
+      "facility_inactive": {
+        "title": "{{facility}} er ikke i drift"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}} er ikke koblet til nettet for {{product_name}}"
+      },
+      "slum_sanitation": {
+        "title": "Noen husholdninger bor i slum",
+        "evidence": "Husholdninger som bor i slum: {{count}}"
+      },
+      "service_shortage": {
+        "title": "Husholdningene får ikke nok {{product_name}}",
+        "evidence": "Husholdningene fikk {{percent}}% av referansemengden"
+      },
+      "tourism_no_attraction": {
+        "title": "Det finnes ingen turistattraksjoner"
+      },
+      "tourism_no_gateway": {
+        "title": "Det finnes ingen innfallsport for turister"
+      },
+      "tourism_no_trade_hub": {
+        "title": "Det finnes ingen handelsknutepunkt som betaler reisepengene"
+      },
+      "tourists_without_lodging": {
+        "title": "Noen turister finner ikke overnatting",
+        "evidence": "Turister som venter på overnatting: {{count}}"
+      },
+      "tourism_lodging_costly": {
+        "title": "Overnatting er dyrt i forhold til reisebudsjettet",
+        "evidence": "Nye turistsøknader ligger på {{percent}}% av normalt"
+      },
+      "tourists_dissatisfied": {
+        "title": "Turistene er lite fornøyde",
+        "evidence": "Nye søknader på {{percent}}% av normalt · reist hjem misfornøyde: {{count}}"
+      },
+      "tourism_experience_short": {
+        "title": "Turistene får ikke nok turistopplevelser",
+        "evidence": "Dekning av turistopplevelser: {{percent}}%"
+      },
+      "tourism_leisure_short": {
+        "title": "Turistene får ikke nok underholdning og fritid",
+        "evidence": "Dekning av underholdning og fritid: {{percent}}%"
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "Skap arbeidsplasser i offentlige anlegg"
+      },
+      "population": {
+        "title": "Reduser befolkningen ved å utvise innbyggere"
+      },
+      "budget": {
+        "title": "Fordel driftsbudsjetter"
+      },
+      "education": {
+        "title": "Bygg flere skoler"
+      },
+      "higher_education": {
+        "title": "Utdann spesialister gjennom høyere utdanning"
+      },
+      "welfare": {
+        "title": "Øk stønader og sosialhjelp"
+      },
+      "employment": {
+        "title": "Undersøk ansettelseskravene i sysselsettingsstatistikken"
+      },
+      "police": {
+        "title": "Bygg politistasjoner"
+      },
+      "facilities": {
+        "title": "Se hvordan anleggene går"
+      },
+      "immigration_skills": {
+        "title": "Se over kompetansekravene for innflyttere"
+      },
+      "immigration_limit": {
+        "title": "Begrens innflyttingen"
+      },
+      "criminality": {
+        "title": "Se på innbyggernes kriminelle tilbøyeligheter"
+      },
+      "service_facility": {
+        "title": "Bygg et anlegg som leverer tjenesten",
+        "title_named": "Bygg {{suppliers}}",
+        "title_tourism_no_attraction": "Bygg en turistattraksjon",
+        "title_tourism_no_gateway": "Bygg en havn eller flyplass"
+      },
+      "parcel": {
+        "title": "Klargjør en større parsell"
+      },
+      "transit": {
+        "title": "Se over avganger og spor i kollektivtransporten"
+      },
+      "entity_detail": {
+        "title": "Åpne detaljer"
+      }
+    },
+    "selectorTitle": "Hva vil du undersøke?",
+    "eventsTitle": "Hva som skjer",
+    "causeTitle": "Årsak",
+    "adviceTitle": "Forslag til tiltak",
+    "needsAttention": "Rom for forbedring",
+    "values": {
+      "money": "{{value}} / husholdning / dag",
+      "per_thousand": "{{value}} tilfeller per 1 000 innbyggere (siste måned)",
+      "per_thousand_week": "{{value}} tilfeller per 1 000 innbyggere (siste uke)"
+    },
+    "collapse": "Skjul",
+    "investigate": {
+      "crime": "Undersøk årsakene til kriminaliteten",
+      "unemployment": "Undersøk årsakene til arbeidsledigheten",
+      "income": "Undersøk årsakene til lav inntekt",
+      "water": "Undersøk årsakene til vannmangelen",
+      "electricity": "Undersøk årsakene til strømmangelen",
+      "internet": "Undersøk årsakene til telekommangelen",
+      "upkeep": "Undersøk årsakene til vedlikeholdsmangelen",
+      "high_water": "Undersøk årsakene til mangelen på høytrykksvann",
+      "high_electricity": "Undersøk årsakene til mangelen på høyspent strøm",
+      "facility": "Undersøk dette anlegget"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "Indikatorer",
+    "problems": {
+      "resource_runway": "Ressursen «{{name}}» tar slutt om ca. {{remaining_epochs}} epoker",
+      "resource_depleted": "Ressursen «{{name}}» er brukt opp",
+      "facility_inoperative": "Det offentlige anlegget «{{name}}» er ikke i drift",
+      "facility_inoperative_labor": "Det offentlige anlegget «{{name}}» er ikke i drift på grunn av mangel på arbeidskraft",
+      "facility_inoperative_material": "Det offentlige anlegget «{{name}}» er ikke i drift på grunn av mangel på råvarer",
+      "facility_inoperative_high_skill": "Det offentlige anlegget «{{name}}» har redusert drift på grunn av mangel på spesialister",
+      "facility_inoperative_budget": "Det offentlige anlegget «{{name}}» har redusert drift på grunn av for lite budsjett",
+      "education_low_enrollment": "Utdanningsinstitusjonen «{{name}}» har lav utnyttelse fordi få elever søker seg dit ({{enrolled}} av {{max_students}} plasser)",
+      "infra_facility_down": "Infrastrukturanlegget «{{name}}» er ute av drift",
+      "infra_disconnected": "{{count}} anlegg er ikke koblet til infrastrukturnettet",
+      "rail_capacity_exceeded": "Togavgangene overstiger sporkapasiteten på {{count}} spor",
+      "collapse": "Bygninger eller veier har styrtet sammen ({{count}})",
+      "collapse_with_deaths": "Bygninger eller veier har styrtet sammen ({{count}}) – omkomne: {{deaths}}",
+      "deaths_traffic": "Omkomne i trafikkulykker: {{count}}",
+      "tenant_blocked_by_parcel_size": "I bydelen «{{zone_name}}» kan det ikke bygges noen bygning for «{{tenant_name}}» (trenger {{required}} m2, største mulige {{max_capacity}} m2)",
+      "unknown": "En alvorlig hendelse har inntruffet",
+      "sanitation": "Husholdninger med forverret hygiene: {{count}}"
+    },
+    "facilitiesTitle": "Anlegg som ikke er i drift",
+    "otherProblemsTitle": "Andre problemer",
+    "facility": {
+      "title": "{{facility}} er ikke i drift",
+      "evidence": "Produksjonen er {{percent}}% av planen"
+    }
+  }
+}

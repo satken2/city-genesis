@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Acest joc folosește materialele de mai jos. Numele autorilor, sursele, numele licențelor și textele de atribuire cerute de licențe sunt reproduse întocmai.",
+    "empty": "Nicio intrare.",
+    "requiredText": "Atribuire obligatorie",
+    "categories": {
+      "bgm": "Muzică",
+      "sfx": "Efecte sonore",
+      "image": "Imagini și pictograme",
+      "font": "Fonturi",
+      "model": "Modele 3D",
+      "texture": "Texturi"
+    }
+  }
+}

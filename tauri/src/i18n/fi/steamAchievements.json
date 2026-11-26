@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Seuraava",
+    "close": "Sulje",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "Kaupungin ensiaskeleet",
+        "description": "Saata ensimmäinen rakennus valmiiksi. Tästä alkaa kaupunkisi tarina."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Kaupunki lähtee merelle",
+        "description": "Saata ensimmäinen merituulipuisto tai öljynporauslautta valmiiksi. Kaupunkisi teollisuus suuntaa merelle."
+      },
+      "RAIL_LINES_1": {
+        "name": "Juna lähtee!",
+        "description": "Avaa rautatielinja"
+      },
+      "RAIL_LINES_20": {
+        "name": "Rautatiekuningaskunta",
+        "description": "Liikennöi 20 rautatielinjaa samassa kaupungissa. Linjakartta on jo melkoinen näky."
+      },
+      "BUS_LINES_1": {
+        "name": "Bussi tulee kaupunkiin",
+        "description": "Avaa bussilinja"
+      },
+      "BUS_LINES_20": {
+        "name": "Bussilla minne vain",
+        "description": "Liikennöi 20 bussilinjaa samassa kaupungissa"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Työmatka kattojen yllä",
+        "description": "Avaa monorail-linja. Näe tutut kadut vähän korkeammalta."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Kaupunki taivaalla",
+        "description": "Liikennöi 20 monorail-linjaa samassa kaupungissa"
+      },
+      "LRT_LINES_1": {
+        "name": "Raitiovaunu saapuu kaupunkiin",
+        "description": "Avaa LRT-linja"
+      },
+      "LRT_LINES_20": {
+        "name": "Raitiovaunujen kaupunki",
+        "description": "Liikennöi 20 LRT-linjaa samassa kaupungissa"
+      },
+      "POPULATION_10K": {
+        "name": "Kymmenentuhannen koti",
+        "description": "Saavuta 10 000 asukkaan väkiluku"
+      },
+      "POPULATION_100K": {
+        "name": "Vilkas maakuntakaupunki",
+        "description": "Saavuta 100 000 asukkaan väkiluku"
+      },
+      "POPULATION_500K": {
+        "name": "Suurkaupunkien joukkoon",
+        "description": "Saavuta 500 000 asukkaan väkiluku"
+      },
+      "POPULATION_1M": {
+        "name": "Miljoonakaupunki",
+        "description": "Saavuta miljoonan asukkaan väkiluku. Suurkaupunki, jossa elää miljoona erilaista elämää."
+      },
+      "FLOORS_5": {
+        "name": "Kaupunki kurottaa ylös",
+        "description": "Yksityinen vähintään 5-kerroksinen rakennus valmistuu"
+      },
+      "FLOORS_10": {
+        "name": "Kohti korkeaa rakentamista",
+        "description": "Yksityinen vähintään 10-kerroksinen rakennus valmistuu. Onneksi on hissit."
+      },
+      "FLOORS_20": {
+        "name": "Siluetti muotoutuu",
+        "description": "Yksityinen vähintään 20-kerroksinen rakennus valmistuu"
+      },
+      "FLOORS_40": {
+        "name": "Pilvenpiirtäjä",
+        "description": "Yksityinen vähintään 40-kerroksinen rakennus valmistuu. Kaupungille uusi maamerkki."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Terveyttä teollisuudesta",
+        "description": "Lääketehdas aloittaa toimintansa kaupungissa. Täältä tuetaan ihmisten terveyttä."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Piikaupunki",
+        "description": "Puolijohdetehdas aloittaa toimintansa kaupungissa. Pienistä siruista kasvaa suuri teollisuudenala."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Tarkkuuden kaupunki",
+        "description": "Tarkkuuslaitetehdas aloittaa toimintansa kaupungissa. Vankasta osaamisesta tulee kaupungin vahvuus."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Ohjelmistojen uusi koti",
+        "description": "Ohjelmistoyritys aloittaa toimintansa kaupungissa. Täällä uudet ideat pääsevät kasvamaan."
+      },
+      "TOURISTS_1": {
+        "name": "Tervetuloa kaupunkiimme",
+        "description": "Ensimmäinen matkailija majoittuu kaupunkiin"
+      },
+      "TOURISTS_1K": {
+        "name": "Matkan arvoinen kaupunki",
+        "description": "Kaupungissa majoittuu yhtä aikaa 1 000 matkailijaa"
+      },
+      "TOURISTS_10K": {
+        "name": "Maailma tulee kylään",
+        "description": "Kaupungissa majoittuu yhtä aikaa 10 000 matkailijaa"
+      },
+      "YEARS_10": {
+        "name": "Kymmenen vuotta kaupungin kanssa",
+        "description": "Pelaa samaa kaupunkia 10 vuotta. Kaupunkirakentaminen jatkuu yhä."
+      },
+      "YEARS_100": {
+        "name": "Vuosisadan kaupunki",
+        "description": "Pelaa samaa kaupunkia 100 vuotta. Seuraa kaupunkisi kokonainen vuosisata."
+      },
+      "YEARS_500": {
+        "name": "Historiaa tekevä kaupunki",
+        "description": "Pelaa samaa kaupunkia 500 vuotta. Sukupolvet vaihtuvat, kaupunki jatkaa."
+      },
+      "YEARS_1000": {
+        "name": "Tuhatvuotinen kaupunki",
+        "description": "Pelaa samaa kaupunkia 1 000 vuotta. Rakenna kaupunki, jolla on tuhatvuotinen historia."
+      },
+      "YEARS_10000": {
+        "name": "Ikuinen kaupunki",
+        "description": "Pelaa samaa kaupunkia 10 000 vuotta. Melkoinen virkakausi, pormestari."
+      }
+    }
+  }
+}

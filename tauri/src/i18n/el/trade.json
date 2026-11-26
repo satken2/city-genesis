@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Στοιχεία προσφοράς",
+    "product": "Προϊόν προσφοράς",
+    "amount": "Ποσότητα προσφοράς",
+    "price": "Τιμή προσφοράς",
+    "soldAmount": "Πωλήσεις",
+    "profitRate": "Περιθώριο κέρδους",
+    "utilization": "Βαθμός αξιοποίησης"
+  },
+  "tourismSupply": {
+    "title": "Υποδοχή τουριστών",
+    "touristCapacity": "Δυνατότητα υποδοχής τουριστών",
+    "persons": "{{value}} άτομα",
+    "218": {
+      "price": "Εισιτήριο εισόδου",
+      "amount": "Δυνατότητα υποδοχής (συνολικά)",
+      "soldAmount": "Επισκέπτες (συνολικά)"
+    },
+    "219": {
+      "price": "Ναύλος",
+      "amount": "Μεταφορική ικανότητα (συνολικά)",
+      "soldAmount": "Επιβάτες (συνολικά)"
+    }
+  },
+  "demand": {
+    "product": "Αγαθό",
+    "demandAmount": "Ζήτηση",
+    "receivedAmount": "Αποκτήθηκαν",
+    "acquiredAmount": "Απόθεμα"
+  },
+  "cargo": {
+    "title": "Διακίνηση φορτίων",
+    "description": "Αυτός ο κόμβος εισάγει αγαθά από έξω για να εφοδιάζει τις αγορές της πόλης και αγοράζει την πλεονάζουσα παραγωγή της πόλης για να την εξάγει.",
+    "capacity": "Ικανότητα διακίνησης",
+    "perPeriod": "/μήνα",
+    "perPeriod_week": "/εβδομάδα",
+    "materialCapacity": "Όριο βάσει πρώτων υλών",
+    "areaCapacity": "Όριο βάσει εμβαδού",
+    "importHandled": "Διακίνηση εισαγωγών",
+    "exportHandled": "Διακίνηση εξαγωγών",
+    "utilization": "Βαθμός αξιοποίησης",
+    "importSectionTitle": "Εισαγωγές",
+    "exportSectionTitle": "Εξαγωγές",
+    "handledImport": "Πωλήσεις",
+    "handledExport": "Αγορές",
+    "allocation": "Κατανομή",
+    "priceImport": "Τιμή πώλησης",
+    "priceExport": "Τιμή αγοράς",
+    "lost": "Χαμένες πωλήσεις",
+    "noProducts": "Δεν διακινούνται αγαθά"
+  }
+}

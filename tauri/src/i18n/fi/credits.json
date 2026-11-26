@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Peli käyttää alla lueteltuja aineistoja. Tekijöiden nimet, lähteet, lisenssien nimet ja lisenssin edellyttämät tekijämerkinnät on esitetty alkuperäisessä muodossaan.",
+    "empty": "Ei merkintöjä.",
+    "requiredText": "Vaadittu tekijämerkintä",
+    "categories": {
+      "bgm": "Musiikki",
+      "sfx": "Äänitehosteet",
+      "image": "Kuvat ja kuvakkeet",
+      "font": "Fontit",
+      "model": "3D-mallit",
+      "texture": "Tekstuurit"
+    }
+  }
+}

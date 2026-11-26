@@ -1,0 +1,23 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Čeká se na data z editoru terénu…"
+  },
+  "groundCover": {
+    "label": "Povrch terénu",
+    "hint": "Mění barvu a texturu povrchu ve hře a barvy 2D map. Na simulaci nemá vliv.",
+    "1": "Travnatá pláň",
+    "2": "Poušť",
+    "3": "Svěží louka",
+    "4": "Sněhová pláň",
+    "5": "Polosuchá krajina",
+    "6": "Mřížka"
+  },
+  "climate": {
+    "label": "Podnebí",
+    "hint": "Zkopíruje z předvolby měsíční teploty, srážky, sluneční svit a pravděpodobnosti počasí. Podrobnosti lze upravit v nastavení klimatu v režimu tvorby scénáře."
+  },
+  "assetPack": {
+    "label": "Balíček assetů",
+    "standard": "Standardní"
+  }
+}

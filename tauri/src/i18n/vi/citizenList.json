@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Tìm công dân",
+    "tabTracking": "Danh sách theo dõi",
+    "name": "Tên",
+    "age": "Tuổi",
+    "ageSeparator": "đến",
+    "search": "Tìm",
+    "noResults": "Không có công dân nào phù hợp.",
+    "truncated": "Đang hiển thị {{shown, number}} trong số {{total, number}} công dân phù hợp."
+  }
+}

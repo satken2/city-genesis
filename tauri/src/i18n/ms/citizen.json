@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} tahun",
+    "male": "Lelaki",
+    "female": "Perempuan",
+    "single": "Bujang",
+    "married": "Berkahwin",
+    "household": "Isi rumah",
+    "employer": "Tempat kerja",
+    "unemployed": "Tidak bekerja",
+    "school": "Sekolah",
+    "notEnrolled": "Tidak bersekolah",
+    "major": "Kemahiran pengkhususan",
+    "higherEducation": "Pendidikan tinggi",
+    "graduated": "Tamat",
+    "notGraduated": "Belum tamat",
+    "skills": "Kemahiran",
+    "criminality": "Kecenderungan jenayah",
+    "commuteTime": "Masa perjalanan ke tempat kerja",
+    "automobile": "Kereta",
+    "automobileOwned": "Ada",
+    "automobileNone": "Tiada",
+    "householdStatus": "Keadaan isi rumah"
+  },
+  "household": {
+    "title": "Maklumat isi rumah",
+    "familyType": "Jenis isi rumah",
+    "familySingle": "Bujang",
+    "familyCouple": "Pasangan",
+    "familyFamily": "Keluarga",
+    "familySenior": "Warga emas",
+    "hasAutomobile": "Ada kereta",
+    "noAutomobile": "Tiada kereta",
+    "discretionaryIncome": "Pendapatan boleh guna",
+    "livingStandard": "Taraf hidup",
+    "livingStandardLevel": {
+      "0": "Papa kedana",
+      "1": "Miskin",
+      "2": "Kelas pertengahan",
+      "3": "Mewah"
+    },
+    "satisNutrition": "Pemakanan",
+    "satisHealthcare": "Kesihatan",
+    "satisLeisure": "Hiburan dan riadah",
+    "satisTourism": "Pelancongan",
+    "tourist": "Pelancong",
+    "partySize": "Bil. orang",
+    "members": "Ahli isi rumah"
+  },
+  "education": {
+    "people": "orang"
+  }
+}

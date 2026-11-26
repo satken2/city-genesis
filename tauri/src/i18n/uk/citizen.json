@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} р.",
+    "male": "Чоловік",
+    "female": "Жінка",
+    "single": "Не в шлюбі",
+    "married": "У шлюбі",
+    "household": "Домогосподарство",
+    "employer": "Місце роботи",
+    "unemployed": "Без роботи",
+    "school": "Місце навчання",
+    "notEnrolled": "Не навчається",
+    "major": "Профільна кваліфікація",
+    "higherEducation": "Вища освіта",
+    "graduated": "Здобуто",
+    "notGraduated": "Не здобуто",
+    "skills": "Кваліфікації",
+    "criminality": "Схильність до злочинів",
+    "commuteTime": "Час дороги на роботу",
+    "automobile": "Автомобіль",
+    "automobileOwned": "Є",
+    "automobileNone": "Немає",
+    "householdStatus": "Стан домогосподарства"
+  },
+  "household": {
+    "title": "Домогосподарство",
+    "familyType": "Тип домогосподарства",
+    "familySingle": "Одна особа",
+    "familyCouple": "Пара",
+    "familyFamily": "Сім'я",
+    "familySenior": "Літні люди",
+    "hasAutomobile": "Є автомобіль",
+    "noAutomobile": "Без автомобіля",
+    "discretionaryIncome": "Наявний дохід",
+    "livingStandard": "Рівень життя",
+    "livingStandardLevel": {
+      "0": "Злидні",
+      "1": "Бідність",
+      "2": "Середній клас",
+      "3": "Заможність"
+    },
+    "satisNutrition": "Харчування",
+    "satisHealthcare": "Медицина",
+    "satisLeisure": "Розваги та дозвілля",
+    "satisTourism": "Туризм",
+    "tourist": "Туристи",
+    "partySize": "Кількість осіб",
+    "members": "Члени домогосподарства"
+  },
+  "education": {
+    "people": "ос."
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Σταθμός",
+    "name": "Όνομα σταθμού",
+    "ridership": "Επιβιβάσεις",
+    "platforms": "Αποβάθρες",
+    "noPlatforms": "Καμία αποβάθρα δεν ανήκει σε αυτόν τον σταθμό (ανήκουν οι αποβάθρες που τέμνει η γραμμή)",
+    "lines": "Γραμμές που εξυπηρετούν",
+    "noLines": "Καμία γραμμή δεν εξυπηρετεί αυτόν τον σταθμό",
+    "stops": "Επιβιβάσεις ανά στάση",
+    "noStops": "Δεν υπάρχουν στάσεις σε αυτόν τον σταθμό",
+    "lineRunning": "Σε λειτουργία",
+    "lineSuspended": "Αναστολή δρομολογίων",
+    "houseEnds": "Θέση κτιρίων σταθμού",
+    "houseEnds_both": "Και στα δύο άκρα",
+    "houseEnds_start": "Αρχή",
+    "houseEnds_end": "Τέλος",
+    "passageMode": "Θέση διαδρόμου",
+    "passageMode_elevated": "Υπερυψωμένος",
+    "passageMode_ground": "Στο ισόπεδο",
+    "passageMode_underground": "Υπόγειος"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Ajelu",
+    "car": "Auto",
+    "rail": "Raidelinjat",
+    "running": "Liikkuvat ajoneuvot",
+    "standard": "Henkilöauto",
+    "commercial": "Pakettiauto",
+    "truck": "Kuorma-auto",
+    "finishEditing": "Lopeta muokkaus ennen ajelun aloittamista.",
+    "noLines": "Liikennöiviä raidelinjoja, joille voisi nousta, ei ole.",
+    "pickRail": "Napsauta valitun linjan raidetta.",
+    "pickRoad": "Napsauta käytössä olevaa tietä.",
+    "pickVehicle": "Napsauta liikkuvaa autoa, bussia tai junaa (siirrä karttaa vetämällä).",
+    "clickStart": "Valitse lähtöpaikka (siirrä karttaa vetämällä)",
+    "startSelected": "Lähtöpaikka valittu. Lähdet nuolen suuntaan.",
+    "reverse": "Käännä kulkusuunta",
+    "start": "Lähde",
+    "back": "Takaisin",
+    "close": "Lopeta (Esc)",
+    "invalidStart": "Tästä ei voi lähteä. Valitse ajokelpoinen tie tai valitun linjan raide.",
+    "invalidVehicle": "Ajoneuvoa ei voitu valita. Napsauta liikkuvaa autoa, bussia tai junaa.",
+    "notReady": "Tähän suuntaan ei voi lähteä tai ympäristöä ladataan vielä. Vaihda suuntaa tai paikkaa tai odota hetki ja yritä uudelleen."
+  }
+}

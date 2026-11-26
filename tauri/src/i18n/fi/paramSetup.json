@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Pelin parametrit",
+    "description": "Oletusarvoja suositellaan useimmiten. Muuta arvoja vain, jos haluat mukauttaa peliä.",
+    "skip": "Ohita",
+    "start": "Aloita peli",
+    "apply": "Käytä ja sulje",
+    "close": "Sulje",
+    "loading": "Ladataan…",
+    "reload": "Lataa uudelleen",
+    "reloadHint": "Lataa uudelleen, kun taustapalvelun alustus on valmis, niin näet uusimmat arvot.",
+    "fetchError": "Parametrien haku epäonnistui",
+    "category": {
+      "population": "Väestö ja muutto",
+      "citizen": "Kaupunkilaisten elämä",
+      "economy": "Talous",
+      "labor": "Työ ja palkat",
+      "education": "Koulutus",
+      "construction": "Rakentaminen ja kiinteistöt",
+      "environment": "Ympäristö",
+      "traffic": "Liikenne",
+      "general": "Yleiset",
+      "pathfind": "Liikenne ja reitit",
+      "building": "Rakennukset ja rakentaminen",
+      "disaster": "Onnettomuudet ja turvallisuus",
+      "slum": "Slummit",
+      "production": "Tuotanto ja varastot",
+      "zone": "Kaupunginosat ja tontit",
+      "financial": "Rahoitus"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Kaupungin tiivistyskerroin",
+        "desc": "Asuntojen ja laitosten käyttämä lattiapinta-ala jaetaan tällä arvolla, jotta pienelle kartalle mahtuu suurkaupungin taloudellinen toiminta. Jos arvoa muutetaan, kun yksikin tie tai rakennus on jo tehty, kaupunki rikkoutuu, joten päätä arvo ennen kuin rakennat mitään."
+      },
+      "TFR_TARGET": {
+        "label": "Kokonaishedelmällisyysluvun (TFR) tavoite",
+        "desc": "Syntyvyys, johon kotitaloudet pyrkivät. Mitä suurempi arvo, sitä todennäköisemmin lapsia syntyy."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Avioliittojen yleisyys",
+        "desc": "Kerroin todennäköisyydelle, jolla kaupunkilaiset menevät naimisiin. Mitä suurempi arvo, sitä enemmän avioliittoja."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Synnytysiän alaraja",
+        "desc": "Alin ikä, jolloin lapsia voi syntyä. Tätä nuoremmille ei synny lapsia."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Synnytysiän yläraja",
+        "desc": "Ylin ikä, jolloin lapsia voi syntyä. Tätä vanhemmille ei synny lapsia."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Avioparien osuus (tulomuuttajat)",
+        "desc": "Todennäköisyys, että kaupunkiin saapuva tulomuuttajakotitalous on aviopari."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Ensimmäinen lapsi (tulomuuttajat)",
+        "desc": "Todennäköisyys, että tulomuuttajakotitaloudella on syntyessään 1 lapsi."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Toinen lapsi (tulomuuttajat)",
+        "desc": "Todennäköisyys, että tulomuuttajakotitaloudella on syntyessään 2 lasta."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Kolmas lapsi (tulomuuttajat)",
+        "desc": "Todennäköisyys, että tulomuuttajakotitaloudella on syntyessään 3 lasta."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Aikuisen tulomuuttajan alaikäraja",
+        "desc": "Kaupunkiin tulomuuttajana saapuvan aikuisen alin ikä."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Aikuisen tulomuuttajan yläikäraja",
+        "desc": "Kaupunkiin tulomuuttajana saapuvan aikuisen ylin ikä."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Elinikäkerroin",
+        "desc": "Kerroin kaupunkilaisten enimmäiselinikään. Arvolla 1,08 yläraja on noin 100 vuotta, arvolla 1,06 noin 150 vuotta.",
+        "graphX": "Ikä",
+        "graphY": "Vuotuinen kuolemantodennäköisyys (terveys 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Yhden hengen kotitalouden asuintila (m²)",
+        "desc": "Yhden hengen kotitalouden tarvitsema vähimmäisasuinpinta-ala."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Lisätila puolisolle (m²)",
+        "desc": "Lisäasuinpinta-ala, jonka pariskunta tarvitsee yksin asuvaan verrattuna."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Lisätila lasta kohden (m²)",
+        "desc": "Asuinpinta-alan lisäys kutakin lasta kohden."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Vuokran osuus tuloista (enintään)",
+        "desc": "Suurin osuus kotitalouden tuloista, jonka se voi käyttää vuokraan. Arvo 0,3 tarkoittaa enintään 30 % tuloista."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Matka-ajan paino asunnon valinnassa",
+        "desc": "Asuntoa valitessa: kuinka raskaasti jokainen työ-, koulu- ja ostosmatkojen edestakaiseen matkaan kuluva minuutti painaa, kerrottuna kaupungin keskipalkalla. Arvolla 1 minuutti on palkan arvoinen. Suuremmat arvot suosivat asuntoja lähellä työpaikkoja ja kauppoja."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Keskipalkka (perusarvo)",
+        "desc": "Keskipalkan perusarvo simulaation alussa."
+      },
+      "AVERAGE_RENT": {
+        "label": "Keskivuokra (perusarvo)",
+        "desc": "Keskivuokran perusarvo simulaation alussa (päivässä neliömetriä kohden)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Osinkojen varallisuussidonnainen osuus",
+        "desc": "Osuus osingoista, joka jaetaan kotitalouksien rahavarojen suhteessa. Loput jaetaan tasan kaikille kotitalouksille. 0 = kaikki tasan, 1 = kaikki rahavarojen suhteessa."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Laitteiden poistoaste",
+        "desc": "Kuinka paljon laiteinvestointien pääomakanta arvoaan menettää joka kausi."
+      },
+      "WORK_HOURS": {
+        "label": "Päivittäinen työaika (h)",
+        "desc": "Kaupunkilaisen tavallinen työtuntimäärä päivässä."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Perusopetuksen aloitusikä",
+        "desc": "Ikä, jolloin lapset aloittavat perusopetuksen (alakoulua vastaava)."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Perusopetuksen päättymisikä",
+        "desc": "Ikä, jolloin perusopetus päättyy (vastaa toisen asteen valmistumista)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Valmistumis- ja itsenäistymisikä",
+        "desc": "Ikä, jolloin kaupunkilainen suorittaa korkeakouluopinnot ja muuttaa pois kotitaloudesta."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Työikäisyyden alaraja",
+        "desc": "Tätä nuoremmat kaupunkilaiset eivät hae töitä eikä heitä lasketa työttömyysasteeseen."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Kerrosten enimmäismäärä",
+        "desc": "Yksityisen sektorin automaattisesti rakentamien rakennusten kerrosmäärän yläraja."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Kerrosrangaistuskerroin",
+        "desc": "Korkean rakentamisen kustannusrangaistuksen kerroin. Mitä suurempi arvo, sitä pienempi rangaistus korkeille rakennuksille.",
+        "graphX": "Kerrokset",
+        "graphY": "Rakennuskustannusten kerroin"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Raivauksen tehokkuuskerroin",
+        "desc": "Kuinka paljon tehokkaampaa raivaus on uudisrakentamiseen verrattuna (kerroin)."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Sortumisen perustodennäköisyys vuodessa",
+        "desc": "Todennäköisyys, jolla rakennus, jonka kestävyys on 0,5, sortuu vuoden aikana."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Sortumisen Weibull-muotoparametri",
+        "desc": "Mitä suurempi arvo, sitä jyrkemmin sortumisen todennäköisyys kasvaa käyttöiän lähestyessä loppuaan."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Korjauskustannusten osuus",
+        "desc": "Korjauskustannukset osuutena uudisrakentamisen kustannuksista."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Vanhenemiskerroin ilman ylläpitoa",
+        "desc": "Kuinka nopeasti rakennus tai väylä vanhenee, kun se ei saa lainkaan päivittäistä ylläpitoa, kerrottuna täyden ylläpidon vanhenemisnopeudella. Kerroin muuttuu lineaarisesti arvosta 1 tähän arvoon sen mukaan, kuinka suuri osa ylläpidosta jää saamatta."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Korjaukseen siirtymisen perustodennäköisyys vuodessa",
+        "desc": "Vuotuinen perustodennäköisyys, jolla korjattavaksi soveltuva rakennus todella siirtyy korjaukseen."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Alkuperäinen rakennusvelka (per m²)",
+        "desc": "Rakennuksen alkuperäinen rakennusvelka kerrosalan neliömetriä kohden (negatiiviset varat)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Tieliikenteen melukerroin",
+        "desc": "Kuinka paljon tieliikenne vaikuttaa melun lämpökarttaan. Mitä suurempi arvo, sitä meluisampaa teiden varsilla on."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Jalankulun melukerroin",
+        "desc": "Kuinka paljon jalankulku vaikuttaa melun lämpökarttaan."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Jalankulun melukynnys",
+        "desc": "Vain tämän arvon ylittävä osa jalankulkijamäärästä aiheuttaa melua."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Melun vaimenemisetäisyys (m)",
+        "desc": "Melu heikkenee etäisyyden neliön mukaan ja lisäksi 1/e-osaan tämän matkan välein (rakennusten suojaus sekä ilman ja maan vaimennus). Mitä pienempi arvo, sitä lähemmäs lähdettä melu jää."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Tieliikenteen ilmansaastekerroin",
+        "desc": "Kuinka paljon tieliikenne vaikuttaa ilmansaasteiden lämpökarttaan."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Ilmansaasteiden vaimenemisetäisyys (m)",
+        "desc": "Ilmansaasteet ja hajut heikkenevät etäisyyden neliön mukaan ja lisäksi 1/e-osaan tämän matkan välein (leviäminen ja laskeuma). Mitä pienempi arvo, sitä lähemmäs lähdettä ne jäävät."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Työttömyyden painoarvo rikollisuudessa",
+        "desc": "Kuinka voimakkaasti työttömyysaste vaikuttaa rikollisuuden lämpökarttaan. Mitä suurempi arvo, sitä suoremmin työttömyys heikentää yleistä turvallisuutta."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Rikollisuuden levinneisyys (m)",
+        "desc": "Rikollisuuden lämpökartan Gaussin sumennuksen säde."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Kävelynopeus (km/h)",
+        "desc": "Jalankulkijoiden nopeus. Käytetään reittihaun kustannusten laskennassa."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Autojen kiihdytysmatka (m)",
+        "desc": "Matka, jonka autot tarvitsevat kiihdyttämiseen. Vaikuttaa nopeuden laskentaan lyhyillä teillä."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Teiden päivittäinen käyttöaika (h)",
+        "desc": "Kuinka monta tuntia päivässä tie on käytössä. Käytetään liikennemäärien muuntamiseen."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Tieliikennebonuksen kyllästymiskynnys",
+        "desc": "Kun tieliikenne on vähintään tämän arvon suuruinen, vähittäiskaupat saavat suurimman liikennebonuksen."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Jalankulkubonuksen kyllästymiskynnys",
+        "desc": "Kun jalankulkijamäärä on vähintään tämän arvon suuruinen, vähittäiskaupat saavat suurimman jalankulkijabonuksen."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Ladataan…",
+    "noScenarios": "Skenaarioita ei ole saatavilla",
+    "starting": "Aloitetaan…",
+    "startFailed": "Aloitus epäonnistui",
+    "confirmTitle": "Vahvista pelin asetukset",
+    "confirmStartTitle": "Aloitetaanko peli?",
+    "unsavedChangesWarning": "Jos aloitat, nykyisen pelin tallentamattomat muutokset menetetään.",
+    "startSettingsHeading": "Kaupungin asetukset",
+    "cityNameLabel": "Kaupungin nimi",
+    "insigniaLabel": "Vaakuna ja kaupungin lippu",
+    "languageLabel": "Kaupungin kieli",
+    "languageNote": "*Ei voi muuttaa myöhemmin",
+    "simulationDaysLabel": "Simulaatiopäivät",
+    "simulationDaysNote": "*Ei voi muuttaa myöhemmin",
+    "daysOption": "{{days}} päivää",
+    "startButton": "Aloita",
+    "backButton": "Takaisin",
+    "cleared": "Läpäisty",
+    "tutorialBadge": "Opetusohjelma",
+    "sectionDebug": "Virheenjäljitys",
+    "sectionTutorials": "Opetusohjelmat",
+    "sectionScenarios": "Skenaariot",
+    "detailPlaceholder": "Valitse skenaario vasemmalla olevasta luettelosta.",
+    "detailMapSizeLabel": "Kartan koko",
+    "detailUnknown": "Tuntematon",
+    "detailObjectiveLabel": "Tavoitteet",
+    "detailCreditsLabel": "Tekijät",
+    "detailNoObjective": "Ei tavoitteita",
+    "detailNoDescription": "Tälle skenaariolle ei ole kuvausta.",
+    "tutorialObjective": "Suorita opetusohjelman kaikki vaiheet.",
+    "startScenarioButton": "Aloita tämä skenaario",
+    "tabSelect": "Valitse skenaario",
+    "tabBrowse": "Etsi skenaarioita",
+    "tabTerrain": "Valitse maasto",
+    "relocalizeNote": "Tämä skenaario on tehty kielellä {{from}}. Jos aloitat kielellä {{to}}, kaupunginosat, laitokset, asukkaat, asemat ja muut kohteet nimetään uudelleen kielellä {{to}}.",
+    "developmentNotice": {
+      "heading": "Tämä peli on kehitysvaiheen kokeiluversio",
+      "subheading": "Lue ennen pelaamista",
+      "text": "Talouden parametrit ja logiikka ovat vielä hiomatta, joten kaupunkisi ei välttämättä kasva niin kuin pitäisi. Työttömyys voi nousta ja kaupunki voi jopa romahtaa, mutta se ei missään nimessä johdu sinun pelaamisestasi. Odota tulevia päivityksiä. Lisää peli toivelistallesi ja odota virallista julkaisua."
+    }
+  }
+}

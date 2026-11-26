@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Qualificação exigida",
+    "wage": "Salário unitário",
+    "quota": "Mão de obra necessária",
+    "totalLabor": "Mão de obra contratada",
+    "employees": "Lista de trabalhadores",
+    "hired": "Preenchido",
+    "vacant": "Por preencher",
+    "noQuota": "Não precisa de mão de obra",
+    "noEmployees": "Não há trabalhadores",
+    "statusTitle": "Situação do emprego"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Bygninger",
+      "paths": "Traseer",
+      "vehicles": "Kjøretøy",
+      "props": "Dekorobjekter"
+    },
+    "additional": "Ekstra modeller",
+    "loading": "Laster modeller fra 3D-visningen…",
+    "noModel": "Ingen modell",
+    "noImage": "Intet bilde",
+    "weight": "Vekt",
+    "applyNote": "Endringer i vekt trer i kraft neste gang du starter eller laster inn et spill.",
+    "preview": {
+      "hint": "Dra for å rotere / rull for å zoome",
+      "zoomIn": "Zoom inn",
+      "zoomOut": "Zoom ut",
+      "reset": "Tilbakestill"
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Търсене на граждани",
+    "tabTracking": "Списък за проследяване",
+    "name": "Име",
+    "age": "Възраст",
+    "ageSeparator": "до",
+    "search": "Търси",
+    "noResults": "Няма граждани, отговарящи на условията.",
+    "truncated": "Показани са {{shown, number}} от {{total, number}} граждани, отговарящи на условията."
+  }
+}

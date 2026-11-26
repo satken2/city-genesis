@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Alapadatok",
+    "tabActivity": "Tevékenység",
+    "follow": "Követés kamerával",
+    "unfollow": "Kamerakövetés leállítása",
+    "track": "Hozzáadás a követési listához",
+    "trackRandom": "Véletlen polgár követése",
+    "noUntrackedCitizens": "Nincs olyan polgár, akit még nem követsz.",
+    "trackRandomError": "Nem sikerült polgárt követni.",
+    "untrack": "Eltávolítás a követési listáról",
+    "home": "Lakóhely",
+    "mobility": "Közlekedés módja",
+    "mode": {
+      "automobile": "Autó",
+      "pedestrian": "Gyalog és tömegközlekedéssel"
+    },
+    "visits": "Úti célok",
+    "visitKind": {
+      "home": "Otthon",
+      "work": "Munkahely",
+      "school": "Iskola",
+      "shop": "Vásárlás"
+    },
+    "legs": {
+      "walk": "Gyalog",
+      "drive": "Autó",
+      "transit": "Tömegközlekedés",
+      "conveyor": "Személyszállító berendezés"
+    },
+    "trip": "Egy irányban {{minutes}} perc · {{route}}",
+    "noRoute": "Nincs útvonal",
+    "noVisits": "Nincs hová mennie.",
+    "status": {
+      "not_ready": "A szimuláció futtatása után jelenik meg.",
+      "busy": "Szimuláció közben nem jeleníthető meg.",
+      "no_home": "Lakásra vár, ezért nincs rögzített tevékenysége.",
+      "missing": "Ez a polgár már nem él a városban.",
+      "error": "Nem sikerült betölteni."
+    },
+    "empty": "Nem követsz egyetlen polgárt sem.",
+    "pickFailed": {
+      "not_ready": "Futtasd a szimulációt, és utána az autókra, gyalogosokra kattintva megnézheted, kik ők.",
+      "busy": "Szimuláció közben a polgárok nem jeleníthetők meg.",
+      "none": "Nem sikerült kideríteni, ki ül ebben az autóban, illetve ki ez a gyalogos.",
+      "missing": "Ez a polgár már nem él a városban.",
+      "no_home": "Ez a polgár lakásra vár.",
+      "error": "Nem sikerült megjeleníteni a polgárt."
+    }
+  }
+}

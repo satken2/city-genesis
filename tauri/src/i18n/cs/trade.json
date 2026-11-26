@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Informace o dodávkách",
+    "product": "Dodávané zboží",
+    "amount": "Dodávané množství",
+    "price": "Dodávací cena",
+    "soldAmount": "Prodané množství",
+    "profitRate": "Marže",
+    "utilization": "Vytížení"
+  },
+  "tourismSupply": {
+    "title": "Přijímání turistů",
+    "touristCapacity": "Kapacita pro turisty",
+    "persons": "{{value}} os.",
+    "218": {
+      "price": "Vstupné",
+      "amount": "Kapacita návštěvníků (celkem)",
+      "soldAmount": "Návštěvníci (celkem)"
+    },
+    "219": {
+      "price": "Jízdné",
+      "amount": "Přepravní kapacita (celkem)",
+      "soldAmount": "Cestující (celkem)"
+    }
+  },
+  "demand": {
+    "product": "Zboží",
+    "demandAmount": "Poptávka",
+    "receivedAmount": "Získáno",
+    "acquiredAmount": "Zásoby"
+  },
+  "cargo": {
+    "title": "Překládka zboží",
+    "description": "Toto centrum dováží zboží ze zahraničí a dodává ho na trhy ve městě. Zároveň vykupuje přebytky městské výroby a vyváží je ven.",
+    "capacity": "Překládací kapacita",
+    "perPeriod": "/měsíc",
+    "perPeriod_week": "/týden",
+    "materialCapacity": "Limit podle dodaných surovin",
+    "areaCapacity": "Limit podle podlahové plochy",
+    "importHandled": "Objem dovozu",
+    "exportHandled": "Objem vývozu",
+    "utilization": "Vytížení",
+    "importSectionTitle": "Dovoz",
+    "exportSectionTitle": "Vývoz",
+    "handledImport": "Prodáno",
+    "handledExport": "Vykoupeno",
+    "allocation": "Přiděleno",
+    "priceImport": "Prodejní cena",
+    "priceExport": "Výkupní cena",
+    "lost": "Ušlý prodej",
+    "noProducts": "Žádné zboží"
+  }
+}

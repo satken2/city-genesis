@@ -1,0 +1,22 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Edifícios",
+      "paths": "Traçados",
+      "vehicles": "Veículos",
+      "props": "Elementos decorativos"
+    },
+    "additional": "Modelos adicionais",
+    "loading": "A carregar os modelos a partir da vista 3D…",
+    "noModel": "Sem modelo",
+    "noImage": "Sem imagem",
+    "weight": "Peso",
+    "applyNote": "As alterações de peso aplicam-se da próxima vez que iniciar ou carregar um jogo.",
+    "preview": {
+      "hint": "Arrastar para rodar / roda do rato para ampliar ou reduzir",
+      "zoomIn": "Ampliar",
+      "zoomOut": "Reduzir",
+      "reset": "Repor"
+    }
+  }
+}

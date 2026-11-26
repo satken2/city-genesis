@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Caută cetățeni",
+    "tabTracking": "Lista de urmărire",
+    "name": "Nume",
+    "age": "Vârstă",
+    "ageSeparator": "–",
+    "search": "Caută",
+    "noResults": "Niciun cetățean nu corespunde criteriilor.",
+    "truncated": "Se afișează {{shown, number}} din {{total, number}} cetățeni care corespund criteriilor."
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "mapNavigation": {
+    "title": "Udforsk byen",
+    "openSidebar": "Åbn sidepanel",
+    "closeSidebar": "Luk sidepanel",
+    "back": "Tilbage",
+    "search": "Søg efter et sted",
+    "origin": "Søg efter et startpunkt",
+    "destination": "Søg efter en destination",
+    "clear": "Ryd",
+    "searching": "Søger…",
+    "error": "Kan ikke oprette forbindelse. Genindlæs, og prøv igen.",
+    "noResults": "Ingen steder fundet",
+    "mode": "Transportform",
+    "pedestrian": "Gang og kollektiv trafik",
+    "automobile": "Bil",
+    "pickOrigin": "Vælg start på kortet",
+    "pickDestination": "Vælg destination på kortet",
+    "swap": "Byt om",
+    "cancel": "Annuller",
+    "directions": "Rutevejledning hertil",
+    "intro": "Søg efter anlæg, stationer, bydele eller veje, eller vælg et sted på kortet.",
+    "chooseOrigin": "Søg efter et startpunkt, eller vælg et på kortet.",
+    "routing": "Finder rute…",
+    "showRoute": "Vis hele ruten",
+    "mapPoint": "Punkt på kortet",
+    "minutes": "ca. {{count}} min.",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Et skøn baseret på vejnettet fra ruteberegning #{{epoch}}. Stiplede linjer viser gang og forbindelser til veje.",
+    "busy": "Simuleringen kører. Resultaterne opdateres, når den er færdig.",
+    "not_ready": "Der er endnu ingen rutedata. Kør en simulering i denne by for at se ruter.",
+    "unreachable": "Der er ingen rute mellem de to steder.",
+    "no_access": "Der blev ikke fundet nogen tilgængelig vej ved det valgte sted.",
+    "geometry_unavailable": "Den kollektive trafiks forløb for denne rute er ikke tilgængeligt.",
+    "place_missing": "Det valgte sted er blevet fjernet. Vælg igen.",
+    "kind": {
+      "agent": "Anlæg",
+      "zone": "Bydel",
+      "stop": "Stoppested",
+      "station": "Station",
+      "point": "Punkt",
+      "road": "Vej"
+    },
+    "leg": {
+      "walk": "Gang",
+      "drive": "Bil",
+      "transit": "Kollektiv trafik",
+      "conveyor": "Persontransport",
+      "access": "Forbindelse til vej",
+      "turn": "Vending i kryds"
+    },
+    "picking": {
+      "origin": "Klik på dit startpunkt på kortet.",
+      "destination": "Klik på din destination på kortet."
+    },
+    "pins": {
+      "tab": "Nåle",
+      "hint": "Klik på kortet for at sætte en nål i den valgte farve. Højreklik på en nål for at fjerne den.",
+      "list": "Liste over nåle",
+      "remove": "Fjern nål"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Notificações da cidade",
+    "empty": "De momento, não há problemas que exijam atenção",
+    "loadFailed": "Falha ao obter as notificações",
+    "types": {
+      "resource_runway": "Prevê-se que o recurso «{{name}}» se esgote dentro de cerca de {{remaining_epochs}} épocas",
+      "resource_depleted": "O recurso «{{name}}» esgotou-se",
+      "facility_inoperative": "O equipamento público «{{name}}» não está a funcionar",
+      "facility_inoperative_labor": "O equipamento público «{{name}}» não está a funcionar por falta de mão de obra",
+      "facility_inoperative_material": "O equipamento público «{{name}}» não está a funcionar por falta de matérias-primas",
+      "facility_inoperative_high_skill": "O equipamento público «{{name}}» está a funcionar com capacidade reduzida por falta de pessoal especializado",
+      "facility_inoperative_budget": "O equipamento público «{{name}}» está a funcionar com capacidade reduzida por falta de orçamento",
+      "education_low_enrollment": "A instituição de ensino «{{name}}» tem pouca procura (inscritos: {{enrolled}} / vagas: {{max_students}})",
+      "infra_facility_down": "A infraestrutura «{{name}}» está parada",
+      "infra_disconnected": "Instalações sem ligação à rede de infraestruturas: {{count}}",
+      "rail_capacity_exceeded": "Troços de via em que o número de comboios excede a capacidade: {{count}}",
+      "collapse": "Edifícios/estradas que ruíram: {{count}}",
+      "collapse_with_deaths": "Edifícios/estradas que ruíram: {{count}}; mortos: {{deaths}}",
+      "deaths_traffic": "Mortos em acidentes de viação: {{count}}",
+      "tenant_blocked_by_parcel_size": "No bairro «{{zone_name}}» não é possível construir um edifício para «{{tenant_name}}» (necessário: {{required}} m2; máximo do lote: {{max_capacity}} m2). É necessário um lote maior",
+      "unknown": "Ocorreu um acontecimento grave",
+      "sanitation": "Agregados familiares com condições de higiene a piorar: {{count}}. Melhore o tratamento de esgotos e de resíduos."
+    }
+  }
+}

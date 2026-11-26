@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Estado do abastecimento",
+    "selected": "Selecionado",
+    "providers": "Fornecedores – {{product}}",
+    "executing": "Não é possível obter o diagrama de abastecimento enquanto a simulação está em curso.",
+    "fetchError": "Não foi possível obter o estado do abastecimento.",
+    "activeCount": "Ativos {{active}}/{{count}}",
+    "production": "Produção anterior: {{amount}} {{unit}}",
+    "resourceRemaining": "Reservas acessíveis: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Disponível",
+      "unknown": "Por determinar",
+      "missing": "Inexistente",
+      "inactive": "Inativo",
+      "partial": "Problemas parciais",
+      "limited": "Insuficiente ou parado",
+      "disconnected": "Sem ligação",
+      "supply_shortage": "Possível falta de abastecimento",
+      "capacity_limited": "Possível limite de capacidade"
+    },
+    "facilities": {
+      "401": "Centrais elétricas",
+      "402": "Captações de água",
+      "403": "Fornecedores de petróleo bruto",
+      "404": "Estações de mercadorias",
+      "405": "Fornecedores de minério",
+      "406": "Rotas oceânicas (alto-mar)",
+      "501": "Depósitos ferroviários",
+      "502": "Depósitos de autocarros",
+      "503": "Depósitos de LRT",
+      "504": "Depósitos de monocarril",
+      "505": "Doca de manutenção"
+    },
+    "consumers": {
+      "401": "Consumidores de eletricidade",
+      "402": "Estações elevatórias",
+      "403": "Consumidores de petróleo bruto",
+      "404": "Utilizadores de mercadorias",
+      "405": "Consumidores de minério",
+      "406": "Portos",
+      "501": "Linhas ferroviárias",
+      "502": "Carreiras de autocarro",
+      "503": "Linhas de LRT",
+      "504": "Linhas de monocarril",
+      "505": "Linhas de ferry"
+    }
+  }
+}

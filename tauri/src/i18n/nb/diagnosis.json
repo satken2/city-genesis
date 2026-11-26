@@ -1,0 +1,202 @@
+{
+  "diagnosis": {
+    "refresh": "Diagnostiser på nytt",
+    "note": "Følger årsakene til problemet trinn for trinn ut fra forrige simuleringsresultat. Når du har gjort tiltak, kjører du neste epoke for å oppdatere resultatet.",
+    "noProblem": {
+      "title": "Fant ingen problemer",
+      "description": "Det er ingenting å rapportere for denne økonomiske aktøren akkurat nå."
+    },
+    "target": {
+      "agent": "Anlegg nr. {{id}}",
+      "path": "Trasé nr. {{id}}",
+      "node": "Tilkoblingspunkt nr. {{id}}",
+      "nodeAt": "Punkt ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": {
+        "title": "Fant ikke den økonomiske aktøren",
+        "description": ""
+      },
+      "cycle": {
+        "title": "Årsakene går i ring",
+        "description": "Problemet ved dette anlegget diagnostiseres allerede lenger opp (de er avhengige av hverandre)."
+      },
+      "depth_limit": {
+        "title": "Graver ikke dypere",
+        "description": "Årsakskjeden er for lang, så den stopper her. Diagnostiser anlegget direkte."
+      },
+      "no_alert": {
+        "title": "Anlegget selv har ingen problemer",
+        "description": "Tilbudet kan være begrenset av anleggets størrelse eller utnyttelsesmål."
+      },
+      "facility_inactive": {
+        "title": "Anlegget er ikke i drift",
+        "description": "Det produserer ikke fordi det er under bygging, stanset, kollapset eller lignende. Se detaljene for anlegget."
+      },
+      "producer_ref": {
+        "title": "Leverandøranlegg",
+        "description": ""
+      },
+      "material_shortage": {
+        "title": "Får ikke skaffet råvarer",
+        "description": "Noen av de nødvendige råvarene kom ikke frem, så produksjonen ble lavere enn planlagt."
+      },
+      "material_unmet": {
+        "title": "Mangel på {{product_name}}",
+        "description": "Mottok {{received}} av nødvendige {{demand}} ({{ratio}} %)."
+      },
+      "material_unmet_unknown": {
+        "title": "Kunne ikke finne ut hvilken råvare som manglet",
+        "description": "Dette kan skje rett etter at etterspørselen har falt. Se resultatet etter neste epoke."
+      },
+      "infra_disconnected": {
+        "title": "Ikke koblet til nettet for {{product_name}}",
+        "description": ""
+      },
+      "infra_no_terminal": {
+        "title": "Mangler tilkoblingspunkt",
+        "description": "Dette anlegget har ikke noe tilkoblingspunkt for {{product_name}}."
+      },
+      "infra_terminal_unconnected": {
+        "title": "Ingen trasé er koblet til tilkoblingspunktet",
+        "description": ""
+      },
+      "infra_link_not_active": {
+        "title": "Tilførselstraseen er ikke i drift ennå",
+        "description": "{{count}} traseer som går til tilkoblingspunktet, er under bygging eller ikke påbegynt."
+      },
+      "infra_link_incompatible": {
+        "title": "Tilførselstraseen kan ikke føre {{product_name}}",
+        "description": "Traseen som går til tilkoblingspunktet, er av en type som ikke kan føre denne varen (f.eks. spor uten elektrifisering)."
+      },
+      "infra_no_producer": {
+        "title": "Byen har ingen produsent av {{product_name}}",
+        "description": ""
+      },
+      "infra_producers_inactive": {
+        "title": "Produsentene av {{product_name}} er ikke i drift",
+        "description": "Ingen av de {{count}} produsentene i byen er i drift."
+      },
+      "infra_producers_unconnected": {
+        "title": "Produsentene er ikke koblet til nettet",
+        "description": "{{count}} produsenter er i drift, men ingen av dem er koblet til nettet for {{product_name}}."
+      },
+      "infra_network_split": {
+        "title": "Dette nettet har ingen produsent",
+        "description": "Produsentene av {{product_name}} ({{producers}}) er koblet til et annet nett. De to nettene er brutt et sted eller har aldri vært koblet sammen."
+      },
+      "infra_link_under_construction": {
+        "title": "En trasé som kobler sammen nettene, er under bygging",
+        "description": "{{count}} traseer skal etter planen kobles til dette nettet."
+      },
+      "infra_gap_detected": {
+        "title": "Nettet er brutt her",
+        "description": "Endepunktene til de to nettene ligger bare {{distance}} m fra hverandre."
+      },
+      "infra_tap_missing": {
+        "title": "Ikke koblet til produsentenes nett",
+        "description": ""
+      },
+      "infra_generation_shortage": {
+        "title": "Det produseres for lite {{product_name}}",
+        "description": "Dette nettet produserer {{supply}} mot en etterspørsel på {{demand}} ({{producers}} produsenter)."
+      },
+      "infra_transmission_bottleneck": {
+        "title": "Nettkapasiteten er for liten",
+        "description": "{{count}} traseer går for full kapasitet."
+      },
+      "infra_unexplained": {
+        "title": "Nettet ser ut til å være i orden",
+        "description": "Både produksjon og tilkobling er tilstrekkelig, så mangelen kan ha vært midlertidig. Se resultatet etter neste epoke."
+      },
+      "market_no_supplier": {
+        "title": "Byen har ingen leverandør av {{product_name}}",
+        "description": "Det finnes ingen innenlandsk produsent i drift, og ingenting importeres."
+      },
+      "market_supply_insufficient": {
+        "title": "Tilbudet av {{product_name}} dekker ikke etterspørselen",
+        "description": "Tilbud {{supply}} mot bestillinger for hele byen på {{demand}} ({{producers}} produsenter, {{hubs}} importknutepunkter)."
+      },
+      "market_unmatched": {
+        "title": "Kunne ikke kjøpe {{product_name}} på markedet",
+        "description": "Byens samlede tilbud på {{supply}} dekker bestillingene på {{demand}}, men det nådde ikke frem til dette anlegget. Avstand eller pris kan være årsaken."
+      },
+      "service_out_of_range": {
+        "title": "Utenfor dekningsområdet for {{product_name}}",
+        "description": "Tomten til dette anlegget ligger ikke innenfor virkeområdet til noen av anleggene som leverer {{product_name}} ({{producers}} i byen)."
+      },
+      "high_skill_shortage": {
+        "title": "Får ikke tak i fagfolk",
+        "description": "Det er for få arbeidstakere med høy kompetanse, så produksjonsplanen er redusert til det de tilgjengelige ansatte klarer. Høyt kvalifisert arbeidskraft utdannes ved universiteter: bygg et universitet og fordel studieplassene til riktig kompetanse."
+      },
+      "labor_shortage": {
+        "title": "For få ansatte",
+        "description": "Har fått {{total_labor}} av nødvendig arbeidskraft på {{quota}}."
+      },
+      "labor_market_tight": {
+        "title": "Det er ingen ledig arbeidskraft igjen i byen",
+        "description": "Arbeidsledigheten er bare {{unemployment_rate}} %, så det er ingen å ansette. Bygg flere boliger for å tiltrekke innbyggere."
+      },
+      "labor_unfilled": {
+        "title": "Det finnes arbeidssøkere, men de kommer ikke",
+        "description": "Arbeidsledigheten er {{unemployment_rate}} %. Lang pendlevei, lav lønn eller feil kompetanse er sannsynlige årsaker."
+      },
+      "budget_capped": {
+        "title": "Budsjettet er for lite",
+        "description": "Det tildelte budsjettet er langt under det som trengs. Se over budsjettfordelingen."
+      },
+      "construction_shortage": {
+        "title": "Får ikke skaffet {{product_name}}",
+        "description": ""
+      },
+      "line_paused_route_disconnected": {
+        "title": "Ruten mellom holdeplassene er brutt",
+        "description": "Holdeplasser som kommer etter hverandre i ruten, er ikke forbundet med spor eller gater som kan kjøres i riktig retning. Bygg opp igjen den brutte delen eller endre ruten. For å snu på enveisspor må du enten snu ved en stasjon på spor som kan kjøres begge veier (f.eks. dobbeltspor lagt som én trasé), eller la togene gå over til motsatt spor ved å samle sporene i én node eller legge en sporveksel, og plassere holdeplassene for returen ved plattformene for motsatt retning."
+      },
+      "line_paused_no_underlay": {
+        "title": "Holdeplassen mangler underliggende trasé",
+        "description": "Sporet eller gaten holdeplassen lå på, finnes ikke lenger."
+      },
+      "line_paused_train_too_long": {
+        "title": "Togsettet er lengre enn delstrekningen med holdeplassen",
+        "description": "Reduser antall vogner per togsett eller forleng delstrekningen holdeplassen ligger på (en stasjonsplattform eller en del av en gate eller et spor)."
+      },
+      "line_no_vehicle_product": {
+        "title": "Denne linjetypen har ingen kjøretøy definert",
+        "description": ""
+      },
+      "line_vehicle_shortage": {
+        "title": "Får ikke skaffet kjøretøy",
+        "description": "Har skaffet {{received}} av nødvendige {{required}} vogner."
+      },
+      "line_off_network": {
+        "title": "Linjen ligger ikke på noe trafikknett",
+        "description": "Linjens underliggende rute er ikke forbundet med noe spor eller noen gate."
+      },
+      "transit_no_depot": {
+        "title": "Byen har ikke noe depot for {{product_name}}",
+        "description": "Bygg et depot og koble det til trafikknettet."
+      },
+      "transit_depots_inactive": {
+        "title": "Depotene er ikke i drift",
+        "description": "Ingen av de {{count}} depotene i byen er i drift."
+      },
+      "transit_depots_unconnected": {
+        "title": "Depotene er ikke koblet til trafikknettet",
+        "description": "Ingen av de {{count}} depotene er forbundet med spor eller gate. For jernbane må du legge et sidespor fra hovedstrekningen til depotets tilkoblingspunkt."
+      },
+      "transit_depot_other_network": {
+        "title": "Depotene ligger på et annet nett",
+        "description": "{{count}} depoter er koblet til et sporsystem som ikke når frem til denne linjen. Koble sammen nettene eller bygg et depot på dette nettet."
+      },
+      "transit_vehicle_insufficient": {
+        "title": "Det produseres for få kjøretøy",
+        "description": "Depotene på dette nettet ({{depots}}) leverer {{supply}} vogner, mens linjene trenger {{demand}}."
+      },
+      "transit_unexplained": {
+        "title": "Depotene ser ut til å være i orden",
+        "description": "Både tilbud og tilkobling er tilstrekkelig, så mangelen kan ha vært midlertidig. Se resultatet etter neste epoke."
+      }
+    }
+  }
+}

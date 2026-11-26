@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Beban simulasi",
+      "heading": "Masa pengiraan epok terkini ({{days}} hari)",
+      "noData": "Tiada data pengukuran",
+      "note": "Jika beberapa epok dijalankan berturut-turut, nilai ini ialah epok yang terakhir. Bilangan operasi ialah anggaran kasar bilangan kombinasi dalam perbandingan utama, berdasarkan saiz bandar.",
+      "colGroup": "Proses",
+      "colTime": "Masa",
+      "colWorkload": "Bil. operasi",
+      "workloadHint": "Anggaran kasar bilangan kombinasi dalam perbandingan utama (bilangan elemen tatasusunan). Halakan tetikus pada nilai untuk melihat pecahannya.",
+      "seconds": "{{value}} saat",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Pasaran barangan",
+      "realestate": "Pasaran hartanah",
+      "labor": "Pasaran buruh",
+      "building_spawn": "Kemunculan bangunan",
+      "agent_spawn": "Kemunculan entiti ekonomi",
+      "routing": "Pencarian rute warga kota",
+      "transit": "Pencarian rute pengangkutan awam",
+      "environment": "Persekitaran kediaman",
+      "other": "Lain-lain"
+    },
+    "workload": {
+      "market": "Pembeli {{demanders}} × pembekal {{suppliers}} (didarab bagi setiap barangan dan dijumlahkan)",
+      "realestate": "Isi rumah yang mempertimbangkan pindah {{movers}} × bangunan kediaman {{housing}}",
+      "labor": "Pencari kerja {{seekers}} × majikan {{employers}}",
+      "building_spawn": "Lot calon {{parcels}} × jenis bangunan × bilangan tingkat × kegunaan lantai",
+      "agent_spawn": "Barangan × daerah {{zones}} × daerah {{zones}}",
+      "routing": "2 mod perjalanan × daerah {{zones}} × daerah {{zones}} × 3 rute calon × jajaran {{paths}}",
+      "transit": "Hentian {{stops}} × nod {{nodes}}",
+      "environment": "Grid {{width}} × {{height}} × kedudukan matahari"
+    },
+    "entities": {
+      "colMetric": "Perkara",
+      "colCount": "Bilangan",
+      "title": "Bilangan entiti",
+      "agents": "Entiti ekonomi",
+      "households": "Isi rumah",
+      "businesses": "Premis perniagaan",
+      "publicFacilities": "Kemudahan awam",
+      "buildings": "Bangunan",
+      "citizens": "Warga kota",
+      "population": "Penduduk",
+      "zones": "Daerah",
+      "parcels": "Lot",
+      "paths": "Jajaran",
+      "roads": "Jalan",
+      "tracks": "Landasan",
+      "infra": "Rangkaian infrastruktur",
+      "nodes": "Nod"
+    },
+    "approximation": {
+      "title": "Penghampiran simulasi",
+      "intro": "Tetapan untuk meringkaskan pengiraan bagi bandar besar akan ditambah kelak. Tetapan ini belum boleh diubah buat masa ini.",
+      "warning": "Perubahan ini mungkin menjejaskan keseimbangan permainan. Ia tidak boleh dibatalkan",
+      "irreversible": "Perubahan akibat penghampiran kekal dalam epok-epok seterusnya. Penghampiran yang telah diaktifkan tidak boleh dimatikan atau dikurangkan tahapnya.",
+      "undecided": "Belum ditetapkan",
+      "candidates": "calon maks.",
+      "epochs": "epok sekali",
+      "off": "Mati",
+      "on": "Hidup",
+      "goods": {
+        "label": "Bilangan calon pembelian",
+        "description": "Hadkan bilangan pembekal yang dibandingkan dari segi harga dan jarak."
+      },
+      "jobs": {
+        "label": "Bilangan calon pekerjaan",
+        "description": "Hadkan bilangan majikan yang dibandingkan dari segi gaji dan keadaan perjalanan ke tempat kerja."
+      },
+      "housing": {
+        "label": "Bilangan calon kediaman",
+        "description": "Hadkan bilangan kediaman yang dibandingkan dari segi sewa dan lokasi."
+      },
+      "interval": {
+        "label": "Sela keputusan berkala",
+        "description": "Kurangkan kekerapan menilai semula tempat membeli-belah, pekerjaan dan kediaman."
+      },
+      "aggregation": {
+        "label": "Kira warga kota dan isi rumah serupa secara berkumpulan",
+        "description": "Sebahagian keputusan warga kota atau isi rumah yang keadaannya serupa dikendalikan secara berkumpulan."
+      }
+    },
+    "status": {
+      "title": "Status sistem",
+      "gpuDisabled": "Pecutan GPU: Dinyahaktifkan",
+      "coreSimulator": "Simulator teras",
+      "currentMemory": "Penggunaan memori semasa: {{value}}",
+      "peakMemory": "Penggunaan memori maksimum sejak dimulakan: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Penggunaan VRAM semasa: {{value}}",
+      "usageTooltip": "Seluruh PC {{pc}} / Permainan ini {{game}} / Terpasang {{total}}",
+      "legendPc": "Seluruh PC",
+      "legendGame": "Permainan ini"
+    }
+  }
+}

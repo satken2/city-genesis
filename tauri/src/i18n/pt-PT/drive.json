@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Condução",
+    "car": "Automóvel",
+    "rail": "Linhas ferroviárias",
+    "running": "Veículos em circulação",
+    "standard": "Ligeiro de passageiros",
+    "commercial": "Veículo comercial",
+    "truck": "Camião",
+    "finishEditing": "Termine a edição antes de começar a conduzir.",
+    "noLines": "Não há linhas ferroviárias em funcionamento onde se possa viajar.",
+    "pickRail": "Clique na via da linha selecionada.",
+    "pickRoad": "Clique numa estrada em funcionamento.",
+    "pickVehicle": "Clique num carro, autocarro ou comboio em circulação (arraste para deslocar o mapa).",
+    "clickStart": "Selecione a posição inicial (arraste para deslocar o mapa)",
+    "startSelected": "Posição inicial selecionada. A partida é no sentido da seta.",
+    "reverse": "Inverter o sentido",
+    "start": "Partir",
+    "back": "Voltar",
+    "close": "Sair (Esc)",
+    "invalidStart": "Não é possível começar aqui. Selecione uma estrada transitável ou a via da linha selecionada.",
+    "invalidVehicle": "Não foi possível selecionar o veículo. Clique num carro, autocarro ou comboio em circulação.",
+    "notReady": "Não é possível partir neste sentido, ou a zona envolvente ainda está a carregar. Mude o sentido ou a posição, ou aguarde um pouco e tente novamente."
+  }
+}

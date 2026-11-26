@@ -1,0 +1,323 @@
+{
+  "policy": {
+    "pending": "Simulatie loopt",
+    "noData": "Geen gegevens",
+    "actionError": "Het actiescherm kon niet worden geopend.",
+    "indicators": {
+      "unemployment": {
+        "tab": "Werkloosheid",
+        "issue": "De werkloosheid is hoog",
+        "clear": "Geen problemen met werkloosheid gevonden",
+        "evidence": "Werkloosheid {{value}}"
+      },
+      "income": {
+        "tab": "Inkomen",
+        "issue": "Het inkomen van huishoudens is laag",
+        "clear": "Geen problemen met inkomen gevonden",
+        "evidence": "Gemiddeld huishoudinkomen {{value}}"
+      },
+      "tourism": {
+        "tab": "Toerisme",
+        "issue": "Er komen weinig toeristen",
+        "clear": "Geen problemen met toerisme gevonden",
+        "evidence": "{{value}} toeristen aanwezig · capaciteit {{capacity}}"
+      },
+      "crime": {
+        "tab": "Criminaliteit",
+        "issue": "Er zijn misdrijven en ruzies",
+        "clear": "Geen problemen met criminaliteit gevonden",
+        "evidence": "Schade door criminaliteit {{value}} · {{incidents}} ruzies"
+      },
+      "sanitation": {
+        "tab": "Hygiëne",
+        "issue": "Er zijn hygiëneproblemen",
+        "clear": "Geen hygiëneproblemen gevonden",
+        "evidence": "De hygiëne gaat achteruit bij {{value}} huishoudens"
+      },
+      "water": {
+        "tab": "Water",
+        "issue": "Er is een tekort aan water",
+        "clear": "Geen problemen met de watervoorziening gevonden",
+        "evidence": "Huishoudens en voorzieningen kregen {{value}} van hun bestellingen"
+      },
+      "electricity": {
+        "tab": "Elektriciteit",
+        "issue": "Er is een tekort aan elektriciteit",
+        "clear": "Geen problemen met de stroomvoorziening gevonden",
+        "evidence": "Huishoudens en voorzieningen kregen {{value}} van hun bestellingen"
+      },
+      "internet": {
+        "tab": "Telecom",
+        "issue": "Er is een tekort aan telecom",
+        "clear": "Geen problemen met de telecomvoorziening gevonden",
+        "evidence": "Huishoudens en voorzieningen kregen {{value}} van hun bestellingen"
+      },
+      "high_water": {
+        "tab": "Hogedrukwater",
+        "issue": "Er is een tekort aan hogedrukwater",
+        "clear": "Geen problemen met de levering van hogedrukwater gevonden",
+        "evidence": "Voorzieningen kregen {{value}} van hun bestellingen"
+      },
+      "high_electricity": {
+        "tab": "Hoogspanningsstroom",
+        "issue": "Er is een tekort aan hoogspanningsstroom",
+        "clear": "Geen problemen met de levering van hoogspanningsstroom gevonden",
+        "evidence": "Voorzieningen kregen {{value}} van hun bestellingen"
+      },
+      "upkeep": {
+        "tab": "Onderhoud",
+        "issue": "Openbare gebouwen, wegen en sporen krijgen te weinig onderhoud",
+        "clear": "Geen problemen met onderhoud gevonden",
+        "evidence": "{{value}} van het benodigde onderhoud is uitgevoerd"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "Alle huidige banen zijn bezet",
+        "evidence": "{{count}} werkzoekenden"
+      },
+      "unfilled_jobs": {
+        "title": "Er zijn tegelijk vacatures en werklozen",
+        "evidence": "{{count}} werkzoekenden · {{vacancies}} vacante effectieve arbeidseenheden"
+      },
+      "public_budget": {
+        "title": "Openbare voorzieningen worden door het budget beperkt",
+        "evidence": "Voorzieningen met ingeperkte plannen door het exploitatiebudget: {{count}}"
+      },
+      "education_gap": {
+        "title": "Sommige werkzoekenden hebben geen basisonderwijs afgerond",
+        "evidence": "Werkzoekenden zonder basisonderwijs: {{count}}"
+      },
+      "school_capacity": {
+        "title": "Te weinig plaatsen in het basisonderwijs",
+        "evidence": "Ingeschreven: {{enrolled}} · Niet ingeschreven: {{waiting}} / Capaciteit: {{capacity}}"
+      },
+      "immigrant_education_gap": {
+        "title": "Onder de werkzoekenden zonder basisonderwijs zijn immigranten",
+        "evidence": "Immigranten onder deze werkzoekenden: {{count}}"
+      },
+      "specialists": {
+        "title": "Door een tekort aan specialisten kunnen voorzieningen niet draaien",
+        "evidence": "Voorzieningen met een tekort aan specialisten: {{count}}"
+      },
+      "household_unemployment": {
+        "title": "Sommige huishoudens hebben werkloze volwassenen",
+        "evidence": "Huishoudens met werkloze volwassenen: {{count}}"
+      },
+      "security_response": {
+        "title": "De politie kan niet alle schade voorkomen",
+        "evidence": "Gevallen van criminaliteit afgelopen maand: {{count}}",
+        "evidence_week": "Gevallen van criminaliteit afgelopen week: {{count}}"
+      },
+      "no_police": {
+        "title": "Er is geen politiebureau in bedrijf"
+      },
+      "police_staff": {
+        "title": "Politiebureaus hebben te weinig personeel",
+        "evidence": "Politiebureaus met personeelstekort: {{count}}"
+      },
+      "police_budget": {
+        "title": "Het politiebudget is te laag",
+        "evidence": "Politiebureaus met een budgettekort: {{count}}"
+      },
+      "police_inputs": {
+        "title": "Politiebureaus hebben te weinig middelen",
+        "evidence": "Politiebureaus met een tekort aan middelen: {{count}}"
+      },
+      "unemployment_pressure": {
+        "title": "Werkloosheid ondermijnt de openbare veiligheid",
+        "evidence": "Werkloze volwassenen: {{count}}"
+      },
+      "citizen_criminality": {
+        "title": "Sommige burgers neigen tot criminaliteit",
+        "evidence": "Burgers die neigen tot criminaliteit: {{count}}"
+      },
+      "children_in_poverty": {
+        "title": "Kinderen groeien op in huishoudens onder het bestaansminimum",
+        "evidence": "Kinderen in huishoudens onder het bestaansminimum: {{count}}"
+      },
+      "children_in_crime_zones": {
+        "title": "Kinderen groeien op in wijken met criminaliteit",
+        "evidence": "Kinderen in wijken met criminaliteit afgelopen maand: {{count}}",
+        "evidence_week": "Kinderen in wijken met criminaliteit afgelopen week: {{count}}"
+      },
+      "service_no_facility": {
+        "title": "Geen voorziening levert deze dienst",
+        "title_named": "Geen {{suppliers}} aanwezig"
+      },
+      "service_facility_limited": {
+        "title": "Niet alle voorzieningen draaien: {{kinds}}",
+        "evidence": "Voorzieningen die feitelijk niet draaien: {{count}}"
+      },
+      "repair_budget_exhausted": {
+        "title": "Het herstelbudget is op en onderhoudsopdrachten zijn ingekort",
+        "evidence": "Uitgaven herstel {{expense}} / budget {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "Huishoudens of voorzieningen liggen buiten het verzorgingsgebied",
+        "evidence": "Buiten het bereik van elke voorziening: {{count}} huishoudens, {{facilities}} voorzieningen",
+        "title_named": "Huishoudens of voorzieningen liggen buiten het verzorgingsgebied van {{suppliers}}"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}} kan {{product_name}} niet inkopen",
+        "evidence": "{{received}} ontvangen van de benodigde {{demand}}"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}} heeft te weinig personeel",
+        "evidence": "{{total_labor}} van de benodigde {{quota}} effectieve arbeidseenheden ingevuld"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}} vindt geen specialisten"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}} heeft zijn plan ingeperkt door budgettekort"
+      },
+      "facility_inactive": {
+        "title": "{{facility}} is niet in bedrijf"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}} is niet aangesloten op het net voor {{product_name}}"
+      },
+      "slum_sanitation": {
+        "title": "Er wonen huishoudens in sloppenwijken",
+        "evidence": "Huishoudens in sloppenwijken: {{count}}"
+      },
+      "service_shortage": {
+        "title": "Huishoudens krijgen niet genoeg {{product_name}}",
+        "evidence": "Huishoudens kregen {{percent}}% van de referentiehoeveelheid"
+      },
+      "tourism_no_attraction": {
+        "title": "Er zijn geen toeristische attracties"
+      },
+      "tourism_no_gateway": {
+        "title": "Er is geen toegangspoort waarlangs toeristen kunnen aankomen"
+      },
+      "tourism_no_trade_hub": {
+        "title": "Er is geen handelsknooppunt dat reisgeld uitbetaalt"
+      },
+      "tourists_without_lodging": {
+        "title": "Sommige toeristen vinden geen onderdak",
+        "evidence": "Toeristen die op onderdak wachten: {{count}}"
+      },
+      "tourism_lodging_costly": {
+        "title": "Overnachten is duur vergeleken met het reisbudget",
+        "evidence": "Nieuwe toeristen melden zich op {{percent}}% van het normale niveau"
+      },
+      "tourists_dissatisfied": {
+        "title": "Toeristen zijn weinig tevreden",
+        "evidence": "Nieuwe aanmeldingen op {{percent}}% van normaal · {{count}} ontevreden naar huis"
+      },
+      "tourism_experience_short": {
+        "title": "Toeristen krijgen te weinig toeristische belevingen",
+        "evidence": "Toeristische belevingen ontvangen: {{percent}}%"
+      },
+      "tourism_leisure_short": {
+        "title": "Toeristen krijgen te weinig ontspanning en vrije tijd",
+        "evidence": "Ontspanning en vrije tijd ontvangen: {{percent}}%"
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "Banen scheppen in openbare voorzieningen"
+      },
+      "population": {
+        "title": "Bevolking verkleinen door burgers uit te zetten"
+      },
+      "budget": {
+        "title": "Exploitatiebudgetten verdelen"
+      },
+      "education": {
+        "title": "Meer scholen bouwen"
+      },
+      "higher_education": {
+        "title": "Specialisten opleiden via hoger onderwijs"
+      },
+      "welfare": {
+        "title": "Uitkeringen en bijstand verhogen"
+      },
+      "employment": {
+        "title": "Aannamevoorwaarden bekijken in de werkgelegenheidsstatistieken"
+      },
+      "police": {
+        "title": "Politiebureaus bouwen"
+      },
+      "facilities": {
+        "title": "Bekijken hoe voorzieningen ervoor staan"
+      },
+      "immigration_skills": {
+        "title": "Vaardigheidseisen voor immigranten herzien"
+      },
+      "immigration_limit": {
+        "title": "Immigratie beperken"
+      },
+      "criminality": {
+        "title": "Neiging tot criminaliteit van burgers bekijken"
+      },
+      "service_facility": {
+        "title": "Een voorziening bouwen die dit levert",
+        "title_named": "{{suppliers}} bouwen",
+        "title_tourism_no_attraction": "Een toeristische attractie bouwen",
+        "title_tourism_no_gateway": "Een haven of luchthaven bouwen"
+      },
+      "parcel": {
+        "title": "Een groter perceel klaarmaken"
+      },
+      "transit": {
+        "title": "Frequentie en sporen van het openbaar vervoer herzien"
+      },
+      "entity_detail": {
+        "title": "Details openen"
+      }
+    },
+    "selectorTitle": "Wat wil je onderzoeken?",
+    "eventsTitle": "Wat er gebeurt",
+    "causeTitle": "Oorzaak",
+    "adviceTitle": "Mogelijke maatregelen",
+    "needsAttention": "Kan beter",
+    "values": {
+      "money": "{{value}} / huishouden / dag",
+      "per_thousand": "{{value}} gevallen per 1.000 inwoners (afgelopen maand)",
+      "per_thousand_week": "{{value}} gevallen per 1.000 inwoners (afgelopen week)"
+    },
+    "collapse": "Inklappen",
+    "investigate": {
+      "crime": "Oorzaken van criminaliteit onderzoeken",
+      "unemployment": "Oorzaken van werkloosheid onderzoeken",
+      "income": "Oorzaken van laag inkomen onderzoeken",
+      "water": "Oorzaken van het watertekort onderzoeken",
+      "electricity": "Oorzaken van het stroomtekort onderzoeken",
+      "internet": "Oorzaken van het telecomtekort onderzoeken",
+      "upkeep": "Oorzaken van het onderhoudstekort onderzoeken",
+      "high_water": "Oorzaken van het tekort aan hogedrukwater onderzoeken",
+      "high_electricity": "Oorzaken van het tekort aan hoogspanningsstroom onderzoeken",
+      "facility": "Deze voorziening onderzoeken"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "Indicatoren",
+    "problems": {
+      "resource_runway": "Hulpbron “{{name}}” is over ongeveer {{remaining_epochs}} tijdvakken uitgeput",
+      "resource_depleted": "Hulpbron “{{name}}” is uitgeput",
+      "facility_inoperative": "Openbare voorziening “{{name}}” is niet in bedrijf",
+      "facility_inoperative_labor": "Openbare voorziening “{{name}}” is niet in bedrijf door een personeelstekort",
+      "facility_inoperative_material": "Openbare voorziening “{{name}}” is niet in bedrijf door een tekort aan grondstoffen",
+      "facility_inoperative_high_skill": "Openbare voorziening “{{name}}” draait op halve kracht door een tekort aan specialisten",
+      "facility_inoperative_budget": "Openbare voorziening “{{name}}” draait op halve kracht door een budgettekort",
+      "education_low_enrollment": "Onderwijsinstelling “{{name}}” trekt weinig leerlingen en wordt onderbenut ({{enrolled}} van {{max_students}} plaatsen bezet)",
+      "infra_facility_down": "Infrastructuurvoorziening “{{name}}” ligt stil",
+      "infra_disconnected": "{{count}} voorzieningen zijn niet aangesloten op het infrastructuurnet",
+      "rail_capacity_exceeded": "Op {{count}} sporen overschrijdt het aantal treinen de capaciteit van het spoor",
+      "collapse": "{{count}} gebouwen/wegen zijn ingestort",
+      "collapse_with_deaths": "{{count}} gebouwen/wegen zijn ingestort, met {{deaths}} doden tot gevolg",
+      "deaths_traffic": "{{count}} mensen zijn omgekomen bij verkeersongevallen",
+      "tenant_blocked_by_parcel_size": "In wijk “{{zone_name}}” kan geen gebouw voor “{{tenant_name}}” worden gebouwd (nodig: {{required}} m², grootste mogelijke: {{max_capacity}} m²)",
+      "unknown": "Er heeft zich een ernstige gebeurtenis voorgedaan",
+      "sanitation": "De hygiëne gaat achteruit bij {{count}} huishoudens"
+    },
+    "facilitiesTitle": "Voorzieningen die niet draaien",
+    "otherProblemsTitle": "Overige problemen",
+    "facility": {
+      "title": "{{facility}} draait niet",
+      "evidence": "Productie is {{percent}}% van het plan"
+    }
+  }
+}

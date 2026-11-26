@@ -20,6 +20,8 @@ const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 for (const [language, unit] of Object.entries({
   ja: "円", en: "$", "es-419": "$", "zh-Hans": "元", "zh-Hant": "元", fr: "€", ko: "₩",
   de: "€", pl: "zł", ru: "₽", "pt-BR": "R$", "es-ES": "€", tr: "₺", it: "€", id: "Rp",
+  ar: "G", "pt-PT": "€", uk: "₴", th: "฿", vi: "₫", ms: "RM", nl: "€", sv: "kr", nb: "kr", da: "kr.", fi: "€",
+  cs: "Kč", hu: "Ft", ro: "lei", bg: "€", el: "€",
 })) {
   assert.equal(getCurrencyUnit(language), unit);
 }
@@ -35,6 +37,10 @@ for (const [tag, language, locale] of [
   ["it-IT", "it", "it-IT"],
   ["id-ID", "id", "id-ID"],
   ["ar-SA", "ar", "ar-EG-u-nu-latn"],
+  ["pt-PT", "pt-PT", "pt-PT"],
+  ["pt-AO", "pt-BR", "pt-BR"],
+  ["nb-NO", "nb", "nb-NO"],
+  ["el-GR", "el", "el-GR"],
 ]) {
   assert.equal(languageFromLocaleTag(tag), language);
   assert.equal(resolveIntlLocale(tag), locale);

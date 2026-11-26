@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Aansluiting",
+      "jct": "Knooppunt"
+    },
+    "fallbackName": {
+      "ic": "Aansluiting #{{id}}",
+      "jct": "Knooppunt #{{id}}"
+    },
+    "connections": {
+      "from": "Van weg",
+      "to": "Naar weg",
+      "road": "{{type}} #{{id}}",
+      "none": "Geen verbonden wegparen.",
+      "direction": {
+        "n": "Noord",
+        "ne": "Noordoost",
+        "e": "Oost",
+        "se": "Zuidoost",
+        "s": "Zuid",
+        "sw": "Zuidwest",
+        "w": "West",
+        "nw": "Noordwest"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

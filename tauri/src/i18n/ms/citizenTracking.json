@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Asas",
+    "tabActivity": "Aktiviti",
+    "follow": "Ikut dengan kamera",
+    "unfollow": "Berhenti mengikut",
+    "track": "Tambah ke senarai jejakan",
+    "trackRandom": "Jejak seorang secara rawak",
+    "noUntrackedCitizens": "Tiada warga kota yang belum dijejak.",
+    "trackRandomError": "Tidak dapat menjejak warga kota.",
+    "untrack": "Buang dari senarai jejakan",
+    "home": "Kediaman",
+    "mobility": "Cara bergerak",
+    "mode": {
+      "automobile": "Kereta",
+      "pedestrian": "Berjalan kaki dan pengangkutan awam"
+    },
+    "visits": "Destinasi",
+    "visitKind": {
+      "home": "Rumah",
+      "work": "Tempat kerja",
+      "school": "Sekolah",
+      "shop": "Membeli-belah"
+    },
+    "legs": {
+      "walk": "Berjalan kaki",
+      "drive": "Kereta",
+      "transit": "Pengangkutan awam",
+      "conveyor": "Pengangkut penumpang"
+    },
+    "trip": "Sehala {{minutes}} minit · {{route}}",
+    "noRoute": "Tiada rute",
+    "noVisits": "Tiada tempat untuk dituju.",
+    "status": {
+      "not_ready": "Dipaparkan selepas simulasi dijalankan.",
+      "busy": "Tidak dapat dipaparkan semasa simulasi berjalan.",
+      "no_home": "Sedang menunggu kediaman, jadi tiada rekod aktiviti.",
+      "missing": "Warga kota ini tidak lagi tinggal di bandar.",
+      "error": "Tidak dapat dimuatkan."
+    },
+    "empty": "Tiada warga kota yang sedang dijejak.",
+    "pickFailed": {
+      "not_ready": "Jalankan simulasi untuk mengklik kereta dan pejalan kaki bagi melihat warga kota.",
+      "busy": "Warga kota tidak dapat dipaparkan semasa simulasi berjalan.",
+      "none": "Warga kota dalam kereta atau pejalan kaki ini tidak ditemui.",
+      "missing": "Warga kota ini tidak lagi tinggal di bandar.",
+      "no_home": "Warga kota ini sedang menunggu kediaman.",
+      "error": "Tidak dapat memaparkan warga kota."
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Procurar cidadãos",
+    "tabTracking": "Lista de seguimento",
+    "name": "Nome",
+    "age": "Idade",
+    "ageSeparator": "a",
+    "search": "Procurar",
+    "noResults": "Nenhum cidadão corresponde aos critérios.",
+    "truncated": "A mostrar {{shown, number}} de {{total, number}} cidadãos correspondentes."
+  }
+}

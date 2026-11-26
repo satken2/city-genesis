@@ -1,0 +1,202 @@
+{
+  "diagnosis": {
+    "refresh": "Chẩn đoán lại",
+    "note": "Dựa trên kết quả mô phỏng lần trước, lần lượt lần theo nguyên nhân của vấn đề. Sau khi khắc phục, hãy chạy kỳ tiếp theo để cập nhật kết quả.",
+    "noProblem": {
+      "title": "Không tìm thấy vấn đề",
+      "description": "Hiện chủ thể kinh tế này không có trục trặc nào cần báo cáo."
+    },
+    "target": {
+      "agent": "Công trình #{{id}}",
+      "path": "Đường dẫn #{{id}}",
+      "node": "Điểm nối #{{id}}",
+      "nodeAt": "Vị trí ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": {
+        "title": "Không tìm thấy chủ thể kinh tế",
+        "description": ""
+      },
+      "cycle": {
+        "title": "Nguyên nhân lặp vòng",
+        "description": "Trục trặc của công trình này đã được chẩn đoán ở cấp trên (hai bên phụ thuộc lẫn nhau)."
+      },
+      "depth_limit": {
+        "title": "Dừng đào sâu thêm",
+        "description": "Chuỗi nguyên nhân quá dài nên dừng tại đây. Hãy chẩn đoán trực tiếp công trình đó."
+      },
+      "no_alert": {
+        "title": "Bản thân công trình này không có trục trặc",
+        "description": "Nguồn cung thiếu có thể là do quy mô hoặc tỷ lệ vận hành mục tiêu của công trình."
+      },
+      "facility_inactive": {
+        "title": "Công trình không hoạt động",
+        "description": "Công trình không sản xuất vì đang xây dựng, tạm dừng, đã sập hoặc tương tự. Hãy kiểm tra chi tiết công trình."
+      },
+      "producer_ref": {
+        "title": "Công trình cung cấp",
+        "description": ""
+      },
+      "material_shortage": {
+        "title": "Không mua được nguyên liệu",
+        "description": "Một phần nguyên liệu cần thiết không về tới nên sản lượng thấp hơn kế hoạch."
+      },
+      "material_unmet": {
+        "title": "Thiếu {{product_name}}",
+        "description": "Cần {{demand}}, chỉ nhận được {{received}} ({{ratio}}%)."
+      },
+      "material_unmet_unknown": {
+        "title": "Không xác định được nguyên liệu bị thiếu",
+        "description": "Thường xảy ra ngay sau khi nhu cầu gần đây giảm. Hãy kiểm tra kết quả của kỳ tiếp theo."
+      },
+      "infra_disconnected": {
+        "title": "Chưa nối vào mạng lưới {{product_name}}",
+        "description": ""
+      },
+      "infra_no_terminal": {
+        "title": "Không có điểm đấu nối",
+        "description": "Công trình này không có nút điểm đấu nối cho {{product_name}}"
+      },
+      "infra_terminal_unconnected": {
+        "title": "Chưa có đường dẫn nào nối tới điểm đấu nối",
+        "description": ""
+      },
+      "infra_link_not_active": {
+        "title": "Đường dẫn nhánh chưa hoạt động",
+        "description": "{{count}} đường dẫn nối tới điểm đấu nối đang xây dựng hoặc chưa khởi công"
+      },
+      "infra_link_incompatible": {
+        "title": "Đường dẫn nhánh không tải được {{product_name}}",
+        "description": "Đường dẫn nối tới điểm đấu nối thuộc loại không tải được hàng này (ví dụ đường ray chưa điện khí hóa)"
+      },
+      "infra_no_producer": {
+        "title": "Thành phố không có công trình sản xuất {{product_name}}",
+        "description": ""
+      },
+      "infra_producers_inactive": {
+        "title": "Công trình sản xuất {{product_name}} không hoạt động",
+        "description": "Không công trình nào trong {{count}} công trình sản xuất của thành phố đang hoạt động"
+      },
+      "infra_producers_unconnected": {
+        "title": "Công trình sản xuất chưa nối vào mạng lưới",
+        "description": "{{count}} công trình sản xuất đang hoạt động nhưng không công trình nào nối vào mạng lưới {{product_name}}"
+      },
+      "infra_network_split": {
+        "title": "Mạng lưới này không có công trình sản xuất",
+        "description": "Các công trình sản xuất {{product_name}} ({{producers}} nơi) nối vào một mạng lưới khác. Hai mạng lưới bị đứt giữa chừng hoặc chưa được nối với nhau"
+      },
+      "infra_link_under_construction": {
+        "title": "Đang xây đường dẫn nối mạng lưới",
+        "description": "Có {{count}} đường dẫn dự kiến nối vào mạng lưới này"
+      },
+      "infra_gap_detected": {
+        "title": "Mạng lưới bị đứt tại đây",
+        "description": "Đầu mút của hai mạng lưới chỉ cách nhau {{distance}} m"
+      },
+      "infra_tap_missing": {
+        "title": "Chưa nối với mạng lưới phía công trình sản xuất",
+        "description": ""
+      },
+      "infra_generation_shortage": {
+        "title": "Sản lượng {{product_name}} không đủ",
+        "description": "Mạng lưới này sản xuất {{supply}} trong khi nhu cầu là {{demand}} ({{producers}} công trình sản xuất)"
+      },
+      "infra_transmission_bottleneck": {
+        "title": "Mạng lưới quá tải",
+        "description": "{{count}} đường dẫn đang chạy hết công suất"
+      },
+      "infra_unexplained": {
+        "title": "Mạng lưới có vẻ bình thường",
+        "description": "Sản lượng và kết nối đều đủ, có thể chỉ là thiếu hụt tạm thời. Hãy kiểm tra kết quả của kỳ tiếp theo."
+      },
+      "market_no_supplier": {
+        "title": "Thành phố không có nhà cung cấp {{product_name}}",
+        "description": "Không có nhà sản xuất trong nước nào đang hoạt động, cũng không có hàng nhập khẩu"
+      },
+      "market_supply_insufficient": {
+        "title": "Nguồn cung {{product_name}} không đáp ứng đủ nhu cầu",
+        "description": "Nguồn cung {{supply}} trong khi tổng đơn hàng toàn thành phố là {{demand}} ({{producers}} nhà sản xuất, {{hubs}} đầu mối nhập khẩu)"
+      },
+      "market_unmatched": {
+        "title": "Không mua được {{product_name}} trên thị trường",
+        "description": "Trên toàn thành phố, nguồn cung {{supply}} đủ cho đơn hàng {{demand}}, nhưng không tới được công trình này. Nguyên nhân có thể là khoảng cách hoặc giá."
+      },
+      "service_out_of_range": {
+        "title": "Nằm ngoài phạm vi cung cấp {{product_name}}",
+        "description": "Khuôn viên của công trình này không nằm trong phạm vi phục vụ của công trình cung cấp {{product_name}} nào ({{producers}} nơi)"
+      },
+      "high_skill_shortage": {
+        "title": "Không tuyển được nhân lực chuyên môn",
+        "description": "Thiếu lao động kỹ năng cao nên kế hoạch sản xuất bị giảm xuống mức nhân lực hiện có làm được. Nhân lực trình độ cao được đào tạo ở trường đại học. Hãy xây trường đại học và phân bổ chỉ tiêu tuyển sinh cho kỹ năng cần thiết."
+      },
+      "labor_shortage": {
+        "title": "Thiếu nhân viên",
+        "description": "Cần lao động {{quota}}, chỉ tuyển được {{total_labor}}."
+      },
+      "labor_market_tight": {
+        "title": "Thành phố không còn người lao động",
+        "description": "Tỷ lệ thất nghiệp chỉ {{unemployment_rate}}%, không còn ai để tuyển. Hãy xây thêm nhà ở để thu hút dân số."
+      },
+      "labor_unfilled": {
+        "title": "Có người tìm việc nhưng không đến làm",
+        "description": "Tỷ lệ thất nghiệp là {{unemployment_rate}}%. Có thể do quãng đường đi làm xa, lương thấp hoặc kỹ năng không phù hợp."
+      },
+      "budget_capped": {
+        "title": "Thiếu ngân sách",
+        "description": "Ngân sách được phân bổ thấp hơn nhiều so với mức cần thiết. Hãy xem lại phân bổ ngân sách."
+      },
+      "construction_shortage": {
+        "title": "Không mua được {{product_name}}",
+        "description": ""
+      },
+      "line_paused_route_disconnected": {
+        "title": "Lộ trình giữa các điểm dừng bị chia cắt",
+        "description": "Giữa hai điểm dừng liền kề theo thứ tự chạy vòng không có đường ray hay đường phố đi được theo hướng cần thiết. Hãy xây lại chỗ bị đứt hoặc xem lại lộ trình. Để quay đầu trên đường ray một chiều, hãy quay đầu tại một ga trên đường ray chạy được hai chiều (như đường đôi đặt bằng một đường dẫn), hoặc cho tàu chuyển sang đường ray ngược chiều bằng cách gom hai đường ray về một nút hay đặt đường ray chuyển tuyến, rồi đặt các điểm dừng chiều về ở sân ga ngược chiều."
+      },
+      "line_paused_no_underlay": {
+        "title": "Điểm dừng không có đường dẫn nền",
+        "description": "Đường ray hoặc đường phố mà điểm dừng nằm trên đó không còn nữa."
+      },
+      "line_paused_train_too_long": {
+        "title": "Đoàn tàu dài hơn đoạn có điểm dừng",
+        "description": "Hãy giảm số toa mỗi đoàn tàu, hoặc kéo dài đoạn có điểm dừng (sân ga, hoặc đoạn đường phố hay đường ray)."
+      },
+      "line_no_vehicle_product": {
+        "title": "Loại tuyến này chưa được định nghĩa phương tiện",
+        "description": ""
+      },
+      "line_vehicle_shortage": {
+        "title": "Không mua được phương tiện",
+        "description": "Cần {{required}} toa, chỉ mua được {{received}} toa."
+      },
+      "line_off_network": {
+        "title": "Tuyến không nằm trên mạng lưới chạy tàu xe",
+        "description": "Lộ trình nền của tuyến không nối với đường ray hay đường phố nào."
+      },
+      "transit_no_depot": {
+        "title": "Thành phố không có depot {{product_name}}",
+        "description": "Hãy xây depot và nối vào mạng lưới chạy tàu xe."
+      },
+      "transit_depots_inactive": {
+        "title": "Depot không hoạt động",
+        "description": "Không depot nào trong {{count}} depot của thành phố đang hoạt động."
+      },
+      "transit_depots_unconnected": {
+        "title": "Depot chưa nối vào mạng lưới chạy tàu xe",
+        "description": "Không depot nào trong {{count}} depot nối với đường ray hay đường phố. Với đường sắt, hãy đặt đường ray nhánh từ đường chính tới điểm đấu nối của depot."
+      },
+      "transit_depot_other_network": {
+        "title": "Depot nằm trên mạng lưới khác",
+        "description": "{{count}} depot nối vào một mạng lưới đường ray khác không thông với tuyến này. Hãy nối các mạng lưới bằng đường ray hoặc xây depot trên mạng lưới này."
+      },
+      "transit_vehicle_insufficient": {
+        "title": "Sản lượng phương tiện không đủ",
+        "description": "Depot trên mạng lưới này ({{depots}} nơi) cung cấp {{supply}} toa, trong khi các tuyến cần {{demand}} toa."
+      },
+      "transit_unexplained": {
+        "title": "Depot có vẻ bình thường",
+        "description": "Nguồn cung và kết nối đều đủ, có thể chỉ là thiếu hụt tạm thời. Hãy kiểm tra kết quả của kỳ tiếp theo."
+      }
+    }
+  }
+}

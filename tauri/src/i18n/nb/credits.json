@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Dette spillet bruker materialet som er oppført nedenfor. Navn på opphavspersoner, kilder og lisenser samt kreditteringstekst som lisensen krever, gjengis uendret.",
+    "empty": "Ingen oppføringer.",
+    "requiredText": "Påkrevd kreditering",
+    "categories": {
+      "bgm": "Musikk",
+      "sfx": "Lydeffekter",
+      "image": "Bilder og ikoner",
+      "font": "Skrifttyper",
+      "model": "3D-modeller",
+      "texture": "Teksturer"
+    }
+  }
+}

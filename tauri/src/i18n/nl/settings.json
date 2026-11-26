@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Instellingen",
+    "groups": {
+      "general": "Algemeen",
+      "display": "Scherm",
+      "sound": "Geluid",
+      "system": "Systeem",
+      "about": "Info",
+      "developer": "Ontwikkelaarsinstellingen"
+    },
+    "swagger": {
+      "label": "Swagger (API-documentatie)",
+      "description": "Bekijk de API-specificatie van de kernsimulator in je standaardbrowser",
+      "action": "Openen in browser"
+    },
+    "currencyUnit": {
+      "label": "Valuta-eenheid",
+      "description": "De eenheid die bij geldbedragen wordt getoond. Laat leeg om de weergavetaal te volgen."
+    },
+    "fontSize": {
+      "label": "Tekstgrootte",
+      "large": "Groot",
+      "medium": "Middel",
+      "small": "Klein",
+      "custom": "Aangepast",
+      "preview": "Huidige grootte"
+    },
+    "monitor": {
+      "label": "Beeldscherm",
+      "prev": "Vorig beeldscherm",
+      "next": "Volgend beeldscherm"
+    },
+    "graphicMonitor": {
+      "label": "Beeldscherm voor 3D-weergave"
+    },
+    "multiDisplay": {
+      "label": "Modus voor meerdere schermen",
+      "description": "Toont vensters op een ander beeldscherm dan het spelscherm",
+      "on": "Aan",
+      "off": "Uit"
+    },
+    "popupMonitor": {
+      "label": "Beeldscherm voor vensters"
+    },
+    "hintbar": {
+      "label": "Hintbalk",
+      "show": "Tonen",
+      "hide": "Verbergen",
+      "description": "Balk boven in het scherm met tips voor de bediening"
+    },
+    "citizenVoice": {
+      "label": "Stem van de burger",
+      "show": "Tonen",
+      "hide": "Verbergen",
+      "description": "Kaart rechtsboven in het scherm die om beurten uitspraken van inwoners toont"
+    },
+    "language": {
+      "label": "Taal",
+      "description": "De weergavetaal van de interface. Deze staat los van de taal van je opgeslagen spel",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Volume",
+      "master": "Hoofdvolume",
+      "bgm": "Muziek",
+      "sfx": "Geluidseffecten"
+    },
+    "compute": {
+      "label": "GPU-versnelling",
+      "comingSoon": "Binnenkort beschikbaar",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU actief",
+      "statusInactive": "CPU actief",
+      "restartRequired": "Na het wijzigen van deze instelling wordt het hoofdprogramma opnieuw gestart",
+      "restarting": "Opnieuw starten…",
+      "restartFailed": "Opnieuw starten mislukt",
+      "restartUnavailable": "Instellingen opgeslagen. De wijzigingen gaan in bij de volgende start van het spel",
+      "confirmRestart": "Rekenmodus wijzigen naar {{mode}}? Het hoofdprogramma wordt opnieuw gestart.",
+      "restartAction": "Opnieuw starten"
+    },
+    "windowReset": {
+      "label": "Positie en grootte van vensters",
+      "action": "Herstellen"
+    },
+    "credits": {
+      "label": "Credits",
+      "description": "Vermeldingen voor de materialen en software die dit spel gebruikt",
+      "action": "Bekijken"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Nieuw spel",
+    "overwriteSave": "Opslaan (overschrijven)",
+    "saveAs": "Opslaan als",
+    "load": "Laden",
+    "quitGame": "Spel afsluiten",
+    "returnToTop": "Terug naar hoofdmenu",
+    "loading": "Laden…",
+    "shuttingDown": "Afsluiten…",
+    "saveFailed": "Opslaan mislukt",
+    "loadFailed": "Laden mislukt",
+    "confirmNewGame": "De huidige gegevens gaan verloren. Een nieuw spel starten?",
+    "confirmQuitGame": "Weet je zeker dat je wilt afsluiten? Je huidige voortgang wordt niet automatisch opgeslagen.",
+    "confirmReturnToTop": "Terug naar het hoofdmenu? Je huidige voortgang wordt niet automatisch opgeslagen.",
+    "confirm": "Ja",
+    "cancel": "Nee",
+    "saveAsScenario": "Opslaan als scenario",
+    "saveAsNewScenario": "Opslaan als ander scenario",
+    "overwriteScenario": "Scenario overschrijven",
+    "backToGame": "Terug naar spel",
+    "saveName": "Naam opgeslagen spel",
+    "confirmOverwrite": "Opgeslagen spel “{{name}}” overschrijven?",
+    "confirmOverwriteScenario": "Scenario “{{name}}” overschrijven?"
+  },
+  "saveList": {
+    "noSaves": "Geen opgeslagen spellen",
+    "currentSave": "Huidige gegevens",
+    "population": "Bevolking",
+    "inGameDate": "Datum",
+    "savedAt": "Opgeslagen op",
+    "loadButton": "Laden",
+    "deleteButton": "Verwijderen",
+    "confirmLoad": "Dit opgeslagen spel laden?",
+    "confirmDelete": "Dit opgeslagen spel verwijderen? Dit kan niet ongedaan worden gemaakt.",
+    "loading": "Laden…",
+    "loadFailed": "Laden mislukt",
+    "deleteFailed": "Verwijderen mislukt",
+    "openFolderButton": "Opslagmap openen",
+    "scenario": "Scenario",
+    "autosaveName": "{{name}} (automatisch opgeslagen bij afsluiten)"
+  }
+}

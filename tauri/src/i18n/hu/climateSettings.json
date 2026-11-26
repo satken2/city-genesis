@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Éghajlati beállítások",
+    "name": "Éghajlat neve",
+    "probabilities": "Az időjárás havi gyakorisága",
+    "probabilityHint": "A színhatárokat vízszintesen húzva állíthatod. Az alsó számmezőkben a 0%-os időjárás is beállítható.",
+    "month": "{{month}}. hónap",
+    "preset": "Éghajlati sablon",
+    "current": "Jelenlegi beállítások",
+    "chartHint": "Válassz egy adatsort a jelmagyarázatban, majd húzd a havi pontjait fel vagy le.",
+    "averageHint": "A hőmérséklet, a csapadék és a napsütés havi átlagérték. A tényleges értékek korszakonként e körül ingadoznak.",
+    "apply": "Alkalmaz",
+    "chart": "Havi klímadiagram"
+  }
+}

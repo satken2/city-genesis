@@ -1,0 +1,22 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Budovy",
+      "paths": "Liniové stavby",
+      "vehicles": "Vozidla",
+      "props": "Dekorativní objekty"
+    },
+    "additional": "Další modely",
+    "loading": "Načítání modelů z 3D zobrazení…",
+    "noModel": "Bez modelu",
+    "noImage": "Bez obrázku",
+    "weight": "Váha",
+    "applyNote": "Změny vah se projeví při příštím zahájení nebo načtení hry.",
+    "preview": {
+      "hint": "Tažením otočíte / kolečkem přiblížíte",
+      "zoomIn": "Přiblížit",
+      "zoomOut": "Oddálit",
+      "reset": "Obnovit"
+    }
+  }
+}

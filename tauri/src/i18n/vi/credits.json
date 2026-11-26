@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Trò chơi sử dụng các tài nguyên dưới đây. Tên tác giả, nơi phân phối, tên giấy phép và nội dung ghi công theo yêu cầu của điều khoản được giữ nguyên văn.",
+    "empty": "Không có mục nào.",
+    "requiredText": "Nội dung ghi công theo yêu cầu",
+    "categories": {
+      "bgm": "Nhạc nền",
+      "sfx": "Hiệu ứng âm thanh",
+      "image": "Hình ảnh và biểu tượng",
+      "font": "Phông chữ",
+      "model": "Mô hình 3D",
+      "texture": "Texture"
+    }
+  }
+}

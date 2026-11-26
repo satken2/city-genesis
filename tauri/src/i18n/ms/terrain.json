@@ -1,0 +1,23 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Menunggu data daripada editor rupa bumi…"
+  },
+  "groundCover": {
+    "label": "Jenis permukaan tanah",
+    "hint": "Menukar warna dan tekstur permukaan tanah dalam permainan serta warna peta 2D. Tidak menjejaskan simulasi.",
+    "1": "Padang rumput",
+    "2": "Gurun",
+    "3": "Padang rumput subur",
+    "4": "Padang salji",
+    "5": "Tanah separa kering",
+    "6": "Grid"
+  },
+  "climate": {
+    "label": "Iklim",
+    "hint": "Menyalin suhu bulanan, taburan hujan, cahaya matahari dan kebarangkalian cuaca daripada pratetap. Butirannya boleh disunting dalam “Tetapan iklim” dalam mod penciptaan senario."
+  },
+  "assetPack": {
+    "label": "Pek aset",
+    "standard": "Standard"
+  }
+}

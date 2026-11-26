@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Seterusnya",
+    "close": "Tutup",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "Langkah pertama bandar",
+        "description": "Siapkan bangunan pertama anda. Sejarah bandar anda bermula di sini."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Bandar ke laut",
+        "description": "Siapkan ladang angin luar pesisir atau pelantar minyak luar pesisir yang pertama. Industri bandar anda kini menjangkau ke laut."
+      },
+      "RAIL_LINES_1": {
+        "name": "Kereta api bertolak!",
+        "description": "Buka laluan kereta api"
+      },
+      "RAIL_LINES_20": {
+        "name": "Kerajaan kereta api",
+        "description": "Kendalikan 20 laluan kereta api dalam satu bandar. Peta laluannya pun sudah cukup mengagumkan."
+      },
+      "BUS_LINES_1": {
+        "name": "Bas pun tiba",
+        "description": "Buka laluan bas"
+      },
+      "BUS_LINES_20": {
+        "name": "Ke mana-mana dengan bas",
+        "description": "Kendalikan 20 laluan bas dalam satu bandar"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Ulang-alik di udara",
+        "description": "Buka laluan monorel. Lihat jalan-jalan yang biasa dari tempat yang lebih tinggi."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Bandar di awan",
+        "description": "Kendalikan 20 laluan monorel dalam satu bandar"
+      },
+      "LRT_LINES_1": {
+        "name": "Trem tiba di bandar",
+        "description": "Buka laluan LRT"
+      },
+      "LRT_LINES_20": {
+        "name": "Bandar trem",
+        "description": "Kendalikan 20 laluan LRT dalam satu bandar"
+      },
+      "POPULATION_10K": {
+        "name": "Kampung halaman 10,000 jiwa",
+        "description": "Capai 10,000 penduduk"
+      },
+      "POPULATION_100K": {
+        "name": "Bandar wilayah yang meriah",
+        "description": "Capai 100,000 penduduk"
+      },
+      "POPULATION_500K": {
+        "name": "Menyertai bandar besar",
+        "description": "Capai 500,000 penduduk"
+      },
+      "POPULATION_1M": {
+        "name": "Bandar sejuta penduduk",
+        "description": "Capai 1,000,000 penduduk. Sebuah metropolis yang menampung sejuta kehidupan."
+      },
+      "FLOORS_5": {
+        "name": "Bandar yang menjulang",
+        "description": "Siapkan bangunan swasta setinggi 5 tingkat atau lebih"
+      },
+      "FLOORS_10": {
+        "name": "Permulaan bangunan tinggi",
+        "description": "Siapkan bangunan swasta setinggi 10 tingkat atau lebih. Nasib baik ada lif."
+      },
+      "FLOORS_20": {
+        "name": "Latar langit terbentuk",
+        "description": "Siapkan bangunan swasta setinggi 20 tingkat atau lebih"
+      },
+      "FLOORS_40": {
+        "name": "Pencakar langit",
+        "description": "Siapkan bangunan swasta setinggi 40 tingkat atau lebih. Mercu tanda baharu bandar anda."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Industri demi kesihatan",
+        "description": "Kilang farmaseutikal mula beroperasi di bandar anda. Bantu orang ramai hidup lebih sihat, bermula dari sini."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Bandar silikon",
+        "description": "Kilang semikonduktor mula beroperasi di bandar anda. Cip kecil, industri besar."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Bandar teknologi jitu",
+        "description": "Kilang peralatan kejituan mula beroperasi di bandar anda. Kepakaran teknikal menjadi kekuatan bandar anda."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Rumah baharu perisian",
+        "description": "Syarikat perisian mula berniaga di bandar anda. Tempat idea-idea baharu berkembang."
+      },
+      "TOURISTS_1": {
+        "name": "Selamat datang ke bandar kami",
+        "description": "Sambut pelancong pertama yang menginap di bandar anda"
+      },
+      "TOURISTS_1K": {
+        "name": "Bandar yang berbaloi dikunjungi",
+        "description": "Capai 1,000 pelancong menginap di bandar anda serentak"
+      },
+      "TOURISTS_10K": {
+        "name": "Dunia datang berkunjung",
+        "description": "Capai 10,000 pelancong menginap di bandar anda serentak"
+      },
+      "YEARS_10": {
+        "name": "Sedekad bersama bandar",
+        "description": "Bermain selama 10 tahun dalam satu bandar. Masih banyak lagi yang boleh dibina."
+      },
+      "YEARS_100": {
+        "name": "Bandar seabad",
+        "description": "Bermain selama 100 tahun dalam satu bandar. Saksikan bandar anda melalui satu abad penuh."
+      },
+      "YEARS_500": {
+        "name": "Bandar yang mencipta sejarah",
+        "description": "Bermain selama 500 tahun dalam satu bandar. Generasi berganti, bandar terus hidup."
+      },
+      "YEARS_1000": {
+        "name": "Bandar seribu tahun",
+        "description": "Bermain selama 1,000 tahun dalam satu bandar. Bina bandar yang mempunyai sejarah seribu tahun."
+      },
+      "YEARS_10000": {
+        "name": "Bandar abadi",
+        "description": "Bermain selama 10,000 tahun dalam satu bandar. Panjang sungguh penggal anda, Datuk Bandar."
+      }
+    }
+  }
+}

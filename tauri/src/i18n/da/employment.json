@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Krævet kvalifikation",
+    "wage": "Lønsats",
+    "quota": "Nødvendig arbejdskraft",
+    "totalLabor": "Ansat arbejdskraft",
+    "employees": "Medarbejderliste",
+    "hired": "Ansat",
+    "vacant": "Ubesat",
+    "noQuota": "Kræver ingen arbejdskraft",
+    "noEmployees": "Ingen medarbejdere",
+    "statusTitle": "Beskæftigelsesstatus"
+  }
+}

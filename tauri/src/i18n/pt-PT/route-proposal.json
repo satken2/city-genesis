@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Sugerir trajeto",
+    "mode": "Modo de altura",
+    "fixed": "Manter a altura dos pontos de passagem",
+    "adjust": "Ajustar a altura dos pontos intermédios",
+    "help": "Disponível depois de confirmar a forma. As extremidades e a posição XZ dos pontos de passagem mantêm-se fixas.",
+    "searching": "A procurar…",
+    "cancel": "Cancelar",
+    "undo": "Anular sugestão",
+    "notFound": "Não foi encontrado nenhum trajeto.",
+    "failed": "Não foi possível sugerir um trajeto."
+  }
+}

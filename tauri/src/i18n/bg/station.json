@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Гара",
+    "name": "Име на гарата",
+    "ridership": "Качвания",
+    "platforms": "Перони",
+    "noPlatforms": "Към тази гара няма перони (към нея принадлежат пероните, които линията пресича)",
+    "lines": "Обслужващи линии",
+    "noLines": "Няма линии, които обслужват тази гара",
+    "stops": "Качвания по спирки",
+    "noStops": "На тази гара няма спирки",
+    "lineRunning": "В движение",
+    "lineSuspended": "Спряно движение",
+    "houseEnds": "Разположение на сградите",
+    "houseEnds_both": "В двата края",
+    "houseEnds_start": "В началото",
+    "houseEnds_end": "В края",
+    "passageMode": "Разположение на прохода",
+    "passageMode_elevated": "Надземен",
+    "passageMode_ground": "На нивото на терена",
+    "passageMode_underground": "Подземен"
+  }
+}

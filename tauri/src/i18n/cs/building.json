@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Skladba podlaží",
+    "parking": "Parkování",
+    "type": "Typ budovy",
+    "durability": "Životnost",
+    "floors": "Podlaží",
+    "floorsValue": "{{floors}} podl. (podlahová plocha {{area, number}} m²)",
+    "heightLabel": "Výška: {{value}} m",
+    "baseAreaLabel": "Zastavěná plocha: {{area, number}} m²",
+    "underMaintenance": "Probíhá oprava",
+    "parkingCapacity": "Kapacita parkoviště",
+    "parkingCapacityValue": "{{capacity}} voz.",
+    "parkingDay": "Ve dne",
+    "parkingNight": "V noci",
+    "parkingUsage": "{{used}} / {{capacity}} voz."
+  },
+  "building_appearance": {
+    "variantLabel": "Vzhled {{index}}",
+    "layoutHint": "Přetažením karty na pozemek umístíte / tažením přesunete / Shift+tažení otočí / klávesa Delete odstraní",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Odstranit vybranou budovu",
+    "apply": "Použít",
+    "saveFailed": "Vzhled se nepodařilo uložit",
+    "noSubbuildings": "Pro tento typ budovy nejsou definovány žádné vedlejší budovy"
+  }
+}

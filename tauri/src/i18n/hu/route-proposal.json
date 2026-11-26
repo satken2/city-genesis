@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Útvonaljavaslat",
+    "mode": "Magassági mód",
+    "fixed": "Megadott pontok magasságának rögzítése",
+    "adjust": "Köztes megadott pontok magasságának igazítása",
+    "help": "Az alak véglegesítése után kérhető. A kezdő- és végpont, valamint a megadott pontok XZ-pozíciója rögzített marad.",
+    "searching": "Keresés…",
+    "cancel": "Mégse",
+    "undo": "Javaslat visszavonása",
+    "notFound": "Nem található útvonal.",
+    "failed": "Nem sikerült útvonalat javasolni."
+  }
+}

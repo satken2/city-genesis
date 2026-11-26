@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Perustiedot",
+    "tabActivity": "Toiminta",
+    "follow": "Seuraa kameralla",
+    "unfollow": "Lopeta kameraseuranta",
+    "track": "Lisää seurantalistalle",
+    "trackRandom": "Seuraa satunnaista kaupunkilaista",
+    "noUntrackedCitizens": "Seurattavia kaupunkilaisia ei ole jäljellä.",
+    "trackRandomError": "Kaupunkilaista ei voitu lisätä seurantaan.",
+    "untrack": "Poista seurantalistalta",
+    "home": "Koti",
+    "mobility": "Liikkuminen",
+    "mode": {
+      "automobile": "Auto",
+      "pedestrian": "Kävely ja joukkoliikenne"
+    },
+    "visits": "Kohteet",
+    "visitKind": {
+      "home": "Koti",
+      "work": "Työ",
+      "school": "Koulu",
+      "shop": "Ostokset"
+    },
+    "legs": {
+      "walk": "Kävely",
+      "drive": "Auto",
+      "transit": "Joukkoliikenne",
+      "conveyor": "Henkilökuljetin"
+    },
+    "trip": "Yhteen suuntaan {{minutes}} min · {{route}}",
+    "noRoute": "Ei reittiä",
+    "noVisits": "Ei menokohteita.",
+    "status": {
+      "not_ready": "Näkyy, kun simulaatio on suoritettu.",
+      "busy": "Ei käytettävissä simulaation aikana.",
+      "no_home": "Odottaa asuntoa, joten toimintaa ei ole tallennettu.",
+      "missing": "Tämä kaupunkilainen ei enää asu kaupungissa.",
+      "error": "Lataus epäonnistui."
+    },
+    "empty": "Seurannassa ei ole kaupunkilaisia.",
+    "pickFailed": {
+      "not_ready": "Suorita simulaatio, niin voit napsauttaa autoja ja jalankulkijoita ja nähdä, keitä he ovat.",
+      "busy": "Kaupunkilaisia ei voi näyttää simulaation aikana.",
+      "none": "Autossa tai jalan liikkuvaa kaupunkilaista ei löytynyt.",
+      "missing": "Tämä kaupunkilainen ei enää asu kaupungissa.",
+      "no_home": "Tämä kaupunkilainen odottaa asuntoa.",
+      "error": "Kaupunkilaista ei voitu näyttää."
+    }
+  }
+}

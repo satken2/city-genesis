@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Név adományozása",
+      "message": "Add meg az új nevet, amelyet {{name}} kapni fog.",
+      "inputLabel": "Új név",
+      "confirm": "Adományozás"
+    },
+    "reward": {
+      "label": "Jutalom odaítélése",
+      "message": "Jutalom a város pénzéből {{name}} háztartásának.\nA város pénzeszközei: {{available}}",
+      "confirm": "Átadás"
+    },
+    "expel": {
+      "label": "További sok sikert kívánunk",
+      "message": "{{name}} kiutasítása a városból. Biztosan folytatod?",
+      "confirm": "Kiutasítás",
+      "results": {
+        "0": "{{name}} összecsomagolt, és csendben elhagyta a várost. Senki sem jött el elbúcsúztatni.",
+        "1": "{{name}} ezzel a mondattal lépte át a város határát: „Ide többé be nem teszem a lábam!”",
+        "2": "{{name}} udvarias kísérettel elhagyta a várost. További sok sikert kívánunk neki!"
+      }
+    },
+    "donation": {
+      "label": "Adomány kérése",
+      "message": "Adományt kérsz a város számára {{name}} háztartásától.\nA háztartás pénzeszközei: {{available}}",
+      "confirm": "Kérés"
+    },
+    "relocate": {
+      "label": "Új otthon felajánlása",
+      "message": "Kilakoltatod {{name}} háztartását a jelenlegi otthonából?\nA háztartás a következő korszakban új otthont keres.",
+      "confirm": "Kilakoltatás",
+      "results": {
+        "0": "{{name}} családját kitették az otthonából. A bútoraik az út szélén tornyosulnak.",
+        "1": "{{name}} otthonában lecserélték a zárakat. A család már új lakást keres.",
+        "2": "{{name}} családjának új otthont ajánlottunk fel. A régibe már nem térhetnek vissza."
+      }
+    }
+  }
+}

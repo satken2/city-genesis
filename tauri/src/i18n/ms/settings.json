@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Tetapan",
+    "groups": {
+      "general": "Umum",
+      "display": "Paparan",
+      "sound": "Bunyi",
+      "system": "Sistem",
+      "about": "Maklumat",
+      "developer": "Tetapan pembangun"
+    },
+    "swagger": {
+      "label": "Swagger (dokumentasi API)",
+      "description": "Paparkan spesifikasi API simulator teras dalam pelayar lalai",
+      "action": "Buka dalam pelayar"
+    },
+    "currencyUnit": {
+      "label": "Unit mata wang",
+      "description": "Unit yang dipaparkan bersama jumlah wang. Biarkan kosong untuk mengikut bahasa paparan."
+    },
+    "fontSize": {
+      "label": "Saiz teks",
+      "large": "Besar",
+      "medium": "Sederhana",
+      "small": "Kecil",
+      "custom": "Tersuai",
+      "preview": "Saiz semasa"
+    },
+    "monitor": {
+      "label": "Paparan",
+      "prev": "Paparan sebelumnya",
+      "next": "Paparan seterusnya"
+    },
+    "graphicMonitor": {
+      "label": "Paparan untuk skrin 3D"
+    },
+    "multiDisplay": {
+      "label": "Mod berbilang paparan",
+      "description": "Paparkan pelbagai tetingkap pada paparan yang berbeza daripada skrin permainan",
+      "on": "Guna",
+      "off": "Jangan guna"
+    },
+    "popupMonitor": {
+      "label": "Paparan untuk tetingkap"
+    },
+    "hintbar": {
+      "label": "Bar petunjuk",
+      "show": "Tunjukkan",
+      "hide": "Sembunyikan",
+      "description": "Bar di bahagian atas skrin yang memaparkan petunjuk kawalan"
+    },
+    "citizenVoice": {
+      "label": "Suara warga kota",
+      "show": "Tunjukkan",
+      "hide": "Sembunyikan",
+      "description": "Kad di penjuru kanan atas skrin yang memaparkan kata-kata warga kota secara bergilir"
+    },
+    "language": {
+      "label": "Bahasa",
+      "description": "Bahasa paparan UI. Ini berasingan daripada bahasa data simpanan anda.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Kelantangan",
+      "master": "Kelantangan utama",
+      "bgm": "BGM",
+      "sfx": "Kesan bunyi"
+    },
+    "compute": {
+      "label": "Pecutan GPU",
+      "comingSoon": "Akan datang",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU aktif",
+      "statusInactive": "CPU aktif",
+      "restartRequired": "Program utama akan dimulakan semula selepas tetapan ini diubah",
+      "restarting": "Memulakan semula...",
+      "restartFailed": "Gagal dimulakan semula",
+      "restartUnavailable": "Tetapan telah disimpan. Perubahan akan berkuat kuasa apabila permainan dimulakan pada kali seterusnya",
+      "confirmRestart": "Tukar mod pengkomputeran kepada {{mode}}? Program utama akan dimulakan semula.",
+      "restartAction": "Mulakan semula"
+    },
+    "windowReset": {
+      "label": "Kedudukan dan saiz tetingkap",
+      "action": "Tetapkan semula"
+    },
+    "credits": {
+      "label": "Kredit",
+      "description": "Pernyataan hak bagi aset dan perisian yang digunakan dalam permainan ini",
+      "action": "Lihat"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Permainan baharu",
+    "overwriteSave": "Simpan ganti",
+    "saveAs": "Simpan sebagai",
+    "load": "Muat",
+    "quitGame": "Keluar permainan",
+    "returnToTop": "Kembali ke menu utama",
+    "loading": "Memuatkan...",
+    "shuttingDown": "Sedang ditutup...",
+    "saveFailed": "Gagal menyimpan",
+    "loadFailed": "Gagal memuatkan",
+    "confirmNewGame": "Data semasa akan hilang. Mulakan permainan baharu?",
+    "confirmQuitGame": "Keluar daripada permainan? Kemajuan semasa tidak disimpan secara automatik.",
+    "confirmReturnToTop": "Kembali ke menu utama? Kemajuan semasa tidak disimpan secara automatik.",
+    "confirm": "Ya",
+    "cancel": "Tidak",
+    "saveAsScenario": "Simpan sebagai senario",
+    "saveAsNewScenario": "Simpan sebagai senario lain",
+    "overwriteScenario": "Simpan ganti senario",
+    "backToGame": "Kembali ke permainan",
+    "saveName": "Nama simpanan",
+    "confirmOverwrite": "Simpan ganti “{{name}}”?",
+    "confirmOverwriteScenario": "Simpan ganti senario “{{name}}”?"
+  },
+  "saveList": {
+    "noSaves": "Tiada data simpanan",
+    "currentSave": "Data semasa",
+    "population": "Penduduk",
+    "inGameDate": "Tarikh",
+    "savedAt": "Masa disimpan",
+    "loadButton": "Muat",
+    "deleteButton": "Padam",
+    "confirmLoad": "Muatkan data simpanan ini?",
+    "confirmDelete": "Padam data simpanan ini? Tindakan ini tidak boleh dibuat asal.",
+    "loading": "Memuatkan...",
+    "loadFailed": "Gagal memuatkan",
+    "deleteFailed": "Gagal memadam",
+    "openFolderButton": "Buka folder simpanan",
+    "scenario": "Senario",
+    "autosaveName": "{{name}} (simpan automatik semasa keluar)"
+  }
+}

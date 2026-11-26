@@ -1,0 +1,22 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Épületek",
+      "paths": "Nyomvonalak",
+      "vehicles": "Járművek",
+      "props": "Díszelemek"
+    },
+    "additional": "További modellek",
+    "loading": "Modellek betöltése a 3D nézetből…",
+    "noModel": "Nincs modell",
+    "noImage": "Nincs kép",
+    "weight": "Súly",
+    "applyNote": "A súlyok módosítása a következő új játék indításakor vagy betöltéskor lép érvénybe.",
+    "preview": {
+      "hint": "Húzás: forgatás / görgő: nagyítás",
+      "zoomIn": "Nagyítás",
+      "zoomOut": "Kicsinyítés",
+      "reset": "Alaphelyzet"
+    }
+  }
+}

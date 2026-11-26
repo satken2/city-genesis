@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Ilmastoasetukset",
+    "name": "Ilmaston nimi",
+    "probabilities": "Säätyyppien osuudet kuukausittain",
+    "probabilityHint": "Säädä vetämällä värien rajoja vaakasuunnassa. Alla olevissa kentissä voit asettaa myös 0 %:n säätyypit.",
+    "month": "Kuukausi {{month}}",
+    "preset": "Ilmastopohja",
+    "current": "Nykyiset asetukset",
+    "chartHint": "Valitse sarja selitteestä ja säädä vetämällä kuukausittaisia pisteitä pystysuunnassa.",
+    "averageHint": "Lämpötila, sademäärä ja auringonpaiste ovat kuukausittaisia keskiarvoja. Todelliset arvot vaihtelevat kausittain näiden keskiarvojen ympärillä.",
+    "apply": "Käytä",
+    "chart": "Kuukausittainen ilmastodiagrammi"
+  }
+}

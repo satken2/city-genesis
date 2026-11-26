@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Címer",
+    "flag": "Városzászló",
+    "motif": "Motívum",
+    "fieldColor": "Alapszín",
+    "motifColor": "Motívum színe",
+    "pattern": "Mintázat",
+    "accentColor": "Kiemelőszín",
+    "placement": "Címer helye",
+    "loadImage": "Kép betöltése",
+    "randomize": "Véletlenszerű",
+    "apply": "Alkalmaz",
+    "imageLoadFailed": "Nem sikerült betölteni a képet.",
+    "placements": {
+      "center": "Középen",
+      "canton": "Bal felső sarok",
+      "none": "Nincs"
+    },
+    "motifs": {
+      "wave": "Hullám",
+      "mountain": "Hegy",
+      "star": "Csillag",
+      "tree": "Fa",
+      "sun": "Nap",
+      "moon": "Hold",
+      "flower": "Virág",
+      "leaf": "Levél",
+      "bird": "Madár",
+      "fish": "Hal",
+      "anchor": "Horgony",
+      "gear": "Fogaskerék",
+      "tower": "Vár",
+      "bridge": "Híd",
+      "key": "Kulcs",
+      "crown": "Korona",
+      "snowflake": "Hópehely",
+      "flame": "Láng",
+      "diamond": "Rombusz",
+      "cross": "Kereszt"
+    },
+    "patterns": {
+      "plain": "Egyszínű",
+      "bicolor": "Kétszínű (vízszintes)",
+      "triband": "Három függőleges sáv",
+      "diagonal": "Átlós felosztás",
+      "border": "Szegély",
+      "bands": "Felső és alsó sáv"
+    }
+  }
+}

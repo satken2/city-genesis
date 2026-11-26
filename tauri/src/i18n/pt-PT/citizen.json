@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} anos",
+    "male": "Masculino",
+    "female": "Feminino",
+    "single": "Sem cônjuge",
+    "married": "Com cônjuge",
+    "household": "Agregado familiar",
+    "employer": "Local de trabalho",
+    "unemployed": "Sem emprego",
+    "school": "Escola",
+    "notEnrolled": "Não estuda",
+    "major": "Qualificação de especialização",
+    "higherEducation": "Ensino superior",
+    "graduated": "Concluído",
+    "notGraduated": "Não concluído",
+    "skills": "Qualificações",
+    "criminality": "Propensão para o crime",
+    "commuteTime": "Tempo de deslocação",
+    "automobile": "Automóvel",
+    "automobileOwned": "Sim",
+    "automobileNone": "Não",
+    "householdStatus": "Situação do agregado"
+  },
+  "household": {
+    "title": "Agregado familiar",
+    "familyType": "Tipo de agregado",
+    "familySingle": "Pessoa só",
+    "familyCouple": "Casal",
+    "familyFamily": "Família",
+    "familySenior": "Idosos",
+    "hasAutomobile": "Tem automóvel",
+    "noAutomobile": "Sem automóvel",
+    "discretionaryIncome": "Rendimento disponível",
+    "livingStandard": "Nível de vida",
+    "livingStandardLevel": {
+      "0": "Miséria",
+      "1": "Pobreza",
+      "2": "Classe média",
+      "3": "Abastado"
+    },
+    "satisNutrition": "Alimentação",
+    "satisHealthcare": "Saúde",
+    "satisLeisure": "Lazer",
+    "satisTourism": "Turismo",
+    "tourist": "Turistas",
+    "partySize": "Número de pessoas",
+    "members": "Membros do agregado"
+  },
+  "education": {
+    "people": "pessoas"
+  }
+}

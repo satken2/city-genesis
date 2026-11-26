@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Simulaation kuormitus",
+      "heading": "Viimeisimmän kauden laskenta-aika ({{days}} päivää)",
+      "noData": "Ei mittaustietoja",
+      "note": "Kun useita kausia ajetaan peräkkäin, arvo koskee viimeistä kautta. Käsittelymäärä on kaupungin koosta arvioitu suuntaa-antava määrä tärkeimpien vertailujen yhdistelmistä.",
+      "colGroup": "Käsittely",
+      "colTime": "Aika",
+      "colWorkload": "Käsittelymäärä",
+      "workloadHint": "Tärkeimpien vertailujen yhdistelmien (taulukon alkioiden) arvioitu määrä. Vie hiiri arvon päälle nähdäksesi erittelyn.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Hyödykemarkkinat",
+      "realestate": "Kiinteistömarkkinat",
+      "labor": "Työmarkkinat",
+      "building_spawn": "Rakennusten syntyminen",
+      "agent_spawn": "Taloustoimijoiden syntyminen",
+      "routing": "Kaupunkilaisten reitinhaku",
+      "transit": "Joukkoliikenteen reitinhaku",
+      "environment": "Asuinympäristö",
+      "other": "Muut"
+    },
+    "workload": {
+      "market": "Ostajat {{demanders}} × myyjät {{suppliers}} (kerrottu tuotteittain ja laskettu yhteen)",
+      "realestate": "Muuttoa harkitsevat kotitaloudet {{movers}} × asuinrakennukset {{housing}}",
+      "labor": "Työnhakijat {{seekers}} × työnantajat {{employers}}",
+      "building_spawn": "Ehdokastontit {{parcels}} × rakennustyypit × kerrosluvut × kerrosten käyttötarkoitukset",
+      "agent_spawn": "Tuotteet × kaupunginosat {{zones}} × kaupunginosat {{zones}}",
+      "routing": "2 kulkutapaa × kaupunginosat {{zones}} × kaupunginosat {{zones}} × 3 ehdokasreittiä × väylät {{paths}}",
+      "transit": "Pysäkit {{stops}} × solmut {{nodes}}",
+      "environment": "Ruudukko {{width}} × {{height}} × auringon asemat"
+    },
+    "entities": {
+      "colMetric": "Kohde",
+      "colCount": "Määrä",
+      "title": "Kohteiden määrät",
+      "agents": "Taloustoimijat",
+      "households": "Kotitaloudet",
+      "businesses": "Toimipaikat",
+      "publicFacilities": "Julkiset laitokset",
+      "buildings": "Rakennukset",
+      "citizens": "Kaupunkilaiset",
+      "population": "Väestö",
+      "zones": "Kaupunginosat",
+      "parcels": "Tontit",
+      "paths": "Väylät",
+      "roads": "Tiet",
+      "tracks": "Raiteet",
+      "infra": "Infraverkot",
+      "nodes": "Solmut"
+    },
+    "approximation": {
+      "title": "Simulaation yksinkertaistaminen",
+      "intro": "Suuria kaupunkeja varten on tulossa asetuksia, jotka yksinkertaistavat laskentaa. Niitä ei voi vielä muuttaa.",
+      "warning": "Voi vaikuttaa pelitasapainoon. Muutosta ei voi perua",
+      "irreversible": "Yksinkertaistamisen aiheuttamat muutokset säilyvät myöhemmillä kausilla. Käyttöön otettua yksinkertaistusta ei voi poistaa eikä sen tasoa laskea.",
+      "undecided": "Ei päätetty",
+      "candidates": "ehdokasta enintään",
+      "epochs": "kauden välein",
+      "off": "Pois",
+      "on": "Päällä",
+      "goods": {
+        "label": "Ostoehdokkaiden määrä",
+        "description": "Rajoittaa ostopaikkoja, joiden hintaa ja etäisyyttä verrataan."
+      },
+      "jobs": {
+        "label": "Työpaikkaehdokkaiden määrä",
+        "description": "Rajoittaa työpaikkoja, joiden palkkaa ja työmatkaa verrataan."
+      },
+      "housing": {
+        "label": "Asuntoehdokkaiden määrä",
+        "description": "Rajoittaa asuntoja, joiden vuokraa ja sijaintia verrataan."
+      },
+      "interval": {
+        "label": "Säännöllisten päätösten väli",
+        "description": "Ostopaikat, työpaikat ja asunnot arvioidaan uudelleen harvemmin."
+      },
+      "aggregation": {
+        "label": "Samankaltaisten kaupunkilaisten ja kotitalouksien yhteislaskenta",
+        "description": "Osa samankaltaisessa tilanteessa olevien kaupunkilaisten ja kotitalouksien päätöksistä käsitellään ryhmänä."
+      }
+    },
+    "status": {
+      "title": "Järjestelmän tila",
+      "gpuDisabled": "GPU-kiihdytys: ei käytössä",
+      "coreSimulator": "Ydinsimulaattori",
+      "currentMemory": "Muistinkäyttö nyt: {{value}}",
+      "peakMemory": "Suurin muistinkäyttö käynnistyksen jälkeen: {{value}}",
+      "graphic": "3D",
+      "currentVram": "VRAM-käyttö nyt: {{value}}",
+      "usageTooltip": "Koko PC {{pc}} / tämä peli {{game}} / asennettu {{total}}",
+      "legendPc": "Koko PC",
+      "legendGame": "Tämä peli"
+    }
+  }
+}

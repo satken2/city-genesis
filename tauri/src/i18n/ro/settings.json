@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Setări",
+    "groups": {
+      "general": "General",
+      "display": "Ecran",
+      "sound": "Sunet",
+      "system": "Sistem",
+      "about": "Despre",
+      "developer": "Setări pentru dezvoltatori"
+    },
+    "swagger": {
+      "label": "Swagger (documentația API)",
+      "description": "Afișează specificația API a simulatorului principal în browserul implicit",
+      "action": "Deschide în browser"
+    },
+    "currencyUnit": {
+      "label": "Unitate monetară",
+      "description": "Unitatea afișată lângă sume. Lasă gol ca să urmeze limba de afișare."
+    },
+    "fontSize": {
+      "label": "Dimensiunea textului",
+      "large": "Mare",
+      "medium": "Medie",
+      "small": "Mică",
+      "custom": "Personalizată",
+      "preview": "Dimensiunea actuală"
+    },
+    "monitor": {
+      "label": "Monitor",
+      "prev": "Monitorul anterior",
+      "next": "Monitorul următor"
+    },
+    "graphicMonitor": {
+      "label": "Monitor pentru vizualizarea 3D"
+    },
+    "multiDisplay": {
+      "label": "Mod cu mai multe monitoare",
+      "description": "Afișează ferestrele pe alt monitor decât ecranul jocului",
+      "on": "Activat",
+      "off": "Dezactivat"
+    },
+    "popupMonitor": {
+      "label": "Monitor pentru ferestre"
+    },
+    "hintbar": {
+      "label": "Bară de indicii",
+      "show": "Afișează",
+      "hide": "Ascunde",
+      "description": "Bară din partea de sus a ecranului care afișează indicii de utilizare"
+    },
+    "citizenVoice": {
+      "label": "Vocea cetățenilor",
+      "show": "Afișează",
+      "hide": "Ascunde",
+      "description": "Card din colțul din dreapta sus al ecranului care afișează pe rând replicile locuitorilor"
+    },
+    "language": {
+      "label": "Limbă",
+      "description": "Limba de afișare a interfeței. Este diferită de limba salvării.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Volum",
+      "master": "Volum general",
+      "bgm": "Muzică de fundal",
+      "sfx": "Efecte sonore"
+    },
+    "compute": {
+      "label": "Accelerare GPU",
+      "comingSoon": "În curând",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU activ",
+      "statusInactive": "CPU activ",
+      "restartRequired": "După schimbarea setării, programul principal va reporni",
+      "restarting": "Se repornește…",
+      "restartFailed": "Repornirea a eșuat",
+      "restartUnavailable": "Setările au fost salvate. Modificările se aplică la următoarea pornire a jocului",
+      "confirmRestart": "Schimbi modul de calcul la {{mode}}? Programul principal va reporni.",
+      "restartAction": "Repornește"
+    },
+    "windowReset": {
+      "label": "Poziția și dimensiunea ferestrelor",
+      "action": "Resetează"
+    },
+    "credits": {
+      "label": "Credite",
+      "description": "Mențiunile de drepturi pentru resursele și programele folosite în acest joc",
+      "action": "Afișează"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Joc nou",
+    "overwriteSave": "Suprascrie salvarea",
+    "saveAs": "Salvează ca",
+    "load": "Încarcă",
+    "quitGame": "Ieși din joc",
+    "returnToTop": "Revino la meniul principal",
+    "loading": "Se încarcă…",
+    "shuttingDown": "Se închide…",
+    "saveFailed": "Salvarea a eșuat",
+    "loadFailed": "Încărcarea a eșuat",
+    "confirmNewGame": "Datele actuale se vor pierde. Începi un joc nou?",
+    "confirmQuitGame": "Ieși din joc? Progresul actual nu se salvează automat.",
+    "confirmReturnToTop": "Revii la meniul principal? Progresul actual nu se salvează automat.",
+    "confirm": "Da",
+    "cancel": "Nu",
+    "saveAsScenario": "Salvează ca scenariu",
+    "saveAsNewScenario": "Salvează ca alt scenariu",
+    "overwriteScenario": "Suprascrie scenariul",
+    "backToGame": "Înapoi la joc",
+    "saveName": "Numele salvării",
+    "confirmOverwrite": "Suprascrii salvarea „{{name}}”?",
+    "confirmOverwriteScenario": "Suprascrii scenariul „{{name}}”?"
+  },
+  "saveList": {
+    "noSaves": "Nu există salvări",
+    "currentSave": "Datele actuale",
+    "population": "Populație",
+    "inGameDate": "Dată",
+    "savedAt": "Salvat la",
+    "loadButton": "Încarcă",
+    "deleteButton": "Șterge",
+    "confirmLoad": "Încarci această salvare?",
+    "confirmDelete": "Ștergi această salvare? Această acțiune nu poate fi anulată.",
+    "loading": "Se încarcă…",
+    "loadFailed": "Încărcarea a eșuat",
+    "deleteFailed": "Ștergerea a eșuat",
+    "openFolderButton": "Deschide folderul salvărilor",
+    "scenario": "Scenariu",
+    "autosaveName": "{{name}} (salvare automată la ieșire)"
+  }
+}

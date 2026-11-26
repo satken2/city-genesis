@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Tải mô phỏng",
+      "heading": "Thời gian tính toán của kỳ gần nhất ({{days}} ngày)",
+      "noData": "Không có dữ liệu đo",
+      "note": "Khi chạy liên tiếp nhiều kỳ, đây là số liệu của kỳ cuối cùng. Số phép xử lý là con số ước tính số tổ hợp của các phép so sánh chính, dựa trên quy mô thành phố.",
+      "colGroup": "Xử lý",
+      "colTime": "Thời gian",
+      "colWorkload": "Số phép xử lý",
+      "workloadHint": "Con số ước tính số tổ hợp của các phép so sánh chính (số phần tử mảng). Di chuột lên giá trị để xem chi tiết.",
+      "seconds": "{{value}} giây",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Thị trường hàng hóa",
+      "realestate": "Thị trường bất động sản",
+      "labor": "Thị trường lao động",
+      "building_spawn": "Xuất hiện tòa nhà",
+      "agent_spawn": "Xuất hiện chủ thể kinh tế",
+      "routing": "Tìm lộ trình của công dân",
+      "transit": "Tìm lộ trình giao thông công cộng",
+      "environment": "Môi trường sống",
+      "other": "Khác"
+    },
+    "workload": {
+      "market": "Bên mua {{demanders}} × bên bán {{suppliers}} (nhân theo từng hàng hóa rồi cộng lại)",
+      "realestate": "Hộ gia đình muốn chuyển nhà {{movers}} × tòa nhà có nhà ở {{housing}}",
+      "labor": "Người tìm việc {{seekers}} × chủ thể tuyển dụng {{employers}}",
+      "building_spawn": "Lô đất ứng viên {{parcels}} × loại tòa nhà × số tầng × mục đích sử dụng sàn",
+      "agent_spawn": "Hàng hóa × khu vực {{zones}} × khu vực {{zones}}",
+      "routing": "2 phương tiện × khu vực {{zones}} × khu vực {{zones}} × 3 lộ trình ứng viên × đường dẫn {{paths}}",
+      "transit": "Điểm dừng {{stops}} × nút {{nodes}}",
+      "environment": "Lưới {{width}} × {{height}} × thời điểm chiếu nắng"
+    },
+    "entities": {
+      "colMetric": "Hạng mục",
+      "colCount": "Số lượng",
+      "title": "Số lượng thực thể",
+      "agents": "Chủ thể kinh tế",
+      "households": "Hộ gia đình",
+      "businesses": "Cơ sở kinh doanh",
+      "publicFacilities": "Công trình công cộng",
+      "buildings": "Tòa nhà",
+      "citizens": "Công dân",
+      "population": "Dân số",
+      "zones": "Khu vực",
+      "parcels": "Lô đất",
+      "paths": "Đường dẫn",
+      "roads": "Đường",
+      "tracks": "Đường ray",
+      "infra": "Mạng lưới hạ tầng",
+      "nodes": "Nút"
+    },
+    "approximation": {
+      "title": "Tính gần đúng trong mô phỏng",
+      "intro": "Các tùy chọn đơn giản hóa tính toán cho thành phố lớn sẽ được bổ sung sau. Hiện chưa thể thay đổi.",
+      "warning": "Có thể ảnh hưởng đến cân bằng trò chơi. Không thể hoàn tác",
+      "irreversible": "Những thay đổi do tính gần đúng gây ra vẫn còn ở các kỳ sau. Không thể tắt tính gần đúng đã bật hay giảm mức gần đúng.",
+      "undecided": "Chưa quyết định",
+      "candidates": "ứng viên tối đa",
+      "epochs": "kỳ một lần",
+      "off": "Tắt",
+      "on": "Bật",
+      "goods": {
+        "label": "Số nơi mua ứng viên",
+        "description": "Giới hạn số nơi bán được so sánh về giá và khoảng cách."
+      },
+      "jobs": {
+        "label": "Số nơi làm ứng viên",
+        "description": "Giới hạn số nơi làm việc được so sánh về lương và điều kiện đi lại."
+      },
+      "housing": {
+        "label": "Số nơi ở ứng viên",
+        "description": "Giới hạn số chỗ ở được so sánh về tiền thuê và vị trí."
+      },
+      "interval": {
+        "label": "Chu kỳ ra quyết định định kỳ",
+        "description": "Giảm tần suất xem xét lại nơi mua sắm, nơi làm việc và nơi ở."
+      },
+      "aggregation": {
+        "label": "Gộp công dân và hộ gia đình tương tự để tính",
+        "description": "Một số quyết định của công dân hoặc hộ gia đình có hoàn cảnh tương tự được xử lý theo nhóm."
+      }
+    },
+    "status": {
+      "title": "Trạng thái hệ thống",
+      "gpuDisabled": "Tăng tốc GPU: Tắt",
+      "coreSimulator": "Trình mô phỏng lõi",
+      "currentMemory": "Bộ nhớ đang dùng: {{value}}",
+      "peakMemory": "Bộ nhớ dùng tối đa từ khi khởi động: {{value}}",
+      "graphic": "3D",
+      "currentVram": "VRAM đang dùng: {{value}}",
+      "usageTooltip": "Toàn bộ PC {{pc}} / Trò chơi này {{game}} / Dung lượng lắp đặt {{total}}",
+      "legendPc": "Toàn bộ PC",
+      "legendGame": "Trò chơi này"
+    }
+  }
+}

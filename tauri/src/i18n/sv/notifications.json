@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Stadens aviseringar",
+    "empty": "Just nu finns det inga problem som kräver åtgärd",
+    "loadFailed": "Det gick inte att hämta aviseringarna",
+    "types": {
+      "resource_runway": "Resursen ”{{name}}” väntas vara uttömd om ca {{remaining_epochs}} epoker",
+      "resource_depleted": "Resursen ”{{name}}” är uttömd",
+      "facility_inoperative": "Den offentliga anläggningen ”{{name}}” är inte i drift",
+      "facility_inoperative_labor": "Den offentliga anläggningen ”{{name}}” är inte i drift på grund av brist på arbetskraft",
+      "facility_inoperative_material": "Den offentliga anläggningen ”{{name}}” är inte i drift på grund av brist på råvaror",
+      "facility_inoperative_high_skill": "Den offentliga anläggningen ”{{name}}” har dragit ner på verksamheten på grund av brist på specialister",
+      "facility_inoperative_budget": "Den offentliga anläggningen ”{{name}}” har dragit ner på verksamheten på grund av otillräcklig budget",
+      "education_low_enrollment": "Utbildningsanläggningen ”{{name}}” har för få elever och används dåligt ({{enrolled}} inskrivna av {{max_students}} platser)",
+      "infra_facility_down": "Infrastrukturanläggningen ”{{name}}” har stannat",
+      "infra_disconnected": "{{count}} anläggningar är inte anslutna till infrastrukturnätet",
+      "rail_capacity_exceeded": "Antalet tåg överstiger spårkapaciteten på {{count}} spårsträckor",
+      "collapse": "{{count}} byggnader/vägar har rasat",
+      "collapse_with_deaths": "{{count}} byggnader/vägar har rasat och {{deaths}} personer har omkommit",
+      "deaths_traffic": "{{count}} personer omkom i trafikolyckor",
+      "tenant_blocked_by_parcel_size": "I stadsdelen ”{{zone_name}}” går det inte att bygga en byggnad som ”{{tenant_name}}” kan flytta in i (behöver {{required}} m2, tomten rymmer högst {{max_capacity}} m2). En större tomt behövs",
+      "unknown": "En allvarlig händelse har inträffat",
+      "sanitation": "Hygienen försämras för {{count}} hushåll. Förbättra avlopps- och avfallshanteringen."
+    }
+  }
+}

@@ -1,0 +1,212 @@
+{
+  "agent": {
+    "back": "Tilbage",
+    "editAppearance": "Skift udseende",
+    "relocateCityHall": "Flyt rådhuset",
+    "publicFacility": "Offentligt anlæg",
+    "underAcquisition": "Forhandler om arealerhvervelse",
+    "publicFacilityPanel": {
+      "title": "Offentligt anlæg"
+    },
+    "abandon": "Opgiv",
+    "abandonHint": "Stop vedligeholdelsen, og lad bygningen forfalde uden reparationer",
+    "statusSince": {
+      "founded": "Stiftet",
+      "householdFormed": "Husstand dannet",
+      "arrived": "Ankommet",
+      "opened": "Åbnet",
+      "schoolOpened": "Skolen åbnet",
+      "completed": "Færdiggjort",
+      "operatingSince": "I drift siden",
+      "resumed": "Genoptaget",
+      "paused": "Sat på pause",
+      "suspended": "Lukket midlertidigt",
+      "schoolClosed": "Skolen lukket midlertidigt",
+      "constructionStarted": "Byggestart",
+      "demolitionScheduled": "Nedrivning besluttet",
+      "demolitionStarted": "Nedrivning påbegyndt",
+      "demolished": "Nedrevet",
+      "collapsed": "Styrtet sammen",
+      "burnedDown": "Brændt ned",
+      "default": "Status ændret"
+    },
+    "reserves": "Likvide midler",
+    "revenues": "Indtægter",
+    "expenses": "Udgifter",
+    "zone": "Bydel",
+    "building": "Bygning",
+    "rent": "Husleje",
+    "floorOccupancy": "Optaget etageareal",
+    "tenants": "Lejere",
+    "guests": "Gæster",
+    "tabBasicInfo": "Grundoplysninger",
+    "utilizationTarget": "Mål for kapacitetsudnyttelse",
+    "currentUtilization": "Aktuel kapacitetsudnyttelse",
+    "constructionSpeed": "Byggetempo",
+    "constructionCostPerEpoch": "Byggeomkostning pr. epoke",
+    "remainingConstruction": "Resterende byggetid",
+    "remainingEpochs": "ca. {{n}} epoker",
+    "tabBuildingInfo": "Bygning",
+    "tabCargoInfo": "Godshåndtering",
+    "tabTradeInfo": "Udbud, efterspørgsel og handel",
+    "tabTourismInfo": "Turisme",
+    "tabEmploymentInfo": "Beskæftigelse",
+    "action": {
+      "purchase": "Opkøb",
+      "bulldoze": "Riv ned",
+      "cancelBulldoze": "Annuller nedrivning",
+      "pause": "Sæt på pause",
+      "resume": "Genoptag",
+      "delete": "Slet",
+      "repair": "Reparer",
+      "rebuild": "Genopfør",
+      "edit": "Rediger",
+      "startConstruction": "Påbegynd byggeri",
+      "stopConstruction": "Sæt byggeri i bero",
+      "cancelAbandon": "Annuller opgivelse",
+      "explode": "Spræng",
+      "explodeConfirm": "Vil du sprænge bygningen og få det til at ligne en ulykke?\nBygningen styrter sammen med det samme, og alle, der bor eller arbejder i den, omkommer. Det går hårdt ud over stemningen i byen, og det kan ikke fortrydes.",
+      "explodeTitle": "Spræng bygning",
+      "explodeConfirmAction": "Spræng"
+    },
+    "pendingWarning": "Bygningen er planlagt. Giv besked om byggestart.",
+    "alerts": {
+      "diagnoseHint": "Klik for at finde årsagen",
+      "title": "Advarsler",
+      "constructionShortage": {
+        "title": "Mangel på byggeydelser",
+        "description": "Byggebudgettet er for lille, så arbejdet bliver forsinket."
+      },
+      "onFire": {
+        "title": "Brand!",
+        "description": "Der er udbrudt brand i bygningen."
+      },
+      "accidentalFire": {
+        "title": "Mindre brand",
+        "description": "Der opstod brand i bygningen, men den blev holdt i ave."
+      },
+      "infraDisconnected": {
+        "title": "Ikke tilsluttet infrastrukturnettet",
+        "description": "Der er ikke tilsluttet noget infrastrukturtracé til anlæggets tilslutningspunkt. Anlægget kan hverken levere eller modtage, før det er tilsluttet nettet."
+      },
+      "capacityTight": {
+        "title": "Tæt på kapacitetsgrænsen",
+        "description": "Anlægget håndterer 90 % eller mere af sin kapacitet. Det kan næsten ikke klare mere efterspørgsel."
+      },
+      "nonconforming": {
+        "title": "Overholder ikke bestemmelserne",
+        "description": "Bygningen overholder ikke parcellens bestemmelser. Den bliver ikke repareret og rives ned, når den er nedslidt."
+      },
+      "crime": {
+        "title": "Kriminalitet",
+        "description": "Der er begået en forbrydelse i denne bygning."
+      },
+      "crimeSign": {
+        "title": "Tegn på kriminalitet",
+        "description": "Der er set tegn på kriminalitet i denne bygning. Hold øje med, om trygheden bliver dårligere."
+      },
+      "laborShortage": {
+        "title": "Mangel på arbejdskraft",
+        "description": "Der er for få ansatte, så produktionen og serviceydelserne ligger under planen."
+      },
+      "materialShortage": {
+        "title": "Mangel på råvarer",
+        "description": "Der kan ikke skaffes nok råvarer, så produktionen og serviceydelserne ligger under planen."
+      },
+      "highSkillShortage": {
+        "title": "Mangel på specialister",
+        "description": "Der mangler højt kvalificerede medarbejdere, så produktionen er skåret ned til det, de nuværende medarbejdere kan klare."
+      },
+      "budgetCapped": {
+        "title": "Budgetunderskud",
+        "description": "Det tildelte budget ligger langt under det nødvendige, så driften er skåret ned. Se budgetfordelingen igennem."
+      },
+      "facilityWarning": {
+        "title": "Offentligt anlæg ude af drift",
+        "description": "Anlægget leverer langt mindre service end planlagt. Tjek, om det kan skaffe arbejdskraft og råvarer."
+      },
+      "sanitationWarning": {
+        "title": "Forværrede sanitære forhold",
+        "description": "De sanitære forhold på bygningens grund er blevet alvorligt forværret og går ud over husstandene, der bor her. Forbedr forsyningen af kloak- og affaldsbehandling."
+      },
+      "infraWarning": {
+        "title": "Infrastrukturanlæg standset eller styrtet sammen",
+        "description": "Anlægget er standset eller styrtet sammen, og det påvirker forsyningen. Tjek anlæggets tilstand og forsyningsvejene."
+      },
+      "farFromRoad": {
+        "title": "Langt fra vej",
+        "description": "Der er ca. {{distance}} m til nærmeste vej. Det gør det meget sværere at skaffe varer, pendle og handle, så overvej at føre en vej tættere på."
+      },
+      "noRoadAccess": {
+        "title": "Ingen vejadgang",
+        "description": "Der er ingen vej, som bygningen kan tilsluttes. Det gør det meget sværere at skaffe varer, pendle og handle, så byg en vej i nærheden."
+      }
+    },
+    "infra": {
+      "title": "Infrastrukturtilslutning",
+      "connected": "Tilsluttet",
+      "disconnected": "Ikke tilsluttet",
+      "received": "Modtaget mængde"
+    },
+    "tabConstructionInfo": "Byggeri",
+    "tabEducationInfo": "Uddannelse",
+    "education": {
+      "totalStudents": "Indskrevne elever",
+      "totalCapacity": "Samlet kapacitet",
+      "statusTitle": "Indskrivning",
+      "enrolled": "Indskrevet",
+      "vacant": "Ledige pladser",
+      "noCapacity": "Ingen pladser",
+      "countLabel": "Antal",
+      "enrollmentBySkill": "Indskrivning fordelt på kvalifikation",
+      "settingsTitle": "Optagelseskvoter",
+      "settingsHint": "Angiv en vægt for hver kvalifikation. Den samlede kapacitet fordeles efter vægtene.",
+      "skillHeader": "Kvalifikation",
+      "weightHeader": "Vægt",
+      "previewHeader": "Pladser",
+      "save": "Gem",
+      "saving": "Gemmer…",
+      "saveFailed": "Kunne ikke gemme",
+      "sumMustBePositive": "Kvoterne skal tilsammen være mindst 1",
+      "invalidWeight": "Vægte skal være hele tal på 0 eller derover",
+      "studentsList": "Elevliste",
+      "noStudents": "Ingen elever",
+      "showMore": "Vis flere ({{count}})"
+    }
+  },
+  "agentList": {
+    "filterType": "Type",
+    "filterVariant": "Variant",
+    "filterZone": "Bydel",
+    "allVariants": "Alle varianter",
+    "allZones": "Alle bydele",
+    "resultCount": "{{count}} resultater",
+    "capped": "(af {{total}} i alt)",
+    "loading": "Indlæser…",
+    "noResults": "Ingen aktører matcher",
+    "colStatus": "Status",
+    "colVariant": "Variant",
+    "colName": "Navn",
+    "colProduct": "Vare",
+    "colPrice": "Pris",
+    "colProduction": "Produktion",
+    "colStock": "Lager",
+    "colSold": "Solgt",
+    "colWage": "Lønsats",
+    "colEmployment": "Ansatte",
+    "colUtilization": "Udnyttelse",
+    "colBdType": "Bygningstype",
+    "colDurability": "Holdbarhed",
+    "colRent": "Leje",
+    "colFloors": "Etager",
+    "colFloorArea": "Etageareal",
+    "colOccupancy": "Udlejningsgrad",
+    "colFamilyType": "Husstandstype",
+    "colDiscretionaryIncome": "Rådighedsbeløb",
+    "colSatisNutrition": "Ernæring",
+    "colSatisHealthcare": "Sundhed",
+    "colSatisLeisure": "Fritid",
+    "colSatisResidential": "Bolig",
+    "colAutomobile": "Bil"
+  }
+}

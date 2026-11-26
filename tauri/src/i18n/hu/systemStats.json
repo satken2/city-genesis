@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Szimulációs terhelés",
+      "heading": "A legutóbbi korszak ({{days}} nap) számítási ideje",
+      "noData": "Nincs mérési adat",
+      "note": "Több egymás után futtatott korszak esetén az utolsó értéke látható. A műveletszám a fő összehasonlítások kombinációinak a város méretéből becsült közelítő száma.",
+      "colGroup": "Folyamat",
+      "colTime": "Idő",
+      "colWorkload": "Műveletszám",
+      "workloadHint": "A fő összehasonlítások (tömbelemek) közelítő száma. Vidd az egeret egy érték fölé a részletekért.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Árupiac",
+      "realestate": "Ingatlanpiac",
+      "labor": "Munkaerőpiac",
+      "building_spawn": "Épületek megjelenése",
+      "agent_spawn": "Gazdasági szereplők megjelenése",
+      "routing": "Polgárok útvonalkeresése",
+      "transit": "Tömegközlekedési útvonalkeresés",
+      "environment": "Lakókörnyezet",
+      "other": "Egyéb"
+    },
+    "workload": {
+      "market": "Vevők: {{demanders}} × eladók: {{suppliers}} (termékenként szorozva, összegezve)",
+      "realestate": "Költözést fontolgató háztartások: {{movers}} × lakóépületek: {{housing}}",
+      "labor": "Álláskeresők: {{seekers}} × munkáltatók: {{employers}}",
+      "building_spawn": "Jelölt telkek: {{parcels}} × épülettípusok × szintszámok × szintrendeltetések",
+      "agent_spawn": "Termékek × kerületek: {{zones}} × kerületek: {{zones}}",
+      "routing": "2 közlekedési mód × kerületek: {{zones}} × kerületek: {{zones}} × 3 jelölt útvonal × nyomvonalak: {{paths}}",
+      "transit": "Megállók: {{stops}} × csomópontok: {{nodes}}",
+      "environment": "Rács: {{width}} × {{height}} × napállások"
+    },
+    "entities": {
+      "colMetric": "Tétel",
+      "colCount": "Darabszám",
+      "title": "Entitások száma",
+      "agents": "Gazdasági szereplők",
+      "households": "Háztartások",
+      "businesses": "Vállalkozások",
+      "publicFacilities": "Közlétesítmények",
+      "buildings": "Épületek",
+      "citizens": "Polgárok",
+      "population": "Népesség",
+      "zones": "Kerületek",
+      "parcels": "Telkek",
+      "paths": "Nyomvonalak",
+      "roads": "Utak",
+      "tracks": "Vágányok",
+      "infra": "Infrastruktúra-hálózatok",
+      "nodes": "Csomópontok"
+    },
+    "approximation": {
+      "title": "Szimulációs közelítés",
+      "intro": "Nagy városokhoz a számítást egyszerűsítő beállítások érkeznek majd. Ezek egyelőre nem módosíthatók.",
+      "warning": "Hatással lehet a játékegyensúlyra. Nem vonható vissza",
+      "irreversible": "A közelítés okozta változások a későbbi korszakokban is megmaradnak. A bekapcsolt közelítés nem kapcsolható ki, és mértéke sem csökkenthető.",
+      "undecided": "Nincs eldöntve",
+      "candidates": "jelöltig",
+      "epochs": "korszakonként",
+      "off": "Ki",
+      "on": "Be",
+      "goods": {
+        "label": "Vásárlási jelöltek száma",
+        "description": "Korlátozza az ár és távolság alapján összehasonlított beszállítók számát."
+      },
+      "jobs": {
+        "label": "Álláskeresési jelöltek száma",
+        "description": "Korlátozza a bér és ingázási feltételek alapján összehasonlított munkahelyek számát."
+      },
+      "housing": {
+        "label": "Költözési jelöltek száma",
+        "description": "Korlátozza a lakbér és elhelyezkedés alapján összehasonlított lakások számát."
+      },
+      "interval": {
+        "label": "Rendszeres döntések gyakorisága",
+        "description": "Ritkábban vizsgálják felül a vásárlás helyét, a munkahelyet és a lakóhelyet."
+      },
+      "aggregation": {
+        "label": "Hasonló polgárok és háztartások együttes számítása",
+        "description": "A hasonló helyzetű polgárok és háztartások egyes döntéseit csoportként kezeli."
+      }
+    },
+    "status": {
+      "title": "Rendszerállapot",
+      "gpuDisabled": "GPU-gyorsítás: kikapcsolva",
+      "coreSimulator": "Szimulációs mag",
+      "currentMemory": "Jelenlegi memóriahasználat: {{value}}",
+      "peakMemory": "Legnagyobb memóriahasználat indítás óta: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Jelenlegi VRAM-használat: {{value}}",
+      "usageTooltip": "Teljes gép: {{pc}} / Játék: {{game}} / Összesen: {{total}}",
+      "legendPc": "Teljes gép",
+      "legendGame": "Játék"
+    }
+  }
+}

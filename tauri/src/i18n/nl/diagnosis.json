@@ -1,0 +1,202 @@
+{
+  "diagnosis": {
+    "refresh": "Opnieuw diagnosticeren",
+    "note": "Spoort de oorzaken van het probleem stap voor stap op aan de hand van het laatste simulatieresultaat. Voer na het ingrijpen het volgende tijdvak uit om het resultaat bij te werken.",
+    "noProblem": {
+      "title": "Geen problemen gevonden",
+      "description": "Er valt voor deze economische actor op dit moment niets te melden."
+    },
+    "target": {
+      "agent": "Voorziening #{{id}}",
+      "path": "Tracé #{{id}}",
+      "node": "Verbindingspunt #{{id}}",
+      "nodeAt": "Punt ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": {
+        "title": "Economische actor niet gevonden",
+        "description": ""
+      },
+      "cycle": {
+        "title": "Oorzaken in een kringloop",
+        "description": "Deze voorziening wordt hogerop al gediagnosticeerd (ze zijn van elkaar afhankelijk)."
+      },
+      "depth_limit": {
+        "title": "Hier stopt de analyse",
+        "description": "De keten van oorzaken is te lang, dus de analyse stopt hier. Diagnosticeer de betreffende voorziening rechtstreeks."
+      },
+      "no_alert": {
+        "title": "Deze voorziening zelf heeft geen problemen",
+        "description": "Het tekort komt mogelijk door de omvang van de voorziening of door haar doelbezetting."
+      },
+      "facility_inactive": {
+        "title": "Voorziening is niet in bedrijf",
+        "description": "Er wordt niets geproduceerd omdat de voorziening in aanbouw, stilgelegd of ingestort is, of iets dergelijks. Bekijk de details van de voorziening."
+      },
+      "producer_ref": {
+        "title": "Leverende voorziening",
+        "description": ""
+      },
+      "material_shortage": {
+        "title": "Grondstoffen kunnen niet worden ingekocht",
+        "description": "Een deel van de benodigde grondstoffen kwam niet aan, waardoor de productie onder het plan bleef."
+      },
+      "material_unmet": {
+        "title": "Tekort: {{product_name}}",
+        "description": "Ontvangen: {{received}} van de benodigde {{demand}} ({{ratio}}%)."
+      },
+      "material_unmet_unknown": {
+        "title": "De ontbrekende grondstof kon niet worden bepaald",
+        "description": "Dit kan bijvoorbeeld gebeuren vlak nadat de vraag is gedaald. Bekijk het resultaat van het volgende tijdvak."
+      },
+      "infra_disconnected": {
+        "title": "Niet aangesloten op het net voor {{product_name}}",
+        "description": ""
+      },
+      "infra_no_terminal": {
+        "title": "Geen aansluitpunt",
+        "description": "Deze voorziening heeft geen aansluitpunt voor {{product_name}}."
+      },
+      "infra_terminal_unconnected": {
+        "title": "Geen enkel tracé bereikt het aansluitpunt",
+        "description": ""
+      },
+      "infra_link_not_active": {
+        "title": "Aansluitend tracé is nog niet in gebruik",
+        "description": "Tracés naar het aansluitpunt die in aanbouw of nog niet gestart zijn: {{count}}."
+      },
+      "infra_link_incompatible": {
+        "title": "Aansluitend tracé kan geen {{product_name}} vervoeren",
+        "description": "Het tracé naar het aansluitpunt is van een soort die dit goed niet kan vervoeren (bijv. niet-geëlektrificeerd spoor)."
+      },
+      "infra_no_producer": {
+        "title": "Geen producent van {{product_name}} in de stad",
+        "description": ""
+      },
+      "infra_producers_inactive": {
+        "title": "Producenten van {{product_name}} zijn niet in bedrijf",
+        "description": "Geen van de producenten in de stad ({{count}}) is in bedrijf."
+      },
+      "infra_producers_unconnected": {
+        "title": "Producenten zijn niet op het net aangesloten",
+        "description": "Producenten in bedrijf: {{count}}, maar geen enkele is aangesloten op het net voor {{product_name}}."
+      },
+      "infra_network_split": {
+        "title": "Dit net heeft geen producent",
+        "description": "De producenten van {{product_name}} ({{producers}}) zitten op een ander net. De twee netten zijn ergens onderbroken of nooit met elkaar verbonden."
+      },
+      "infra_link_under_construction": {
+        "title": "Er wordt een verbindend tracé gebouwd",
+        "description": "Tracés die op dit net aangesloten gaan worden: {{count}}."
+      },
+      "infra_gap_detected": {
+        "title": "Hier is het net onderbroken",
+        "description": "De eindpunten van de twee netten liggen maar {{distance}} m uit elkaar."
+      },
+      "infra_tap_missing": {
+        "title": "Niet aangesloten op het net van de producenten",
+        "description": ""
+      },
+      "infra_generation_shortage": {
+        "title": "Er wordt te weinig {{product_name}} geproduceerd",
+        "description": "Dit net produceert {{supply}} tegenover een vraag van {{demand}} (producenten: {{producers}})."
+      },
+      "infra_transmission_bottleneck": {
+        "title": "De capaciteit van het net is ontoereikend",
+        "description": "Tracés die volledig benut worden: {{count}}."
+      },
+      "infra_unexplained": {
+        "title": "Het net lijkt in orde",
+        "description": "Productie en aansluitingen zijn voldoende, dus het tekort was mogelijk tijdelijk. Bekijk het resultaat van het volgende tijdvak."
+      },
+      "market_no_supplier": {
+        "title": "Geen leverancier van {{product_name}} in de stad",
+        "description": "Er is geen binnenlandse producent in bedrijf en er wordt ook niets geïmporteerd."
+      },
+      "market_supply_insufficient": {
+        "title": "Het aanbod van {{product_name}} haalt de vraag niet",
+        "description": "Aanbod {{supply}} tegenover bestellingen van {{demand}} in de hele stad (producenten: {{producers}}, importknooppunten: {{hubs}})."
+      },
+      "market_unmatched": {
+        "title": "{{product_name}} kon niet op de markt worden ingekocht",
+        "description": "In de hele stad dekt het aanbod ({{supply}}) de bestellingen ({{demand}}), maar het bereikte deze voorziening niet. Mogelijk ligt het aan afstand of prijs."
+      },
+      "service_out_of_range": {
+        "title": "Buiten het bereik voor {{product_name}}",
+        "description": "Het bouwterrein van deze voorziening valt buiten het bereik van alle voorzieningen die {{product_name}} leveren ({{producers}} in de stad)."
+      },
+      "high_skill_shortage": {
+        "title": "Er is geen gespecialiseerd personeel te vinden",
+        "description": "Er zijn te weinig hoogopgeleide werknemers, dus het productieplan is teruggeschroefd tot wat het aanwezige personeel aankan. Hoogopgeleiden worden aan universiteiten opgeleid: bouw een universiteit en wijs de toelatingsplaatsen toe aan de vereiste vaardigheid."
+      },
+      "labor_shortage": {
+        "title": "Te weinig werknemers",
+        "description": "Geworven: {{total_labor}} van de benodigde {{quota}} arbeid."
+      },
+      "labor_market_tight": {
+        "title": "Er zijn geen werkzoekenden meer in de stad",
+        "description": "De werkloosheid is maar {{unemployment_rate}}%, dus er is niemand om aan te nemen. Bouw meer woningen om inwoners aan te trekken."
+      },
+      "labor_unfilled": {
+        "title": "Er zijn werkzoekenden, maar ze komen niet",
+        "description": "De werkloosheid is {{unemployment_rate}}%. Mogelijke oorzaken zijn een lange reistijd, lage lonen of vaardigheden die niet aansluiten."
+      },
+      "budget_capped": {
+        "title": "Het budget is ontoereikend",
+        "description": "Het toegewezen budget ligt ver onder het benodigde bedrag. Bekijk de budgetverdeling opnieuw."
+      },
+      "construction_shortage": {
+        "title": "{{product_name}} kan niet worden ingekocht",
+        "description": ""
+      },
+      "line_paused_route_disconnected": {
+        "title": "De route tussen haltes is onderbroken",
+        "description": "Opeenvolgende haltes in de rondgang zijn niet verbonden door spoor of straat die in de benodigde richting berijdbaar is. Herbouw het onderbroken stuk of pas de route aan. Om op eenrichtingssporen te keren, keer je bij een station op spoor dat in beide richtingen berijdbaar is (zoals dubbelspoor dat als één tracé is aangelegd), of laat je treinen overstappen naar het andere spoor door de sporen in één knooppunt samen te brengen of een overloopwissel aan te leggen; plaats de haltes voor de terugweg dan aan de perrons voor de andere richting."
+      },
+      "line_paused_no_underlay": {
+        "title": "Halte heeft geen onderliggend tracé",
+        "description": "Het spoor of de straat waarop de halte lag, bestaat niet meer."
+      },
+      "line_paused_train_too_long": {
+        "title": "Treinstel is langer dan het deeltraject van de halte",
+        "description": "Verminder het aantal rijtuigen per treinstel of verleng het deeltraject van de halte (een perron, of een deeltraject van een straat of spoor)."
+      },
+      "line_no_vehicle_product": {
+        "title": "Voor dit lijntype is geen voertuig gedefinieerd",
+        "description": ""
+      },
+      "line_vehicle_shortage": {
+        "title": "Voertuigen kunnen niet worden ingekocht",
+        "description": "Ingekocht: {{received}} van de benodigde {{required}} rijtuigen."
+      },
+      "line_off_network": {
+        "title": "De lijn ligt niet op een berijdbaar net",
+        "description": "Het onderliggende verloop van de lijn is met geen enkel spoor of straat verbonden."
+      },
+      "transit_no_depot": {
+        "title": "Geen depot voor {{product_name}} in de stad",
+        "description": "Bouw een depot en sluit het aan op het berijdbare net."
+      },
+      "transit_depots_inactive": {
+        "title": "Depots zijn niet in bedrijf",
+        "description": "Geen van de depots in de stad ({{count}}) is in bedrijf."
+      },
+      "transit_depots_unconnected": {
+        "title": "Depots zijn niet op het berijdbare net aangesloten",
+        "description": "Geen van de depots ({{count}}) is verbonden met spoor of straat. Leg bij spoor een opstelspoor aan van de hoofdlijn naar het aansluitpunt van het depot."
+      },
+      "transit_depot_other_network": {
+        "title": "Depots liggen op een ander net",
+        "description": "Depots ({{count}}) zijn aangesloten op een spoornet dat niet met deze lijn verbonden is. Verbind de netten met spoor of bouw een depot op dit net."
+      },
+      "transit_vehicle_insufficient": {
+        "title": "Er worden te weinig voertuigen geproduceerd",
+        "description": "De depots op dit net ({{depots}}) leveren {{supply}} rijtuigen, terwijl de lijnen er {{demand}} nodig hebben."
+      },
+      "transit_unexplained": {
+        "title": "De depots lijken in orde",
+        "description": "Aanbod en aansluitingen zijn voldoende, dus het tekort was mogelijk tijdelijk. Bekijk het resultaat van het volgende tijdvak."
+      }
+    }
+  }
+}

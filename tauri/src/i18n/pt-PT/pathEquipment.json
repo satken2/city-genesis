@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Equipamento da estrada",
+    "streetlight_type": "Candeeiros",
+    "fence_type": "Vedações",
+    "street_tree_type": "Árvores",
+    "utility_mode": "Cablagem",
+    "none": "Nenhum",
+    "standard": "Normal",
+    "overhead": "Aérea",
+    "underground": "Subterrânea",
+    "apply": "Aplicar",
+    "bench_type": "Bancos",
+    "bin_type": "Papeleiras",
+    "planter_type": "Floreiras",
+    "advert_type": "Publicidade"
+  }
+}

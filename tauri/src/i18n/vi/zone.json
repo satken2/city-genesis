@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Khu vực #{{id}}",
+    "color": "Màu khu vực",
+    "colorUpdateFailed": "Không thể cập nhật màu khu vực",
+    "basicInfo": "Thông tin cơ bản",
+    "area": "Diện tích",
+    "zonePopulation": "Dân số cư trú",
+    "daytimePopulation": "Dân số ban ngày",
+    "spaceAmount": "Diện tích sàn đã sử dụng",
+    "slotStarvationTitle": "Có nhu cầu thuê đang chờ nhưng không thể xây",
+    "slotStarvationWarning": "“{{tenant}}” cần ít nhất {{required}} m2 sàn trong một tòa nhà, nhưng diện tích lớn nhất có thể xây trên các lô đất của khu vực này là {{max}} m2. Hãy chuẩn bị một lô đất lớn hơn.",
+    "restrictions": "Quy định xây dựng",
+    "restrictionUpdateFailed": "Không thể cập nhật quy định khu vực",
+    "restrictionRequired": "Không được để trống mật độ xây dựng, hệ số sử dụng đất và chiều cao",
+    "mergeConfirm": "Gộp “{{source}}” vào “{{target}}”. Khu vực bị gộp sẽ biến mất cùng với các thiết lập quy định của nó.",
+    "mergeAction": "Gộp",
+    "mergeFailed": "Không thể gộp khu vực (không thể gộp các khu vực không liền kề)",
+    "mergeNoRequest": "Chưa chọn khu vực để gộp",
+    "edit": {
+      "toolHeading": "Nội dung chỉnh sửa",
+      "toolCreate": "Tạo khu vực mới",
+      "toolExpand": "Mở rộng khu vực hiện có",
+      "toolExpandZone": "Mở rộng {{name}}",
+      "modeHeading": "Cách chọn phạm vi",
+      "modeBlock": "Cả khối phố",
+      "modeRoad": "Theo bên đường",
+      "hint": {
+        "create": {
+          "block": "Giữ Ctrl và kéo để tô các khối phố được bao quanh bởi đường; các khối đã tô cùng các lô đất bên trong sẽ thành khu vực mới. Kéo để di chuyển bản đồ, cuộn chuột để phóng to/thu nhỏ.",
+          "road": "Giữ Ctrl và kéo để tô một bên đường (nửa mặt đường hoặc các lô đất nằm dọc theo đó); bên đường đó cùng các lô đất sẽ thành khu vực mới. Kéo để di chuyển bản đồ, cuộn chuột để phóng to/thu nhỏ."
+        },
+        "expand": {
+          "block": "Di chuột lên một khu vực, rồi giữ Ctrl và kéo để tô khối phố; các khối đó cùng các lô đất bên trong sẽ được gộp vào khu vực ấy. Kéo để di chuyển bản đồ, cuộn chuột để phóng to/thu nhỏ.",
+          "road": "Di chuột lên một khu vực, rồi giữ Ctrl và kéo để tô một bên đường (nửa mặt đường hoặc các lô đất nằm dọc theo đó); bên đường đó cùng các lô đất sẽ được gộp vào khu vực ấy. Kéo để di chuyển bản đồ, cuộn chuột để phóng to/thu nhỏ."
+        }
+      },
+      "failed": "Không thể thay đổi khu vực."
+    }
+  }
+}

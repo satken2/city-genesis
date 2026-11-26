@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Lambang",
+    "flag": "Bendera bandar",
+    "motif": "Motif",
+    "fieldColor": "Warna latar",
+    "motifColor": "Warna motif",
+    "pattern": "Corak latar",
+    "accentColor": "Warna aksen",
+    "placement": "Kedudukan lambang",
+    "loadImage": "Muatkan imej",
+    "randomize": "Rawak",
+    "apply": "Guna",
+    "imageLoadFailed": "Imej tidak dapat dimuatkan",
+    "placements": {
+      "center": "Tengah",
+      "canton": "Kiri atas",
+      "none": "Tiada"
+    },
+    "motifs": {
+      "wave": "Ombak",
+      "mountain": "Gunung",
+      "star": "Bintang",
+      "tree": "Pokok",
+      "sun": "Matahari",
+      "moon": "Bulan",
+      "flower": "Bunga",
+      "leaf": "Daun",
+      "bird": "Burung",
+      "fish": "Ikan",
+      "anchor": "Sauh",
+      "gear": "Gear",
+      "tower": "Istana",
+      "bridge": "Jambatan",
+      "key": "Kunci",
+      "crown": "Mahkota",
+      "snowflake": "Salji",
+      "flame": "Api",
+      "diamond": "Belah ketupat",
+      "cross": "Pangkah"
+    },
+    "patterns": {
+      "plain": "Polos",
+      "bicolor": "Dua warna atas bawah",
+      "triband": "Tiga jalur menegak",
+      "diagonal": "Belahan pepenjuru",
+      "border": "Bingkai",
+      "bands": "Jalur atas dan bawah"
+    }
+  }
+}

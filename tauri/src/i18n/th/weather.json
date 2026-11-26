@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "สภาพอากาศ",
+    "choose": "เลือกสภาพอากาศ",
+    "loading": "กำลังตรวจสอบสภาพอากาศ…",
+    "unknown": "ไม่ทราบ",
+    "automatic": "{{weather}} (อัตโนมัติ)",
+    "failed": "เปลี่ยนสภาพอากาศไม่สำเร็จ",
+    "names": {
+      "clear": "ท้องฟ้าแจ่มใส",
+      "high_clouds": "เมฆบาง",
+      "fair": "แดดออก",
+      "broken_clouds": "มีแดดเป็นช่วงๆ",
+      "overcast": "เมฆครึ้ม",
+      "rain_clouds": "เมฆฝน",
+      "fog": "หมอก",
+      "drizzle": "ฝนปรอย",
+      "rain": "ฝนตก",
+      "heavy_rain": "ฝนตกหนัก",
+      "light_snow": "หิมะตกเล็กน้อย",
+      "snow": "หิมะตก",
+      "blizzard": "พายุหิมะ"
+    },
+    "epochClimate": "ภูมิอากาศประจำรอบ",
+    "temperature": "อุณหภูมิ",
+    "precipitation": "ปริมาณน้ำฝน",
+    "sunlight": "ความเข้มแสงแดด",
+    "windSpeed": "ความเร็วลม"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "mapNavigation": {
+    "title": "Explorează orașul",
+    "openSidebar": "Deschide bara laterală",
+    "closeSidebar": "Închide bara laterală",
+    "back": "Înapoi",
+    "search": "Caută un loc",
+    "origin": "Caută punctul de plecare",
+    "destination": "Caută destinația",
+    "clear": "Golește",
+    "searching": "Se caută…",
+    "error": "Nu se poate realiza conexiunea. Reîncarcă și încearcă din nou.",
+    "noResults": "Niciun loc găsit",
+    "mode": "Mijloc de deplasare",
+    "pedestrian": "Pe jos și transport public",
+    "automobile": "Cu mașina",
+    "pickOrigin": "Alege plecarea pe hartă",
+    "pickDestination": "Alege destinația pe hartă",
+    "swap": "Inversează",
+    "cancel": "Anulează",
+    "directions": "Cum ajungi aici",
+    "intro": "Caută facilități, gări, cartiere sau drumuri ori alege un loc pe hartă.",
+    "chooseOrigin": "Caută un punct de plecare sau alege-l pe hartă.",
+    "routing": "Se caută itinerariul…",
+    "showRoute": "Arată tot itinerariul",
+    "mapPoint": "Punct pe hartă",
+    "minutes": "Aprox. {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Estimare bazată pe rețeaua de drumuri din calculul de itinerarii nr. {{epoch}}. Liniile punctate arată mersul pe jos și legăturile cu drumurile.",
+    "busy": "Simularea rulează. Rezultatele se actualizează după ce se termină.",
+    "not_ready": "Încă nu există date despre itinerarii. Rulează o simulare în acest oraș ca să le poți vedea.",
+    "unreachable": "Nu s-a găsit niciun itinerariu între aceste două locuri.",
+    "no_access": "Nu s-a găsit niciun drum accesibil lângă locul ales.",
+    "geometry_unavailable": "Traseul parcurs de transportul public pe acest itinerariu nu este disponibil.",
+    "place_missing": "Locul ales a fost șters. Alege din nou.",
+    "kind": {
+      "agent": "Facilitate",
+      "zone": "Cartier",
+      "stop": "Stație",
+      "station": "Gară",
+      "point": "Punct",
+      "road": "Drum"
+    },
+    "leg": {
+      "walk": "Pe jos",
+      "drive": "Cu mașina",
+      "transit": "Transport public",
+      "conveyor": "Transport de persoane",
+      "access": "Legătură cu drumul",
+      "turn": "Întoarcere în intersecție"
+    },
+    "picking": {
+      "origin": "Dă clic pe hartă pe punctul de plecare.",
+      "destination": "Dă clic pe hartă pe destinație."
+    },
+    "pins": {
+      "tab": "Pioneze",
+      "hint": "Dă clic pe hartă ca să pui o pioneză în culoarea aleasă. Clic dreapta pe o pioneză o șterge.",
+      "list": "Lista pionezelor",
+      "remove": "Șterge pioneza"
+    }
+  }
+}

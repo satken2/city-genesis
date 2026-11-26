@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritma",
+    "roadVariants": "Jenis jalan",
+    "patterns": {
+      "grid_1": "Grid 1",
+      "grid_2": "Grid 2",
+      "sprawl_1": "Gaya rebakan 1",
+      "sprawl_2": "Gaya rebakan 2",
+      "sprawl_3": "Gaya rebakan 3",
+      "planned_city_1": "Bandar terancang 1",
+      "split_1": "Pecahan 1"
+    },
+    "spacing": "Jarak antara jalan",
+    "blockLength": "Panjang blok",
+    "splitHint": "Masukkan keseluruhan blok yang dikelilingi jalan ke dalam kawasan. Jalan yang selari dengan sisi panjang blok dibina mengikut “Jarak antara jalan”, dan jalan yang bersilang tegak dibina mengikut “Panjang blok”.",
+    "createParcels": "Buat lot",
+    "parcelArea": "Keluasan lot",
+    "hint": "Tekan Ctrl dan seret kiri untuk mewarnakan kawasan yang hendak dibangunkan. Seret kiri untuk menggerakkan peta, dan gunakan roda tetikus untuk zum masuk atau keluar.",
+    "clear": "Kosongkan",
+    "preview": "Pratonton",
+    "previewing": "Mengira...",
+    "create": "Sahkan",
+    "creating": "Mencipta...",
+    "previewed": "Rupa bumi dalam kawasan {{area}} akan diratakan sedikit, dan {{roads}} segmen jalan serta {{parcels}} lot boleh dirancang ({{rejected}} ditolak)",
+    "created": "Rupa bumi telah diratakan, dan {{roads}} segmen jalan serta {{parcels}} lot telah dirancang ({{rejected}} ditolak)"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Εξοπλισμός δρόμου",
+    "streetlight_type": "Φωτιστικά δρόμου",
+    "fence_type": "Φράχτες",
+    "street_tree_type": "Δέντρα δρόμου",
+    "utility_mode": "Καλωδίωση δικτύων",
+    "none": "Κανένα",
+    "standard": "Τυπικό",
+    "overhead": "Εναέρια",
+    "underground": "Υπόγεια",
+    "apply": "Εφαρμογή",
+    "bench_type": "Παγκάκια",
+    "bin_type": "Κάδοι",
+    "planter_type": "Ζαρντινιέρες",
+    "advert_type": "Διαφημίσεις"
+  }
+}

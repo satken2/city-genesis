@@ -7,8 +7,9 @@ use tauri::Manager;
 const SETTINGS_FILE_NAME: &str = "settings.json";
 
 /// Supported UI languages. Keep in sync with SUPPORTED_LANGUAGES in src/utils/locale.ts and the table in steam::game_language.
-const SUPPORTED_LANGUAGES: [&str; 16] = [
+const SUPPORTED_LANGUAGES: [&str; 31] = [
     "ja", "en", "es-419", "zh-Hans", "zh-Hant", "fr", "ko", "de", "pl", "ru", "pt-BR", "es-ES", "tr", "it", "id", "ar",
+    "pt-PT", "uk", "th", "vi", "ms", "nl", "sv", "nb", "da", "fi", "cs", "hu", "ro", "bg", "el",
 ];
 /// Initial language when neither Steam nor the OS gives a supported language.
 const FALLBACK_LANGUAGE: &str = "en";
@@ -77,20 +78,21 @@ fn initial_language() -> String {
         .to_string()
 }
 
-/// Map a BCP 47 tag (ja-JP, zh-Hant-HK, ...) to a supported language by its primary subtag. Chinese resources are
-/// split by script. Spain selects es-ES, while other Spanish tags retain the Latin American default.
+/// Map a BCP 47 tag (ja-JP, zh-Hant-HK, ...) to a supported language by its primary subtag. A language with regional
+/// resources picks the code whose region appears in the tag, else its first code in SUPPORTED_LANGUAGES (es-MX → es-419,
+/// pt-AO → pt-BR). Chinese resources are split by script.
 fn language_from_locale_tag(tag: &str) -> Option<&'static str> {
     let subtags: Vec<String> = tag.split(['-', '_']).map(str::to_ascii_lowercase).collect();
     let has = |subtag: &str| subtags.iter().any(|s| s == subtag);
     let primary = subtags.first()?.as_str();
-    if primary == "es" {
-        return Some(if subtags[1..].iter().any(|subtag| subtag == "es") { "es-ES" } else { "es-419" });
-    }
     if primary == "zh" {
         let traditional = has("hant") || (!has("hans") && TRADITIONAL_CHINESE_REGIONS.iter().any(|r| has(r)));
         return Some(if traditional { "zh-Hant" } else { "zh-Hans" });
     }
-    SUPPORTED_LANGUAGES.iter().copied().find(|code| code.split('-').next() == Some(primary))
+    let candidates: Vec<&'static str> =
+        SUPPORTED_LANGUAGES.iter().copied().filter(|code| code.split('-').next() == Some(primary)).collect();
+    let in_tag = |region: &str| subtags[1..].iter().any(|s| s.eq_ignore_ascii_case(region));
+    candidates.iter().copied().find(|code| code.split('-').nth(1).is_some_and(in_tag)).or(candidates.first().copied())
 }
 
 /// Windows display languages in the user's preference order, as MUI names (ja-JP, zh-TW, ...).
@@ -220,7 +222,23 @@ mod tests {
             ("it-IT", Some("it")),
             ("id-ID", Some("id")),
             ("ar-SA", Some("ar")),
-            ("nl-NL", None),
+            ("pt-PT", Some("pt-PT")),
+            ("pt-AO", Some("pt-BR")),
+            ("uk-UA", Some("uk")),
+            ("th-TH", Some("th")),
+            ("vi-VN", Some("vi")),
+            ("ms-MY", Some("ms")),
+            ("nl-NL", Some("nl")),
+            ("sv-SE", Some("sv")),
+            ("nb-NO", Some("nb")),
+            ("da-DK", Some("da")),
+            ("fi-FI", Some("fi")),
+            ("cs-CZ", Some("cs")),
+            ("hu-HU", Some("hu")),
+            ("ro-RO", Some("ro")),
+            ("bg-BG", Some("bg")),
+            ("el-GR", Some("el")),
+            ("he-IL", None),
             ("", None),
         ];
         for (tag, expected) in cases {

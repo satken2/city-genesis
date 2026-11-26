@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Návrh trasy",
+    "mode": "Režim výšky",
+    "fixed": "Zachovat výšky průjezdních bodů",
+    "adjust": "Upravit výšky mezilehlých bodů",
+    "help": "K dispozici po potvrzení tvaru. Počátek, konec a polohy průjezdních bodů v XZ zůstanou pevné.",
+    "searching": "Hledání…",
+    "cancel": "Zrušit",
+    "undo": "Vrátit stav před návrhem",
+    "notFound": "Žádná trasa nebyla nalezena.",
+    "failed": "Návrh trasy se nezdařil."
+  }
+}

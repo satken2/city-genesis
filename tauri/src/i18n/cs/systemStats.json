@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Zátěž simulace",
+      "heading": "Doba výpočtu poslední epochy (dní: {{days}})",
+      "noData": "Žádná naměřená data",
+      "note": "Při spuštění několika epoch za sebou se zobrazují hodnoty poslední z nich. Počet operací je hrubý odhad počtu kombinací v hlavních porovnáních, odvozený z velikosti města.",
+      "colGroup": "Proces",
+      "colTime": "Čas",
+      "colWorkload": "Počet operací",
+      "workloadHint": "Přibližný počet kombinací v hlavních porovnáních (prvků pole). Po najetí myší na hodnotu se zobrazí rozpis.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Trh se zbožím",
+      "realestate": "Trh s nemovitostmi",
+      "labor": "Trh práce",
+      "building_spawn": "Vznik budov",
+      "agent_spawn": "Vznik ekonomických subjektů",
+      "routing": "Hledání tras občanů",
+      "transit": "Hledání tras veřejné dopravy",
+      "environment": "Obytné prostředí",
+      "other": "Ostatní"
+    },
+    "workload": {
+      "market": "Kupující {{demanders}} × prodávající {{suppliers}} (vynásobeno pro každé zboží a sečteno)",
+      "realestate": "Domácnosti zvažující stěhování {{movers}} × budovy s byty {{housing}}",
+      "labor": "Uchazeči o práci {{seekers}} × zaměstnavatelé {{employers}}",
+      "building_spawn": "Kandidátské parcely {{parcels}} × typy budov × počty podlaží × využití podlaží",
+      "agent_spawn": "Zboží × čtvrti {{zones}} × čtvrti {{zones}}",
+      "routing": "2 druhy dopravy × čtvrti {{zones}} × čtvrti {{zones}} × 3 kandidátské trasy × liniové stavby {{paths}}",
+      "transit": "Zastávky {{stops}} × uzly {{nodes}}",
+      "environment": "Mřížka {{width}} × {{height}} × polohy slunce"
+    },
+    "entities": {
+      "colMetric": "Položka",
+      "colCount": "Počet",
+      "title": "Počty entit",
+      "agents": "Ekonomické subjekty",
+      "households": "Domácnosti",
+      "businesses": "Provozovny",
+      "publicFacilities": "Veřejná zařízení",
+      "buildings": "Budovy",
+      "citizens": "Občané",
+      "population": "Obyvatelstvo",
+      "zones": "Čtvrti",
+      "parcels": "Parcely",
+      "paths": "Liniové stavby",
+      "roads": "Silnice",
+      "tracks": "Koleje",
+      "infra": "Infrastrukturní sítě",
+      "nodes": "Uzly"
+    },
+    "approximation": {
+      "title": "Zjednodušení simulace",
+      "intro": "Pro velká města se chystají nastavení, která zjednoduší výpočty. Zatím je nelze měnit.",
+      "warning": "Může to ovlivnit herní vyváženost. Změnu nelze vrátit zpět",
+      "irreversible": "Změny způsobené zjednodušením přetrvají i v dalších epochách. Zapnuté zjednodušení nelze vypnout ani zmírnit.",
+      "undecided": "Neurčeno",
+      "candidates": "kandidátů max.",
+      "epochs": "epoch mezi revizemi",
+      "off": "Vypnuto",
+      "on": "Zapnuto",
+      "goods": {
+        "label": "Kandidáti nákupu",
+        "description": "Omezí počet dodavatelů, u kterých se porovnává cena a vzdálenost."
+      },
+      "jobs": {
+        "label": "Kandidáti zaměstnání",
+        "description": "Omezí počet zaměstnavatelů, u kterých se porovnává mzda a dojíždění."
+      },
+      "housing": {
+        "label": "Kandidáti bydlení",
+        "description": "Omezí počet bytů, u kterých se porovnává nájemné a poloha."
+      },
+      "interval": {
+        "label": "Interval pravidelných rozhodnutí",
+        "description": "Sníží četnost, s jakou se přehodnocují nákupy, zaměstnání a bydlení."
+      },
+      "aggregation": {
+        "label": "Počítat podobné občany a domácnosti společně",
+        "description": "Některá rozhodnutí občanů a domácností v podobné situaci se počítají hromadně."
+      }
+    },
+    "status": {
+      "title": "Stav systému",
+      "gpuDisabled": "Akcelerace GPU: vypnuto",
+      "coreSimulator": "Jádro simulace",
+      "currentMemory": "Aktuální využití paměti: {{value}}",
+      "peakMemory": "Nejvyšší využití paměti od spuštění: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Aktuální využití VRAM: {{value}}",
+      "usageTooltip": "Celý počítač {{pc}} / tato hra {{game}} / celkem {{total}}",
+      "legendPc": "Celý počítač",
+      "legendGame": "Tato hra"
+    }
+  }
+}

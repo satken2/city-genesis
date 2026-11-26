@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritmus",
+    "roadVariants": "Úttípusok",
+    "patterns": {
+      "grid_1": "Sakktábla 1",
+      "grid_2": "Sakktábla 2",
+      "sprawl_1": "Szétterülő 1",
+      "sprawl_2": "Szétterülő 2",
+      "sprawl_3": "Szétterülő 3",
+      "planned_city_1": "Tervezett város 1",
+      "split_1": "Felosztás 1"
+    },
+    "spacing": "Utak távolsága",
+    "blockLength": "Háztömb hossza",
+    "splitHint": "A kijelölésbe az utakkal határolt háztömböket teljes egészükben vedd bele. A háztömb hosszabb oldalával párhuzamos utak az „Utak távolsága”, a rá merőleges utak a „Háztömb hossza” szerinti közönként épülnek.",
+    "createParcels": "Telkek létrehozása",
+    "parcelArea": "Telekterület",
+    "hint": "Ctrl + bal egérgombos húzással fested ki a fejlesztendő területet. Bal egérgombos húzással mozgathatod a térképet, a görgővel nagyíthatsz és kicsinyíthetsz.",
+    "clear": "Törlés",
+    "preview": "Előnézet",
+    "previewing": "Számítás…",
+    "create": "Jóváhagyás",
+    "creating": "Létrehozás…",
+    "previewed": "Terület: {{area}}. Enyhe tereprendezéssel {{roads}} útszakasz és {{parcels}} telek tervezhető ({{rejected}} elvetve)",
+    "created": "Tereprendezés kész, {{roads}} útszakasz és {{parcels}} telek megtervezve ({{rejected}} elvetve)"
+  }
+}

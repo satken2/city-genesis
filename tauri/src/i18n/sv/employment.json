@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Krävd kompetens",
+    "wage": "Lönesats",
+    "quota": "Behövd arbetskraft",
+    "totalLabor": "Anställd arbetskraft",
+    "employees": "Anställda",
+    "hired": "Anställd",
+    "vacant": "Vakant",
+    "noQuota": "Ingen arbetskraft behövs",
+    "noEmployees": "Inga anställda",
+    "statusTitle": "Anställningsläge"
+  }
+}

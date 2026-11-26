@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Aktuální datum",
+    "afterDate": "Datum po spuštění",
+    "epochCount": "Počet epoch",
+    "message": "Dokončit práci v tomto tahu a posunout čas?",
+    "yes": "Ano",
+    "no": "Ne",
+    "executing": "Probíhá simulace…",
+    "errorSteamLimit": "Ověření přes Steam se nepodařilo potvrdit, další epochy proto nelze spustit. (Bez ověření lze hrát do počtu obyvatel {{limit}}.)",
+    "errorAlreadyRunning": "Již probíhá jiná epocha. Zkuste to znovu, až skončí.",
+    "errorFailed": "Epochu se nepodařilo spustit: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "(počet epoch: {{count}})",
+    "sectionConstruction": "Stav výstavby",
+    "kindPath": "Silnice",
+    "kindBuilding": "Zařízení",
+    "kindProject": "Projekt",
+    "noItems": "Nic",
+    "progressFormat": "{{before}} % → {{after}} %",
+    "completed": "Dokončeno",
+    "sectionStatistics": "Statistiky",
+    "sectionScore": "Skóre",
+    "scoreGain": "Body navíc",
+    "scoreLoss": "Srážky",
+    "questState": {
+      "completed": "Splněno",
+      "active": "Probíhá",
+      "locked": "Uzamčeno",
+      "failed": "Nesplněno"
+    },
+    "trendHint": "Trend za poslední epochy ({{count}}): {{trend}}",
+    "trend": {
+      "up": "Roste",
+      "flat": "Beze změny",
+      "down": "Klesá",
+      "none": "Nedostatek historických dat"
+    },
+    "statPopulation": "Počet obyvatel",
+    "statTourists": "Turisté",
+    "statGdp": "HDP",
+    "statPrice": "Ceny",
+    "statIncome": "Příjmy",
+    "statUnemployment": "Nezaměstnanost",
+    "statHealthcare": "Zdravotní péče",
+    "statNutrition": "Výživa",
+    "statLeisure": "Zábava a volný čas",
+    "statFire": "Požáry",
+    "statTraffic": "Dopravní nehody",
+    "statCrime": "Kriminalita",
+    "questCompleted": "Splněno!",
+    "questFailed": "Lhůta vypršela"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Mapování dopravní sítě",
+      "prepare": "Příprava tohoto období",
+      "transit": "Zajišťování veřejné dopravy",
+      "market": "Obchodování se zbožím",
+      "production": "Výroba a spotřeba",
+      "commute": "Cesty do práce a do školy",
+      "growth": "Občané dospívají",
+      "evaluate": "Hodnocení města",
+      "immigration": "Přijímání přistěhovalců",
+      "labor": "Hledání práce",
+      "spawn": "Vznikají nové obchody a firmy",
+      "relocate": "Stěhování domácností",
+      "construction": "Výstavba budov",
+      "finance": "Vypořádání financí",
+      "plan": "Plánování dalšího období",
+      "incident": "Zásahy u požárů a nehod",
+      "finalize": "Sestavování statistik"
+    }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Oznámení města",
+    "empty": "Momentálně nejsou žádné problémy, které by vyžadovaly pozornost",
+    "loadFailed": "Oznámení se nepodařilo načíst",
+    "types": {
+      "resource_runway": "Surovina „{{name}}“ se podle odhadu brzy vyčerpá (zbývající epochy: cca {{remaining_epochs}})",
+      "resource_depleted": "Surovina „{{name}}“ je vyčerpána",
+      "facility_inoperative": "Veřejné zařízení „{{name}}“ není v provozu",
+      "facility_inoperative_labor": "Veřejné zařízení „{{name}}“ není v provozu kvůli nedostatku pracovníků",
+      "facility_inoperative_material": "Veřejné zařízení „{{name}}“ není v provozu kvůli nedostatku surovin",
+      "facility_inoperative_high_skill": "Veřejné zařízení „{{name}}“ omezuje provoz kvůli nedostatku odborníků",
+      "facility_inoperative_budget": "Veřejné zařízení „{{name}}“ omezuje provoz kvůli nedostatku rozpočtu",
+      "education_low_enrollment": "Vzdělávací zařízení „{{name}}“ je málo využité – zapsáno {{enrolled}} z {{max_students}} míst",
+      "infra_facility_down": "Infrastrukturní zařízení „{{name}}“ je mimo provoz",
+      "infra_disconnected": "Počet zařízení nepřipojených k infrastrukturní síti: {{count}}",
+      "rail_capacity_exceeded": "Počet úseků kolejí, kde počet spojů překračuje kapacitu: {{count}}",
+      "collapse": "Zřícení budov a silnic: {{count}}",
+      "collapse_with_deaths": "Zřícení budov a silnic: {{count}}, počet obětí: {{deaths}}",
+      "deaths_traffic": "Počet obětí dopravních nehod: {{count}}",
+      "tenant_blocked_by_parcel_size": "Ve čtvrti „{{zone_name}}“ nelze postavit budovu pro nájemce „{{tenant_name}}“ (potřeba {{required}} m2, největší možná plocha {{max_capacity}} m2). Je potřeba větší parcela",
+      "unknown": "Došlo k závažné události",
+      "sanitation": "Hygienické podmínky se zhoršují v domácnostech (počet: {{count}}). Zlepšete čištění odpadních vod a nakládání s odpady."
+    }
+  }
+}

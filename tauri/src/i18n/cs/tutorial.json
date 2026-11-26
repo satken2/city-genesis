@@ -1,0 +1,756 @@
+{
+  "tutorial": {
+    "startButton": "Začít",
+    "controls": {
+      "title": "Základní ovládání",
+      "description": "Seznámíte se s tím, o co jako starosta usilujete a jak se hraje: nejdřív plánujete, potom necháte plynout čas. Projdete si, co znamenají údaje na obrazovce, k čemu slouží jednotlivá tlačítka a jak se ovládá kamera. Pak sami prodloužíte silnici, založíte novou obytnou čtvrť a zajistíte v ní bydlení, elektřinu a vodu.",
+      "step1": {
+        "title": "Začněte budovat město jako starosta",
+        "role": "V City Genesis vedete město jako jeho starosta. Plánujete stavbu silnic a zařízení, rozhodujete o využití pozemků, o daních a o rozpočtu na veřejné služby. Vaším úkolem je vytvářet podmínky, ve kterých se obyvatelům i firmám dobře žije a daří. Ve čtení pokračujte tlačítkem „Další“.",
+        "goal": "Cílem je město, kde obyvatelé žijí v blahobytu a bezpečí. Zajistěte bydlení a práci a dopravte k lidem elektřinu, vodu i zdravotní péči. Rozvoj města ale stojí peníze. Při rozhodování, co zlepšit, proto sledujte jak život obyvatel, tak městské finance.",
+        "epoch": "Čas ve hře běží po měsících. Nejprve nastavte rozpočet a stavební plány, a až budete připraveni, stiskněte „Spustit“. Čas se posune, pokročí stavby i činnost obyvatel a firem, a podle výsledků pak promyslíte další plány. Dokud „Spustit“ nestisknete, datum stojí, takže si můžete dát na čas.",
+        "epoch_week": "Čas ve hře běží po týdnech. Nejprve nastavte rozpočet a stavební plány, a až budete připraveni, stiskněte „Spustit“. Čas se posune, pokročí stavby i činnost obyvatel a firem, a podle výsledků pak promyslíte další plány. Dokud „Spustit“ nestisknete, datum stojí, takže si můžete dát na čas."
+      },
+      "step2": {
+        "title": "Sledujte město z kokpitu",
+        "tools": "Kokpit v dolní části obrazovky slouží k tomu, abyste měli přehled o stavu města a mohli se rozhodnout, co dál. V „Zobrazení“ najdete barevně odlišená místa, kde něco chybí nebo kde jsou problémy. „Mapa“ ukazuje polohu míst v celém městě a pomůže vám zorientovat se, i když se město rozroste.",
+        "tracking": "„Seznam občanů“ slouží k vyhledání obyvatel podle jména a k pozdějšímu návratu k těm, jejichž život nebo dojíždění chcete sledovat. Když občana v jeho detailu přidáte ke sledování, otevřete odsud jeho údaje. Použijte ho, když chcete poznat životy jednotlivých lidí, které z čísel za celé město nevyčtete.",
+        "bulldozer": "„Buldozer“ slouží k odstranění prázdných parcel a ke zrušení plánovaných budov a silnic. Stiskněte tlačítko, klikněte na cíl ve 3D zobrazení a po dokončení režim dalším stisknutím tlačítka vypněte. Dokončenou budovu nebo silnici odstraníte tak, že otevřete její detail a zvolíte zbourání.",
+        "services": "Ukazatele s bleskem, kapkou a lodí ukazují, kolik rezervy zbývá v kapacitě elektřiny, vody a zahraničního obchodu. Čím víc se plní, tím víc roste poptávka nebo objem obchodu a tím menší je rezerva. Kliknutím zobrazíte veřejná zařízení a obchodní centra. Než město rozšíříte, ověřte si, zda není třeba přidat další zařízení.",
+        "score": "„Skóre“ souhrnně vyjadřuje, jak spokojení jsou obyvatelé se životem ve vašem městě. Čím vyšší, tím lépe se ve městě žije. Ke zlepšení vede bydlení, práce, zdravotní péče a příjemné prostředí. Když skóre klesne, zjistěte, co obyvatele trápí.",
+        "budget": "„Rozpočet“ ukazuje očekávané výdaje v příštím měsíci vzhledem k příjmům za minulý měsíc. Když ručička ukazuje doprava, výdaje převyšují příjmy. Když naopak ukazuje doleva, peníze vám zbývají. Před posunutím času ho zkontrolujte.",
+        "budget_week": "„Rozpočet“ ukazuje očekávané výdaje v příštím týdnu vzhledem k příjmům za minulý týden. Když ručička ukazuje doprava, výdaje převyšují příjmy. Když naopak ukazuje doleva, peníze vám zbývají. Před posunutím času ho zkontrolujte.",
+        "budgetChanges": "Více staveb silnic a zařízení, vyšší provoz zařízení nebo rychlejší stavby zvyšují potřebné peníze a ukazatel rozpočtu stoupá. Snížením provozu nebo zpomalením staveb očekávané výdaje snížíte. Když porostou daňové příjmy, ukazatel při stejných výdajích klesne.",
+        "budgetPlanning": "Nízký ukazatel znamená, že máte peníze, které můžete pro město využít. Zvažte investice do chybějících služeb nebo do zařízení, která budete brzy potřebovat.",
+        "date": "Datum ukazuje, kam až čas ve městě pokročil. Podle něj můžete sledovat postup staveb i proměny města během ročních období. Zatímco plánujete, datum stojí; změní se, až čas posunete tlačítkem „Spustit“.",
+        "climate": "Panel s teplotou, srážkami, slunečním svitem a rychlostí větru ukazuje průměrné počasí v tomto měsíci. Tyto podmínky ovlivňují výnosnost zemědělství, větrných a solárních elektráren. Když je úroda nebo výroba elektřiny nízká, podívejte se i na podnebí.",
+        "climate_week": "Panel s teplotou, srážkami, slunečním svitem a rychlostí větru ukazuje průměrné počasí v tomto týdnu. Tyto podmínky ovlivňují výnosnost zemědělství, větrných a solárních elektráren. Když je úroda nebo výroba elektřiny nízká, podívejte se i na podnebí.",
+        "climateEffects": "Při slabém slunci klesá výkon solárních elektráren, při slabém větru výkon větrných. Zemědělství ovlivňuje i teplota a množství srážek. Po kliknutí na panel podnebí uvidíte, jak podmínky tohoto měsíce ovlivňují výrobní efektivitu jednotlivých zařízení. Při plánování zařízení počítejte s tím, že se dodávky během roku mění.",
+        "climateEffects_week": "Při slabém slunci klesá výkon solárních elektráren, při slabém větru výkon větrných. Zemědělství ovlivňuje i teplota a množství srážek. Po kliknutí na panel podnebí uvidíte, jak podmínky tohoto týdne ovlivňují výrobní efektivitu jednotlivých zařízení. Při plánování zařízení počítejte s tím, že se dodávky během roku mění.",
+        "notifications": "Číslo u „Oznámení“ udává počet varování a upozornění, která byste si teď měli prohlédnout. Červené číslo a blikání znamenají, že je narušen chod města a problém je třeba brzy řešit. Žluté číslo označuje upozornění, například na přípravu na růst nebo na problémy, jejichž zlepšení trvá déle. Nejprve tlačítko stiskněte a obsah si přečtěte.",
+        "notificationActions": "Pokud se oznámení týká konkrétního zařízení nebo čtvrti, kliknutím na řádek si je prohlédnete podrobněji. Řešte příčinu: připojte chybějící elektrické vedení, zajistěte dodávky zařízení, kterému chybějí suroviny, a podobně. Oznámení o trvajících problémech zmizí, jakmile se odstraní jejich příčina. Po zásahu zkontrolujte výsledky v dalším měsíci."
+      },
+      "step3": {
+        "title": "Přepněte zobrazení a hledejte problémy",
+        "open": "Nedostatek elektřiny nebo dopravní zácpy podle vzhledu města snadno nepoznáte. Pomocí „Zobrazení“ si na mapě zobrazte údaje, které potřebujete. Stiskněte v kokpitu „Zobrazení“ a otevřete panel.",
+        "tabs": "Svislými kartami vyberete, co chcete zkoumat: budovy, silnice, parcely, čtvrti a další. Když se údaje překrývají a zobrazení je nepřehledné, můžete nepotřebné objekty skrýt. Stiskněte „Další“ a projděte si možnosti zobrazení.",
+        "modes": "Tlačítky na každé kartě zvolíte, podle jakých údajů se objekty obarví. Najděte přetížené silnice nebo problémové budovy a využijte je jako vodítko k dalším krokům. Objekt, který chcete prozkoumat podrobněji, můžete ve 3D zobrazení rozkliknout. Stiskněte „Další“."
+      },
+      "step4": {
+        "title": "Poznejte nástroje pro budování města",
+        "grading": "Projdeme tlačítka na levé straně shora dolů. „Zemní práce“ slouží k srovnání svahů, na kterých se špatně staví, nebo k zavezení moře a získání nové využitelné půdy. Když chcete víc bydlení nebo pracovišť, ale chybí vám pozemky, získáte tak prostor pro rozvoj.",
+        "road": "„Silnice, železnice a infrastruktura“ vytváří cesty, po kterých se pohybují lidé, zboží, elektřina a voda. Silnicemi propojíte bydlení s pracovišti, železnicí vzdálená místa a elektrickým vedením a vodovodem zařízení mezi sebou. Tyto sítě umožňují cestování obyvatel, obchod firem i dodávky elektřiny a vody.",
+        "land": "„Parcely“ připravují pozemky pro budovy. Samotná volná půda ještě není stavební pozemek. Více domů i velká zařízení potřebují pozemky odpovídající velikosti.",
+        "landDevelopment": "Na připravených parcelách může stavět město a mohou na nich vyrůstat i soukromé domy a firmy. Soukromé budovy vznikají podle poptávky a stavebních regulací čtvrti. Když chcete víc bydlení nebo pracovních míst, ověřte si, že je k dispozici dost volných parcel.",
+        "district": "„Čtvrti“ slouží ke správě částí města jako celků. Pro jednotlivá místa můžete určit odlišné zaměření, třeba obytnou oblast nebo oblast se soustředěnými továrnami. V každé čtvrti lze omezit druhy povolených budov, a určit tak vhodný směr výstavby pro celou oblast.",
+        "districtRules": "V detailu čtvrti určíte, jaké druhy budov se v ní smějí stavět. Využijte to podle toho, jaké město chcete vybudovat – třeba aby se do obytné oblasti nedostaly továrny. Můžete také porovnávat počet obyvatel a životní podmínky v jednotlivých čtvrtích a zjistit, kde je potřeba pomoc.",
+        "construction": "„Stavba“ slouží k plánování budov, které město potřebuje. Můžete stavět bydlení, pracoviště, nemocnice, školy nebo elektrárny. Použijte ji k zajištění bydlení a pracovních míst nebo k doplnění chybějících služeb, jako je zdravotnictví, školství či elektřina.",
+        "transport": "„Veřejná doprava“ pomáhá obyvatelům cestovat autobusem nebo vlakem. Určíte linky a zastávky a nastavíte jízdné a interval. Propojením bydlení s pracovišti a školami ulehčíte lidem dojíždění.",
+        "propPlacement": "„Umístění dekorativních objektů“ slouží k doplnění stromů, skal a dalších prvků, které dotvářejí vzhled města. Použijte ho, když chcete ulice ozelenit nebo ozdobit terén.",
+        "cityDevelopment": "„Automatický rozvoj města“ naplánuje silnice a parcely na velké ploše najednou. Vybarvěte na mapě oblast, kterou chcete rozvíjet, zvolte typ uliční sítě a silnice i parcely se připraví naráz. Hodí se, když zakládáte novou obytnou oblast nebo městskou zástavbu na zelené louce.",
+        "constructionProjects": "V okně „Stavební projekty“ najdete přehled plánovaných a probíhajících staveb. Podle postupu a nákladů se rozhodněte, které stavby posunout dál.",
+        "regulation": "„Regulace“ určují pravidla pro život a práci ve městě: omezení rychlosti, pracovní dobu, přijímání přistěhovalců, sociální zabezpečení a další. Upravujte je podle situace a podle toho, zda dáváte přednost bezpečnosti, volnému času obyvatel, nebo růstu města.",
+        "stat": "„Statistiky“ slouží k vyhodnocení výsledků vaší správy. V grafech uvidíte vývoj počtu obyvatel, příjmů, dojíždění, spokojenosti obyvatel, velikosti ekonomiky i cen. Po změně politik nebo zařízení zkontrolujte, zda se život zlepšuje a co ještě chybí. Tím jsme prošli všechna tlačítka na levé straně."
+      },
+      "step5": {
+        "title": "Proveďte plány a zkontrolujte výsledky",
+        "flow": "Až zhodnotíte stav města a promyslíte potřebné stavby a rozdělení rozpočtu, posuňte čas tlačítkem „Spustit“ v kokpitu. Stavby pokročí, obyvatelé pracují, firmy vyrábějí a mění se městské finance i skóre. Než se účinek plánů projeví, může to trvat i několik měsíců.",
+        "execute": "Po posunutí času si prohlédněte výsledky a oznámení. Problémy řešte v dalších plánech a pak čas znovu posuňte. Město roste opakováním kroků „naplánovat – posunout čas – zkontrolovat výsledky“. Teď „Spustit“ mačkat nemusíte. Stiskněte „Další“ a přejděte k ovládání kamery."
+      },
+      "step6": {
+        "title": "Pohybujte kamerou",
+        "description": "Kameru ovládáte takto: tažením levým tlačítkem posunete pohled, tažením pravým tlačítkem ho otočíte, klávesami W/A/S/D (nebo šipkami) se pohybujete, Q/E otáčí, R/F mění výšku a kolečkem myši přibližujete. Klidně si to vyzkoušejte a pak stiskněte „Další“."
+      },
+      "step7": {
+        "title": "Režim letu a filmový režim",
+        "description": "Kamera má dva zvláštní režimy. „Režim letu“ zapnete klávesami Shift+F: W/A/S/D vás posouvá ve směru pohledu, myší se rozhlížíte a R/F stoupáte či klesáte. Opustíte ho klávesou Esc. „Filmový režim“ spustíte tlačítkem v levém horním rohu obrazovky a můžete v něm kroužit kolem města. Myší se rozhlížíte, Shift přepíná mezi kroužením a přesunem, mezerník pozastaví, Backspace přehrává pozpátku a Esc režim ukončí. V obou režimech jsou panely na obrazovce skryté a po stisknutí Esc se vrátí. Až si je vyzkoušíte, oba režimy ukončete a stiskněte „Další“."
+      },
+      "step8": {
+        "title": "Prohlédněte si hranici města",
+        "description": "Kamera se přesunula k východnímu okraji města. Jako město lze využít jen tento obdélník, ve kterém je vytvořen podrobný terén, a kamera ho také nemůže opustit. Tím končí popis obrazovky a ovládání. Teď si vyzkoušíte založit novou obytnou čtvrť. Stiskněte „Další“."
+      },
+      "step9": {
+        "title": "Prodlužte silnici",
+        "description": "Teď postavíte obytnou oblast pro nové obyvatele. Bydlení ani pracoviště nejsou k ničemu, pokud je nespojují silnice: lidé se nedostanou tam a zpět a zboží nedorazí. Nejprve prodlužte hlavní ulici, která vede městem z východu na západ, dál na západ, aby vznikla cesta do nové čtvrti. Stiskněte na panelu ikon „Silnice, železnice a infrastruktura“ a otevřete stavební panel.",
+        "confirm": "Pozemky podél silnice se po jejím dokončení rozdělí na parcely. Velikost parcel můžete ve stavebním panelu v části „Parcely podél silnice vytvořené po dokončení“ zvolit zvlášť pro levou a pravou stranu silnice. Rozhodněte se podle toho, jaké budovy chcete přilákat: pro bydlení se hodí menší parcely, pro továrny a farmy větší. Tato silnice povede do obytné oblasti, takže nastavení ponechte. Silnici uložte tlačítkem „Potvrdit“ ve stavebním panelu a pak stiskněte „Další“."
+      },
+      "step10": {
+        "title": "Dokončete silnici",
+        "description": "Silnice je zatím ve stavu „Plánovaná výstavba“. Pouze naplánovanou silnici nelze používat – lidé a auta po ní mohou jezdit až po dokončení prací. Stiskněte v kokpitu 2–3krát „Spustit“, posuňte tak čas a počkejte na dokončení. Během stavby se každý měsíc platí stavební náklady.",
+        "description_week": "Silnice je zatím ve stavu „Plánovaná výstavba“. Pouze naplánovanou silnici nelze používat – lidé a auta po ní mohou jezdit až po dokončení prací. Stiskněte v kokpitu 2–3krát „Spustit“, posuňte tak čas a počkejte na dokončení. Během stavby se každý týden platí stavební náklady."
+      },
+      "step11": {
+        "title": "Parcely jsou vytvořeny",
+        "description": "Silnice je hotová a podél ní vznikly parcely. Budovy mohou stát jen na parcelách, a protože parcela sousedí se silnicí, mohou se k ní dostat lidé i zboží. Chcete-li přidat parcely podél existující silnice, použijte na panelu ikon „Parcely“."
+      },
+      "step12": {
+        "title": "Vytvořte čtvrť",
+        "description": "Než začnete stavět, rozhodněte, čím se má tato ulice stát. Bez jasného zaměření by mohla hned vedle domů vyrůst továrna. Zaměření jednotlivých míst se určuje po „čtvrtích“. Čtvrti se přiřazují po silnicích a parcela patří do čtvrti silnice, ke které přiléhá. Stiskněte na panelu ikon „Čtvrti“ a otevřete okno Úprava čtvrtí: uvidíte, že celé město teď tvoří jedinou čtvrť.",
+        "create": "Jako způsob výběru zvolte „Strana ulice“. Přepněte nástroj na „Vytvořit novou čtvrť“, podržte klávesu Ctrl a táhněte po prodloužené silnici. Obě strany silnice, po které táhnete, se i s přiléhajícími parcelami stanou novou čtvrtí."
+      },
+      "step13": {
+        "title": "Čtvrť je vytvořena",
+        "description": "Novou ulici se podařilo oddělit od centra města jako samostatnou čtvrť. V každé čtvrti můžete souhrnně sledovat počet obyvatel a ceny a určovat, jaké budovy se v ní smějí stavět, takže se každé místo může rozvíjet tak, jak mu to sluší. Až si to prohlédnete, zavřete okno Úprava čtvrtí."
+      },
+      "step14": {
+        "title": "Otevřete detail čtvrti",
+        "description": "Nastavte novou čtvrť jako obytnou. Ikonou vlevo dole na obrazovce zobrazte čtvrti, klikněte na popisek nově vytvořené čtvrti a otevřete její detail."
+      },
+      "step15": {
+        "title": "Určete ji jako obytnou",
+        "description": "Ve stavebních regulacích v dolní části panelu vyberete, jaké budovy se mohou na parcelách této čtvrti stavět. Tady chceme klidné místo k bydlení, proto kliknutím zakažte všechny budovy kromě „Bytový dům“ a „Rodinný dům“."
+      },
+      "step16": {
+        "title": "Prohlédněte si parcelu",
+        "description": "Regulace určené ve čtvrti platí pro všechny její parcely. Klikněte na parcelu se žlutou značkou a otevřete její detail."
+      },
+      "step17": {
+        "title": "Regulace se uplatnila",
+        "description": "V dolní části panelu parcely vidíte, že se uplatnila regulace čtvrti povolující jen „Bytový dům“ a „Rodinný dům“. Na této ulici se teď mohou stavět jen obytné domy. Parcely nemusíte nastavovat jednu po druhé – stačí určit zaměření čtvrti a celá ulice se jím bude řídit."
+      },
+      "step18": {
+        "title": "Postavte bydlení",
+        "description": "Konečně zajistíte bydlení. Obytné domy obvykle staví soukromý sektor automaticky, pokud tu chtějí lidé bydlet, ale obecní byty postavené městem nedostatek bydlení rychle vyřeší. Postavte tu obecní bytový dům. Stiskněte na panelu ikon „Stavba“.",
+        "select": "V kategorii „Bydlení“ vyberte „Bytový dům“, klikněte na libovolnou parcelu v nové čtvrti jako místo stavby a stiskněte „Potvrdit“."
+      },
+      "step19": {
+        "title": "Dokončete bydlení",
+        "description": "Stejně jako u silnic se v budově nedá bydlet jen proto, že je naplánovaná. Bytový dům se staví déle než půl roku. Posuňte čas tlačítkem „Spustit“ a počkejte na dokončení."
+      },
+      "step20": {
+        "title": "Ověřte, zda dorazila elektřina",
+        "description": "Bez elektřiny a vody se ani v novém bytě žít nedá. Toto město zatím nemá elektrárnu ani vodovod. Klikněte na bytový dům se žlutou značkou, kde bydlí místní obyvatelé, a otevřete jeho detail. Na kartě „Budova“ vyberte jednoho z nájemců a otevřete jeho kartu „Nabídka, poptávka a obchod“: uvidíte, že položka „Získáno“ u elektřiny je 0."
+      },
+      "step21": {
+        "title": "Postavte solární elektrárnu",
+        "description": "Aby mohla elektřina dorazit, potřebujete nejprve elektrárnu, která ji vyrobí. Postavte na parcele se žlutou značkou budovu „Solární elektrárna“. Normálně by stavba nějakou dobu trvala, ale protože jde o tutoriál, doba výstavby se přeskočí."
+      },
+      "step22": {
+        "title": "Postavte rozvodnu",
+        "description": "Vysokonapěťovou elektřinu z elektrárny nemohou domácnosti použít přímo. Rozvodna ji převádí na elektřinu pro domácnosti a rozvádí ji do okolních budov napojených silnicí. Postavte budovu „Rozvodna“ na parcele se žlutou značkou poblíž bytového domu."
+      },
+      "step23": {
+        "title": "Propojte je elektrickým vedením",
+        "description": "I když jsou elektrárna a rozvodna od sebe daleko, propojí je cesta, po které elektřina poteče. Otevřete na panelu ikon „Silnice, železnice a infrastruktura“, v části „Elektřina“ zvolte „Elektrické vedení“ a veďte ho od přípojného bodu solární elektrárny k přípojnému bodu rozvodny. Pokud body spojíte rovnou čarou, stačí jedno vedení."
+      },
+      "step24": {
+        "title": "Ověřte dodávku elektřiny",
+        "description": "Po propojení ověřte, že elektřina opravdu teče. Posuňte čas tlačítkem „Spustit“, klikněte na rozvodnu, otevřete její detail a na kartě „Nabídka, poptávka a obchod“ zkontrolujte, že „Přijaté množství“ vysokonapěťové elektřiny není 0. Než se elektrárna rozběhne a elektřina dorazí, může to trvat několik měsíců."
+      },
+      "step25": {
+        "title": "Elektřina dorazila do domácností",
+        "description": "V detailu bytového domu otevřete stejně jako na začátku kartu „Nabídka, poptávka a obchod“ některého nájemce a zkontrolujte, že položka „Získáno“ u elektřiny už není 0. Než elektřina dorazí do domácností, může být potřeba posunout čas ještě o měsíc či dva. Elektrárna elektřinu vyrobí, vedení ji přenese a rozvodna ji rozvede – teprve když jsou propojeny všechny tři, dorazí elektřina do domácností."
+      },
+      "step26": {
+        "title": "Najděte vodní zdroj",
+        "description": "Teď přijde na řadu voda. Voda z vodovodu se čerpá z podzemí a posílá do města. Nejprve zjistěte, kde se dá voda čerpat. Stiskněte v kokpitu „Zobrazení“ a otevřete panel zobrazení.",
+        "show": "Na svislých kartách vyberte „Přírodní zdroje“ a přepněte na „Zobrazit“. Vodní zdroje jsou na mapě vyznačeny světle modře. Klikněte na vodní zdroj se žlutou značkou a otevřete jeho detail."
+      },
+      "step27": {
+        "title": "Postavte čerpadlo podzemní vody",
+        "description": "Čerpadlo podzemní vody čerpá vodu z podzemí, a proto musí stát tam, kde je vodní zdroj. K provozu potřebuje také elektřinu a pracovníky – proto jsme nejdřív zavedli elektřinu. Postavte „Čerpadlo podzemní vody“ na parcele se žlutou značkou nad vodním zdrojem. Protože jde o tutoriál, doba výstavby se přeskočí."
+      },
+      "step28": {
+        "title": "Postavte vodárenskou čerpací stanici",
+        "description": "Načerpanou vodu nelze domácnostem rozvádět přímo. Podobně jako rozvodna rozvádí elektřinu, vodárenská čerpací stanice rozvádí vodu do okolních budov napojených silnicí. Postavte budovu „Vodárenská čerpací stanice“ na parcele se žlutou značkou poblíž bytového domu."
+      },
+      "step29": {
+        "title": "Propojte je přivaděčem",
+        "description": "K dopravě vody z čerpadla podzemní vody do čerpací stanice potřebujete potrubí. Otevřete na panelu ikon „Silnice, železnice a infrastruktura“, v části „Voda“ zvolte „Vodovodní přivaděč“ a veďte ho od přípojného bodu čerpadla podzemní vody k přípojnému bodu čerpací stanice. Aby nekolidoval se silnicemi a elektrickým vedením, veďte ho velkým obloukem po východní straně."
+      },
+      "step30": {
+        "title": "Ověřte dodávku vody",
+        "description": "Posuňte čas tlačítkem „Spustit“, klikněte na vodárenskou čerpací stanici, otevřete její detail a na kartě „Nabídka, poptávka a obchod“ zkontrolujte, že „Přijaté množství“ tlakové vody není 0. Než se u čerpadla podzemní vody sejdou pracovníci a voda dorazí, může to trvat několik měsíců."
+      },
+      "step31": {
+        "title": "Základy budování města jsou hotové",
+        "description": "Voda dorazila do vodárenské čerpací stanice, takže ji teď mohou používat i okolní domácnosti. Postavit silnice, připravit parcely, určit zaměření čtvrtí, postavit bydlení a zavést elektřinu a vodu – to je základní postup při budování města. Stiskněte „Další“ a dokončete tutoriál Základní ovládání."
+      }
+    },
+    "scenario4": {
+      "title": "Postavte železnici",
+      "description": "Chceme železnicí propojit obytnou zástavbu s pracovišti, jenže v plánované trase stojí soukromé budovy a veřejná nemocnice. V tomto tutoriálu se naučíte vykupovat pozemky, odstraňovat veřejná zařízení, vést estakádu nad silnicí, stavět nástupiště, nádražní budovy a depo, upravovat oblouky a sklon trati a nakonec zajistit napájení a zahájit provoz linky.",
+      "step1": {
+        "title": "Postavte nástupiště na estakádě",
+        "description": "V nabídce „Silnice, železnice a infrastruktura“ → „Železnice“ postavte na západní straně města „Vnější nástupiště na estakádě“ a na východní straně „Dvoukolejné nástupiště (vnější)“. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte. Obě nástupiště jsou ve výšce 6 m.",
+        "open": "V nabídce „Silnice, železnice a infrastruktura“ → „Železnice“ postavte na západní straně města „Vnější nástupiště na estakádě“ a na východní straně „Dvoukolejné nástupiště (vnější)“. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte. Obě nástupiště jsou ve výšce 6 m.",
+        "variant": "V nabídce „Silnice, železnice a infrastruktura“ → „Železnice“ postavte na západní straně města „Vnější nástupiště na estakádě“ a na východní straně „Dvoukolejné nástupiště (vnější)“. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte. Obě nástupiště jsou ve výšce 6 m.",
+        "start": "V nabídce „Silnice, železnice a infrastruktura“ → „Železnice“ postavte na západní straně města „Vnější nástupiště na estakádě“ a na východní straně „Dvoukolejné nástupiště (vnější)“. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte. Obě nástupiště jsou ve výšce 6 m.",
+        "end": "V nabídce „Silnice, železnice a infrastruktura“ → „Železnice“ postavte na západní straně města „Vnější nástupiště na estakádě“ a na východní straně „Dvoukolejné nástupiště (vnější)“. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte. Obě nástupiště jsou ve výšce 6 m.",
+        "confirm": "V nabídce „Silnice, železnice a infrastruktura“ → „Železnice“ postavte na západní straně města „Vnější nástupiště na estakádě“ a na východní straně „Dvoukolejné nástupiště (vnější)“. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte. Obě nástupiště jsou ve výšce 6 m.",
+        "town": "Postavte západní „Vnější nástupiště na estakádě“. Ve výšce 6 m klikněte levým tlačítkem na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte.",
+        "new": "Teď postavte východní nástupiště. Tlačítkem „Zpět“ v panelu se vraťte na seznam typů a v části „Železnice“ vyberte „Dvoukolejné nástupiště (vnější)“. Ve výšce 6 m klikněte levým tlačítkem na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte. Pokud panel zavřete, otevřete ho znovu přes „Silnice, železnice a infrastruktura“.",
+        "east": "Teď postavte východní nástupiště. Tlačítkem „Zpět“ v panelu se vraťte na seznam typů a v části „Železnice“ vyberte „Dvoukolejné nástupiště (vnější)“. Ve výšce 6 m klikněte levým tlačítkem na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte. Pokud panel zavřete, otevřete ho znovu přes „Silnice, železnice a infrastruktura“."
+      },
+      "step2": {
+        "title": "Postavte nádražní budovy a vstupy",
+        "description": "Vyberte „Jednoduchá nádražní budova“ a na západě i na východě propojte vždy dvě značky krátkou chodbou napříč nástupištěm. Vstupy umístěte těsně po obou stranách nástupiště. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte.",
+        "open": "Vyberte „Jednoduchá nádražní budova“ a na západě i na východě propojte vždy dvě značky krátkou chodbou napříč nástupištěm. Vstupy umístěte těsně po obou stranách nástupiště. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte.",
+        "variant": "Vyberte „Jednoduchá nádražní budova“ a na západě i na východě propojte vždy dvě značky krátkou chodbou napříč nástupištěm. Vstupy umístěte těsně po obou stranách nástupiště. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte.",
+        "start": "Vyberte „Jednoduchá nádražní budova“ a na západě i na východě propojte vždy dvě značky krátkou chodbou napříč nástupištěm. Vstupy umístěte těsně po obou stranách nástupiště. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte.",
+        "end": "Vyberte „Jednoduchá nádražní budova“ a na západě i na východě propojte vždy dvě značky krátkou chodbou napříč nástupištěm. Vstupy umístěte těsně po obou stranách nástupiště. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte.",
+        "confirm": "Vyberte „Jednoduchá nádražní budova“ a na západě i na východě propojte vždy dvě značky krátkou chodbou napříč nástupištěm. Vstupy umístěte těsně po obou stranách nástupiště. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte.",
+        "town": "Vyberte „Jednoduchá nádražní budova“ a na západě i na východě propojte vždy dvě značky krátkou chodbou napříč nástupištěm. Vstupy umístěte těsně po obou stranách nástupiště. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte.",
+        "new": "Vyberte „Jednoduchá nádražní budova“ a na západě i na východě propojte vždy dvě značky krátkou chodbou napříč nástupištěm. Vstupy umístěte těsně po obou stranách nástupiště. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte.",
+        "east": "Vyberte „Jednoduchá nádražní budova“ a na západě i na východě propojte vždy dvě značky krátkou chodbou napříč nástupištěm. Vstupy umístěte těsně po obou stranách nástupiště. Levým tlačítkem klikněte na počáteční a koncový bod v kruzích, pravým tlačítkem dokončete tvar a potvrďte."
+      },
+      "step3": {
+        "title": "Naplánujte úsek s výkupem pozemků",
+        "description": "Vyberte „Dvoukolejná trať“ a veďte přímou kolej ve výšce 6 m od východního konce západního nástupiště k západnímu konci hlavní silnice. Úsek zasahuje do budov, proto je nutný výkup pozemků. Potvrďte plán a stiskněte „Další“. Doba výstavby se v tomto úseku nezkracuje.",
+        "open": "Vyberte „Dvoukolejná trať“ a veďte přímou kolej ve výšce 6 m od východního konce západního nástupiště k západnímu konci hlavní silnice. Úsek zasahuje do budov, proto je nutný výkup pozemků. Potvrďte plán a stiskněte „Další“. Doba výstavby se v tomto úseku nezkracuje.",
+        "variant": "Vyberte „Dvoukolejná trať“ a veďte přímou kolej ve výšce 6 m od východního konce západního nástupiště k západnímu konci hlavní silnice. Úsek zasahuje do budov, proto je nutný výkup pozemků. Potvrďte plán a stiskněte „Další“. Doba výstavby se v tomto úseku nezkracuje.",
+        "start": "Vyberte „Dvoukolejná trať“ a veďte přímou kolej ve výšce 6 m od východního konce západního nástupiště k západnímu konci hlavní silnice. Úsek zasahuje do budov, proto je nutný výkup pozemků. Potvrďte plán a stiskněte „Další“. Doba výstavby se v tomto úseku nezkracuje.",
+        "end": "Vyberte „Dvoukolejná trať“ a veďte přímou kolej ve výšce 6 m od východního konce západního nástupiště k západnímu konci hlavní silnice. Úsek zasahuje do budov, proto je nutný výkup pozemků. Potvrďte plán a stiskněte „Další“. Doba výstavby se v tomto úseku nezkracuje.",
+        "confirm": "Vyberte „Dvoukolejná trať“ a veďte přímou kolej ve výšce 6 m od východního konce západního nástupiště k západnímu konci hlavní silnice. Úsek zasahuje do budov, proto je nutný výkup pozemků. Potvrďte plán a stiskněte „Další“. Doba výstavby se v tomto úseku nezkracuje.",
+        "town": "Vyberte „Dvoukolejná trať“ a veďte přímou kolej ve výšce 6 m od východního konce západního nástupiště k západnímu konci hlavní silnice. Úsek zasahuje do budov, proto je nutný výkup pozemků. Potvrďte plán a stiskněte „Další“. Doba výstavby se v tomto úseku nezkracuje.",
+        "new": "Vyberte „Dvoukolejná trať“ a veďte přímou kolej ve výšce 6 m od východního konce západního nástupiště k západnímu konci hlavní silnice. Úsek zasahuje do budov, proto je nutný výkup pozemků. Potvrďte plán a stiskněte „Další“. Doba výstavby se v tomto úseku nezkracuje.",
+        "east": "Vyberte „Dvoukolejná trať“ a veďte přímou kolej ve výšce 6 m od východního konce západního nástupiště k západnímu konci hlavní silnice. Úsek zasahuje do budov, proto je nutný výkup pozemků. Potvrďte plán a stiskněte „Další“. Doba výstavby se v tomto úseku nezkracuje."
+      },
+      "step4": {
+        "title": "Nařiďte zbourání nemocnice",
+        "description": "Na pozemcích soukromých budov začne vyjednávání o výkupu automaticky, ale nemocnice jako veřejné zařízení města se sama neodstraní a brání zahájení stavby koleje. Klikněte na nemocnici a v tlačítkách nahoře stiskněte „Zbourat“. Jakmile se zobrazí stav „Plánovaná demolice“, stiskněte „Další“.",
+        "open": "Na pozemcích soukromých budov začne vyjednávání o výkupu automaticky, ale nemocnice jako veřejné zařízení města se sama neodstraní a brání zahájení stavby koleje. Klikněte na nemocnici a v tlačítkách nahoře stiskněte „Zbourat“. Jakmile se zobrazí stav „Plánovaná demolice“, stiskněte „Další“.",
+        "variant": "Na pozemcích soukromých budov začne vyjednávání o výkupu automaticky, ale nemocnice jako veřejné zařízení města se sama neodstraní a brání zahájení stavby koleje. Klikněte na nemocnici a v tlačítkách nahoře stiskněte „Zbourat“. Jakmile se zobrazí stav „Plánovaná demolice“, stiskněte „Další“.",
+        "start": "Na pozemcích soukromých budov začne vyjednávání o výkupu automaticky, ale nemocnice jako veřejné zařízení města se sama neodstraní a brání zahájení stavby koleje. Klikněte na nemocnici a v tlačítkách nahoře stiskněte „Zbourat“. Jakmile se zobrazí stav „Plánovaná demolice“, stiskněte „Další“.",
+        "end": "Na pozemcích soukromých budov začne vyjednávání o výkupu automaticky, ale nemocnice jako veřejné zařízení města se sama neodstraní a brání zahájení stavby koleje. Klikněte na nemocnici a v tlačítkách nahoře stiskněte „Zbourat“. Jakmile se zobrazí stav „Plánovaná demolice“, stiskněte „Další“.",
+        "confirm": "Na pozemcích soukromých budov začne vyjednávání o výkupu automaticky, ale nemocnice jako veřejné zařízení města se sama neodstraní a brání zahájení stavby koleje. Klikněte na nemocnici a v tlačítkách nahoře stiskněte „Zbourat“. Jakmile se zobrazí stav „Plánovaná demolice“, stiskněte „Další“.",
+        "town": "Na pozemcích soukromých budov začne vyjednávání o výkupu automaticky, ale nemocnice jako veřejné zařízení města se sama neodstraní a brání zahájení stavby koleje. Klikněte na nemocnici a v tlačítkách nahoře stiskněte „Zbourat“. Jakmile se zobrazí stav „Plánovaná demolice“, stiskněte „Další“.",
+        "new": "Na pozemcích soukromých budov začne vyjednávání o výkupu automaticky, ale nemocnice jako veřejné zařízení města se sama neodstraní a brání zahájení stavby koleje. Klikněte na nemocnici a v tlačítkách nahoře stiskněte „Zbourat“. Jakmile se zobrazí stav „Plánovaná demolice“, stiskněte „Další“.",
+        "east": "Na pozemcích soukromých budov začne vyjednávání o výkupu automaticky, ale nemocnice jako veřejné zařízení města se sama neodstraní a brání zahájení stavby koleje. Klikněte na nemocnici a v tlačítkách nahoře stiskněte „Zbourat“. Jakmile se zobrazí stav „Plánovaná demolice“, stiskněte „Další“."
+      },
+      "step5": {
+        "title": "Počkejte na dokončení úseku s výkupem",
+        "description": "Nechte běžet čas a počkejte na výkup soukromých pozemků, zbourání nemocnice a dokončení stavby koleje. Potrvá to několik měsíců. Doba výstavby se v tomto úseku nezkracuje, takže uvidíte, jak kolej vznikne běžnou stavbou.",
+        "open": "Nechte běžet čas a počkejte na výkup soukromých pozemků, zbourání nemocnice a dokončení stavby koleje. Potrvá to několik měsíců. Doba výstavby se v tomto úseku nezkracuje, takže uvidíte, jak kolej vznikne běžnou stavbou.",
+        "variant": "Nechte běžet čas a počkejte na výkup soukromých pozemků, zbourání nemocnice a dokončení stavby koleje. Potrvá to několik měsíců. Doba výstavby se v tomto úseku nezkracuje, takže uvidíte, jak kolej vznikne běžnou stavbou.",
+        "start": "Nechte běžet čas a počkejte na výkup soukromých pozemků, zbourání nemocnice a dokončení stavby koleje. Potrvá to několik měsíců. Doba výstavby se v tomto úseku nezkracuje, takže uvidíte, jak kolej vznikne běžnou stavbou.",
+        "end": "Nechte běžet čas a počkejte na výkup soukromých pozemků, zbourání nemocnice a dokončení stavby koleje. Potrvá to několik měsíců. Doba výstavby se v tomto úseku nezkracuje, takže uvidíte, jak kolej vznikne běžnou stavbou.",
+        "confirm": "Nechte běžet čas a počkejte na výkup soukromých pozemků, zbourání nemocnice a dokončení stavby koleje. Potrvá to několik měsíců. Doba výstavby se v tomto úseku nezkracuje, takže uvidíte, jak kolej vznikne běžnou stavbou.",
+        "town": "Nechte běžet čas a počkejte na výkup soukromých pozemků, zbourání nemocnice a dokončení stavby koleje. Potrvá to několik měsíců. Doba výstavby se v tomto úseku nezkracuje, takže uvidíte, jak kolej vznikne běžnou stavbou.",
+        "new": "Nechte běžet čas a počkejte na výkup soukromých pozemků, zbourání nemocnice a dokončení stavby koleje. Potrvá to několik měsíců. Doba výstavby se v tomto úseku nezkracuje, takže uvidíte, jak kolej vznikne běžnou stavbou.",
+        "east": "Nechte běžet čas a počkejte na výkup soukromých pozemků, zbourání nemocnice a dokončení stavby koleje. Potrvá to několik měsíců. Doba výstavby se v tomto úseku nezkracuje, takže uvidíte, jak kolej vznikne běžnou stavbou."
+      },
+      "step6": {
+        "title": "Položte kolej přímo nad hlavní silnici",
+        "description": "Typem „Dvoukolejná trať“ veďte kolej ve výšce 6 m od západního ke východnímu konci hlavní silnice. Povede-li přímo nad osou silnice, nezasáhne soukromé parcely podél ní a výkupu se vyhnete. Pokud ze silnice odbočí do budov, bude potřeba výkup nebo odstranění veřejných zařízení.",
+        "open": "Typem „Dvoukolejná trať“ veďte kolej ve výšce 6 m od západního ke východnímu konci hlavní silnice. Povede-li přímo nad osou silnice, nezasáhne soukromé parcely podél ní a výkupu se vyhnete. Pokud ze silnice odbočí do budov, bude potřeba výkup nebo odstranění veřejných zařízení.",
+        "variant": "Typem „Dvoukolejná trať“ veďte kolej ve výšce 6 m od západního ke východnímu konci hlavní silnice. Povede-li přímo nad osou silnice, nezasáhne soukromé parcely podél ní a výkupu se vyhnete. Pokud ze silnice odbočí do budov, bude potřeba výkup nebo odstranění veřejných zařízení.",
+        "start": "Typem „Dvoukolejná trať“ veďte kolej ve výšce 6 m od západního ke východnímu konci hlavní silnice. Povede-li přímo nad osou silnice, nezasáhne soukromé parcely podél ní a výkupu se vyhnete. Pokud ze silnice odbočí do budov, bude potřeba výkup nebo odstranění veřejných zařízení.",
+        "end": "Typem „Dvoukolejná trať“ veďte kolej ve výšce 6 m od západního ke východnímu konci hlavní silnice. Povede-li přímo nad osou silnice, nezasáhne soukromé parcely podél ní a výkupu se vyhnete. Pokud ze silnice odbočí do budov, bude potřeba výkup nebo odstranění veřejných zařízení.",
+        "confirm": "Typem „Dvoukolejná trať“ veďte kolej ve výšce 6 m od západního ke východnímu konci hlavní silnice. Povede-li přímo nad osou silnice, nezasáhne soukromé parcely podél ní a výkupu se vyhnete. Pokud ze silnice odbočí do budov, bude potřeba výkup nebo odstranění veřejných zařízení.",
+        "town": "Typem „Dvoukolejná trať“ veďte kolej ve výšce 6 m od západního ke východnímu konci hlavní silnice. Povede-li přímo nad osou silnice, nezasáhne soukromé parcely podél ní a výkupu se vyhnete. Pokud ze silnice odbočí do budov, bude potřeba výkup nebo odstranění veřejných zařízení.",
+        "new": "Typem „Dvoukolejná trať“ veďte kolej ve výšce 6 m od západního ke východnímu konci hlavní silnice. Povede-li přímo nad osou silnice, nezasáhne soukromé parcely podél ní a výkupu se vyhnete. Pokud ze silnice odbočí do budov, bude potřeba výkup nebo odstranění veřejných zařízení.",
+        "east": "Nakonec veďte ve výšce 6 m kolej typu „Dvoukolejná trať“ od východního konce hlavní silnice k západnímu konci východního nástupiště. Jakmile budou obě nástupiště propojena, stiskněte „Další“ a doba výstavby se přeskočí."
+      },
+      "step7": {
+        "title": "Postavte depo",
+        "description": "V panelu výstavby vyberte „Železniční depo“ a postavte ho na žluté parcele severně od města. I tentokrát zvolte umístění podle sebe. Tlačítko „Další“ přeskočí dobu výstavby a depo dokončí.",
+        "open": "V panelu výstavby vyberte „Železniční depo“ a postavte ho na žluté parcele severně od města. I tentokrát zvolte umístění podle sebe. Tlačítko „Další“ přeskočí dobu výstavby a depo dokončí.",
+        "variant": "V panelu výstavby vyberte „Železniční depo“ a postavte ho na žluté parcele severně od města. I tentokrát zvolte umístění podle sebe. Tlačítko „Další“ přeskočí dobu výstavby a depo dokončí.",
+        "start": "V panelu výstavby vyberte „Železniční depo“ a postavte ho na žluté parcele severně od města. I tentokrát zvolte umístění podle sebe. Tlačítko „Další“ přeskočí dobu výstavby a depo dokončí.",
+        "end": "V panelu výstavby vyberte „Železniční depo“ a postavte ho na žluté parcele severně od města. I tentokrát zvolte umístění podle sebe. Tlačítko „Další“ přeskočí dobu výstavby a depo dokončí.",
+        "confirm": "V panelu výstavby vyberte „Železniční depo“ a postavte ho na žluté parcele severně od města. I tentokrát zvolte umístění podle sebe. Tlačítko „Další“ přeskočí dobu výstavby a depo dokončí.",
+        "town": "V panelu výstavby vyberte „Železniční depo“ a postavte ho na žluté parcele severně od města. I tentokrát zvolte umístění podle sebe. Tlačítko „Další“ přeskočí dobu výstavby a depo dokončí.",
+        "new": "V panelu výstavby vyberte „Železniční depo“ a postavte ho na žluté parcele severně od města. I tentokrát zvolte umístění podle sebe. Tlačítko „Další“ přeskočí dobu výstavby a depo dokončí.",
+        "east": "V panelu výstavby vyberte „Železniční depo“ a postavte ho na žluté parcele severně od města. I tentokrát zvolte umístění podle sebe. Tlačítko „Další“ přeskočí dobu výstavby a depo dokončí."
+      },
+      "step8": {
+        "title": "Upravte oblouk a sklon a napojte se na hlavní trať",
+        "description": "Typem „Železniční kolej“ veďte trať od přípojného bodu na úrovni terénu na východní straně depa širokým obloukem na východ přes značku na severovýchodě až k bodu napojení na hlavní trať ve výšce 6 m. Abyste nepřekročili limity zakřivení a sklonu, řiďte se žlutými mezilehlými body. Po potvrzení tvaru pravým tlačítkem můžete tvar doladit přetažením vrcholů a řídicích bodů.",
+        "open": "Typem „Železniční kolej“ veďte trať od přípojného bodu na úrovni terénu na východní straně depa širokým obloukem na východ přes značku na severovýchodě až k bodu napojení na hlavní trať ve výšce 6 m. Abyste nepřekročili limity zakřivení a sklonu, řiďte se žlutými mezilehlými body. Po potvrzení tvaru pravým tlačítkem můžete tvar doladit přetažením vrcholů a řídicích bodů.",
+        "variant": "Typem „Železniční kolej“ veďte trať od přípojného bodu na úrovni terénu na východní straně depa širokým obloukem na východ přes značku na severovýchodě až k bodu napojení na hlavní trať ve výšce 6 m. Abyste nepřekročili limity zakřivení a sklonu, řiďte se žlutými mezilehlými body. Po potvrzení tvaru pravým tlačítkem můžete tvar doladit přetažením vrcholů a řídicích bodů.",
+        "start": "Typem „Železniční kolej“ veďte trať od přípojného bodu na úrovni terénu na východní straně depa širokým obloukem na východ přes značku na severovýchodě až k bodu napojení na hlavní trať ve výšce 6 m. Abyste nepřekročili limity zakřivení a sklonu, řiďte se žlutými mezilehlými body. Po potvrzení tvaru pravým tlačítkem můžete tvar doladit přetažením vrcholů a řídicích bodů.",
+        "end": "Typem „Železniční kolej“ veďte trať od přípojného bodu na úrovni terénu na východní straně depa širokým obloukem na východ přes značku na severovýchodě až k bodu napojení na hlavní trať ve výšce 6 m. Abyste nepřekročili limity zakřivení a sklonu, řiďte se žlutými mezilehlými body. Po potvrzení tvaru pravým tlačítkem můžete tvar doladit přetažením vrcholů a řídicích bodů.",
+        "confirm": "Typem „Železniční kolej“ veďte trať od přípojného bodu na úrovni terénu na východní straně depa širokým obloukem na východ přes značku na severovýchodě až k bodu napojení na hlavní trať ve výšce 6 m. Abyste nepřekročili limity zakřivení a sklonu, řiďte se žlutými mezilehlými body. Po potvrzení tvaru pravým tlačítkem můžete tvar doladit přetažením vrcholů a řídicích bodů.",
+        "town": "Typem „Železniční kolej“ veďte trať od přípojného bodu na úrovni terénu na východní straně depa širokým obloukem na východ přes značku na severovýchodě až k bodu napojení na hlavní trať ve výšce 6 m. Abyste nepřekročili limity zakřivení a sklonu, řiďte se žlutými mezilehlými body. Po potvrzení tvaru pravým tlačítkem můžete tvar doladit přetažením vrcholů a řídicích bodů.",
+        "new": "Typem „Železniční kolej“ veďte trať od přípojného bodu na úrovni terénu na východní straně depa širokým obloukem na východ přes značku na severovýchodě až k bodu napojení na hlavní trať ve výšce 6 m. Abyste nepřekročili limity zakřivení a sklonu, řiďte se žlutými mezilehlými body. Po potvrzení tvaru pravým tlačítkem můžete tvar doladit přetažením vrcholů a řídicích bodů.",
+        "east": "Typem „Železniční kolej“ veďte trať od přípojného bodu na úrovni terénu na východní straně depa širokým obloukem na východ přes značku na severovýchodě až k bodu napojení na hlavní trať ve výšce 6 m. Abyste nepřekročili limity zakřivení a sklonu, řiďte se žlutými mezilehlými body. Po potvrzení tvaru pravým tlačítkem můžete tvar doladit přetažením vrcholů a řídicích bodů."
+      },
+      "step9": {
+        "title": "Přiveďte do depa elektřinu ze stávající elektrárny",
+        "description": "Aby mohly vlaky jezdit, je potřeba připojit je elektrickým vedením k elektrárně. Typem „Elektrické vedení“ propojte přípojný bod elektrárny se sdíleným přípojným bodem na východní straně depa a potvrďte.",
+        "open": "Aby mohly vlaky jezdit, je potřeba připojit je elektrickým vedením k elektrárně. Typem „Elektrické vedení“ propojte přípojný bod elektrárny se sdíleným přípojným bodem na východní straně depa a potvrďte.",
+        "variant": "Aby mohly vlaky jezdit, je potřeba připojit je elektrickým vedením k elektrárně. Typem „Elektrické vedení“ propojte přípojný bod elektrárny se sdíleným přípojným bodem na východní straně depa a potvrďte.",
+        "start": "Aby mohly vlaky jezdit, je potřeba připojit je elektrickým vedením k elektrárně. Typem „Elektrické vedení“ propojte přípojný bod elektrárny se sdíleným přípojným bodem na východní straně depa a potvrďte.",
+        "end": "Aby mohly vlaky jezdit, je potřeba připojit je elektrickým vedením k elektrárně. Typem „Elektrické vedení“ propojte přípojný bod elektrárny se sdíleným přípojným bodem na východní straně depa a potvrďte.",
+        "confirm": "Aby mohly vlaky jezdit, je potřeba připojit je elektrickým vedením k elektrárně. Typem „Elektrické vedení“ propojte přípojný bod elektrárny se sdíleným přípojným bodem na východní straně depa a potvrďte.",
+        "town": "Aby mohly vlaky jezdit, je potřeba připojit je elektrickým vedením k elektrárně. Typem „Elektrické vedení“ propojte přípojný bod elektrárny se sdíleným přípojným bodem na východní straně depa a potvrďte.",
+        "new": "Aby mohly vlaky jezdit, je potřeba připojit je elektrickým vedením k elektrárně. Typem „Elektrické vedení“ propojte přípojný bod elektrárny se sdíleným přípojným bodem na východní straně depa a potvrďte.",
+        "east": "Aby mohly vlaky jezdit, je potřeba připojit je elektrickým vedením k elektrárně. Typem „Elektrické vedení“ propojte přípojný bod elektrárny se sdíleným přípojným bodem na východní straně depa a potvrďte."
+      },
+      "step10": {
+        "title": "Zahajte provoz železniční linky",
+        "description": "V části „Veřejná doprava“ → „+ Nová linka“ vyberte „Linka regionální železnice“. Umístěte zastávky na západní a východní nástupiště na estakádě a kliknutím na první zastávku uzavřete okruh. Nastavte jízdné 0 a cílový interval 5 minut a potvrďte.",
+        "open": "V části „Veřejná doprava“ → „+ Nová linka“ vyberte „Linka regionální železnice“. Umístěte zastávky na západní a východní nástupiště na estakádě a kliknutím na první zastávku uzavřete okruh. Nastavte jízdné 0 a cílový interval 5 minut a potvrďte.",
+        "variant": "V části „Veřejná doprava“ → „+ Nová linka“ vyberte „Linka regionální železnice“. Umístěte zastávky na západní a východní nástupiště na estakádě a kliknutím na první zastávku uzavřete okruh. Nastavte jízdné 0 a cílový interval 5 minut a potvrďte.",
+        "start": "V části „Veřejná doprava“ → „+ Nová linka“ vyberte „Linka regionální železnice“. Umístěte zastávky na západní a východní nástupiště na estakádě a kliknutím na první zastávku uzavřete okruh. Nastavte jízdné 0 a cílový interval 5 minut a potvrďte.",
+        "end": "V části „Veřejná doprava“ → „+ Nová linka“ vyberte „Linka regionální železnice“. Umístěte zastávky na západní a východní nástupiště na estakádě a kliknutím na první zastávku uzavřete okruh. Nastavte jízdné 0 a cílový interval 5 minut a potvrďte.",
+        "confirm": "V části „Veřejná doprava“ → „+ Nová linka“ vyberte „Linka regionální železnice“. Umístěte zastávky na západní a východní nástupiště na estakádě a kliknutím na první zastávku uzavřete okruh. Nastavte jízdné 0 a cílový interval 5 minut a potvrďte.",
+        "town": "V části „Veřejná doprava“ → „+ Nová linka“ vyberte „Linka regionální železnice“. Umístěte zastávky na západní a východní nástupiště na estakádě a kliknutím na první zastávku uzavřete okruh. Nastavte jízdné 0 a cílový interval 5 minut a potvrďte.",
+        "new": "V části „Veřejná doprava“ → „+ Nová linka“ vyberte „Linka regionální železnice“. Umístěte zastávky na západní a východní nástupiště na estakádě a kliknutím na první zastávku uzavřete okruh. Nastavte jízdné 0 a cílový interval 5 minut a potvrďte.",
+        "east": "V části „Veřejná doprava“ → „+ Nová linka“ vyberte „Linka regionální železnice“. Umístěte zastávky na západní a východní nástupiště na estakádě a kliknutím na první zastávku uzavřete okruh. Nastavte jízdné 0 a cílový interval 5 minut a potvrďte."
+      },
+      "step11": {
+        "title": "Ověřte vozidla a provoz",
+        "description": "Nechte běžet čas a ve správě veřejné dopravy zkontrolujte přepravní kapacitu a interval linky. Depo potřebuje několik měsíců na pořízení vozidel. Jakmile má linka nenulovou kapacitu, provoz je zahájen. Obyvatelé při volbě trasy zvažují i chůzi pěšky, takže na krátkém úseku mezi stanicemi zatím nemusí být žádní cestující.",
+        "open": "Nechte běžet čas a ve správě veřejné dopravy zkontrolujte přepravní kapacitu a interval linky. Depo potřebuje několik měsíců na pořízení vozidel. Jakmile má linka nenulovou kapacitu, provoz je zahájen. Obyvatelé při volbě trasy zvažují i chůzi pěšky, takže na krátkém úseku mezi stanicemi zatím nemusí být žádní cestující.",
+        "variant": "Nechte běžet čas a ve správě veřejné dopravy zkontrolujte přepravní kapacitu a interval linky. Depo potřebuje několik měsíců na pořízení vozidel. Jakmile má linka nenulovou kapacitu, provoz je zahájen. Obyvatelé při volbě trasy zvažují i chůzi pěšky, takže na krátkém úseku mezi stanicemi zatím nemusí být žádní cestující.",
+        "start": "Nechte běžet čas a ve správě veřejné dopravy zkontrolujte přepravní kapacitu a interval linky. Depo potřebuje několik měsíců na pořízení vozidel. Jakmile má linka nenulovou kapacitu, provoz je zahájen. Obyvatelé při volbě trasy zvažují i chůzi pěšky, takže na krátkém úseku mezi stanicemi zatím nemusí být žádní cestující.",
+        "end": "Nechte běžet čas a ve správě veřejné dopravy zkontrolujte přepravní kapacitu a interval linky. Depo potřebuje několik měsíců na pořízení vozidel. Jakmile má linka nenulovou kapacitu, provoz je zahájen. Obyvatelé při volbě trasy zvažují i chůzi pěšky, takže na krátkém úseku mezi stanicemi zatím nemusí být žádní cestující.",
+        "confirm": "Nechte běžet čas a ve správě veřejné dopravy zkontrolujte přepravní kapacitu a interval linky. Depo potřebuje několik měsíců na pořízení vozidel. Jakmile má linka nenulovou kapacitu, provoz je zahájen. Obyvatelé při volbě trasy zvažují i chůzi pěšky, takže na krátkém úseku mezi stanicemi zatím nemusí být žádní cestující.",
+        "town": "Nechte běžet čas a ve správě veřejné dopravy zkontrolujte přepravní kapacitu a interval linky. Depo potřebuje několik měsíců na pořízení vozidel. Jakmile má linka nenulovou kapacitu, provoz je zahájen. Obyvatelé při volbě trasy zvažují i chůzi pěšky, takže na krátkém úseku mezi stanicemi zatím nemusí být žádní cestující.",
+        "new": "Nechte běžet čas a ve správě veřejné dopravy zkontrolujte přepravní kapacitu a interval linky. Depo potřebuje několik měsíců na pořízení vozidel. Jakmile má linka nenulovou kapacitu, provoz je zahájen. Obyvatelé při volbě trasy zvažují i chůzi pěšky, takže na krátkém úseku mezi stanicemi zatím nemusí být žádní cestující.",
+        "east": "Nechte běžet čas a ve správě veřejné dopravy zkontrolujte přepravní kapacitu a interval linky. Depo potřebuje několik měsíců na pořízení vozidel. Jakmile má linka nenulovou kapacitu, provoz je zahájen. Obyvatelé při volbě trasy zvažují i chůzi pěšky, takže na krátkém úseku mezi stanicemi zatím nemusí být žádní cestující."
+      },
+      "step12": {
+        "title": "Ohlédnutí za stavbou železnice",
+        "description": "Kamera se přesunula k západní stanici. Podívejte se na vlaky, které stojí u nástupiště. Hotová jsou nástupiště, nádražní budovy, hlavní trať, depo s vlečkou, napájení i nastavení linky. Na řadu přišel výkup soukromých pozemků i odstranění veřejného zařízení a v úseku nad silnicí se výkupu podařilo vyhnout. Ladění vedení trati podle poloměru oblouku a sklonu využijte i při dalších stavbách železnic.",
+        "open": "Kamera se přesunula k západní stanici. Podívejte se na vlaky, které stojí u nástupiště. Hotová jsou nástupiště, nádražní budovy, hlavní trať, depo s vlečkou, napájení i nastavení linky. Na řadu přišel výkup soukromých pozemků i odstranění veřejného zařízení a v úseku nad silnicí se výkupu podařilo vyhnout. Ladění vedení trati podle poloměru oblouku a sklonu využijte i při dalších stavbách železnic.",
+        "variant": "Kamera se přesunula k západní stanici. Podívejte se na vlaky, které stojí u nástupiště. Hotová jsou nástupiště, nádražní budovy, hlavní trať, depo s vlečkou, napájení i nastavení linky. Na řadu přišel výkup soukromých pozemků i odstranění veřejného zařízení a v úseku nad silnicí se výkupu podařilo vyhnout. Ladění vedení trati podle poloměru oblouku a sklonu využijte i při dalších stavbách železnic.",
+        "start": "Kamera se přesunula k západní stanici. Podívejte se na vlaky, které stojí u nástupiště. Hotová jsou nástupiště, nádražní budovy, hlavní trať, depo s vlečkou, napájení i nastavení linky. Na řadu přišel výkup soukromých pozemků i odstranění veřejného zařízení a v úseku nad silnicí se výkupu podařilo vyhnout. Ladění vedení trati podle poloměru oblouku a sklonu využijte i při dalších stavbách železnic.",
+        "end": "Kamera se přesunula k západní stanici. Podívejte se na vlaky, které stojí u nástupiště. Hotová jsou nástupiště, nádražní budovy, hlavní trať, depo s vlečkou, napájení i nastavení linky. Na řadu přišel výkup soukromých pozemků i odstranění veřejného zařízení a v úseku nad silnicí se výkupu podařilo vyhnout. Ladění vedení trati podle poloměru oblouku a sklonu využijte i při dalších stavbách železnic.",
+        "confirm": "Kamera se přesunula k západní stanici. Podívejte se na vlaky, které stojí u nástupiště. Hotová jsou nástupiště, nádražní budovy, hlavní trať, depo s vlečkou, napájení i nastavení linky. Na řadu přišel výkup soukromých pozemků i odstranění veřejného zařízení a v úseku nad silnicí se výkupu podařilo vyhnout. Ladění vedení trati podle poloměru oblouku a sklonu využijte i při dalších stavbách železnic.",
+        "town": "Kamera se přesunula k západní stanici. Podívejte se na vlaky, které stojí u nástupiště. Hotová jsou nástupiště, nádražní budovy, hlavní trať, depo s vlečkou, napájení i nastavení linky. Na řadu přišel výkup soukromých pozemků i odstranění veřejného zařízení a v úseku nad silnicí se výkupu podařilo vyhnout. Ladění vedení trati podle poloměru oblouku a sklonu využijte i při dalších stavbách železnic.",
+        "new": "Kamera se přesunula k západní stanici. Podívejte se na vlaky, které stojí u nástupiště. Hotová jsou nástupiště, nádražní budovy, hlavní trať, depo s vlečkou, napájení i nastavení linky. Na řadu přišel výkup soukromých pozemků i odstranění veřejného zařízení a v úseku nad silnicí se výkupu podařilo vyhnout. Ladění vedení trati podle poloměru oblouku a sklonu využijte i při dalších stavbách železnic.",
+        "east": "Kamera se přesunula k západní stanici. Podívejte se na vlaky, které stojí u nástupiště. Hotová jsou nástupiště, nádražní budovy, hlavní trať, depo s vlečkou, napájení i nastavení linky. Na řadu přišel výkup soukromých pozemků i odstranění veřejného zařízení a v úseku nad silnicí se výkupu podařilo vyhnout. Ladění vedení trati podle poloměru oblouku a sklonu využijte i při dalších stavbách železnic."
+      }
+    },
+    "complete": {
+      "title": "Tutoriál dokončen",
+      "description": "Gratulujeme! Tutoriál je u konce. Stisknutím „Ukončit“ zavřete průvodce a v tomto městě můžete dál volně hrát.",
+      "button": "Ukončit"
+    },
+    "nextButton": "Další",
+    "checking": "Ověřování…",
+    "failed": "Podmínka není splněna. Zkuste to prosím znovu.",
+    "completed": "Tutoriál dokončen! Dobrá práce.",
+    "stepProgress": "Krok {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Ikonou silnice otevřete panel výstavby.",
+      "selectRoad": "V kategorii „Ulice“ vyberte pozemní dvoupruhovou silnici. Vybrat lze jen povolené typy.",
+      "placeStart": "Kliknutím levým tlačítkem do světle modrého kruhu umístěte začátek silnice.",
+      "placeEnd": "Kliknutím levým tlačítkem do žlutého kruhu umístěte konec silnice.",
+      "finalizeRoad": "Kliknutím pravým tlačítkem ve 3D zobrazení dokončete tvar silnice.",
+      "confirmRoad": "Uložte silnici tlačítkem „Potvrdit“ v panelu výstavby a poté stiskněte „Další“.",
+      "failed": "Příprava nebo komunikace selhala. Pokud opakování nepomůže, ukončete tutoriál a spusťte ho v novém městě.",
+      "retry": "Zkusit znovu",
+      "placementRequired": "Použijte typ a pozice podle průvodce.",
+      "preparing": "Připravuje se výchozí stav tutoriálu.",
+      "finishFailed": "Tutoriál se nepodařilo ukončit. Zkuste to prosím znovu."
+    },
+    "trade": {
+      "title": "Zahajte mezinárodní obchod",
+      "description": "Místní továrna hledá odbyt v zahraničí. V tomto tutoriálu se naučíte vyvážet potraviny přes přístav a dovážet zboží nákladní železnicí ze sousední země.",
+      "step1": {
+        "description": "K vývozu potravin vyrobených na tomto ostrově je potřeba vývozní terminál. Na pobřežní parcele se žlutou značkou postavte „Kontejnerový terminál“. V tutoriálu se doba výstavby přeskakuje.",
+        "title": "Postavte kontejnerový přístav"
+      },
+      "step2": {
+        "description": "Rozběhnutí výroby a dopravy v továrně potrvá několik měsíců, nechte tedy běžet čas a podívejte se, co přístav vyvezl. Zavřete detaily kontejnerového terminálu a znovu je otevřete – na kartě „Překládka“ uvidíte objemy dovozu a vývozu.",
+        "title": "Ověřte vývoz potravin"
+      },
+      "step3": {
+        "description": "Místo pro dovoz a vývoz po moři je hotové. Teď vybudujeme místo pro dovoz a vývoz zboží po železnici. Na parcele se žlutou značkou u silnice postavte „Mezinárodní nákladové nádraží“. Na východní hranici vede trať do sousední země a stojí tam hraniční nákladové nádraží.",
+        "title": "Postavte mezinárodní nákladové nádraží"
+      },
+      "step4": {
+        "open": "Na panelu ikon otevřete „Silnice, železnice a infrastruktura“ a v části „Železnice“ vyberte „Nástupiště pro kontejnery“.",
+        "place": "Severně od mezinárodního nákladového nádraží položte nástupiště souběžně s nádražím. Levým kliknutím do světle modrého kruhu (západ) umístěte začátek, levým kliknutím do žlutého kruhu (východ) konec a pravým kliknutím ve 3D zobrazení dokončete tvar. Přepněte „Strana nástupiště“ na „Vnitřní“, ověřte, že je nástupiště na straně nádražní budovy (na jihu), a potvrďte. Potom stiskněte „Další“.",
+        "title": "Postavte nástupiště vedle nádraží"
+      },
+      "step5": {
+        "description": "Tlačítkem „Zpět“ se vraťte na seznam, vyberte „Železniční kolej“ a položte kolej od východního konce nástupiště k západnímu konci koleje, která sem vede od hraničního nákladového nádraží za hranicí města.",
+        "title": "Položte kolej až k hranici"
+      },
+      "step6": {
+        "title": "Postavte depo",
+        "description": "Na parcele se žlutou značkou podél trati postavte „Železniční depo“. Po stisknutí „Další“ se v tutoriálu doba výstavby přeskočí a depo bude dokončeno."
+      },
+      "step7": {
+        "title": "Napojte depo na hlavní trať",
+        "description": "Od přípojného bodu na východním konci depa položte vlečku k hlavní trati. Nenapojujte ji v pravém úhlu, ale pod mírným úhlem směrem na východ. Potom stiskněte „Další“."
+      },
+      "step8": {
+        "description": "Na panelu ikon otevřete „Silnice, železnice a infrastruktura“ a typem „Elektrické vedení“ v části „Elektřina“ propojte přípojný bod solární elektrárny na východě města s přípojným bodem depa.",
+        "title": "Přiveďte do depa elektřinu"
+      },
+      "step9": {
+        "description": "V části „Veřejná doprava“ stiskněte „+ Nová linka“ a jako typ vyberte „Mezinárodní nákladní linka“. Umístěte zastávky na nástupiště mezinárodního a hraničního nákladového nádraží, kliknutím na první zastávku uzavřete okruh a zahajte provoz. Na jednokolejné trati se vlaky nemohou míjet, proto nastavte cílový interval 45 minut, aby jedna souprava stihla cestu tam i zpět.",
+        "title": "Zahajte provoz mezinárodní nákladní linky"
+      },
+      "step10": {
+        "description": "Nechte běžet čas a ověřte, že na mezinárodní nákladní lince začnou jezdit nákladní vlaky. Než depo najme zaměstnance, nakoupí materiál a připraví vozidla, uplyne několik měsíců.",
+        "title": "Vypravte nákladní vlaky"
+      }
+    },
+    "highway": {
+      "title": "Postavte dálnici",
+      "description": "S rozvojem města bude potřeba nová cesta pro auta. V tomto tutoriálu se naučíte postavit dálnici na estakádě přes běžnou silnici, propojit je rampami a vytvořit mimoúrovňovou křižovatku.",
+      "step1": {
+        "title": "Křížení na estakádě",
+        "open": "Centrální silnici překlenete dálnicí na estakádě. Na panelu ikon otevřete „Silnice, železnice a infrastruktura“ a v části „Dálnice“ vyberte „Dvoupruhová dálnice“.",
+        "start": "Kliknutím levým tlačítkem do světle modrého kruhu umístěte začátek dálnice. Začátek se přichytí k estakádě ve výšce 7 m.",
+        "end": "Kliknutím levým tlačítkem do žlutého kruhu umístěte konec. Přichytí se ve stejné výšce 7 m na protější straně silnice.",
+        "confirm": "Uložte dálnici tlačítkem „Potvrdit“ v panelu výstavby a poté stiskněte „Další“. V tutoriálu se doba výstavby přeskočí a dálnice bude hned hotová."
+      },
+      "step2": {
+        "title": "Pojmenujte dálnici",
+        "description": "Silnice můžete pojmenovat a spravovat podle názvu. V horní části okna s detaily postavené dálnice je u položky „Silnice“ zatím uvedeno „Žádná (bezejmenná cesta)“, dejte jí tedy libovolný název."
+      },
+      "step3": {
+        "title": "Postavte rampu",
+        "description": "Postavte rampu, která dálnici napojí na běžnou silnici. Jako typ silnice vyberte „Rampa“ a od žluté značky na obrazovce napojte na dálnici plynule zakřivenou rampu."
+      },
+      "step4": {
+        "title": "Prohlédněte si mimoúrovňovou křižovatku",
+        "description": "Kliknutím na „IC1“ u rampy otevřete panel s detaily mimoúrovňové křižovatky. Ověřte, že běžná silnice a dálnice jsou propojené."
+      }
+    },
+    "mining": {
+      "title": "Těžte nerostné suroviny",
+      "description": "Pod ostrovem leží cenné suroviny, ale není jak je odvézt. V tomto tutoriálu se naučíte vybudovat důl, nákladní železnici a přístav a projdete celým postupem od těžby rudy přes přepravu až po vývoz do zahraničí.",
+      "step1": {
+        "description": "Zapněte zobrazení přírodních zdrojů a otevřete panel s detaily ložiska rudy na jihovýchodě.",
+        "title": "Prohlédněte si ložisko rudy"
+      },
+      "step2": {
+        "description": "Na žluté parcele nad ložiskem rudy na jihovýchodě postavte „Důl“. V tutoriálu se doba výstavby přeskakuje.",
+        "title": "Postavte důl"
+      },
+      "step3": {
+        "description": "Na velké stávající parcele jihovýchodně od dolu postavte „Nakládací stanice rudy“. V nakládací stanici se ruda vytěžená v dole nakládá do vlaků.",
+        "title": "Postavte vedle dolu nakládací stanici"
+      },
+      "step4": {
+        "description": "Na velké stávající parcele jižně od přístavu postavte „Vykládací stanice rudy“. Ve vykládací stanici se ruda přivezená vlakem vykládá a odváží dál.",
+        "title": "Postavte u přístavu vykládací stanici"
+      },
+      "step5": {
+        "description": "Na žluté pobřežní parcele postavte „Přístav pro sypký náklad“.",
+        "title": "Postavte přístav pro sypký náklad"
+      },
+      "step6": {
+        "open": "V části „Železnice“ vyberte „Nástupiště pro rudu“ a propojte vždy dvě značky jihozápadně od nakládací stanice a jižně od vykládací stanice. Každé nástupiště natočte směrem k jeho zařízení.",
+        "loading": "V části „Železnice“ vyberte „Nástupiště pro rudu“ a propojte vždy dvě značky jihozápadně od nakládací stanice a jižně od vykládací stanice. Každé nástupiště natočte směrem k jeho zařízení.",
+        "unloading": "V části „Železnice“ vyberte „Nástupiště pro rudu“ a propojte vždy dvě značky jihozápadně od nakládací stanice a jižně od vykládací stanice. Každé nástupiště natočte směrem k jeho zařízení.",
+        "title": "Postavte nástupiště vedle stanic"
+      },
+      "step7": {
+        "town": "Položte nákladní kolej od východního konce přístavního nástupiště jižně kolem středního bodu silnice až k severozápadnímu konci horského nástupiště. Kolej ještě není propojená, takže ji musíte položit. Oblouky srovnejte směr jízdy, na úseku stoupání do kopce přepněte „Kopírování terénu“ na „Nekopírovat“ a upravujte tvar, dokud nezmizí červená porušení sklonu a zakřivení. Přidejte mezilehlé body, aby žádný úsek nebyl delší než 500 m.",
+        "climb": "Položte nákladní kolej od východního konce přístavního nástupiště jižně kolem středního bodu silnice až k severozápadnímu konci horského nástupiště. Kolej ještě není propojená, takže ji musíte položit. Oblouky srovnejte směr jízdy, na úseku stoupání do kopce přepněte „Kopírování terénu“ na „Nekopírovat“ a upravujte tvar, dokud nezmizí červená porušení sklonu a zakřivení. Přidejte mezilehlé body, aby žádný úsek nebyl delší než 500 m.",
+        "title": "Propojte obě stanice kolejí"
+      },
+      "step8": {
+        "title": "Postavte depo",
+        "description": "Na stávající parcele jihozápadně od přístavu postavte „Železniční depo“. Natočte ho tak, aby od přípojného bodu na jeho východním konci mohla vést vlečka k přístavnímu nástupišti."
+      },
+      "step9": {
+        "title": "Napojte depo na hlavní trať",
+        "description": "Od přípojného bodu na úrovni terénu na východním konci depa položte vlečku k západnímu konci přístavního nástupiště. Napojte ji plynule pod mírným úhlem."
+      },
+      "step10": {
+        "description": "Položte elektrické vedení od přípojného bodu stávající solární elektrárny ke sdílenému přípojnému bodu na východním konci depa.",
+        "title": "Přiveďte do depa elektřinu"
+      },
+      "step11": {
+        "description": "V části „Veřejná doprava“ → „Nová linka“ → „Linka pro přepravu rudy“ umístěte zastávky na nákladní nástupiště pro rudu u hor i u přístavu a kliknutím na první zastávku uzavřete okruh. Na jednokolejné trati se vlaky nemohou míjet, proto nastavte cílový interval 45 minut, aby jedna souprava stihla cestu tam i zpět, a potvrďte.",
+        "title": "Zahajte provoz linky pro přepravu rudy"
+      },
+      "step12": {
+        "description": "Nechte běžet čas a rozjeďte těžbu, nakládku, železniční přepravu, vykládku i vývoz. Pořízení vozidel a rozběh přepravy potrvá několik měsíců.",
+        "title": "Nechte běžet čas"
+      },
+      "step13": {
+        "description": "Nechte běžet čas a v detailech pobřežního přístavu pro sypký náklad zkontrolujte příjem a vývoz rudy. Pořízení vozidel, těžba i přeprava potrvají několik měsíců.",
+        "title": "Ověřte vývoz rudy"
+      }
+    },
+    "tourism": {
+      "title": "Rozviňte cestovní ruch",
+      "description": "Ostrov nemá přístav ani ubytování pro návštěvníky svých ruin a chybí i autobusová linka pro turisty. V tomto tutoriálu se naučíte postavit hotel a terminál výletních lodí, zřídit autobusovou linku a sledovat příjezdy turistů, tržby restaurací a využití autobusu.",
+      "step1": {
+        "description": "Na parcele se žlutou značkou západně od starověkých ruin postavte „Rekreační hotel“. V tutoriálu se doba výstavby přeskakuje.",
+        "title": "Postavte hotel u ruin"
+      },
+      "step2": {
+        "description": "K přijímání turistů je potřeba přístav. Na označené parcele v přístavu postavte „Terminál výletních lodí“.",
+        "title": "Postavte terminál výletních lodí"
+      },
+      "step3": {
+        "description": "Turisté nemají vlastní auta, proto je třeba zajistit veřejnou dopravu. V části „Veřejná doprava“ → „Nová linka“ vyberte „Autobusová linka“. Na silnice u žlutých značek umístěte zastávky v pořadí přístav → u domů → u ruin → u domů a nakonec kliknutím na zastávku v přístavu uzavřete okruh. Nastavte jízdné 0 a cílový interval 1 minutu a potvrďte.",
+        "title": "Zřiďte autobusovou linku z přístavu k ruinám"
+      },
+      "step4": {
+        "description": "Nechte běžet čas a přivítejte turisty. Rozběh zařízení a pořízení autobusů potrvá několik měsíců.",
+        "title": "Nechte běžet čas"
+      },
+      "step5": {
+        "description": "Zkontrolujte tržby restaurace u ruin a cestující na vytvořené autobusové lince. Krok je splněn, jakmile přijedou turisté, tržby restaurace převýší výchozí úroveň a autobus začne vozit cestující. V případě potřeby nechte čas běžet déle.",
+        "title": "Ověřte tržby a cestující v autobusu"
+      }
+    },
+    "intro": {
+      "controls": "Ujímáte se úřadu starosty a obyvatelé od vás čekají město, kde se dá klidně a bezpečně žít. V tomto městě zatím nejsou domovy pro nové obyvatele a chybí i elektřina a voda, bez nichž se žít nedá. V tomto tutoriálu se seznámíte s úlohou starosty, s ovládáním času, se čtením stavu města i s tlačítky a ovládáním kamery. Potom projdete celým postupem budování města: připravíte silnice a parcely, určíte zaměření čtvrti, postavíte domy a přivedete elektřinu a vodu.",
+      "scenario4": "Chceme železnicí propojit obytnou zástavbu s pracovišti, jenže v plánované trase stojí soukromé budovy a veřejná nemocnice. V tomto tutoriálu se naučíte vykupovat pozemky, odstraňovat veřejná zařízení, vést estakádu nad silnicí, stavět nástupiště, nádražní budovy a depo, upravovat oblouky a sklon trati a nakonec zajistit napájení a zahájit provoz linky.",
+      "trade": "Místní potravinářská továrna by ráda prodávala své výrobky i v zahraničí. Město by také potřebovalo cestu, jak dovážet zboží, které mu chybí. V tomto tutoriálu se naučíte vyvážet potraviny přes přístav a dovážet zboží nákladní železnicí ze sousední země.",
+      "highway": "Jak bude město růst, přibude i aut, která vozí lidi a zboží. Aby se tranzitní doprava nehrnula na běžné silnice, je dobré včas připravit jinou cestu. V tomto tutoriálu se naučíte postavit dálnici na estakádě přes běžnou silnici, propojit je rampami a vytvořit mimoúrovňovou křižovatku.",
+      "mining": "Pod tímto ostrovem leží cenné suroviny. Není však jak je dopravit z hor do přístavu, a tak z nich ostrovní průmysl nemá žádný užitek. V tomto tutoriálu se naučíte vybudovat důl, nákladní železnici a přístav a projdete celým postupem od těžby rudy přes přepravu až po vývoz do zahraničí.",
+      "tourism": "Ostrované by rádi ukázali starověké ruiny ve vnitrozemí více lidem. Chybí však přístav a ubytování pro návštěvníky a není ani autobusová linka z přístavu do města. V tomto tutoriálu se naučíte postavit hotel a terminál výletních lodí, zřídit autobusovou linku a sledovat příjezdy turistů, tržby restaurací a využití autobusu.",
+      "heading": "Prosba pro starostu",
+      "windowTitle": "Tutoriál",
+      "marine": "Toto město na břehu zálivu zatím nemá přístav ani ropná zařízení. V tomto tutoriálu se naučíte získat půdu navážkou do moře a postavit tankerové molo, přemostit ústí zálivu visutým mostem, dopravit ropu čerpanou z podmořského ložiska ropovodem k vývozu a spojit vzdálený ostrov s městem trajektem."
+    },
+    "marine": {
+      "title": "Využijte moře",
+      "description": "Toto město na břehu zálivu zatím nemá přístav ani ropná zařízení. V tomto tutoriálu se naučíte získat půdu navážkou do moře a postavit tankerové molo, přemostit ústí zálivu visutým mostem, dopravit ropu čerpanou z podmořského ložiska ropovodem k vývozu a spojit vzdálený ostrov s městem trajektem.",
+      "step1": {
+        "title": "Naplánujte navážku",
+        "description": "Přístav potřebuje nábřeží, u kterého mohou kotvit velké lodě, a pozemky pro svá zařízení. Navezte zeminu do moře v hloubi zálivu a vytvořte tak půdu pro přístav. Stiskněte ikonu „Zemní práce“, postupně klikněte levým tlačítkem na čtyři žluté značky, vyznačte tak oblast a pravým tlačítkem ji uzavřete. Ověřte, že odhad je pro typ „Navážka“, a stavbu potvrďte."
+      },
+      "step2": {
+        "title": "Dokončete navážku",
+        "description": "Tlačítkem „Spustit“ posuňte čas alespoň o měsíc a poté stiskněte „Další“. V této lekci nejsou žádné stavební firmy, takže „Další“ zbytek navážky přeskočí. Po dokončení se z moře stane pevnina a její okraj obrácený k moři se změní v nábřeží, kde mohou kotvit lodě."
+      },
+      "step3": {
+        "title": "Postavte silnici na navážku",
+        "description": "Přístav nebo ropný terminál na navážce nemá bez silnice smysl: lidé se nedostanou do práce a zboží se nedá převážet. Postavte silnici od konce městské silnice až na navážku. V této lekci je silnice hotová hned po potvrzení. Na panelu ikon stiskněte „Silnice, železnice a infrastruktura“ a otevřete panel výstavby."
+      },
+      "step4": {
+        "title": "Postavte tankerové molo",
+        "description": "Tankery převážející ropu jsou velké lodě, proto lze přístav postavit jen tam, kde je moře před nábřežím dostatečně hluboké. Nábřeží navážky hledí do hluboké vody, a proto se pro přístav hodí. Stiskněte ikonu budov, v kategorii „Přístavy“ vyberte „Tankerové molo“, levým kliknutím do žlutého kruhu na nábřeží určete místo a v panelu výstavby stiskněte „Potvrdit“. Po postavení přístavu se automaticky vytvoří spojovací plavební dráha k námořní plavební dráze pro velké lodě a lodě mohou připlouvat a odplouvat. V této lekci se doba výstavby přeskakuje."
+      },
+      "step5": {
+        "title": "Přemostěte ústí zálivu visutým mostem",
+        "description": "Dálnice na obou březích ústí zálivu končí. Ústí je široké celých 1,6 km a běžný most na řadě pilířů ho nepřeklene, proto ho propojte visutým mostem, který dokáže překonat velkou vzdálenost jedním polem. Pod mostem vede plavební dráha velkých lodí, takže musí být dost vysoko, aby do něj lodě nenarazily. Konce dálnice na obou březích už jsou v této výšce. Na panelu ikon otevřete „Silnice, železnice a infrastruktura“, v části „Dálnice“ vyberte „Čtyřpruhový visutý most“ a veďte ho od severního konce (světle modrý kruh) k jižnímu konci (žlutý kruh). Pravým tlačítkem dokončete tvar, v panelu výstavby stiskněte „Potvrdit“ a pak „Další“."
+      },
+      "step6": {
+        "title": "Najděte podmořské ložisko ropy",
+        "description": "Teď využijete bohatství moře. Před stavbou ropného terminálu ověřte, zda je pod mořem poblíž ložisko ropy. V kokpitu stiskněte „Zobrazení“ a otevřete panel zobrazení.",
+        "show": "Ve svislých kartách vyberte „Přírodní zdroje“ a přepněte na „Zobrazit“. Uvidíte ložisko ropy, které se rozkládá pod zálivem. Klikněte na ložisko u žluté značky a otevřete jeho detaily."
+      },
+      "step7": {
+        "title": "Postavte ropný terminál",
+        "description": "Ropa vytěžená z podmořského ložiska se ropovodem posílá do ropného terminálu na břehu a odtud na trh. Terminál se staví u nábřeží, kam lze přivést ropovod. Stiskněte ikonu budov, v kategorii „Přístavy“ vyberte „Pevninský ropný terminál“, levým kliknutím do žlutého kruhu na nábřeží určete místo a v panelu výstavby stiskněte „Potvrdit“. V této lekci se doba výstavby přeskakuje."
+      },
+      "step8": {
+        "title": "Postavte ropnou plošinu",
+        "description": "Ropná plošina, která čerpá ropu, musí stát v moři přímo nad ložiskem. Stiskněte ikonu budov, v kategorii „Zemědělství a suroviny“ vyberte „Ropná plošina na moři“, levým kliknutím do žlutého kruhu na moři určete místo a v panelu výstavby stiskněte „Potvrdit“. V této lekci se doba výstavby přeskakuje."
+      },
+      "step9": {
+        "title": "Propojte je ropovodem",
+        "description": "Ropu načerpanou plošinou pošlete podmořským ropovodem do ropného terminálu. Na panelu ikon otevřete „Silnice, železnice a infrastruktura“, v části „Ropa“ vyberte „Podmořský ropovod“ a veďte ho od přípojného bodu plošiny k přípojnému bodu ropného terminálu. Po potvrzení stiskněte „Další“ a ropovod bude okamžitě hotový."
+      },
+      "step10": {
+        "title": "Vyvezte ropu",
+        "description": "Ropný terminál prodává přijatou ropu na trhu a tankerové molo ji vykupuje a vyváží lodí do zahraničí. Než se sejdou pracovníci a ropa se začne prodávat, uplyne několik měsíců. Tlačítkem „Spustit“ posuňte čas o několik měsíců a poté stiskněte „Další“. Pokud se ještě nic nevyvezlo, posuňte čas o kousek dál a stiskněte tlačítko znovu."
+      },
+      "step11": {
+        "title": "Postavte trajektové molo",
+        "description": "Ostrov na moři nemá žádné spojení s městem. Aby obyvatelé ostrova mohli dojíždět do města, zřiďte trajekt. Nejprve postavte trajektové molo na městském břehu. Na panelu ikon otevřete „Silnice, železnice a infrastruktura“, v části „Plavební dráha“ vyberte „Trajektové molo“ a veďte ho z břehu (světle modrý kruh) nad moře (žlutý kruh). Pravým tlačítkem dokončete tvar, v panelu výstavby stiskněte „Potvrdit“ a pak „Další“."
+      },
+      "step12": {
+        "title": "Vyznačte plavební dráhu trajektu",
+        "description": "Dále vyznačte plavební dráhu, po které popluje trajekt od ostrovního mola k městskému. Plavební dráha nemůže vést přes pevninu, proto ostrov obeplujte ze severu, proplujte pod visutým mostem v ústí zálivu a vplujte do zálivu; cestou přidávejte body levým kliknutím. V části „Plavební dráha“ vyberte „Plavební dráha trajektu“, propojte konec ostrovního mola s koncem městského mola, potvrďte a pak stiskněte „Další“."
+      },
+      "step13": {
+        "title": "Zřiďte trajektovou linku",
+        "description": "Nakonec vytvořte linku trajektu, který bude po plavební dráze jezdit. V části „Veřejná doprava“ → „Nová linka“ → „Trajektová linka“ umístěte zastávky na ostrovní a městské molo, kliknutím na první zastávku uzavřete okruh a potvrďte. Jakmile linka vznikne, je tutoriál dokončen. Aby lodě skutečně vypluly, budete potřebovat i servisní dok, který je pronajímá."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Spustit hru",
+    "nowLoading": "Načítání…",
+    "startError": "Hru se nepodařilo spustit. Zkuste to prosím znovu.",
+    "todaysTips": "Tip dne",
+    "gotIt": "Zavřít",
+    "items": {
+      "tip1": {
+        "title": "Peníze musí obíhat",
+        "description": "Výdaje města na stavby a mzdy ve veřejných zařízeních se stávají příjmem firem a domácností a podporují nákupy i další výrobu. Samotné vybírání daní ekonomiku nerozhýbe. Dávejte rozpočet na potřebné služby a opravy a vracejte peníze zpět do města."
+      },
+      "tip2": {
+        "title": "Dlouhý boj za bezpečnost",
+        "description": "Občanům, kteří vyrůstali v nebezpečném prostředí, zůstává sklon k trestné činnosti i v dospělosti. Pokračujte v policejním dohledu i ve zlepšování prostředí, ve kterém vyrůstají děti. Zlepšit bezpečnost od kořenů trvá nejméně jednu generaci."
+      },
+      "tip3": {
+        "title": "Uvolněte cestu!",
+        "description": "Hasiči pomohou, až když dorazí na místo. I když máte hasičskou stanici, škody se rozšíří, je-li příliš daleko nebo jsou-li silnice cestou ucpané. Spolu s rozpočtem prověřte i rozmístění stanic a příjezdové cesty."
+      },
+      "tip5": {
+        "title": "Strmá cesta",
+        "description": "Stavba silnic na strmých svazích je mnohem náročnější než na rovině. Nejkratší cesta na mapě nemusí být nejlevnější. Porovnejte terén s odhadem stavebních nákladů a zvažte i mírnou okliku."
+      },
+      "tip6": {
+        "title": "S rozmyslem",
+        "description": "S přibývajícími obyvateli a továrnami roste i poptávka po elektřině a vodě. Když začnete stavět až při nedostatku, budete na dokončení čekat. Před rozvojem nové čtvrti si ověřte, zda máte v dodávkách rezervu."
+      },
+      "tip7": {
+        "title": "Spěchej pomalu",
+        "description": "Vyšší rychlostní limit zrychlí cestování, ale zvýší riziko nehod. Pozor i na ostré zatáčky. Kde je hodně nehod, prověřte tvar silnice a rychlostní limit."
+      },
+      "tip8": {
+        "title": "Investice do budoucnosti",
+        "description": "Nedostatek personálu v nemocnicích a vyspělých továrnách samotný růst počtu obyvatel nevyřeší. Připravte vysokoškolské obory a kapacity, které vychovají potřebné odborníky, a počítejte s časem, než studenti dostudují."
+      },
+      "tip9": {
+        "title": "Ať to vydrží",
+        "description": "Zanedbané opravy vedou k chátrání budov i silnic a nakonec ke zřícení. Požáry a zřícení navíc kazí nálady občanů, takže utrácet jen za novou výstavbu je riskantní. Nechte v rozpočtu peníze i na opravy stávajících zařízení a na hasiče."
+      },
+      "tip10": {
+        "title": "Velký požár",
+        "description": "V husté zástavbě se požár jedné budovy snadno rozšíří na okolní. Před katastrofami chrání kromě hasičů i dostatečné rozestupy mezi budovami."
+      },
+      "tip11": {
+        "title": "Kopej, co to dá",
+        "description": "U dolů a ropných vrtů nejdřív zjistěte rozložení surovin a podle něj vyberte místo. Těžbou zásoby ubývají. Město závislé na těžbě musí myslet i na pracovní místa a daňové příjmy po vyčerpání ložisek."
+      },
+      "tip12": {
+        "title": "Dojná kráva",
+        "description": "Když starosta postaví obytné nebo komerční budovy, získává od nájemníků nájemné. Prázdné prostory nic nevydělají, proto si ověřte, o jaké využití je zájem, kolik prostor je volných v okolí a jaká je poloha."
+      },
+      "tip13": {
+        "title": "Ždímejte",
+        "description": "Daňové sazby ovlivňují nejen příjmy města, ale i náklady a ziskovost firem. Dají se využít i v průmyslové politice, například nižším zdaněním odvětví, která chcete podpořit. Když daňové příjmy nestačí, prověřte situaci v jednotlivých odvětvích dřív, než plošně zvýšíte daně."
+      },
+      "tip14": {
+        "title": "Záloha",
+        "description": "Když nehoda nebo katastrofa vyřadí elektrárnu nebo elektrické vedení, dopad se rozšíří na továrny i domácnosti, které elektřinu potřebují. U důležité infrastruktury zajistěte rezervu jak ve zdrojích, tak v cestách, kudy se dodávky vedou, aby jedna porucha nezastavila celé město."
+      },
+      "tip15": {
+        "title": "Hledání domova",
+        "description": "Necháte-li v centru města ležet ladem prázdné pozemky, mohou se tam usadit lidé, kteří přišli o domov, a snadno vznikne slum. Když zajistíte bydlení s dostupným nájemným, obyvatelé se tam postupně přestěhují a slum se sám zmenší."
+      },
+      "tip16": {
+        "title": "Průmyslové klastry",
+        "description": "Když jsou blízko sebe stejná odvětví nebo výrobci jejich surovin, je to pro výrobu výhodná poloha. Místo rozptýlení továren po celém městě zvažte seskupení souvisejících odvětví. U obytných oblastí ale myslete na hluk a znečištění ovzduší."
+      },
+      "tip17": {
+        "title": "Makat nonstop",
+        "description": "Delší pracovní doba nastavená v panelu regulací umožní stejnému počtu lidí zvládnout větší výrobu. Na druhou stranu trpí zdraví a volný čas a klesá útrata za zábavu. Kdo jen vydělává, nemá kdy utrácet."
+      },
+      "tip18": {
+        "title": "Peklo dojíždění",
+        "description": "Dlouhé dojíždění ukrajuje z volného času a snižuje útratu za zábavu. Prověřte vzdálenost mezi domovy a pracovišti i zácpy cestou. Pro občany, kteří se domů vracejí jen přespat, je i to nejživější centrum jen kulisou za oknem."
+      },
+      "tip19": {
+        "title": "Prozíravost",
+        "description": "Dlouhé vlaky mohou jezdit, jen když se vejdou k nástupištím všech stanic na lince. Myslete na budoucí nárůst cestujících a plánujte délku nástupišť už při stavbě stanic. Prodloužení jedné stanice nepomůže, když jsou ostatní krátké."
+      },
+      "tip20": {
+        "title": "Pod zem s tím",
+        "description": "Silnice vedené pod zemí nevytvářejí hluk ani znečištění ovzduší, a jsou proto jednou z možností, jak chránit obytné oblasti. Některé problémy se opravdu dají zakopat."
+      },
+      "tip21": {
+        "title": "Ve stínu mrakodrapů",
+        "description": "Vysoké budovy vrhají stín na sever a zhoršují obytné prostředí v okolí. Hlídejte výšku budov i jejich rozestupy. Stín vrhá i terén, například hory. Budoucnost města může být zářivá, a přitom pod nohama tma jako v pytli."
+      },
+      "tip22": {
+        "title": "Předplatné místo volantu",
+        "description": "Když veřejná doprava usnadní cestu do práce, do školy i za nákupy, domácnosti se snáz rozhodnou žít bez auta. Ušetřené náklady na auto pak mohou utratit za jiné věci."
+      },
+      "tip23": {
+        "title": "Vozíme vzduch",
+        "description": "Autobus zatěžuje silnici, i když veze nula cestujících. Příliš mnoho spojů může zácpy naopak zhoršit. Podle počtu cestujících a intervalů zvažte, kolik spojů je opravdu potřeba."
+      },
+      "tip24": {
+        "title": "Krtek nájem neplatí",
+        "description": "Dostatečně hluboký tunel lze vést bez výkupu pozemků nad ním. Mělké úseky výkup vyžadují, proto kontrolujte hloubku a odhad nákladů. Pokud vyjednávání vázne, zavrtejte se hlouběji."
+      },
+      "tip25": {
+        "title": "Do práce vzduchem",
+        "description": "Kde hory a strmé svahy brání stavbě silnic, můžete veřejnou dopravu zajistit lanovkou. Nezapomeňte na cesty ke stanicím a na přestupy. Je-li cestování po zemi příliš náročné, můžete občany nechat viset ve vzduchu."
+      },
+      "tip26": {
+        "title": "Zácpa v drátech",
+        "description": "I když mají elektrárny výkon v rezervě, elektřina nedorazí, pokud nestačí kapacita vedení. Než postavíte další elektrárny, zkontrolujte připojení a přenosovou kapacitu až do čtvrti, kde elektřina chybí. Jedno slabé vedení cestou může omezovat dodávky pro celé město."
+      },
+      "tip27": {
+        "title": "Nešťastná náhoda",
+        "description": "Budovu, která překáží rozvoji, můžete vyhodit do povětří a vydávat to za nehodu. Nálady občanů se tím ale výrazně zhorší. Když potřebujete uvolnit pozemek, zvažte náklady na výkup a demolici i stopy, které násilný postup ve městě zanechá."
+      },
+      "tip28": {
+        "title": "Vyplujte na moře",
+        "description": "Pokud chybí pevnina, můžete navážkou vytvořit nové pozemky. Kde jsou pod mořským dnem suroviny, lze postavit i ropné plošiny."
+      },
+      "tip29": {
+        "title": "Zase červená",
+        "description": "Čím víc světelných křižovatek, tím víc času se při cestě prostojí na semaforech. Na hlavních silnicích to s počtem křižovatek nepřehánějte. Když se ulice pečlivě kříží jedna přes druhou, může se setmít dřív, než někdo uvidí zelenou."
+      },
+      "tip30": {
+        "title": "Krásný výhled",
+        "description": "Vysílač pokryje větší oblast, čím výš stojí a čím je vyšší. Ověřte, zda mezi ním a místy bez signálu nestojí hory nebo jiné překážky. Zablokovaný signál neprorazí ani sebevětší nadšení pro vyšší výkon."
+      },
+      "tip31": {
+        "title": "Dary moře",
+        "description": "I město bez blízkého zdroje vody může zásobovat pobřežní odsolovací stanice. K provozu však potřebuje elektřinu. Po hledání vody přijde na řadu hledání elektřiny."
+      },
+      "tip32": {
+        "title": "Prevence jinak",
+        "description": "Nezaměstnanost je jednou z příčin zhoršení bezpečnosti. Kromě policie potřebují občané i místa, kde mohou pracovat. Při vysoké nezaměstnanosti zkontrolujte počet volných míst, požadovanou kvalifikaci a to, zda se lidé do práce vůbec dostanou."
+      },
+      "tip33": {
+        "title": "Účet pro budoucnost",
+        "description": "Budovy i silnice vyžadují po dokončení neustálé opravy. Když se budete rozšiřovat jen proto, že na stavbu máte, budoucí rozpočty spolkne údržba. Budoucím starostou jste také vy."
+      },
+      "tip34": {
+        "title": "Pozor na přečerpání",
+        "description": "Zdroje vody se časem obnovují, ale pokud čerpáte víc, než stihnou doplnit, zásoby ubývají. Zajistěte si další zdroj dřív, než poptávka vzroste. Přidáním čerpadel vody nepřibude."
+      },
+      "tip35": {
+        "title": "Fatální chyba",
+        "description": "Silnice a budovy po zahájení stavby jen tak nepřesunete. Před potvrzením stavby zkontrolujte orientaci, napojení i pozemky, které kolem zbudou. Ale i nechtěně zahnutá silnice se časem stane osobitým rysem města."
+      },
+      "tip36": {
+        "title": "Starosta vidí všechno",
+        "description": "Kliknutím na chodce nebo auto přidáte občana do seznamu sledovaných. Hodí se to, když chcete nahlédnout do života obyvatele, který vás zaujal. Město můžete sledovat nejen přes celkové statistiky, ale i očima jednoho člověka."
+      },
+      "tip37": {
+        "title": "Základní zatížení",
+        "description": "Výkon solárních a větrných elektráren se mění s počasím. Pokud vycházíte jen z dodávek za hezkého počasí, při jeho změně může elektřina chybět. Kombinujte je se zdroji, které na počasí tolik nezávisí, například s tepelnými nebo jadernými elektrárnami."
+      },
+      "tip38": {
+        "title": "Kdo má velké, má i malé",
+        "description": "Některé budovy na malé parcely nepostavíte. Pokud chcete postavit konkrétní zařízení, ověřte si potřebnou plochu dřív, než parcely rozdělíte. I když máte půdy dost, velká budova se na samé malé parcely nevejde."
+      },
+      "tip39": {
+        "title": "Tahle služba je placená",
+        "description": "Veřejné služby jako čištění odpadních vod, likvidace odpadu, telekomunikace nebo zdravotní péče mohou být ve výchozím nastavení zdarma. Nastavením poplatků přenesete část provozních nákladů na uživatele. Zda zvolíte vlídné ceny, nebo sebevědomé cenovky, je jen na vás."
+      },
+      "tip40": {
+        "title": "Město metodou Ctrl+C",
+        "description": "Při výstavbě může starosta zkopírovat stávající budovu. Pokud nezměníte typ ani počet podlaží a postavíte ji na parcele, kam se původní budova vejde, ušetříte na stavebních nákladech. Ulice budou vypadat jednotvárně, ale peněžence se to bude líbit."
+      },
+      "tip41": {
+        "title": "Rozhoduje jen nájemné?",
+        "description": "Obyvatelé při stěhování porovnávají nájemné, náročnost dojíždění do práce, do školy i za nákupy, kvalitu bydlení a obytné prostředí. Důležitý je i hluk, znečištění ovzduší, bezpečnost a oslunění. Levné, ale nepraktické bydlení láká méně – a i praktické bydlení potřebuje nájemné, na které domácnost má, a dost místa, aby se do něj mohla nastěhovat."
+      },
+      "tip42": {
+        "title": "Na mělčině už je pozdě",
+        "description": "Velké přístavy – kontejnerové, pro sypké náklady nebo tankerové – potřebují dostatečnou hloubku vody. Pobřeží se strmě klesajícím dnem má hlubokou vodu blízko a pro přístavy se hodí. I u plochého pobřeží s mělčinou daleko od břehu můžete přístav postavit, pokud navážkou protáhnete pevninu až k hluboké vodě."
+      },
+      "tip43": {
+        "title": "Jen na chviličku",
+        "description": "Parkování na ulici zpomaluje projíždějící auta a zvyšuje riziko nehod. Postavte parkoviště, aby auta z ulic měla kde stát. Z „jen na chviličku“ se snadno stane zastavené město."
+      },
+      "tip44": {
+        "title": "Odříznuté místo",
+        "description": "Budovy lze stavět i daleko od silnic, ale čím je silnice dál, tím horší je dostupnost. Továrny a obchody déle shánějí zásoby a domácnostem se prodlužuje dojíždění i cesty za nákupy. Stavte budovy podél silnic, nebo k nim silnici prodlužte."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Výběrem parcely můžete naplánovat budovu. Od naplánování do dokončení stavby uplyne nějaký čas.",
+    "parcelCreation": "Klávesou Ctrl otevřete kruhové menu a vyberte způsob vytvoření, pak kliknutím ve 3D zobrazení určete cíl. Rozměry upravte v panelu a potvrďte.",
+    "transitCreation": "Levým kliknutím postupně umisťujte zastávky; kliknutím na první zastávku okruh uzavřete. Přetažením úseku přidáte průjezdní bod, přetažením bodu ho přesunete, pravým kliknutím smažete. U kyvadlového provozu umístěte i zastávky pro zpáteční směr. Opětovným kliknutím na umístěnou zastávku nebo přetažením zastávky na jinou zastávku zde spoj zastaví znovu.",
+    "transitManagement": "Seznam linek veřejné dopravy. Můžete upravovat jízdné a intervaly nebo linky zakládat a rušit. Jízdné ovlivňuje, jakou trasu obyvatelé volí. Příliš vysoké jízdné snižuje počet cestujících a zvyšuje počet aut.",
+    "pathConstruction": "Stavba silnic a kolejí. Klikněte na terén ve 3D zobrazení: levým kliknutím přidáte vrchol, pravým kliknutím potvrdíte tvar a vrcholy lze přesouvat přetažením. Podržením Ctrl otevřete nabídku nastavení (oblouk/přímka, přichytávání). Klávesami 3/4 měníte výšku náspu či zářezu.",
+    "pathConstructionElevated": "Stavba silnic a kolejí. Klikněte na terén ve 3D zobrazení: levým kliknutím přidáte vrchol, pravým kliknutím potvrdíte tvar a vrcholy lze přesouvat přetažením. Podržením Ctrl otevřete nabídku nastavení (oblouk/přímka, přichytávání). Klávesami PageUp/PageDown nebo 1/2 měníte výšku, klávesami 3/4 výšku náspu či zářezu.",
+    "districtEdit": "Vytvářejte, rozšiřujte a slučujte „čtvrti“, které jsou jednotkou regulací a statistik. Nástroje přepínáte podržením Ctrl ve 3D zobrazení. Nástroj Vytvořit: levým kliknutím na silnici vytvoříte novou čtvrť v zobrazené barvě (barva se mění při každém výběru nástroje). Nástroj Rozšířit: pravým kliknutím vyberte čtvrť, kterou chcete rozšířit, a levým kliknutím na silnice je k ní připojte. Nástroj Sloučit: pravým kliknutím vyberte cílovou čtvrť a levým kliknutím na čtvrť, kterou chcete sloučit, otevřete panel s potvrzením. Barva a název vybrané čtvrti se zobrazují vedle kurzoru myši. Dalším stisknutím tlačítka režim ukončíte.",
+    "bulldozer": "Režim buldozeru. Levým kliknutím odstraníte prázdné parcely, plánované budovy, plánované silnice a dekorativní objekty v terénu (plošně rozmístěné objekty se po potvrzení odstraní celé najednou). Dalším stisknutím tlačítka režim ukončíte.",
+    "bulldozerInstant": "Režim buldozeru. Levým kliknutím okamžitě a bez potvrzení smažete budovy, silnice, prázdné parcely a dekorativní objekty v terénu. Budovy zmizí i s nájemci a obyvateli a terén se do původního stavu nevrátí (radnici, hraniční přechod a úseky veřejné dopravy smazat nelze; jen plošně rozmístěné objekty se po potvrzení odstraní celé najednou). Dalším stisknutím tlačítka režim ukončíte.",
+    "cityBudget": "Rozhodněte, jak rozdělit prostředky získané z daní a z provozu služeb na další období. Když městská správa nakupuje materiál na stavbu silnic nebo provoz veřejných zařízení, může nakupovat jen v rámci zde stanoveného rozpočtu. Při nedostatečném rozpočtu může dojít i k propouštění zaměstnanců veřejných zařízení.",
+    "resourceEdit": "Vytvoření oblasti přírodních zdrojů. Vyberte typ zdroje a klikněte na terén. Levým kliknutím přidáte vrchol, kliknutím na hranu vložíte vrchol a pravým kliknutím vrchol odstraníte. Přetažením vrchol přesunete.",
+    "grading": "Levým kliknutím umisťujte vrcholy, pravým kliknutím potvrďte oblast."
+  }
+}

@@ -1,0 +1,212 @@
+{
+  "agent": {
+    "back": "Tillbaka",
+    "editAppearance": "Ändra utseende",
+    "relocateCityHall": "Flytta stadshuset",
+    "publicFacility": "Offentlig anläggning",
+    "underAcquisition": "Förhandlar om markförvärv",
+    "publicFacilityPanel": {
+      "title": "Offentlig/kommunal anläggning"
+    },
+    "abandon": "Överge",
+    "abandonHint": "Sluta underhålla och låt byggnaden förfalla utan reparationer",
+    "statusSince": {
+      "founded": "Grundat",
+      "householdFormed": "Hushållet bildades",
+      "arrived": "Anlände",
+      "opened": "Öppnade",
+      "schoolOpened": "Skolan öppnade",
+      "completed": "Färdigställd",
+      "operatingSince": "I drift sedan",
+      "resumed": "Återupptogs",
+      "paused": "Pausades",
+      "suspended": "Stängde tillfälligt",
+      "schoolClosed": "Skolan stängde tillfälligt",
+      "constructionStarted": "Byggstart",
+      "demolitionScheduled": "Rivning beslutad",
+      "demolitionStarted": "Rivning påbörjad",
+      "demolished": "Riven",
+      "collapsed": "Rasade",
+      "burnedDown": "Brann ner",
+      "default": "Status sedan"
+    },
+    "reserves": "Likvida medel",
+    "revenues": "Intäkter",
+    "expenses": "Utgifter",
+    "zone": "Stadsdel",
+    "building": "Byggnad",
+    "rent": "Hyra",
+    "floorOccupancy": "Upptagen våningsyta",
+    "tenants": "Hyresgäster",
+    "guests": "Gäster",
+    "tabBasicInfo": "Grundinfo",
+    "utilizationTarget": "Mål för kapacitetsutnyttjande",
+    "currentUtilization": "Aktuellt kapacitetsutnyttjande",
+    "constructionSpeed": "Bygghastighet",
+    "constructionCostPerEpoch": "Byggkostnad per epok",
+    "remainingConstruction": "Återstående byggtid",
+    "remainingEpochs": "ca {{n}} epoker",
+    "tabBuildingInfo": "Byggnad",
+    "tabCargoInfo": "Godshantering",
+    "tabTradeInfo": "Utbud, efterfrågan och handel",
+    "tabTourismInfo": "Turism",
+    "tabEmploymentInfo": "Sysselsättning",
+    "action": {
+      "purchase": "Köp upp",
+      "bulldoze": "Riv",
+      "cancelBulldoze": "Avbryt rivning",
+      "pause": "Pausa",
+      "resume": "Återuppta",
+      "delete": "Ta bort",
+      "repair": "Reparera",
+      "rebuild": "Bygg om",
+      "edit": "Redigera",
+      "startConstruction": "Byggstart",
+      "stopConstruction": "Pausa bygget",
+      "cancelAbandon": "Sluta överge",
+      "explode": "Spräng",
+      "explodeConfirm": "Vill du spränga byggnaden och få det att se ut som en olycka?\nByggnaden rasar direkt och alla som bor eller arbetar där dör. Stämningen bland medborgarna försämras kraftigt, och det går inte att ångra.",
+      "explodeTitle": "Spräng byggnad",
+      "explodeConfirmAction": "Spräng"
+    },
+    "pendingWarning": "Byggnaden är planerad. Ge order om byggstart.",
+    "alerts": {
+      "diagnoseHint": "Klicka för att ta reda på orsaken",
+      "title": "Varningar",
+      "constructionShortage": {
+        "title": "Brist på byggtjänster",
+        "description": "Byggbudgeten räcker inte, så bygget försenas."
+      },
+      "onFire": {
+        "title": "Brand!",
+        "description": "Det brinner i byggnaden."
+      },
+      "accidentalFire": {
+        "title": "Mindre brand",
+        "description": "En brand uppstod i byggnaden men kunde begränsas."
+      },
+      "infraDisconnected": {
+        "title": "Inte ansluten till infrastrukturnätet",
+        "description": "Ingen infrastruktursträckning är kopplad till anläggningens anslutningspunkt. Den kan varken leverera eller ta emot förrän den är ansluten till nätet."
+      },
+      "capacityTight": {
+        "title": "Nära kapacitetsgränsen",
+        "description": "Anläggningen hanterar 90 % eller mer av sin kapacitet. Den klarar knappt mer efterfrågan."
+      },
+      "nonconforming": {
+        "title": "Strider mot byggreglerna",
+        "description": "Byggnaden följer inte tomtens byggregler. Den repareras inte och rivs när den har förfallit."
+      },
+      "crime": {
+        "title": "Brott begånget",
+        "description": "Ett brott har begåtts i den här byggnaden."
+      },
+      "crimeSign": {
+        "title": "Tecken på brottslighet",
+        "description": "Tecken på brottslighet har upptäckts i den här byggnaden. Håll koll så att tryggheten inte försämras."
+      },
+      "laborShortage": {
+        "title": "Brist på arbetskraft",
+        "description": "Det saknas anställda, så produktionen och tjänsterna ligger under plan."
+      },
+      "materialShortage": {
+        "title": "Brist på råvaror",
+        "description": "Det går inte att skaffa tillräckligt med råvaror, så produktionen och tjänsterna ligger under plan."
+      },
+      "highSkillShortage": {
+        "title": "Brist på specialister",
+        "description": "Det finns inte tillräckligt med högkvalificerad personal, så produktionen har dragits ner till vad den befintliga personalen klarar."
+      },
+      "budgetCapped": {
+        "title": "Budgetunderskott",
+        "description": "Den tilldelade budgeten ligger långt under vad som behövs, så verksamheten har dragits ner. Se över budgetfördelningen."
+      },
+      "facilityWarning": {
+        "title": "Offentlig anläggning ur funktion",
+        "description": "Anläggningen levererar betydligt mindre service än planerat. Kontrollera tillgången på arbetskraft och råvaror."
+      },
+      "sanitationWarning": {
+        "title": "Försämrad sanitet",
+        "description": "Saniteten på byggnadens byggplats har försämrats kraftigt och påverkar hushållen som bor där. Förbättra tillgången på avlopps- och avfallshantering."
+      },
+      "infraWarning": {
+        "title": "Infrastrukturanläggning stoppad eller rasad",
+        "description": "Anläggningen har stoppats eller rasat, vilket påverkar infrastrukturförsörjningen. Kontrollera anläggningens skick och försörjningsvägar."
+      },
+      "farFromRoad": {
+        "title": "Långt från väg",
+        "description": "Närmaste väg ligger ca {{distance}} m bort. Det försvårar kraftigt leveranser, pendling och inköp, så överväg att dra en väg närmare byggnaden."
+      },
+      "noRoadAccess": {
+        "title": "Ingen väg att ansluta till",
+        "description": "Byggnaden har ingen väg att ansluta till. Det försvårar kraftigt leveranser, pendling och inköp, så bygg en väg i närheten."
+      }
+    },
+    "infra": {
+      "title": "Infrastrukturanslutning",
+      "connected": "Ansluten",
+      "disconnected": "Inte ansluten",
+      "received": "Mottagen mängd"
+    },
+    "tabConstructionInfo": "Byggarbete",
+    "tabEducationInfo": "Utbildning",
+    "education": {
+      "totalStudents": "Inskrivna elever",
+      "totalCapacity": "Totalt antal platser",
+      "statusTitle": "Inskrivning",
+      "enrolled": "Inskrivna",
+      "vacant": "Lediga platser",
+      "noCapacity": "Inga platser",
+      "countLabel": "Antal",
+      "enrollmentBySkill": "Inskrivning per kompetens",
+      "settingsTitle": "Fördelning av platser",
+      "settingsHint": "Ange en vikt för varje kompetens. Det totala antalet platser fördelas efter vikterna.",
+      "skillHeader": "Kompetens",
+      "weightHeader": "Vikt",
+      "previewHeader": "Platser",
+      "save": "Spara",
+      "saving": "Sparar…",
+      "saveFailed": "Det gick inte att spara.",
+      "sumMustBePositive": "Summan av platserna måste vara minst 1",
+      "invalidWeight": "Vikterna måste vara heltal från 0 och uppåt",
+      "studentsList": "Elevlista",
+      "noStudents": "Inga elever",
+      "showMore": "Visa fler ({{count}})"
+    }
+  },
+  "agentList": {
+    "filterType": "Typ",
+    "filterVariant": "Variant",
+    "filterZone": "Stadsdel",
+    "allVariants": "Alla varianter",
+    "allZones": "Alla stadsdelar",
+    "resultCount": "{{count}} träffar",
+    "capped": "(av totalt {{total}})",
+    "loading": "Läser in…",
+    "noResults": "Inga matchande ekonomiska aktörer",
+    "colStatus": "Status",
+    "colVariant": "Variant",
+    "colName": "Namn",
+    "colProduct": "Produkt",
+    "colPrice": "Pris",
+    "colProduction": "Produktion",
+    "colStock": "Lager",
+    "colSold": "Sålt",
+    "colWage": "Lönesats",
+    "colEmployment": "Anställda",
+    "colUtilization": "Utnyttjande",
+    "colBdType": "Byggnadstyp",
+    "colDurability": "Hållbarhet",
+    "colRent": "Hyra",
+    "colFloors": "Våningar",
+    "colFloorArea": "Våningsyta",
+    "colOccupancy": "Uthyrningsgrad",
+    "colFamilyType": "Hushållstyp",
+    "colDiscretionaryIncome": "Disponibel inkomst",
+    "colSatisNutrition": "Mat",
+    "colSatisHealthcare": "Vård",
+    "colSatisLeisure": "Nöje och fritid",
+    "colSatisResidential": "Boende",
+    "colAutomobile": "Bil"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Estação",
+    "name": "Nome da estação",
+    "ridership": "Embarques",
+    "platforms": "Plataformas",
+    "noPlatforms": "Nenhuma plataforma pertence a esta estação (pertencem-lhe as plataformas atravessadas pelo segmento)",
+    "lines": "Linhas servidas",
+    "noLines": "Nenhuma linha serve esta estação",
+    "stops": "Embarques por paragem",
+    "noStops": "Nenhuma paragem nesta estação",
+    "lineRunning": "Em serviço",
+    "lineSuspended": "Serviço suspenso",
+    "houseEnds": "Posição dos edifícios",
+    "houseEnds_both": "Ambas as pontas",
+    "houseEnds_start": "Início",
+    "houseEnds_end": "Fim",
+    "passageMode": "Posição da passagem",
+    "passageMode_elevated": "Superior",
+    "passageMode_ground": "Ao nível do solo",
+    "passageMode_underground": "Subterrânea"
+  }
+}

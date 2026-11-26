@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Nastavení klimatu",
+    "name": "Název klimatu",
+    "probabilities": "Pravděpodobnost počasí podle měsíců",
+    "probabilityHint": "Upravte tažením hranic barev doleva a doprava. V polích níže lze nastavit i počasí s 0 %.",
+    "month": "{{month}}. měsíc",
+    "preset": "Předvolba klimatu",
+    "current": "Aktuální nastavení",
+    "chartHint": "Vyberte položku v legendě a tažením bodů jednotlivých měsíců nahoru a dolů ji upravte.",
+    "averageHint": "Teplota, srážky a sluneční svit jsou měsíční průměry. Skutečné hodnoty v jednotlivých epochách kolem těchto průměrů kolísají.",
+    "apply": "Použít",
+    "chart": "Klimadiagram podle měsíců"
+  }
+}

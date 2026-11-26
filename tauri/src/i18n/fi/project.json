@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Rakennusprojekti",
+    "none": "(Ei tunnistetta)",
+    "createNew": "+ Uusi tunniste…",
+    "newPlaceholder": "Kirjoita tunnisteen nimi",
+    "add": "Lisää",
+    "cancel": "Peruuta",
+    "saveFailed": "Tunnisteen tallentaminen epäonnistui",
+    "showObject": "Näytä 3D-näkymässä",
+    "hideObject": "Piilota 3D-näkymästä"
+  },
+  "constructionProjects": {
+    "all": "Kaikki",
+    "empty": "Työmaita ei vielä ole. Valitse tunniste, kun sijoitat kohteen rakennuspaneelista, tai lisää se suunnitteilla tai rakenteilla olevan julkisen laitoksen tai tien tietopaneelista, niin voit tarkastella töitä projekteittain.",
+    "loadFailed": "Rakennusprojektien lataaminen epäonnistui",
+    "totalCost": "Arvioidut kustannukset",
+    "duration": "Rakennusaikaa jäljellä",
+    "progress": "Edistyminen",
+    "progressValue": "{{done}} / {{total}} valmiina",
+    "monthsValue": "{{value}} kk",
+    "stalled": "Pysähtynyt",
+    "stalledWarning": "Työt ({{count}} kpl) eivät etene, koska rakennusnopeus on 0 (ei sisälly rakennusajan summaan).",
+    "done": "Valmis",
+    "unnamed": "#{{id}}",
+    "showAll": "Näytä taas kaikki ({{count}})",
+    "showTag": "Näytä tämä projekti 3D-näkymässä",
+    "hideTag": "Piilota tämä projekti 3D-näkymästä",
+    "showObject": "Näytä 3D-näkymässä",
+    "hideObject": "Piilota 3D-näkymästä",
+    "deleteTag": "Poista tunniste",
+    "confirmDeleteTag": "Poistetaanko tunniste ”{{tag}}”? Se poistetaan rakennuksista ja teistä, joihin se on liitetty (itse työt säilyvät).",
+    "columns": {
+      "name": "Kohde",
+      "status": "Tila",
+      "cost": "Kustannuksia jäljellä",
+      "remaining": "Aikaa jäljellä"
+    }
+  }
+}

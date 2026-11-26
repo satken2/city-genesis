@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Útberendezések",
+    "streetlight_type": "Utcai lámpák",
+    "fence_type": "Kerítések",
+    "street_tree_type": "Utcafák",
+    "utility_mode": "Vezetékek elhelyezése",
+    "none": "Nincs",
+    "standard": "Normál",
+    "overhead": "Légvezeték",
+    "underground": "Földkábel",
+    "apply": "Alkalmaz",
+    "bench_type": "Padok",
+    "bin_type": "Szemetesek",
+    "planter_type": "Növénykazetták",
+    "advert_type": "Reklámok"
+  }
+}

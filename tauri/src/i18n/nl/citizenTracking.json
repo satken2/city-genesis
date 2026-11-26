@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Overzicht",
+    "tabActivity": "Activiteit",
+    "follow": "Volgen met camera",
+    "unfollow": "Camera niet meer laten volgen",
+    "track": "Toevoegen aan volglijst",
+    "trackRandom": "Willekeurige burger volgen",
+    "noUntrackedCitizens": "Er zijn geen burgers meer die je nog niet volgt.",
+    "trackRandomError": "Kon geen burger volgen.",
+    "untrack": "Verwijderen uit volglijst",
+    "home": "Woning",
+    "mobility": "Vervoerswijze",
+    "mode": {
+      "automobile": "Auto",
+      "pedestrian": "Te voet en openbaar vervoer"
+    },
+    "visits": "Bestemmingen",
+    "visitKind": {
+      "home": "Thuis",
+      "work": "Werk",
+      "school": "School",
+      "shop": "Winkelen"
+    },
+    "legs": {
+      "walk": "Te voet",
+      "drive": "Auto",
+      "transit": "OV",
+      "conveyor": "Personenvervoersysteem"
+    },
+    "trip": "Enkele reis {{minutes}} min · {{route}}",
+    "noRoute": "Geen route",
+    "noVisits": "Gaat nergens heen.",
+    "status": {
+      "not_ready": "Wordt getoond nadat de simulatie heeft gedraaid.",
+      "busy": "Niet beschikbaar terwijl de simulatie draait.",
+      "no_home": "Wacht op een woning, dus er is nog geen activiteit vastgelegd.",
+      "missing": "Deze burger woont niet meer in de stad.",
+      "error": "Laden mislukt."
+    },
+    "empty": "Je volgt nog geen burgers.",
+    "pickFailed": {
+      "not_ready": "Voer de simulatie uit; daarna kun je op auto's en voetgangers klikken om te zien wie het zijn.",
+      "busy": "Burgers kunnen niet worden getoond terwijl de simulatie draait.",
+      "none": "Kon niet vinden wie er in deze auto zit of hier loopt.",
+      "missing": "Deze burger woont niet meer in de stad.",
+      "no_home": "Deze burger wacht op een woning.",
+      "error": "Kon de burger niet tonen."
+    }
+  }
+}

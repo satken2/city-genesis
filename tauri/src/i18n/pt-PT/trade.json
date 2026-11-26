@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Informação de oferta",
+    "product": "Produto oferecido",
+    "amount": "Quantidade oferecida",
+    "price": "Preço de venda",
+    "soldAmount": "Quantidade vendida",
+    "profitRate": "Margem de lucro",
+    "utilization": "Taxa de utilização"
+  },
+  "tourismSupply": {
+    "title": "Acolhimento de turistas",
+    "touristCapacity": "Capacidade de acolhimento de turistas",
+    "persons": "{{value}} pessoas",
+    "218": {
+      "price": "Preço de entrada",
+      "amount": "Capacidade de visitantes (total)",
+      "soldAmount": "Visitantes (total)"
+    },
+    "219": {
+      "price": "Tarifa",
+      "amount": "Capacidade de passageiros (total)",
+      "soldAmount": "Passageiros (total)"
+    }
+  },
+  "demand": {
+    "product": "Produto",
+    "demandAmount": "Procura",
+    "receivedAmount": "Quantidade obtida",
+    "acquiredAmount": "Stock"
+  },
+  "cargo": {
+    "title": "Movimentação de carga",
+    "description": "Este ponto importa produtos de fora da região para abastecer os mercados da cidade e compra a produção excedentária da cidade para a exportar para fora da região.",
+    "capacity": "Capacidade de movimentação",
+    "perPeriod": "/mês",
+    "perPeriod_week": "/semana",
+    "materialCapacity": "Limite pelas matérias-primas recebidas",
+    "areaCapacity": "Limite pela área",
+    "importHandled": "Volume de importação",
+    "exportHandled": "Volume de exportação",
+    "utilization": "Taxa de utilização",
+    "importSectionTitle": "Importações",
+    "exportSectionTitle": "Exportações",
+    "handledImport": "Vendido",
+    "handledExport": "Comprado",
+    "allocation": "Atribuído",
+    "priceImport": "Preço de venda unitário",
+    "priceExport": "Preço de compra unitário",
+    "lost": "Vendas perdidas",
+    "noProducts": "Não há produtos movimentados"
+  }
+}

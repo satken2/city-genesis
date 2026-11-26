@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Burgers zoeken",
+    "tabTracking": "Volglijst",
+    "name": "Naam",
+    "age": "Leeftijd",
+    "ageSeparator": "tot",
+    "search": "Zoeken",
+    "noResults": "Geen burgers gevonden.",
+    "truncated": "{{shown, number}} van {{total, number}} gevonden burgers worden getoond."
+  }
+}

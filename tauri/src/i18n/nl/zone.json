@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Wijk #{{id}}",
+    "color": "Wijkkleur",
+    "colorUpdateFailed": "Kan de wijkkleur niet bijwerken",
+    "basicInfo": "Basisgegevens",
+    "area": "Oppervlakte",
+    "zonePopulation": "Inwoners",
+    "daytimePopulation": "Dagbevolking",
+    "spaceAmount": "Vloerbezetting",
+    "slotStarvationTitle": "Wachtende huurders kunnen niet worden gehuisvest",
+    "slotStarvationWarning": "“{{tenant}}” heeft minstens {{required}} m2 vloeroppervlak in één gebouw nodig, maar het grootste wat in deze wijk gebouwd kan worden is {{max}} m2. Zorg voor een groter perceel.",
+    "restrictions": "Bouwvoorschriften",
+    "restrictionUpdateFailed": "Kan de wijkvoorschriften niet bijwerken",
+    "restrictionRequired": "Bebouwingspercentage, vloer-terreinverhouding en hoogte mogen niet leeg zijn",
+    "mergeConfirm": "“{{source}}” wordt samengevoegd met “{{target}}”. De bronwijk verdwijnt, samen met de voorschriften ervan.",
+    "mergeAction": "Samenvoegen",
+    "mergeFailed": "Kan de wijken niet samenvoegen (alleen aangrenzende wijken kunnen worden samengevoegd)",
+    "mergeNoRequest": "Geen wijk gekozen om samen te voegen",
+    "edit": {
+      "toolHeading": "Bewerking",
+      "toolCreate": "Nieuwe wijk maken",
+      "toolExpand": "Wijk uitbreiden",
+      "toolExpandZone": "{{name}} uitbreiden",
+      "modeHeading": "Selectiemethode",
+      "modeBlock": "Heel bouwblok",
+      "modeRoad": "Straatkant",
+      "hint": {
+        "create": {
+          "block": "Houd Ctrl ingedrukt en sleep over bouwblokken die door straten zijn omsloten; de gemarkeerde blokken worden met hun percelen een nieuwe wijk. Sleep om te verschuiven, scroll om te zoomen.",
+          "road": "Houd Ctrl ingedrukt en sleep over één kant van een straat (de helft van de rijbaan of de percelen erlangs); die straatkant wordt met de percelen een nieuwe wijk. Sleep om te verschuiven, scroll om te zoomen."
+        },
+        "expand": {
+          "block": "Wijs een wijk aan, houd Ctrl ingedrukt en sleep over bouwblokken om ze met hun percelen aan die wijk toe te voegen. Sleep om te verschuiven, scroll om te zoomen.",
+          "road": "Wijs een wijk aan, houd Ctrl ingedrukt en sleep over één kant van een straat (de helft van de rijbaan of de percelen erlangs) om die straatkant met de percelen aan die wijk toe te voegen. Sleep om te verschuiven, scroll om te zoomen."
+        }
+      },
+      "failed": "Kan de wijk niet wijzigen."
+    }
+  }
+}

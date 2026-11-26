@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Cài đặt",
+    "groups": {
+      "general": "Chung",
+      "display": "Màn hình",
+      "sound": "Âm thanh",
+      "system": "Hệ thống",
+      "about": "Thông tin",
+      "developer": "Cài đặt cho nhà phát triển"
+    },
+    "swagger": {
+      "label": "Swagger (tài liệu API)",
+      "description": "Xem đặc tả API của trình mô phỏng lõi trong trình duyệt mặc định",
+      "action": "Mở trong trình duyệt"
+    },
+    "currencyUnit": {
+      "label": "Đơn vị tiền tệ",
+      "description": "Đơn vị hiển thị kèm số tiền. Để trống thì theo ngôn ngữ hiển thị."
+    },
+    "fontSize": {
+      "label": "Cỡ chữ",
+      "large": "Lớn",
+      "medium": "Vừa",
+      "small": "Nhỏ",
+      "custom": "Tùy chỉnh",
+      "preview": "Cỡ hiện tại"
+    },
+    "monitor": {
+      "label": "Màn hình hiển thị",
+      "prev": "Màn hình trước",
+      "next": "Màn hình tiếp theo"
+    },
+    "graphicMonitor": {
+      "label": "Màn hình hiển thị cảnh 3D"
+    },
+    "multiDisplay": {
+      "label": "Chế độ nhiều màn hình",
+      "description": "Hiển thị các cửa sổ trên màn hình khác với màn hình trò chơi",
+      "on": "Bật",
+      "off": "Tắt"
+    },
+    "popupMonitor": {
+      "label": "Màn hình hiển thị cửa sổ"
+    },
+    "hintbar": {
+      "label": "Thanh gợi ý",
+      "show": "Hiện",
+      "hide": "Ẩn",
+      "description": "Thanh ở phía trên màn hình hiển thị gợi ý thao tác"
+    },
+    "citizenVoice": {
+      "label": "Tiếng nói công dân",
+      "show": "Hiện",
+      "hide": "Ẩn",
+      "description": "Thẻ ở góc trên bên phải màn hình lần lượt hiển thị lời của cư dân"
+    },
+    "language": {
+      "label": "Ngôn ngữ",
+      "description": "Ngôn ngữ hiển thị của giao diện, khác với ngôn ngữ của dữ liệu lưu",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Âm lượng",
+      "master": "Âm lượng tổng",
+      "bgm": "Nhạc nền",
+      "sfx": "Hiệu ứng âm thanh"
+    },
+    "compute": {
+      "label": "Tăng tốc GPU",
+      "comingSoon": "Sắp ra mắt",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "Đang dùng GPU",
+      "statusInactive": "Đang dùng CPU",
+      "restartRequired": "Chương trình chính sẽ khởi động lại sau khi thay đổi cài đặt này",
+      "restarting": "Đang khởi động lại…",
+      "restartFailed": "Không thể khởi động lại",
+      "restartUnavailable": "Đã lưu cài đặt. Thay đổi sẽ có hiệu lực ở lần khởi động trò chơi tiếp theo",
+      "confirmRestart": "Chuyển chế độ tính toán sang {{mode}}? Chương trình chính sẽ khởi động lại.",
+      "restartAction": "Khởi động lại"
+    },
+    "windowReset": {
+      "label": "Vị trí và kích thước cửa sổ",
+      "action": "Đặt lại"
+    },
+    "credits": {
+      "label": "Ghi công",
+      "description": "Thông tin bản quyền của tài nguyên và phần mềm được dùng trong trò chơi",
+      "action": "Xem"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Trò chơi mới",
+    "overwriteSave": "Lưu đè",
+    "saveAs": "Lưu với tên khác",
+    "load": "Tải",
+    "quitGame": "Thoát trò chơi",
+    "returnToTop": "Về menu chính",
+    "loading": "Đang tải…",
+    "shuttingDown": "Đang thoát…",
+    "saveFailed": "Không thể lưu",
+    "loadFailed": "Không thể tải",
+    "confirmNewGame": "Dữ liệu hiện tại sẽ bị mất. Bắt đầu trò chơi mới?",
+    "confirmQuitGame": "Thoát trò chơi? Tiến trình hiện tại không được tự động lưu.",
+    "confirmReturnToTop": "Về menu chính? Tiến trình hiện tại không được tự động lưu.",
+    "confirm": "Có",
+    "cancel": "Không",
+    "saveAsScenario": "Lưu thành kịch bản",
+    "saveAsNewScenario": "Lưu thành kịch bản khác",
+    "overwriteScenario": "Lưu đè kịch bản",
+    "backToGame": "Quay lại trò chơi",
+    "saveName": "Tên bản lưu",
+    "confirmOverwrite": "Lưu đè lên “{{name}}”?",
+    "confirmOverwriteScenario": "Lưu đè lên kịch bản “{{name}}”?"
+  },
+  "saveList": {
+    "noSaves": "Không có dữ liệu lưu",
+    "currentSave": "Dữ liệu hiện tại",
+    "population": "Dân số",
+    "inGameDate": "Ngày",
+    "savedAt": "Thời điểm lưu",
+    "loadButton": "Tải",
+    "deleteButton": "Xóa",
+    "confirmLoad": "Tải dữ liệu lưu này?",
+    "confirmDelete": "Xóa dữ liệu lưu này? Thao tác này không thể hoàn tác.",
+    "loading": "Đang tải…",
+    "loadFailed": "Không thể tải",
+    "deleteFailed": "Không thể xóa",
+    "openFolderButton": "Mở thư mục lưu",
+    "scenario": "Kịch bản",
+    "autosaveName": "{{name}} (tự động lưu khi thoát)"
+  }
+}

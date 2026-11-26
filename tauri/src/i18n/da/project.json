@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Byggeprojekt",
+    "none": "(intet mærke)",
+    "createNew": "+ Nyt mærke…",
+    "newPlaceholder": "Indtast et navn på mærket",
+    "add": "Tilføj",
+    "cancel": "Annuller",
+    "saveFailed": "Mærket kunne ikke gemmes",
+    "showObject": "Vis i 3D-visningen",
+    "hideObject": "Skjul i 3D-visningen"
+  },
+  "constructionProjects": {
+    "all": "Alle",
+    "empty": "Der er ingen byggearbejder endnu. Vælg et mærke, når du placerer fra et byggepanel, eller tilføj et fra detaljepanelet for et offentligt anlæg eller en vej, der er planlagt eller under opførelse, så kan du se arbejderne samlet pr. projekt.",
+    "loadFailed": "Byggeprojekterne kunne ikke hentes",
+    "totalCost": "Byggeomkostning (anslået)",
+    "duration": "Byggetid (tilbage)",
+    "progress": "Fremdrift",
+    "progressValue": "{{done}} / {{total}} færdige",
+    "monthsValue": "{{value}} måneder",
+    "stalled": "Står stille",
+    "stalledWarning": "{{count}} byggearbejder kommer ikke videre, fordi byggehastigheden er 0 (de tæller ikke med i den samlede byggetid).",
+    "done": "Færdig",
+    "unnamed": "#{{id}}",
+    "showAll": "Vis alt igen ({{count}})",
+    "showTag": "Vis dette projekt i 3D-visningen",
+    "hideTag": "Skjul dette projekt i 3D-visningen",
+    "showObject": "Vis i 3D-visningen",
+    "hideObject": "Skjul i 3D-visningen",
+    "deleteTag": "Slet mærket",
+    "confirmDeleteTag": "Vil du slette mærket »{{tag}}«? Det fjernes fra de tilhørende bygninger og veje (selve byggearbejderne forbliver).",
+    "columns": {
+      "name": "Objekt",
+      "status": "Status",
+      "cost": "Resterende omkostning",
+      "remaining": "Resterende byggetid"
+    }
+  }
+}

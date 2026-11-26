@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Csomópont",
+      "jct": "Autópálya-elágazás"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "Kiinduló út",
+      "to": "Érkező út",
+      "road": "{{type}} #{{id}}",
+      "none": "Nincsenek összekötött útpárok.",
+      "direction": {
+        "n": "Észak",
+        "ne": "Északkelet",
+        "e": "Kelet",
+        "se": "Délkelet",
+        "s": "Dél",
+        "sw": "Délnyugat",
+        "w": "Nyugat",
+        "nw": "Északnyugat"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

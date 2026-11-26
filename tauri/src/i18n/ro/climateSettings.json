@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Setări climatice",
+    "name": "Numele climei",
+    "probabilities": "Frecvența lunară a tipurilor de vreme",
+    "probabilityHint": "Trage limitele dintre culori spre stânga sau spre dreapta. În câmpurile de mai jos poți seta și vremea cu 0%.",
+    "month": "Luna {{month}}",
+    "preset": "Climă presetată",
+    "current": "Setări actuale",
+    "chartHint": "Alege o serie din legendă, apoi trage punctele lunare în sus sau în jos.",
+    "averageHint": "Temperatura, precipitațiile și însorirea sunt medii lunare. Valorile reale din fiecare epocă variază în jurul acestor medii.",
+    "apply": "Aplică",
+    "chart": "Climatogramă lunară"
+  }
+}

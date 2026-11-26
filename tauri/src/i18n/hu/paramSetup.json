@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Játékparaméterek beállítása",
+    "description": "Általában az alapértékek ajánlottak. Csak akkor módosíts, ha egyedi beállítást szeretnél.",
+    "skip": "Kihagyás",
+    "start": "Játék indítása",
+    "apply": "Alkalmazás és bezárás",
+    "close": "Bezárás",
+    "loading": "Betöltés…",
+    "reload": "Újratöltés",
+    "reloadHint": "Ha a háttérrendszer inicializálása után töltöd újra, a legfrissebb értékek jelennek meg.",
+    "fetchError": "Nem sikerült lekérni a paramétereket",
+    "category": {
+      "population": "Népesség és bevándorlás",
+      "citizen": "A polgárok élete",
+      "economy": "Gazdaság",
+      "labor": "Munka és bérek",
+      "education": "Oktatás",
+      "construction": "Építés és ingatlan",
+      "environment": "Környezet",
+      "traffic": "Közlekedés",
+      "general": "Általános",
+      "pathfind": "Közlekedés és útvonalak",
+      "building": "Épületek és építés",
+      "disaster": "Katasztrófák és közbiztonság",
+      "slum": "Nyomornegyed",
+      "production": "Termelés és készlet",
+      "zone": "Kerületek és telkek",
+      "financial": "Pénzügy"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Városi sűrítési tényező",
+        "desc": "A lakások és létesítmények által használt alapterületet ezzel az értékkel osztja el, hogy egy kis térképen is elférjen egy nagyváros gazdasági tevékenysége. Ha akár egyetlen út vagy épület elkészülte után módosítod, a város tönkremegy, ezért még az első építés előtt dönts róla."
+      },
+      "TFR_TARGET": {
+        "label": "Teljes termékenységi arányszám (TFR), cél",
+        "desc": "A háztartások által megcélzott termékenységi arány. Minél nagyobb, annál valószínűbb a gyermekszületés."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Házasodási arány",
+        "desc": "A polgárok házasságkötési alapvalószínűségének szorzója. Minél nagyobb, annál több a házasság."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Gyermekvállalás alsó korhatára",
+        "desc": "A legalacsonyabb életkor, amelyben gyermek születhet. Ez alatt nincs szülés."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Gyermekvállalás felső korhatára",
+        "desc": "A legmagasabb életkor, amelyben gyermek születhet. E fölött nincs szülés."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Házaspárok aránya a bevándorlók között",
+        "desc": "Annak valószínűsége, hogy a városba érkező bevándorló háztartás házaspár."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Egygyermekes arány (bevándorlók)",
+        "desc": "Annak valószínűsége, hogy a megjelenő bevándorló háztartásnak 1 gyermeke van."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Kétgyermekes arány (bevándorlók)",
+        "desc": "Annak valószínűsége, hogy a megjelenő bevándorló háztartásnak 2 gyermeke van."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Háromgyermekes arány (bevándorlók)",
+        "desc": "Annak valószínűsége, hogy a megjelenő bevándorló háztartásnak 3 gyermeke van."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Felnőtt bevándorlók alsó korhatára",
+        "desc": "A bevándorlóként érkező felnőttek legalacsonyabb életkora."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Felnőtt bevándorlók felső korhatára",
+        "desc": "A bevándorlóként érkező felnőttek legmagasabb életkora."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Élettartam-tényező",
+        "desc": "A polgárok maximális élettartamára alkalmazott szorzó. 1,08 esetén kb. 100, 1,06 esetén 150 év a felső határ.",
+        "graphX": "Életkor",
+        "graphY": "Éves halálozási valószínűség (egészség: 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Egyszemélyes háztartás lakótere (m²)",
+        "desc": "Az egyszemélyes háztartás számára szükséges minimális lakóterület."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Többlet lakótér a házastárs után (m²)",
+        "desc": "A házaspár háztartásának az egyedülállóhoz képest szükséges többlet lakóterülete."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Többlet lakótér gyermekenként (m²)",
+        "desc": "Ennyivel nő a szükséges lakóterület minden gyermek után."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Lakbér a jövedelem arányában (max.)",
+        "desc": "A háztartás jövedelmének lakbérre fordítható legnagyobb hányada. 0,3 esetén a jövedelem legfeljebb 30%-a."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Utazási idő súlya a lakásválasztásban",
+        "desc": "Lakásválasztáskor a munkába, iskolába és vásárolni járás oda-vissza útjának minden perce a városi átlagbér hányszorosának megfelelő tehernek számít. 1 esetén éppen a bérrel egyenlő. Minél nagyobb, annál inkább a munkahelyhez és üzletekhez közeli lakásokat választják."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Átlagbér (alapérték)",
+        "desc": "A szimuláció kezdetén érvényes átlagbér-alapérték."
+      },
+      "AVERAGE_RENT": {
+        "label": "Átlagos lakbér (alapérték)",
+        "desc": "A szimuláció kezdetén érvényes átlagos lakbér-alapérték (naponta, m²-enként)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Osztalék vagyonarányos része",
+        "desc": "Az osztaléknak az a része, amelyet a háztartások pénzeszközeivel arányosan osztanak szét. A maradékot minden háztartás egyenlő arányban kapja. 0 esetén minden egyenlően, 1 esetén minden a pénzeszközök arányában oszlik meg."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Eszközök értékcsökkenési rátája",
+        "desc": "A beruházásokból származó tőkeállomány korszakonkénti értékcsökkenési rátája."
+      },
+      "WORK_HOURS": {
+        "label": "Napi munkaidő (h)",
+        "desc": "A polgárok napi szokásos munkaóráinak száma."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Alapfokú oktatás kezdőkora",
+        "desc": "Az életkor, amelyben a gyermekek megkezdik az alapfokú (általános iskolai) oktatást."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Alapfokú oktatás befejezési kora",
+        "desc": "Az életkor, amelyben az alapfokú oktatás véget ér (a középiskola elvégzésének felel meg)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Egyetem elvégzésének és önállósodásnak kora",
+        "desc": "Az életkor, amelyben a polgár befejezi a felsőfokú tanulmányait, és kiválik a háztartásból."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Munkavállalási alsó korhatár",
+        "desc": "Az ennél fiatalabb polgárok nem keresnek munkát, és nem számítanak bele a munkanélküliségi rátába."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Legnagyobb szintszám (szint)",
+        "desc": "A magánszektor által automatikusan épített épületek szintszámának felső határa."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Szintszám-büntetési tényező",
+        "desc": "A magasépítés költségbüntetésének tényezője. Minél nagyobb, annál kisebb a magas épületek büntetése.",
+        "graphX": "Szintszám",
+        "graphY": "Építési költség szorzója"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Lebontás hatékonysági aránya",
+        "desc": "Hányszor hatékonyabb a lebontás az új építéshez képest (szorzó)."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Összeomlás éves alapvalószínűsége",
+        "desc": "Egy 0,5-ös tartósságú épület összeomlásának éves alapvalószínűsége."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Összeomlási valószínűség Weibull-alakparamétere",
+        "desc": "Minél nagyobb, annál meredekebben nő az összeomlás valószínűsége a tervezett élettartam közelében."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Felújítási költség aránya",
+        "desc": "A felújítás költsége az új építés költségének arányában."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Elöregedési szorzó fenntartás nélkül",
+        "desc": "Milyen gyorsan öregszik az az épület vagy nyomvonal, amely semmilyen napi fenntartást nem kap, a teljes fenntartás melletti öregedés többszöröseként. A meg nem kapott fenntartás arányában 1 és ezen érték között lineárisan változik."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Felújítás megkezdésének éves alapvalószínűsége",
+        "desc": "Annak éves alapvalószínűsége, hogy egy felújításra szoruló épület ténylegesen felújításba kerül."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Kezdeti építési adósság (m²-enként)",
+        "desc": "Az épület teljes szintterületének minden m²-ére jutó kezdeti építési adósság (negatív tartalék)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Közúti forgalom zajtényezője",
+        "desc": "A közúti forgalom hatása a zaj-hőtérképre. Minél nagyobb, annál zajosabb az utak környéke."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Gyalogosforgalom zajtényezője",
+        "desc": "A gyalogosforgalom hatása a zaj-hőtérképre."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Gyalogoszaj küszöbértéke",
+        "desc": "A gyalogosforgalomnak csak az ezt meghaladó része kelt zajt."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Zaj csillapodási távolsága (m)",
+        "desc": "A zaj a távolság négyzetével gyengül, ráadásul ennyi méterenként 1/e-ére csökken (épületek árnyékolása, levegő és talaj elnyelése). Minél kisebb, annál inkább a forrás közelében marad."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Közúti forgalom légszennyezési tényezője",
+        "desc": "A közúti forgalom hatása a légszennyezési hőtérképre."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Légszennyezés csillapodási távolsága (m)",
+        "desc": "A légszennyezés és a bűz a távolság négyzetével gyengül, ráadásul ennyi méterenként 1/e-ére csökken (szétterjedés és kiülepedés). Minél kisebb, annál inkább a forrás közelében marad."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Munkanélküliség súlya a bűnözésben",
+        "desc": "A munkanélküliségi ráta súlya a közbiztonsági hőtérképen. Minél nagyobb, annál közvetlenebbül rontja a munkanélküliség a közbiztonságot."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Bűnözés kiterjedési sugara (m)",
+        "desc": "A közbiztonsági hőtérkép Gauss-elmosásának sugara."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Gyalogos sebesség (km/h)",
+        "desc": "A gyalogosok haladási sebessége. Az útvonalkeresés költségszámításához használjuk."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Gépjárművek gyorsulási távolsága (m)",
+        "desc": "A gépjárművek gyorsulásához szükséges távolság. A rövid utakon érvényes sebesség számítását befolyásolja."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Utak napi üzemideje (h)",
+        "desc": "Napi hány órán át forgalmas az út. A forgalom átszámításához használjuk."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Közúti forgalmi bónusz telítési küszöbe",
+        "desc": "Ha a közúti forgalom eléri vagy meghaladja ezt az értéket, a kiskereskedelmi üzletek forgalmi bónusza maximális."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Gyalogosforgalmi bónusz telítési küszöbe",
+        "desc": "Ha a gyalogosforgalom eléri vagy meghaladja ezt az értéket, a kiskereskedelmi üzletek gyalogosbónusza maximális."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Betöltés…",
+    "noScenarios": "Nincs elérhető forgatókönyv",
+    "starting": "Indítás…",
+    "startFailed": "Nem sikerült elindítani",
+    "confirmTitle": "Játékbeállítások megerősítése",
+    "confirmStartTitle": "Elindítod a játékot?",
+    "unsavedChangesWarning": "Indításkor a jelenlegi játék nem mentett változásai elvesznek.",
+    "startSettingsHeading": "A város beállításai",
+    "cityNameLabel": "Város neve",
+    "insigniaLabel": "Címer és városzászló",
+    "languageLabel": "A város nyelve",
+    "languageNote": "*Később nem módosítható",
+    "simulationDaysLabel": "Szimulált napok száma",
+    "simulationDaysNote": "*Később nem módosítható",
+    "daysOption": "{{days}} nap",
+    "startButton": "Indítás",
+    "backButton": "Vissza",
+    "cleared": "Teljesítve",
+    "tutorialBadge": "Oktatóanyag",
+    "sectionDebug": "Hibakeresés",
+    "sectionTutorials": "Oktatóanyagok",
+    "sectionScenarios": "Forgatókönyvek",
+    "detailPlaceholder": "Válassz egy forgatókönyvet a bal oldali listából.",
+    "detailMapSizeLabel": "Térképméret",
+    "detailUnknown": "Ismeretlen",
+    "detailObjectiveLabel": "Teljesítési feltételek",
+    "detailCreditsLabel": "Közreműködők",
+    "detailNoObjective": "Nincs teljesítési feltétel",
+    "detailNoDescription": "Ehhez a forgatókönyvhöz nincs leírás.",
+    "tutorialObjective": "Végezd el az oktatóanyag összes lépését.",
+    "startScenarioButton": "Forgatókönyv indítása",
+    "tabSelect": "Forgatókönyv választása",
+    "tabBrowse": "Forgatókönyvek keresése",
+    "tabTerrain": "Terep választása",
+    "relocalizeNote": "A forgatókönyv eredeti nyelve: {{from}}. Ha a következő nyelven indítod: {{to}}, a kerületek, létesítmények, lakosok, állomások és egyéb elemek ezen a nyelven kapnak új nevet.",
+    "developmentNotice": {
+      "heading": "Ez a játék fejlesztés alatt álló kísérleti változat",
+      "subheading": "Játék előtt olvasd el",
+      "text": "A gazdaság paraméterei és logikája még finomhangolás alatt állnak, ezért előfordulhat, hogy a városod nem fejlődik megfelelően. A munkanélküliség megugorhat, sőt a város akár össze is omolhat – de ez semmiképp sem a te játékod hibája. Kövesd a jövőbeli frissítéseket! Vedd fel a játékot a kívánságlistádra, és várd velünk a hivatalos megjelenést!"
+    }
+  }
+}

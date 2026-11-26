@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "General",
+    "tabActivity": "Activitate",
+    "follow": "Urmărește cu camera",
+    "unfollow": "Nu mai urmări cu camera",
+    "track": "Adaugă la lista de urmărire",
+    "trackRandom": "Urmărește un cetățean la întâmplare",
+    "noUntrackedCitizens": "Nu mai există cetățeni care să nu fie deja urmăriți.",
+    "trackRandomError": "Nu s-a putut urmări niciun cetățean.",
+    "untrack": "Scoate din lista de urmărire",
+    "home": "Locuință",
+    "mobility": "Mod de deplasare",
+    "mode": {
+      "automobile": "Mașină",
+      "pedestrian": "Pe jos și cu transportul public"
+    },
+    "visits": "Destinații",
+    "visitKind": {
+      "home": "Acasă",
+      "work": "Loc de muncă",
+      "school": "Școală",
+      "shop": "Cumpărături"
+    },
+    "legs": {
+      "walk": "Pe jos",
+      "drive": "Mașină",
+      "transit": "Transport public",
+      "conveyor": "Sistem de transport de persoane"
+    },
+    "trip": "Dus {{minutes}} min · {{route}}",
+    "noRoute": "Niciun itinerariu",
+    "noVisits": "Nu are unde să meargă.",
+    "status": {
+      "not_ready": "Se afișează după ce rulezi simularea.",
+      "busy": "Nu se poate afișa în timpul simulării.",
+      "no_home": "Așteaptă o locuință, așa că nu există activitate înregistrată.",
+      "missing": "Acest cetățean nu mai locuiește în oraș.",
+      "error": "Nu s-a putut încărca."
+    },
+    "empty": "Nu urmărești niciun cetățean.",
+    "pickFailed": {
+      "not_ready": "Rulează simularea ca să poți apăsa pe mașini și pietoni și să vezi cine sunt.",
+      "busy": "Cetățenii nu pot fi afișați în timpul simulării.",
+      "none": "Nu s-a găsit cetățeanul din această mașină sau acest pieton.",
+      "missing": "Acest cetățean nu mai locuiește în oraș.",
+      "no_home": "Acest cetățean așteaptă o locuință.",
+      "error": "Cetățeanul nu a putut fi afișat."
+    }
+  }
+}

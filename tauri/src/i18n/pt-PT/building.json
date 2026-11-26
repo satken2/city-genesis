@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Composição dos pisos",
+    "parking": "Estacionamento",
+    "type": "Tipo de edifício",
+    "durability": "Durabilidade",
+    "floors": "Pisos",
+    "floorsValue": "{{floors}} pisos (área de pavimento {{area, number}} m²)",
+    "heightLabel": "Altura: {{value}} m",
+    "baseAreaLabel": "Área de implantação: {{area, number}} m²",
+    "underMaintenance": "Em reparação",
+    "parkingCapacity": "Capacidade de estacionamento",
+    "parkingCapacityValue": "{{capacity}} lugares",
+    "parkingDay": "Dia",
+    "parkingNight": "Noite",
+    "parkingUsage": "{{used}} / {{capacity}} lugares"
+  },
+  "building_appearance": {
+    "variantLabel": "Aspeto {{index}}",
+    "layoutHint": "Arraste um cartão para o terreno para o colocar / arraste para mover / Shift+arrastar para rodar / tecla Delete para remover",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Remover bloco selecionado",
+    "apply": "Aplicar",
+    "saveFailed": "Não foi possível guardar o aspeto",
+    "noSubbuildings": "Não há blocos secundários definidos para este tipo de edifício"
+  }
+}

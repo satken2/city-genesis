@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Resumo",
+    "tabActivity": "Atividade",
+    "follow": "Seguir com a câmara",
+    "unfollow": "Deixar de seguir com a câmara",
+    "track": "Adicionar à lista de seguimento",
+    "trackRandom": "Seguir um cidadão ao acaso",
+    "noUntrackedCitizens": "Não há cidadãos disponíveis que ainda não estejam a ser seguidos.",
+    "trackRandomError": "Não foi possível seguir um cidadão.",
+    "untrack": "Remover da lista de seguimento",
+    "home": "Residência",
+    "mobility": "Meio de deslocação",
+    "mode": {
+      "automobile": "Automóvel",
+      "pedestrian": "A pé e transportes públicos"
+    },
+    "visits": "Destinos",
+    "visitKind": {
+      "home": "Casa",
+      "work": "Trabalho",
+      "school": "Escola",
+      "shop": "Compras"
+    },
+    "legs": {
+      "walk": "A pé",
+      "drive": "Automóvel",
+      "transit": "Transportes públicos",
+      "conveyor": "Transporte de pessoas"
+    },
+    "trip": "Ida: {{minutes}} min · {{route}}",
+    "noRoute": "Sem percurso",
+    "noVisits": "Não tem para onde ir.",
+    "status": {
+      "not_ready": "Aparece depois de executar a simulação.",
+      "busy": "Não disponível durante a simulação.",
+      "no_home": "À espera de habitação, por isso não há atividade registada.",
+      "missing": "Este cidadão já não vive na cidade.",
+      "error": "Não foi possível obter os dados."
+    },
+    "empty": "Não há cidadãos a ser seguidos.",
+    "pickFailed": {
+      "not_ready": "Execute a simulação para poder clicar em automóveis e peões e ver quem são.",
+      "busy": "Não é possível mostrar cidadãos durante a simulação.",
+      "none": "Não foi possível encontrar o cidadão neste automóvel ou a pé.",
+      "missing": "Este cidadão já não vive na cidade.",
+      "no_home": "Este cidadão está à espera de habitação.",
+      "error": "Não foi possível mostrar o cidadão."
+    }
+  }
+}

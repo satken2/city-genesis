@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Vybavení silnice",
+    "streetlight_type": "Pouliční osvětlení",
+    "fence_type": "Ploty",
+    "street_tree_type": "Stromořadí",
+    "utility_mode": "Vedení sítí",
+    "none": "Žádné",
+    "standard": "Standardní",
+    "overhead": "Nadzemní vedení",
+    "underground": "Podzemní vedení",
+    "apply": "Použít",
+    "bench_type": "Lavičky",
+    "bin_type": "Odpadkové koše",
+    "planter_type": "Záhony",
+    "advert_type": "Reklama"
+  }
+}

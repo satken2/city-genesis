@@ -1,0 +1,323 @@
+{
+  "policy": {
+    "pending": "Probíhá simulace",
+    "noData": "Bez dat",
+    "actionError": "Obrazovku akce se nepodařilo otevřít.",
+    "indicators": {
+      "unemployment": {
+        "tab": "Nezaměstnanost",
+        "issue": "Vysoká nezaměstnanost",
+        "clear": "Žádné problémy s nezaměstnaností nebyly zjištěny",
+        "evidence": "Míra nezaměstnanosti {{value}}"
+      },
+      "income": {
+        "tab": "Příjmy",
+        "issue": "Nízké příjmy domácností",
+        "clear": "Žádné problémy s příjmy nebyly zjištěny",
+        "evidence": "Průměrný příjem domácnosti {{value}}"
+      },
+      "tourism": {
+        "tab": "Cestovní ruch",
+        "issue": "Přijíždí málo turistů",
+        "clear": "Žádné problémy s cestovním ruchem nebyly zjištěny",
+        "evidence": "Pobývající turisté: {{value}} · kapacita: {{capacity}}"
+      },
+      "crime": {
+        "tab": "Kriminalita",
+        "issue": "Dochází ke kriminalitě a sporům",
+        "clear": "Žádné problémy s kriminalitou nebyly zjištěny",
+        "evidence": "Škody z kriminality {{value}} · spory: {{incidents}}"
+      },
+      "sanitation": {
+        "tab": "Hygiena",
+        "issue": "Vyskytují se hygienické problémy",
+        "clear": "Žádné hygienické problémy nebyly zjištěny",
+        "evidence": "Domácnosti se zhoršující se hygienou: {{value}}"
+      },
+      "water": {
+        "tab": "Voda",
+        "issue": "Nedostatek vody",
+        "clear": "Žádné problémy s dodávkou vody nebyly zjištěny",
+        "evidence": "Domácnosti a zařízení obdržely {{value}} objednaného množství"
+      },
+      "electricity": {
+        "tab": "Elektřina",
+        "issue": "Nedostatek elektřiny",
+        "clear": "Žádné problémy s dodávkou elektřiny nebyly zjištěny",
+        "evidence": "Domácnosti a zařízení obdržely {{value}} objednaného množství"
+      },
+      "internet": {
+        "tab": "Telekomunikace",
+        "issue": "Nedostatek telekomunikačních služeb",
+        "clear": "Žádné problémy s telekomunikacemi nebyly zjištěny",
+        "evidence": "Domácnosti a zařízení obdržely {{value}} objednaného množství"
+      },
+      "high_water": {
+        "tab": "Vysokotlaká voda",
+        "issue": "Nedostatek vysokotlaké vody",
+        "clear": "Žádné problémy s dodávkou vysokotlaké vody nebyly zjištěny",
+        "evidence": "Zařízení obdržela {{value}} objednaného množství"
+      },
+      "high_electricity": {
+        "tab": "Vysoké napětí",
+        "issue": "Nedostatek elektřiny vysokého napětí",
+        "clear": "Žádné problémy s dodávkou vysokého napětí nebyly zjištěny",
+        "evidence": "Zařízení obdržela {{value}} objednaného množství"
+      },
+      "upkeep": {
+        "tab": "Údržba zařízení",
+        "issue": "Nedostatečná údržba veřejných budov, silnic a kolejí",
+        "clear": "Žádné problémy s údržbou nebyly zjištěny",
+        "evidence": "Zajištěná údržba: {{value}} potřebného množství"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "Stávající pracovní místa jsou plně obsazena",
+        "evidence": "Uchazeči o práci: {{count}}"
+      },
+      "unfilled_jobs": {
+        "title": "Volná místa a nezaměstnanost existují současně",
+        "evidence": "Uchazeči o práci: {{count}} · volná místa: {{vacancies}} (efektivní pracovní síla)"
+      },
+      "public_budget": {
+        "title": "Veřejná zařízení omezují provoz kvůli rozpočtu",
+        "evidence": "Zařízení s plánem omezeným provozním rozpočtem: {{count}}"
+      },
+      "education_gap": {
+        "title": "Někteří uchazeči o práci nemají základní vzdělání",
+        "evidence": "Uchazeči bez základního vzdělání: {{count}}"
+      },
+      "school_capacity": {
+        "title": "Kapacita základního vzdělávání nestačí",
+        "evidence": "Zapsaní: {{enrolled}} · nezapsaní: {{waiting}} / kapacita: {{capacity}}"
+      },
+      "immigrant_education_gap": {
+        "title": "Mezi uchazeči bez základního vzdělání jsou přistěhovalci",
+        "evidence": "Přistěhovalci mezi těmito uchazeči: {{count}}"
+      },
+      "specialists": {
+        "title": "Některá zařízení nemohou fungovat kvůli nedostatku odborníků",
+        "evidence": "Zařízení s nedostatkem odborníků: {{count}}"
+      },
+      "household_unemployment": {
+        "title": "Některé domácnosti mají nezaměstnané dospělé",
+        "evidence": "Domácnosti s nezaměstnanými dospělými: {{count}}"
+      },
+      "security_response": {
+        "title": "Policie nedokáže zabránit všem škodám",
+        "evidence": "Trestné činy za poslední měsíc: {{count}}",
+        "evidence_week": "Trestné činy za poslední týden: {{count}}"
+      },
+      "no_police": {
+        "title": "Žádná policejní stanice není v provozu"
+      },
+      "police_staff": {
+        "title": "Policejním stanicím chybějí lidé",
+        "evidence": "Policejní stanice s nedostatkem lidí: {{count}}"
+      },
+      "police_budget": {
+        "title": "Policie má nedostatečný rozpočet",
+        "evidence": "Policejní stanice s nedostatkem financí: {{count}}"
+      },
+      "police_inputs": {
+        "title": "Policejním stanicím chybí materiál",
+        "evidence": "Policejní stanice s nedostatkem materiálu: {{count}}"
+      },
+      "unemployment_pressure": {
+        "title": "Nezaměstnanost zhoršuje bezpečnost",
+        "evidence": "Nezaměstnaní dospělí: {{count}}"
+      },
+      "citizen_criminality": {
+        "title": "Někteří občané mají sklony ke kriminalitě",
+        "evidence": "Občané se sklony ke kriminalitě: {{count}}"
+      },
+      "children_in_poverty": {
+        "title": "Děti vyrůstají v domácnostech pod hranicí životních nákladů",
+        "evidence": "Děti v domácnostech pod hranicí životních nákladů: {{count}}"
+      },
+      "children_in_crime_zones": {
+        "title": "Děti vyrůstají ve čtvrtích s kriminalitou",
+        "evidence": "Děti ve čtvrtích s trestnou činností za poslední měsíc: {{count}}",
+        "evidence_week": "Děti ve čtvrtích s trestnou činností za poslední týden: {{count}}"
+      },
+      "service_no_facility": {
+        "title": "Chybí zařízení, které službu poskytuje",
+        "title_named": "Chybí zařízení: {{suppliers}}"
+      },
+      "service_facility_limited": {
+        "title": "Některá zařízení nefungují: {{kinds}}",
+        "evidence": "Zařízení, která fakticky nefungují: {{count}}"
+      },
+      "repair_budget_exhausted": {
+        "title": "Rozpočet na opravy byl vyčerpán a objednávky údržby byly kráceny",
+        "evidence": "Výdaje na opravy {{expense}} / rozpočet {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "Některé domácnosti či zařízení leží mimo dosah služby",
+        "evidence": "Mimo dosah všech zařízení: domácnosti {{count}}, zařízení {{facilities}}",
+        "title_named": "Některé domácnosti či zařízení leží mimo dosah zařízení: {{suppliers}}"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}}: nedaří se obstarat zboží {{product_name}}",
+        "evidence": "Obdrženo {{received}} z potřebných {{demand}}"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}}: nedostatek pracovníků",
+        "evidence": "Zajištěno {{total_labor}} z potřebných {{quota}} (efektivní pracovní síla)"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}}: nedaří se zajistit odborníky"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}}: plán omezen kvůli nedostatku rozpočtu"
+      },
+      "facility_inactive": {
+        "title": "{{facility}}: mimo provoz"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}}: nepřipojeno k síti ({{product_name}})"
+      },
+      "slum_sanitation": {
+        "title": "Některé domácnosti žijí ve slumech",
+        "evidence": "Domácnosti žijící ve slumech: {{count}}"
+      },
+      "service_shortage": {
+        "title": "Domácnosti nedostávají dost: {{product_name}}",
+        "evidence": "Domácnosti obdržely {{percent}} % referenčního množství"
+      },
+      "tourism_no_attraction": {
+        "title": "Chybějí turistické atrakce"
+      },
+      "tourism_no_gateway": {
+        "title": "Chybí brána, kudy by turisté přijeli"
+      },
+      "tourism_no_trade_hub": {
+        "title": "Chybí obchodní uzel, který by platil cestovní výdaje"
+      },
+      "tourists_without_lodging": {
+        "title": "Někteří turisté nemohou najít ubytování",
+        "evidence": "Turisté čekající na ubytování: {{count}}"
+      },
+      "tourism_lodging_costly": {
+        "title": "Ubytování je drahé vzhledem k cestovnímu rozpočtu",
+        "evidence": "Zájem nových turistů je na {{percent}} % běžné úrovně"
+      },
+      "tourists_dissatisfied": {
+        "title": "Nízká spokojenost turistů",
+        "evidence": "Zájem nových turistů na {{percent}} % běžné úrovně · nespokojeně odjeli: {{count}}"
+      },
+      "tourism_experience_short": {
+        "title": "Turisté nedostávají dost turistických zážitků",
+        "evidence": "Naplnění turistických zážitků: {{percent}} %"
+      },
+      "tourism_leisure_short": {
+        "title": "Turisté nedostávají dost zábavy a volného času",
+        "evidence": "Naplnění zábavy a volného času: {{percent}} %"
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "Vytvořit pracovní místa ve veřejných zařízeních"
+      },
+      "population": {
+        "title": "Snížit počet obyvatel vyhoštěním občanů"
+      },
+      "budget": {
+        "title": "Rozdělit provozní rozpočty"
+      },
+      "education": {
+        "title": "Postavit více škol"
+      },
+      "higher_education": {
+        "title": "Vychovat odborníky vysokoškolským vzděláním"
+      },
+      "welfare": {
+        "title": "Zvýšit dávky a sociální podporu"
+      },
+      "employment": {
+        "title": "Prověřit podmínky náboru ve statistikách zaměstnanosti"
+      },
+      "police": {
+        "title": "Postavit policejní stanice"
+      },
+      "facilities": {
+        "title": "Zkontrolovat stav zařízení"
+      },
+      "immigration_skills": {
+        "title": "Přehodnotit požadavky na kvalifikaci přistěhovalců"
+      },
+      "immigration_limit": {
+        "title": "Omezit přistěhovalectví"
+      },
+      "criminality": {
+        "title": "Zkontrolovat sklony občanů ke kriminalitě"
+      },
+      "service_facility": {
+        "title": "Postavit zařízení, které službu poskytuje",
+        "title_named": "Postavit: {{suppliers}}",
+        "title_tourism_no_attraction": "Postavit turistickou atrakci",
+        "title_tourism_no_gateway": "Postavit přístav nebo letiště"
+      },
+      "parcel": {
+        "title": "Připravit větší parcelu"
+      },
+      "transit": {
+        "title": "Přehodnotit počet spojů veřejné dopravy a koleje"
+      },
+      "entity_detail": {
+        "title": "Otevřít podrobnosti"
+      }
+    },
+    "selectorTitle": "Co chcete prošetřit?",
+    "eventsTitle": "Co se děje",
+    "causeTitle": "Příčina",
+    "adviceTitle": "Doporučená opatření",
+    "needsAttention": "Je co zlepšovat",
+    "values": {
+      "money": "{{value}} / domácnost / den",
+      "per_thousand": "{{value}} případů na 1 000 obyvatel (poslední měsíc)",
+      "per_thousand_week": "{{value}} případů na 1 000 obyvatel (poslední týden)"
+    },
+    "collapse": "Sbalit",
+    "investigate": {
+      "crime": "Prošetřit příčiny kriminality",
+      "unemployment": "Prošetřit příčiny nezaměstnanosti",
+      "income": "Prošetřit příčiny nízkých příjmů",
+      "water": "Prošetřit příčiny nedostatku vody",
+      "electricity": "Prošetřit příčiny nedostatku elektřiny",
+      "internet": "Prošetřit příčiny nedostatku telekomunikačních služeb",
+      "upkeep": "Prošetřit příčiny nedostatečné údržby",
+      "high_water": "Prošetřit příčiny nedostatku vysokotlaké vody",
+      "high_electricity": "Prošetřit příčiny nedostatku vysokého napětí",
+      "facility": "Prošetřit toto zařízení"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "Ukazatele",
+    "problems": {
+      "resource_runway": "Zdroj „{{name}}“ se vyčerpá přibližně za {{remaining_epochs}} epoch",
+      "resource_depleted": "Zdroj „{{name}}“ je vyčerpán",
+      "facility_inoperative": "Veřejné zařízení „{{name}}“ nefunguje",
+      "facility_inoperative_labor": "Veřejné zařízení „{{name}}“ nefunguje kvůli nedostatku pracovní síly",
+      "facility_inoperative_material": "Veřejné zařízení „{{name}}“ nefunguje kvůli nedostatku surovin",
+      "facility_inoperative_high_skill": "Veřejné zařízení „{{name}}“ omezuje provoz kvůli nedostatku odborníků",
+      "facility_inoperative_budget": "Veřejné zařízení „{{name}}“ omezuje provoz kvůli nedostatku rozpočtu",
+      "education_low_enrollment": "Vzdělávací instituce „{{name}}“ je málo vytížená, chybějí studenti (zapsáno {{enrolled}} z kapacity {{max_students}})",
+      "infra_facility_down": "Infrastrukturní zařízení „{{name}}“ je mimo provoz",
+      "infra_disconnected": "Zařízení nepřipojená k infrastrukturní síti: {{count}}",
+      "rail_capacity_exceeded": "Počet spojů překračuje kapacitu trati – počet dotčených kolejí: {{count}}",
+      "collapse": "Zřícené budovy a silnice: {{count}}",
+      "collapse_with_deaths": "Zřícené budovy a silnice: {{count}}, počet obětí: {{deaths}}",
+      "deaths_traffic": "Oběti dopravních nehod: {{count}}",
+      "tenant_blocked_by_parcel_size": "Ve čtvrti „{{zone_name}}“ nelze postavit budovu pro nájemce „{{tenant_name}}“ (potřeba {{required}} m2, největší možná {{max_capacity}} m2)",
+      "unknown": "Došlo k závažné události",
+      "sanitation": "Domácnosti se zhoršující se hygienou: {{count}}"
+    },
+    "facilitiesTitle": "Zařízení mimo provoz",
+    "otherProblemsTitle": "Další problémy",
+    "facility": {
+      "title": "{{facility}}: nemůže fungovat",
+      "evidence": "Výroba je na {{percent}} % plánu"
+    }
+  }
+}

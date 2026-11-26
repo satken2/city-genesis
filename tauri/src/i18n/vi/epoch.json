@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Ngày hiện tại",
+    "afterDate": "Ngày sau khi chạy",
+    "epochCount": "Số kỳ",
+    "message": "Hoàn tất công việc lượt này và cho thời gian trôi tiếp?",
+    "yes": "Có",
+    "no": "Không",
+    "executing": "Đang chạy mô phỏng…",
+    "errorSteamLimit": "Không xác minh được xác thực Steam nên không thể chạy thêm kỳ. (Khi chưa xác thực, bạn có thể chơi đến dân số {{limit}} người.)",
+    "errorAlreadyRunning": "Đang chạy một kỳ khác. Hãy thử lại khi kỳ đó kết thúc.",
+    "errorFailed": "Chạy kỳ thất bại: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "(chạy {{count}} kỳ)",
+    "sectionConstruction": "Tình hình xây dựng",
+    "kindPath": "Đường",
+    "kindBuilding": "Công trình",
+    "kindProject": "Dự án",
+    "noItems": "Không có",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Hoàn thành",
+    "sectionStatistics": "Thống kê",
+    "sectionScore": "Điểm",
+    "scoreGain": "Điểm cộng",
+    "scoreLoss": "Điểm trừ",
+    "questState": {
+      "completed": "Đã đạt",
+      "active": "Đang thực hiện",
+      "locked": "Chưa mở khóa",
+      "failed": "Thất bại"
+    },
+    "trendHint": "Xu hướng {{count}} kỳ gần đây: {{trend}}",
+    "trend": {
+      "up": "Đang tăng",
+      "flat": "Đi ngang",
+      "down": "Đang giảm",
+      "none": "Chưa đủ lịch sử"
+    },
+    "statPopulation": "Dân số",
+    "statTourists": "Khách du lịch",
+    "statGdp": "GDP",
+    "statPrice": "Vật giá",
+    "statIncome": "Thu nhập",
+    "statUnemployment": "Tỷ lệ thất nghiệp",
+    "statHealthcare": "Mức đáp ứng y tế",
+    "statNutrition": "Mức đáp ứng dinh dưỡng",
+    "statLeisure": "Giải trí và nghỉ ngơi",
+    "statFire": "Hỏa hoạn",
+    "statTraffic": "Tai nạn giao thông",
+    "statCrime": "Tội phạm",
+    "questCompleted": "Đã đạt!",
+    "questFailed": "Hết hạn"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Đang khảo sát mạng lưới giao thông",
+      "prepare": "Đang chuẩn bị cho kỳ này",
+      "transit": "Đang bố trí giao thông công cộng",
+      "market": "Đang giao dịch hàng hóa",
+      "production": "Đang sản xuất và tiêu dùng",
+      "commute": "Đang đi làm và đi học",
+      "growth": "Công dân đang lớn lên",
+      "evaluate": "Đang đánh giá thành phố",
+      "immigration": "Đang đón người nhập cư",
+      "labor": "Đang tìm việc làm",
+      "spawn": "Cửa hàng và công ty mới đang ra đời",
+      "relocate": "Đang chuyển nhà",
+      "construction": "Đang xây dựng các tòa nhà",
+      "finance": "Đang quyết toán dòng tiền",
+      "plan": "Đang lập kế hoạch tiếp theo",
+      "incident": "Đang xử lý hỏa hoạn và sự cố",
+      "finalize": "Đang tổng hợp thống kê"
+    }
+  }
+}

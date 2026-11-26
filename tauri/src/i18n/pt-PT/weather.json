@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Meteorologia",
+    "choose": "Escolher o estado do tempo",
+    "loading": "A verificar o estado do tempo…",
+    "unknown": "Desconhecido",
+    "automatic": "{{weather}} (automático)",
+    "failed": "Não foi possível alterar o estado do tempo",
+    "names": {
+      "clear": "Céu limpo",
+      "high_clouds": "Nuvens altas",
+      "fair": "Bom tempo",
+      "broken_clouds": "Abertas",
+      "overcast": "Encoberto",
+      "rain_clouds": "Nuvens de chuva",
+      "fog": "Nevoeiro",
+      "drizzle": "Chuvisco",
+      "rain": "Chuva",
+      "heavy_rain": "Chuva forte",
+      "light_snow": "Neve fraca",
+      "snow": "Neve",
+      "blizzard": "Tempestade de neve"
+    },
+    "epochClimate": "Clima da época",
+    "temperature": "Temperatura",
+    "precipitation": "Precipitação",
+    "sunlight": "Intensidade solar",
+    "windSpeed": "Velocidade do vento"
+  }
+}

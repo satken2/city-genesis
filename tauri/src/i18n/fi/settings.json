@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Asetukset",
+    "groups": {
+      "general": "Yleiset",
+      "display": "Näyttö",
+      "sound": "Ääni",
+      "system": "Järjestelmä",
+      "about": "Tietoja",
+      "developer": "Kehittäjäasetukset"
+    },
+    "swagger": {
+      "label": "Swagger (API-dokumentaatio)",
+      "description": "Näyttää ydinsimulaattorin API-määrittelyn oletusselaimessa",
+      "action": "Avaa selaimessa"
+    },
+    "currencyUnit": {
+      "label": "Valuuttayksikkö",
+      "description": "Rahamäärien yhteydessä näytettävä yksikkö. Jos kenttä on tyhjä, yksikkö määräytyy näyttökielen mukaan."
+    },
+    "fontSize": {
+      "label": "Tekstikoko",
+      "large": "Suuri",
+      "medium": "Keskikokoinen",
+      "small": "Pieni",
+      "custom": "Mukautettu",
+      "preview": "Nykyinen koko"
+    },
+    "monitor": {
+      "label": "Näyttö",
+      "prev": "Edellinen näyttö",
+      "next": "Seuraava näyttö"
+    },
+    "graphicMonitor": {
+      "label": "3D-näkymän näyttö"
+    },
+    "multiDisplay": {
+      "label": "Usean näytön tila",
+      "description": "Näyttää ikkunat eri näytöllä kuin pelinäkymän",
+      "on": "Käytössä",
+      "off": "Pois käytöstä"
+    },
+    "popupMonitor": {
+      "label": "Ikkunoiden näyttö"
+    },
+    "hintbar": {
+      "label": "Vihjepalkki",
+      "show": "Näytä",
+      "hide": "Piilota",
+      "description": "Näytön yläreunan palkki, joka näyttää käyttövihjeitä"
+    },
+    "citizenVoice": {
+      "label": "Kaupunkilaisten äänet",
+      "show": "Näytä",
+      "hide": "Piilota",
+      "description": "Näytön oikean yläkulman kortti, joka näyttää asukkaiden kommentteja vuorotellen"
+    },
+    "language": {
+      "label": "Kieli",
+      "description": "Käyttöliittymän kieli. Se on eri asia kuin tallennuksen kieli.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Äänenvoimakkuus",
+      "master": "Pääänenvoimakkuus",
+      "bgm": "Taustamusiikki",
+      "sfx": "Ääniefektit"
+    },
+    "compute": {
+      "label": "GPU-kiihdytys",
+      "comingSoon": "Tulossa pian",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU käytössä",
+      "statusInactive": "CPU käytössä",
+      "restartRequired": "Pääohjelma käynnistetään uudelleen asetuksen muuttamisen jälkeen",
+      "restarting": "Käynnistetään uudelleen…",
+      "restartFailed": "Uudelleenkäynnistys epäonnistui",
+      "restartUnavailable": "Asetukset tallennettu. Muutokset tulevat voimaan, kun peli käynnistetään seuraavan kerran",
+      "confirmRestart": "Vaihdetaanko laskentatilaksi {{mode}}? Pääohjelma käynnistetään uudelleen.",
+      "restartAction": "Käynnistä uudelleen"
+    },
+    "windowReset": {
+      "label": "Ikkunoiden sijainti ja koko",
+      "action": "Palauta"
+    },
+    "credits": {
+      "label": "Tekijät",
+      "description": "Pelissä käytettyjen aineistojen ja ohjelmistojen tekijä- ja oikeustiedot",
+      "action": "Näytä"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Uusi peli",
+    "overwriteSave": "Tallenna päälle",
+    "saveAs": "Tallenna nimellä",
+    "load": "Lataa",
+    "quitGame": "Lopeta peli",
+    "returnToTop": "Palaa päävalikkoon",
+    "loading": "Ladataan…",
+    "shuttingDown": "Suljetaan…",
+    "saveFailed": "Tallennus epäonnistui",
+    "loadFailed": "Lataus epäonnistui",
+    "confirmNewGame": "Nykyiset tiedot menetetään. Aloitetaanko uusi peli?",
+    "confirmQuitGame": "Haluatko varmasti lopettaa? Nykyistä edistymistä ei tallenneta automaattisesti.",
+    "confirmReturnToTop": "Palataanko päävalikkoon? Nykyistä edistymistä ei tallenneta automaattisesti.",
+    "confirm": "Kyllä",
+    "cancel": "Ei",
+    "saveAsScenario": "Tallenna skenaariona",
+    "saveAsNewScenario": "Tallenna uutena skenaariona",
+    "overwriteScenario": "Tallenna skenaarion päälle",
+    "backToGame": "Palaa peliin",
+    "saveName": "Tallennuksen nimi",
+    "confirmOverwrite": "Tallennetaanko tallennuksen ”{{name}}” päälle?",
+    "confirmOverwriteScenario": "Tallennetaanko skenaarion ”{{name}}” päälle?"
+  },
+  "saveList": {
+    "noSaves": "Tallennuksia ei ole",
+    "currentSave": "Nykyiset tiedot",
+    "population": "Väkiluku",
+    "inGameDate": "Päivämäärä",
+    "savedAt": "Tallennettu",
+    "loadButton": "Lataa",
+    "deleteButton": "Poista",
+    "confirmLoad": "Ladataanko tämä tallennus?",
+    "confirmDelete": "Poistetaanko tämä tallennus? Toimintoa ei voi kumota.",
+    "loading": "Ladataan…",
+    "loadFailed": "Lataus epäonnistui",
+    "deleteFailed": "Poisto epäonnistui",
+    "openFolderButton": "Avaa tallennuskansio",
+    "scenario": "Skenaario",
+    "autosaveName": "{{name}} (automaattitallennus lopetettaessa)"
+  }
+}

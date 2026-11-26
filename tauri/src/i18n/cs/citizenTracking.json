@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Přehled",
+    "tabActivity": "Činnost",
+    "follow": "Sledovat kamerou",
+    "unfollow": "Přestat sledovat kamerou",
+    "track": "Přidat mezi sledované",
+    "trackRandom": "Sledovat náhodného občana",
+    "noUntrackedCitizens": "Nejsou k dispozici žádní další občané ke sledování.",
+    "trackRandomError": "Občana se nepodařilo začít sledovat.",
+    "untrack": "Odebrat ze sledovaných",
+    "home": "Bydliště",
+    "mobility": "Způsob dopravy",
+    "mode": {
+      "automobile": "Auto",
+      "pedestrian": "Pěšky a veřejnou dopravou"
+    },
+    "visits": "Cíle cest",
+    "visitKind": {
+      "home": "Domov",
+      "work": "Práce",
+      "school": "Škola",
+      "shop": "Nákupy"
+    },
+    "legs": {
+      "walk": "Pěšky",
+      "drive": "Auto",
+      "transit": "Veřejná doprava",
+      "conveyor": "Zařízení pro přepravu osob"
+    },
+    "trip": "Jedna cesta {{minutes}} min · {{route}}",
+    "noRoute": "Žádná trasa",
+    "noVisits": "Nemá kam chodit.",
+    "status": {
+      "not_ready": "Zobrazí se po spuštění simulace.",
+      "busy": "Během simulace nelze zobrazit.",
+      "no_home": "Čeká na bydlení, proto není zaznamenána žádná činnost.",
+      "missing": "Tento občan už ve městě nežije.",
+      "error": "Nepodařilo se načíst."
+    },
+    "empty": "Nesledujete žádné občany.",
+    "pickFailed": {
+      "not_ready": "Po spuštění simulace můžete kliknutím na auta a chodce zobrazit, o koho jde.",
+      "busy": "Během simulace nelze občany zobrazit.",
+      "none": "Nepodařilo se zjistit, kdo sedí v tomto autě nebo jde pěšky.",
+      "missing": "Tento občan už ve městě nežije.",
+      "no_home": "Tento občan čeká na bydlení.",
+      "error": "Občana se nepodařilo zobrazit."
+    }
+  }
+}

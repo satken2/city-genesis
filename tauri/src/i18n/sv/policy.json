@@ -1,0 +1,323 @@
+{
+  "policy": {
+    "pending": "Simulering pågår",
+    "noData": "Inga data",
+    "actionError": "Det gick inte att öppna åtgärdsvyn.",
+    "indicators": {
+      "unemployment": {
+        "tab": "Arbetslöshet",
+        "issue": "Arbetslösheten är hög",
+        "clear": "Inga problem med arbetslöshet hittades",
+        "evidence": "Arbetslöshet {{value}}"
+      },
+      "income": {
+        "tab": "Inkomst",
+        "issue": "Hushållens inkomster är låga",
+        "clear": "Inga inkomstproblem hittades",
+        "evidence": "Genomsnittlig hushållsinkomst {{value}}"
+      },
+      "tourism": {
+        "tab": "Turism",
+        "issue": "Få turister kommer",
+        "clear": "Inga turismproblem hittades",
+        "evidence": "Turister på plats: {{value}} · kapacitet: {{capacity}}"
+      },
+      "crime": {
+        "tab": "Brott",
+        "issue": "Brott och bråk förekommer",
+        "clear": "Inga brottsproblem hittades",
+        "evidence": "Brottsskador {{value}} · bråk: {{incidents}}"
+      },
+      "sanitation": {
+        "tab": "Sanitet",
+        "issue": "Det finns sanitära problem",
+        "clear": "Inga sanitära problem hittades",
+        "evidence": "Sanitära förhållanden försämras: {{value}} hushåll"
+      },
+      "water": {
+        "tab": "Vatten",
+        "issue": "Det är brist på vatten",
+        "clear": "Inga problem med vattenförsörjningen hittades",
+        "evidence": "Hushåll och anläggningar fick {{value}} av sina beställningar"
+      },
+      "electricity": {
+        "tab": "El",
+        "issue": "Det är brist på el",
+        "clear": "Inga problem med elförsörjningen hittades",
+        "evidence": "Hushåll och anläggningar fick {{value}} av sina beställningar"
+      },
+      "internet": {
+        "tab": "Telekom",
+        "issue": "Det är brist på telekommunikation",
+        "clear": "Inga problem med telekommunikationen hittades",
+        "evidence": "Hushåll och anläggningar fick {{value}} av sina beställningar"
+      },
+      "high_water": {
+        "tab": "Högtrycksvatten",
+        "issue": "Det är brist på högtrycksvatten",
+        "clear": "Inga problem med försörjningen av högtrycksvatten hittades",
+        "evidence": "Anläggningarna fick {{value}} av sina beställningar"
+      },
+      "high_electricity": {
+        "tab": "Högspänningsel",
+        "issue": "Det är brist på högspänningsel",
+        "clear": "Inga problem med försörjningen av högspänningsel hittades",
+        "evidence": "Anläggningarna fick {{value}} av sina beställningar"
+      },
+      "upkeep": {
+        "tab": "Underhåll",
+        "issue": "Offentliga byggnader, vägar och spår får för lite underhåll",
+        "clear": "Inga underhållsproblem hittades",
+        "evidence": "Underhållet som gavs var {{value}} av behovet"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "De nuvarande jobbkvoterna är fyllda",
+        "evidence": "Arbetssökande: {{count}}"
+      },
+      "unfilled_jobs": {
+        "title": "Lediga jobb och arbetslöshet finns samtidigt",
+        "evidence": "Arbetssökande: {{count}} · lediga platser: {{vacancies}} (effektiv arbetskraft)"
+      },
+      "public_budget": {
+        "title": "Offentliga anläggningar begränsas av budgeten",
+        "evidence": "Anläggningar med budgetbegränsad plan: {{count}}"
+      },
+      "education_gap": {
+        "title": "Vissa arbetssökande saknar grundläggande utbildning",
+        "evidence": "Arbetssökande utan grundläggande utbildning: {{count}}"
+      },
+      "school_capacity": {
+        "title": "Platserna i grundläggande utbildning räcker inte",
+        "evidence": "Inskrivna: {{enrolled}} · ej inskrivna: {{waiting}} / platser: {{capacity}}"
+      },
+      "immigrant_education_gap": {
+        "title": "Bland de arbetssökande utan grundläggande utbildning finns invandrare",
+        "evidence": "Berörda invandrare som söker arbete: {{count}}"
+      },
+      "specialists": {
+        "title": "Brist på specialister hindrar anläggningar från att vara i drift",
+        "evidence": "Anläggningar som saknar specialister: {{count}}"
+      },
+      "household_unemployment": {
+        "title": "Vissa hushåll har arbetslösa vuxna",
+        "evidence": "Hushåll med arbetslösa vuxna: {{count}}"
+      },
+      "security_response": {
+        "title": "Polisen hinner inte förhindra alla brott",
+        "evidence": "Brottsskador den senaste månaden: {{count}}",
+        "evidence_week": "Brottsskador den senaste veckan: {{count}}"
+      },
+      "no_police": {
+        "title": "Det finns ingen polisstation i drift"
+      },
+      "police_staff": {
+        "title": "Polisstationerna har för lite personal",
+        "evidence": "Underbemannade polisstationer: {{count}}"
+      },
+      "police_budget": {
+        "title": "Polisens budget räcker inte",
+        "evidence": "Polisstationer med för liten budget: {{count}}"
+      },
+      "police_inputs": {
+        "title": "Polisstationerna saknar förnödenheter",
+        "evidence": "Polisstationer med brist på förnödenheter: {{count}}"
+      },
+      "unemployment_pressure": {
+        "title": "Arbetslösheten bidrar till sämre trygghet",
+        "evidence": "Arbetslösa vuxna: {{count}}"
+      },
+      "citizen_criminality": {
+        "title": "Vissa medborgare har brottsbenägenhet",
+        "evidence": "Brottsbenägna medborgare: {{count}}"
+      },
+      "children_in_poverty": {
+        "title": "Barn växer upp i hushåll som inte når upp till levnadskostnaden",
+        "evidence": "Barn i hushåll under levnadskostnaden: {{count}}"
+      },
+      "children_in_crime_zones": {
+        "title": "Barn växer upp i stadsdelar med brottslighet",
+        "evidence": "Barn i stadsdelar med brott den senaste månaden: {{count}}",
+        "evidence_week": "Barn i stadsdelar med brott den senaste veckan: {{count}}"
+      },
+      "service_no_facility": {
+        "title": "Ingen anläggning levererar tjänsten",
+        "title_named": "Saknas: {{suppliers}}"
+      },
+      "service_facility_limited": {
+        "title": "Ur drift: {{kinds}}",
+        "evidence": "Anläggningar som i praktiken inte drivs: {{count}}"
+      },
+      "repair_budget_exhausted": {
+        "title": "Reparationsbudgeten tog slut och underhållsbeställningar ströks",
+        "evidence": "Reparationsutgifter {{expense}} / budget {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "Hushåll eller anläggningar ligger utanför täckningsområdet",
+        "evidence": "Utanför alla anläggningars täckning: {{count}} hushåll, {{facilities}} anläggningar",
+        "title_named": "Hushåll eller anläggningar ligger utanför täckningsområdet för {{suppliers}}"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}} kan inte skaffa {{product_name}}",
+        "evidence": "Fick {{received}} av de {{demand}} som behövs"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}} har för lite personal",
+        "evidence": "Har {{total_labor}} av de {{quota}} som behövs (effektiv arbetskraft)"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}} får inte tag på specialister"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}} har skalat ner sin plan på grund av för liten budget"
+      },
+      "facility_inactive": {
+        "title": "{{facility}} är inte i drift"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}} är inte ansluten till nätet för {{product_name}}"
+      },
+      "slum_sanitation": {
+        "title": "Det finns hushåll som bor i slum",
+        "evidence": "Hushåll som bor i slum: {{count}}"
+      },
+      "service_shortage": {
+        "title": "Hushållen får inte tillräckligt av {{product_name}}",
+        "evidence": "Hushållen fick {{percent}} % av referensmängden"
+      },
+      "tourism_no_attraction": {
+        "title": "Det finns inga turistattraktioner"
+      },
+      "tourism_no_gateway": {
+        "title": "Det finns ingen ankomstpunkt för turister"
+      },
+      "tourism_no_trade_hub": {
+        "title": "Det finns inget handelsnav som betalar resekostnader"
+      },
+      "tourists_without_lodging": {
+        "title": "Vissa turister hittar inget boende",
+        "evidence": "Turister som väntar på boende: {{count}}"
+      },
+      "tourism_lodging_costly": {
+        "title": "Boendet är dyrt i förhållande till resebudgeten",
+        "evidence": "Nya turistansökningar ligger på {{percent}} % av det normala"
+      },
+      "tourists_dissatisfied": {
+        "title": "Turisternas nöjdhet är låg",
+        "evidence": "Nya ansökningar på {{percent}} % av det normala · {{count}} åkte hem missnöjda"
+      },
+      "tourism_experience_short": {
+        "title": "Turisterna får inte tillräckligt med turistupplevelser",
+        "evidence": "Turistupplevelser: {{percent}} % av behovet"
+      },
+      "tourism_leisure_short": {
+        "title": "Turisterna får inte tillräckligt med nöje och fritid",
+        "evidence": "Nöje och fritid: {{percent}} % av behovet"
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "Skapa jobb i offentliga anläggningar"
+      },
+      "population": {
+        "title": "Minska befolkningen genom att utvisa medborgare"
+      },
+      "budget": {
+        "title": "Fördela driftbudgetar"
+      },
+      "education": {
+        "title": "Bygg fler skolor"
+      },
+      "higher_education": {
+        "title": "Utbilda specialister genom högre utbildning"
+      },
+      "welfare": {
+        "title": "Höj bidrag och försörjningsstöd"
+      },
+      "employment": {
+        "title": "Undersök anställningsvillkoren i sysselsättningsstatistiken"
+      },
+      "police": {
+        "title": "Bygg polisstationer"
+      },
+      "facilities": {
+        "title": "Kontrollera anläggningarnas läge"
+      },
+      "immigration_skills": {
+        "title": "Se över kompetenskraven för invandrare"
+      },
+      "immigration_limit": {
+        "title": "Begränsa invandringen"
+      },
+      "criminality": {
+        "title": "Kontrollera medborgarnas brottsbenägenhet"
+      },
+      "service_facility": {
+        "title": "Bygg en anläggning som levererar tjänsten",
+        "title_named": "Bygg: {{suppliers}}",
+        "title_tourism_no_attraction": "Bygg en turistattraktion",
+        "title_tourism_no_gateway": "Bygg en hamn eller flygplats"
+      },
+      "parcel": {
+        "title": "Förbered en större tomt"
+      },
+      "transit": {
+        "title": "Se över turtäthet och spår i kollektivtrafiken"
+      },
+      "entity_detail": {
+        "title": "Öppna detaljer"
+      }
+    },
+    "selectorTitle": "Vad vill du undersöka?",
+    "eventsTitle": "Vad som händer",
+    "causeTitle": "Bakomliggande orsak",
+    "adviceTitle": "Förslag på åtgärder",
+    "needsAttention": "Kan förbättras",
+    "values": {
+      "money": "{{value}} / hushåll / dag",
+      "per_thousand": "{{value}} fall per 1 000 invånare (senaste månaden)",
+      "per_thousand_week": "{{value}} fall per 1 000 invånare (senaste veckan)"
+    },
+    "collapse": "Fäll ihop",
+    "investigate": {
+      "crime": "Undersök orsakerna till brotten",
+      "unemployment": "Undersök orsakerna till arbetslösheten",
+      "income": "Undersök orsakerna till de låga inkomsterna",
+      "water": "Undersök orsakerna till vattenbristen",
+      "electricity": "Undersök orsakerna till elbristen",
+      "internet": "Undersök orsakerna till bristen på telekommunikation",
+      "upkeep": "Undersök orsakerna till det bristande underhållet",
+      "high_water": "Undersök orsakerna till bristen på högtrycksvatten",
+      "high_electricity": "Undersök orsakerna till bristen på högspänningsel",
+      "facility": "Undersök den här anläggningen"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "Indikatorer",
+    "problems": {
+      "resource_runway": "Resursen ”{{name}}” väntas ta slut om ungefär {{remaining_epochs}} epoker",
+      "resource_depleted": "Resursen ”{{name}}” har tagit slut",
+      "facility_inoperative": "Den offentliga anläggningen ”{{name}}” är inte i drift",
+      "facility_inoperative_labor": "Den offentliga anläggningen ”{{name}}” är inte i drift på grund av personalbrist",
+      "facility_inoperative_material": "Den offentliga anläggningen ”{{name}}” är inte i drift på grund av materialbrist",
+      "facility_inoperative_high_skill": "Den offentliga anläggningen ”{{name}}” går på reducerad kapacitet på grund av brist på specialister",
+      "facility_inoperative_budget": "Den offentliga anläggningen ”{{name}}” går på reducerad kapacitet på grund av för liten budget",
+      "education_low_enrollment": "Utbildningsanläggningen ”{{name}}” är underutnyttjad – få elever söker sig dit ({{enrolled}} av {{max_students}} platser)",
+      "infra_facility_down": "Infrastrukturanläggningen ”{{name}}” är ur drift",
+      "infra_disconnected": "Anläggningar som inte är anslutna till infrastrukturnätet: {{count}}",
+      "rail_capacity_exceeded": "Tågens turtäthet överstiger spårkapaciteten på {{count}} spår",
+      "collapse": "Byggnader/vägar som har rasat: {{count}}",
+      "collapse_with_deaths": "Byggnader/vägar som har rasat: {{count}}. Döda: {{deaths}}",
+      "deaths_traffic": "Döda i trafikolyckor: {{count}}",
+      "tenant_blocked_by_parcel_size": "Ingen byggnad för ”{{tenant_name}}” kan uppföras i stadsdelen ”{{zone_name}}” (behöver {{required}} m2, största möjliga på tomten {{max_capacity}} m2)",
+      "unknown": "En allvarlig händelse har inträffat",
+      "sanitation": "Sanitära förhållanden försämras: {{count}} hushåll"
+    },
+    "facilitiesTitle": "Anläggningar ur drift",
+    "otherProblemsTitle": "Övriga problem",
+    "facility": {
+      "title": "{{facility}} kan inte vara i drift",
+      "evidence": "Produktionen är {{percent}} % av planen"
+    }
+  }
+}

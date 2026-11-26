@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Atribuir um nome",
+      "message": "Introduza o nome que pretende atribuir a {{name}}.",
+      "inputLabel": "Novo nome",
+      "confirm": "Atribuir"
+    },
+    "reward": {
+      "label": "Atribuir um prémio",
+      "message": "Entregar ao agregado de {{name}} um prémio pago com fundos municipais.\nLiquidez do Município: {{available}}",
+      "confirm": "Entregar"
+    },
+    "expel": {
+      "label": "Desejar-lhe as maiores felicidades fora da cidade",
+      "message": "Pretende expulsar {{name}} da cidade?",
+      "confirm": "Expulsar",
+      "results": {
+        "0": "{{name}} fez as malas e saiu da cidade em silêncio. Ninguém foi à despedida.",
+        "1": "{{name}} atravessou o limite do concelho a gritar: «Nunca mais cá ponho os pés!»",
+        "2": "Acompanhámos gentilmente {{name}} até ao limite do concelho. Desejamos-lhe as maiores felicidades lá fora."
+      }
+    },
+    "donation": {
+      "label": "Pedir um donativo",
+      "message": "Pedir ao agregado de {{name}} um donativo para a cidade.\nLiquidez do agregado: {{available}}",
+      "confirm": "Pedir"
+    },
+    "relocate": {
+      "label": "Sugerir uma nova casa",
+      "message": "Pretende despejar o agregado de {{name}} da casa onde vive?\nO agregado vai procurar uma nova casa na próxima época.",
+      "confirm": "Despejar",
+      "results": {
+        "0": "A família de {{name}} foi posta na rua. Os móveis estão empilhados no passeio.",
+        "1": "Mudaram a fechadura da casa de {{name}}. A família já começou a procurar outro sítio para viver.",
+        "2": "Foi sugerida uma nova casa à família de {{name}}. À antiga já não podem voltar."
+      }
+    }
+  }
+}

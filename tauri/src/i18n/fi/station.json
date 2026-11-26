@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Asema",
+    "name": "Aseman nimi",
+    "ridership": "Nousukerrat",
+    "platforms": "Laiturit",
+    "noPlatforms": "Asemaan ei kuulu laitureita (linjan ylittämät laiturit kuuluvat asemaan)",
+    "lines": "Liikennöivät linjat",
+    "noLines": "Asemalla ei liikennöi linjoja",
+    "stops": "Nousukerrat pysäkeittäin",
+    "noStops": "Asemalla ei ole pysäkkejä",
+    "lineRunning": "Liikenteessä",
+    "lineSuspended": "Keskeytetty",
+    "houseEnds": "Asemarakennusten sijoitus",
+    "houseEnds_both": "Molemmat päät",
+    "houseEnds_start": "Alkupää",
+    "houseEnds_end": "Loppupää",
+    "passageMode": "Kulkuyhteyden sijoitus",
+    "passageMode_elevated": "Yläkulku",
+    "passageMode_ground": "Maantaso",
+    "passageMode_underground": "Alikulku"
+  }
+}

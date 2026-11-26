@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Nod rutier",
+      "jct": "Joncțiune"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "Drum de plecare",
+      "to": "Drum de sosire",
+      "road": "{{type}} #{{id}}",
+      "none": "Nu există perechi de drumuri legate.",
+      "direction": {
+        "n": "Nord",
+        "ne": "Nord-est",
+        "e": "Est",
+        "se": "Sud-est",
+        "s": "Sud",
+        "sw": "Sud-vest",
+        "w": "Vest",
+        "nw": "Nord-vest"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

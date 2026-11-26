@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Ge ett namn",
+      "message": "Ange namnet du vill ge {{name}}.",
+      "inputLabel": "Nytt namn",
+      "confirm": "Ge namn"
+    },
+    "reward": {
+      "label": "Dela ut en belöning",
+      "message": "Ge hushållet {{name}} en belöning ur stadens kassa.\nStadens likvida medel: {{available}}",
+      "confirm": "Dela ut"
+    },
+    "expel": {
+      "label": "Önska lycka till utanför staden",
+      "message": "Vill du förvisa {{name}} från staden?",
+      "confirm": "Förvisa",
+      "results": {
+        "0": "{{name}} packade sina saker och lämnade tyst staden. Ingen kom för att vinka av.",
+        "1": "{{name}} korsade stadsgränsen och skrek: ”Hit kommer jag aldrig tillbaka!”",
+        "2": "{{name}} har artigt eskorterats ut över stadsgränsen. Vi önskar all lycka till på annat håll."
+      }
+    },
+    "donation": {
+      "label": "Be om en donation",
+      "message": "Be hushållet {{name}} om en donation till staden.\nHushållets likvida medel: {{available}}",
+      "confirm": "Be om donation"
+    },
+    "relocate": {
+      "label": "Föreslå ett nytt boende",
+      "message": "Vill du vräka hushållet {{name}} från sitt nuvarande hem?\nHushållet letar efter ett nytt boende nästa epok.",
+      "confirm": "Vräk",
+      "results": {
+        "0": "Familjen {{name}} har blivit utkastad. Möblerna står staplade vid vägkanten.",
+        "1": "Låsen till hemmet har bytts ut. Familjen {{name}} har börjat leta efter ett nytt ställe.",
+        "2": "Familjen {{name}} har fått förslag på ett nytt boende. Till det gamla kan de inte återvända."
+      }
+    }
+  }
+}

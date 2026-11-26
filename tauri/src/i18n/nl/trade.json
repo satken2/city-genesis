@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Aanbodinformatie",
+    "product": "Geleverd product",
+    "amount": "Aanbod",
+    "price": "Aanbodprijs",
+    "soldAmount": "Verkocht",
+    "profitRate": "Winstmarge",
+    "utilization": "Bezettingsgraad"
+  },
+  "tourismSupply": {
+    "title": "Ontvangst van toeristen",
+    "touristCapacity": "Opvangcapaciteit toeristen",
+    "persons": "{{value}} personen",
+    "218": {
+      "price": "Toegangsprijs",
+      "amount": "Bezoekerscapaciteit (totaal)",
+      "soldAmount": "Bezoekers (totaal)"
+    },
+    "219": {
+      "price": "Ritprijs",
+      "amount": "Vervoerscapaciteit (totaal)",
+      "soldAmount": "Reizigers (totaal)"
+    }
+  },
+  "demand": {
+    "product": "Product",
+    "demandAmount": "Vraag",
+    "receivedAmount": "Verkregen",
+    "acquiredAmount": "Voorraad"
+  },
+  "cargo": {
+    "title": "Goederenoverslag",
+    "description": "Dit knooppunt importeert goederen van buiten de regio voor de markten in de stad en koopt overschotten uit de stad op om ze buiten de regio te exporteren.",
+    "capacity": "Overslagcapaciteit",
+    "perPeriod": "/mnd.",
+    "perPeriod_week": "/week",
+    "materialCapacity": "Limiet door aangevoerde grondstoffen",
+    "areaCapacity": "Limiet door vloeroppervlak",
+    "importHandled": "Overgeslagen import",
+    "exportHandled": "Overgeslagen export",
+    "utilization": "Bezettingsgraad",
+    "importSectionTitle": "Import",
+    "exportSectionTitle": "Export",
+    "handledImport": "Verkocht",
+    "handledExport": "Ingekocht",
+    "allocation": "Toegewezen",
+    "priceImport": "Verkoopprijs",
+    "priceExport": "Inkoopprijs",
+    "lost": "Gemiste verkoop",
+    "noProducts": "Geen producten in behandeling"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Време",
+    "choose": "Избор на времето",
+    "loading": "Проверка на времето…",
+    "unknown": "Неизвестно",
+    "automatic": "{{weather}} (автоматично)",
+    "failed": "Времето не можа да бъде променено",
+    "names": {
+      "clear": "Ясно",
+      "high_clouds": "Високи облаци",
+      "fair": "Слънчево",
+      "broken_clouds": "Разкъсана облачност",
+      "overcast": "Облачно",
+      "rain_clouds": "Дъждовни облаци",
+      "fog": "Мъгла",
+      "drizzle": "Ръмеж",
+      "rain": "Дъжд",
+      "heavy_rain": "Силен дъжд",
+      "light_snow": "Слаб сняг",
+      "snow": "Сняг",
+      "blizzard": "Виелица"
+    },
+    "epochClimate": "Климат за епохата",
+    "temperature": "Температура",
+    "precipitation": "Валежи",
+    "sunlight": "Интензивност на слънцето",
+    "windSpeed": "Скорост на вятъра"
+  }
+}

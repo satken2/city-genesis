@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Aprovizionare",
+    "selected": "Selectat",
+    "providers": "Furnizori pentru {{product}}",
+    "executing": "Diagrama de aprovizionare nu este disponibilă cât timp rulează simularea.",
+    "fetchError": "Situația aprovizionării nu a putut fi încărcată.",
+    "activeCount": "Active {{active}} / {{count}}",
+    "production": "Producția precedentă: {{amount}} {{unit}}",
+    "resourceRemaining": "Rezerve accesibile: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Disponibil",
+      "unknown": "Neevaluat",
+      "missing": "Lipsă",
+      "inactive": "Inactiv",
+      "partial": "Probleme parțiale",
+      "limited": "Insuficient / oprit",
+      "disconnected": "Neconectat",
+      "supply_shortage": "Posibil deficit de aprovizionare",
+      "capacity_limited": "Posibilă limită de capacitate"
+    },
+    "facilities": {
+      "401": "Centrale electrice",
+      "402": "Captări de apă",
+      "403": "Furnizori de țiței",
+      "404": "Gări de marfă",
+      "405": "Furnizori de minereu",
+      "406": "Rută pentru nave mari (larg)",
+      "501": "Depouri feroviare",
+      "502": "Autobaze",
+      "503": "Depouri LRT",
+      "504": "Depouri de monorai",
+      "505": "Doc de întreținere"
+    },
+    "consumers": {
+      "401": "Consumatori de energie",
+      "402": "Stații de pompare a apei",
+      "403": "Consumatori de țiței",
+      "404": "Beneficiari de transport de marfă",
+      "405": "Consumatori de minereu",
+      "406": "Porturi",
+      "501": "Linii feroviare",
+      "502": "Linii de autobuz",
+      "503": "Linii LRT",
+      "504": "Linii de monorai",
+      "505": "Linii de feribot"
+    }
+  }
+}

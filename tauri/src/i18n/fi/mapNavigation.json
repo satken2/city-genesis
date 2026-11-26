@@ -1,0 +1,63 @@
+{
+  "mapNavigation": {
+    "title": "Tutki kaupunkia",
+    "openSidebar": "Avaa sivupalkki",
+    "closeSidebar": "Sulje sivupalkki",
+    "back": "Takaisin",
+    "search": "Hae paikkaa",
+    "origin": "Hae lähtöpaikkaa",
+    "destination": "Hae määränpäätä",
+    "clear": "Tyhjennä",
+    "searching": "Haetaan…",
+    "error": "Yhteyttä ei saada. Lataa sivu uudelleen ja yritä uudestaan.",
+    "noResults": "Paikkoja ei löytynyt",
+    "mode": "Kulkutapa",
+    "pedestrian": "Kävely ja joukkoliikenne",
+    "automobile": "Auto",
+    "pickOrigin": "Valitse lähtöpaikka kartalta",
+    "pickDestination": "Valitse määränpää kartalta",
+    "swap": "Vaihda päittäin",
+    "cancel": "Peruuta",
+    "directions": "Reittiohjeet tänne",
+    "intro": "Hae laitoksia, asemia, kaupunginosia tai teitä tai valitse paikka kartalta.",
+    "chooseOrigin": "Hae lähtöpaikkaa tai valitse se kartalta.",
+    "routing": "Haetaan reittiä…",
+    "showRoute": "Näytä koko reitti",
+    "mapPoint": "Piste kartalla",
+    "minutes": "n. {{count}} min",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Arvio perustuu reittilaskennan #{{epoch}} tieverkkoon. Katkoviivat kuvaavat kävelyä ja yhteyksiä teille.",
+    "busy": "Simulaatio on käynnissä. Tulokset päivittyvät, kun se on valmis.",
+    "not_ready": "Reittitietoja ei vielä ole. Aja simulaatio tässä kaupungissa, niin reitit tulevat näkyviin.",
+    "unreachable": "Näiden kahden paikan välillä ei löytynyt reittiä.",
+    "no_access": "Valitun paikan läheltä ei löytynyt käytettävää tietä.",
+    "geometry_unavailable": "Tämän reitin joukkoliikenteen kulkureittiä ei ole saatavilla.",
+    "place_missing": "Valittu paikka on poistettu. Valitse uudelleen.",
+    "kind": {
+      "agent": "Laitos",
+      "zone": "Kaupunginosa",
+      "stop": "Pysäkki",
+      "station": "Asema",
+      "point": "Piste",
+      "road": "Tie"
+    },
+    "leg": {
+      "walk": "Kävely",
+      "drive": "Auto",
+      "transit": "Joukkoliikenne",
+      "conveyor": "Henkilökuljetin",
+      "access": "Yhteys tielle",
+      "turn": "Kääntyminen risteyksessä"
+    },
+    "picking": {
+      "origin": "Napsauta lähtöpaikkaa kartalla.",
+      "destination": "Napsauta määränpäätä kartalla."
+    },
+    "pins": {
+      "tab": "Nastat",
+      "hint": "Napsauta karttaa asettaaksesi valitun värisen nastan. Poista nasta napsauttamalla sitä hiiren oikealla painikkeella.",
+      "list": "Nastaluettelo",
+      "remove": "Poista nasta"
+    }
+  }
+}

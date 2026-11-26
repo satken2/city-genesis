@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Udělit jméno",
+      "message": "Zadejte jméno, které chcete udělit. (Současné jméno: {{name}})",
+      "inputLabel": "Nové jméno",
+      "confirm": "Udělit"
+    },
+    "reward": {
+      "label": "Udělit odměnu",
+      "message": "Domácnost, ve které žije {{name}}, dostane odměnu z městských prostředků.\nHotovost města: {{available}}",
+      "confirm": "Předat"
+    },
+    "expel": {
+      "label": "Popřát hodně štěstí jinde",
+      "message": "Vykázat z města osobu jménem {{name}}?",
+      "confirm": "Vykázat",
+      "results": {
+        "0": "{{name}} balí kufry a potichu odchází z města. Vyprovodit nepřišel nikdo.",
+        "1": "„Sem už nikdy nevkročím!“ – s těmito slovy překračuje {{name}} hranice města.",
+        "2": "Osobu jménem {{name}} jsme zdvořile doprovodili až za hranice města. Přejeme hodně úspěchů jinde."
+      }
+    },
+    "donation": {
+      "label": "Požádat o dar",
+      "message": "Požádat domácnost, ve které žije {{name}}, o dar pro město.\nHotovost domácnosti: {{available}}",
+      "confirm": "Požádat"
+    },
+    "relocate": {
+      "label": "Navrhnout nové bydlení",
+      "message": "Vystěhovat domácnost, ve které žije {{name}}, ze současného bydlení?\nV příští epoše si domácnost začne hledat nové bydlení.",
+      "confirm": "Vystěhovat",
+      "results": {
+        "0": "Rodinu, ke které patří {{name}}, vyhodili z domu. Nábytek leží naskládaný u cesty.",
+        "1": "V domě, kde bydlí {{name}}, jsou nové zámky. Rodina si začíná hledat nové bydlení.",
+        "2": "Rodině, ke které patří {{name}}, bylo navrženo nové bydlení. Do starého domova už se vrátit nemůže."
+      }
+    }
+  }
+}

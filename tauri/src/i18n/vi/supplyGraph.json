@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Tình hình cung ứng",
+    "selected": "Đang chọn",
+    "providers": "Cơ sở cung ứng: {{product}}",
+    "executing": "Không thể tải sơ đồ cung ứng khi đang chạy mô phỏng.",
+    "fetchError": "Không thể tải tình hình cung ứng.",
+    "activeCount": "Đang hoạt động {{active}}/{{count}}",
+    "production": "Sản lượng lần trước: {{amount}} {{unit}}",
+    "resourceRemaining": "Trữ lượng tài nguyên còn khai thác được: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Sẵn sàng",
+      "unknown": "Chưa xác định",
+      "missing": "Không có",
+      "inactive": "Không hoạt động",
+      "partial": "Có vấn đề một phần",
+      "limited": "Thiếu hụt hoặc ngừng",
+      "disconnected": "Chưa kết nối",
+      "supply_shortage": "Có thể thiếu nguồn cung",
+      "capacity_limited": "Có thể bị giới hạn công suất"
+    },
+    "facilities": {
+      "401": "Nhà máy điện",
+      "402": "Công trình lấy nước",
+      "403": "Cơ sở cung cấp dầu thô",
+      "404": "Ga hàng hóa",
+      "405": "Cơ sở cung cấp quặng",
+      "406": "Luồng tàu viễn dương (ngoài khơi)",
+      "501": "Depot tàu hỏa",
+      "502": "Bãi đỗ xe buýt",
+      "503": "Depot LRT",
+      "504": "Depot tàu một ray",
+      "505": "Ụ bảo dưỡng tàu"
+    },
+    "consumers": {
+      "401": "Cơ sở dùng điện",
+      "402": "Trạm bơm nước",
+      "403": "Cơ sở dùng dầu thô",
+      "404": "Cơ sở dùng vận tải hàng hóa",
+      "405": "Cơ sở dùng quặng",
+      "406": "Cảng",
+      "501": "Tuyến đường sắt",
+      "502": "Tuyến xe buýt",
+      "503": "Tuyến LRT",
+      "504": "Tuyến tàu một ray",
+      "505": "Tuyến phà"
+    }
+  }
+}

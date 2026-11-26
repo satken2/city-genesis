@@ -1,0 +1,756 @@
+{
+  "tutorial": {
+    "startButton": "Mula",
+    "controls": {
+      "title": "Kawalan asas",
+      "description": "Pelajari matlamat anda sebagai datuk bandar dan cara bermain dengan merancang dahulu sebelum memajukan masa. Selepas meneliti maksud maklumat di skrin, fungsi setiap butang dan cara menggerakkan kamera, anda akan memanjangkan jalan untuk membuka kawasan kediaman baharu, lalu menyediakan rumah, elektrik dan bekalan air untuknya.",
+      "step1": {
+        "title": "Mulakan pembinaan bandar sebagai datuk bandar",
+        "role": "City Genesis ialah permainan membangunkan bandar sebagai datuk bandar. Anda merancang pembinaan jalan dan kemudahan, menentukan kegunaan tanah, cukai serta belanjawan perkhidmatan awam. Tugas datuk bandar ialah mewujudkan persekitaran yang menyokong kehidupan dan aktiviti penduduk serta syarikat. Tekan “Seterusnya” untuk meneruskan.",
+        "goal": "Matlamatnya ialah bandar tempat penduduk dapat hidup selesa dan selamat. Tambahkan tempat tinggal dan pekerjaan, dan sediakan elektrik, air, rawatan kesihatan dan sebagainya. Membesarkan bandar juga memerlukan wang. Fikirkan apa yang perlu diperbaiki sambil memerhatikan kehidupan penduduk dan kewangan bandar.",
+        "epoch": "Dalam permainan ini, masa bergerak sebulan demi sebulan. Mula-mula tetapkan belanjawan dan rancangan pembinaan, kemudian tekan “Mula” apabila sudah bersedia. Masa akan bergerak, kerja pembinaan serta aktiviti penduduk dan syarikat akan berjalan, dan anda boleh melihat hasilnya sebelum membuat rancangan seterusnya. Tarikh tidak berubah selagi “Mula” tidak ditekan, jadi anda boleh berfikir dengan tenang.",
+        "epoch_week": "Dalam permainan ini, masa bergerak seminggu demi seminggu. Mula-mula tetapkan belanjawan dan rancangan pembinaan, kemudian tekan “Mula” apabila sudah bersedia. Masa akan bergerak, kerja pembinaan serta aktiviti penduduk dan syarikat akan berjalan, dan anda boleh melihat hasilnya sebelum membuat rancangan seterusnya. Tarikh tidak berubah selagi “Mula” tidak ditekan, jadi anda boleh berfikir dengan tenang."
+      },
+      "step2": {
+        "title": "Fahami keadaan bandar dari kokpit",
+        "tools": "Kokpit di bahagian bawah skrin ialah tempat untuk menyemak keadaan bandar dan memikirkan langkah seterusnya. “Paparan” menggunakan warna untuk membantu mencari kekurangan dan kawasan bermasalah. “Peta” menunjukkan kedudukan tempat di seluruh bandar, jadi anda mudah mencari tempat yang diperlukan walaupun bandar semakin luas.",
+        "tracking": "“Senarai warga kota” ialah butang untuk mencari penduduk mengikut nama dan sebagainya, serta melihat semula kehidupan dan perjalanan ke tempat kerja penduduk yang menarik perhatian anda. Jika anda menambah seseorang ke dalam jejakan dari butiran warga kota, maklumatnya boleh dibuka dari sini. Gunakannya apabila anda ingin mengenali kehidupan setiap individu yang tidak terlihat daripada angka seluruh bandar.",
+        "bulldozer": "“Jentolak” digunakan untuk membuang lot kosong atau membatalkan bangunan dan jalan yang masih dirancang. Tekan butang, kemudian klik sasaran dalam paparan 3D; apabila selesai, tekan butang sekali lagi untuk keluar. Untuk merobohkan bangunan atau jalan yang sudah siap, buka butirannya dan pilih robohkan.",
+        "services": "Meter kilat, titisan air dan kapal ialah petunjuk baki kapasiti elektrik, bekalan air dan import-eksport. Semakin penuh meter, semakin banyak permintaan atau jumlah dikendalikan dan semakin sedikit baki kapasitinya. Tekan meter untuk menyemak kemudahan awam dan pusat import-eksport. Sebelum membesarkan bandar, pastikan sama ada kemudahan perlu ditambah.",
+        "score": "“Skor” menunjukkan secara keseluruhan sejauh mana penduduk berpuas hati dengan kehidupan di bandar ini. Semakin tinggi, semakin selesa bandar untuk didiami. Menyediakan tempat tinggal, pekerjaan, rawatan kesihatan dan persekitaran hidup yang baik akan meningkatkannya. Jika skor menurun, cari masalah yang dihadapi penduduk.",
+        "budget": "“Belanjawan” menunjukkan anggaran perbelanjaan bulan depan berbanding pendapatan bulan lepas. Jika jarum meter condong ke kanan, perbelanjaan melebihi pendapatan. Sebaliknya, jika condong ke kiri, ada lebihan wang. Semaklah sebelum memajukan masa.",
+        "budget_week": "“Belanjawan” menunjukkan anggaran perbelanjaan minggu depan berbanding pendapatan minggu lepas. Jika jarum meter condong ke kanan, perbelanjaan melebihi pendapatan. Sebaliknya, jika condong ke kiri, ada lebihan wang. Semaklah sebelum memajukan masa.",
+        "budgetChanges": "Menambah kerja pembinaan jalan dan kemudahan, atau meningkatkan operasi kemudahan dan kelajuan pembinaan, akan menambah wang yang diperlukan dan menaikkan meter belanjawan. Menurunkan operasi atau kelajuan pembinaan boleh mengurangkan anggaran perbelanjaan. Apabila hasil cukai bertambah, meter akan turun walaupun perbelanjaannya sama.",
+        "budgetPlanning": "Jika meter rendah, ada wang yang boleh digunakan untuk bandar. Fikirkan pelaburan dalam perkhidmatan yang kurang atau kemudahan yang akan diperlukan kelak.",
+        "date": "Tarikh menunjukkan sejauh mana masa bandar telah berjalan. Gunakannya sebagai panduan untuk menyemak kemajuan pembinaan dan perubahan bandar mengikut musim. Tarikh tidak bergerak semasa anda merancang, dan dikemas kini apabila masa dimajukan dengan “Mula”.",
+        "climate": "Panel suhu, hujan, cahaya matahari dan kelajuan angin menunjukkan purata iklim bulan ini. Keadaan ini mempengaruhi kecekapan pengeluaran pertanian, tenaga angin dan tenaga solar. Jika hasil tanaman atau penjanaan elektrik rendah, semak juga iklimnya.",
+        "climate_week": "Panel suhu, hujan, cahaya matahari dan kelajuan angin menunjukkan purata iklim minggu ini. Keadaan ini mempengaruhi kecekapan pengeluaran pertanian, tenaga angin dan tenaga solar. Jika hasil tanaman atau penjanaan elektrik rendah, semak juga iklimnya.",
+        "climateEffects": "Cahaya matahari yang lemah mengurangkan keluaran tenaga solar, dan angin yang lemah mengurangkan keluaran tenaga angin. Suhu dan jumlah hujan juga mempengaruhi pertanian. Tekan panel iklim untuk melihat kesan keadaan bulan ini terhadap kecekapan pengeluaran setiap kemudahan. Rancang kemudahan dengan mengambil kira perubahan bekalan mengikut musim.",
+        "climateEffects_week": "Cahaya matahari yang lemah mengurangkan keluaran tenaga solar, dan angin yang lemah mengurangkan keluaran tenaga angin. Suhu dan jumlah hujan juga mempengaruhi pertanian. Tekan panel iklim untuk melihat kesan keadaan minggu ini terhadap kecekapan pengeluaran setiap kemudahan. Rancang kemudahan dengan mengambil kira perubahan bekalan mengikut musim.",
+        "notifications": "Nombor pada “Pemberitahuan” ialah bilangan amaran dan peringatan yang patut disemak sekarang. Nombor merah dan butang yang berkelip menandakan fungsi bandar terganggu dan masalah itu perlu ditangani segera. Nombor kuning ialah peringatan, contohnya persediaan untuk pertumbuhan atau masalah yang mengambil masa untuk diperbaiki. Mula-mula, tekan butang itu untuk membaca kandungannya.",
+        "notificationActions": "Jika pemberitahuan menyebut kemudahan atau daerah tertentu, klik barisnya untuk melihat butirannya. Tangani mengikut puncanya: sambungkan talian elektrik yang belum bersambung, atau pastikan kemudahan yang kekurangan bahan dapat memperolehnya. Pemberitahuan tentang masalah berterusan akan hilang apabila puncanya selesai. Selepas mengambil tindakan, semak hasilnya pada bulan berikutnya."
+      },
+      "step3": {
+        "title": "Tukar paparan untuk mencari masalah",
+        "open": "Kekurangan elektrik dan kesesakan lalu lintas sukar dilihat daripada rupa bandar sahaja. Gunakan “Paparan” untuk memaparkan maklumat yang anda perlukan pada peta. Tekan “Paparan” di kokpit untuk membuka panelnya.",
+        "tabs": "Tab menegak membolehkan anda memilih perkara untuk diperiksa, seperti bangunan, jalan, lot atau daerah. Jika maklumat bertindih dan sukar dibaca, anda juga boleh menyembunyikan perkara yang tidak diperlukan. Tekan “Seterusnya” untuk melihat cara menggunakan paparan.",
+        "modes": "Butang dalam setiap tab menentukan maklumat yang digunakan untuk mewarnakan objek. Cari jalan yang sesak atau bangunan bermasalah dan jadikannya petunjuk untuk langkah seterusnya. Klik objek dalam paparan 3D untuk memeriksanya dengan lebih terperinci. Tekan “Seterusnya”."
+      },
+      "step4": {
+        "title": "Kenali alat pembinaan bandar",
+        "grading": "Mari lihat butang di sebelah kiri skrin dari atas ke bawah. “Kerja tanah” digunakan untuk meratakan cerun yang sukar dibina atau menambak laut untuk menambah tanah yang boleh digunakan. Apabila anda mahu menambah kediaman atau tempat kerja tetapi tanah tidak mencukupi, alat ini meluaskan ruang untuk bandar berkembang.",
+        "road": "“Jalan, kereta api & infrastruktur” ialah butang untuk membina laluan bagi orang, barangan, elektrik dan air. Hubungkan kediaman dan tempat kerja dengan jalan, hubungkan tempat yang jauh dengan landasan, dan sambungkan kemudahan dengan talian elektrik dan paip air. Rangkaian ini menyokong pergerakan penduduk, urus niaga syarikat serta bekalan elektrik dan air.",
+        "land": "“Lot tanah” ialah butang untuk menyediakan tapak bangunan. Tanah sahaja tidak cukup untuk bangunan didirikan. Sama ada untuk menambah kediaman atau menerima kemudahan besar, tapak dengan keluasan yang sesuai diperlukan.",
+        "landDevelopment": "Lot yang disediakan boleh digunakan oleh kerajaan tempatan untuk membina bangunan, dan juga menjadi tempat kediaman dan syarikat swasta berkembang. Bangunan swasta didirikan mengikut permintaan dan peraturan bangunan daerah. Apabila anda mahu menambah kediaman atau pekerjaan, pastikan juga lot kosong mencukupi.",
+        "district": "“Daerah” ialah butang untuk mengurus sebahagian bandar sebagai satu kawasan. Anda boleh menetapkan hala tuju berbeza bagi setiap tempat, seperti kawasan yang tertumpu pada kediaman atau kawasan untuk mengumpulkan kilang. Setiap daerah boleh menghadkan jenis bangunan yang dibenarkan, jadi anda boleh menentukan hala tuju pembangunan yang sesuai untuk seluruh kawasan itu.",
+        "districtRules": "Dalam butiran daerah, anda boleh menentukan jenis bangunan yang dibenarkan. Gunakannya mengikut jenis bandar yang ingin anda bangunkan, contohnya supaya kilang tidak bercampur dengan kawasan kediaman. Anda juga boleh membandingkan penduduk dan keadaan hidup antara daerah untuk menentukan kawasan yang memerlukan bantuan.",
+        "construction": "“Pembinaan” ialah butang untuk merancang bangunan yang diperlukan oleh bandar. Anda boleh membina kediaman, tempat kerja, hospital, sekolah, stesen jana kuasa dan sebagainya. Gunakannya untuk menambah tempat tinggal dan pekerjaan, atau menampung kekurangan perkhidmatan seperti kesihatan, pendidikan dan elektrik.",
+        "transport": "“Pengangkutan awam” ialah butang untuk menyokong pergerakan penduduk dengan bas dan kereta api. Anda boleh menentukan laluan dan hentian, serta melaraskan tambang dan sela masa. Gunakannya untuk menghubungkan kediaman dengan tempat kerja dan sekolah, dan meringankan beban perjalanan harian.",
+        "propPlacement": "“Letak objek hiasan” ialah butang untuk meletakkan pokok, batu dan sebagainya bagi mencantikkan pemandangan bandar. Gunakannya apabila anda ingin menambah kehijauan di jalan atau menghias rupa bumi.",
+        "cityDevelopment": "“Pembangunan bandar automatik” ialah butang untuk merancang jalan dan lot sekali gus di kawasan yang luas. Warnakan kawasan yang ingin dibangunkan pada peta dan pilih corak susun atur jalan untuk menyediakan jalan dan lot sekali gus. Gunakannya apabila membuka kawasan kediaman atau pekan baharu dari awal.",
+        "constructionProjects": "“Projek pembinaan” menghimpunkan kerja yang sedang dirancang dan sedang dibina di satu tempat. Lihat kerja mana yang sedang berjalan dan di mana kos dibelanjakan untuk menentukan kerja yang perlu diteruskan.",
+        "regulation": "“Peraturan” ialah tempat menentukan peraturan untuk hidup dan bekerja di bandar. Anda boleh menetapkan had laju, waktu bekerja, penerimaan imigran, keselamatan sosial dan sebagainya. Laraskan mengikut keadaan, dengan memikirkan sama ada keselamatan, keselesaan hidup atau pertumbuhan bandar yang ingin diutamakan.",
+        "stat": "“Statistik” ialah butang untuk menyemak hasil pembangunan bandar anda. Graf menunjukkan perubahan penduduk, pendapatan, perjalanan ke tempat kerja, kepuasan penduduk, saiz ekonomi bandar, harga barangan dan sebagainya. Selepas mengubah dasar atau kemudahan, semak sama ada kehidupan bertambah baik dan apa yang masih kurang. Itulah semua butang di sebelah kiri."
+      },
+      "step5": {
+        "title": "Laksanakan rancangan dan semak hasilnya",
+        "flow": "Selepas menyemak keadaan bandar dan merancang pembinaan serta peruntukan belanjawan, majukan masa dengan “Mula” di kokpit. Kerja pembinaan berjalan, penduduk bekerja, syarikat mengeluarkan barangan, dan kewangan serta skor bandar berubah. Kesan sesuatu rancangan mungkin mengambil masa beberapa bulan untuk kelihatan.",
+        "execute": "Selepas memajukan masa, semak hasil dan pemberitahuan. Jika ada masalah, tangani dalam rancangan seterusnya, kemudian majukan masa sekali lagi. Bandar dibangunkan dengan mengulangi “rancang → majukan → semak hasil”. Anda tidak perlu menekan “Mula” di sini. Tekan “Seterusnya” untuk belajar kawalan kamera."
+      },
+      "step6": {
+        "title": "Gerakkan kamera",
+        "description": "Kamera boleh digerakkan seperti berikut: seret dengan butang kiri untuk mengalihkan pandangan, seret dengan butang kanan untuk memutar, W/A/S/D (atau kekunci anak panah) untuk bergerak, Q/E untuk memutar, R/F untuk menukar ketinggian, dan roda tetikus untuk zum. Cubalah sesuka hati, kemudian tekan “Seterusnya”."
+      },
+      "step7": {
+        "title": "Mod terbang dan mod sinematik",
+        "description": "Kamera mempunyai dua mod khas. “Mod terbang” dimulakan dengan Shift+F: bergerak mengikut arah pandangan dengan W/A/S/D, lihat sekeliling dengan tetikus, dan naik atau turun dengan R/F. Tekan Esc untuk keluar. “Mod sinematik” dimulakan dengan butang di penjuru kiri atas skrin dan membolehkan anda mengelilingi bandar sambil menikmati pemandangan. Lihat sekeliling dengan tetikus; Shift menukar antara mengelilingi dan bergerak, Space untuk jeda, Backspace untuk main undur, dan Esc untuk keluar. Panel di skrin disembunyikan semasa kedua-dua mod aktif dan muncul semula apabila anda menekan Esc. Selepas mencubanya, keluar daripada kedua-dua mod dan tekan “Seterusnya”."
+      },
+      "step8": {
+        "title": "Lihat sempadan bandar",
+        "description": "Kamera telah dialihkan ke hujung timur bandar. Kawasan yang boleh digunakan sebagai bandar ialah segi empat ini, tempat rupa bumi terperinci tersedia, dan kamera juga tidak boleh keluar dari sempadan ini. Itu sahaja penerangan tentang skrin dan kawalan. Seterusnya, mari kita bina kawasan kediaman baharu. Tekan “Seterusnya”."
+      },
+      "step9": {
+        "title": "Panjangkan jalan",
+        "description": "Sekarang, mari bina kawasan kediaman untuk menyambut penduduk baharu. Kediaman dan tempat kerja tidak berguna jika tidak dihubungkan oleh jalan: orang tidak dapat berulang-alik dan barangan tidak dapat sampai. Mula-mula, panjangkan jalan timur-barat pekan ini ke arah barat untuk membuka laluan ke kawasan kediaman baharu. Tekan “Jalan, kereta api & infrastruktur” pada panel ikon untuk membuka panel pembinaan.",
+        "confirm": "Tanah di sepanjang jalan dibahagikan kepada lot apabila jalan itu siap dibina. Dalam “Lot tepi jalan yang dicipta apabila siap” pada panel pembinaan, anda boleh memilih saiz setiap lot bagi sisi kiri dan kanan jalan. Tentukan mengikut jenis bangunan yang ingin anda terima: lot kecil sesuai untuk kediaman, manakala lot besar sesuai untuk kilang dan ladang. Jalan ini untuk kawasan kediaman, jadi biarkan seperti sedia ada. Tekan “Sahkan” pada panel pembinaan untuk menyimpan, kemudian tekan butang “Seterusnya”."
+      },
+      "step10": {
+        "title": "Siapkan jalan",
+        "description": "Jalan itu masih “Pembinaan dirancang”. Jalan yang baru dirancang belum boleh digunakan; orang dan kereta hanya boleh melaluinya selepas kerja pembinaan selesai. Tekan “Mula” di kokpit 2-3 kali untuk memajukan masa dan tunggu sehingga siap. Kos pembinaan dikenakan setiap bulan selagi kerja sedang berjalan.",
+        "description_week": "Jalan itu masih “Pembinaan dirancang”. Jalan yang baru dirancang belum boleh digunakan; orang dan kereta hanya boleh melaluinya selepas kerja pembinaan selesai. Tekan “Mula” di kokpit 2-3 kali untuk memajukan masa dan tunggu sehingga siap. Kos pembinaan dikenakan setiap minggu selagi kerja sedang berjalan."
+      },
+      "step11": {
+        "title": "Lot telah dicipta",
+        "description": "Jalan telah siap, dan lot telah dicipta di sepanjangnya. Bangunan hanya boleh didirikan di atas lot, dan lot yang menghadap jalan membolehkan orang dan barangan keluar masuk. Untuk menambah lot di sepanjang jalan sedia ada, gunakan “Lot tanah” pada panel ikon."
+      },
+      "step12": {
+        "title": "Cipta daerah",
+        "description": "Sebelum membina, tentukan dahulu hala tuju jalan ini. Tanpa hala tuju, kilang mungkin didirikan betul-betul di sebelah rumah. Hala tuju setiap tempat ditentukan mengikut unit “Daerah”. Daerah ditetapkan mengikut jalan, dan lot termasuk dalam daerah jalan yang dihadapinya. Tekan “Daerah” pada panel ikon untuk membuka tetingkap suntingan daerah; anda akan dapati seluruh pekan kini ialah satu daerah sahaja.",
+        "create": "Gunakan kaedah pemilihan “Mengikut sisi jalan”. Tukar alat kepada “Cipta daerah baharu”, kemudian tahan kekunci Ctrl dan seret di sepanjang jalan yang anda panjangkan tadi. Kedua-dua sisi jalan yang diwarnakan, bersama lot yang menghadapnya, akan menjadi daerah baharu."
+      },
+      "step13": {
+        "title": "Daerah telah dipisahkan",
+        "description": "Jalan baharu telah dipisahkan daripada pusat pekan sebagai daerah tersendiri. Anda boleh menyemak penduduk dan harga mengikut daerah serta menentukan bangunan yang boleh dibina di situ, jadi setiap kawasan boleh dibangunkan mengikut kesesuaiannya. Selepas menyemaknya, tutup tetingkap suntingan daerah."
+      },
+      "step14": {
+        "title": "Buka butiran daerah",
+        "description": "Mari tetapkan daerah baharu ini sebagai kawasan kediaman. Paparkan daerah dengan ikon di bahagian kiri bawah skrin, kemudian klik label daerah yang baru anda cipta untuk membuka butirannya."
+      },
+      "step15": {
+        "title": "Jadikan kawasan kediaman",
+        "description": "Peraturan bangunan di bahagian bawah panel menentukan bangunan yang boleh dibina di atas lot dalam daerah ini. Kita mahu kawasan ini menjadi tempat tinggal yang tenang, jadi klik semua bangunan selain “Pangsapuri” dan “Rumah sesebuah” untuk menyahaktifkannya."
+      },
+      "step16": {
+        "title": "Semak lot",
+        "description": "Peraturan yang ditetapkan untuk daerah dikenakan pada semua lot dalam daerah itu. Klik lot yang bertanda kuning untuk membuka butirannya."
+      },
+      "step17": {
+        "title": "Peraturan telah dikenakan",
+        "description": "Di bahagian bawah panel lot, anda dapat melihat peraturan daerah yang hanya membenarkan “Pangsapuri” dan “Rumah sesebuah”. Kini hanya kediaman boleh dibina di lot sepanjang jalan ini. Anda tidak perlu menetapkan lot satu per satu; apabila hala tuju daerah ditentukan, seluruh jalan akan mengikutinya."
+      },
+      "step18": {
+        "title": "Bina kediaman",
+        "description": "Kini tiba masanya menyediakan tempat tinggal. Biasanya, kediaman dibina secara automatik oleh pihak swasta apabila ada orang yang ingin tinggal di sini, tetapi perumahan awam yang dibina oleh kerajaan tempatan dapat menampung kekurangan tempat tinggal dengan segera. Mari bina pangsapuri awam di sini. Tekan “Pembinaan” pada panel ikon.",
+        "select": "Pilih “Pangsapuri” dalam kategori “Kediaman”, klik mana-mana lot dalam daerah baharu sebagai tapak pembinaan, kemudian tekan “Sahkan”."
+      },
+      "step19": {
+        "title": "Siapkan kediaman",
+        "description": "Sama seperti jalan, bangunan yang baru dirancang belum boleh didiami. Pangsapuri mengambil masa lebih setengah tahun untuk siap. Tekan “Mula” untuk memajukan masa dan tunggu sehingga siap."
+      },
+      "step20": {
+        "title": "Semak bekalan elektrik",
+        "description": "Tempat tinggal sahaja tidak mencukupi jika elektrik dan air tidak sampai. Pekan ini belum mempunyai stesen jana kuasa mahupun bekalan air. Klik pangsapuri bertanda kuning, tempat penduduk pekan tinggal, untuk membuka butirannya. Pilih salah satu penyewa dalam tab “Maklumat bangunan”, kemudian buka tab “Permintaan, penawaran dan dagangan”; anda akan dapati jumlah elektrik yang diperoleh ialah 0."
+      },
+      "step21": {
+        "title": "Bina stesen jana kuasa solar",
+        "description": "Untuk membekalkan elektrik, anda memerlukan stesen jana kuasa untuk menjananya terlebih dahulu. Bina “Stesen jana kuasa solar” di lot bertanda kuning. Biasanya pembinaan mengambil masa, tetapi kerana ini tutorial, tempoh pembinaan dilangkau."
+      },
+      "step22": {
+        "title": "Bina pencawang elektrik",
+        "description": "Elektrik voltan tinggi dari stesen jana kuasa tidak boleh digunakan terus oleh isi rumah. Pencawang elektrik menukarnya kepada elektrik yang boleh digunakan di rumah dan mengagihkannya kepada bangunan sekitar yang dihubungkan oleh jalan. Bina “Pencawang elektrik” di lot bertanda kuning berhampiran pangsapuri."
+      },
+      "step23": {
+        "title": "Sambungkan dengan talian elektrik",
+        "description": "Walaupun stesen jana kuasa dan pencawang elektrik berjauhan, keduanya boleh disambungkan jika ada laluan untuk elektrik. Buka “Jalan, kereta api & infrastruktur” pada panel ikon, pilih “Talian elektrik” di bawah “Elektrik”, dan tarik talian dari titik sambungan stesen jana kuasa solar ke titik sambungan pencawang elektrik. Garisan lurus antara kedua-dua titik sambungan sudah memadai."
+      },
+      "step24": {
+        "title": "Sahkan bekalan elektrik",
+        "description": "Selepas disambungkan, pastikan elektrik benar-benar mengalir. Tekan “Mula” untuk memajukan masa, klik pencawang elektrik untuk membuka butirannya, dan dalam tab “Permintaan, penawaran dan dagangan”, pastikan jumlah elektrik voltan tinggi yang diterima bukan 0. Stesen jana kuasa mungkin mengambil masa beberapa bulan untuk mula beroperasi dan elektrik untuk sampai."
+      },
+      "step25": {
+        "title": "Elektrik sampai ke rumah",
+        "description": "Dari butiran pangsapuri, buka tab “Permintaan, penawaran dan dagangan” bagi seorang penyewa seperti yang anda lakukan tadi, dan pastikan jumlah elektrik yang diperoleh bukan 0 lagi. Mungkin perlu sebulan dua lagi sebelum elektrik sampai ke isi rumah. Jana di stesen jana kuasa, salurkan melalui talian elektrik, agihkan dari pencawang elektrik — hanya apabila ketiga-tiganya bersambung barulah elektrik sampai ke rumah."
+      },
+      "step26": {
+        "title": "Cari sumber air",
+        "description": "Seterusnya ialah bekalan air. Air paip diperoleh dengan mengepam air bawah tanah dan menyalurkannya ke pekan. Mula-mula, cari tempat air boleh dipam. Tekan “Paparan” di kokpit untuk membuka panel paparan.",
+        "show": "Pilih “Sumber asli” daripada tab menegak dan tukar kepada “Papar”. Sumber air ditunjukkan dengan warna biru muda pada peta. Klik sumber air bertanda kuning untuk membuka butirannya."
+      },
+      "step27": {
+        "title": "Bina pam air bawah tanah",
+        "description": "Pam air bawah tanah ialah kemudahan yang mengepam air dari bawah tanah, jadi ia mesti dibina di tempat yang mempunyai sumber air. Ia juga memerlukan elektrik dan pekerja untuk beroperasi; itulah sebabnya elektrik disambungkan dahulu. Bina “Pam air bawah tanah” di lot bertanda kuning di atas sumber air. Kerana ini tutorial, tempoh pembinaan dilangkau."
+      },
+      "step28": {
+        "title": "Bina stesen pam air",
+        "description": "Air yang dipam tidak boleh diagihkan terus kepada isi rumah. Sama seperti pencawang elektrik mengagihkan elektrik, stesen pam air menyalurkan air kepada bangunan sekitar yang dihubungkan oleh jalan. Bina “Stesen pam air” di lot bertanda kuning berhampiran pangsapuri."
+      },
+      "step29": {
+        "title": "Sambungkan dengan paip penyalur air",
+        "description": "Anda memerlukan paip untuk membawa air dari pam air bawah tanah ke stesen pam air. Buka “Jalan, kereta api & infrastruktur” pada panel ikon, pilih “Paip penyalur air” di bawah “Bekalan air”, dan pasang paip dari titik sambungan pam air bawah tanah ke titik sambungan stesen pam air. Supaya tidak bertembung dengan jalan dan talian elektrik, pasang paip dengan melencong jauh ke sebelah timur."
+      },
+      "step30": {
+        "title": "Sahkan bekalan air",
+        "description": "Tekan “Mula” untuk memajukan masa, klik stesen pam air untuk membuka butirannya, dan dalam tab “Permintaan, penawaran dan dagangan”, pastikan jumlah air tekanan tinggi yang diterima bukan 0. Mungkin perlu beberapa bulan sebelum pekerja berkumpul di pam air bawah tanah dan air sampai."
+      },
+      "step31": {
+        "title": "Asas pembinaan bandar sudah sedia",
+        "description": "Air telah sampai ke stesen pam air, jadi rumah di sekitarnya kini boleh menggunakan air paip. Bina jalan, sediakan lot, tentukan hala tuju daerah, bina kediaman, dan salurkan elektrik serta air — itulah aliran asas pembinaan bandar. Tekan “Seterusnya” untuk menamatkan tutorial kawalan asas."
+      }
+    },
+    "scenario4": {
+      "title": "Bina kereta api",
+      "description": "Kami mahu menghubungkan kawasan perumahan dengan tempat kerja melalui kereta api, tetapi di tapak yang dirancang terdapat bangunan swasta dan sebuah hospital awam. Dalam tutorial ini, anda akan belajar tentang pengambilan tanah, pemindahan kemudahan awam, landasan layang di atas jalan, pembinaan platform, bangunan stesen dan depoh, pelarasan lengkung dan kecerunan, serta bekalan elektrik hingga laluan dibuka.",
+      "step1": {
+        "title": "Letakkan platform layang",
+        "description": "Dalam “Jalan, kereta api & infrastruktur” → “Kereta api”, bina “Platform jejambat (sisi)” di sebelah barat bandar dan “Platform landasan berkembar (sisi)” di sebelah timur bandar. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan. Kedua-duanya pada ketinggian 6m.",
+        "open": "Dalam “Jalan, kereta api & infrastruktur” → “Kereta api”, bina “Platform jejambat (sisi)” di sebelah barat bandar dan “Platform landasan berkembar (sisi)” di sebelah timur bandar. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan. Kedua-duanya pada ketinggian 6m.",
+        "variant": "Dalam “Jalan, kereta api & infrastruktur” → “Kereta api”, bina “Platform jejambat (sisi)” di sebelah barat bandar dan “Platform landasan berkembar (sisi)” di sebelah timur bandar. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan. Kedua-duanya pada ketinggian 6m.",
+        "start": "Dalam “Jalan, kereta api & infrastruktur” → “Kereta api”, bina “Platform jejambat (sisi)” di sebelah barat bandar dan “Platform landasan berkembar (sisi)” di sebelah timur bandar. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan. Kedua-duanya pada ketinggian 6m.",
+        "end": "Dalam “Jalan, kereta api & infrastruktur” → “Kereta api”, bina “Platform jejambat (sisi)” di sebelah barat bandar dan “Platform landasan berkembar (sisi)” di sebelah timur bandar. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan. Kedua-duanya pada ketinggian 6m.",
+        "confirm": "Dalam “Jalan, kereta api & infrastruktur” → “Kereta api”, bina “Platform jejambat (sisi)” di sebelah barat bandar dan “Platform landasan berkembar (sisi)” di sebelah timur bandar. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan. Kedua-duanya pada ketinggian 6m.",
+        "town": "Bina “Platform jejambat (sisi)” di sebelah barat. Pada ketinggian 6m, klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan.",
+        "new": "Kini bina di sebelah timur. Tekan “Kembali” pada panel untuk kembali ke senarai jenis, kemudian pilih “Platform landasan berkembar (sisi)” di bawah “Kereta api”. Pada ketinggian 6m, klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan. Jika panel tertutup, buka semula melalui “Jalan, kereta api & infrastruktur”.",
+        "east": "Kini bina di sebelah timur. Tekan “Kembali” pada panel untuk kembali ke senarai jenis, kemudian pilih “Platform landasan berkembar (sisi)” di bawah “Kereta api”. Pada ketinggian 6m, klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan. Jika panel tertutup, buka semula melalui “Jalan, kereta api & infrastruktur”."
+      },
+      "step2": {
+        "title": "Bina bangunan stesen dan pintu masuk",
+        "description": "Pilih “Bangunan stesen ringkas” dan sambungkan setiap pasangan penanda di barat dan di timur untuk membuat laluan pejalan kaki pendek yang merentasi platform. Letakkan pintu masuk betul-betul di kedua-dua sisi platform. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan.",
+        "open": "Pilih “Bangunan stesen ringkas” dan sambungkan setiap pasangan penanda di barat dan di timur untuk membuat laluan pejalan kaki pendek yang merentasi platform. Letakkan pintu masuk betul-betul di kedua-dua sisi platform. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan.",
+        "variant": "Pilih “Bangunan stesen ringkas” dan sambungkan setiap pasangan penanda di barat dan di timur untuk membuat laluan pejalan kaki pendek yang merentasi platform. Letakkan pintu masuk betul-betul di kedua-dua sisi platform. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan.",
+        "start": "Pilih “Bangunan stesen ringkas” dan sambungkan setiap pasangan penanda di barat dan di timur untuk membuat laluan pejalan kaki pendek yang merentasi platform. Letakkan pintu masuk betul-betul di kedua-dua sisi platform. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan.",
+        "end": "Pilih “Bangunan stesen ringkas” dan sambungkan setiap pasangan penanda di barat dan di timur untuk membuat laluan pejalan kaki pendek yang merentasi platform. Letakkan pintu masuk betul-betul di kedua-dua sisi platform. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan.",
+        "confirm": "Pilih “Bangunan stesen ringkas” dan sambungkan setiap pasangan penanda di barat dan di timur untuk membuat laluan pejalan kaki pendek yang merentasi platform. Letakkan pintu masuk betul-betul di kedua-dua sisi platform. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan.",
+        "town": "Pilih “Bangunan stesen ringkas” dan sambungkan setiap pasangan penanda di barat dan di timur untuk membuat laluan pejalan kaki pendek yang merentasi platform. Letakkan pintu masuk betul-betul di kedua-dua sisi platform. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan.",
+        "new": "Pilih “Bangunan stesen ringkas” dan sambungkan setiap pasangan penanda di barat dan di timur untuk membuat laluan pejalan kaki pendek yang merentasi platform. Letakkan pintu masuk betul-betul di kedua-dua sisi platform. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan.",
+        "east": "Pilih “Bangunan stesen ringkas” dan sambungkan setiap pasangan penanda di barat dan di timur untuk membuat laluan pejalan kaki pendek yang merentasi platform. Letakkan pintu masuk betul-betul di kedua-dua sisi platform. Klik kiri pada titik mula dan titik akhir dalam bulatan, klik kanan untuk menetapkan bentuk, kemudian sahkan."
+      },
+      "step3": {
+        "title": "Rancang segmen yang memerlukan pengambilan tanah",
+        "description": "Pilih “Landasan kereta api berkembar” dan bina garis lurus pada ketinggian 6m dari hujung timur platform barat ke hujung barat jalan utama. Segmen ini melalui bangunan, jadi pengambilan tanah diperlukan. Sahkan rancangan, kemudian tekan “Seterusnya”. Tempoh pembinaan segmen ini tidak dilangkau.",
+        "open": "Pilih “Landasan kereta api berkembar” dan bina garis lurus pada ketinggian 6m dari hujung timur platform barat ke hujung barat jalan utama. Segmen ini melalui bangunan, jadi pengambilan tanah diperlukan. Sahkan rancangan, kemudian tekan “Seterusnya”. Tempoh pembinaan segmen ini tidak dilangkau.",
+        "variant": "Pilih “Landasan kereta api berkembar” dan bina garis lurus pada ketinggian 6m dari hujung timur platform barat ke hujung barat jalan utama. Segmen ini melalui bangunan, jadi pengambilan tanah diperlukan. Sahkan rancangan, kemudian tekan “Seterusnya”. Tempoh pembinaan segmen ini tidak dilangkau.",
+        "start": "Pilih “Landasan kereta api berkembar” dan bina garis lurus pada ketinggian 6m dari hujung timur platform barat ke hujung barat jalan utama. Segmen ini melalui bangunan, jadi pengambilan tanah diperlukan. Sahkan rancangan, kemudian tekan “Seterusnya”. Tempoh pembinaan segmen ini tidak dilangkau.",
+        "end": "Pilih “Landasan kereta api berkembar” dan bina garis lurus pada ketinggian 6m dari hujung timur platform barat ke hujung barat jalan utama. Segmen ini melalui bangunan, jadi pengambilan tanah diperlukan. Sahkan rancangan, kemudian tekan “Seterusnya”. Tempoh pembinaan segmen ini tidak dilangkau.",
+        "confirm": "Pilih “Landasan kereta api berkembar” dan bina garis lurus pada ketinggian 6m dari hujung timur platform barat ke hujung barat jalan utama. Segmen ini melalui bangunan, jadi pengambilan tanah diperlukan. Sahkan rancangan, kemudian tekan “Seterusnya”. Tempoh pembinaan segmen ini tidak dilangkau.",
+        "town": "Pilih “Landasan kereta api berkembar” dan bina garis lurus pada ketinggian 6m dari hujung timur platform barat ke hujung barat jalan utama. Segmen ini melalui bangunan, jadi pengambilan tanah diperlukan. Sahkan rancangan, kemudian tekan “Seterusnya”. Tempoh pembinaan segmen ini tidak dilangkau.",
+        "new": "Pilih “Landasan kereta api berkembar” dan bina garis lurus pada ketinggian 6m dari hujung timur platform barat ke hujung barat jalan utama. Segmen ini melalui bangunan, jadi pengambilan tanah diperlukan. Sahkan rancangan, kemudian tekan “Seterusnya”. Tempoh pembinaan segmen ini tidak dilangkau.",
+        "east": "Pilih “Landasan kereta api berkembar” dan bina garis lurus pada ketinggian 6m dari hujung timur platform barat ke hujung barat jalan utama. Segmen ini melalui bangunan, jadi pengambilan tanah diperlukan. Sahkan rancangan, kemudian tekan “Seterusnya”. Tempoh pembinaan segmen ini tidak dilangkau."
+      },
+      "step4": {
+        "title": "Arahkan perobohan hospital",
+        "description": "Rundingan pengambilan tanah bermula secara automatik bagi tapak bangunan swasta, tetapi hospital, iaitu kemudahan awam milik bandar, tidak dirobohkan secara automatik dan menghalang pembinaan landasan daripada bermula. Klik hospital itu, kemudian tekan “Robohkan” pada butang di bahagian atas. Apabila statusnya menjadi “Perobohan dirancang”, tekan “Seterusnya”.",
+        "open": "Rundingan pengambilan tanah bermula secara automatik bagi tapak bangunan swasta, tetapi hospital, iaitu kemudahan awam milik bandar, tidak dirobohkan secara automatik dan menghalang pembinaan landasan daripada bermula. Klik hospital itu, kemudian tekan “Robohkan” pada butang di bahagian atas. Apabila statusnya menjadi “Perobohan dirancang”, tekan “Seterusnya”.",
+        "variant": "Rundingan pengambilan tanah bermula secara automatik bagi tapak bangunan swasta, tetapi hospital, iaitu kemudahan awam milik bandar, tidak dirobohkan secara automatik dan menghalang pembinaan landasan daripada bermula. Klik hospital itu, kemudian tekan “Robohkan” pada butang di bahagian atas. Apabila statusnya menjadi “Perobohan dirancang”, tekan “Seterusnya”.",
+        "start": "Rundingan pengambilan tanah bermula secara automatik bagi tapak bangunan swasta, tetapi hospital, iaitu kemudahan awam milik bandar, tidak dirobohkan secara automatik dan menghalang pembinaan landasan daripada bermula. Klik hospital itu, kemudian tekan “Robohkan” pada butang di bahagian atas. Apabila statusnya menjadi “Perobohan dirancang”, tekan “Seterusnya”.",
+        "end": "Rundingan pengambilan tanah bermula secara automatik bagi tapak bangunan swasta, tetapi hospital, iaitu kemudahan awam milik bandar, tidak dirobohkan secara automatik dan menghalang pembinaan landasan daripada bermula. Klik hospital itu, kemudian tekan “Robohkan” pada butang di bahagian atas. Apabila statusnya menjadi “Perobohan dirancang”, tekan “Seterusnya”.",
+        "confirm": "Rundingan pengambilan tanah bermula secara automatik bagi tapak bangunan swasta, tetapi hospital, iaitu kemudahan awam milik bandar, tidak dirobohkan secara automatik dan menghalang pembinaan landasan daripada bermula. Klik hospital itu, kemudian tekan “Robohkan” pada butang di bahagian atas. Apabila statusnya menjadi “Perobohan dirancang”, tekan “Seterusnya”.",
+        "town": "Rundingan pengambilan tanah bermula secara automatik bagi tapak bangunan swasta, tetapi hospital, iaitu kemudahan awam milik bandar, tidak dirobohkan secara automatik dan menghalang pembinaan landasan daripada bermula. Klik hospital itu, kemudian tekan “Robohkan” pada butang di bahagian atas. Apabila statusnya menjadi “Perobohan dirancang”, tekan “Seterusnya”.",
+        "new": "Rundingan pengambilan tanah bermula secara automatik bagi tapak bangunan swasta, tetapi hospital, iaitu kemudahan awam milik bandar, tidak dirobohkan secara automatik dan menghalang pembinaan landasan daripada bermula. Klik hospital itu, kemudian tekan “Robohkan” pada butang di bahagian atas. Apabila statusnya menjadi “Perobohan dirancang”, tekan “Seterusnya”.",
+        "east": "Rundingan pengambilan tanah bermula secara automatik bagi tapak bangunan swasta, tetapi hospital, iaitu kemudahan awam milik bandar, tidak dirobohkan secara automatik dan menghalang pembinaan landasan daripada bermula. Klik hospital itu, kemudian tekan “Robohkan” pada butang di bahagian atas. Apabila statusnya menjadi “Perobohan dirancang”, tekan “Seterusnya”."
+      },
+      "step5": {
+        "title": "Tunggu segmen pengambilan tanah siap",
+        "description": "Majukan masa dan tunggu sehingga pengambilan tanah swasta, perobohan hospital dan kerja landasan selesai. Proses ini mengambil masa beberapa bulan. Tempoh pembinaan segmen ini tidak dilangkau, jadi anda dapat melihat landasan siap melalui pembinaan biasa.",
+        "open": "Majukan masa dan tunggu sehingga pengambilan tanah swasta, perobohan hospital dan kerja landasan selesai. Proses ini mengambil masa beberapa bulan. Tempoh pembinaan segmen ini tidak dilangkau, jadi anda dapat melihat landasan siap melalui pembinaan biasa.",
+        "variant": "Majukan masa dan tunggu sehingga pengambilan tanah swasta, perobohan hospital dan kerja landasan selesai. Proses ini mengambil masa beberapa bulan. Tempoh pembinaan segmen ini tidak dilangkau, jadi anda dapat melihat landasan siap melalui pembinaan biasa.",
+        "start": "Majukan masa dan tunggu sehingga pengambilan tanah swasta, perobohan hospital dan kerja landasan selesai. Proses ini mengambil masa beberapa bulan. Tempoh pembinaan segmen ini tidak dilangkau, jadi anda dapat melihat landasan siap melalui pembinaan biasa.",
+        "end": "Majukan masa dan tunggu sehingga pengambilan tanah swasta, perobohan hospital dan kerja landasan selesai. Proses ini mengambil masa beberapa bulan. Tempoh pembinaan segmen ini tidak dilangkau, jadi anda dapat melihat landasan siap melalui pembinaan biasa.",
+        "confirm": "Majukan masa dan tunggu sehingga pengambilan tanah swasta, perobohan hospital dan kerja landasan selesai. Proses ini mengambil masa beberapa bulan. Tempoh pembinaan segmen ini tidak dilangkau, jadi anda dapat melihat landasan siap melalui pembinaan biasa.",
+        "town": "Majukan masa dan tunggu sehingga pengambilan tanah swasta, perobohan hospital dan kerja landasan selesai. Proses ini mengambil masa beberapa bulan. Tempoh pembinaan segmen ini tidak dilangkau, jadi anda dapat melihat landasan siap melalui pembinaan biasa.",
+        "new": "Majukan masa dan tunggu sehingga pengambilan tanah swasta, perobohan hospital dan kerja landasan selesai. Proses ini mengambil masa beberapa bulan. Tempoh pembinaan segmen ini tidak dilangkau, jadi anda dapat melihat landasan siap melalui pembinaan biasa.",
+        "east": "Majukan masa dan tunggu sehingga pengambilan tanah swasta, perobohan hospital dan kerja landasan selesai. Proses ini mengambil masa beberapa bulan. Tempoh pembinaan segmen ini tidak dilangkau, jadi anda dapat melihat landasan siap melalui pembinaan biasa."
+      },
+      "step6": {
+        "title": "Bina landasan tepat di atas jalan utama",
+        "description": "Dengan “Landasan kereta api berkembar”, bina landasan pada ketinggian 6m dari hujung barat ke hujung timur jalan utama. Jika landasan melalui bahagian tengah jalan, ia tidak menyentuh lot swasta di tepi jalan dan pengambilan tanah dapat dielakkan. Jika landasan keluar dari jalan dan melalui bangunan, pengambilan tanah atau pemindahan kemudahan awam diperlukan.",
+        "open": "Dengan “Landasan kereta api berkembar”, bina landasan pada ketinggian 6m dari hujung barat ke hujung timur jalan utama. Jika landasan melalui bahagian tengah jalan, ia tidak menyentuh lot swasta di tepi jalan dan pengambilan tanah dapat dielakkan. Jika landasan keluar dari jalan dan melalui bangunan, pengambilan tanah atau pemindahan kemudahan awam diperlukan.",
+        "variant": "Dengan “Landasan kereta api berkembar”, bina landasan pada ketinggian 6m dari hujung barat ke hujung timur jalan utama. Jika landasan melalui bahagian tengah jalan, ia tidak menyentuh lot swasta di tepi jalan dan pengambilan tanah dapat dielakkan. Jika landasan keluar dari jalan dan melalui bangunan, pengambilan tanah atau pemindahan kemudahan awam diperlukan.",
+        "start": "Dengan “Landasan kereta api berkembar”, bina landasan pada ketinggian 6m dari hujung barat ke hujung timur jalan utama. Jika landasan melalui bahagian tengah jalan, ia tidak menyentuh lot swasta di tepi jalan dan pengambilan tanah dapat dielakkan. Jika landasan keluar dari jalan dan melalui bangunan, pengambilan tanah atau pemindahan kemudahan awam diperlukan.",
+        "end": "Dengan “Landasan kereta api berkembar”, bina landasan pada ketinggian 6m dari hujung barat ke hujung timur jalan utama. Jika landasan melalui bahagian tengah jalan, ia tidak menyentuh lot swasta di tepi jalan dan pengambilan tanah dapat dielakkan. Jika landasan keluar dari jalan dan melalui bangunan, pengambilan tanah atau pemindahan kemudahan awam diperlukan.",
+        "confirm": "Dengan “Landasan kereta api berkembar”, bina landasan pada ketinggian 6m dari hujung barat ke hujung timur jalan utama. Jika landasan melalui bahagian tengah jalan, ia tidak menyentuh lot swasta di tepi jalan dan pengambilan tanah dapat dielakkan. Jika landasan keluar dari jalan dan melalui bangunan, pengambilan tanah atau pemindahan kemudahan awam diperlukan.",
+        "town": "Dengan “Landasan kereta api berkembar”, bina landasan pada ketinggian 6m dari hujung barat ke hujung timur jalan utama. Jika landasan melalui bahagian tengah jalan, ia tidak menyentuh lot swasta di tepi jalan dan pengambilan tanah dapat dielakkan. Jika landasan keluar dari jalan dan melalui bangunan, pengambilan tanah atau pemindahan kemudahan awam diperlukan.",
+        "new": "Dengan “Landasan kereta api berkembar”, bina landasan pada ketinggian 6m dari hujung barat ke hujung timur jalan utama. Jika landasan melalui bahagian tengah jalan, ia tidak menyentuh lot swasta di tepi jalan dan pengambilan tanah dapat dielakkan. Jika landasan keluar dari jalan dan melalui bangunan, pengambilan tanah atau pemindahan kemudahan awam diperlukan.",
+        "east": "Akhir sekali, bina “Landasan kereta api berkembar” pada ketinggian 6m dari hujung timur jalan utama ke hujung barat platform timur. Apabila kedua-dua platform bersambung, tekan “Seterusnya” untuk melangkau tempoh pembinaan."
+      },
+      "step7": {
+        "title": "Bina depoh",
+        "description": "Pilih “Depoh kereta api” dalam panel pembinaan dan bina di lot kuning di utara bandar. Letakkan depoh ini sendiri juga. Tekan “Seterusnya” untuk melangkau tempoh pembinaan depoh dan menyiapkannya.",
+        "open": "Pilih “Depoh kereta api” dalam panel pembinaan dan bina di lot kuning di utara bandar. Letakkan depoh ini sendiri juga. Tekan “Seterusnya” untuk melangkau tempoh pembinaan depoh dan menyiapkannya.",
+        "variant": "Pilih “Depoh kereta api” dalam panel pembinaan dan bina di lot kuning di utara bandar. Letakkan depoh ini sendiri juga. Tekan “Seterusnya” untuk melangkau tempoh pembinaan depoh dan menyiapkannya.",
+        "start": "Pilih “Depoh kereta api” dalam panel pembinaan dan bina di lot kuning di utara bandar. Letakkan depoh ini sendiri juga. Tekan “Seterusnya” untuk melangkau tempoh pembinaan depoh dan menyiapkannya.",
+        "end": "Pilih “Depoh kereta api” dalam panel pembinaan dan bina di lot kuning di utara bandar. Letakkan depoh ini sendiri juga. Tekan “Seterusnya” untuk melangkau tempoh pembinaan depoh dan menyiapkannya.",
+        "confirm": "Pilih “Depoh kereta api” dalam panel pembinaan dan bina di lot kuning di utara bandar. Letakkan depoh ini sendiri juga. Tekan “Seterusnya” untuk melangkau tempoh pembinaan depoh dan menyiapkannya.",
+        "town": "Pilih “Depoh kereta api” dalam panel pembinaan dan bina di lot kuning di utara bandar. Letakkan depoh ini sendiri juga. Tekan “Seterusnya” untuk melangkau tempoh pembinaan depoh dan menyiapkannya.",
+        "new": "Pilih “Depoh kereta api” dalam panel pembinaan dan bina di lot kuning di utara bandar. Letakkan depoh ini sendiri juga. Tekan “Seterusnya” untuk melangkau tempoh pembinaan depoh dan menyiapkannya.",
+        "east": "Pilih “Depoh kereta api” dalam panel pembinaan dan bina di lot kuning di utara bandar. Letakkan depoh ini sendiri juga. Tekan “Seterusnya” untuk melangkau tempoh pembinaan depoh dan menyiapkannya."
+      },
+      "step8": {
+        "title": "Laraskan lengkung dan kecerunan untuk bersambung ke landasan utama",
+        "description": "Dengan “Landasan kereta api”, mulakan dari titik sambungan aras tanah di sebelah timur depoh, buat pusingan besar ke arah timur, lalui penanda di timur laut, dan sambungkan ke titik cantuman landasan utama pada ketinggian 6m. Gunakan titik perantaraan kuning sebagai panduan supaya landasan tidak melanggar had kelengkungan dan kecerunan. Selepas menetapkan bentuk dengan klik kanan, anda boleh melaraskannya dengan menyeret bucu dan titik kawalan.",
+        "open": "Dengan “Landasan kereta api”, mulakan dari titik sambungan aras tanah di sebelah timur depoh, buat pusingan besar ke arah timur, lalui penanda di timur laut, dan sambungkan ke titik cantuman landasan utama pada ketinggian 6m. Gunakan titik perantaraan kuning sebagai panduan supaya landasan tidak melanggar had kelengkungan dan kecerunan. Selepas menetapkan bentuk dengan klik kanan, anda boleh melaraskannya dengan menyeret bucu dan titik kawalan.",
+        "variant": "Dengan “Landasan kereta api”, mulakan dari titik sambungan aras tanah di sebelah timur depoh, buat pusingan besar ke arah timur, lalui penanda di timur laut, dan sambungkan ke titik cantuman landasan utama pada ketinggian 6m. Gunakan titik perantaraan kuning sebagai panduan supaya landasan tidak melanggar had kelengkungan dan kecerunan. Selepas menetapkan bentuk dengan klik kanan, anda boleh melaraskannya dengan menyeret bucu dan titik kawalan.",
+        "start": "Dengan “Landasan kereta api”, mulakan dari titik sambungan aras tanah di sebelah timur depoh, buat pusingan besar ke arah timur, lalui penanda di timur laut, dan sambungkan ke titik cantuman landasan utama pada ketinggian 6m. Gunakan titik perantaraan kuning sebagai panduan supaya landasan tidak melanggar had kelengkungan dan kecerunan. Selepas menetapkan bentuk dengan klik kanan, anda boleh melaraskannya dengan menyeret bucu dan titik kawalan.",
+        "end": "Dengan “Landasan kereta api”, mulakan dari titik sambungan aras tanah di sebelah timur depoh, buat pusingan besar ke arah timur, lalui penanda di timur laut, dan sambungkan ke titik cantuman landasan utama pada ketinggian 6m. Gunakan titik perantaraan kuning sebagai panduan supaya landasan tidak melanggar had kelengkungan dan kecerunan. Selepas menetapkan bentuk dengan klik kanan, anda boleh melaraskannya dengan menyeret bucu dan titik kawalan.",
+        "confirm": "Dengan “Landasan kereta api”, mulakan dari titik sambungan aras tanah di sebelah timur depoh, buat pusingan besar ke arah timur, lalui penanda di timur laut, dan sambungkan ke titik cantuman landasan utama pada ketinggian 6m. Gunakan titik perantaraan kuning sebagai panduan supaya landasan tidak melanggar had kelengkungan dan kecerunan. Selepas menetapkan bentuk dengan klik kanan, anda boleh melaraskannya dengan menyeret bucu dan titik kawalan.",
+        "town": "Dengan “Landasan kereta api”, mulakan dari titik sambungan aras tanah di sebelah timur depoh, buat pusingan besar ke arah timur, lalui penanda di timur laut, dan sambungkan ke titik cantuman landasan utama pada ketinggian 6m. Gunakan titik perantaraan kuning sebagai panduan supaya landasan tidak melanggar had kelengkungan dan kecerunan. Selepas menetapkan bentuk dengan klik kanan, anda boleh melaraskannya dengan menyeret bucu dan titik kawalan.",
+        "new": "Dengan “Landasan kereta api”, mulakan dari titik sambungan aras tanah di sebelah timur depoh, buat pusingan besar ke arah timur, lalui penanda di timur laut, dan sambungkan ke titik cantuman landasan utama pada ketinggian 6m. Gunakan titik perantaraan kuning sebagai panduan supaya landasan tidak melanggar had kelengkungan dan kecerunan. Selepas menetapkan bentuk dengan klik kanan, anda boleh melaraskannya dengan menyeret bucu dan titik kawalan.",
+        "east": "Dengan “Landasan kereta api”, mulakan dari titik sambungan aras tanah di sebelah timur depoh, buat pusingan besar ke arah timur, lalui penanda di timur laut, dan sambungkan ke titik cantuman landasan utama pada ketinggian 6m. Gunakan titik perantaraan kuning sebagai panduan supaya landasan tidak melanggar had kelengkungan dan kecerunan. Selepas menetapkan bentuk dengan klik kanan, anda boleh melaraskannya dengan menyeret bucu dan titik kawalan."
+      },
+      "step9": {
+        "title": "Salurkan elektrik dari stesen jana kuasa sedia ada ke depoh",
+        "description": "Untuk menjalankan tren elektrik, talian elektrik dari stesen jana kuasa perlu disambungkan. Dengan “Talian elektrik”, sambungkan titik sambungan stesen jana kuasa ke titik sambungan kongsi di sebelah timur depoh, kemudian sahkan.",
+        "open": "Untuk menjalankan tren elektrik, talian elektrik dari stesen jana kuasa perlu disambungkan. Dengan “Talian elektrik”, sambungkan titik sambungan stesen jana kuasa ke titik sambungan kongsi di sebelah timur depoh, kemudian sahkan.",
+        "variant": "Untuk menjalankan tren elektrik, talian elektrik dari stesen jana kuasa perlu disambungkan. Dengan “Talian elektrik”, sambungkan titik sambungan stesen jana kuasa ke titik sambungan kongsi di sebelah timur depoh, kemudian sahkan.",
+        "start": "Untuk menjalankan tren elektrik, talian elektrik dari stesen jana kuasa perlu disambungkan. Dengan “Talian elektrik”, sambungkan titik sambungan stesen jana kuasa ke titik sambungan kongsi di sebelah timur depoh, kemudian sahkan.",
+        "end": "Untuk menjalankan tren elektrik, talian elektrik dari stesen jana kuasa perlu disambungkan. Dengan “Talian elektrik”, sambungkan titik sambungan stesen jana kuasa ke titik sambungan kongsi di sebelah timur depoh, kemudian sahkan.",
+        "confirm": "Untuk menjalankan tren elektrik, talian elektrik dari stesen jana kuasa perlu disambungkan. Dengan “Talian elektrik”, sambungkan titik sambungan stesen jana kuasa ke titik sambungan kongsi di sebelah timur depoh, kemudian sahkan.",
+        "town": "Untuk menjalankan tren elektrik, talian elektrik dari stesen jana kuasa perlu disambungkan. Dengan “Talian elektrik”, sambungkan titik sambungan stesen jana kuasa ke titik sambungan kongsi di sebelah timur depoh, kemudian sahkan.",
+        "new": "Untuk menjalankan tren elektrik, talian elektrik dari stesen jana kuasa perlu disambungkan. Dengan “Talian elektrik”, sambungkan titik sambungan stesen jana kuasa ke titik sambungan kongsi di sebelah timur depoh, kemudian sahkan.",
+        "east": "Untuk menjalankan tren elektrik, talian elektrik dari stesen jana kuasa perlu disambungkan. Dengan “Talian elektrik”, sambungkan titik sambungan stesen jana kuasa ke titik sambungan kongsi di sebelah timur depoh, kemudian sahkan."
+      },
+      "step10": {
+        "title": "Buka laluan kereta api",
+        "description": "Dalam “Pengangkutan awam” → “+ Laluan baharu”, pilih “Laluan kereta api serantau”. Letakkan hentian di atas platform layang barat dan timur, kemudian klik hentian pertama untuk menutup pusingan. Tetapkan tambang 0 dan sela masa sasaran 5 minit, kemudian sahkan.",
+        "open": "Dalam “Pengangkutan awam” → “+ Laluan baharu”, pilih “Laluan kereta api serantau”. Letakkan hentian di atas platform layang barat dan timur, kemudian klik hentian pertama untuk menutup pusingan. Tetapkan tambang 0 dan sela masa sasaran 5 minit, kemudian sahkan.",
+        "variant": "Dalam “Pengangkutan awam” → “+ Laluan baharu”, pilih “Laluan kereta api serantau”. Letakkan hentian di atas platform layang barat dan timur, kemudian klik hentian pertama untuk menutup pusingan. Tetapkan tambang 0 dan sela masa sasaran 5 minit, kemudian sahkan.",
+        "start": "Dalam “Pengangkutan awam” → “+ Laluan baharu”, pilih “Laluan kereta api serantau”. Letakkan hentian di atas platform layang barat dan timur, kemudian klik hentian pertama untuk menutup pusingan. Tetapkan tambang 0 dan sela masa sasaran 5 minit, kemudian sahkan.",
+        "end": "Dalam “Pengangkutan awam” → “+ Laluan baharu”, pilih “Laluan kereta api serantau”. Letakkan hentian di atas platform layang barat dan timur, kemudian klik hentian pertama untuk menutup pusingan. Tetapkan tambang 0 dan sela masa sasaran 5 minit, kemudian sahkan.",
+        "confirm": "Dalam “Pengangkutan awam” → “+ Laluan baharu”, pilih “Laluan kereta api serantau”. Letakkan hentian di atas platform layang barat dan timur, kemudian klik hentian pertama untuk menutup pusingan. Tetapkan tambang 0 dan sela masa sasaran 5 minit, kemudian sahkan.",
+        "town": "Dalam “Pengangkutan awam” → “+ Laluan baharu”, pilih “Laluan kereta api serantau”. Letakkan hentian di atas platform layang barat dan timur, kemudian klik hentian pertama untuk menutup pusingan. Tetapkan tambang 0 dan sela masa sasaran 5 minit, kemudian sahkan.",
+        "new": "Dalam “Pengangkutan awam” → “+ Laluan baharu”, pilih “Laluan kereta api serantau”. Letakkan hentian di atas platform layang barat dan timur, kemudian klik hentian pertama untuk menutup pusingan. Tetapkan tambang 0 dan sela masa sasaran 5 minit, kemudian sahkan.",
+        "east": "Dalam “Pengangkutan awam” → “+ Laluan baharu”, pilih “Laluan kereta api serantau”. Letakkan hentian di atas platform layang barat dan timur, kemudian klik hentian pertama untuk menutup pusingan. Tetapkan tambang 0 dan sela masa sasaran 5 minit, kemudian sahkan."
+      },
+      "step11": {
+        "title": "Semak perolehan kenderaan dan operasi",
+        "description": "Majukan masa dan semak kapasiti serta sela masa laluan dalam skrin pengurusan pengangkutan awam. Depoh memerlukan beberapa bulan untuk memperoleh kenderaan. Laluan dikira dibuka sebaik sahaja ada kapasiti. Penduduk memilih rute termasuk berjalan kaki, jadi laluan dengan jarak antara stesen yang pendek mungkin belum ada penumpang.",
+        "open": "Majukan masa dan semak kapasiti serta sela masa laluan dalam skrin pengurusan pengangkutan awam. Depoh memerlukan beberapa bulan untuk memperoleh kenderaan. Laluan dikira dibuka sebaik sahaja ada kapasiti. Penduduk memilih rute termasuk berjalan kaki, jadi laluan dengan jarak antara stesen yang pendek mungkin belum ada penumpang.",
+        "variant": "Majukan masa dan semak kapasiti serta sela masa laluan dalam skrin pengurusan pengangkutan awam. Depoh memerlukan beberapa bulan untuk memperoleh kenderaan. Laluan dikira dibuka sebaik sahaja ada kapasiti. Penduduk memilih rute termasuk berjalan kaki, jadi laluan dengan jarak antara stesen yang pendek mungkin belum ada penumpang.",
+        "start": "Majukan masa dan semak kapasiti serta sela masa laluan dalam skrin pengurusan pengangkutan awam. Depoh memerlukan beberapa bulan untuk memperoleh kenderaan. Laluan dikira dibuka sebaik sahaja ada kapasiti. Penduduk memilih rute termasuk berjalan kaki, jadi laluan dengan jarak antara stesen yang pendek mungkin belum ada penumpang.",
+        "end": "Majukan masa dan semak kapasiti serta sela masa laluan dalam skrin pengurusan pengangkutan awam. Depoh memerlukan beberapa bulan untuk memperoleh kenderaan. Laluan dikira dibuka sebaik sahaja ada kapasiti. Penduduk memilih rute termasuk berjalan kaki, jadi laluan dengan jarak antara stesen yang pendek mungkin belum ada penumpang.",
+        "confirm": "Majukan masa dan semak kapasiti serta sela masa laluan dalam skrin pengurusan pengangkutan awam. Depoh memerlukan beberapa bulan untuk memperoleh kenderaan. Laluan dikira dibuka sebaik sahaja ada kapasiti. Penduduk memilih rute termasuk berjalan kaki, jadi laluan dengan jarak antara stesen yang pendek mungkin belum ada penumpang.",
+        "town": "Majukan masa dan semak kapasiti serta sela masa laluan dalam skrin pengurusan pengangkutan awam. Depoh memerlukan beberapa bulan untuk memperoleh kenderaan. Laluan dikira dibuka sebaik sahaja ada kapasiti. Penduduk memilih rute termasuk berjalan kaki, jadi laluan dengan jarak antara stesen yang pendek mungkin belum ada penumpang.",
+        "new": "Majukan masa dan semak kapasiti serta sela masa laluan dalam skrin pengurusan pengangkutan awam. Depoh memerlukan beberapa bulan untuk memperoleh kenderaan. Laluan dikira dibuka sebaik sahaja ada kapasiti. Penduduk memilih rute termasuk berjalan kaki, jadi laluan dengan jarak antara stesen yang pendek mungkin belum ada penumpang.",
+        "east": "Majukan masa dan semak kapasiti serta sela masa laluan dalam skrin pengurusan pengangkutan awam. Depoh memerlukan beberapa bulan untuk memperoleh kenderaan. Laluan dikira dibuka sebaik sahaja ada kapasiti. Penduduk memilih rute termasuk berjalan kaki, jadi laluan dengan jarak antara stesen yang pendek mungkin belum ada penumpang."
+      },
+      "step12": {
+        "title": "Imbas kembali pembinaan kereta api",
+        "description": "Kamera telah dialihkan ke stesen barat. Lihat tren yang berhenti di platform. Anda telah menyediakan platform, bangunan stesen, landasan utama, depoh dan landasan susurnya, bekalan elektrik serta tetapan laluan. Anda juga telah melalui pengambilan tanah swasta dan pemindahan kemudahan awam, dan mengelakkan pengambilan tanah dengan menggunakan ruang di atas jalan. Gunakan cara melaraskan jajaran sambil menyemak jejari lengkung dan kecerunan dalam projek kereta api yang lain juga.",
+        "open": "Kamera telah dialihkan ke stesen barat. Lihat tren yang berhenti di platform. Anda telah menyediakan platform, bangunan stesen, landasan utama, depoh dan landasan susurnya, bekalan elektrik serta tetapan laluan. Anda juga telah melalui pengambilan tanah swasta dan pemindahan kemudahan awam, dan mengelakkan pengambilan tanah dengan menggunakan ruang di atas jalan. Gunakan cara melaraskan jajaran sambil menyemak jejari lengkung dan kecerunan dalam projek kereta api yang lain juga.",
+        "variant": "Kamera telah dialihkan ke stesen barat. Lihat tren yang berhenti di platform. Anda telah menyediakan platform, bangunan stesen, landasan utama, depoh dan landasan susurnya, bekalan elektrik serta tetapan laluan. Anda juga telah melalui pengambilan tanah swasta dan pemindahan kemudahan awam, dan mengelakkan pengambilan tanah dengan menggunakan ruang di atas jalan. Gunakan cara melaraskan jajaran sambil menyemak jejari lengkung dan kecerunan dalam projek kereta api yang lain juga.",
+        "start": "Kamera telah dialihkan ke stesen barat. Lihat tren yang berhenti di platform. Anda telah menyediakan platform, bangunan stesen, landasan utama, depoh dan landasan susurnya, bekalan elektrik serta tetapan laluan. Anda juga telah melalui pengambilan tanah swasta dan pemindahan kemudahan awam, dan mengelakkan pengambilan tanah dengan menggunakan ruang di atas jalan. Gunakan cara melaraskan jajaran sambil menyemak jejari lengkung dan kecerunan dalam projek kereta api yang lain juga.",
+        "end": "Kamera telah dialihkan ke stesen barat. Lihat tren yang berhenti di platform. Anda telah menyediakan platform, bangunan stesen, landasan utama, depoh dan landasan susurnya, bekalan elektrik serta tetapan laluan. Anda juga telah melalui pengambilan tanah swasta dan pemindahan kemudahan awam, dan mengelakkan pengambilan tanah dengan menggunakan ruang di atas jalan. Gunakan cara melaraskan jajaran sambil menyemak jejari lengkung dan kecerunan dalam projek kereta api yang lain juga.",
+        "confirm": "Kamera telah dialihkan ke stesen barat. Lihat tren yang berhenti di platform. Anda telah menyediakan platform, bangunan stesen, landasan utama, depoh dan landasan susurnya, bekalan elektrik serta tetapan laluan. Anda juga telah melalui pengambilan tanah swasta dan pemindahan kemudahan awam, dan mengelakkan pengambilan tanah dengan menggunakan ruang di atas jalan. Gunakan cara melaraskan jajaran sambil menyemak jejari lengkung dan kecerunan dalam projek kereta api yang lain juga.",
+        "town": "Kamera telah dialihkan ke stesen barat. Lihat tren yang berhenti di platform. Anda telah menyediakan platform, bangunan stesen, landasan utama, depoh dan landasan susurnya, bekalan elektrik serta tetapan laluan. Anda juga telah melalui pengambilan tanah swasta dan pemindahan kemudahan awam, dan mengelakkan pengambilan tanah dengan menggunakan ruang di atas jalan. Gunakan cara melaraskan jajaran sambil menyemak jejari lengkung dan kecerunan dalam projek kereta api yang lain juga.",
+        "new": "Kamera telah dialihkan ke stesen barat. Lihat tren yang berhenti di platform. Anda telah menyediakan platform, bangunan stesen, landasan utama, depoh dan landasan susurnya, bekalan elektrik serta tetapan laluan. Anda juga telah melalui pengambilan tanah swasta dan pemindahan kemudahan awam, dan mengelakkan pengambilan tanah dengan menggunakan ruang di atas jalan. Gunakan cara melaraskan jajaran sambil menyemak jejari lengkung dan kecerunan dalam projek kereta api yang lain juga.",
+        "east": "Kamera telah dialihkan ke stesen barat. Lihat tren yang berhenti di platform. Anda telah menyediakan platform, bangunan stesen, landasan utama, depoh dan landasan susurnya, bekalan elektrik serta tetapan laluan. Anda juga telah melalui pengambilan tanah swasta dan pemindahan kemudahan awam, dan mengelakkan pengambilan tanah dengan menggunakan ruang di atas jalan. Gunakan cara melaraskan jajaran sambil menyemak jejari lengkung dan kecerunan dalam projek kereta api yang lain juga."
+      }
+    },
+    "complete": {
+      "title": "Tutorial selesai",
+      "description": "Tahniah! Tutorial ini telah selesai. Tekan “Tamat” untuk menutup panduan dan terus bermain dengan bebas di bandar ini.",
+      "button": "Tamat"
+    },
+    "nextButton": "Seterusnya",
+    "checking": "Menyemak...",
+    "failed": "Syarat belum dipenuhi. Sila cuba lagi.",
+    "completed": "Tutorial selesai! Syabas.",
+    "stepProgress": "Langkah {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Tekan ikon jalan untuk membuka panel pembinaan.",
+      "selectRoad": "Pilih jalan aras tanah 2 lorong di bawah “Jalan bandar”. Hanya jenis yang dibenarkan boleh dipilih.",
+      "placeStart": "Klik kiri di dalam bulatan biru muda untuk meletakkan titik mula jalan.",
+      "placeEnd": "Klik kiri di dalam bulatan kuning untuk meletakkan titik akhir jalan.",
+      "finalizeRoad": "Klik kanan dalam paparan 3D untuk menetapkan bentuk jalan.",
+      "confirmRoad": "Tekan “Sahkan” dalam panel pembinaan untuk menyimpan, kemudian tekan butang “Seterusnya”.",
+      "failed": "Persediaan atau komunikasi gagal. Jika masalah berterusan selepas mencuba semula, keluar dan mulakan tutorial dalam bandar baharu.",
+      "retry": "Cuba semula",
+      "placementRequired": "Letakkan dengan jenis dan kedudukan yang ditunjukkan oleh panduan.",
+      "preparing": "Menyediakan keadaan awal tutorial.",
+      "finishFailed": "Tutorial tidak dapat ditamatkan. Sila cuba lagi."
+    },
+    "trade": {
+      "title": "Mulakan perdagangan antarabangsa",
+      "description": "Sebuah kilang tempatan mahu menjual produknya ke luar negara. Dalam tutorial ini, anda akan belajar cara mengeksport makanan melalui pelabuhan dan mengimport barangan melalui kereta api kargo yang bersambung ke negara jiran.",
+      "step1": {
+        "description": "Terminal eksport diperlukan untuk mengeksport makanan yang dihasilkan di pulau ini. Bina “Terminal kontena” di lot tepi laut yang bertanda kuning. Oleh sebab ini tutorial, tempoh pembinaan dilangkau.",
+        "title": "Bina pelabuhan kontena"
+      },
+      "step2": {
+        "description": "Pengeluaran dan pengangkutan kilang mengambil masa beberapa bulan untuk bermula, jadi majukan masa dan lihat rekod eksport pelabuhan. Tutup butiran terminal kontena, buka semula, dan anda boleh melihat rekod import dan eksport dalam tab “Kargo”.",
+        "title": "Semak eksport makanan"
+      },
+      "step3": {
+        "description": "Kini anda sudah mempunyai tempat untuk mengimport dan mengeksport melalui kapal. Seterusnya, bina tempat untuk mengimport dan mengeksport barangan melalui kereta api. Bina “Stesen kargo antarabangsa” di lot tepi jalan yang bertanda kuning. Di sempadan timur terdapat landasan yang menuju ke negara jiran dan sebuah stesen kargo sempadan.",
+        "title": "Bina stesen kargo antarabangsa"
+      },
+      "step4": {
+        "open": "Buka “Jalan, kereta api & infrastruktur” pada panel ikon, kemudian pilih “Platform kargo kontena” di bawah “Kereta api”.",
+        "place": "Bina platform di sebelah utara stesen kargo antarabangsa, selari dengan stesen. Klik kiri di dalam bulatan biru muda (barat) untuk meletakkan titik mula dan di dalam bulatan kuning (timur) untuk meletakkan titik akhir, kemudian klik kanan dalam paparan 3D untuk menetapkan bentuk. Tukar “Kedudukan platform” kepada “Dalam”, pastikan platform berada di sebelah bangunan stesen (sebelah selatan), kemudian sahkan. Setelah selesai, tekan butang “Seterusnya”.",
+        "title": "Bina platform di sebelah stesen"
+      },
+      "step5": {
+        "description": "Tekan “Kembali” untuk kembali ke senarai, pilih “Landasan kereta api”, dan bina landasan dari hujung timur platform ke hujung barat landasan yang datang dari stesen kargo sempadan di luar bandar.",
+        "title": "Bina landasan hingga ke sempadan"
+      },
+      "step6": {
+        "title": "Bina depoh",
+        "description": "Bina “Depoh kereta api” di lot tepi landasan yang bertanda kuning. Apabila anda menekan “Seterusnya”, tempoh pembinaan dilangkau dan depoh disiapkan kerana ini tutorial."
+      },
+      "step7": {
+        "title": "Sambungkan depoh ke landasan utama",
+        "description": "Bina landasan susur dari titik sambungan di hujung timur depoh ke landasan utama. Cantumkan dengan landasan utama pada sudut landai ke arah timur, bukan pada sudut tegak. Setelah selesai, tekan butang “Seterusnya”."
+      },
+      "step8": {
+        "description": "Buka “Jalan, kereta api & infrastruktur” pada panel ikon, dan dengan “Talian elektrik” di bawah “Elektrik”, sambungkan titik sambungan stesen jana kuasa solar di timur bandar ke titik sambungan depoh.",
+        "title": "Salurkan elektrik ke depoh"
+      },
+      "step9": {
+        "description": "Dalam “Pengangkutan awam”, tekan “+ Laluan baharu” dan pilih “Laluan kargo antarabangsa” sebagai jenis. Letakkan hentian di atas platform stesen kargo antarabangsa dan stesen kargo sempadan, kemudian klik hentian pertama untuk menutup pusingan dan buka laluan. Tren tidak dapat berselisih di landasan tunggal, jadi tetapkan sela masa sasaran kepada 45 minit supaya satu tren sempat berulang-alik.",
+        "title": "Buka laluan kargo antarabangsa"
+      },
+      "step10": {
+        "description": "Majukan masa dan pastikan tren kargo mula bergerak di laluan kargo antarabangsa. Depoh memerlukan beberapa bulan untuk mengambil pekerja, membeli bahan dan menyediakan kenderaan.",
+        "title": "Jalankan tren kargo"
+      }
+    },
+    "highway": {
+      "title": "Bina lebuh raya",
+      "description": "Bandar ini memerlukan laluan baharu untuk kereta seiring dengan pembangunannya. Dalam tutorial ini, anda akan belajar cara membina lebuh raya layang yang merentasi jalan biasa, lalu menyambungkannya dengan susur untuk membentuk persimpangan bertingkat.",
+      "step1": {
+        "title": "Lintasi jalan secara layang",
+        "open": "Lintasi jalan biasa di tengah dengan lebuh raya layang. Buka “Jalan, kereta api & infrastruktur” pada panel ikon, kemudian pilih “Lebuh raya 2 lorong” di bawah “Lebuh raya”.",
+        "start": "Klik kiri di dalam bulatan biru muda untuk meletakkan titik mula lebuh raya. Titik mula akan melekat pada kedudukan layang setinggi 7m.",
+        "end": "Klik kiri di dalam bulatan kuning untuk meletakkan titik akhir. Titik ini akan melekat pada ketinggian yang sama, 7m, di seberang jalan biasa.",
+        "confirm": "Tekan “Sahkan” dalam panel pembinaan untuk menyimpan, kemudian tekan butang “Seterusnya”. Oleh sebab ini tutorial, tempoh pembinaan dilangkau dan lebuh raya disiapkan serta-merta."
+      },
+      "step2": {
+        "title": "Namakan lebuh raya",
+        "description": "Jalan boleh diurus dengan memberinya nama. Di bahagian paling atas tetingkap butiran lebuh raya yang anda bina, jalan yang dianggotainya kini tertulis “Tiada (jalan tanpa nama)”, jadi berikan nama pilihan anda."
+      },
+      "step3": {
+        "title": "Bina susur",
+        "description": "Bina susur untuk bersambung ke jalan biasa. Pilih “Susur” sebagai jenis jalan, kemudian sambungkan susur yang melengkung dengan lancar dari kedudukan penanda kuning pada skrin ke lebuh raya."
+      },
+      "step4": {
+        "title": "Semak persimpangan bertingkat",
+        "description": "Klik “IC1” yang dipaparkan di sekitar susur untuk membuka panel butiran persimpangan bertingkat. Pastikan jalan biasa dan lebuh raya telah bersambung."
+      }
+    },
+    "mining": {
+      "title": "Lombong sumber asli",
+      "description": "Pulau ini kaya dengan sumber berharga, tetapi tiada cara untuk mengangkutnya keluar. Dalam tutorial ini, anda akan belajar keseluruhan proses menyediakan lombong, kereta api kargo dan pelabuhan, melombong bijih, mengangkutnya dan mengeksportnya ke luar negara.",
+      "step1": {
+        "description": "Hidupkan paparan sumber asli dan buka panel butiran urat bijih di tenggara.",
+        "title": "Semak urat bijih"
+      },
+      "step2": {
+        "description": "Bina “Lombong” di lot kuning di atas urat bijih di tenggara. Oleh sebab ini tutorial, tempoh pembinaan dilangkau.",
+        "title": "Bina lombong"
+      },
+      "step3": {
+        "description": "Bina “Stesen pemuatan bijih” di lot besar sedia ada di tenggara lombong. Di stesen pemuatan bijih, bijih yang dilombong dimuatkan ke dalam tren.",
+        "title": "Bina stesen pemuatan di sebelah lombong"
+      },
+      "step4": {
+        "description": "Bina “Stesen pemunggahan bijih” di lot besar sedia ada di selatan pelabuhan. Di stesen pemunggahan bijih, bijih yang dibawa oleh tren dipunggah dan dihantar keluar.",
+        "title": "Bina stesen pemunggahan berhampiran pelabuhan"
+      },
+      "step5": {
+        "description": "Bina “Pelabuhan pukal” di lot kuning di tepi pantai.",
+        "title": "Bina pelabuhan pukal"
+      },
+      "step6": {
+        "open": "Pilih “Platform kargo bijih” di bawah “Kereta api”, kemudian sambungkan setiap pasangan penanda di barat daya stesen pemuatan dan di selatan stesen pemunggahan. Hadapkan setiap platform ke arah kemudahannya.",
+        "loading": "Pilih “Platform kargo bijih” di bawah “Kereta api”, kemudian sambungkan setiap pasangan penanda di barat daya stesen pemuatan dan di selatan stesen pemunggahan. Hadapkan setiap platform ke arah kemudahannya.",
+        "unloading": "Pilih “Platform kargo bijih” di bawah “Kereta api”, kemudian sambungkan setiap pasangan penanda di barat daya stesen pemuatan dan di selatan stesen pemunggahan. Hadapkan setiap platform ke arah kemudahannya.",
+        "title": "Bina platform di sebelah stesen"
+      },
+      "step7": {
+        "town": "Bina landasan kargo dari hujung timur platform pelabuhan, melalui sebelah selatan titik tengah jalan, ke hujung barat laut platform gunung. Landasan belum bersambung, jadi binanya sendiri. Gunakan lengkung untuk menyelaraskan arah perjalanan, tetapkan “Ikut rupa bumi” kepada “Tidak ikut” bagi segmen yang mendaki gunung, dan laraskan bentuk sehingga tiada lagi amaran merah bagi kecerunan dan kelengkungan. Tambah titik perantaraan supaya setiap segmen tidak melebihi 500m.",
+        "climb": "Bina landasan kargo dari hujung timur platform pelabuhan, melalui sebelah selatan titik tengah jalan, ke hujung barat laut platform gunung. Landasan belum bersambung, jadi binanya sendiri. Gunakan lengkung untuk menyelaraskan arah perjalanan, tetapkan “Ikut rupa bumi” kepada “Tidak ikut” bagi segmen yang mendaki gunung, dan laraskan bentuk sehingga tiada lagi amaran merah bagi kecerunan dan kelengkungan. Tambah titik perantaraan supaya setiap segmen tidak melebihi 500m.",
+        "title": "Sambungkan dua stesen dengan landasan"
+      },
+      "step8": {
+        "title": "Bina depoh",
+        "description": "Bina “Depoh kereta api” di lot sedia ada di barat daya pelabuhan. Letakkannya menghadap arah yang membolehkan landasan susur dibina dari titik sambungan di hujung timurnya ke platform pelabuhan."
+      },
+      "step9": {
+        "title": "Sambungkan depoh ke landasan utama",
+        "description": "Bina landasan susur dari titik sambungan aras tanah di hujung timur depoh ke hujung barat platform pelabuhan. Cantumkan dengan lancar pada sudut landai."
+      },
+      "step10": {
+        "description": "Bina talian elektrik dari titik sambungan stesen jana kuasa solar sedia ada ke titik sambungan kongsi di hujung timur depoh.",
+        "title": "Salurkan elektrik ke depoh"
+      },
+      "step11": {
+        "description": "Dalam “Pengangkutan awam” → “Laluan baharu” → “Laluan pengangkutan bijih”, letakkan hentian di platform kargo bijih sebelah gunung dan sebelah pelabuhan, kemudian klik hentian pertama untuk menutup pusingan. Tren tidak dapat berselisih di landasan tunggal, jadi tetapkan sela masa sasaran kepada 45 minit supaya satu tren sempat berulang-alik, kemudian sahkan.",
+        "title": "Buka laluan pengangkutan bijih"
+      },
+      "step12": {
+        "description": "Majukan masa untuk menggerakkan perlombongan, pemuatan, pengangkutan kereta api, pemunggahan dan eksport. Perolehan kenderaan dan permulaan pengangkutan mengambil masa beberapa bulan.",
+        "title": "Majukan masa"
+      },
+      "step13": {
+        "description": "Majukan masa dan semak penerimaan serta eksport bijih dalam butiran pelabuhan pukal di tepi pantai. Perolehan kenderaan, perlombongan dan pengangkutan mengambil masa beberapa bulan.",
+        "title": "Semak eksport bijih"
+      }
+    },
+    "tourism": {
+      "title": "Majukan pelancongan",
+      "description": "Pulau ini tiada pelabuhan dan penginapan untuk menyambut pelancong ke tapak runtuhannya, dan tiada juga laluan bas untuk pelancong. Dalam tutorial ini, anda akan belajar cara membina hotel dan terminal penumpang kapal, menyediakan laluan bas, serta menyemak ketibaan pelancong, jualan restoran dan penggunaan bas.",
+      "step1": {
+        "description": "Bina “Hotel peranginan” di lot bertanda kuning di sebelah barat runtuhan purba. Oleh sebab ini tutorial, tempoh pembinaan dilangkau.",
+        "title": "Bina hotel berhampiran runtuhan"
+      },
+      "step2": {
+        "description": "Pelabuhan diperlukan untuk menerima pelancong. Bina “Terminal kapal persiaran” di lot pelabuhan yang bertanda.",
+        "title": "Bina terminal kapal persiaran"
+      },
+      "step3": {
+        "description": "Pelancong tidak mempunyai kereta sendiri, jadi pengangkutan awam perlu disediakan. Dalam “Pengangkutan awam” → “Laluan baharu”, pilih “Laluan bas”. Letakkan hentian di atas jalan bertanda kuning mengikut urutan: pelabuhan → depan perumahan → depan runtuhan → depan perumahan, kemudian klik hentian pelabuhan untuk menutup pusingan. Tetapkan tambang 0 dan sela masa sasaran 1 minit, kemudian sahkan.",
+        "title": "Wujudkan laluan bas antara pelabuhan dan runtuhan"
+      },
+      "step4": {
+        "description": "Majukan masa untuk menyambut pelancong. Operasi kemudahan dan perolehan bas mengambil masa beberapa bulan.",
+        "title": "Majukan masa"
+      },
+      "step5": {
+        "description": "Semak jualan restoran di depan runtuhan dan penumpang laluan bas yang anda wujudkan. Langkah ini selesai apabila pelancong telah tiba, jualan restoran melebihi tahap awal dan bas digunakan. Majukan masa lagi jika perlu.",
+        "title": "Semak jualan dan penumpang bas"
+      }
+    },
+    "intro": {
+      "controls": "Sebagai datuk bandar yang baru dilantik, kami harap anda dapat membina bandar tempat penduduk boleh hidup dengan tenang. Bandar ini belum mempunyai kediaman untuk menyambut penduduk baharu, malah belum ada bekalan elektrik dan air yang penting untuk kehidupan. Dalam tutorial ini, anda akan belajar tentang peranan datuk bandar, cara memajukan masa, cara membaca keadaan bandar, serta penggunaan butang dan kamera. Selepas itu, anda akan melalui proses membina bandar: menyediakan jalan dan lot, menetapkan hala tuju daerah, membina rumah, dan menyalurkan elektrik serta air.",
+      "scenario4": "Kami mahu menghubungkan kawasan perumahan dengan tempat kerja melalui kereta api, tetapi di tapak yang dirancang terdapat bangunan swasta dan sebuah hospital awam. Dalam tutorial ini, anda akan belajar tentang pengambilan tanah, pemindahan kemudahan awam, landasan layang di atas jalan, pembinaan platform, bangunan stesen dan depoh, pelarasan lengkung dan kecerunan, serta bekalan elektrik hingga laluan dibuka.",
+      "trade": "Sebuah kilang makanan tempatan meminta bantuan untuk menjual produknya ke luar negara. Bandar ini juga mahu menyediakan cara untuk membawa masuk barangan yang diperlukan dari luar negara. Dalam tutorial ini, anda akan belajar cara mengeksport makanan melalui pelabuhan dan mengimport barangan melalui kereta api kargo yang bersambung ke negara jiran.",
+      "highway": "Apabila bandar ini berkembang, semakin banyak kenderaan akan mengangkut orang dan barangan. Supaya kenderaan yang sekadar melalui bandar tidak tertumpu di jalan biasa, eloklah laluan lain disediakan dari sekarang. Dalam tutorial ini, anda akan belajar cara membina lebuh raya layang yang merentasi jalan biasa, lalu menyambungkannya dengan susur untuk membentuk persimpangan bertingkat.",
+      "mining": "Pulau ini kaya dengan sumber berharga. Namun, tiada cara untuk mengangkutnya dari gunung ke pelabuhan, jadi sumber yang bernilai itu tidak dapat dimanfaatkan oleh industri pulau. Dalam tutorial ini, anda akan belajar keseluruhan proses menyediakan lombong, kereta api kargo dan pelabuhan, melombong bijih, mengangkutnya dan mengeksportnya ke luar negara.",
+      "tourism": "Penduduk pulau ini mahu lebih ramai orang melihat runtuhan purba di kawasan pedalaman. Namun, belum ada pelabuhan dan penginapan untuk menyambut pelancong, dan belum ada juga laluan bas dari pelabuhan ke bandar. Dalam tutorial ini, anda akan belajar cara membina hotel dan terminal penumpang kapal, menyediakan laluan bas, serta menyemak ketibaan pelancong, jualan restoran dan penggunaan bas.",
+      "heading": "Permintaan kepada Datuk Bandar",
+      "windowTitle": "Tutorial",
+      "marine": "Bandar di tepi teluk ini belum mempunyai pelabuhan atau kemudahan minyak. Dalam tutorial ini, anda akan belajar keseluruhan proses menambak laut untuk membina dermaga kapal tangki, merentangkan jambatan gantung di muara teluk, mengepam minyak mentah dari medan minyak dasar laut dan menghantarnya melalui saluran paip untuk dieksport, serta menghubungkan pulau terpencil dengan bandar menggunakan feri."
+    },
+    "marine": {
+      "title": "Bangunkan laut",
+      "description": "Bandar di tepi teluk ini belum mempunyai pelabuhan atau kemudahan minyak. Dalam tutorial ini, anda akan belajar keseluruhan proses menambak laut untuk membina dermaga kapal tangki, merentangkan jambatan gantung di muara teluk, mengepam minyak mentah dari medan minyak dasar laut dan menghantarnya melalui saluran paip untuk dieksport, serta menghubungkan pulau terpencil dengan bandar menggunakan feri.",
+      "step1": {
+        "title": "Rancang kerja tebus guna tanah",
+        "description": "Pelabuhan memerlukan dermaga tempat kapal besar boleh berlabuh dan tanah untuk membina kemudahan. Tambak laut di hujung dalam teluk untuk mewujudkan tanah bagi pelabuhan. Tekan ikon kerja tanah, klik kiri empat penanda kuning mengikut urutan untuk melukis kawasan, kemudian klik kanan untuk menutupnya. Pastikan jenis anggaran kos ialah “Tebus guna tanah”, kemudian sahkan kerja tersebut."
+      },
+      "step2": {
+        "title": "Siapkan tanah tebus guna",
+        "description": "Majukan masa sekurang-kurangnya sebulan dengan “Mula”, kemudian tekan “Seterusnya”. Tiada kontraktor dalam pelajaran ini, jadi “Seterusnya” akan melangkau tempoh kerja tebus guna tanah. Setelah siap, kawasan yang dahulunya laut menjadi tanah, dan tebingnya yang menghadap laut menjadi dermaga tempat kapal boleh berlabuh."
+      },
+      "step3": {
+        "title": "Bina jalan ke tanah tebus guna",
+        "description": "Walaupun pelabuhan atau terminal minyak dibina di atas tanah tebus guna, tanpa sambungan jalan orang tidak dapat datang bekerja dan barangan tidak dapat diangkut. Bina jalan dari hujung jalan bandar hingga ke tanah tebus guna. Dalam pelajaran ini, jalan siap sebaik sahaja disahkan. Tekan “Jalan, kereta api & infrastruktur” pada panel ikon untuk membuka panel pembinaan."
+      },
+      "step4": {
+        "title": "Bina dermaga kapal tangki",
+        "description": "Kapal tangki yang membawa minyak mentah ialah kapal besar, jadi pelabuhan hanya boleh dibina di tempat laut di hadapan dermaganya cukup dalam. Laut di hadapan dermaga tanah tebus guna adalah dalam, jadi ia sesuai untuk pelabuhan. Tekan ikon bangunan, pilih “Dermaga kapal tangki” dalam kategori “Pelabuhan”, klik kiri di dalam bulatan kuning di atas dermaga untuk menetapkan kedudukan, kemudian tekan “Sahkan” dalam panel pembinaan. Apabila pelabuhan dibina, lorong penghubung ke lorong kapal besar di luar pesisir akan dibuat secara automatik supaya kapal boleh keluar masuk. Pelajaran ini melangkau tempoh pembinaan."
+      },
+      "step5": {
+        "title": "Rentangkan jambatan gantung di muara teluk",
+        "description": "Lebuh raya terputus di kedua-dua tebing muara teluk. Muara teluk selebar 1.6km, terlalu lebar untuk jambatan biasa yang bertiang berderet, jadi sambungkannya dengan jambatan gantung yang boleh merentasi jarak jauh sekali gus. Lorong kapal besar melalui bawah jambatan, jadi jambatan mesti dibina cukup tinggi supaya kapal tidak terlanggar. Hujung lebuh raya di kedua-dua tebing sudah diselaraskan dengan ketinggian itu. Buka “Jalan, kereta api & infrastruktur” pada panel ikon, pilih “Jambatan gantung 4 lorong” di bawah “Lebuh raya”, dan tarik dari hujung utara (bulatan biru muda) ke hujung selatan (bulatan kuning). Klik kanan untuk menetapkan bentuk, tekan “Sahkan” dalam panel pembinaan, kemudian tekan “Seterusnya”."
+      },
+      "step6": {
+        "title": "Cari medan minyak dasar laut",
+        "description": "Seterusnya, gunakan sumber laut. Sebelum membina terminal minyak, pastikan terdapat medan minyak di dasar laut berhampiran. Tekan “Paparan” di kokpit untuk membuka panel paparan.",
+        "show": "Pilih “Sumber asli” daripada tab menegak dan tukar kepada “Papar”. Anda dapat melihat medan minyak yang terbentang di dasar laut dalam teluk. Klik medan minyak berhampiran penanda kuning untuk membuka butirannya."
+      },
+      "step7": {
+        "title": "Bina terminal minyak",
+        "description": "Minyak mentah yang dipam dari medan minyak dasar laut dihantar melalui saluran paip ke terminal minyak di pantai, lalu dijual ke pasaran dari situ. Terminal minyak dibina menghadap dermaga supaya saluran paip boleh disambungkan. Tekan ikon bangunan, pilih “Terminal saluran paip minyak” dalam kategori “Pelabuhan”, klik kiri di dalam bulatan kuning di atas dermaga untuk menetapkan kedudukan, kemudian tekan “Sahkan” dalam panel pembinaan. Pelajaran ini melangkau tempoh pembinaan."
+      },
+      "step8": {
+        "title": "Bina pelantar minyak",
+        "description": "Pelantar minyak yang mengepam minyak mentah mesti dibina di laut tepat di atas medan minyak. Tekan ikon bangunan, pilih “Pelantar minyak luar pesisir” dalam kategori “Pertanian & sumber”, klik kiri di dalam bulatan kuning di atas laut untuk menetapkan kedudukan, kemudian tekan “Sahkan” dalam panel pembinaan. Pelajaran ini melangkau tempoh pembinaan."
+      },
+      "step9": {
+        "title": "Sambungkan dengan saluran paip",
+        "description": "Hantar minyak mentah yang dipam oleh pelantar ke terminal minyak melalui saluran paip dasar laut. Buka “Jalan, kereta api & infrastruktur” pada panel ikon, pilih “Saluran paip minyak dasar laut” di bawah “Minyak”, dan tarik garisan dari titik sambungan pelantar ke titik sambungan terminal minyak. Selepas mengesahkan, tekan “Seterusnya” dan saluran paip akan siap serta-merta."
+      },
+      "step10": {
+        "title": "Eksport minyak mentah",
+        "description": "Terminal minyak menjual minyak mentah yang diterimanya ke pasaran, dan dermaga kapal tangki membelinya lalu mengeksportnya ke luar negara dengan kapal. Beberapa bulan diperlukan sebelum pekerja berkumpul dan minyak mula terjual. Majukan masa beberapa bulan dengan “Mula”, kemudian tekan “Seterusnya”. Jika belum ada eksport, majukan masa sedikit lagi dan tekan semula."
+      },
+      "step11": {
+        "title": "Bina jeti feri",
+        "description": "Pulau terpencil di luar pesisir tiada cara untuk ke bandar. Buka perkhidmatan feri supaya penduduk pulau dapat berulang-alik ke bandar. Mula-mula, bina jeti feri di pantai bandar. Buka “Jalan, kereta api & infrastruktur” pada panel ikon, pilih “Jeti feri” di bawah “Lorong pelayaran”, dan tarik dari darat (bulatan biru muda) ke laut (bulatan kuning). Klik kanan untuk menetapkan bentuk, tekan “Sahkan” dalam panel pembinaan, kemudian tekan “Seterusnya”."
+      },
+      "step12": {
+        "title": "Bina lorong feri",
+        "description": "Seterusnya, bina lorong yang dilalui kapal dari jeti pulau ke jeti bandar. Lorong tidak boleh melalui darat, jadi klik kiri untuk meletakkan titik di sepanjang jalan supaya lorong mengelilingi sebelah utara pulau, melalui bawah jambatan gantung di muara teluk dan masuk ke dalam teluk. Pilih “Lorong feri” di bawah “Lorong pelayaran”, sambungkan hujung jeti pulau ke hujung jeti bandar, sahkan, kemudian tekan “Seterusnya”."
+      },
+      "step13": {
+        "title": "Buka laluan feri",
+        "description": "Akhir sekali, wujudkan laluan feri yang bergerak di lorong tersebut. Dalam “Pengangkutan awam” → “Laluan baharu” → “Laluan feri”, letakkan hentian di jeti pulau dan jeti bandar, klik hentian pertama untuk menutup pusingan, kemudian sahkan. Apabila laluan sudah wujud, tutorial ini selesai. Untuk benar-benar menjalankan kapal, anda juga memerlukan limbungan penyelenggaraan yang menyewakan kapal."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Mula permainan",
+    "nowLoading": "Sedang memuatkan...",
+    "startError": "Tidak dapat dimulakan. Sila cuba lagi.",
+    "todaysTips": "Tip hari ini",
+    "gotIt": "Tutup",
+    "items": {
+      "tip1": {
+        "title": "Wang yang berputar",
+        "description": "Kos pembinaan bandar dan gaji pekerja kemudahan awam menjadi pendapatan syarikat dan isi rumah, lalu menyokong perbelanjaan serta pengeluaran seterusnya. Mengutip cukai sahaja tidak akan menggerakkan ekonomi. Peruntukkan belanjawan untuk perkhidmatan dan pembaikan yang diperlukan supaya wang kembali ke bandar."
+      },
+      "tip2": {
+        "title": "Perjuangan panjang menentang jenayah",
+        "description": "Warga kota yang membesar dalam persekitaran yang tidak selamat cenderung melakukan jenayah walaupun sudah dewasa. Teruskan penguatkuasaan oleh polis dan perbaiki persekitaran tempat kanak-kanak membesar. Untuk memulihkan keselamatan awam hingga ke akarnya, sekurang-kurangnya satu generasi diperlukan."
+      },
+      "tip3": {
+        "title": "Beri laluan!",
+        "description": "Bomba hanya berguna apabila sampai ke tempat kejadian. Walaupun ada balai bomba, kerosakan akan merebak jika balai terlalu jauh atau jalan ke sana sesak. Selain belanjawan, kaji semula lokasi balai dan jalan ke tempat kejadian."
+      },
+      "tip5": {
+        "title": "Jalan yang mendaki",
+        "description": "Jalan yang melalui cerun curam lebih berat kerja pembinaannya berbanding tanah rata. Jarak terpendek pada peta tidak semestinya rute paling murah. Bandingkan rupa bumi dengan anggaran kos pembinaan, dan pertimbangkan juga pilihan yang sedikit melencong."
+      },
+      "tip6": {
+        "title": "Rancang lebih awal",
+        "description": "Apabila penduduk dan kilang bertambah, permintaan elektrik dan air turut meningkat. Jika anda hanya mula membina kemudahan selepas kekurangan berlaku, anda terpaksa menunggu sehingga siap. Sebelum membangunkan daerah baharu, semak juga lebihan bekalan."
+      },
+      "tip7": {
+        "title": "Biar lambat asalkan selamat",
+        "description": "Had laju yang lebih tinggi mempercepat perjalanan, tetapi meningkatkan risiko kemalangan. Selekoh tajam juga perlu diberi perhatian. Di tempat yang kerap berlaku kemalangan, kaji semula bentuk jalan dan had lajunya."
+      },
+      "tip8": {
+        "title": "Pelaburan untuk masa depan",
+        "description": "Kekurangan tenaga kerja di hospital dan kilang berteknologi tinggi tidak dapat diatasi dengan menambah penduduk sahaja. Sediakan bidang pengajian universiti dan kuota pengambilan untuk melatih tenaga mahir dalam bidang yang diperlukan, dan rancang dengan mengambil kira masa hingga mereka bergraduat."
+      },
+      "tip9": {
+        "title": "Guna selama-lamanya",
+        "description": "Jika pembaikan diabaikan, bangunan dan jalan semakin rosak hingga boleh runtuh. Kebakaran dan keruntuhan juga memburukkan sentimen warga kota, jadi berbahaya jika belanjawan dihabiskan untuk pembinaan baharu sahaja. Simpan juga belanjawan untuk membaiki kemudahan sedia ada dan untuk bomba."
+      },
+      "tip10": {
+        "title": "Kebakaran besar",
+        "description": "Apabila bangunan terlalu rapat, kebakaran sebuah bangunan mudah merebak ke sekelilingnya. Selain perkhidmatan bomba, menyediakan jarak antara bangunan juga membantu mencegah bencana."
+      },
+      "tip11": {
+        "title": "Gali sepuas-puasnya",
+        "description": "Bagi lombong dan medan minyak, semak taburan sumber sebelum memilih lokasi. Simpanan akan berkurangan jika terus digali. Bandar yang bergantung pada perlombongan perlu memikirkan pekerjaan dan hasil cukai selepas sumbernya habis."
+      },
+      "tip12": {
+        "title": "Lombong emas bandar",
+        "description": "Apabila datuk bandar membina bangunan kediaman atau komersial, sewa boleh dikutip daripada penyewa. Ruang kosong tidak menghasilkan pendapatan, jadi semak kegunaan yang diperlukan, kekosongan di sekitar dan lokasinya."
+      },
+      "tip13": {
+        "title": "Perah sampai kering",
+        "description": "Kadar cukai bukan sahaja mempengaruhi pendapatan bandar, tetapi juga beban dan keuntungan syarikat. Ia juga boleh digunakan sebagai dasar industri, contohnya dengan meringankan cukai industri yang ingin anda majukan. Apabila hasil cukai tidak mencukupi, lihat keadaan setiap jenis industri dahulu sebelum menaikkan cukai secara menyeluruh."
+      },
+      "tip14": {
+        "title": "Sandaran",
+        "description": "Apabila stesen jana kuasa atau talian elektrik terhenti akibat kemalangan atau bencana, kesannya merebak kepada kilang dan kehidupan warga kota yang menggunakan elektrik. Bagi infrastruktur penting, sediakan simpanan untuk kedua-dua kemudahan pembekal dan laluan penghantaran, supaya kerosakan di satu tempat tidak melumpuhkan seluruh bandar."
+      },
+      "tip15": {
+        "title": "Mencari tempat berteduh",
+        "description": "Jika tanah kosong di pusat bandar dibiarkan, orang yang kehilangan tempat tinggal akan berkumpul di situ dan setinggan mudah terbentuk. Jika anda menyediakan rumah dengan sewa yang mampu dibayar, penduduk akan beransur-ansur berpindah ke sana dan setinggan akan mengecil dengan sendirinya."
+      },
+      "tip16": {
+        "title": "Kelompok industri",
+        "description": "Apabila industri yang sama atau industri yang menghasilkan bahan mentahnya berkumpul berdekatan, lokasi itu menjadi lebih menguntungkan untuk pengeluaran. Daripada menyelerakkan kilang di seluruh bandar, pertimbangkan untuk mengumpulkan industri yang berkaitan. Namun, berhati-hati dengan bunyi bising dan pencemaran udara berhampiran kawasan perumahan."
+      },
+      "tip17": {
+        "title": "Kerja siang malam",
+        "description": "Jika waktu bekerja dilanjutkan dalam panel peraturan, bilangan pekerja yang sama boleh menampung lebih banyak pengeluaran. Sebaliknya, kesihatan dan masa lapang terjejas, dan perbelanjaan hiburan berkurangan. Jika terlalu banyak masa digunakan untuk mencari wang, tiada masa lagi untuk membelanjakannya."
+      },
+      "tip18": {
+        "title": "Neraka ulang-alik",
+        "description": "Perjalanan ke tempat kerja yang panjang mengurangkan masa lapang, dan perbelanjaan seperti hiburan turut merosot. Kaji semula jarak antara rumah dan tempat kerja serta kesesakan di sepanjang perjalanan. Bagi warga kota yang pulang hanya untuk tidur, kawasan beli-belah yang meriah hanyalah pemandangan di luar tingkap."
+      },
+      "tip19": {
+        "title": "Pandangan jauh",
+        "description": "Tren yang panjang hanya boleh digunakan jika muat di platform setiap stesen di laluannya. Sebagai persediaan untuk pertambahan penumpang, fikirkan panjang platform semasa membina stesen. Memanjangkan satu stesen sahaja tidak membantu jika stesen lain masih pendek."
+      },
+      "tip20": {
+        "title": "Sorok bawah tanah",
+        "description": "Jalan bawah tanah tidak menghasilkan bunyi bising atau pencemaran udara, jadi ia pilihan untuk melindungi persekitaran kediaman di kawasan perumahan. Ada masalah yang boleh selesai dengan menimbusnya."
+      },
+      "tip21": {
+        "title": "Di celah-celah bangunan tinggi",
+        "description": "Bangunan tinggi membuat bayang di sebelah utaranya dan memburukkan persekitaran kediaman di sekitarnya. Beri perhatian juga kepada ketinggian dan jarak antara bangunan. Rupa bumi seperti gunung juga menghasilkan bayang. Masa depan bandar mungkin cerah, tetapi tanah di bawahnya mungkin gelap gelita."
+      },
+      "tip22": {
+        "title": "Pas transit lebih baik daripada kereta",
+        "description": "Apabila pengangkutan awam memudahkan perjalanan ke tempat kerja, sekolah dan kedai, isi rumah lebih cenderung memilih hidup tanpa kereta. Kos memiliki kereta yang dijimatkan boleh dibelanjakan untuk perkara lain."
+      },
+      "tip23": {
+        "title": "Mengangkut angin",
+        "description": "Bas tetap menambah trafik jalan walaupun tanpa penumpang. Jika terlalu banyak bas dijalankan, usaha mengurangkan kesesakan boleh memakan diri. Lihat bilangan penumpang dan sela masa untuk menentukan kekerapan yang diperlukan."
+      },
+      "tip24": {
+        "title": "Tikus mondok tak bayar sewa tanah",
+        "description": "Terowong yang cukup dalam boleh dibina tanpa mengambil tanah di atasnya. Segmen yang cetek masih memerlukan pengambilan tanah, jadi semak kedalaman dan anggaran kos. Jika rundingan sukar, gali lebih dalam lagi."
+      },
+      "tip25": {
+        "title": "Ulang-alik tanpa jalan",
+        "description": "Di gunung atau cerun curam yang sukar dibina jalan, kereta kabel boleh menyediakan pengangkutan awam. Sediakan juga jalan ke stesen dan sambungan ke pengangkutan lain. Jika perjalanan di darat terlalu sukar, anda boleh menggantung warga kota di udara."
+      },
+      "tip26": {
+        "title": "Kesesakan elektrik",
+        "description": "Walaupun penjanaan elektrik berlebihan, elektrik tidak akan sampai jika kapasiti talian elektrik tidak mencukupi. Sebelum menambah stesen jana kuasa, semak sambungan dan kapasiti penghantaran ke daerah yang kekurangan. Satu talian elektrik yang kecil di tengah jalan mungkin mengehadkan bekalan seluruh bandar."
+      },
+      "tip27": {
+        "title": "Kemalangan yang tidak disangka",
+        "description": "Bangunan yang menghalang pembangunan boleh diletupkan dan dibuat seolah-olah kemalangan. Namun, sentimen warga kota akan merosot teruk. Jika ingin mengosongkan tanah, timbang kos membeli dan merobohkannya berbanding kesan yang ditinggalkan oleh cara paksa di bandar."
+      },
+      "tip28": {
+        "title": "Ke laut kita",
+        "description": "Jika tanah tidak mencukupi, tebus guna tanah boleh mewujudkan tapak baharu. Pelantar minyak juga boleh dibina di tempat yang mempunyai sumber dasar laut."
+      },
+      "tip29": {
+        "title": "Neraka lampu merah",
+        "description": "Semakin banyak persimpangan berlampu isyarat, semakin banyak masa menunggu lampu dalam perjalanan. Elakkan terlalu banyak persimpangan di jalan utama. Jika jalan disilangkan terlalu kemas, matahari mungkin terbenam sebelum sempat melihat lampu hijau."
+      },
+      "tip30": {
+        "title": "Pemandangan luas",
+        "description": "Menara pemancar lebih mudah meliputi kawasan yang luas jika dibina tinggi di tempat yang tinggi. Semak sama ada terdapat halangan seperti gunung di antara menara dan kawasan yang tidak mendapat liputan. Isyarat yang terhalang tidak dapat diatasi dengan semangat untuk menambah kuasa."
+      },
+      "tip31": {
+        "title": "Rezeki dari laut",
+        "description": "Bandar tanpa sumber air berhampiran pun boleh mendapat bekalan air daripada loji penyahgaraman air laut di pantai. Namun, loji ini memerlukan elektrik untuk beroperasi. Selepas mencari sumber air, cari pula sumber elektrik."
+      },
+      "tip32": {
+        "title": "Cara lain mencegah jenayah",
+        "description": "Pengangguran ialah salah satu faktor yang memburukkan keselamatan awam. Selain menambah polis, warga kota juga memerlukan tempat untuk bekerja. Apabila penganggur ramai, semak bilangan kekosongan kerja, kemahiran yang diperlukan dan sama ada tempat kerja boleh dicapai."
+      },
+      "tip33": {
+        "title": "Hutang untuk masa depan",
+        "description": "Bangunan dan jalan terus memerlukan kos pembaikan selepas siap. Jika anda membina terlalu banyak hanya kerana mampu membayar kos pembinaan, belanjawan masa depan akan dipenuhi kos penyelenggaraan. Datuk bandar pada masa depan juga ialah anda."
+      },
+      "tip34": {
+        "title": "Jangan pam berlebihan",
+        "description": "Sumber air pulih dari semasa ke semasa, tetapi jika terus dipam melebihi kadar pemulihan, simpanannya akan berkurangan. Dapatkan sumber air lain sebelum permintaan meningkat. Menambah pam tidak akan menambah air."
+      },
+      "tip35": {
+        "title": "Kesilapan yang dikesali",
+        "description": "Jalan dan bangunan tidak mudah dialihkan setelah pembinaan bermula. Sebelum mengesahkan pembinaan, semak arah, sambungan dan tanah yang tinggal di sekelilingnya. Namun, jalan yang tersilap bengkok pun lama-kelamaan menjadi identiti bandar."
+      },
+      "tip36": {
+        "title": "Masyarakat dalam pemerhatian",
+        "description": "Klik pejalan kaki atau kereta untuk menambah warga kota ke senarai jejakan. Gunakannya apabila anda ingin melihat kehidupan seseorang penduduk. Selain statistik seluruh bandar, anda juga boleh melihat bandar melalui kehidupan seorang individu."
+      },
+      "tip37": {
+        "title": "Sumber elektrik beban asas",
+        "description": "Penjanaan elektrik solar dan angin berubah mengikut cuaca. Jika anda hanya berpandukan bekalan pada hari cerah, kekurangan mungkin berlaku apabila cuaca berubah. Gabungkan juga sumber yang kurang bergantung pada cuaca, seperti terma atau nuklear."
+      },
+      "tip38": {
+        "title": "Besar lebih baik",
+        "description": "Sesetengah bangunan tidak boleh dibina di lot kecil. Jika ada kemudahan yang ingin dibina, semak keluasan yang diperlukan sebelum membahagikan lot. Walaupun tanah banyak berlebihan, bangunan besar tidak akan muat jika semuanya lot kecil."
+      },
+      "tip39": {
+        "title": "Perkhidmatan ini berbayar",
+        "description": "Perkhidmatan awam seperti rawatan kumbahan, pelupusan sisa, telekomunikasi dan perubatan mungkin percuma secara lalai. Dengan menetapkan caj, pengguna boleh menanggung sebahagian kos operasi. Sama ada harga yang mesra warga kota atau tanda harga yang berani, keputusannya di tangan datuk bandar."
+      },
+      "tip40": {
+        "title": "Bandar salin dan tampal",
+        "description": "Apabila datuk bandar membina bangunan, bangunan sedia ada boleh disalin untuk dibina. Jika jenis dan bilangan tingkat tidak diubah dan bangunan dibina di lot yang muat untuk bangunan asal, kos pembinaan dapat dijimatkan. Rupanya seragam, tetapi pemandangan ini mesra dompet."
+      },
+      "tip41": {
+        "title": "Sewa sahajakah ukuran rumah?",
+        "description": "Penduduk membandingkan tempat tinggal baharu berdasarkan sewa, beban perjalanan ke tempat kerja, sekolah dan kedai, serta kualiti rumah dan persekitaran kediaman. Bunyi bising, pencemaran udara, keselamatan awam dan cahaya matahari juga penting. Rumah yang murah tetapi menyusahkan kurang dipilih, manakala rumah yang mudah pun masih perlu sewa yang sepadan dengan kemampuan dan ruang yang cukup untuk didiami."
+      },
+      "tip42": {
+        "title": "Jangan tunggu kapal tersadai",
+        "description": "Pelabuhan besar seperti pelabuhan kontena, pelabuhan pukal dan pelabuhan kapal tangki memerlukan air yang cukup dalam. Pantai dengan dasar laut yang curam dekat dengan laut dalam, jadi ia sesuai untuk pelabuhan. Pantai landai yang cetek jauh ke tengah pun boleh dibina pelabuhan jika tanah ditambak hingga ke laut dalam."
+      },
+      "tip43": {
+        "title": "Berhenti sekejap sahaja",
+        "description": "Apabila letak kereta di tepi jalan bertambah, kenderaan bergerak lebih perlahan dan kemalangan lebih mudah berlaku. Sediakan tempat letak kereta supaya kereta yang melimpah di jalan ada tempat diletakkan. “Berhenti sekejap sahaja” boleh menghentikan seluruh bandar."
+      },
+      "tip44": {
+        "title": "Terpencil di daratan",
+        "description": "Bangunan boleh dibina jauh dari jalan, tetapi semakin jauh dari jalan, semakin teruk aksesnya. Kilang dan kedai mengambil masa lebih lama untuk mendapatkan bekalan, manakala rumah menanggung beban perjalanan ke tempat kerja dan kedai yang lebih berat. Bina bangunan di tepi jalan, atau panjangkan jalan hingga ke sebelahnya."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Pilih lot untuk merancang bangunan. Pembinaan mengambil sedikit masa dari perancangan hingga siap.",
+    "parcelCreation": "Tekan Ctrl untuk membuka menu roda dan pilih kaedah penciptaan, kemudian klik dalam paparan 3D untuk memilih sasaran. Laraskan saiz dalam panel, kemudian sahkan.",
+    "transitCreation": "Klik kiri untuk meletakkan hentian mengikut urutan, dan klik hentian pertama untuk menutup pusingan. Seret segmen untuk menambah titik laluan, seret titik untuk mengalihkannya, klik kanan untuk memadam. Untuk perjalanan pergi balik, letakkan juga hentian bagi arah pulang. Klik semula hentian yang sudah diletakkan, atau letakkan hentian di atas hentian lain, untuk berhenti di situ sekali lagi.",
+    "transitManagement": "Senarai laluan pengangkutan awam. Anda boleh melaraskan tambang dan sela masa, atau mewujudkan dan memadam laluan. Tambang mempengaruhi pilihan rute penduduk. Jika terlalu mahal, penumpang berkurangan dan pemilikan kereta bertambah.",
+    "pathConstruction": "Bina jalan dan landasan. Klik rupa bumi dalam paparan 3D. Klik kiri untuk menambah bucu, klik kanan untuk menetapkan bentuk, dan seret bucu untuk mengalihkannya. Tahan Ctrl untuk membuka menu tetapan (lengkung/lurus, lekap). Tekan kekunci 3/4 untuk mengubah ketinggian tambakan/potongan.",
+    "pathConstructionElevated": "Bina jalan dan landasan. Klik rupa bumi dalam paparan 3D. Klik kiri untuk menambah bucu, klik kanan untuk menetapkan bentuk, dan seret bucu untuk mengalihkannya. Tahan Ctrl untuk membuka menu tetapan (lengkung/lurus, lekap). Tekan PageUp/PageDown atau kekunci 1/2 untuk mengubah ketinggian, dan kekunci 3/4 untuk mengubah ketinggian tambakan/potongan.",
+    "districtEdit": "Cipta, luaskan dan gabungkan “daerah”, iaitu unit bagi peraturan dan statistik. Tahan Ctrl dalam paparan 3D untuk menukar alat. Alat cipta: klik kiri pada jalan untuk mencipta daerah baharu dengan warna yang ditunjukkan (warna berubah setiap kali alat dipilih). Alat luaskan: klik kanan untuk memilih daerah yang hendak diluaskan, kemudian klik kiri pada jalan untuk memasukkannya ke dalam daerah itu. Alat gabung: klik kanan untuk memilih daerah sasaran, kemudian klik kiri pada daerah yang hendak digabungkan untuk membuka panel pengesahan. Warna dan nama daerah yang dipilih dipaparkan di sebelah kursor tetikus. Tekan butang sekali lagi untuk keluar.",
+    "bulldozer": "Mod jentolak. Klik kiri untuk memadam lot kosong, bangunan yang dirancang, jalan yang dirancang dan objek hiasan rupa bumi (objek hiasan yang diletakkan mengikut kawasan dipadam bersama seluruh kawasannya selepas pengesahan). Tekan butang sekali lagi untuk keluar.",
+    "bulldozerInstant": "Mod jentolak. Klik kiri untuk memadam bangunan, jalan, lot kosong dan objek hiasan rupa bumi serta-merta tanpa pengesahan. Bangunan dipadam bersama penyewa dan warga kotanya, dan rupa bumi tidak dipulihkan (Dewan Bandaran, pusat pemeriksaan sempadan dan segmen pengangkutan awam tidak boleh dipadam; hanya objek hiasan yang diletakkan mengikut kawasan dipadam bersama seluruh kawasannya selepas pengesahan). Tekan butang sekali lagi untuk keluar.",
+    "cityBudget": "Tentukan cara memperuntukkan dana yang diperoleh daripada hasil cukai dan operasi perniagaan bagi tempoh seterusnya. Apabila kerajaan tempatan membeli bahan untuk membina jalan atau mengendalikan kemudahan awam, pembelian hanya boleh dibuat dalam had belanjawan yang ditetapkan di sini. Jika belanjawan tidak mencukupi, pekerja kemudahan awam mungkin diberhentikan.",
+    "resourceEdit": "Cipta kawasan sumber asli. Pilih jenis sumber, kemudian klik rupa bumi. Klik kiri untuk menambah bucu, klik pada sisi untuk menyisipkan bucu, dan klik kanan untuk memadam bucu. Seret bucu untuk mengalihkannya.",
+    "grading": "Klik kiri untuk meletakkan bucu, kemudian klik kanan untuk menetapkan kawasan."
+  }
+}

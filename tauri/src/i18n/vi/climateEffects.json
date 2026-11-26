@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "Khí hậu trung bình tháng này",
+    "currentClimate_week": "Khí hậu trung bình tuần này",
+    "title": "Hiệu suất sản xuất của công trình theo khí hậu",
+    "facility": "Công trình",
+    "factor": "Hiệu suất sản xuất"
+  }
+}

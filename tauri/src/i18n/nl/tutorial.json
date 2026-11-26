@@ -1,0 +1,756 @@
+{
+  "tutorial": {
+    "startButton": "Beginnen",
+    "controls": {
+      "title": "Basisbediening",
+      "description": "Ontdek wat je als burgemeester wilt bereiken en hoe je eerst plant en daarna de tijd laat lopen. Je bekijkt wat de informatie op het scherm betekent, wat elke knop doet en hoe je de camera beweegt. Daarna verleng je een weg, leg je een nieuwe woonwijk aan en zorg je voor woningen, stroom en water.",
+      "step1": {
+        "title": "Bouw als burgemeester aan je stad",
+        "role": "In City Genesis laat je als burgemeester een stad groeien. Je plant wegen en voorzieningen, bepaalt hoe de grond wordt gebruikt en stelt de belastingen en het budget voor openbare diensten vast. Jouw taak is een omgeving te scheppen waarin inwoners en bedrijven kunnen leven en werken. Klik op “Volgende” om verder te lezen.",
+        "goal": "Je doel is een stad waar inwoners welvarend en zorgeloos kunnen leven. Zorg voor meer woningen en banen, en voor stroom, water, gezondheidszorg en meer. Om de stad te laten groeien heb je ook geld nodig. Houd zowel het leven van de inwoners als de gemeentefinanciën in het oog als je bepaalt wat je aanpakt.",
+        "epoch": "In dit spel gaat de tijd telkens een maand vooruit. Stel eerst je begroting en bouwplannen op en klik op “Starten” als je klaar bent. Dan loopt de tijd, vordert de bouw en gaan inwoners en bedrijven hun gang. Bekijk de resultaten en bedenk je volgende plannen. Zolang je niet op “Starten” klikt, staat de datum stil, dus neem gerust de tijd.",
+        "epoch_week": "In dit spel gaat de tijd telkens een week vooruit. Stel eerst je begroting en bouwplannen op en klik op “Starten” als je klaar bent. Dan loopt de tijd, vordert de bouw en gaan inwoners en bedrijven hun gang. Bekijk de resultaten en bedenk je volgende plannen. Zolang je niet op “Starten” klikt, staat de datum stil, dus neem gerust de tijd."
+      },
+      "step2": {
+        "title": "Lees de stad af in de cockpit",
+        "tools": "In de cockpit onder in beeld bekijk je hoe de stad ervoor staat en bedenk je wat je hierna doet. Met “Weergave” spoor je tekorten en probleemplekken op met kleuren. “Kaart” laat zien hoe alles in de stad ten opzichte van elkaar ligt. Zo vind je ook in een grote stad snel de plek die je zoekt.",
+        "tracking": "Met “Burgerlijst” zoek je inwoners op naam en kijk je later terug hoe het met bepaalde inwoners gaat, bijvoorbeeld met hun woon-werkverkeer. Voeg iemand in de burgergegevens toe aan de gevolgde burgers; dan open je zijn of haar gegevens hier. Handig als je het leven van individuele mensen wilt leren kennen, dat je uit de cijfers van de hele stad niet haalt.",
+        "bulldozer": "Met de “Bulldozer” verwijder je lege percelen en schrap je geplande gebouwen en wegen. Klik op de knop en daarna op het object in de 3D-weergave; klik nog eens op de knop om de modus te verlaten. Wil je een opgeleverd gebouw of een aangelegde weg weghalen, open dan de gegevens ervan en kies voor slopen.",
+        "services": "De meters met de bliksem, de waterdruppel en het schip laten zien hoeveel ruimte er nog is in de capaciteit voor stroom, water en import/export. Hoe voller de meter, hoe dichter de vraag of het handelsvolume bij de grens zit. Klik erop om de openbare voorzieningen en de import- en exportpunten te bekijken. Controleer voordat je de stad uitbreidt of je extra voorzieningen nodig hebt.",
+        "score": "De “Score” geeft samengevat aan hoe tevreden de inwoners zijn met het leven in je stad. Hoe hoger, hoe prettiger de stad om in te wonen. Woningen, werk, gezondheidszorg en een goede leefomgeving helpen de score omhoog. Daalt hij, zoek dan uit waar de inwoners tegenaan lopen.",
+        "budget": "De “Begroting” toont de verwachte uitgaven voor volgende maand ten opzichte van de inkomsten van vorige maand. Slaat de meter naar rechts uit, dan zijn de uitgaven hoger dan de inkomsten. Slaat hij naar links uit, dan houd je geld over. Kijk er even naar voordat je de tijd laat lopen.",
+        "budget_week": "De “Begroting” toont de verwachte uitgaven voor volgende week ten opzichte van de inkomsten van vorige week. Slaat de meter naar rechts uit, dan zijn de uitgaven hoger dan de inkomsten. Slaat hij naar links uit, dan houd je geld over. Kijk er even naar voordat je de tijd laat lopen.",
+        "budgetChanges": "Meer bouwwerkzaamheden aan wegen en voorzieningen, voorzieningen die harder draaien of sneller bouwen: dat kost allemaal meer geld en laat de begrotingsmeter stijgen. Draai je voorzieningen terug of bouw je langzamer, dan dalen de verwachte uitgaven. Stijgen de belastinginkomsten, dan daalt de meter bij gelijke uitgaven.",
+        "budgetPlanning": "Staat de meter laag, dan heb je geld over om in de stad te steken. Denk aan investeringen in diensten die ontbreken of in voorzieningen die je straks nodig hebt.",
+        "date": "De datum laat zien hoe ver de tijd in de stad is gevorderd. Gebruik hem om de voortgang van de bouw en de veranderingen per seizoen te volgen. Terwijl je plant staat de datum stil; hij verspringt zodra je de tijd laat lopen met “Starten”.",
+        "climate": "Het paneel met temperatuur, neerslag, zonneschijn en windsnelheid toont het gemiddelde klimaat van deze maand. Die omstandigheden bepalen hoe productief landbouw, windenergie en zonne-energie zijn. Vallen de oogst of de stroomproductie tegen, kijk dan ook naar het klimaat.",
+        "climate_week": "Het paneel met temperatuur, neerslag, zonneschijn en windsnelheid toont het gemiddelde klimaat van deze week. Die omstandigheden bepalen hoe productief landbouw, windenergie en zonne-energie zijn. Vallen de oogst of de stroomproductie tegen, kijk dan ook naar het klimaat.",
+        "climateEffects": "Bij weinig zon leveren zonneparken minder op, bij weinig wind de windturbines. Ook temperatuur en regenval beïnvloeden de landbouw. Klik op het klimaatpaneel om te zien welk effect de omstandigheden van deze maand hebben op de productiviteit van elke voorziening. Houd bij het plannen van voorzieningen rekening met het aanbod dat per seizoen verandert.",
+        "climateEffects_week": "Bij weinig zon leveren zonneparken minder op, bij weinig wind de windturbines. Ook temperatuur en regenval beïnvloeden de landbouw. Klik op het klimaatpaneel om te zien welk effect de omstandigheden van deze week hebben op de productiviteit van elke voorziening. Houd bij het plannen van voorzieningen rekening met het aanbod dat per seizoen verandert.",
+        "notifications": "Het getal bij “Meldingen” is het aantal waarschuwingen en aandachtspunten dat je nu even moet bekijken. Een rood getal en een knipperende knop betekenen dat de stad ergens niet goed functioneert en dat je er snel iets aan moet doen. Gele getallen zijn aandachtspunten, zoals voorbereidingen op groei of problemen die tijd nodig hebben om op te lossen. Klik eerst op de knop om ze te lezen.",
+        "notificationActions": "Noemt een melding een voorziening of wijk, klik dan op die regel om ernaar te kijken. Pak de oorzaak aan: sluit een ontbrekende hoogspanningsleiding aan, of zorg dat een voorziening met een tekort aan grondstoffen kan inkopen. Meldingen over aanhoudende problemen verdwijnen zodra de oorzaak is weggenomen. Bekijk na je ingreep de resultaten van de volgende maand."
+      },
+      "step3": {
+        "title": "Wissel van weergave om problemen te vinden",
+        "open": "Een stroomtekort of verkeersopstopping zie je niet altijd aan het uiterlijk van de stad. Met “Weergave” maak je de informatie die je zoekt zichtbaar op de kaart. Klik in de cockpit op “Weergave” om het paneel te openen.",
+        "tabs": "Met de verticale tabbladen kies je wat je wilt bekijken: gebouwen, wegen, percelen, wijken en meer. Wordt het beeld onoverzichtelijk door overlappende informatie, dan kun je objecten die je niet nodig hebt verbergen. Klik op “Volgende” om te zien hoe de weergave werkt.",
+        "modes": "Met de knoppen in elk tabblad kies je naar welke informatie de objecten gekleurd worden. Zoek drukke wegen of gebouwen met problemen en gebruik dat als aanknopingspunt voor je aanpak. Klik in de 3D-weergave op een object om het nader te bekijken. Klik op “Volgende”."
+      },
+      "step4": {
+        "title": "Leer je gereedschap kennen",
+        "grading": "We lopen de knoppen links in beeld van boven naar beneden langs. Met “Grondwerk” maak je hellingen vlak waar lastig te bouwen is, of win je land op de zee voor extra bouwgrond. Zo maak je ruimte voor groei als je meer woningen of werkplekken wilt, maar te weinig bruikbare grond hebt.",
+        "road": "Met “Wegen, spoor en infrastructuur” leg je de verbindingen aan waarlangs mensen, goederen, stroom en water hun bestemming bereiken. Verbind woningen en werkplekken met wegen, verre plekken met spoor en voorzieningen onderling met hoogspanningsleidingen en waterleidingen. Zo ondersteun je het verkeer van inwoners, de handel van bedrijven en de levering van stroom en water.",
+        "land": "Met “Percelen” maak je bouwterreinen klaar voor gebouwen. Alleen grond is nog geen bouwterrein. Voor extra woningen en voor grote voorzieningen heb je bouwterreinen van de juiste grootte nodig.",
+        "landDevelopment": "Op percelen kan de gemeente zelf bouwen, en ze bieden ook ruimte aan particuliere woningen en bedrijven. Particuliere gebouwen verschijnen naargelang de vraag en de bouwvoorschriften van de wijk. Wil je meer woningen of werkplekken, controleer dan of er genoeg lege percelen zijn.",
+        "district": "Met “Wijken” beheer je delen van de stad als één geheel. Zo kun je per gebied een eigen koers kiezen, bijvoorbeeld een woonwijk of een gebied voor fabrieken. Per wijk kun je beperken welke soorten gebouwen er mogen komen, zodat het hele gebied zich in de gewenste richting ontwikkelt.",
+        "districtRules": "In de wijkgegevens bepaal je welke soorten gebouwen er mogen komen. Gebruik dat naar gelang de stad die je voor ogen hebt, bijvoorbeeld om fabrieken uit een woonwijk te weren. Je kunt ook de bevolking en de leefomstandigheden van wijken vergelijken om te zien waar steun nodig is.",
+        "construction": "Met “Bouwen” plant de gemeente de gebouwen die de stad nodig heeft. Je kunt woningen, werkplekken, ziekenhuizen, scholen, elektriciteitscentrales en meer bouwen. Gebruik het om meer woningen en banen te creëren of om tekorten in gezondheidszorg, onderwijs, stroom en andere diensten aan te vullen.",
+        "transport": "Met “Openbaar vervoer” help je inwoners zich te verplaatsen per bus of trein. Je bepaalt lijnen en haltes en stelt ritprijzen en intervallen in. Verbind woningen met werkplekken en scholen om het woon-werk- en schoolverkeer te ontlasten.",
+        "propPlacement": "Met “Decorobjecten plaatsen” zet je bomen, rotsen en ander decor neer om het stadsbeeld op te fleuren. Gebruik het om straten wat groener te maken of het terrein aan te kleden.",
+        "cityDevelopment": "Met “Automatische stadsontwikkeling” plan je in één keer wegen en percelen over een groot gebied. Kleur op de kaart het gebied dat je wilt ontwikkelen en kies een stratenpatroon; dan worden wegen en percelen in één keer klaargezet. Gebruik het als je een nieuwe woonwijk of stadsdeel van de grond af opbouwt.",
+        "constructionProjects": "Bij “Bouwprojecten” zie je alle geplande en lopende werkzaamheden bij elkaar. Bekijk welke werken opschieten en waar het geld naartoe gaat, en bepaal welke werken je doorzet.",
+        "regulation": "Bij “Voorschriften” leg je de regels vast voor wonen en werken in de stad, zoals maximumsnelheden, werktijden, de toelating van immigranten en sociale zekerheid. Bepaal wat je het belangrijkst vindt – veiligheid, ruimte om van het leven te genieten of groei van de stad – en stel ze bij naargelang de situatie.",
+        "stat": "Met “Statistieken” controleer je de resultaten van je beleid. In grafieken zie je hoe bevolking, inkomen, woon-werkverkeer, tevredenheid van de inwoners, de omvang van de economie en de prijzen zich ontwikkelen. Kijk na een wijziging in beleid of voorzieningen of het leven beter wordt en wat er nog ontbreekt. Dat waren de knoppen aan de linkerkant."
+      },
+      "step5": {
+        "title": "Voer je plannen uit en bekijk de resultaten",
+        "flow": "Heb je de stad bekeken en de nodige bouwwerken en begroting gepland, laat dan de tijd lopen met “Starten” in de cockpit. De bouw vordert, inwoners gaan aan het werk, bedrijven produceren en de gemeentefinanciën en de score veranderen. Soms duurt het een paar maanden voordat een plan effect heeft.",
+        "execute": "Bekijk na het laten lopen van de tijd de resultaten en de meldingen. Pak problemen aan in je volgende plannen en laat de tijd opnieuw lopen. Zo laat je de stad groeien: plannen, tijd laten lopen, resultaten bekijken – en weer opnieuw. Je hoeft hier nog niet op “Starten” te klikken. Klik op “Volgende” om de camerabediening te leren."
+      },
+      "step6": {
+        "title": "Beweeg de camera",
+        "description": "Zo beweeg je de camera: sleep met de linkermuisknop om het beeld te verschuiven, sleep met de rechtermuisknop om te draaien, gebruik W/A/S/D (of de pijltjestoetsen) om te bewegen, Q/E om te draaien, R/F om de hoogte te veranderen en het muiswiel om te zoomen. Probeer het gerust uit en klik daarna op “Volgende”."
+      },
+      "step7": {
+        "title": "Vliegmodus en filmmodus",
+        "description": "De camera heeft twee speciale modi. De “vliegmodus” start je met Shift+F: met W/A/S/D beweeg je in je kijkrichting, met de muis kijk je rond en met R/F ga je omhoog of omlaag. Met Esc verlaat je de modus. De “filmmodus” start je met de knop linksboven in beeld; je cirkelt dan om de stad heen. Kijk rond met de muis, wissel met Shift tussen rondcirkelen en vooruitbewegen, pauzeer met de spatiebalk, speel achteruit af met Backspace en stop met Esc. In beide modi verdwijnen de panelen van het scherm; ze komen terug zodra je met Esc afsluit. Heb je ze uitgeprobeerd, verlaat dan beide modi en klik op “Volgende”."
+      },
+      "step8": {
+        "title": "Bekijk de stadsgrens",
+        "description": "We hebben de camera naar de oostrand van de stad verplaatst. Je kunt als stad alleen dit rechthoekige gebied gebruiken waar gedetailleerd terrein is, en ook de camera kan er niet buiten. Dat was alles over het scherm en de bediening. Nu ga je echt een nieuwe woonwijk aanleggen. Klik op “Volgende”."
+      },
+      "step9": {
+        "title": "Verleng de weg",
+        "description": "Vanaf hier leg je echt een woonwijk aan voor nieuwe inwoners. Woningen en werkplekken hebben weinig zin zonder wegen ertussen: mensen kunnen niet heen en weer en goederen komen niet aan. Verleng eerst de oost-weststraat van het dorp naar het westen, zodat er een weg naar de nieuwe woonwijk komt. Klik in het pictogrammenpaneel op “Wegen, spoor en infrastructuur” om het bouwpaneel te openen.",
+        "confirm": "De grond langs een weg wordt in percelen verdeeld zodra de weg is opgeleverd. Bij “Percelen langs de weg na oplevering” in het bouwpaneel kies je voor de linker- en rechterkant van de weg apart hoe groot elk perceel wordt. Laat dat afhangen van de gebouwen die je er wilt hebben: kleinere percelen voor woningen, grotere voor fabrieken en landbouw. Deze weg is voor een woonwijk, dus laat de instelling zoals ze is. Klik in het bouwpaneel op “Bevestigen” om de weg op te slaan en klik daarna op “Volgende”."
+      },
+      "step10": {
+        "title": "Maak de weg af",
+        "description": "De weg heeft nog de status “Bouw gepland”. Een geplande weg kun je nog niet gebruiken: pas als het werk klaar is, kunnen mensen en auto’s erover. Klik 2 à 3 keer op “Starten” in de cockpit om de tijd te laten lopen en wacht tot de weg is opgeleverd. Zolang er gebouwd wordt, kost dat elke maand geld.",
+        "description_week": "De weg heeft nog de status “Bouw gepland”. Een geplande weg kun je nog niet gebruiken: pas als het werk klaar is, kunnen mensen en auto’s erover. Klik 2 à 3 keer op “Starten” in de cockpit om de tijd te laten lopen en wacht tot de weg is opgeleverd. Zolang er gebouwd wordt, kost dat elke week geld."
+      },
+      "step11": {
+        "title": "De percelen zijn klaar",
+        "description": "De weg is opgeleverd en langs de weg zijn percelen ontstaan. Gebouwen kunnen alleen op percelen staan, en doordat een perceel aan een weg ligt, kunnen mensen en goederen er komen en gaan. Wil je percelen toevoegen langs een bestaande weg, gebruik dan “Percelen” in het pictogrammenpaneel."
+      },
+      "step12": {
+        "title": "Maak een wijk",
+        "description": "Bepaal voordat je gaat bouwen wat er van deze straat moet worden. Zonder plan kan er zomaar een fabriek naast de woningen verrijzen. Zo’n koers bepaal je per “wijk”. Wijken worden per weg ingesteld, en een perceel hoort bij de wijk van de weg waaraan het ligt. Klik in het pictogrammenpaneel op “Wijken” om het venster “Wijken bewerken” te openen: je ziet dat het hele dorp nu nog één wijk is.",
+        "create": "Kies als selectiemethode “Straatkant”. Zet het gereedschap op “Nieuwe wijk maken”, houd Ctrl ingedrukt en sleep over de weg die je hebt verlengd. Beide kanten van de weg waarover je sleept worden samen met de percelen eraan een nieuwe wijk."
+      },
+      "step13": {
+        "title": "De wijk is gesplitst",
+        "description": "De nieuwe straat is nu een eigen wijk, los van het dorpscentrum. Per wijk kun je bevolking en prijzen bekijken en bepalen welke gebouwen er mogen komen, zodat elk gebied zich ontwikkelt op een manier die erbij past. Sluit het venster “Wijken bewerken” als je het hebt bekeken."
+      },
+      "step14": {
+        "title": "Open de wijkgegevens",
+        "description": "Maak van de nieuwe wijk een woonwijk. Toon de wijken met het pictogram linksonder in beeld en klik op het label van de wijk die je net hebt gemaakt om de wijkgegevens te openen."
+      },
+      "step15": {
+        "title": "Maak er een woonwijk van",
+        "description": "Met de bouwvoorschriften onder in het paneel kies je welke gebouwen op de percelen van deze wijk mogen komen. Dit moet een rustige plek om te wonen worden, dus klik alle gebouwen behalve “Appartementengebouw” en “Eengezinswoning” aan om ze uit te schakelen."
+      },
+      "step16": {
+        "title": "Bekijk een perceel",
+        "description": "De voorschriften van een wijk gelden voor alle percelen in die wijk. Klik op het perceel met de gele markering om de perceelgegevens te openen."
+      },
+      "step17": {
+        "title": "De voorschriften zijn doorgevoerd",
+        "description": "Onder in het perceelpaneel zie je dat het voorschrift van de wijk is doorgevoerd: alleen “Appartementengebouw” en “Eengezinswoning” zijn toegestaan. In deze straat kunnen nu alleen nog woningen komen. Je hoeft percelen dus niet één voor één in te stellen: bepaal de koers van een wijk en de hele straat volgt."
+      },
+      "step18": {
+        "title": "Bouw woningen",
+        "description": "Nu zorg je voor woningen. Normaal bouwen particulieren vanzelf woningen als er mensen zijn die hier willen wonen, maar met sociale huurwoningen van de gemeente vul je een woningtekort meteen aan. Bouw hier een gemeentelijk appartementengebouw. Klik in het pictogrammenpaneel op “Bouwen”.",
+        "select": "Kies in de categorie “Wonen” het “Appartementengebouw”, klik op een perceel naar keuze in de nieuwe wijk als bouwplaats en klik op “Bevestigen”."
+      },
+      "step19": {
+        "title": "Maak de woningen af",
+        "description": "Net als bij wegen kun je in een gepland gebouw nog niet wonen. Een appartementengebouw is pas na meer dan een halfjaar klaar. Laat de tijd lopen met “Starten” en wacht tot het is opgeleverd."
+      },
+      "step20": {
+        "title": "Controleer of er stroom is",
+        "description": "Met alleen een woning kom je er niet: zonder stroom en water valt er niet te leven. Dit dorp heeft nog geen elektriciteitscentrale en geen waterleiding. Klik op het appartementengebouw met de gele markering, waar de dorpelingen wonen, om de gegevens te openen. Kies op het tabblad “Gebouwgegevens” een van de huurders en open dan het tabblad “Vraag, aanbod en handel”: je ziet dat de verkregen hoeveelheid elektriciteit 0 is."
+      },
+      "step21": {
+        "title": "Bouw een zonnepark",
+        "description": "Om stroom te leveren heb je eerst een centrale nodig die stroom opwekt. Bouw een “Zonnepark” op het perceel met de gele markering. Normaal duurt het even voordat zo’n park klaar is, maar omdat dit een tutorial is, wordt de bouwtijd overgeslagen."
+      },
+      "step22": {
+        "title": "Bouw een onderstation",
+        "description": "De hoogspanningsstroom uit een centrale kunnen huishoudens niet direct gebruiken. Een onderstation zet die om in stroom voor huishoudens en verdeelt hem over de gebouwen in de buurt die via de weg verbonden zijn. Bouw een “Onderstation” op het perceel met de gele markering vlak bij het appartementengebouw."
+      },
+      "step23": {
+        "title": "Verbind met een hoogspanningsleiding",
+        "description": "Ook als de centrale en het onderstation ver uit elkaar liggen, zijn ze verbonden zodra er een verbinding is waarlangs de stroom kan lopen. Open “Wegen, spoor en infrastructuur” in het pictogrammenpaneel, kies onder “Elektriciteit” de “Hoogspanningsleiding” en trek een lijn van het aansluitpunt van het zonnepark naar het aansluitpunt van het onderstation. Met een rechte lijn tussen de aansluitpunten ben je in één keer klaar."
+      },
+      "step24": {
+        "title": "Controleer de stroomvoorziening",
+        "description": "Controleer na het aansluiten of er echt stroom loopt. Laat de tijd lopen met “Starten”, klik op het onderstation om de gegevens te openen en kijk op het tabblad “Vraag, aanbod en handel” of de ontvangen hoeveelheid hoogspanningsstroom niet 0 is. Het kan een paar maanden duren voordat de centrale draait en de stroom aankomt."
+      },
+      "step25": {
+        "title": "De huizen hebben stroom",
+        "description": "Open net als de eerste keer via de gegevens van het appartementengebouw het tabblad “Vraag, aanbod en handel” van een huurder en controleer of de verkregen hoeveelheid elektriciteit niet meer 0 is. Soms moet je nog een à twee maanden verder voordat de stroom bij de huishoudens aankomt. Opwekken in een centrale, transporteren via hoogspanningsleidingen en verdelen vanuit een onderstation: pas als die drie verbonden zijn, komt de stroom bij de mensen thuis."
+      },
+      "step26": {
+        "title": "Zoek een waterbron",
+        "description": "Nu het water. Leidingwater is grondwater dat wordt opgepompt en naar het dorp gestuurd. Zoek eerst uit waar je water kunt oppompen. Klik in de cockpit op “Weergave” om het weergavepaneel te openen.",
+        "show": "Kies bij de verticale tabbladen “Natuurlijke hulpbronnen” en zet die op “Tonen”. Waterbronnen zie je in lichtblauw op de kaart. Klik op de waterbron met de gele markering om de gegevens te openen."
+      },
+      "step27": {
+        "title": "Bouw een grondwaterpomp",
+        "description": "Een grondwaterpomp pompt water uit de grond op en moet dus op een plek met een waterbron staan. Om te draaien heeft hij ook stroom en personeel nodig; daarom hebben we eerst de stroom aangelegd. Bouw een “Grondwaterpomp” op het perceel met de gele markering boven de waterbron. Omdat dit een tutorial is, wordt de bouwtijd overgeslagen."
+      },
+      "step28": {
+        "title": "Bouw een waterpompstation",
+        "description": "Opgepompt water kun je niet zomaar aan huishoudens leveren. Zoals een onderstation stroom verdeelt, levert een waterpompstation water aan de gebouwen in de buurt die via de weg verbonden zijn. Bouw een “Waterpompstation” op het perceel met de gele markering vlak bij het appartementengebouw."
+      },
+      "step29": {
+        "title": "Verbind met een waterleiding",
+        "description": "Je hebt een leiding nodig die het water van de grondwaterpomp naar het waterpompstation brengt. Open “Wegen, spoor en infrastructuur” in het pictogrammenpaneel, kies onder “Water” de “Waterleiding” en leg die van het aansluitpunt van de grondwaterpomp naar het aansluitpunt van het waterpompstation. Maak een ruime omweg langs de oostkant, zodat de leiding niet in de weg zit van de wegen en de hoogspanningsleiding."
+      },
+      "step30": {
+        "title": "Controleer de watervoorziening",
+        "description": "Laat de tijd lopen met “Starten”, klik op het waterpompstation om de gegevens te openen en kijk op het tabblad “Vraag, aanbod en handel” of de ontvangen hoeveelheid hogedrukwater niet 0 is. Het kan een paar maanden duren voordat er genoeg personeel bij de grondwaterpomp werkt en het water aankomt."
+      },
+      "step31": {
+        "title": "De basis staat",
+        "description": "Het water heeft het waterpompstation bereikt, dus de huishoudens in de buurt hebben nu ook leidingwater. Wegen aanleggen, percelen klaarmaken, de koers van wijken bepalen, woningen bouwen en stroom en water leveren: zo gaat stadsbouw in de basis. Klik op “Volgende” om de tutorial Basisbediening af te ronden."
+      }
+    },
+    "scenario4": {
+      "title": "Bouw een spoorlijn",
+      "description": "We willen de woonwijk en de werkplekken per spoor verbinden, maar op het geplande tracé staan particuliere gebouwen en een openbaar ziekenhuis. In deze tutorial leer je grond verwerven, openbare voorzieningen weghalen, verhoogd spoor boven een weg aanleggen, perrons, stationsgebouwen en een depot bouwen, bochten en hellingen bijstellen, en alles van stroomvoorziening tot het openen van een lijn.",
+      "step1": {
+        "title": "Verhoogde perrons plaatsen",
+        "description": "Bouw via “Wegen, spoor en infrastructuur” → Spoorwegen aan de westkant van de stad een “Verhoogd zijperron (hoogwaardig)” en aan de oostkant een “Zijperrons dubbelspoor”. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig. Beide liggen op 6 m hoogte.",
+        "open": "Bouw via “Wegen, spoor en infrastructuur” → Spoorwegen aan de westkant van de stad een “Verhoogd zijperron (hoogwaardig)” en aan de oostkant een “Zijperrons dubbelspoor”. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig. Beide liggen op 6 m hoogte.",
+        "variant": "Bouw via “Wegen, spoor en infrastructuur” → Spoorwegen aan de westkant van de stad een “Verhoogd zijperron (hoogwaardig)” en aan de oostkant een “Zijperrons dubbelspoor”. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig. Beide liggen op 6 m hoogte.",
+        "start": "Bouw via “Wegen, spoor en infrastructuur” → Spoorwegen aan de westkant van de stad een “Verhoogd zijperron (hoogwaardig)” en aan de oostkant een “Zijperrons dubbelspoor”. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig. Beide liggen op 6 m hoogte.",
+        "end": "Bouw via “Wegen, spoor en infrastructuur” → Spoorwegen aan de westkant van de stad een “Verhoogd zijperron (hoogwaardig)” en aan de oostkant een “Zijperrons dubbelspoor”. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig. Beide liggen op 6 m hoogte.",
+        "confirm": "Bouw via “Wegen, spoor en infrastructuur” → Spoorwegen aan de westkant van de stad een “Verhoogd zijperron (hoogwaardig)” en aan de oostkant een “Zijperrons dubbelspoor”. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig. Beide liggen op 6 m hoogte.",
+        "town": "Leg het westelijke “Verhoogd zijperron (hoogwaardig)” aan. Klik op 6 m hoogte met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig.",
+        "new": "Nu de oostkant. Ga in het paneel met “Terug” naar het overzicht van types en kies bij Spoorwegen het “Zijperrons dubbelspoor”. Klik op 6 m hoogte met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig. Heb je het paneel gesloten, open het dan opnieuw via “Wegen, spoor en infrastructuur”.",
+        "east": "Nu de oostkant. Ga in het paneel met “Terug” naar het overzicht van types en kies bij Spoorwegen het “Zijperrons dubbelspoor”. Klik op 6 m hoogte met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig. Heb je het paneel gesloten, open het dan opnieuw via “Wegen, spoor en infrastructuur”."
+      },
+      "step2": {
+        "title": "Stationsgebouwen en ingangen bouwen",
+        "description": "Kies “Eenvoudig stationsgebouw” en verbind in het westen en in het oosten telkens de twee markeringen met een korte doorgang dwars over het perron. De ingangen komen direct aan weerszijden van het perron. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig.",
+        "open": "Kies “Eenvoudig stationsgebouw” en verbind in het westen en in het oosten telkens de twee markeringen met een korte doorgang dwars over het perron. De ingangen komen direct aan weerszijden van het perron. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig.",
+        "variant": "Kies “Eenvoudig stationsgebouw” en verbind in het westen en in het oosten telkens de twee markeringen met een korte doorgang dwars over het perron. De ingangen komen direct aan weerszijden van het perron. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig.",
+        "start": "Kies “Eenvoudig stationsgebouw” en verbind in het westen en in het oosten telkens de twee markeringen met een korte doorgang dwars over het perron. De ingangen komen direct aan weerszijden van het perron. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig.",
+        "end": "Kies “Eenvoudig stationsgebouw” en verbind in het westen en in het oosten telkens de twee markeringen met een korte doorgang dwars over het perron. De ingangen komen direct aan weerszijden van het perron. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig.",
+        "confirm": "Kies “Eenvoudig stationsgebouw” en verbind in het westen en in het oosten telkens de twee markeringen met een korte doorgang dwars over het perron. De ingangen komen direct aan weerszijden van het perron. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig.",
+        "town": "Kies “Eenvoudig stationsgebouw” en verbind in het westen en in het oosten telkens de twee markeringen met een korte doorgang dwars over het perron. De ingangen komen direct aan weerszijden van het perron. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig.",
+        "new": "Kies “Eenvoudig stationsgebouw” en verbind in het westen en in het oosten telkens de twee markeringen met een korte doorgang dwars over het perron. De ingangen komen direct aan weerszijden van het perron. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig.",
+        "east": "Kies “Eenvoudig stationsgebouw” en verbind in het westen en in het oosten telkens de twee markeringen met een korte doorgang dwars over het perron. De ingangen komen direct aan weerszijden van het perron. Klik met links op het begin- en eindpunt in de cirkels, klik met rechts om de vorm vast te leggen en bevestig."
+      },
+      "step3": {
+        "title": "Het deeltraject met grondverwerving plannen",
+        "description": "Kies “Dubbelspoor” en trek op 6 m hoogte een rechte lijn van het oosteinde van het westelijke perron naar het westeinde van de hoofdweg. Het tracé raakt gebouwen, dus grondverwerving is nodig. Bevestig het plan en klik op “Volgende”. De bouwtijd van dit deeltraject wordt niet overgeslagen.",
+        "open": "Kies “Dubbelspoor” en trek op 6 m hoogte een rechte lijn van het oosteinde van het westelijke perron naar het westeinde van de hoofdweg. Het tracé raakt gebouwen, dus grondverwerving is nodig. Bevestig het plan en klik op “Volgende”. De bouwtijd van dit deeltraject wordt niet overgeslagen.",
+        "variant": "Kies “Dubbelspoor” en trek op 6 m hoogte een rechte lijn van het oosteinde van het westelijke perron naar het westeinde van de hoofdweg. Het tracé raakt gebouwen, dus grondverwerving is nodig. Bevestig het plan en klik op “Volgende”. De bouwtijd van dit deeltraject wordt niet overgeslagen.",
+        "start": "Kies “Dubbelspoor” en trek op 6 m hoogte een rechte lijn van het oosteinde van het westelijke perron naar het westeinde van de hoofdweg. Het tracé raakt gebouwen, dus grondverwerving is nodig. Bevestig het plan en klik op “Volgende”. De bouwtijd van dit deeltraject wordt niet overgeslagen.",
+        "end": "Kies “Dubbelspoor” en trek op 6 m hoogte een rechte lijn van het oosteinde van het westelijke perron naar het westeinde van de hoofdweg. Het tracé raakt gebouwen, dus grondverwerving is nodig. Bevestig het plan en klik op “Volgende”. De bouwtijd van dit deeltraject wordt niet overgeslagen.",
+        "confirm": "Kies “Dubbelspoor” en trek op 6 m hoogte een rechte lijn van het oosteinde van het westelijke perron naar het westeinde van de hoofdweg. Het tracé raakt gebouwen, dus grondverwerving is nodig. Bevestig het plan en klik op “Volgende”. De bouwtijd van dit deeltraject wordt niet overgeslagen.",
+        "town": "Kies “Dubbelspoor” en trek op 6 m hoogte een rechte lijn van het oosteinde van het westelijke perron naar het westeinde van de hoofdweg. Het tracé raakt gebouwen, dus grondverwerving is nodig. Bevestig het plan en klik op “Volgende”. De bouwtijd van dit deeltraject wordt niet overgeslagen.",
+        "new": "Kies “Dubbelspoor” en trek op 6 m hoogte een rechte lijn van het oosteinde van het westelijke perron naar het westeinde van de hoofdweg. Het tracé raakt gebouwen, dus grondverwerving is nodig. Bevestig het plan en klik op “Volgende”. De bouwtijd van dit deeltraject wordt niet overgeslagen.",
+        "east": "Kies “Dubbelspoor” en trek op 6 m hoogte een rechte lijn van het oosteinde van het westelijke perron naar het westeinde van de hoofdweg. Het tracé raakt gebouwen, dus grondverwerving is nodig. Bevestig het plan en klik op “Volgende”. De bouwtijd van dit deeltraject wordt niet overgeslagen."
+      },
+      "step4": {
+        "title": "Opdracht geven het ziekenhuis te slopen",
+        "description": "Voor de grond onder particuliere gebouwen beginnen de onderhandelingen over aankoop vanzelf, maar het ziekenhuis is een openbare voorziening van de gemeente. Dat wordt niet automatisch weggehaald en houdt de start van de spooraanleg tegen. Klik op het ziekenhuis en kies bovenaan “Slopen”. Staat er “Sloop gepland”, klik dan op “Volgende”.",
+        "open": "Voor de grond onder particuliere gebouwen beginnen de onderhandelingen over aankoop vanzelf, maar het ziekenhuis is een openbare voorziening van de gemeente. Dat wordt niet automatisch weggehaald en houdt de start van de spooraanleg tegen. Klik op het ziekenhuis en kies bovenaan “Slopen”. Staat er “Sloop gepland”, klik dan op “Volgende”.",
+        "variant": "Voor de grond onder particuliere gebouwen beginnen de onderhandelingen over aankoop vanzelf, maar het ziekenhuis is een openbare voorziening van de gemeente. Dat wordt niet automatisch weggehaald en houdt de start van de spooraanleg tegen. Klik op het ziekenhuis en kies bovenaan “Slopen”. Staat er “Sloop gepland”, klik dan op “Volgende”.",
+        "start": "Voor de grond onder particuliere gebouwen beginnen de onderhandelingen over aankoop vanzelf, maar het ziekenhuis is een openbare voorziening van de gemeente. Dat wordt niet automatisch weggehaald en houdt de start van de spooraanleg tegen. Klik op het ziekenhuis en kies bovenaan “Slopen”. Staat er “Sloop gepland”, klik dan op “Volgende”.",
+        "end": "Voor de grond onder particuliere gebouwen beginnen de onderhandelingen over aankoop vanzelf, maar het ziekenhuis is een openbare voorziening van de gemeente. Dat wordt niet automatisch weggehaald en houdt de start van de spooraanleg tegen. Klik op het ziekenhuis en kies bovenaan “Slopen”. Staat er “Sloop gepland”, klik dan op “Volgende”.",
+        "confirm": "Voor de grond onder particuliere gebouwen beginnen de onderhandelingen over aankoop vanzelf, maar het ziekenhuis is een openbare voorziening van de gemeente. Dat wordt niet automatisch weggehaald en houdt de start van de spooraanleg tegen. Klik op het ziekenhuis en kies bovenaan “Slopen”. Staat er “Sloop gepland”, klik dan op “Volgende”.",
+        "town": "Voor de grond onder particuliere gebouwen beginnen de onderhandelingen over aankoop vanzelf, maar het ziekenhuis is een openbare voorziening van de gemeente. Dat wordt niet automatisch weggehaald en houdt de start van de spooraanleg tegen. Klik op het ziekenhuis en kies bovenaan “Slopen”. Staat er “Sloop gepland”, klik dan op “Volgende”.",
+        "new": "Voor de grond onder particuliere gebouwen beginnen de onderhandelingen over aankoop vanzelf, maar het ziekenhuis is een openbare voorziening van de gemeente. Dat wordt niet automatisch weggehaald en houdt de start van de spooraanleg tegen. Klik op het ziekenhuis en kies bovenaan “Slopen”. Staat er “Sloop gepland”, klik dan op “Volgende”.",
+        "east": "Voor de grond onder particuliere gebouwen beginnen de onderhandelingen over aankoop vanzelf, maar het ziekenhuis is een openbare voorziening van de gemeente. Dat wordt niet automatisch weggehaald en houdt de start van de spooraanleg tegen. Klik op het ziekenhuis en kies bovenaan “Slopen”. Staat er “Sloop gepland”, klik dan op “Volgende”."
+      },
+      "step5": {
+        "title": "Wachten tot het deeltraject klaar is",
+        "description": "Laat de tijd verstrijken tot de particuliere grond is verworven, het ziekenhuis is gesloopt en het spoor is aangelegd. Dat duurt een paar maanden. Op dit deeltraject wordt de bouwtijd niet overgeslagen: zo zie je dat het spoor via de gewone bouw wordt opgeleverd.",
+        "open": "Laat de tijd verstrijken tot de particuliere grond is verworven, het ziekenhuis is gesloopt en het spoor is aangelegd. Dat duurt een paar maanden. Op dit deeltraject wordt de bouwtijd niet overgeslagen: zo zie je dat het spoor via de gewone bouw wordt opgeleverd.",
+        "variant": "Laat de tijd verstrijken tot de particuliere grond is verworven, het ziekenhuis is gesloopt en het spoor is aangelegd. Dat duurt een paar maanden. Op dit deeltraject wordt de bouwtijd niet overgeslagen: zo zie je dat het spoor via de gewone bouw wordt opgeleverd.",
+        "start": "Laat de tijd verstrijken tot de particuliere grond is verworven, het ziekenhuis is gesloopt en het spoor is aangelegd. Dat duurt een paar maanden. Op dit deeltraject wordt de bouwtijd niet overgeslagen: zo zie je dat het spoor via de gewone bouw wordt opgeleverd.",
+        "end": "Laat de tijd verstrijken tot de particuliere grond is verworven, het ziekenhuis is gesloopt en het spoor is aangelegd. Dat duurt een paar maanden. Op dit deeltraject wordt de bouwtijd niet overgeslagen: zo zie je dat het spoor via de gewone bouw wordt opgeleverd.",
+        "confirm": "Laat de tijd verstrijken tot de particuliere grond is verworven, het ziekenhuis is gesloopt en het spoor is aangelegd. Dat duurt een paar maanden. Op dit deeltraject wordt de bouwtijd niet overgeslagen: zo zie je dat het spoor via de gewone bouw wordt opgeleverd.",
+        "town": "Laat de tijd verstrijken tot de particuliere grond is verworven, het ziekenhuis is gesloopt en het spoor is aangelegd. Dat duurt een paar maanden. Op dit deeltraject wordt de bouwtijd niet overgeslagen: zo zie je dat het spoor via de gewone bouw wordt opgeleverd.",
+        "new": "Laat de tijd verstrijken tot de particuliere grond is verworven, het ziekenhuis is gesloopt en het spoor is aangelegd. Dat duurt een paar maanden. Op dit deeltraject wordt de bouwtijd niet overgeslagen: zo zie je dat het spoor via de gewone bouw wordt opgeleverd.",
+        "east": "Laat de tijd verstrijken tot de particuliere grond is verworven, het ziekenhuis is gesloopt en het spoor is aangelegd. Dat duurt een paar maanden. Op dit deeltraject wordt de bouwtijd niet overgeslagen: zo zie je dat het spoor via de gewone bouw wordt opgeleverd."
+      },
+      "step6": {
+        "title": "Spoor recht boven de hoofdweg aanleggen",
+        "description": "Leg met “Dubbelspoor” op 6 m hoogte een spoor van het westeinde naar het oosteinde van de hoofdweg. Volg je het midden van de weg, dan raak je de particuliere percelen langs de weg niet en is geen grondverwerving nodig. Wijk je van de weg af en raak je gebouwen, dan zijn grondverwerving of het weghalen van openbare voorzieningen nodig.",
+        "open": "Leg met “Dubbelspoor” op 6 m hoogte een spoor van het westeinde naar het oosteinde van de hoofdweg. Volg je het midden van de weg, dan raak je de particuliere percelen langs de weg niet en is geen grondverwerving nodig. Wijk je van de weg af en raak je gebouwen, dan zijn grondverwerving of het weghalen van openbare voorzieningen nodig.",
+        "variant": "Leg met “Dubbelspoor” op 6 m hoogte een spoor van het westeinde naar het oosteinde van de hoofdweg. Volg je het midden van de weg, dan raak je de particuliere percelen langs de weg niet en is geen grondverwerving nodig. Wijk je van de weg af en raak je gebouwen, dan zijn grondverwerving of het weghalen van openbare voorzieningen nodig.",
+        "start": "Leg met “Dubbelspoor” op 6 m hoogte een spoor van het westeinde naar het oosteinde van de hoofdweg. Volg je het midden van de weg, dan raak je de particuliere percelen langs de weg niet en is geen grondverwerving nodig. Wijk je van de weg af en raak je gebouwen, dan zijn grondverwerving of het weghalen van openbare voorzieningen nodig.",
+        "end": "Leg met “Dubbelspoor” op 6 m hoogte een spoor van het westeinde naar het oosteinde van de hoofdweg. Volg je het midden van de weg, dan raak je de particuliere percelen langs de weg niet en is geen grondverwerving nodig. Wijk je van de weg af en raak je gebouwen, dan zijn grondverwerving of het weghalen van openbare voorzieningen nodig.",
+        "confirm": "Leg met “Dubbelspoor” op 6 m hoogte een spoor van het westeinde naar het oosteinde van de hoofdweg. Volg je het midden van de weg, dan raak je de particuliere percelen langs de weg niet en is geen grondverwerving nodig. Wijk je van de weg af en raak je gebouwen, dan zijn grondverwerving of het weghalen van openbare voorzieningen nodig.",
+        "town": "Leg met “Dubbelspoor” op 6 m hoogte een spoor van het westeinde naar het oosteinde van de hoofdweg. Volg je het midden van de weg, dan raak je de particuliere percelen langs de weg niet en is geen grondverwerving nodig. Wijk je van de weg af en raak je gebouwen, dan zijn grondverwerving of het weghalen van openbare voorzieningen nodig.",
+        "new": "Leg met “Dubbelspoor” op 6 m hoogte een spoor van het westeinde naar het oosteinde van de hoofdweg. Volg je het midden van de weg, dan raak je de particuliere percelen langs de weg niet en is geen grondverwerving nodig. Wijk je van de weg af en raak je gebouwen, dan zijn grondverwerving of het weghalen van openbare voorzieningen nodig.",
+        "east": "Leg tot slot op 6 m hoogte “Dubbelspoor” aan van het oosteinde van de hoofdweg naar het westeinde van het oostelijke perron. Zijn de twee perrons verbonden, dan slaat “Volgende” de bouwtijd over."
+      },
+      "step7": {
+        "title": "Het depot bouwen",
+        "description": "Kies in het bouwpaneel “Spoordepot” en bouw het op het gele perceel ten noorden van de stad. Ook dit plaats je zelf. Met “Volgende” wordt de bouwtijd van het depot overgeslagen en is het meteen klaar.",
+        "open": "Kies in het bouwpaneel “Spoordepot” en bouw het op het gele perceel ten noorden van de stad. Ook dit plaats je zelf. Met “Volgende” wordt de bouwtijd van het depot overgeslagen en is het meteen klaar.",
+        "variant": "Kies in het bouwpaneel “Spoordepot” en bouw het op het gele perceel ten noorden van de stad. Ook dit plaats je zelf. Met “Volgende” wordt de bouwtijd van het depot overgeslagen en is het meteen klaar.",
+        "start": "Kies in het bouwpaneel “Spoordepot” en bouw het op het gele perceel ten noorden van de stad. Ook dit plaats je zelf. Met “Volgende” wordt de bouwtijd van het depot overgeslagen en is het meteen klaar.",
+        "end": "Kies in het bouwpaneel “Spoordepot” en bouw het op het gele perceel ten noorden van de stad. Ook dit plaats je zelf. Met “Volgende” wordt de bouwtijd van het depot overgeslagen en is het meteen klaar.",
+        "confirm": "Kies in het bouwpaneel “Spoordepot” en bouw het op het gele perceel ten noorden van de stad. Ook dit plaats je zelf. Met “Volgende” wordt de bouwtijd van het depot overgeslagen en is het meteen klaar.",
+        "town": "Kies in het bouwpaneel “Spoordepot” en bouw het op het gele perceel ten noorden van de stad. Ook dit plaats je zelf. Met “Volgende” wordt de bouwtijd van het depot overgeslagen en is het meteen klaar.",
+        "new": "Kies in het bouwpaneel “Spoordepot” en bouw het op het gele perceel ten noorden van de stad. Ook dit plaats je zelf. Met “Volgende” wordt de bouwtijd van het depot overgeslagen en is het meteen klaar.",
+        "east": "Kies in het bouwpaneel “Spoordepot” en bouw het op het gele perceel ten noorden van de stad. Ook dit plaats je zelf. Met “Volgende” wordt de bouwtijd van het depot overgeslagen en is het meteen klaar."
+      },
+      "step8": {
+        "title": "Bocht en helling bijstellen en aansluiten op de hoofdlijn",
+        "description": "Leg met “Enkelspoor” een tracé vanaf het aansluitpunt op maaiveldniveau aan de oostkant van het depot, met een ruime boog naar het oosten langs de markering in het noordoosten, naar het aansluitpunt van de hoofdlijn op 6 m hoogte. Gebruik de gele tussenpunten als richtlijn, zodat je binnen de grenzen voor boogstraal en helling blijft. Heb je de vorm met rechts vastgelegd, dan kun je hem nog bijstellen door hoekpunten en controlepunten te verslepen.",
+        "open": "Leg met “Enkelspoor” een tracé vanaf het aansluitpunt op maaiveldniveau aan de oostkant van het depot, met een ruime boog naar het oosten langs de markering in het noordoosten, naar het aansluitpunt van de hoofdlijn op 6 m hoogte. Gebruik de gele tussenpunten als richtlijn, zodat je binnen de grenzen voor boogstraal en helling blijft. Heb je de vorm met rechts vastgelegd, dan kun je hem nog bijstellen door hoekpunten en controlepunten te verslepen.",
+        "variant": "Leg met “Enkelspoor” een tracé vanaf het aansluitpunt op maaiveldniveau aan de oostkant van het depot, met een ruime boog naar het oosten langs de markering in het noordoosten, naar het aansluitpunt van de hoofdlijn op 6 m hoogte. Gebruik de gele tussenpunten als richtlijn, zodat je binnen de grenzen voor boogstraal en helling blijft. Heb je de vorm met rechts vastgelegd, dan kun je hem nog bijstellen door hoekpunten en controlepunten te verslepen.",
+        "start": "Leg met “Enkelspoor” een tracé vanaf het aansluitpunt op maaiveldniveau aan de oostkant van het depot, met een ruime boog naar het oosten langs de markering in het noordoosten, naar het aansluitpunt van de hoofdlijn op 6 m hoogte. Gebruik de gele tussenpunten als richtlijn, zodat je binnen de grenzen voor boogstraal en helling blijft. Heb je de vorm met rechts vastgelegd, dan kun je hem nog bijstellen door hoekpunten en controlepunten te verslepen.",
+        "end": "Leg met “Enkelspoor” een tracé vanaf het aansluitpunt op maaiveldniveau aan de oostkant van het depot, met een ruime boog naar het oosten langs de markering in het noordoosten, naar het aansluitpunt van de hoofdlijn op 6 m hoogte. Gebruik de gele tussenpunten als richtlijn, zodat je binnen de grenzen voor boogstraal en helling blijft. Heb je de vorm met rechts vastgelegd, dan kun je hem nog bijstellen door hoekpunten en controlepunten te verslepen.",
+        "confirm": "Leg met “Enkelspoor” een tracé vanaf het aansluitpunt op maaiveldniveau aan de oostkant van het depot, met een ruime boog naar het oosten langs de markering in het noordoosten, naar het aansluitpunt van de hoofdlijn op 6 m hoogte. Gebruik de gele tussenpunten als richtlijn, zodat je binnen de grenzen voor boogstraal en helling blijft. Heb je de vorm met rechts vastgelegd, dan kun je hem nog bijstellen door hoekpunten en controlepunten te verslepen.",
+        "town": "Leg met “Enkelspoor” een tracé vanaf het aansluitpunt op maaiveldniveau aan de oostkant van het depot, met een ruime boog naar het oosten langs de markering in het noordoosten, naar het aansluitpunt van de hoofdlijn op 6 m hoogte. Gebruik de gele tussenpunten als richtlijn, zodat je binnen de grenzen voor boogstraal en helling blijft. Heb je de vorm met rechts vastgelegd, dan kun je hem nog bijstellen door hoekpunten en controlepunten te verslepen.",
+        "new": "Leg met “Enkelspoor” een tracé vanaf het aansluitpunt op maaiveldniveau aan de oostkant van het depot, met een ruime boog naar het oosten langs de markering in het noordoosten, naar het aansluitpunt van de hoofdlijn op 6 m hoogte. Gebruik de gele tussenpunten als richtlijn, zodat je binnen de grenzen voor boogstraal en helling blijft. Heb je de vorm met rechts vastgelegd, dan kun je hem nog bijstellen door hoekpunten en controlepunten te verslepen.",
+        "east": "Leg met “Enkelspoor” een tracé vanaf het aansluitpunt op maaiveldniveau aan de oostkant van het depot, met een ruime boog naar het oosten langs de markering in het noordoosten, naar het aansluitpunt van de hoofdlijn op 6 m hoogte. Gebruik de gele tussenpunten als richtlijn, zodat je binnen de grenzen voor boogstraal en helling blijft. Heb je de vorm met rechts vastgelegd, dan kun je hem nog bijstellen door hoekpunten en controlepunten te verslepen."
+      },
+      "step9": {
+        "title": "Stroom van de centrale naar het depot",
+        "description": "Om treinen te laten rijden, moet de elektriciteitscentrale via een hoogspanningsleiding worden aangesloten. Verbind met “Hoogspanningsleiding” het aansluitpunt van de centrale met het gedeelde aansluitpunt aan de oostkant van het depot en bevestig.",
+        "open": "Om treinen te laten rijden, moet de elektriciteitscentrale via een hoogspanningsleiding worden aangesloten. Verbind met “Hoogspanningsleiding” het aansluitpunt van de centrale met het gedeelde aansluitpunt aan de oostkant van het depot en bevestig.",
+        "variant": "Om treinen te laten rijden, moet de elektriciteitscentrale via een hoogspanningsleiding worden aangesloten. Verbind met “Hoogspanningsleiding” het aansluitpunt van de centrale met het gedeelde aansluitpunt aan de oostkant van het depot en bevestig.",
+        "start": "Om treinen te laten rijden, moet de elektriciteitscentrale via een hoogspanningsleiding worden aangesloten. Verbind met “Hoogspanningsleiding” het aansluitpunt van de centrale met het gedeelde aansluitpunt aan de oostkant van het depot en bevestig.",
+        "end": "Om treinen te laten rijden, moet de elektriciteitscentrale via een hoogspanningsleiding worden aangesloten. Verbind met “Hoogspanningsleiding” het aansluitpunt van de centrale met het gedeelde aansluitpunt aan de oostkant van het depot en bevestig.",
+        "confirm": "Om treinen te laten rijden, moet de elektriciteitscentrale via een hoogspanningsleiding worden aangesloten. Verbind met “Hoogspanningsleiding” het aansluitpunt van de centrale met het gedeelde aansluitpunt aan de oostkant van het depot en bevestig.",
+        "town": "Om treinen te laten rijden, moet de elektriciteitscentrale via een hoogspanningsleiding worden aangesloten. Verbind met “Hoogspanningsleiding” het aansluitpunt van de centrale met het gedeelde aansluitpunt aan de oostkant van het depot en bevestig.",
+        "new": "Om treinen te laten rijden, moet de elektriciteitscentrale via een hoogspanningsleiding worden aangesloten. Verbind met “Hoogspanningsleiding” het aansluitpunt van de centrale met het gedeelde aansluitpunt aan de oostkant van het depot en bevestig.",
+        "east": "Om treinen te laten rijden, moet de elektriciteitscentrale via een hoogspanningsleiding worden aangesloten. Verbind met “Hoogspanningsleiding” het aansluitpunt van de centrale met het gedeelde aansluitpunt aan de oostkant van het depot en bevestig."
+      },
+      "step10": {
+        "title": "De treinlijn openen",
+        "description": "Kies via “Openbaar vervoer” → “+ Nieuwe lijn” een “Regionale treinlijn”. Zet haltes op het westelijke en het oostelijke verhoogde perron en klik op de eerste halte om de rondrit te sluiten. Bevestig met tarief 0 en een beoogd interval van 5 minuten.",
+        "open": "Kies via “Openbaar vervoer” → “+ Nieuwe lijn” een “Regionale treinlijn”. Zet haltes op het westelijke en het oostelijke verhoogde perron en klik op de eerste halte om de rondrit te sluiten. Bevestig met tarief 0 en een beoogd interval van 5 minuten.",
+        "variant": "Kies via “Openbaar vervoer” → “+ Nieuwe lijn” een “Regionale treinlijn”. Zet haltes op het westelijke en het oostelijke verhoogde perron en klik op de eerste halte om de rondrit te sluiten. Bevestig met tarief 0 en een beoogd interval van 5 minuten.",
+        "start": "Kies via “Openbaar vervoer” → “+ Nieuwe lijn” een “Regionale treinlijn”. Zet haltes op het westelijke en het oostelijke verhoogde perron en klik op de eerste halte om de rondrit te sluiten. Bevestig met tarief 0 en een beoogd interval van 5 minuten.",
+        "end": "Kies via “Openbaar vervoer” → “+ Nieuwe lijn” een “Regionale treinlijn”. Zet haltes op het westelijke en het oostelijke verhoogde perron en klik op de eerste halte om de rondrit te sluiten. Bevestig met tarief 0 en een beoogd interval van 5 minuten.",
+        "confirm": "Kies via “Openbaar vervoer” → “+ Nieuwe lijn” een “Regionale treinlijn”. Zet haltes op het westelijke en het oostelijke verhoogde perron en klik op de eerste halte om de rondrit te sluiten. Bevestig met tarief 0 en een beoogd interval van 5 minuten.",
+        "town": "Kies via “Openbaar vervoer” → “+ Nieuwe lijn” een “Regionale treinlijn”. Zet haltes op het westelijke en het oostelijke verhoogde perron en klik op de eerste halte om de rondrit te sluiten. Bevestig met tarief 0 en een beoogd interval van 5 minuten.",
+        "new": "Kies via “Openbaar vervoer” → “+ Nieuwe lijn” een “Regionale treinlijn”. Zet haltes op het westelijke en het oostelijke verhoogde perron en klik op de eerste halte om de rondrit te sluiten. Bevestig met tarief 0 en een beoogd interval van 5 minuten.",
+        "east": "Kies via “Openbaar vervoer” → “+ Nieuwe lijn” een “Regionale treinlijn”. Zet haltes op het westelijke en het oostelijke verhoogde perron en klik op de eerste halte om de rondrit te sluiten. Bevestig met tarief 0 en een beoogd interval van 5 minuten."
+      },
+      "step11": {
+        "title": "Materieel en dienstregeling controleren",
+        "description": "Laat de tijd verstrijken en bekijk in het beheerscherm van het openbaar vervoer de capaciteit en het interval van de lijn. Het duurt een paar maanden voordat het depot treinen heeft aangeschaft. Zodra er capaciteit is, is de lijn geopend. Inwoners kiezen hun route inclusief lopen, dus tussen dicht bij elkaar gelegen stations kunnen er nog geen reizigers zijn.",
+        "open": "Laat de tijd verstrijken en bekijk in het beheerscherm van het openbaar vervoer de capaciteit en het interval van de lijn. Het duurt een paar maanden voordat het depot treinen heeft aangeschaft. Zodra er capaciteit is, is de lijn geopend. Inwoners kiezen hun route inclusief lopen, dus tussen dicht bij elkaar gelegen stations kunnen er nog geen reizigers zijn.",
+        "variant": "Laat de tijd verstrijken en bekijk in het beheerscherm van het openbaar vervoer de capaciteit en het interval van de lijn. Het duurt een paar maanden voordat het depot treinen heeft aangeschaft. Zodra er capaciteit is, is de lijn geopend. Inwoners kiezen hun route inclusief lopen, dus tussen dicht bij elkaar gelegen stations kunnen er nog geen reizigers zijn.",
+        "start": "Laat de tijd verstrijken en bekijk in het beheerscherm van het openbaar vervoer de capaciteit en het interval van de lijn. Het duurt een paar maanden voordat het depot treinen heeft aangeschaft. Zodra er capaciteit is, is de lijn geopend. Inwoners kiezen hun route inclusief lopen, dus tussen dicht bij elkaar gelegen stations kunnen er nog geen reizigers zijn.",
+        "end": "Laat de tijd verstrijken en bekijk in het beheerscherm van het openbaar vervoer de capaciteit en het interval van de lijn. Het duurt een paar maanden voordat het depot treinen heeft aangeschaft. Zodra er capaciteit is, is de lijn geopend. Inwoners kiezen hun route inclusief lopen, dus tussen dicht bij elkaar gelegen stations kunnen er nog geen reizigers zijn.",
+        "confirm": "Laat de tijd verstrijken en bekijk in het beheerscherm van het openbaar vervoer de capaciteit en het interval van de lijn. Het duurt een paar maanden voordat het depot treinen heeft aangeschaft. Zodra er capaciteit is, is de lijn geopend. Inwoners kiezen hun route inclusief lopen, dus tussen dicht bij elkaar gelegen stations kunnen er nog geen reizigers zijn.",
+        "town": "Laat de tijd verstrijken en bekijk in het beheerscherm van het openbaar vervoer de capaciteit en het interval van de lijn. Het duurt een paar maanden voordat het depot treinen heeft aangeschaft. Zodra er capaciteit is, is de lijn geopend. Inwoners kiezen hun route inclusief lopen, dus tussen dicht bij elkaar gelegen stations kunnen er nog geen reizigers zijn.",
+        "new": "Laat de tijd verstrijken en bekijk in het beheerscherm van het openbaar vervoer de capaciteit en het interval van de lijn. Het duurt een paar maanden voordat het depot treinen heeft aangeschaft. Zodra er capaciteit is, is de lijn geopend. Inwoners kiezen hun route inclusief lopen, dus tussen dicht bij elkaar gelegen stations kunnen er nog geen reizigers zijn.",
+        "east": "Laat de tijd verstrijken en bekijk in het beheerscherm van het openbaar vervoer de capaciteit en het interval van de lijn. Het duurt een paar maanden voordat het depot treinen heeft aangeschaft. Zodra er capaciteit is, is de lijn geopend. Inwoners kiezen hun route inclusief lopen, dus tussen dicht bij elkaar gelegen stations kunnen er nog geen reizigers zijn."
+      },
+      "step12": {
+        "title": "Terugblik op de spooraanleg",
+        "description": "De camera staat nu bij het westelijke station. Kijk eens naar de treinen die aan het perron stoppen. Je hebt perrons, stationsgebouwen, de hoofdlijn, een depot met aansluitspoor, stroomvoorziening en een lijn opgezet. Je hebt particuliere grond verworven en een openbare voorziening laten slopen, en boven de weg grondverwerving vermeden. Gebruik het bijstellen van het tracé op boogstraal en helling ook bij je volgende spoorprojecten.",
+        "open": "De camera staat nu bij het westelijke station. Kijk eens naar de treinen die aan het perron stoppen. Je hebt perrons, stationsgebouwen, de hoofdlijn, een depot met aansluitspoor, stroomvoorziening en een lijn opgezet. Je hebt particuliere grond verworven en een openbare voorziening laten slopen, en boven de weg grondverwerving vermeden. Gebruik het bijstellen van het tracé op boogstraal en helling ook bij je volgende spoorprojecten.",
+        "variant": "De camera staat nu bij het westelijke station. Kijk eens naar de treinen die aan het perron stoppen. Je hebt perrons, stationsgebouwen, de hoofdlijn, een depot met aansluitspoor, stroomvoorziening en een lijn opgezet. Je hebt particuliere grond verworven en een openbare voorziening laten slopen, en boven de weg grondverwerving vermeden. Gebruik het bijstellen van het tracé op boogstraal en helling ook bij je volgende spoorprojecten.",
+        "start": "De camera staat nu bij het westelijke station. Kijk eens naar de treinen die aan het perron stoppen. Je hebt perrons, stationsgebouwen, de hoofdlijn, een depot met aansluitspoor, stroomvoorziening en een lijn opgezet. Je hebt particuliere grond verworven en een openbare voorziening laten slopen, en boven de weg grondverwerving vermeden. Gebruik het bijstellen van het tracé op boogstraal en helling ook bij je volgende spoorprojecten.",
+        "end": "De camera staat nu bij het westelijke station. Kijk eens naar de treinen die aan het perron stoppen. Je hebt perrons, stationsgebouwen, de hoofdlijn, een depot met aansluitspoor, stroomvoorziening en een lijn opgezet. Je hebt particuliere grond verworven en een openbare voorziening laten slopen, en boven de weg grondverwerving vermeden. Gebruik het bijstellen van het tracé op boogstraal en helling ook bij je volgende spoorprojecten.",
+        "confirm": "De camera staat nu bij het westelijke station. Kijk eens naar de treinen die aan het perron stoppen. Je hebt perrons, stationsgebouwen, de hoofdlijn, een depot met aansluitspoor, stroomvoorziening en een lijn opgezet. Je hebt particuliere grond verworven en een openbare voorziening laten slopen, en boven de weg grondverwerving vermeden. Gebruik het bijstellen van het tracé op boogstraal en helling ook bij je volgende spoorprojecten.",
+        "town": "De camera staat nu bij het westelijke station. Kijk eens naar de treinen die aan het perron stoppen. Je hebt perrons, stationsgebouwen, de hoofdlijn, een depot met aansluitspoor, stroomvoorziening en een lijn opgezet. Je hebt particuliere grond verworven en een openbare voorziening laten slopen, en boven de weg grondverwerving vermeden. Gebruik het bijstellen van het tracé op boogstraal en helling ook bij je volgende spoorprojecten.",
+        "new": "De camera staat nu bij het westelijke station. Kijk eens naar de treinen die aan het perron stoppen. Je hebt perrons, stationsgebouwen, de hoofdlijn, een depot met aansluitspoor, stroomvoorziening en een lijn opgezet. Je hebt particuliere grond verworven en een openbare voorziening laten slopen, en boven de weg grondverwerving vermeden. Gebruik het bijstellen van het tracé op boogstraal en helling ook bij je volgende spoorprojecten.",
+        "east": "De camera staat nu bij het westelijke station. Kijk eens naar de treinen die aan het perron stoppen. Je hebt perrons, stationsgebouwen, de hoofdlijn, een depot met aansluitspoor, stroomvoorziening en een lijn opgezet. Je hebt particuliere grond verworven en een openbare voorziening laten slopen, en boven de weg grondverwerving vermeden. Gebruik het bijstellen van het tracé op boogstraal en helling ook bij je volgende spoorprojecten."
+      }
+    },
+    "complete": {
+      "title": "Tutorial voltooid",
+      "description": "Gefeliciteerd! Je hebt de tutorial voltooid. Klik op “Afsluiten” om de uitleg te sluiten en vrij verder te spelen met deze stad.",
+      "button": "Afsluiten"
+    },
+    "nextButton": "Volgende",
+    "checking": "Controleren…",
+    "failed": "Niet aan de voorwaarde voldaan. Probeer het opnieuw.",
+    "completed": "Tutorial voltooid! Goed gedaan.",
+    "stepProgress": "Stap {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Klik op het wegpictogram om het bouwpaneel te openen.",
+      "selectRoad": "Kies bij “Straten” de gelijkvloerse tweestrooksweg. Alleen de toegestane types zijn te kiezen.",
+      "placeStart": "Klik met links in de lichtblauwe cirkel om het beginpunt van de weg te plaatsen.",
+      "placeEnd": "Klik met links in de gele cirkel om het eindpunt van de weg te plaatsen.",
+      "finalizeRoad": "Klik met rechts in de 3D-weergave om de vorm van de weg vast te leggen.",
+      "confirmRoad": "Klik in het bouwpaneel op “Bevestigen” om op te slaan en klik daarna op “Volgende”.",
+      "failed": "Voorbereiden of verbinden is mislukt. Helpt opnieuw proberen niet, sluit dan af en start de tutorial in een nieuwe stad.",
+      "retry": "Opnieuw proberen",
+      "placementRequired": "Plaats het type op de posities die de uitleg aangeeft.",
+      "preparing": "Beginsituatie van de tutorial wordt voorbereid.",
+      "finishFailed": "Kan de tutorial niet afsluiten. Probeer het opnieuw."
+    },
+    "trade": {
+      "title": "Begin met internationale handel",
+      "description": "Een plaatselijke fabriek zoekt afzet in het buitenland. In deze tutorial leer je voedsel via een haven exporteren en goederen importeren via een goederenspoorlijn naar het buurland.",
+      "step1": {
+        "description": "Om het voedsel van dit eiland te exporteren, is een exportkade nodig. Bouw een “Containerterminal” op het perceel aan de kust met de gele markering. Omdat dit een tutorial is, wordt de bouwtijd overgeslagen.",
+        "title": "Een containerhaven bouwen"
+      },
+      "step2": {
+        "description": "Het duurt een paar maanden voordat de productie en het vervoer van de fabriek op gang komen. Laat de tijd verstrijken en bekijk de exportcijfers van de haven. Sluit het detailvenster van de containerterminal en open het opnieuw; onder “Goederenoverslag” zie je de import- en exportcijfers.",
+        "title": "Voedselexport controleren"
+      },
+      "step3": {
+        "description": "Je hebt nu een plek om per schip te importeren en exporteren. Maak nu ook een plek voor import en export per spoor. Bouw een “Internationaal vrachtstation” op het perceel langs de weg met de gele markering. Bij de oostgrens liggen een spoorlijn naar het buurland en een grensvrachtstation.",
+        "title": "Een internationaal vrachtstation bouwen"
+      },
+      "step4": {
+        "open": "Open “Wegen, spoor en infrastructuur” in het pictogrammenpaneel en kies bij “Spoorwegen” het “Containerperron”.",
+        "place": "Leg ten noorden van het internationale vrachtstation een perron aan, evenwijdig aan het station. Klik met links in de lichtblauwe cirkel (west) voor het beginpunt en in de gele cirkel (oost) voor het eindpunt, en klik met rechts in de 3D-weergave om de vorm vast te leggen. Zet “Kant van het perron” op “Binnenkant” en controleer vóór het bevestigen dat het perron aan de kant van het stationsgebouw (de zuidkant) ligt. Klik daarna op “Volgende”.",
+        "title": "Een perron naast het station bouwen"
+      },
+      "step5": {
+        "description": "Ga met “Terug” naar het overzicht, kies “Enkelspoor” en leg spoor aan van het oosteinde van het perron tot het westeinde van het spoor dat vanaf het grensvrachtstation buiten de stad binnenkomt.",
+        "title": "Spoor tot aan de grens aanleggen"
+      },
+      "step6": {
+        "title": "Een depot bouwen",
+        "description": "Bouw een “Spoordepot” op het perceel langs het spoor met de gele markering. Omdat dit een tutorial is, wordt na een klik op “Volgende” de bouwtijd overgeslagen en is het depot meteen klaar."
+      },
+      "step7": {
+        "title": "Het depot op de hoofdlijn aansluiten",
+        "description": "Leg een aansluitspoor aan van het aansluitpunt aan het oosteinde van het depot naar de hoofdlijn. Laat het niet haaks maar onder een flauwe hoek in oostelijke richting op de hoofdlijn invoegen. Klik daarna op “Volgende”."
+      },
+      "step8": {
+        "description": "Open “Wegen, spoor en infrastructuur” in het pictogrammenpaneel en verbind met “Hoogspanningsleiding” onder “Elektriciteit” het aansluitpunt van het zonnepark ten oosten van de stad met het aansluitpunt van het depot.",
+        "title": "Het depot van stroom voorzien"
+      },
+      "step9": {
+        "description": "Klik in “Openbaar vervoer” op “+ Nieuwe lijn” en kies als type “Internationale goederenlijn”. Zet haltes op de perrons van het internationale vrachtstation en het grensvrachtstation, klik op de eerste halte om de rondrit te sluiten en open de lijn. Op enkelspoor kunnen treinen elkaar niet passeren, dus stel het beoogde interval in op 45 minuten: genoeg voor één treinstel om heen en weer te rijden.",
+        "title": "De internationale goederenlijn openen"
+      },
+      "step10": {
+        "description": "Laat de tijd verstrijken en controleer of er goederentreinen gaan rijden op de internationale goederenlijn. Het duurt een paar maanden voordat het depot personeel heeft aangenomen, materialen heeft ingekocht en treinen gereed heeft.",
+        "title": "Goederentreinen laten rijden"
+      }
+    },
+    "highway": {
+      "title": "Leg een snelweg aan",
+      "description": "Nu de stad groeit, is er een nieuwe route voor auto’s nodig. In deze tutorial leer je een snelweg aanleggen die een gewone weg via een viaduct kruist, en die met op- en afritten tot een knooppunt verbinden.",
+      "step1": {
+        "title": "Verhoogd kruisen",
+        "open": "Kruis de gewone weg in het midden met een verhoogde snelweg. Open “Wegen, spoor en infrastructuur” in het pictogrammenpaneel en kies bij “Snelwegen” de “2-strookssnelweg”.",
+        "start": "Klik met links in de lichtblauwe cirkel om het beginpunt van de snelweg te plaatsen. Het beginpunt springt naar een viaduct op 7 m hoogte.",
+        "end": "Klik met links in de gele cirkel om het eindpunt te plaatsen. Het springt naar dezelfde hoogte van 7 m aan de overkant van de gewone weg.",
+        "confirm": "Klik in het bouwpaneel op “Bevestigen” om op te slaan en klik daarna op “Volgende”. Omdat dit een tutorial is, wordt de bouwtijd overgeslagen en is de snelweg meteen klaar."
+      },
+      "step2": {
+        "title": "De snelweg een naam geven",
+        "description": "Je kunt wegen een naam geven om ze te beheren. Bovenaan het detailvenster van je nieuwe snelweg staat bij de weg waartoe hij hoort nu “Geen (naamloze weg)”. Geef hem een naam naar keuze."
+      },
+      "step3": {
+        "title": "Een op-/afrit bouwen",
+        "description": "Bouw een op-/afrit om de snelweg op de gewone weg aan te sluiten. Kies als wegtype “Op-/afrit” en verbind vanaf de gele markering een vloeiend gebogen op-/afrit met de snelweg."
+      },
+      "step4": {
+        "title": "Het knooppunt bekijken",
+        "description": "Klik op “IC1” bij de op-/afrit om het detailpaneel van het knooppunt te openen. Controleer dat de gewone weg en de snelweg met elkaar verbonden zijn."
+      }
+    },
+    "mining": {
+      "title": "Win grondstoffen",
+      "description": "Onder het eiland liggen waardevolle grondstoffen, maar er is geen manier om ze af te voeren. In deze tutorial leer je een mijn, een goederenspoorlijn en een haven op te zetten, en zie je hoe erts wordt gewonnen, vervoerd en naar het buitenland geëxporteerd.",
+      "step1": {
+        "description": "Zet de weergave van natuurlijke hulpbronnen aan en open het detailpaneel van de ertsader in het zuidoosten.",
+        "title": "De ertsader bekijken"
+      },
+      "step2": {
+        "description": "Bouw een “Mijn” op het gele perceel boven de ertsader in het zuidoosten. Omdat dit een tutorial is, wordt de bouwtijd overgeslagen.",
+        "title": "Een mijn bouwen"
+      },
+      "step3": {
+        "description": "Bouw een “Ertslaadstation” op het grote bestaande perceel ten zuidoosten van de mijn. In een ertslaadstation wordt het erts uit de mijn in treinen geladen.",
+        "title": "Een laadstation naast de mijn bouwen"
+      },
+      "step4": {
+        "description": "Bouw een “Ertslosstation” op het grote bestaande perceel ten zuiden van de haven. In een ertslosstation wordt het per trein aangevoerde erts gelost en afgevoerd.",
+        "title": "Een losstation bij de haven bouwen"
+      },
+      "step5": {
+        "description": "Bouw een “Bulkhaven” op het gele perceel aan de kust.",
+        "title": "Een bulkhaven bouwen"
+      },
+      "step6": {
+        "open": "Kies bij Spoorwegen het “Ertsperron” en verbind de twee markeringen ten zuidwesten van het laadstation en de twee ten zuiden van het losstation. Laat elk perron naar zijn station wijzen.",
+        "loading": "Kies bij Spoorwegen het “Ertsperron” en verbind de twee markeringen ten zuidwesten van het laadstation en de twee ten zuiden van het losstation. Laat elk perron naar zijn station wijzen.",
+        "unloading": "Kies bij Spoorwegen het “Ertsperron” en verbind de twee markeringen ten zuidwesten van het laadstation en de twee ten zuiden van het losstation. Laat elk perron naar zijn station wijzen.",
+        "title": "Perrons naast de stations bouwen"
+      },
+      "step7": {
+        "town": "Leg goederenspoor aan van het oosteinde van het havenperron, langs de zuidkant van het tussenpunt op de weg, naar het noordwesteinde van het bergperron. Het spoor is nog niet verbonden, dus leg het zelf aan. Breng met bochten de rijrichting op één lijn, zet voor het stuk bergop “Terrein volgen” op “Niet volgen” en stel de vorm bij tot er geen rode overschrijdingen van helling en boogstraal meer zijn. Voeg tussenpunten toe zodat elk deeltraject hooguit 500 m lang is.",
+        "climb": "Leg goederenspoor aan van het oosteinde van het havenperron, langs de zuidkant van het tussenpunt op de weg, naar het noordwesteinde van het bergperron. Het spoor is nog niet verbonden, dus leg het zelf aan. Breng met bochten de rijrichting op één lijn, zet voor het stuk bergop “Terrein volgen” op “Niet volgen” en stel de vorm bij tot er geen rode overschrijdingen van helling en boogstraal meer zijn. Voeg tussenpunten toe zodat elk deeltraject hooguit 500 m lang is.",
+        "title": "De twee stations per spoor verbinden"
+      },
+      "step8": {
+        "title": "Een depot bouwen",
+        "description": "Bouw een “Spoordepot” op het bestaande perceel ten zuidwesten van de haven. Draai het zo dat je vanaf het aansluitpunt aan het oosteinde een spoor naar het havenperron kunt leggen."
+      },
+      "step9": {
+        "title": "Het depot op de hoofdlijn aansluiten",
+        "description": "Leg een aansluitspoor van het aansluitpunt op maaiveldniveau aan het oosteinde van het depot naar het westeinde van het havenperron. Laat het vloeiend en onder een flauwe hoek invoegen."
+      },
+      "step10": {
+        "description": "Leg een hoogspanningsleiding van het aansluitpunt van het bestaande zonnepark naar het gedeelde aansluitpunt aan het oosteinde van het depot.",
+        "title": "Het depot van stroom voorzien"
+      },
+      "step11": {
+        "description": "Kies via Openbaar vervoer → Nieuwe lijn → Ertsgoederenlijn, zet haltes op het ertsperron bij de berg en dat bij de haven, en klik op de eerste halte om de rondrit te sluiten. Op enkelspoor kunnen treinen elkaar niet passeren, dus stel het beoogde interval in op 45 minuten – genoeg voor één treinstel om heen en weer te rijden – en bevestig.",
+        "title": "De ertsgoederenlijn openen"
+      },
+      "step12": {
+        "description": "Laat de tijd verstrijken om winning, laden, spoorvervoer, lossen en export op gang te brengen. Het aanschaffen van treinen en het op gang komen van het vervoer duren een paar maanden.",
+        "title": "Tijd laten verstrijken"
+      },
+      "step13": {
+        "description": "Laat de tijd verstrijken en controleer in het detailvenster van de bulkhaven aan de kust de ontvangst en export van erts. Aanschaf van treinen, winning en vervoer duren een paar maanden.",
+        "title": "Ertsexport controleren"
+      }
+    },
+    "tourism": {
+      "title": "Ontwikkel het toerisme",
+      "description": "Er is geen haven en geen onderdak voor bezoekers van de ruïnes op het eiland, en ook geen buslijn voor toeristen. In deze tutorial leer je een hotel en een cruiseterminal bouwen, een buslijn aanleggen en controleren of er toeristen aankomen, hoeveel omzet de horeca maakt en of de bus wordt gebruikt.",
+      "step1": {
+        "description": "Bouw een “Toeristenhotel” op het perceel met de gele markering ten westen van de oude ruïnes. Omdat dit een tutorial is, wordt de bouwtijd overgeslagen.",
+        "title": "Een hotel bij de ruïnes bouwen"
+      },
+      "step2": {
+        "description": "Om toeristen te ontvangen, is een haven nodig. Bouw een “Cruiseterminal” op het gemarkeerde perceel bij de haven.",
+        "title": "Een cruiseterminal bouwen"
+      },
+      "step3": {
+        "description": "Toeristen hebben geen eigen auto, dus er moet openbaar vervoer komen. Kies via “Openbaar vervoer” → “Nieuwe lijn” een “Buslijn”. Zet op de wegen bij de gele markeringen haltes in deze volgorde: haven → woningen → ruïnes → woningen, en klik tot slot op de halte bij de haven om de rondrit te sluiten. Bevestig met tarief 0 en een beoogd interval van 1 minuut.",
+        "title": "Een buslijn tussen haven en ruïnes aanleggen"
+      },
+      "step4": {
+        "description": "Laat de tijd verstrijken en verwelkom de toeristen. Het duurt een paar maanden voordat de voorzieningen draaien en de bussen zijn aangeschaft.",
+        "title": "Tijd laten verstrijken"
+      },
+      "step5": {
+        "description": "Bekijk de omzet van het restaurant bij de ruïnes en de reizigers op je nieuwe buslijn. De stap is voltooid als er toeristen zijn aangekomen, het restaurant meer omzet dan bij de start en de bus wordt gebruikt. Laat zo nodig nog wat meer tijd verstrijken.",
+        "title": "Omzet en busreizigers controleren"
+      }
+    },
+    "intro": {
+      "controls": "Welkom, nieuwe burgemeester! We vragen je een stad te bouwen waar inwoners veilig en zorgeloos kunnen wonen. Deze stad heeft nog geen woningen voor nieuwe inwoners, en ook geen elektriciteit of drinkwater, die onmisbaar zijn om te leven. In deze tutorial leer je eerst wat de burgemeester doet, hoe je de tijd laat verstrijken, hoe je de toestand van de stad afleest en hoe de knoppen en de camera werken. Daarna doorloop je de opbouw van een stad: wegen en percelen aanleggen, de koers van een wijk bepalen, woningen bouwen en elektriciteit en water leveren.",
+      "scenario4": "We willen de woonwijk en de werkplekken per spoor verbinden, maar op het geplande tracé staan particuliere gebouwen en een openbaar ziekenhuis. In deze tutorial leer je grond verwerven, openbare voorzieningen weghalen, verhoogd spoor boven een weg aanleggen, perrons, stationsgebouwen en een depot bouwen, bochten en hellingen bijstellen, en alles van stroomvoorziening tot het openen van een lijn.",
+      "trade": "Een plaatselijke voedselfabriek wil haar producten ook in het buitenland verkopen. En de stad wil een manier om goederen die ze nodig heeft uit het buitenland te halen. In deze tutorial leer je voedsel via een haven exporteren en goederen importeren via een goederenspoorlijn naar het buurland.",
+      "highway": "Als de stad groeit, komen er ook meer auto’s die mensen en goederen vervoeren. Om te voorkomen dat zelfs het doorgaande verkeer zich op de gewone wegen ophoopt, wil de stad nu alvast een andere route klaarzetten. In deze tutorial leer je een snelweg aanleggen die een gewone weg via een viaduct kruist, en die met op- en afritten tot een knooppunt verbinden.",
+      "mining": "Onder dit eiland liggen waardevolle grondstoffen. Maar er is geen manier om ze van de berg naar de haven te brengen, dus de industrie op het eiland heeft er niets aan. In deze tutorial leer je een mijn, een goederenspoorlijn en een haven op te zetten, en zie je hoe erts wordt gewonnen, vervoerd en naar het buitenland geëxporteerd.",
+      "tourism": "De eilanders willen dat meer mensen hun oude ruïnes in het binnenland komen bekijken. Maar er is geen haven en geen onderdak voor bezoekers, en ook nog geen buslijn van de haven naar de stad. In deze tutorial leer je een hotel en een cruiseterminal bouwen, een buslijn aanleggen en controleren of er toeristen aankomen, hoeveel omzet de horeca maakt en of de bus wordt gebruikt.",
+      "heading": "Een verzoek aan de burgemeester",
+      "windowTitle": "Tutorial",
+      "marine": "Deze stad aan de baai heeft nog geen haven en geen olievoorzieningen. In deze tutorial win je land op de zee en bouw je een tankerpier, overspan je de monding van de baai met een hangbrug, pomp je ruwe olie op uit een olieveld onder de zeebodem en stuur je die via een pijpleiding naar de export, en verbind je een afgelegen eiland met de stad via een veerdienst."
+    },
+    "marine": {
+      "title": "Ontwikkel de zee",
+      "description": "Deze stad aan de baai heeft nog geen haven en geen olievoorzieningen. In deze tutorial win je land op de zee en bouw je een tankerpier, overspan je de monding van de baai met een hangbrug, pomp je ruwe olie op uit een olieveld onder de zeebodem en stuur je die via een pijpleiding naar de export, en verbind je een afgelegen eiland met de stad via een veerdienst.",
+      "step1": {
+        "title": "Landaanwinning plannen",
+        "description": "Een haven heeft een kade nodig waar grote schepen kunnen aanleggen, en grond om voorzieningen op te bouwen. Win land op de zee achter in de baai om ruimte voor een haven te maken. Klik op het pictogram Grondwerk, klik de vier gele markeringen een voor een met links aan om het gebied te tekenen en sluit het met rechts. Controleer dat de raming het type “Landaanwinning” heeft en bevestig het werk."
+      },
+      "step2": {
+        "title": "De landaanwinning voltooien",
+        "description": "Laat met “Starten” minstens een maand verstrijken en klik dan op “Volgende”. In deze les zijn er geen aannemers, dus “Volgende” slaat de resterende bouwtijd van de landaanwinning over. Is het klaar, dan wordt de zee land, en de rand aan de zeekant wordt een kade waar schepen kunnen aanleggen."
+      },
+      "step3": {
+        "title": "Een weg naar het nieuwe land aanleggen",
+        "description": "Een haven of olieterminal op aangewonnen land heeft niets aan zonder weg: mensen kunnen er niet werken en goederen kunnen niet weg. Leg een weg aan van het einde van de stadsweg tot op het aangewonnen land. In deze les is een weg klaar zodra je hem bevestigt. Klik op “Wegen, spoor en infrastructuur” in het pictogrammenpaneel om het bouwpaneel te openen."
+      },
+      "step4": {
+        "title": "De tankerpier bouwen",
+        "description": "Tankers die ruwe olie vervoeren zijn grote schepen. Een haven kan daarom alleen waar het water voor de kade diep genoeg is. Voor de kade van het aangewonnen land is het water diep, dus die plek is geschikt voor een haven. Klik op het gebouwpictogram, kies in de categorie “Havens” de “Tankerpier”, klik met links in de gele cirkel op de kade om de plek te kiezen en klik in het bouwpaneel op “Bevestigen”. Zodra de haven er staat, wordt automatisch een aansluitende vaarroute naar de zeevaartroute getrokken, zodat schepen kunnen aan- en afvaren. In deze les wordt de bouwtijd overgeslagen."
+      },
+      "step5": {
+        "title": "Een hangbrug over de monding van de baai",
+        "description": "Aan beide oevers van de monding van de baai houdt de snelweg op. De monding is maar liefst 1,6 km breed: te breed voor een gewone brug op een rij pijlers. Verbind de oevers daarom met een hangbrug, die een lange afstand in één keer overspant. Onder de brug loopt een zeevaartroute voor grote schepen, dus de brug moet hoog genoeg zijn om ze door te laten. De snelwegeinden aan beide oevers liggen al op die hoogte. Open “Wegen, spoor en infrastructuur” in het pictogrammenpaneel, kies bij “Snelwegen” de “4-strookshangbrug” en trek hem van het noordelijke einde (lichtblauwe cirkel) naar het zuidelijke einde (gele cirkel). Leg de vorm met rechts vast, klik in het bouwpaneel op “Bevestigen” en daarna op “Volgende”."
+      },
+      "step6": {
+        "title": "Het olieveld onder zee zoeken",
+        "description": "Nu ga je de grondstoffen van de zee benutten. Controleer voordat je een olieterminal bouwt of er in de buurt een olieveld onder de zeebodem ligt. Klik in de cockpit op “Weergave” om het weergavepaneel te openen.",
+        "show": "Kies in de verticale tabs “Natuurlijke hulpbronnen” en zet die op “Tonen”. Je ziet dan een olieveld onder de bodem van de baai. Klik op het olieveld bij de gele markering om de details te openen."
+      },
+      "step7": {
+        "title": "De olieterminal bouwen",
+        "description": "Ruwe olie uit het olieveld onder zee gaat via een pijpleiding naar een olieterminal aan de kust en wordt vandaar op de markt gebracht. De olieterminal bouw je aan de kade, waar de pijpleiding kan binnenkomen. Klik op het gebouwpictogram, kies in de categorie “Havens” de “Olieterminal”, klik met links in de gele cirkel op de kade om de plek te kiezen en klik in het bouwpaneel op “Bevestigen”. In deze les wordt de bouwtijd overgeslagen."
+      },
+      "step8": {
+        "title": "Het olieplatform bouwen",
+        "description": "Een olieplatform dat ruwe olie oppompt, moet in zee pal boven het olieveld staan. Klik op het gebouwpictogram, kies in de categorie “Landbouw en grondstoffen” het “Olieplatform”, klik met links in de gele cirkel op zee om de plek te kiezen en klik in het bouwpaneel op “Bevestigen”. In deze les wordt de bouwtijd overgeslagen."
+      },
+      "step9": {
+        "title": "Verbinden met een pijpleiding",
+        "description": "Stuur de ruwe olie van het platform via een pijpleiding over de zeebodem naar de olieterminal. Open “Wegen, spoor en infrastructuur” in het pictogrammenpaneel, kies bij “Olie” de “Onderzeese oliepijpleiding” en trek een lijn van het aansluitpunt van het platform naar het aansluitpunt van de olieterminal. Bevestig en klik op “Volgende”; de pijpleiding is dan meteen klaar."
+      },
+      "step10": {
+        "title": "De ruwe olie exporteren",
+        "description": "De olieterminal verkoopt de binnengekomen ruwe olie op de markt, en de tankerpier koopt die op en exporteert hem per schip naar het buitenland. Het duurt een paar maanden voordat er genoeg personeel is en de olie verkocht wordt. Laat met “Starten” een paar maanden verstrijken en klik dan op “Volgende”. Is er nog niets geëxporteerd, laat dan nog wat tijd verstrijken en klik opnieuw."
+      },
+      "step11": {
+        "title": "Een veersteiger bouwen",
+        "description": "Het eiland voor de kust heeft geen verbinding met de stad. Open een veerdienst, zodat de eilandbewoners naar de stad kunnen reizen. Bouw eerst een veersteiger aan de kust van de stad. Open “Wegen, spoor en infrastructuur” in het pictogrammenpaneel, kies bij “Vaarroute” de “Veersteiger” en trek hem van de wal (lichtblauwe cirkel) het water op (gele cirkel). Leg de vorm met rechts vast, klik in het bouwpaneel op “Bevestigen” en daarna op “Volgende”."
+      },
+      "step12": {
+        "title": "De veerroute trekken",
+        "description": "Trek nu de vaarroute waarover de veerboot van de steiger op het eiland naar die van de stad vaart. Een vaarroute kan niet over land, dus vaar om de noordkant van het eiland heen, onder de hangbrug in de monding door en de baai in. Klik onderweg met links om punten te plaatsen. Kies bij “Vaarroute” de “Veerroute”, verbind het uiteinde van de steiger op het eiland met het uiteinde van de steiger in de stad, bevestig en klik op “Volgende”."
+      },
+      "step13": {
+        "title": "De veerlijn openen",
+        "description": "Maak tot slot de veerlijn die over de vaarroute vaart. Kies via Openbaar vervoer → Nieuwe lijn → Veerlijn, zet haltes bij de steiger op het eiland en de steiger in de stad, klik op de eerste halte om de rondrit te sluiten en bevestig. Staat de lijn er, dan is deze tutorial voltooid. Om echt schepen te laten varen, heb je ook een onderhoudsdok nodig dat de schepen verhuurt."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Spel starten",
+    "nowLoading": "Bezig met laden…",
+    "startError": "Starten is mislukt. Probeer het opnieuw.",
+    "todaysTips": "Tip van de dag",
+    "gotIt": "Sluiten",
+    "items": {
+      "tip1": {
+        "title": "Geld moet rollen",
+        "description": "Wat de gemeente uitgeeft aan bouwwerk en aan salarissen in openbare voorzieningen, wordt inkomen voor bedrijven en huishoudens. Daarmee doen ze boodschappen en financieren ze nieuwe productie. Alleen belasting innen houdt de economie niet draaiende. Besteed je begroting aan de diensten en het onderhoud die nodig zijn, en laat het geld terugvloeien naar de stad."
+      },
+      "tip2": {
+        "title": "Een lange adem",
+        "description": "Burgers die opgroeien in een onveilige omgeving, blijven ook als volwassene vatbaarder voor criminaliteit. Blijf handhaven met de politie en blijf de omgeving verbeteren waarin kinderen opgroeien. Om de openbare veiligheid bij de wortel aan te pakken, heb je minstens een generatie nodig."
+      },
+      "tip3": {
+        "title": "Aan de kant!",
+        "description": "De brandweer helpt pas als ze ter plaatse is. Ook met een brandweerkazerne loopt de schade op als die te ver weg ligt of als de wegen ernaartoe vaststaan. Kijk niet alleen naar de begroting, maar ook naar de ligging van kazernes en de routes naar de brand."
+      },
+      "tip5": {
+        "title": "Een zware klim",
+        "description": "Een weg over een steile helling kost veel meer bouwwerk dan een weg over vlak terrein. De kortste route op de kaart is niet altijd de goedkoopste. Vergelijk het terrein met de geraamde bouwkosten en overweeg ook een kleine omweg."
+      },
+      "tip6": {
+        "title": "Plan vooruit",
+        "description": "Meer inwoners en fabrieken betekent meer vraag naar stroom en water. Begin je pas met bouwen als er een tekort is, dan moet je wachten tot het klaar is. Controleer of er reservecapaciteit is voordat je een nieuwe wijk ontwikkelt."
+      },
+      "tip7": {
+        "title": "Haastige spoed is zelden goed",
+        "description": "Een hogere maximumsnelheid maakt ritten sneller, maar vergroot ook de kans op ongelukken. Pas ook op met scherpe bochten. Gebeuren er op een plek veel ongelukken, kijk dan opnieuw naar de vorm van de weg en de maximumsnelheid."
+      },
+      "tip8": {
+        "title": "Investeren in de toekomst",
+        "description": "Personeelstekorten in ziekenhuizen en geavanceerde fabrieken los je niet op met alleen meer inwoners. Richt universitaire studierichtingen en plaatsen in om de benodigde specialisten op te leiden, en houd in je planning rekening met de tijd tot ze afstuderen."
+      },
+      "tip9": {
+        "title": "Gebouwd om te blijven",
+        "description": "Verwaarloos je het onderhoud, dan raken gebouwen en wegen in verval, tot ze uiteindelijk instorten. Branden en instortingen bederven ook de stemming onder de burgers, dus je hele begroting aan nieuwbouw besteden is riskant. Houd geld achter voor onderhoud van wat er al staat en voor de brandweer."
+      },
+      "tip10": {
+        "title": "Grote brand",
+        "description": "Staan gebouwen dicht op elkaar, dan slaat een brand in één gebouw makkelijk over naar de buren. Naast een goede brandweer helpt ook ruimte tussen gebouwen om rampen te voorkomen."
+      },
+      "tip11": {
+        "title": "Graven maar",
+        "description": "Bekijk waar de grondstoffen liggen voordat je een plek voor een mijn of olieveld kiest. Hoe langer je wint, hoe minder er over is. Een stad die op mijnbouw leunt, moet ook nadenken over banen en belastinginkomsten als de voorraad op is."
+      },
+      "tip12": {
+        "title": "Melkkoe van de stad",
+        "description": "Bouwt de burgemeester woningen of bedrijfsruimte, dan ontvangt de gemeente huur van de huurders. Leegstand brengt niets op, dus kijk welke functies gevraagd zijn, hoeveel leegstand er in de buurt is en hoe goed de locatie is."
+      },
+      "tip13": {
+        "title": "Uitknijpen",
+        "description": "Belastingtarieven bepalen niet alleen de inkomsten van de gemeente, maar ook de lasten en de rendabiliteit van bedrijven. Je kunt ze ook als industriebeleid inzetten, bijvoorbeeld door een sector die je wilt laten groeien minder te belasten. Komen de inkomsten tekort, kijk dan eerst per sector hoe het ervoor staat voordat je alles over de hele linie verhoogt."
+      },
+      "tip14": {
+        "title": "Altijd een plan B",
+        "description": "Valt een centrale of hoogspanningsleiding uit door een ongeluk of ramp, dan raakt dat ook fabrieken en inwoners die van stroom afhankelijk zijn. Zorg voor belangrijke infrastructuur voor reserve in zowel de voorzieningen die leveren als de routes die afleveren, zodat één storing niet de hele stad platlegt."
+      },
+      "tip15": {
+        "title": "Op zoek naar een thuis",
+        "description": "Laat je braakliggende grond in het centrum liggen, dan trekken mensen die hun huis kwijt zijn daarheen en ontstaat er makkelijk een sloppenwijk. Zorg voor woningen met een betaalbare huur, dan verhuizen de bewoners geleidelijk en krimpt de sloppenwijk vanzelf."
+      },
+      "tip16": {
+        "title": "Industriële clusters",
+        "description": "Liggen gelijksoortige bedrijven en hun grondstofleveranciers dicht bij elkaar, dan is dat een gunstige plek om te produceren. Groepeer verwante bedrijven liever dan fabrieken over de hele stad te verspreiden. Let in de buurt van woonwijken wel op geluidsoverlast en luchtvervuiling."
+      },
+      "tip17": {
+        "title": "Dag en nacht doorwerken",
+        "description": "Verleng je in het paneel Voorschriften de arbeidstijd, dan kan hetzelfde aantal mensen meer productie dragen. Maar het gaat ten koste van gezondheid en vrije tijd, en er wordt minder aan ontspanning uitgegeven. Wie alleen nog tijd heeft om te verdienen, heeft geen tijd meer om uit te geven."
+      },
+      "tip18": {
+        "title": "Eten, forenzen, slapen",
+        "description": "Lange reistijden naar het werk kosten vrije tijd en drukken de uitgaven aan onder meer ontspanning. Kijk opnieuw naar de afstand tussen wonen en werken en naar files onderweg. Voor burgers die thuiskomen om meteen te gaan slapen, is je bruisende uitgaansgebied niet meer dan uitzicht vanuit het raam."
+      },
+      "tip19": {
+        "title": "Vooruitziende blik",
+        "description": "Een lange trein kan alleen rijden als hij langs de perrons van alle stations op de lijn past. Houd bij de bouw van stations al rekening met de perronlengte voor toekomstige groei. Eén station verlengen helpt niet als de andere te kort blijven."
+      },
+      "tip20": {
+        "title": "Onder het tapijt",
+        "description": "Ondergrondse wegen maken geen lawaai en vervuilen de lucht niet, en zijn dus een manier om de woonomgeving in woonwijken te beschermen. Sommige problemen los je echt op door ze te begraven."
+      },
+      "tip21": {
+        "title": "In de schaduw van de vooruitgang",
+        "description": "Hoge gebouwen werpen schaduw naar het noorden en verslechteren de woonomgeving in de buurt. Let op de hoogte van gebouwen en de ruimte ertussen. Ook bergen en ander terrein zorgen voor schaduw. De toekomst van je stad mag dan zonnig zijn, aan de voet kan het pikdonker zijn."
+      },
+      "tip22": {
+        "title": "Liever een abonnement dan een auto",
+        "description": "Maakt het openbaar vervoer werk, school en winkels goed bereikbaar, dan kiezen huishoudens sneller voor een leven zonder auto. Wat ze besparen op autokosten, kunnen ze aan andere dingen uitgeven."
+      },
+      "tip23": {
+        "title": "Lucht vervoeren",
+        "description": "Ook een lege bus telt mee in het verkeer op de weg. Te veel bussen kunnen een maatregel tegen files juist averechts laten werken. Kijk naar het aantal reizigers en het interval om te bepalen hoeveel ritten echt nodig zijn."
+      },
+      "tip24": {
+        "title": "Mollen betalen geen grondprijs",
+        "description": "Een tunnel die diep genoeg ligt, kan worden aangelegd zonder de grond erboven te kopen. Op ondiepe stukken is grondverwerving wel nodig, dus controleer de diepte en de raming. Lopen de onderhandelingen vast, graaf dan gewoon wat dieper."
+      },
+      "tip25": {
+        "title": "Forenzen door de lucht",
+        "description": "Waar bergen en steile hellingen een weg lastig maken, kun je met een kabelbaan toch openbaar vervoer bieden. Zorg ook voor wegen naar de stations en aansluitingen op ander vervoer. Is reizen over de grond te lastig, laat je burgers dan gewoon in de lucht hangen."
+      },
+      "tip26": {
+        "title": "Stroomfile",
+        "description": "Reservecapaciteit bij de centrales helpt niet als de hoogspanningsleidingen niet genoeg stroom kunnen vervoeren. Controleer voordat je centrales bijbouwt de verbindingen en de transportcapaciteit naar de wijk met het tekort. Misschien beperkt één dunne leiding onderweg de levering aan de hele stad."
+      },
+      "tip27": {
+        "title": "Een noodlottig ongeluk",
+        "description": "Een gebouw dat de ontwikkeling in de weg staat, kun je opblazen en laten lijken op een ongeluk. Maar de stemming onder de burgers lijdt er flink onder. Wil je grond vrijmaken, weeg dan de kosten van aankoop en sloop af tegen de sporen die een harde aanpak in de stad achterlaat."
+      },
+      "tip28": {
+        "title": "De zee op",
+        "description": "Te weinig land? Win nieuwe grond op de zee. Waar grondstoffen onder de zeebodem liggen, kun je ook olieplatforms bouwen."
+      },
+      "tip29": {
+        "title": "Rood, rood en nog eens rood",
+        "description": "Hoe meer kruispunten met verkeerslichten, hoe meer wachttijd zich bij elke rit opstapelt. Beperk het aantal kruispunten op hoofdwegen. Met een keurig dicht stratenraster gaat de zon misschien onder voordat je inwoners ooit groen zien."
+      },
+      "tip30": {
+        "title": "Vrij uitzicht",
+        "description": "Hoe hoger een zendmast staat en hoe hoger hij is, hoe groter het gebied dat hij bestrijkt. Controleer of er bergen of andere obstakels staan tussen de mast en plekken zonder bereik. Tegen een berg helpt geen enkele hoeveelheid enthousiasme voor meer vermogen."
+      },
+      "tip31": {
+        "title": "Geschenk van de zee",
+        "description": "Ook een stad zonder zoetwaterbron in de buurt kan water krijgen van een ontziltingsinstallatie aan de kust. Die heeft wel stroom nodig om te draaien. Eerst zoek je water, dan zoek je stroom."
+      },
+      "tip32": {
+        "title": "Veiligheid door werk",
+        "description": "Werkloosheid is een van de factoren die de openbare veiligheid ondermijnen. Naast meer politie hebben burgers ook plekken nodig waar ze kunnen werken. Is de werkloosheid hoog, kijk dan naar het aantal vacatures, de gevraagde vaardigheden en of mensen hun werk kunnen bereiken."
+      },
+      "tip33": {
+        "title": "Zorg voor later",
+        "description": "Gebouwen en wegen blijven na de oplevering onderhoud kosten. Breid je uit alleen omdat je de bouw kunt betalen, dan verdwijnt je toekomstige begroting in onderhoudskosten. De burgemeester van later ben jij ook."
+      },
+      "tip34": {
+        "title": "Niet te veel oppompen",
+        "description": "Waterbronnen vullen zich na verloop van tijd weer aan, maar pomp je meer op dan er bijkomt, dan slinkt de voorraad. Zorg voor andere bronnen voordat de vraag groeit. Meer pompen betekent niet meer water."
+      },
+      "tip35": {
+        "title": "Oeps",
+        "description": "Wegen en gebouwen zijn niet makkelijk te verplaatsen als de bouw eenmaal begonnen is. Controleer voor je bevestigt de richting, de aansluitingen en de grond die eromheen overblijft. Al wordt die per ongeluk scheve weg op den duur misschien gewoon een kenmerk van je stad."
+      },
+      "tip36": {
+        "title": "Big Mayor is watching you",
+        "description": "Klik op een voetganger of auto om een burger aan je volglijst toe te voegen. Handig als je wilt zien hoe een inwoner leeft. Naast statistieken over de hele stad kun je je stad ook bekijken door het dagelijks leven van één persoon."
+      },
+      "tip37": {
+        "title": "Basislast",
+        "description": "Hoeveel stroom zon en wind leveren, hangt af van het weer. Reken je alleen met wat ze op mooie dagen opbrengen, dan kom je tekort als het weer omslaat. Combineer ze met bronnen die minder van het weer afhangen, zoals fossiele centrales of kernenergie."
+      },
+      "tip38": {
+        "title": "Beter te groot dan te klein",
+        "description": "Sommige gebouwen passen niet op kleine percelen. Wil je een bepaalde voorziening bouwen, kijk dan hoeveel ruimte die nodig heeft voordat je de grond opdeelt. Ook met genoeg vrije grond past een groot gebouw er niet als alles uit kleine percelen bestaat."
+      },
+      "tip39": {
+        "title": "Die dienst kost geld",
+        "description": "Openbare diensten zoals rioolwaterzuivering, afvalverwerking, telecom en zorg zijn standaard soms gratis. Stel je een tarief in, dan betalen gebruikers een deel van de exploitatiekosten. Een vriendelijke prijs voor de burger of een stevig prijskaartje? Dat bepaalt de burgemeester."
+      },
+      "tip40": {
+        "title": "Kopieer-en-plak-stad",
+        "description": "Als burgemeester kun je een bestaand gebouw kopiëren en opnieuw bouwen. Houd type en aantal verdiepingen gelijk en kies een perceel waar het origineel op past, dan blijven de bouwkosten laag. Het straatbeeld wordt eentonig, maar je portemonnee geniet van het uitzicht."
+      },
+      "tip41": {
+        "title": "Alleen de huur telt?",
+        "description": "Inwoners vergelijken bij een verhuizing de huur, de reistijd naar werk, school en winkels, de kwaliteit van de woning en de woonomgeving. Ook geluid, luchtvervuiling, openbare veiligheid en zonlicht tellen mee. Een goedkope maar onhandig gelegen woning wordt minder snel gekozen, en ook een handige woning moet een huur hebben die bij het huishoudbudget past en groot genoeg zijn om in te trekken."
+      },
+      "tip42": {
+        "title": "Voorkomen is beter dan vastlopen",
+        "description": "Grote havens zoals containerhavens, bulkhavens en tankerhavens hebben voldoende diepgang nodig. Een kust waar de zeebodem steil afloopt, ligt dicht bij diep water en is daarom geschikt voor een haven. Ook aan een vlakke, ondiepe kust kun je een haven bouwen als je het land met landaanwinning tot aan het diepe water doortrekt."
+      },
+      "tip43": {
+        "title": "Heel even maar…",
+        "description": "Veel geparkeerde auto’s langs de weg remmen het doorgaande verkeer af en maken ongelukken waarschijnlijker. Leg parkeerplaatsen aan, zodat die auto’s ergens anders kunnen staan. Zo legt dat “heel even maar…” uiteindelijk de hele stad stil."
+      },
+      "tip44": {
+        "title": "Afgesneden van de weg",
+        "description": "Je kunt ook bouwen op plekken ver van de weg, maar hoe verder een gebouw van de weg staat, hoe slechter de bereikbaarheid. Fabrieken en winkels doen langer over hun bevoorrading, en voor woningen worden woon-werkverkeer en boodschappen zwaarder. Bouw langs de weg of trek een weg tot vlak bij het gebouw."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Selecteer een perceel om een gebouw te plannen. Tussen het plannen en de oplevering zit enige tijd.",
+    "parcelCreation": "Open met Ctrl het wielmenu en kies een manier van aanmaken, en klik daarna in de 3D-weergave op het doel. Stel de afmetingen bij in het paneel en bevestig.",
+    "transitCreation": "Klik met links om haltes op volgorde te plaatsen; klik op de eerste halte om de rondrit te sluiten. Versleep een deeltraject om een tussenpunt toe te voegen, versleep een punt om het te verplaatsen en klik met rechts om te verwijderen. Bij een heen-en-terugdienst plaats je ook de haltes voor de terugweg. Klik nogmaals op een geplaatste halte, of sleep een halte op een andere halte, om daar opnieuw te stoppen.",
+    "transitManagement": "Overzicht van de lijnen van het openbaar vervoer. Hier stel je tarieven en intervallen in, en maak je lijnen aan of verwijder je ze. Het tarief telt mee in de routekeuze van inwoners. Is het te hoog, dan dalen de reizigersaantallen en neemt het autobezit toe.",
+    "pathConstruction": "Bouw wegen en spoor. Klik op het terrein in de 3D-weergave: klik met links om hoekpunten toe te voegen, klik met rechts om de vorm vast te leggen en versleep hoekpunten om ze te verplaatsen. Houd Ctrl ingedrukt voor het instellingenmenu (bocht/recht en uitlijnen). Met de toetsen 3/4 wijzig je de hoogte van ophoging en ingraving.",
+    "pathConstructionElevated": "Bouw wegen en spoor. Klik op het terrein in de 3D-weergave: klik met links om hoekpunten toe te voegen, klik met rechts om de vorm vast te leggen en versleep hoekpunten om ze te verplaatsen. Houd Ctrl ingedrukt voor het instellingenmenu (bocht/recht en uitlijnen). Met PageUp/PageDown of de toetsen 1/2 wijzig je de hoogte, met 3/4 de hoogte van ophoging en ingraving.",
+    "districtEdit": "Maak “wijken” aan, breid ze uit en voeg ze samen. Wijken zijn de eenheid voor voorschriften en statistieken. Houd Ctrl ingedrukt in de 3D-weergave om van gereedschap te wisselen. Aanmaken: klik met links op een weg om een nieuwe wijk in de getoonde kleur te maken (elke keer dat je het gereedschap kiest, krijg je een nieuwe kleur). Uitbreiden: klik met rechts om de wijk te kiezen die je wilt uitbreiden en klik dan met links op wegen om ze aan die wijk toe te voegen. Samenvoegen: klik met rechts om de wijk te kiezen waarin je wilt samenvoegen en klik dan met links op de wijk die erin moet opgaan; er opent een bevestigingspaneel. Kleur en naam van de geselecteerde wijk staan naast de muisaanwijzer. Klik nogmaals op de knop om te stoppen.",
+    "bulldozer": "Bulldozermodus. Klik met links om lege percelen, geplande gebouwen, geplande wegen en decorobjecten op het terrein te verwijderen (verspreid geplaatste decorobjecten worden na bevestiging als heel gebied verwijderd). Klik nogmaals op de knop om te stoppen.",
+    "bulldozerInstant": "Bulldozermodus. Klik met links om gebouwen, wegen, lege percelen en decorobjecten op het terrein direct en zonder bevestiging te verwijderen. Gebouwen verdwijnen samen met hun gebruikers en bewoners, en het terrein wordt niet hersteld (het stadhuis, de grenspost en deeltrajecten van het openbaar vervoer kunnen niet worden verwijderd; alleen verspreid geplaatste decorobjecten worden na bevestiging als heel gebied verwijderd). Klik nogmaals op de knop om te stoppen.",
+    "cityBudget": "Bepaal hoe je het geld uit belastingen en eigen bedrijfsvoering over de volgende periode verdeelt. Als de gemeente materialen inkoopt voor bijvoorbeeld de aanleg van wegen of het draaien van openbare voorzieningen, kan dat alleen binnen de begroting die je hier vaststelt. Is de begroting te krap, dan kan personeel van openbare voorzieningen worden ontslagen.",
+    "resourceEdit": "Maak een gebied met natuurlijke hulpbronnen. Kies een type hulpbron en klik op het terrein. Klik met links om een hoekpunt toe te voegen, klik op een zijde om een hoekpunt in te voegen en klik met rechts om een hoekpunt te verwijderen. Versleep een hoekpunt om het te verplaatsen.",
+    "grading": "Klik met links om hoekpunten te plaatsen en met rechts om het gebied vast te leggen."
+  }
+}

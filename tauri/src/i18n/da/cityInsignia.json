@@ -1,0 +1,51 @@
+{
+  "cityInsignia": {
+    "emblem": "Byvåben",
+    "flag": "Byflag",
+    "motif": "Motiv",
+    "fieldColor": "Bundfarve",
+    "motifColor": "Motivfarve",
+    "pattern": "Mønster",
+    "accentColor": "Accentfarve",
+    "placement": "Våbnets placering",
+    "loadImage": "Indlæs billede",
+    "randomize": "Tilfældig",
+    "apply": "Anvend",
+    "imageLoadFailed": "Billedet kunne ikke indlæses",
+    "placements": {
+      "center": "Midt",
+      "canton": "Øverst til venstre",
+      "none": "Ingen"
+    },
+    "motifs": {
+      "wave": "Bølge",
+      "mountain": "Bjerg",
+      "star": "Stjerne",
+      "tree": "Træ",
+      "sun": "Sol",
+      "moon": "Måne",
+      "flower": "Blomst",
+      "leaf": "Blad",
+      "bird": "Fugl",
+      "fish": "Fisk",
+      "anchor": "Anker",
+      "gear": "Tandhjul",
+      "tower": "Borg",
+      "bridge": "Bro",
+      "key": "Nøgle",
+      "crown": "Krone",
+      "snowflake": "Snefnug",
+      "flame": "Flamme",
+      "diamond": "Rombe",
+      "cross": "Kors"
+    },
+    "patterns": {
+      "plain": "Ensfarvet",
+      "bicolor": "Todelt vandret",
+      "triband": "Tredelt lodret",
+      "diagonal": "Skråt delt",
+      "border": "Kant",
+      "bands": "Striber foroven og forneden"
+    }
+  }
+}

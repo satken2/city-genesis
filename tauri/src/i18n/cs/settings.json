@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Nastavení",
+    "groups": {
+      "general": "Obecné",
+      "display": "Obrazovka",
+      "sound": "Zvuk",
+      "system": "Systém",
+      "about": "O hře",
+      "developer": "Nastavení pro vývojáře"
+    },
+    "swagger": {
+      "label": "Swagger (dokumentace API)",
+      "description": "Zobrazí specifikaci API jádra simulace ve výchozím prohlížeči",
+      "action": "Otevřít v prohlížeči"
+    },
+    "currencyUnit": {
+      "label": "Měnová jednotka",
+      "description": "Jednotka zobrazovaná u peněžních částek. Pokud pole necháte prázdné, řídí se jazykem zobrazení."
+    },
+    "fontSize": {
+      "label": "Velikost písma",
+      "large": "Velké",
+      "medium": "Střední",
+      "small": "Malé",
+      "custom": "Vlastní",
+      "preview": "Aktuální velikost"
+    },
+    "monitor": {
+      "label": "Displej",
+      "prev": "Předchozí displej",
+      "next": "Další displej"
+    },
+    "graphicMonitor": {
+      "label": "Displej pro 3D zobrazení"
+    },
+    "multiDisplay": {
+      "label": "Režim více displejů",
+      "description": "Zobrazuje okna na jiném displeji než herní obrazovku",
+      "on": "Zapnuto",
+      "off": "Vypnuto"
+    },
+    "popupMonitor": {
+      "label": "Displej pro okna"
+    },
+    "hintbar": {
+      "label": "Panel nápovědy",
+      "show": "Zobrazit",
+      "hide": "Skrýt",
+      "description": "Panel v horní části obrazovky s nápovědou k ovládání"
+    },
+    "citizenVoice": {
+      "label": "Hlasy občanů",
+      "show": "Zobrazit",
+      "hide": "Skrýt",
+      "description": "Karta vpravo nahoře, na které se postupně zobrazují výroky občanů"
+    },
+    "language": {
+      "label": "Jazyk",
+      "description": "Jazyk uživatelského rozhraní. Je nezávislý na jazyku uložené hry.",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Hlasitost",
+      "master": "Celková hlasitost",
+      "bgm": "Hudba",
+      "sfx": "Zvukové efekty"
+    },
+    "compute": {
+      "label": "Akcelerace GPU",
+      "comingSoon": "Již brzy",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU aktivní",
+      "statusInactive": "CPU aktivní",
+      "restartRequired": "Po změně nastavení se hlavní program restartuje",
+      "restarting": "Restartování…",
+      "restartFailed": "Restart se nezdařil",
+      "restartUnavailable": "Nastavení bylo uloženo. Změny se projeví při příštím spuštění hry",
+      "confirmRestart": "Přepnout výpočty na {{mode}}? Hlavní program se restartuje.",
+      "restartAction": "Restartovat"
+    },
+    "windowReset": {
+      "label": "Poloha a velikost oken",
+      "action": "Obnovit"
+    },
+    "credits": {
+      "label": "Autoři a zdroje",
+      "description": "Informace o právech k materiálům a softwaru použitým v této hře",
+      "action": "Zobrazit"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Nová hra",
+    "overwriteSave": "Přepsat uloženou hru",
+    "saveAs": "Uložit jako",
+    "load": "Načíst",
+    "quitGame": "Ukončit hru",
+    "returnToTop": "Zpět do hlavní nabídky",
+    "loading": "Načítání…",
+    "shuttingDown": "Ukončování…",
+    "saveFailed": "Uložení se nezdařilo",
+    "loadFailed": "Načtení se nezdařilo",
+    "confirmNewGame": "Aktuální data budou ztracena. Začít novou hru?",
+    "confirmQuitGame": "Opravdu chcete hru ukončit? Aktuální postup se automaticky neukládá.",
+    "confirmReturnToTop": "Vrátit se do hlavní nabídky? Aktuální postup se automaticky neukládá.",
+    "confirm": "Ano",
+    "cancel": "Ne",
+    "saveAsScenario": "Uložit jako scénář",
+    "saveAsNewScenario": "Uložit jako jiný scénář",
+    "overwriteScenario": "Přepsat scénář",
+    "backToGame": "Zpět do hry",
+    "saveName": "Název uložené hry",
+    "confirmOverwrite": "Přepsat uloženou hru „{{name}}“?",
+    "confirmOverwriteScenario": "Přepsat scénář „{{name}}“?"
+  },
+  "saveList": {
+    "noSaves": "Žádné uložené hry",
+    "currentSave": "Aktuální data",
+    "population": "Počet obyvatel",
+    "inGameDate": "Datum",
+    "savedAt": "Uloženo",
+    "loadButton": "Načíst",
+    "deleteButton": "Smazat",
+    "confirmLoad": "Načíst tuto uloženou hru?",
+    "confirmDelete": "Smazat tuto uloženou hru? Tuto akci nelze vrátit.",
+    "loading": "Načítání…",
+    "loadFailed": "Načtení se nezdařilo",
+    "deleteFailed": "Smazání se nezdařilo",
+    "openFolderButton": "Otevřít složku s uloženými hrami",
+    "scenario": "Scénář",
+    "autosaveName": "{{name}} (automatické uložení při ukončení)"
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} ετών",
+    "male": "Άνδρας",
+    "female": "Γυναίκα",
+    "single": "Άγαμος/η",
+    "married": "Έγγαμος/η",
+    "household": "Νοικοκυριό",
+    "employer": "Εργοδότης",
+    "unemployed": "Άνεργος/η",
+    "school": "Σχολείο",
+    "notEnrolled": "Χωρίς φοίτηση",
+    "major": "Ειδίκευση",
+    "higherEducation": "Ανώτατη εκπαίδευση",
+    "graduated": "Ολοκληρώθηκε",
+    "notGraduated": "Δεν ολοκληρώθηκε",
+    "skills": "Δεξιότητες",
+    "criminality": "Ροπή προς το έγκλημα",
+    "commuteTime": "Χρόνος μετακίνησης",
+    "automobile": "Αυτοκίνητο",
+    "automobileOwned": "Ναι",
+    "automobileNone": "Όχι",
+    "householdStatus": "Κατάσταση νοικοκυριού"
+  },
+  "household": {
+    "title": "Νοικοκυριό",
+    "familyType": "Τύπος νοικοκυριού",
+    "familySingle": "Μονοπρόσωπο",
+    "familyCouple": "Ζευγάρι",
+    "familyFamily": "Οικογένεια",
+    "familySenior": "Ηλικιωμένοι",
+    "hasAutomobile": "Με αυτοκίνητο",
+    "noAutomobile": "Χωρίς αυτοκίνητο",
+    "discretionaryIncome": "Διαθέσιμο εισόδημα",
+    "livingStandard": "Βιοτικό επίπεδο",
+    "livingStandardLevel": {
+      "0": "Ακραία φτώχεια",
+      "1": "Φτώχεια",
+      "2": "Μεσαία τάξη",
+      "3": "Ευημερία"
+    },
+    "satisNutrition": "Διατροφή",
+    "satisHealthcare": "Υγειονομική περίθαλψη",
+    "satisLeisure": "Ψυχαγωγία και ελεύθερος χρόνος",
+    "satisTourism": "Τουρισμός",
+    "tourist": "Τουρίστες",
+    "partySize": "Άτομα",
+    "members": "Μέλη νοικοκυριού"
+  },
+  "education": {
+    "people": "άτομα"
+  }
+}

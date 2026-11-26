@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Typ",
+    "kind": {
+      "land": "Srovnání terénu",
+      "shore": "Navážka"
+    },
+    "baseHeight": "Základní výška",
+    "targetHeight": "Cílová výška",
+    "cutVolume": "Objem výkopu",
+    "fillVolume": "Objem násypu",
+    "quayLength": "Délka nábřežní zdi",
+    "quayArea": "Plocha líce nábřežní zdi",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Výška (rozdíl od základní)",
+    "seaLevelHeight": "Výška (nad mořem)",
+    "baseNote": {
+      "frontage": "0 je výška povrchu přilehlé silnice ({{value}} m)",
+      "terrain_mean": "0 je současná průměrná výška oblasti ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "Tvar oblasti je neplatný. Nakreslete ho tak, aby se strany nekřížily.",
+      "outside_city": "Oblast zasahuje mimo město.",
+      "too_large": "Oblast je příliš velká (limit {{limit}} km²).",
+      "on_water": "V oblasti ležící celá na moři nelze provádět zemní práce. Nakreslete ji tak, aby zasahovala na souš.",
+      "no_land_overlap": "Nakreslete oblast tak, aby překrývala souš (jinak mezi břehem a oblastí zůstane pruh moře).",
+      "overlaps_parcel": "Oblast se překrývá s existující parcelou.",
+      "overlaps_path": "Oblast se překrývá se silnicí, kolejí nebo jinou liniovou stavbou.",
+      "overlaps_water": "Oblast zasahuje do řeky nebo jezera.",
+      "overlaps_quay_band": "Oblast zasahuje do nábřežní zdi navážky.",
+      "invalid_height_offset": "Výška je mimo povolený rozsah (nejvýše ±{{offsetLimit}} m od základní výšky).",
+      "below_sea_level": "Výšku nelze nastavit pod hladinu moře.",
+      "too_narrow": "Oblast je příliš úzká, uvnitř nábřežní zdi nezbývá nic k zasypání.",
+      "no_work": "Terén už je v cílové výšce, práce nejsou potřeba.",
+      "insufficient_funds": "Zakázku nelze zadat kvůli nedostatku prostředků."
+    },
+    "confirm": "Potvrdit",
+    "confirming": "Potvrzování…",
+    "cancel": "Zrušit",
+    "confirmFailed": "Zemní práce se nepodařilo zadat."
+  }
+}

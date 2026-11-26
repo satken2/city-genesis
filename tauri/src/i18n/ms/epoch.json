@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Tarikh semasa",
+    "afterDate": "Tarikh selepas dijalankan",
+    "epochCount": "Bilangan epok",
+    "message": "Selesaikan kerja giliran ini dan majukan masa?",
+    "yes": "Ya",
+    "no": "Tidak",
+    "executing": "Simulasi sedang berjalan...",
+    "errorSteamLimit": "Pengesahan Steam tidak dapat dipastikan, jadi epok tidak boleh dijalankan lagi. (Tanpa pengesahan, anda boleh bermain sehingga penduduk {{limit}} orang.)",
+    "errorAlreadyRunning": "Epok lain sedang berjalan. Cuba lagi selepas ia selesai.",
+    "errorFailed": "Gagal menjalankan epok: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} epok dijalankan)",
+    "sectionConstruction": "Status pembinaan",
+    "kindPath": "Jalan",
+    "kindBuilding": "Kemudahan",
+    "kindProject": "Projek",
+    "noItems": "Tiada",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Siap",
+    "sectionStatistics": "Statistik",
+    "sectionScore": "Skor",
+    "scoreGain": "Mata tambahan",
+    "scoreLoss": "Potongan mata",
+    "questState": {
+      "completed": "Tercapai",
+      "active": "Sedang berjalan",
+      "locked": "Belum dibuka",
+      "failed": "Gagal"
+    },
+    "trendHint": "Trend {{count}} epok terkini: {{trend}}",
+    "trend": {
+      "up": "Meningkat",
+      "flat": "Mendatar",
+      "down": "Menurun",
+      "none": "Sejarah tidak mencukupi"
+    },
+    "statPopulation": "Penduduk",
+    "statTourists": "Pelancong",
+    "statGdp": "KDNK",
+    "statPrice": "Harga",
+    "statIncome": "Pendapatan",
+    "statUnemployment": "Pengangguran",
+    "statHealthcare": "Penjagaan kesihatan",
+    "statNutrition": "Pemakanan",
+    "statLeisure": "Hiburan dan riadah",
+    "statFire": "Kebakaran",
+    "statTraffic": "Kemalangan jalan raya",
+    "statCrime": "Jenayah",
+    "questCompleted": "Tercapai!",
+    "questFailed": "Tamat tempoh"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Meneliti rangkaian pengangkutan",
+      "prepare": "Membuat persediaan untuk tempoh ini",
+      "transit": "Mengatur pengangkutan awam",
+      "market": "Memperdagangkan barangan",
+      "production": "Mengeluarkan dan menggunakan barangan",
+      "commute": "Pergi ke tempat kerja dan sekolah",
+      "growth": "Warga kota sedang membesar",
+      "evaluate": "Menilai bandar",
+      "immigration": "Menerima imigran",
+      "labor": "Mencari pekerjaan",
+      "spawn": "Kedai dan syarikat baharu sedang dibuka",
+      "relocate": "Isi rumah sedang berpindah",
+      "construction": "Membina bangunan",
+      "finance": "Menyelesaikan aliran wang",
+      "plan": "Merancang tempoh seterusnya",
+      "incident": "Menangani kebakaran dan kemalangan",
+      "finalize": "Menyusun statistik"
+    }
+  }
+}

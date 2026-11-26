@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Daerah #{{id}}",
+    "color": "Warna daerah",
+    "colorUpdateFailed": "Gagal mengemas kini warna daerah",
+    "basicInfo": "Maklumat asas",
+    "area": "Keluasan",
+    "zonePopulation": "Penduduk bermastautin",
+    "daytimePopulation": "Penduduk siang",
+    "spaceAmount": "Penghunian lantai",
+    "slotStarvationTitle": "Ada penyewa menunggu yang tidak dapat ditempatkan",
+    "slotStarvationWarning": "“{{tenant}}” memerlukan sekurang-kurangnya {{required}} m2 ruang lantai dalam satu bangunan, tetapi bangunan terbesar yang boleh dibina dalam daerah ini ialah {{max}} m2. Sediakan lot yang lebih besar.",
+    "restrictions": "Peraturan bangunan",
+    "restrictionUpdateFailed": "Gagal mengemas kini peraturan daerah",
+    "restrictionRequired": "Nisbah liputan tapak, nisbah plot dan ketinggian tidak boleh dikosongkan",
+    "mergeConfirm": "Gabungkan “{{source}}” ke dalam “{{target}}”. Daerah sumber akan hilang bersama tetapan peraturannya.",
+    "mergeAction": "Gabungkan",
+    "mergeFailed": "Gagal menggabungkan daerah (daerah yang tidak bersebelahan tidak boleh digabungkan)",
+    "mergeNoRequest": "Tiada daerah dipilih untuk digabungkan",
+    "edit": {
+      "toolHeading": "Operasi",
+      "toolCreate": "Cipta daerah baharu",
+      "toolExpand": "Besarkan daerah sedia ada",
+      "toolExpandZone": "Besarkan {{name}}",
+      "modeHeading": "Kaedah pemilihan",
+      "modeBlock": "Seluruh blok",
+      "modeRoad": "Mengikut sisi jalan",
+      "hint": {
+        "create": {
+          "block": "Tahan Ctrl dan seret di atas blok yang dikelilingi jalan; blok yang diwarnakan, bersama lot di dalamnya, menjadi daerah baharu. Seret untuk menggerakkan peta, tatal roda untuk zum.",
+          "road": "Tahan Ctrl dan seret di atas satu sisi jalan (separuh permukaan jalan atau lot yang menghadapnya); sisi jalan itu, bersama lotnya, menjadi daerah baharu. Seret untuk menggerakkan peta, tatal roda untuk zum."
+        },
+        "expand": {
+          "block": "Halakan tetikus pada daerah, kemudian tahan Ctrl dan seret di atas blok untuk memasukkannya, bersama lot di dalamnya, ke dalam daerah itu. Seret untuk menggerakkan peta, tatal roda untuk zum.",
+          "road": "Halakan tetikus pada daerah, kemudian tahan Ctrl dan seret di atas satu sisi jalan (separuh permukaan jalan atau lot yang menghadapnya) untuk memasukkan sisi jalan itu, bersama lotnya, ke dalam daerah itu. Seret untuk menggerakkan peta, tatal roda untuk zum."
+        }
+      },
+      "failed": "Daerah tidak dapat diubah."
+    }
+  }
+}

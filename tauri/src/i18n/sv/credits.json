@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Spelet använder materialet som listas nedan. Upphovspersoners namn, källor, licensnamn och den hänvisningstext som villkoren kräver återges ordagrant.",
+    "empty": "Inga poster.",
+    "requiredText": "Föreskriven hänvisning",
+    "categories": {
+      "bgm": "Musik",
+      "sfx": "Ljudeffekter",
+      "image": "Bilder och ikoner",
+      "font": "Typsnitt",
+      "model": "3D-modeller",
+      "texture": "Texturer"
+    }
+  }
+}

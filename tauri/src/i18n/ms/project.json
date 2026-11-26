@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Projek pembinaan",
+    "none": "(Tiada tag)",
+    "createNew": "+ Tag baharu…",
+    "newPlaceholder": "Masukkan nama tag",
+    "add": "Tambah",
+    "cancel": "Batal",
+    "saveFailed": "Gagal menyimpan tag",
+    "showObject": "Tunjukkan dalam paparan 3D",
+    "hideObject": "Sembunyikan dalam paparan 3D"
+  },
+  "constructionProjects": {
+    "all": "Semua",
+    "empty": "Belum ada kerja pembinaan. Pilih tag semasa meletakkan sesuatu dari panel pembinaan, atau tambah tag dari panel butiran kemudahan awam atau jalan yang belum dimulakan atau sedang dibina, untuk melihat kerja mengikut projek.",
+    "loadFailed": "Gagal mendapatkan projek pembinaan",
+    "totalCost": "Kos pembinaan (anggaran)",
+    "duration": "Tempoh pembinaan (baki)",
+    "progress": "Kemajuan",
+    "progressValue": "{{done}} / {{total}} selesai",
+    "monthsValue": "{{value}} bulan",
+    "stalled": "Tiada kemajuan",
+    "stalledWarning": "{{count}} kerja tidak bergerak kerana kelajuan pembinaan ialah 0 (tidak dikira dalam jumlah tempoh pembinaan).",
+    "done": "Selesai",
+    "unnamed": "#{{id}}",
+    "showAll": "Tunjukkan semua semula ({{count}})",
+    "showTag": "Tunjukkan projek ini dalam paparan 3D",
+    "hideTag": "Sembunyikan projek ini dalam paparan 3D",
+    "showObject": "Tunjukkan dalam paparan 3D",
+    "hideObject": "Sembunyikan dalam paparan 3D",
+    "deleteTag": "Padam tag",
+    "confirmDeleteTag": "Padam tag “{{tag}}”? Tag ini akan dibuang daripada bangunan dan jalan berkenaan (kerja pembinaan itu sendiri kekal). Teruskan?",
+    "columns": {
+      "name": "Sasaran",
+      "status": "Status",
+      "cost": "Baki kos pembinaan",
+      "remaining": "Baki tempoh pembinaan"
+    }
+  }
+}

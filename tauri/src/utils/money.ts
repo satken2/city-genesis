@@ -19,6 +19,21 @@ const DEFAULT_CURRENCY_UNITS: Record<SupportedLanguage, string> = {
   it: "€",
   id: "Rp",
   ar: "G",
+  "pt-PT": "€",
+  uk: "₴",
+  th: "฿",
+  vi: "₫",
+  ms: "RM",
+  nl: "€",
+  sv: "kr",
+  nb: "kr",
+  da: "kr.",
+  fi: "€",
+  cs: "Kč",
+  hu: "Ft",
+  ro: "lei",
+  bg: "€",
+  el: "€",
 };
 
 /** null は言語に追従する。通貨設定は各 WebView で復元し、React 外の確認文も同じ値を参照する。 */

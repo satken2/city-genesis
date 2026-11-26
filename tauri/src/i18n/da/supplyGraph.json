@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Forsyningsstatus",
+    "selected": "Valgt",
+    "providers": "Leverandører – {{product}}",
+    "executing": "Forsyningsoversigten er ikke tilgængelig, mens simuleringen kører.",
+    "fetchError": "Forsyningsstatus kunne ikke hentes.",
+    "activeCount": "I drift {{active}}/{{count}}",
+    "production": "Seneste produktion: {{amount}} {{unit}}",
+    "resourceRemaining": "Tilgængelige ressourcer tilbage: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Tilgængelig",
+      "unknown": "Ikke vurderet",
+      "missing": "Ingen",
+      "inactive": "Ikke i drift",
+      "partial": "Delvist ramt",
+      "limited": "Mangel/stoppet",
+      "disconnected": "Ikke tilsluttet",
+      "supply_shortage": "Mulig forsyningsmangel",
+      "capacity_limited": "Mulig kapacitetsgrænse"
+    },
+    "facilities": {
+      "401": "Kraftværker",
+      "402": "Vandindtag",
+      "403": "Råolieleverandører",
+      "404": "Godsbanegårde",
+      "405": "Malmleverandører",
+      "406": "Skibsruter (åbent hav)",
+      "501": "Togdepoter",
+      "502": "Busgarager",
+      "503": "LRT-depoter",
+      "504": "Monorail-depoter",
+      "505": "Serviceværfter"
+    },
+    "consumers": {
+      "401": "Strømforbrugere",
+      "402": "Vandværker",
+      "403": "Råolieforbrugere",
+      "404": "Godsforbrugere",
+      "405": "Malmforbrugere",
+      "406": "Havne",
+      "501": "Jernbanelinjer",
+      "502": "Buslinjer",
+      "503": "LRT-linjer",
+      "504": "Monorail-linjer",
+      "505": "Færgelinjer"
+    }
+  }
+}

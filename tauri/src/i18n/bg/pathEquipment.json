@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Пътно оборудване",
+    "streetlight_type": "Улично осветление",
+    "fence_type": "Огради",
+    "street_tree_type": "Улични дървета",
+    "utility_mode": "Окабеляване",
+    "none": "Няма",
+    "standard": "Стандартно",
+    "overhead": "Въздушно",
+    "underground": "Подземно",
+    "apply": "Приложи",
+    "bench_type": "Пейки",
+    "bin_type": "Кошчета",
+    "planter_type": "Цветни кътове",
+    "advert_type": "Реклами"
+  }
+}

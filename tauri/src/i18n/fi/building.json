@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Kerrosjakauma",
+    "parking": "Pysäköinti",
+    "type": "Rakennustyyppi",
+    "durability": "Kunto",
+    "floors": "Kerroksia",
+    "floorsValue": "{{floors}} (lattiapinta-ala {{area, number}} m²)",
+    "heightLabel": "Korkeus: {{value}} m",
+    "baseAreaLabel": "Rakennusala: {{area, number}} m²",
+    "underMaintenance": "Korjauksessa",
+    "parkingCapacity": "Pysäköintikapasiteetti",
+    "parkingCapacityValue": "{{capacity}} autopaikkaa",
+    "parkingDay": "Päivällä",
+    "parkingNight": "Yöllä",
+    "parkingUsage": "{{used}} / {{capacity}} autopaikkaa"
+  },
+  "building_appearance": {
+    "variantLabel": "Ulkoasu {{index}}",
+    "layoutHint": "Sijoita vetämällä kortti rakennuspaikalle / siirrä vetämällä / kierrä Shift+vedolla / poista Delete-näppäimellä",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Poista valittu rakennus",
+    "apply": "Käytä",
+    "saveFailed": "Ulkoasun tallennus epäonnistui",
+    "noSubbuildings": "Tälle rakennustyypille ei ole määritelty osarakennuksia"
+  }
+}

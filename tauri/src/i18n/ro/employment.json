@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Calificare cerută",
+    "wage": "Salariu unitar",
+    "quota": "Forță de muncă necesară",
+    "totalLabor": "Forță de muncă angajată",
+    "employees": "Lista angajaților",
+    "hired": "Ocupat",
+    "vacant": "Neocupat",
+    "noQuota": "Nu e nevoie de forță de muncă",
+    "noEmployees": "Niciun angajat",
+    "statusTitle": "Situația angajărilor"
+  }
+}

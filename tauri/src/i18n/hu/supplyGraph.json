@@ -1,0 +1,49 @@
+{
+  "supplyGraph": {
+    "title": "Ellátási helyzet",
+    "selected": "Kijelölve",
+    "providers": "Ellátó létesítmények – {{product}}",
+    "executing": "A szimuláció futása közben az ellátási ábra nem érhető el.",
+    "fetchError": "Nem sikerült betölteni az ellátási helyzetet.",
+    "activeCount": "Működik: {{active}}/{{count}}",
+    "production": "Legutóbbi termelés: {{amount}} {{unit}}",
+    "resourceRemaining": "Hozzáférhető készlet: {{amount}} {{unit}}",
+    "state": {
+      "ok": "Elérhető",
+      "unknown": "Nem megállapított",
+      "missing": "Nincs",
+      "inactive": "Nem működik",
+      "partial": "Részben problémás",
+      "limited": "Hiány vagy leállás",
+      "disconnected": "Nincs csatlakoztatva",
+      "supply_shortage": "Lehetséges ellátási hiány",
+      "capacity_limited": "Lehetséges kapacitáskorlát"
+    },
+    "facilities": {
+      "401": "Erőművek",
+      "402": "Vízkivételi létesítmények",
+      "403": "Nyersolaj-ellátó létesítmények",
+      "404": "Teherpályaudvarok",
+      "405": "Érc-ellátó létesítmények",
+      "406": "Nagyhajós hajóutak (nyílt tenger)",
+      "501": "Vasúti járműtelepek",
+      "502": "Buszgarázsok",
+      "503": "LRT-járműtelepek",
+      "504": "Monorail-járműtelepek",
+      "505": "Javítódokkok"
+    },
+    "consumers": {
+      "401": "Áramot használó létesítmények",
+      "402": "Vízellátó szivattyútelepek",
+      "403": "Nyersolajat használó létesítmények",
+      "404": "Teherszállítást igénybe vevő létesítmények",
+      "405": "Ércet használó létesítmények",
+      "406": "Kikötők",
+      "501": "Vasútvonalak",
+      "502": "Buszvonalak",
+      "503": "LRT-vonalak",
+      "504": "Monorailvonalak",
+      "505": "Kompjáratok"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Route voorstellen",
+    "mode": "Hoogtemodus",
+    "fixed": "Hoogte van tussenpunten vasthouden",
+    "adjust": "Hoogte van tussenpunten aanpassen",
+    "help": "Beschikbaar nadat de vorm is vastgelegd. Begin- en eindpunt en de XZ-positie van tussenpunten blijven vast.",
+    "searching": "Zoeken…",
+    "cancel": "Annuleren",
+    "undo": "Voorstel ongedaan maken",
+    "notFound": "Geen route gevonden.",
+    "failed": "Route voorstellen mislukt."
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Cartierul #{{id}}",
+    "color": "Culoarea cartierului",
+    "colorUpdateFailed": "Culoarea cartierului nu a putut fi actualizată",
+    "basicInfo": "Informații de bază",
+    "area": "Suprafață",
+    "zonePopulation": "Populație rezidentă",
+    "daytimePopulation": "Populație de zi",
+    "spaceAmount": "Ocuparea etajelor",
+    "slotStarvationTitle": "Există chiriași în așteptare care nu au unde să se instaleze",
+    "slotStarvationWarning": "„{{tenant}}” are nevoie de cel puțin {{required}} m2 de suprafață într-o singură clădire, dar maximul care se poate construi pe parcelele acestui cartier este {{max}} m2. Pregătește o parcelă mai mare.",
+    "restrictions": "Reglementări de construcție",
+    "restrictionUpdateFailed": "Reglementările cartierului nu au putut fi actualizate",
+    "restrictionRequired": "POT, CUT și înălțimea nu pot rămâne goale",
+    "mergeConfirm": "„{{source}}” va fi unit cu „{{target}}”. Cartierul-sursă va dispărea, iar reglementările lui se vor pierde.",
+    "mergeAction": "Unește",
+    "mergeFailed": "Cartierele nu au putut fi unite (cartierele care nu sunt învecinate nu pot fi unite)",
+    "mergeNoRequest": "Nu este selectat niciun cartier de unit",
+    "edit": {
+      "toolHeading": "Operație",
+      "toolCreate": "Creează un cartier nou",
+      "toolExpand": "Extinde un cartier existent",
+      "toolExpandZone": "Extinde: {{name}}",
+      "modeHeading": "Mod de selecție",
+      "modeBlock": "Cvartal întreg",
+      "modeRoad": "Pe latură de stradă",
+      "hint": {
+        "create": {
+          "block": "Ține apăsat Ctrl și trage peste cvartalele mărginite de drumuri; cvartalele colorate devin, cu tot cu parcelele din ele, un cartier nou. Trage pentru a muta harta, folosește rotița pentru zoom.",
+          "road": "Ține apăsat Ctrl și trage peste o latură a unei străzi (jumătate din carosabil sau parcelele de pe acea parte); acea latură a străzii devine, cu tot cu parcelele ei, un cartier nou. Trage pentru a muta harta, folosește rotița pentru zoom."
+        },
+        "expand": {
+          "block": "Ține mouse-ul deasupra unui cartier, apoi ține apăsat Ctrl și trage peste cvartale pentru a le adăuga, cu tot cu parcelele lor, la acel cartier. Trage pentru a muta harta, folosește rotița pentru zoom.",
+          "road": "Ține mouse-ul deasupra unui cartier, apoi ține apăsat Ctrl și trage peste o latură a unei străzi (jumătate din carosabil sau parcelele de pe acea parte) pentru a o adăuga, cu tot cu parcelele ei, la acel cartier. Trage pentru a muta harta, folosește rotița pentru zoom."
+        }
+      },
+      "failed": "Cartierul nu a putut fi modificat."
+    }
+  }
+}

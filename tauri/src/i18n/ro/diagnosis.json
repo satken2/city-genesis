@@ -1,0 +1,202 @@
+{
+  "diagnosis": {
+    "refresh": "Rediagnostichează",
+    "note": "Pe baza rezultatelor ultimei simulări, urmărește pe rând cauzele problemei. După ce rezolvi problema, rulează epoca următoare ca să se actualizeze rezultatul.",
+    "noProblem": {
+      "title": "Nu s-a găsit nicio problemă",
+      "description": "Momentan nu există nicio disfuncție de raportat pentru acest agent economic."
+    },
+    "target": {
+      "agent": "Facilitate #{{id}}",
+      "path": "Traseu #{{id}}",
+      "node": "Punct de legătură #{{id}}",
+      "nodeAt": "Punct ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": {
+        "title": "Agentul economic nu a fost găsit",
+        "description": ""
+      },
+      "cycle": {
+        "title": "Cauză circulară",
+        "description": "Disfuncția acestei facilități este deja diagnosticată mai sus (dependență reciprocă)."
+      },
+      "depth_limit": {
+        "title": "Analiza se oprește aici",
+        "description": "Lanțul de cauze este prea lung, așa că analiza s-a oprit aici. Diagnostichează direct facilitatea respectivă."
+      },
+      "no_alert": {
+        "title": "Facilitatea în sine nu are nicio disfuncție",
+        "description": "Oferta insuficientă poate fi cauzată de dimensiunea facilității sau de ținta ei de utilizare."
+      },
+      "facility_inactive": {
+        "title": "Facilitatea nu funcționează",
+        "description": "Nu produce pentru că e în construcție, oprită, prăbușită sau într-o situație similară. Verifică detaliile facilității."
+      },
+      "producer_ref": {
+        "title": "Facilitate furnizoare",
+        "description": ""
+      },
+      "material_shortage": {
+        "title": "Materiile prime nu pot fi procurate",
+        "description": "O parte din materiile prime necesare nu au sosit, așa că producția a rămas sub plan."
+      },
+      "material_unmet": {
+        "title": "Lipsă: {{product_name}}",
+        "description": "Din necesarul de {{demand}} s-au primit {{received}} ({{ratio}}%)."
+      },
+      "material_unmet_unknown": {
+        "title": "Materia primă lipsă nu a putut fi identificată",
+        "description": "Se poate întâmpla imediat după o scădere a cererii. Verifică rezultatul epocii următoare."
+      },
+      "infra_disconnected": {
+        "title": "Nu este racordată la rețeaua pentru {{product_name}}",
+        "description": ""
+      },
+      "infra_no_terminal": {
+        "title": "Fără punct de racord",
+        "description": "Această facilitate nu are un nod de racord pentru {{product_name}}."
+      },
+      "infra_terminal_unconnected": {
+        "title": "Niciun traseu nu ajunge la punctul de racord",
+        "description": ""
+      },
+      "infra_link_not_active": {
+        "title": "Traseul de branșament nu funcționează încă",
+        "description": "Trasee legate la punctul de racord care sunt în construcție sau neîncepute: {{count}}."
+      },
+      "infra_link_incompatible": {
+        "title": "Traseul de branșament nu poate transporta {{product_name}}",
+        "description": "Traseul legat la punctul de racord este de un tip care nu poate transporta acest bun (de exemplu, cale ferată neelectrificată)."
+      },
+      "infra_no_producer": {
+        "title": "Nicio facilitate din oraș nu produce {{product_name}}",
+        "description": ""
+      },
+      "infra_producers_inactive": {
+        "title": "Facilitățile care produc {{product_name}} nu funcționează",
+        "description": "Niciuna dintre facilitățile de producție din oraș nu funcționează (total: {{count}})."
+      },
+      "infra_producers_unconnected": {
+        "title": "Facilitățile de producție nu sunt racordate la rețea",
+        "description": "Facilitățile de producție funcționează (total: {{count}}), dar niciuna nu e racordată la rețeaua pentru {{product_name}}."
+      },
+      "infra_network_split": {
+        "title": "Această rețea nu are nicio facilitate de producție",
+        "description": "Facilitățile care produc {{product_name}} (total: {{producers}}) sunt racordate la altă rețea. Cele două rețele sunt întrerupte pe undeva sau n-au fost legate niciodată."
+      },
+      "infra_link_under_construction": {
+        "title": "Se construiește un traseu care leagă rețeaua",
+        "description": "Trasee care urmează să fie legate la această rețea: {{count}}."
+      },
+      "infra_gap_detected": {
+        "title": "Rețeaua este întreruptă aici",
+        "description": "Capetele celor două rețele sunt la doar {{distance}} m una de alta."
+      },
+      "infra_tap_missing": {
+        "title": "Nu este racordată la rețeaua facilităților de producție",
+        "description": ""
+      },
+      "infra_generation_shortage": {
+        "title": "Producția de {{product_name}} este insuficientă",
+        "description": "Producția acestei rețele este {{supply}}, iar cererea {{demand}} (facilități de producție: {{producers}})."
+      },
+      "infra_transmission_bottleneck": {
+        "title": "Capacitatea rețelei este insuficientă",
+        "description": "Trasee folosite la capacitate maximă: {{count}}."
+      },
+      "infra_unexplained": {
+        "title": "Rețeaua pare să funcționeze normal",
+        "description": "Producția și racordurile sunt suficiente, așa că lipsa a fost probabil temporară. Verifică rezultatul epocii următoare."
+      },
+      "market_no_supplier": {
+        "title": "Niciun furnizor de {{product_name}} în oraș",
+        "description": "Nu există niciun producător local activ și nici importuri."
+      },
+      "market_supply_insufficient": {
+        "title": "Oferta de {{product_name}} nu acoperă cererea",
+        "description": "Oferta este {{supply}}, iar comenzile din tot orașul {{demand}} (producători: {{producers}}, puncte de import: {{hubs}})."
+      },
+      "market_unmatched": {
+        "title": "Produsul {{product_name}} nu a putut fi procurat de pe piață",
+        "description": "La nivelul orașului, oferta de {{supply}} acoperă comenzile de {{demand}}, dar nu a ajuns la această facilitate. Cauza poate fi distanța sau prețul."
+      },
+      "service_out_of_range": {
+        "title": "În afara razei de acoperire pentru {{product_name}}",
+        "description": "Amplasamentul acestei facilități nu se află în raza de acțiune a niciunei facilități care furnizează {{product_name}} (în oraș: {{producers}})."
+      },
+      "high_skill_shortage": {
+        "title": "Specialiștii nu pot fi asigurați",
+        "description": "Nu sunt destui lucrători cu înaltă calificare, așa că planul de producție a fost redus la cât poate duce personalul existent. Lucrătorii cu înaltă calificare se formează la universități: construiește o universitate și alocă locurile de admitere calificării necesare."
+      },
+      "labor_shortage": {
+        "title": "Nu sunt destui angajați",
+        "description": "Din forța de muncă necesară de {{quota}} s-a asigurat {{total_labor}}."
+      },
+      "labor_market_tight": {
+        "title": "Nu mai sunt lucrători disponibili în oraș",
+        "description": "Rata șomajului este de doar {{unemployment_rate}}%, așa că nu are cine să fie angajat. Construiește mai multe locuințe ca să atragi locuitori."
+      },
+      "labor_unfilled": {
+        "title": "Există șomeri, dar nu vin",
+        "description": "Rata șomajului este de {{unemployment_rate}}%. Cauze probabile: navetă lungă, salarii mici sau calificări nepotrivite."
+      },
+      "budget_capped": {
+        "title": "Bugetul este insuficient",
+        "description": "Bugetul alocat este mult sub suma necesară. Revizuiește alocarea bugetului."
+      },
+      "construction_shortage": {
+        "title": "{{product_name}}: nu poate fi procurat",
+        "description": ""
+      },
+      "line_paused_route_disconnected": {
+        "title": "Itinerariul dintre stații este întrerupt",
+        "description": "Stațiile consecutive din circuit nu sunt legate printr-o cale ferată sau o stradă care să poată fi parcursă în sensul necesar. Reconstruiește porțiunea întreruptă sau revizuiește itinerariul. Ca să întorci pe căi ferate cu sens unic, întoarce într-o stație de pe o cale ferată care poate fi parcursă în ambele sensuri (de exemplu, o linie dublă construită ca un singur traseu) sau permite trenurilor să treacă pe linia opusă – unind liniile într-un singur nod ori construind o legătură între linii – și pune stațiile de la întoarcere pe peroanele pentru sensul opus."
+      },
+      "line_paused_no_underlay": {
+        "title": "Stația nu are un traseu de bază",
+        "description": "Calea ferată sau strada pe care se afla stația nu mai există."
+      },
+      "line_paused_train_too_long": {
+        "title": "Garnitura este mai lungă decât tronsonul stației",
+        "description": "Redu numărul de vagoane pe garnitură sau prelungește tronsonul pe care se află stația (peronul unei gări sau un tronson de stradă ori de cale ferată)."
+      },
+      "line_no_vehicle_product": {
+        "title": "Pentru acest tip de linie nu este definit niciun vehicul",
+        "description": ""
+      },
+      "line_vehicle_shortage": {
+        "title": "Vehiculele nu pot fi procurate",
+        "description": "Vagoane procurate: {{received}} din {{required}} necesare."
+      },
+      "line_off_network": {
+        "title": "Linia nu se află pe o rețea de circulație",
+        "description": "Itinerariul de bază al liniei nu este legat de nicio cale ferată sau stradă."
+      },
+      "transit_no_depot": {
+        "title": "Niciun depou pentru {{product_name}} în oraș",
+        "description": "Construiește un depou și leagă-l la rețeaua de circulație."
+      },
+      "transit_depots_inactive": {
+        "title": "Depourile nu funcționează",
+        "description": "Niciunul dintre depourile din oraș nu funcționează (total: {{count}})."
+      },
+      "transit_depots_unconnected": {
+        "title": "Depourile nu sunt legate la rețeaua de circulație",
+        "description": "Niciunul dintre depouri (total: {{count}}) nu este legat la o cale ferată sau o stradă. Pentru calea ferată, construiește o linie de garare de la calea principală până la punctul de racord al depoului."
+      },
+      "transit_depot_other_network": {
+        "title": "Depourile se află pe altă rețea",
+        "description": "Depourile (total: {{count}}) sunt legate la o rețea feroviară care nu ajunge la această linie. Leagă rețelele prin cale ferată sau construiește un depou pe această rețea."
+      },
+      "transit_vehicle_insufficient": {
+        "title": "Producția de vehicule este insuficientă",
+        "description": "Vagoane furnizate de depourile acestei rețele (total: {{depots}}): {{supply}}; necesare liniilor: {{demand}}."
+      },
+      "transit_unexplained": {
+        "title": "Depourile par să funcționeze normal",
+        "description": "Oferta și legăturile sunt suficiente, așa că lipsa a fost probabil temporară. Verifică rezultatul epocii următoare."
+      }
+    }
+  }
+}

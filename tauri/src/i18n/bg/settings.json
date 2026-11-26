@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Настройки",
+    "groups": {
+      "general": "Общи",
+      "display": "Екран",
+      "sound": "Звук",
+      "system": "Система",
+      "about": "Информация",
+      "developer": "Настройки за разработчици"
+    },
+    "swagger": {
+      "label": "Swagger (документация на API)",
+      "description": "Показва спецификацията на API на симулатора в браузъра по подразбиране",
+      "action": "Отвори в браузъра"
+    },
+    "currencyUnit": {
+      "label": "Парична единица",
+      "description": "Единицата, която се показва до паричните суми. Ако полето е празно, се определя според езика на интерфейса."
+    },
+    "fontSize": {
+      "label": "Размер на шрифта",
+      "large": "Голям",
+      "medium": "Среден",
+      "small": "Малък",
+      "custom": "Потребителски",
+      "preview": "Текущ размер"
+    },
+    "monitor": {
+      "label": "Дисплей",
+      "prev": "Предишен дисплей",
+      "next": "Следващ дисплей"
+    },
+    "graphicMonitor": {
+      "label": "Дисплей за 3D изгледа"
+    },
+    "multiDisplay": {
+      "label": "Режим с няколко дисплея",
+      "description": "Показва прозорците на друг дисплей",
+      "on": "Вкл.",
+      "off": "Изкл."
+    },
+    "popupMonitor": {
+      "label": "Дисплей за прозорците"
+    },
+    "hintbar": {
+      "label": "Лента с подсказки",
+      "show": "Показвай",
+      "hide": "Не показвай",
+      "description": "Лента в горната част на екрана с подсказки за управлението"
+    },
+    "citizenVoice": {
+      "label": "Гласът на гражданите",
+      "show": "Показвай",
+      "hide": "Не показвай",
+      "description": "Карта в горния десен ъгъл на екрана, която показва поред изказванията на гражданите"
+    },
+    "language": {
+      "label": "Език",
+      "description": "Езикът на интерфейса. Той е отделен от езика на запазената игра",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Сила на звука",
+      "master": "Обща сила на звука",
+      "bgm": "Музика",
+      "sfx": "Звукови ефекти"
+    },
+    "compute": {
+      "label": "GPU ускорение",
+      "comingSoon": "Очаквайте скоро",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "GPU активен",
+      "statusInactive": "CPU активен",
+      "restartRequired": "След промяна на настройката основната програма ще се рестартира",
+      "restarting": "Рестартиране…",
+      "restartFailed": "Рестартирането е неуспешно",
+      "restartUnavailable": "Настройките са запазени. Промените ще влязат в сила при следващото стартиране на играта",
+      "confirmRestart": "Изчисленията ще се превключат на {{mode}}. Да се рестартира ли основната програма?",
+      "restartAction": "Рестартирай"
+    },
+    "windowReset": {
+      "label": "Позиция и размер на прозорците",
+      "action": "Нулирай"
+    },
+    "credits": {
+      "label": "Автори и източници",
+      "description": "Информация за правата върху материалите и софтуера, използвани в играта",
+      "action": "Покажи"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Нова игра",
+    "overwriteSave": "Запази върху текущия запис",
+    "saveAs": "Запази като",
+    "load": "Зареди",
+    "quitGame": "Изход от играта",
+    "returnToTop": "Към главното меню",
+    "loading": "Зареждане…",
+    "shuttingDown": "Затваряне…",
+    "saveFailed": "Запазването е неуспешно",
+    "loadFailed": "Зареждането е неуспешно",
+    "confirmNewGame": "Текущите данни ще бъдат загубени. Да започне ли нова игра?",
+    "confirmQuitGame": "Да се излезе ли от играта? Текущият напредък не се запазва автоматично.",
+    "confirmReturnToTop": "Да се върнете ли към главното меню? Текущият напредък не се запазва автоматично.",
+    "confirm": "Да",
+    "cancel": "Не",
+    "saveAsScenario": "Запази като сценарий",
+    "saveAsNewScenario": "Запази като друг сценарий",
+    "overwriteScenario": "Запази върху сценария",
+    "backToGame": "Обратно към играта",
+    "saveName": "Име на записа",
+    "confirmOverwrite": "Да се запише ли върху записа „{{name}}“?",
+    "confirmOverwriteScenario": "Да се запише ли върху сценария „{{name}}“?"
+  },
+  "saveList": {
+    "noSaves": "Няма запазени игри",
+    "currentSave": "Текущи данни",
+    "population": "Население",
+    "inGameDate": "Дата",
+    "savedAt": "Запазено на",
+    "loadButton": "Зареди",
+    "deleteButton": "Изтрий",
+    "confirmLoad": "Да се зареди ли тази запазена игра?",
+    "confirmDelete": "Да се изтрие ли тази запазена игра? Това действие не може да бъде отменено.",
+    "loading": "Зареждане…",
+    "loadFailed": "Зареждането е неуспешно",
+    "deleteFailed": "Изтриването е неуспешно",
+    "openFolderButton": "Покажи папката",
+    "scenario": "Сценарий",
+    "autosaveName": "{{name}} (автоматичен запис при изход)"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Station",
+    "name": "Stationsnavn",
+    "ridership": "Påstigninger",
+    "platforms": "Perroner",
+    "noPlatforms": "Ingen perroner hører til stationen (perroner, som linjen krydser, hører til her)",
+    "lines": "Linjer med stop",
+    "noLines": "Ingen linjer stopper her",
+    "stops": "Påstigninger pr. stoppested",
+    "noStops": "Ingen stoppesteder ved denne station",
+    "lineRunning": "I drift",
+    "lineSuspended": "Indstillet",
+    "houseEnds": "Placering af stationsbygning",
+    "houseEnds_both": "Begge ender",
+    "houseEnds_start": "Start",
+    "houseEnds_end": "Slut",
+    "passageMode": "Placering af gangforbindelse",
+    "passageMode_elevated": "Hævet",
+    "passageMode_ground": "I terrænniveau",
+    "passageMode_underground": "Under jorden"
+  }
+}

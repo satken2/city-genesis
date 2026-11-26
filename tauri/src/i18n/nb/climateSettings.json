@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Klimainnstillinger",
+    "name": "Navn på klima",
+    "probabilities": "Værfordeling per måned",
+    "probabilityHint": "Dra fargegrensene til venstre eller høyre for å justere. I tallfeltene nedenfor kan du også stille inn vær som står på 0 %.",
+    "month": "Måned {{month}}",
+    "preset": "Forhåndsvalgt klima",
+    "current": "Gjeldende innstillinger",
+    "chartHint": "Velg en serie i forklaringen, og dra punktene for hver måned opp eller ned for å justere.",
+    "averageHint": "Temperatur, nedbør og soltimer er gjennomsnitt per måned. De faktiske verdiene i hver epoke varierer rundt disse gjennomsnittene.",
+    "apply": "Bruk",
+    "chart": "Klimadiagram per måned"
+  }
+}

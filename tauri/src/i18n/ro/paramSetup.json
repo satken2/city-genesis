@@ -1,0 +1,272 @@
+{
+  "paramSetup": {
+    "title": "Setarea parametrilor jocului",
+    "description": "În general, se recomandă valorile implicite. Modifică-le doar dacă vrei să personalizezi jocul.",
+    "skip": "Sari peste",
+    "start": "Începe jocul",
+    "apply": "Aplică și închide",
+    "close": "Închide",
+    "loading": "Se încarcă…",
+    "reload": "Reîncarcă",
+    "reloadHint": "Reîncarcă după ce s-a terminat inițializarea serverului ca să vezi valorile actuale.",
+    "fetchError": "Nu s-au putut obține parametrii",
+    "category": {
+      "population": "Populație și imigrație",
+      "citizen": "Viața cetățenilor",
+      "economy": "Economie",
+      "labor": "Muncă și salarii",
+      "education": "Educație",
+      "construction": "Construcții și imobiliare",
+      "environment": "Mediu",
+      "traffic": "Trafic",
+      "general": "General",
+      "pathfind": "Trafic și itinerarii",
+      "building": "Clădiri și construcții",
+      "disaster": "Dezastre și siguranță publică",
+      "slum": "Mahalale",
+      "production": "Producție și stocuri",
+      "zone": "Cartiere și parcele",
+      "financial": "Finanțe"
+    },
+    "param": {
+      "CITY_CONDENSATION_FACTOR": {
+        "label": "Factor de concentrare urbană",
+        "desc": "Suprafața folosită de locuințe și facilități se împarte la această valoare, ca o hartă mică să poată găzdui activitatea economică a unui oraș mare. Dacă o schimbi după ce ai construit fie și un singur drum sau o clădire, orașul se strică, așa că stabilește-o înainte să construiești ceva."
+      },
+      "TFR_TARGET": {
+        "label": "Rata fertilității totale (RFT) țintă",
+        "desc": "Natalitatea urmărită de gospodării. Cu cât e mai mare, cu atât se nasc mai ușor copii."
+      },
+      "MARRIAGE_RATE": {
+        "label": "Rata nupțialității",
+        "desc": "Coeficientul probabilității de bază ca cetățenii să se căsătorească. Cu cât e mai mare, cu atât sunt mai multe căsătorii."
+      },
+      "MIN_CHILDBEARING_AGE": {
+        "label": "Vârsta minimă de naștere",
+        "desc": "Vârsta minimă la care se pot naște copii. Sub această vârstă nu au loc nașteri."
+      },
+      "MAX_CHILDBEARING_AGE": {
+        "label": "Vârsta maximă de naștere",
+        "desc": "Vârsta maximă la care se pot naște copii. Peste această vârstă nu au loc nașteri."
+      },
+      "INFLOW_MARRIRD_RATIO": {
+        "label": "Rata căsătoriilor la gospodăriile de imigranți",
+        "desc": "Probabilitatea ca o gospodărie de imigranți care sosește în oraș să fie un cuplu căsătorit."
+      },
+      "INFLOW_CHILDREN1_RATIO": {
+        "label": "Rata primului copil (imigranți)",
+        "desc": "Probabilitatea ca o gospodărie de imigranți să apară cu 1 copil."
+      },
+      "INFLOW_CHILDREN2_RATIO": {
+        "label": "Rata celui de-al doilea copil (imigranți)",
+        "desc": "Probabilitatea ca o gospodărie de imigranți să apară cu 2 copii."
+      },
+      "INFLOW_CHILDREN3_RATIO": {
+        "label": "Rata celui de-al treilea copil (imigranți)",
+        "desc": "Probabilitatea ca o gospodărie de imigranți să apară cu 3 copii."
+      },
+      "IMMIGRATION_ADULT_AGE_MIN": {
+        "label": "Vârsta minimă a imigranților adulți",
+        "desc": "Vârsta minimă a adulților care sosesc ca imigranți."
+      },
+      "IMMIGRATION_ADULT_AGE_MAX": {
+        "label": "Vârsta maximă a imigranților adulți",
+        "desc": "Vârsta maximă a adulților care sosesc ca imigranți."
+      },
+      "LIFESPAN_FACTOR": {
+        "label": "Factor de longevitate",
+        "desc": "Coeficient aplicat duratei maxime de viață a cetățenilor. La 1,08 limita e de aproximativ 100 de ani, la 1,06 de 150 de ani.",
+        "graphX": "Vârstă",
+        "graphY": "Probabilitate anuală de deces (sănătate 1)"
+      },
+      "SPACE_SINGLE": {
+        "label": "Spațiu locativ pentru o persoană singură (m²)",
+        "desc": "Suprafața locativă minimă de care are nevoie o gospodărie formată dintr-o singură persoană."
+      },
+      "ADD_SPACE_MARRIED": {
+        "label": "Spațiu suplimentar pentru partener (m²)",
+        "desc": "Suprafața locativă în plus de care are nevoie o gospodărie de cuplu față de o persoană singură."
+      },
+      "ADD_SPACE_CHILDREN": {
+        "label": "Spațiu suplimentar per copil (m²)",
+        "desc": "Suprafața locativă care se adaugă pentru fiecare copil."
+      },
+      "HOUSEHOLD_RENT_INCOME_RATIO": {
+        "label": "Raport chirie/venit (maxim suportabil)",
+        "desc": "Partea maximă din venitul gospodăriei care poate merge pe chirie. La 0,3, până la 30% din venit."
+      },
+      "HOUSEHOLD_TRIP_TIME_VALUE_RATIO": {
+        "label": "Ponderea timpului de deplasare la alegerea locuinței",
+        "desc": "La alegerea locuinței, cât cântărește fiecare minut de drum dus-întors la muncă, la școală și la cumpărături, ca multiplu al salariului mediu din oraș. La 1 se evaluează exact la nivelul salariului. Cu cât e mai mare, cu atât sunt preferate locuințele apropiate de locul de muncă și de magazine."
+      },
+      "AVERAGE_WAGE": {
+        "label": "Salariu mediu (valoare de referință)",
+        "desc": "Salariul mediu de referință la începutul simulării."
+      },
+      "AVERAGE_RENT": {
+        "label": "Chirie medie (valoare de referință)",
+        "desc": "Chiria medie de referință la începutul simulării (pe zi și pe m²)."
+      },
+      "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
+        "label": "Partea dividendelor proporțională cu averea",
+        "desc": "Partea din dividende distribuită proporțional cu lichiditățile fiecărei gospodării. Restul se împarte în mod egal tuturor gospodăriilor. 0 = totul în mod egal, 1 = totul proporțional cu lichiditățile."
+      },
+      "INVESTMENT_DEPRECIATION_RATE": {
+        "label": "Rata de amortizare a echipamentelor",
+        "desc": "Rata cu care se amortizează în fiecare epocă stocul de capital provenit din investițiile în echipamente."
+      },
+      "WORK_HOURS": {
+        "label": "Ore de muncă pe zi (h)",
+        "desc": "Numărul standard de ore pe care un cetățean le lucrează într-o zi."
+      },
+      "ELEMENTARY_START_AGE": {
+        "label": "Vârsta de începere a educației de bază",
+        "desc": "Vârsta la care copiii încep educația de bază (echivalentul școlii primare)."
+      },
+      "ELEMENTARY_END_AGE": {
+        "label": "Vârsta de încheiere a educației de bază",
+        "desc": "Vârsta la care se încheie educația de bază (echivalentul absolvirii liceului)."
+      },
+      "UNIVERSITY_END_AGE": {
+        "label": "Vârsta de absolvire a facultății și de independență",
+        "desc": "Vârsta la care un cetățean termină studiile superioare și pleacă din gospodăria părinților."
+      },
+      "MIN_WORKING_AGE": {
+        "label": "Vârsta minimă de muncă",
+        "desc": "Cetățenii sub această vârstă nu caută de lucru și nu intră în calculul ratei șomajului."
+      },
+      "BUILDING_FLOOR_LIMIT": {
+        "label": "Număr maxim de etaje (etaje)",
+        "desc": "Limita de etaje pentru clădirile construite automat de sectorul privat."
+      },
+      "FLOOR_PENALTY_FACTOR": {
+        "label": "Factor de penalizare pe etaje",
+        "desc": "Coeficientul penalizării de cost pentru clădirile înalte. Cu cât e mai mare, cu atât penalizarea pentru înălțime e mai mică.",
+        "graphX": "Etaje",
+        "graphY": "Multiplicator al costului de construcție"
+      },
+      "DEMOLITION_RATE": {
+        "label": "Raport de eficiență a dărâmării",
+        "desc": "De câte ori este mai eficientă dărâmarea decât o construcție nouă (multiplicator)."
+      },
+      "COLLAPSE_BASE_RATE": {
+        "label": "Probabilitate anuală de bază a prăbușirii",
+        "desc": "Probabilitatea anuală de bază ca o clădire cu durabilitatea 0,5 să se prăbușească."
+      },
+      "COLLAPSE_SHAPE": {
+        "label": "Parametrul de formă Weibull al prăbușirii",
+        "desc": "Cu cât e mai mare, cu atât probabilitatea de prăbușire crește mai brusc în apropierea duratei de viață proiectate."
+      },
+      "MAINTENANCE_COST_RATIO": {
+        "label": "Raportul costului de reparații",
+        "desc": "Costul reparațiilor exprimat ca raport față de costul unei construcții noi."
+      },
+      "UPKEEP_NEGLECT_AGING_FACTOR": {
+        "label": "Multiplicator de îmbătrânire fără întreținere",
+        "desc": "Cât de repede îmbătrânește o clădire sau un traseu care nu primește deloc întreținere curentă, ca multiplu al îmbătrânirii cu întreținere completă. Variază liniar de la 1 până la această valoare, în funcție de partea de întreținere neprimită."
+      },
+      "MAINTENANCE_BASE_PROB_ANNUAL": {
+        "label": "Probabilitate anuală de bază a intrării în reparații",
+        "desc": "Probabilitatea anuală de bază ca o clădire eligibilă să intre efectiv în reparații."
+      },
+      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
+        "label": "Datorie inițială de construcție (per m²)",
+        "desc": "Datoria inițială de construcție per m² de suprafață desfășurată a clădirii (rezerve negative)."
+      },
+      "NOISE_ROAD_TRAFFIC_COEFF": {
+        "label": "Coeficient de zgomot al traficului rutier",
+        "desc": "Cât contribuie traficul rutier la harta termică a zgomotului. Cu cât e mai mare, cu atât drumurile sunt mai zgomotoase."
+      },
+      "NOISE_PED_TRAFFIC_COEFF": {
+        "label": "Coeficient de zgomot al traficului pietonal",
+        "desc": "Cât contribuie traficul pietonal la harta termică a zgomotului."
+      },
+      "PED_NOISE_THRESHOLD": {
+        "label": "Prag de zgomot pietonal",
+        "desc": "Doar partea din traficul pietonal care depășește această valoare contribuie la zgomot."
+      },
+      "NOISE_ATTENUATION_M": {
+        "label": "Distanța de atenuare a zgomotului (m)",
+        "desc": "Zgomotul scade cu pătratul distanței și, în plus, slăbește la 1/e la fiecare astfel de distanță (ecranare de către clădiri, absorbție în aer și sol). Cu cât e mai mică, cu atât rămâne mai aproape de sursă."
+      },
+      "POLLUTION_ROAD_TRAFFIC_COEFF": {
+        "label": "Coeficient de poluare a aerului din traficul rutier",
+        "desc": "Cât contribuie traficul rutier la harta termică a poluării aerului."
+      },
+      "POLLUTION_ATTENUATION_M": {
+        "label": "Distanța de atenuare a poluării aerului (m)",
+        "desc": "Poluarea aerului și mirosurile scad cu pătratul distanței și, în plus, slăbesc la 1/e la fiecare astfel de distanță (dispersie și depunere). Cu cât e mai mică, cu atât rămân mai aproape de sursă."
+      },
+      "UNEMPLOYMENT_CRIME_WEIGHT": {
+        "label": "Ponderea șomajului în criminalitate",
+        "desc": "Cât de puternic influențează rata șomajului harta termică a siguranței publice. Cu cât e mai mare, cu atât șomajul duce mai direct la scăderea siguranței publice."
+      },
+      "CRIME_BLUR_SIGMA_M": {
+        "label": "Raza de răspândire a criminalității (m)",
+        "desc": "Raza estompării gaussiene pentru harta termică a siguranței publice."
+      },
+      "PEDESTRIAN_SPEED": {
+        "label": "Viteza pietonilor (km/h)",
+        "desc": "Viteza de deplasare a pietonilor. Se folosește la calculul costurilor de căutare a itinerariilor."
+      },
+      "PATH_KASOKU_LENGTH": {
+        "label": "Distanța de accelerare a vehiculelor (m)",
+        "desc": "Distanța pe care accelerează autovehiculele. Influențează calculul vitezei pe drumurile scurte."
+      },
+      "PATH_ACTIVE_HOURS": {
+        "label": "Ore de funcționare a drumului pe zi (h)",
+        "desc": "Numărul de ore pe zi în care drumul este folosit. Se folosește la conversia volumului de trafic."
+      },
+      "ROAD_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Prag de saturație al bonusului de trafic rutier",
+        "desc": "Peste această valoare a traficului rutier, magazinele primesc bonusul maxim de trafic."
+      },
+      "PED_MANY_TRAFFIC_THRESHOLD": {
+        "label": "Prag de saturație al bonusului de trafic pietonal",
+        "desc": "Peste această valoare a traficului pietonal, magazinele primesc bonusul maxim pentru pietoni."
+      }
+    }
+  },
+  "newGame": {
+    "loading": "Se încarcă…",
+    "noScenarios": "Nu există scenarii disponibile",
+    "starting": "Se pornește…",
+    "startFailed": "Pornirea a eșuat",
+    "confirmTitle": "Confirmă setările jocului",
+    "confirmStartTitle": "Începi jocul?",
+    "unsavedChangesWarning": "Dacă începi, modificările nesalvate din jocul curent se vor pierde.",
+    "startSettingsHeading": "Setările orașului",
+    "cityNameLabel": "Numele orașului",
+    "insigniaLabel": "Stemă și drapel",
+    "languageLabel": "Limba orașului",
+    "languageNote": "*Nu poate fi schimbată ulterior",
+    "simulationDaysLabel": "Zile de simulare",
+    "simulationDaysNote": "*Nu pot fi schimbate ulterior",
+    "daysOption": "{{days}} zile",
+    "startButton": "Începe",
+    "backButton": "Înapoi",
+    "cleared": "Terminat",
+    "tutorialBadge": "Tutorial",
+    "sectionDebug": "Depanare",
+    "sectionTutorials": "Tutoriale",
+    "sectionScenarios": "Scenarii",
+    "detailPlaceholder": "Alege un scenariu din lista din stânga.",
+    "detailMapSizeLabel": "Dimensiunea hărții",
+    "detailUnknown": "Necunoscut",
+    "detailObjectiveLabel": "Obiective",
+    "detailCreditsLabel": "Credite",
+    "detailNoObjective": "Fără obiective",
+    "detailNoDescription": "Acest scenariu nu are descriere.",
+    "tutorialObjective": "Termină toți pașii tutorialului.",
+    "startScenarioButton": "Începe acest scenariu",
+    "tabSelect": "Alege un scenariu",
+    "tabBrowse": "Caută scenarii",
+    "tabTerrain": "Alege un teren",
+    "relocalizeNote": "Acest scenariu a fost creat în limba: {{from}}. Dacă începi în limba: {{to}}, cartierele, facilitățile, locuitorii, stațiile și alte elemente vor primi nume noi în această limbă.",
+    "developmentNotice": {
+      "heading": "Acest joc este o versiune experimentală în dezvoltare",
+      "subheading": "Citește înainte să joci",
+      "text": "Parametrii și logica economiei sunt încă în curs de reglare, așa că orașul tău s-ar putea să nu crească așa cum ar trebui. Șomajul poate crește și orașul poate chiar să dea faliment, dar asta nu e niciodată din vina felului în care joci. Urmărește actualizările viitoare! Adaugă jocul în lista de dorințe și așteaptă lansarea oficială."
+    }
+  }
+}

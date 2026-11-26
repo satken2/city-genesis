@@ -1,0 +1,22 @@
+{
+  "assetManager": {
+    "tabs": {
+      "buildings": "Bangunan",
+      "paths": "Jajaran",
+      "vehicles": "Kenderaan",
+      "props": "Objek hiasan"
+    },
+    "additional": "Model tambahan",
+    "loading": "Memuatkan model daripada paparan 3D…",
+    "noModel": "Tiada model",
+    "noImage": "Tiada imej",
+    "weight": "Pemberat",
+    "applyNote": "Perubahan pemberat berkuat kuasa apabila anda memulakan atau memuatkan permainan seterusnya.",
+    "preview": {
+      "hint": "Seret untuk memutar / Tatal untuk zum",
+      "zoomIn": "Zum masuk",
+      "zoomOut": "Zum keluar",
+      "reset": "Set semula"
+    }
+  }
+}

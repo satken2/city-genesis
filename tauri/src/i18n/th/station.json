@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "สถานี",
+    "name": "ชื่อสถานี",
+    "ridership": "จำนวนการขึ้นรถ",
+    "platforms": "รายการชานชาลา",
+    "noPlatforms": "ไม่มีชานชาลาที่สังกัดสถานีนี้ (ชานชาลาที่ตัดกับเส้นอาคารสถานีจะสังกัดที่นี่)",
+    "lines": "สายเดินรถที่ให้บริการ",
+    "noLines": "ไม่มีสายเดินรถที่ให้บริการสถานีนี้",
+    "stops": "จำนวนการขึ้นรถแยกตามจุดจอด",
+    "noStops": "ไม่มีจุดจอดที่สถานีนี้",
+    "lineRunning": "เปิดเดินรถ",
+    "lineSuspended": "งดเดินรถ",
+    "houseEnds": "ตำแหน่งตัวอาคาร",
+    "houseEnds_both": "ทั้งสองปลาย",
+    "houseEnds_start": "จุดเริ่มต้น",
+    "houseEnds_end": "จุดสิ้นสุด",
+    "passageMode": "ตำแหน่งทางเดิน",
+    "passageMode_elevated": "ยกระดับ",
+    "passageMode_ground": "ระดับพื้นดิน",
+    "passageMode_underground": "ใต้ดิน"
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "settings": {
+    "title": "Налаштування",
+    "groups": {
+      "general": "Загальні",
+      "display": "Екран",
+      "sound": "Звук",
+      "system": "Система",
+      "about": "Про гру",
+      "developer": "Для розробників"
+    },
+    "swagger": {
+      "label": "Swagger (документація API)",
+      "description": "Відкриває специфікацію API основного симулятора в типовому браузері",
+      "action": "Відкрити в браузері"
+    },
+    "currencyUnit": {
+      "label": "Грошова одиниця",
+      "description": "Одиниця, що показується біля грошових сум. Якщо залишити порожнім, вона відповідатиме мові інтерфейсу."
+    },
+    "fontSize": {
+      "label": "Розмір шрифту",
+      "large": "Великий",
+      "medium": "Середній",
+      "small": "Малий",
+      "custom": "Власний",
+      "preview": "Поточний розмір"
+    },
+    "monitor": {
+      "label": "Дисплей",
+      "prev": "Попередній дисплей",
+      "next": "Наступний дисплей"
+    },
+    "graphicMonitor": {
+      "label": "Дисплей для 3D-виду"
+    },
+    "multiDisplay": {
+      "label": "Режим кількох дисплеїв",
+      "description": "Показує вікна на іншому дисплеї, ніж ігровий екран",
+      "on": "Увімкнено",
+      "off": "Вимкнено"
+    },
+    "popupMonitor": {
+      "label": "Дисплей для вікон"
+    },
+    "hintbar": {
+      "label": "Панель підказок",
+      "show": "Показувати",
+      "hide": "Не показувати",
+      "description": "Панель угорі екрана з підказками щодо керування"
+    },
+    "citizenVoice": {
+      "label": "Голоси містян",
+      "show": "Показувати",
+      "hide": "Не показувати",
+      "description": "Картка в правому верхньому куті екрана, де по черзі з'являються репліки містян"
+    },
+    "language": {
+      "label": "Мова",
+      "description": "Мова інтерфейсу. Вона не залежить від мови збереження",
+      "ja": "日本語",
+      "en": "English",
+      "es-419": "Español (Latinoamérica)",
+      "zh-Hans": "简体中文",
+      "zh-Hant": "繁體中文",
+      "fr": "Français",
+      "ko": "한국어",
+      "de": "Deutsch",
+      "pl": "Polski",
+      "ru": "Русский",
+      "pt-BR": "Português (Brasil)",
+      "es-ES": "Español (España)",
+      "tr": "Türkçe",
+      "it": "Italiano",
+      "id": "Bahasa Indonesia",
+      "ar": "العربية",
+      "pt-PT": "Português (Portugal)",
+      "uk": "Українська",
+      "th": "ไทย",
+      "vi": "Tiếng Việt",
+      "ms": "Bahasa Melayu",
+      "nl": "Nederlands",
+      "sv": "Svenska",
+      "nb": "Norsk bokmål",
+      "da": "Dansk",
+      "fi": "Suomi",
+      "cs": "Čeština",
+      "hu": "Magyar",
+      "ro": "Română",
+      "bg": "Български",
+      "el": "Ελληνικά"
+    },
+    "volume": {
+      "label": "Гучність",
+      "master": "Загальна гучність",
+      "bgm": "Музика",
+      "sfx": "Звукові ефекти"
+    },
+    "compute": {
+      "label": "Прискорення GPU",
+      "comingSoon": "Незабаром",
+      "cpu": "CPU",
+      "gpu": "GPU",
+      "statusActive": "Працює GPU",
+      "statusInactive": "Працює CPU",
+      "restartRequired": "Після зміни налаштування основну програму буде перезапущено",
+      "restarting": "Перезапуск...",
+      "restartFailed": "Не вдалося перезапустити",
+      "restartUnavailable": "Налаштування збережено. Зміни набудуть чинності під час наступного запуску гри",
+      "confirmRestart": "Перемкнути обчислення на {{mode}}? Основну програму буде перезапущено.",
+      "restartAction": "Перезапустити"
+    },
+    "windowReset": {
+      "label": "Положення й розмір вікон",
+      "action": "Скинути"
+    },
+    "credits": {
+      "label": "Автори й джерела",
+      "description": "Відомості про права на матеріали й програмне забезпечення, використані в грі",
+      "action": "Переглянути"
+    }
+  },
+  "saveLoad": {
+    "newGame": "Нова гра",
+    "overwriteSave": "Перезаписати збереження",
+    "saveAs": "Зберегти як",
+    "load": "Завантажити",
+    "quitGame": "Вийти з гри",
+    "returnToTop": "Повернутися до головного меню",
+    "loading": "Завантаження...",
+    "shuttingDown": "Завершення роботи...",
+    "saveFailed": "Не вдалося зберегти",
+    "loadFailed": "Не вдалося завантажити",
+    "confirmNewGame": "Поточні дані буде втрачено. Почати нову гру?",
+    "confirmQuitGame": "Вийти з гри? Поточний прогрес не зберігається автоматично.",
+    "confirmReturnToTop": "Повернутися до головного меню? Поточний прогрес не зберігається автоматично.",
+    "confirm": "Так",
+    "cancel": "Ні",
+    "saveAsScenario": "Зберегти як сценарій",
+    "saveAsNewScenario": "Зберегти як інший сценарій",
+    "overwriteScenario": "Перезаписати сценарій",
+    "backToGame": "Повернутися до гри",
+    "saveName": "Назва збереження",
+    "confirmOverwrite": "Перезаписати збереження «{{name}}»?",
+    "confirmOverwriteScenario": "Перезаписати сценарій «{{name}}»?"
+  },
+  "saveList": {
+    "noSaves": "Збережень немає",
+    "currentSave": "Поточні дані",
+    "population": "Населення",
+    "inGameDate": "Дата",
+    "savedAt": "Збережено",
+    "loadButton": "Завантажити",
+    "deleteButton": "Видалити",
+    "confirmLoad": "Завантажити це збереження?",
+    "confirmDelete": "Видалити це збереження? Цю дію не можна скасувати.",
+    "loading": "Завантаження...",
+    "loadFailed": "Не вдалося завантажити",
+    "deleteFailed": "Не вдалося видалити",
+    "openFolderButton": "Відкрити теку збережень",
+    "scenario": "Сценарій",
+    "autosaveName": "{{name}} (автозбереження під час виходу)"
+  }
+}

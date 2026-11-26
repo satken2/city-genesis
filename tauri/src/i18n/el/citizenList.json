@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Αναζήτηση πολιτών",
+    "tabTracking": "Λίστα παρακολούθησης",
+    "name": "Όνομα",
+    "age": "Ηλικία",
+    "ageSeparator": "έως",
+    "search": "Αναζήτηση",
+    "noResults": "Κανένας πολίτης δεν ταιριάζει στα κριτήρια.",
+    "truncated": "Εμφανίζονται {{shown, number}} από {{total, number}} πολίτες που ταιριάζουν."
+  }
+}

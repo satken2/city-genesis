@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Simulatiebelasting",
+      "heading": "Rekentijd van het laatste tijdvak ({{days}} dagen)",
+      "noData": "Geen meetgegevens",
+      "note": "Als je meerdere tijdvakken achter elkaar uitvoert, zie je hier het laatste. Het aantal bewerkingen is een ruwe schatting van het aantal combinaties in de belangrijkste vergelijkingen, op basis van de grootte van de stad.",
+      "colGroup": "Proces",
+      "colTime": "Tijd",
+      "colWorkload": "Bewerkingen",
+      "workloadHint": "Ruwe schatting van het aantal combinaties in de belangrijkste vergelijkingen (aantal array-elementen). Beweeg over een waarde voor de uitsplitsing.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Goederenmarkt",
+      "realestate": "Vastgoedmarkt",
+      "labor": "Arbeidsmarkt",
+      "building_spawn": "Spontane vestiging gebouwen",
+      "agent_spawn": "Spontane vestiging actoren",
+      "routing": "Routeberekening burgers",
+      "transit": "Routeberekening openbaar vervoer",
+      "environment": "Woonomgeving",
+      "other": "Overig"
+    },
+    "workload": {
+      "market": "Kopers {{demanders}} × verkopers {{suppliers}} (per product vermenigvuldigd en opgeteld)",
+      "realestate": "Verhuisgeneigde huishoudens {{movers}} × gebouwen met woningen {{housing}}",
+      "labor": "Werkzoekenden {{seekers}} × werkgevers {{employers}}",
+      "building_spawn": "Kandidaat-percelen {{parcels}} × gebouwsoorten × aantal verdiepingen × vloergebruik",
+      "agent_spawn": "Producten × wijken {{zones}} × wijken {{zones}}",
+      "routing": "2 vervoerswijzen × wijken {{zones}} × wijken {{zones}} × 3 kandidaatroutes × tracés {{paths}}",
+      "transit": "Haltes {{stops}} × knooppunten {{nodes}}",
+      "environment": "Raster {{width}} × {{height}} × zonnestanden"
+    },
+    "entities": {
+      "colMetric": "Onderdeel",
+      "colCount": "Aantal",
+      "title": "Aantallen entiteiten",
+      "agents": "Economische actoren",
+      "households": "Huishoudens",
+      "businesses": "Bedrijven",
+      "publicFacilities": "Openbare voorzieningen",
+      "buildings": "Gebouwen",
+      "citizens": "Burgers",
+      "population": "Bevolking",
+      "zones": "Wijken",
+      "parcels": "Percelen",
+      "paths": "Tracés",
+      "roads": "Wegen",
+      "tracks": "Sporen",
+      "infra": "Infrastructuurnetten",
+      "nodes": "Knooppunten"
+    },
+    "approximation": {
+      "title": "Simulatiebenadering",
+      "intro": "Er komen instellingen om de berekeningen voor grote steden te vereenvoudigen. Ze zijn nog niet te wijzigen.",
+      "warning": "Dit kan de spelbalans beïnvloeden. Je kunt het niet ongedaan maken.",
+      "irreversible": "Veranderingen door benadering blijven in latere tijdvakken bestaan. Een ingeschakelde benadering kun je niet uitschakelen of afzwakken.",
+      "undecided": "Nog niet bepaald",
+      "candidates": "kandidaten max.",
+      "epochs": "tijdvakken tussen herzieningen",
+      "off": "Uit",
+      "on": "Aan",
+      "goods": {
+        "label": "Aankoopkandidaten",
+        "description": "Beperk het aantal leveranciers dat op prijs en afstand wordt vergeleken."
+      },
+      "jobs": {
+        "label": "Kandidaat-werkgevers",
+        "description": "Beperk het aantal werkgevers dat op loon en reisomstandigheden wordt vergeleken."
+      },
+      "housing": {
+        "label": "Kandidaat-woningen",
+        "description": "Beperk het aantal woningen dat op huur en ligging wordt vergeleken."
+      },
+      "interval": {
+        "label": "Interval routinebeslissingen",
+        "description": "Herzie winkel-, baan- en woonkeuzes minder vaak."
+      },
+      "aggregation": {
+        "label": "Vergelijkbare burgers en huishoudens samen berekenen",
+        "description": "Behandel sommige beslissingen van burgers of huishoudens in vergelijkbare omstandigheden als groep."
+      }
+    },
+    "status": {
+      "title": "Systeemstatus",
+      "gpuDisabled": "GPU-versnelling: uitgeschakeld",
+      "coreSimulator": "Kernsimulator",
+      "currentMemory": "Huidig geheugengebruik: {{value}}",
+      "peakMemory": "Piekgeheugengebruik sinds opstarten: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Huidig VRAM-gebruik: {{value}}",
+      "usageTooltip": "Hele pc {{pc}} / dit spel {{game}} / geïnstalleerd {{total}}",
+      "legendPc": "Hele pc",
+      "legendGame": "Dit spel"
+    }
+  }
+}

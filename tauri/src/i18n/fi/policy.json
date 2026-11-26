@@ -1,0 +1,323 @@
+{
+  "policy": {
+    "pending": "Simulaatio käynnissä",
+    "noData": "Ei tietoja",
+    "actionError": "Toimintonäkymän avaaminen epäonnistui.",
+    "indicators": {
+      "unemployment": {
+        "tab": "Työttömyys",
+        "issue": "Työttömyys on korkea",
+        "clear": "Työttömyysongelmia ei havaittu",
+        "evidence": "Työttömyysaste {{value}}"
+      },
+      "income": {
+        "tab": "Tulot",
+        "issue": "Kotitalouksien tulot ovat pienet",
+        "clear": "Tulo-ongelmia ei havaittu",
+        "evidence": "Kotitalouksien keskitulot {{value}}"
+      },
+      "tourism": {
+        "tab": "Matkailu",
+        "issue": "Matkailijoita käy vähän",
+        "clear": "Matkailuongelmia ei havaittu",
+        "evidence": "Yöpyviä matkailijoita {{value}} · kapasiteetti {{capacity}}"
+      },
+      "crime": {
+        "tab": "Rikokset",
+        "issue": "Rikoksia ja kahnauksia sattuu",
+        "clear": "Rikosongelmia ei havaittu",
+        "evidence": "Rikosvahingot {{value}} · kahnauksia {{incidents}}"
+      },
+      "sanitation": {
+        "tab": "Hygienia",
+        "issue": "Hygieniaongelmia esiintyy",
+        "clear": "Hygieniaongelmia ei havaittu",
+        "evidence": "Hygienia heikkenee kotitalouksissa: {{value}}"
+      },
+      "water": {
+        "tab": "Vesi",
+        "issue": "Vedestä on pulaa",
+        "clear": "Vedensaantiongelmia ei havaittu",
+        "evidence": "Kotitaloudet ja laitokset saivat {{value}} tilauksistaan"
+      },
+      "electricity": {
+        "tab": "Sähkö",
+        "issue": "Sähköstä on pulaa",
+        "clear": "Sähkönsaantiongelmia ei havaittu",
+        "evidence": "Kotitaloudet ja laitokset saivat {{value}} tilauksistaan"
+      },
+      "internet": {
+        "tab": "Tietoliikenne",
+        "issue": "Tietoliikenteestä on pulaa",
+        "clear": "Tietoliikenneongelmia ei havaittu",
+        "evidence": "Kotitaloudet ja laitokset saivat {{value}} tilauksistaan"
+      },
+      "high_water": {
+        "tab": "Runkovesi",
+        "issue": "Runkovedestä on pulaa",
+        "clear": "Runkoveden saantiongelmia ei havaittu",
+        "evidence": "Laitokset saivat {{value}} tilauksistaan"
+      },
+      "high_electricity": {
+        "tab": "Suurjännitesähkö",
+        "issue": "Suurjännitesähköstä on pulaa",
+        "clear": "Suurjännitesähkön saantiongelmia ei havaittu",
+        "evidence": "Laitokset saivat {{value}} tilauksistaan"
+      },
+      "upkeep": {
+        "tab": "Ylläpito",
+        "issue": "Julkisten rakennusten, teiden ja raiteiden ylläpito ei riitä",
+        "clear": "Ylläpito-ongelmia ei havaittu",
+        "evidence": "Ylläpitoa saatiin {{value}} tarpeesta"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "Nykyiset työpaikkakiintiöt ovat täynnä",
+        "evidence": "Työnhakijoita: {{count}}"
+      },
+      "unfilled_jobs": {
+        "title": "Avoimia työpaikkoja ja työttömyyttä on yhtä aikaa",
+        "evidence": "Työnhakijoita: {{count}} · avoimia paikkoja: {{vacancies}} (todellinen työvoima)"
+      },
+      "public_budget": {
+        "title": "Budjetti rajoittaa julkisia laitoksia",
+        "evidence": "Laitoksia, joiden suunnitelmaa budjetti rajoittaa: {{count}}"
+      },
+      "education_gap": {
+        "title": "Osalta työnhakijoista puuttuu peruskoulutus",
+        "evidence": "Työnhakijoita ilman peruskoulutusta: {{count}}"
+      },
+      "school_capacity": {
+        "title": "Peruskoulutuksen paikat eivät riitä",
+        "evidence": "Koulussa: {{enrolled}} · ilman koulupaikkaa: {{waiting}} / paikkoja: {{capacity}}"
+      },
+      "immigrant_education_gap": {
+        "title": "Osa peruskoulutusta vailla olevista työnhakijoista on tulomuuttajia",
+        "evidence": "Tällaisia tulomuuttajatyönhakijoita: {{count}}"
+      },
+      "specialists": {
+        "title": "Asiantuntijapula estää laitosten toiminnan",
+        "evidence": "Laitoksia, joilta puuttuu asiantuntijoita: {{count}}"
+      },
+      "household_unemployment": {
+        "title": "Joissakin kotitalouksissa on työttömiä aikuisia",
+        "evidence": "Kotitalouksia, joissa on työttömiä aikuisia: {{count}}"
+      },
+      "security_response": {
+        "title": "Poliisi ei pysty estämään kaikkia vahinkoja",
+        "evidence": "Rikosvahinkoja viime kuukautena: {{count}}",
+        "evidence_week": "Rikosvahinkoja viime viikolla: {{count}}"
+      },
+      "no_police": {
+        "title": "Yksikään poliisiasema ei toimi"
+      },
+      "police_staff": {
+        "title": "Poliisiasemilla on henkilöstöpulaa",
+        "evidence": "Poliisiasemia, joilla on henkilöstöpulaa: {{count}}"
+      },
+      "police_budget": {
+        "title": "Poliisin budjetti ei riitä",
+        "evidence": "Poliisiasemia, joilla on budjettivaje: {{count}}"
+      },
+      "police_inputs": {
+        "title": "Poliisiasemilta puuttuu tarvikkeita",
+        "evidence": "Poliisiasemia, joilta puuttuu tarvikkeita: {{count}}"
+      },
+      "unemployment_pressure": {
+        "title": "Työttömyys heikentää yleistä turvallisuutta",
+        "evidence": "Työttömiä aikuisia: {{count}}"
+      },
+      "citizen_criminality": {
+        "title": "Osalla kaupunkilaisista on taipumusta rikollisuuteen",
+        "evidence": "Rikollisuuteen taipuvaisia kaupunkilaisia: {{count}}"
+      },
+      "children_in_poverty": {
+        "title": "Lapsia kasvaa kotitalouksissa, joiden tulot eivät riitä elinkustannuksiin",
+        "evidence": "Lapsia kotitalouksissa, joiden tulot eivät riitä elinkustannuksiin: {{count}}"
+      },
+      "children_in_crime_zones": {
+        "title": "Lapsia kasvaa kaupunginosissa, joissa on tapahtunut rikoksia",
+        "evidence": "Lapsia kaupunginosissa, joissa on tapahtunut rikoksia viime kuukautena: {{count}}",
+        "evidence_week": "Lapsia kaupunginosissa, joissa on tapahtunut rikoksia viime viikolla: {{count}}"
+      },
+      "service_no_facility": {
+        "title": "Palvelua tuottavaa laitosta ei ole",
+        "title_named": "Puuttuu: {{suppliers}}"
+      },
+      "service_facility_limited": {
+        "title": "Osa laitoksista ei toimi: {{kinds}}",
+        "evidence": "Käytännössä toimimattomia laitoksia: {{count}}"
+      },
+      "repair_budget_exhausted": {
+        "title": "Korjausbudjetti loppui ja ylläpitotilauksia karsittiin",
+        "evidence": "Korjausmenot {{expense}} / budjetti {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "Kotitalouksia tai laitoksia on palvelualueen ulkopuolella",
+        "evidence": "Kaikkien laitosten palvelualueen ulkopuolella: {{count}} kotitaloutta, {{facilities}} laitosta",
+        "title_named": "Kotitalouksia tai laitoksia on palvelualueen ulkopuolella: {{suppliers}}"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}} ei saa hankittua tuotetta: {{product_name}}",
+        "evidence": "Saatu {{received}} / tarve {{demand}}"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}} kärsii työvoimapulasta",
+        "evidence": "Saatu {{total_labor}} / tarve {{quota}} (todellinen työvoima)"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}} ei saa asiantuntijoita"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}} on supistanut suunnitelmaansa budjettivajeen vuoksi"
+      },
+      "facility_inactive": {
+        "title": "{{facility}} ei ole toiminnassa"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}} ei ole liitetty verkkoon: {{product_name}}"
+      },
+      "slum_sanitation": {
+        "title": "Kotitalouksia asuu slummeissa",
+        "evidence": "Slummeissa asuvia kotitalouksia: {{count}}"
+      },
+      "service_shortage": {
+        "title": "Kotitaloudet eivät saa tarpeeksi: {{product_name}}",
+        "evidence": "Kotitaloudet saivat {{percent}} % viitemäärästä"
+      },
+      "tourism_no_attraction": {
+        "title": "Nähtävyyksiä ei ole"
+      },
+      "tourism_no_gateway": {
+        "title": "Matkailijoilla ei ole saapumisreittiä"
+      },
+      "tourism_no_trade_hub": {
+        "title": "Matkakuluja maksavaa tuonti- ja vientikeskusta ei ole"
+      },
+      "tourists_without_lodging": {
+        "title": "Osa matkailijoista ei löydä majoitusta",
+        "evidence": "Majoitusta odottavia matkailijoita: {{count}}"
+      },
+      "tourism_lodging_costly": {
+        "title": "Majoitus on kallista matkabudjetteihin nähden",
+        "evidence": "Uusia matkailijahakemuksia {{percent}} % tavallisesta"
+      },
+      "tourists_dissatisfied": {
+        "title": "Matkailijoiden tyytyväisyys on heikko",
+        "evidence": "Uusia hakemuksia {{percent}} % tavallisesta · tyytymättöminä palanneita {{count}}"
+      },
+      "tourism_experience_short": {
+        "title": "Matkailijat eivät saa tarpeeksi matkailuelämyksiä",
+        "evidence": "Matkailuelämyksiä saatu: {{percent}} %"
+      },
+      "tourism_leisure_short": {
+        "title": "Matkailijat eivät saa tarpeeksi viihdettä ja vapaa-ajan palveluja",
+        "evidence": "Viihdettä ja vapaa-aikaa saatu: {{percent}} %"
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "Luo työpaikkoja julkisiin laitoksiin"
+      },
+      "population": {
+        "title": "Vähennä väestöä karkottamalla kaupunkilaisia"
+      },
+      "budget": {
+        "title": "Jaa käyttöbudjetteja"
+      },
+      "education": {
+        "title": "Rakenna lisää kouluja"
+      },
+      "higher_education": {
+        "title": "Kouluta asiantuntijoita korkeakouluissa"
+      },
+      "welfare": {
+        "title": "Lisää etuuksia ja toimeentulotukea"
+      },
+      "employment": {
+        "title": "Tutki rekrytointiehtoja työllisyystilastoista"
+      },
+      "police": {
+        "title": "Rakenna poliisiasemia"
+      },
+      "facilities": {
+        "title": "Tarkista laitosten tilanne"
+      },
+      "immigration_skills": {
+        "title": "Tarkista tulomuuttajien osaamisvaatimukset"
+      },
+      "immigration_limit": {
+        "title": "Rajoita tulomuuttoa"
+      },
+      "criminality": {
+        "title": "Tarkista kaupunkilaisten rikollisuustaipumus"
+      },
+      "service_facility": {
+        "title": "Rakenna palvelua tuottava laitos",
+        "title_named": "Rakenna: {{suppliers}}",
+        "title_tourism_no_attraction": "Rakenna nähtävyys",
+        "title_tourism_no_gateway": "Rakenna satama tai lentoasema"
+      },
+      "parcel": {
+        "title": "Valmistele suurempi tontti"
+      },
+      "transit": {
+        "title": "Tarkista joukkoliikenteen vuorotiheys ja raiteet"
+      },
+      "entity_detail": {
+        "title": "Avaa tiedot"
+      }
+    },
+    "selectorTitle": "Mitä haluat tutkia?",
+    "eventsTitle": "Mitä tapahtuu",
+    "causeTitle": "Taustalla oleva syy",
+    "adviceTitle": "Suositellut toimet",
+    "needsAttention": "Parannettavaa",
+    "values": {
+      "money": "{{value}} / kotitalous / vrk",
+      "per_thousand": "{{value}} tapausta / 1 000 asukasta (viime kuukausi)",
+      "per_thousand_week": "{{value}} tapausta / 1 000 asukasta (viime viikko)"
+    },
+    "collapse": "Pienennä",
+    "investigate": {
+      "crime": "Tutki rikosten syitä",
+      "unemployment": "Tutki työttömyyden syitä",
+      "income": "Tutki pienten tulojen syitä",
+      "water": "Tutki vesipulan syitä",
+      "electricity": "Tutki sähköpulan syitä",
+      "internet": "Tutki tietoliikennepulan syitä",
+      "upkeep": "Tutki ylläpitovajeen syitä",
+      "high_water": "Tutki runkovesipulan syitä",
+      "high_electricity": "Tutki suurjännitesähkön pulan syitä",
+      "facility": "Tutki tätä laitosta"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "Mittarit",
+    "problems": {
+      "resource_runway": "Luonnonvara ”{{name}}” ehtyy noin {{remaining_epochs}} kauden kuluttua",
+      "resource_depleted": "Luonnonvara ”{{name}}” on ehtynyt",
+      "facility_inoperative": "Julkinen laitos ”{{name}}” ei toimi",
+      "facility_inoperative_labor": "Julkinen laitos ”{{name}}” ei toimi työvoimapulan vuoksi",
+      "facility_inoperative_material": "Julkinen laitos ”{{name}}” ei toimi raaka-ainepulan vuoksi",
+      "facility_inoperative_high_skill": "Julkinen laitos ”{{name}}” toimii supistetusti asiantuntijapulan vuoksi",
+      "facility_inoperative_budget": "Julkinen laitos ”{{name}}” toimii supistetusti budjettivajeen vuoksi",
+      "education_low_enrollment": "Oppilaitos ”{{name}}” on vajaakäytössä, koska opiskelijoita on vähän ({{enrolled}} / {{max_students}} paikkaa)",
+      "infra_facility_down": "Infralaitos ”{{name}}” on poissa käytöstä",
+      "infra_disconnected": "Infraverkosta irti olevia laitoksia: {{count}}",
+      "rail_capacity_exceeded": "Junavuorot ylittävät raidekapasiteetin {{count}} raideosuudella",
+      "collapse": "Sortuneita rakennuksia tai teitä: {{count}}",
+      "collapse_with_deaths": "Sortuneita rakennuksia tai teitä: {{count}}, kuolleita: {{deaths}}",
+      "deaths_traffic": "Liikenneonnettomuuksissa kuolleita: {{count}}",
+      "tenant_blocked_by_parcel_size": "Kaupunginosaan ”{{zone_name}}” ei voi rakentaa rakennusta käyttäjälle ”{{tenant_name}}” (tarve {{required}} m2, suurin rakennettava {{max_capacity}} m2)",
+      "unknown": "On tapahtunut vakava tapahtuma",
+      "sanitation": "Hygienia heikkenee kotitalouksissa: {{count}}"
+    },
+    "facilitiesTitle": "Toimimattomat laitokset",
+    "otherProblemsTitle": "Muut ongelmat",
+    "facility": {
+      "title": "{{facility}} ei pysty toimimaan",
+      "evidence": "Tuotanto on {{percent}} % suunnitellusta"
+    }
+  }
+}

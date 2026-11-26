@@ -1,0 +1,99 @@
+{
+  "systemStats": {
+    "load": {
+      "title": "Carga da simulação",
+      "heading": "Tempo de cálculo da última época ({{days}} dias)",
+      "noData": "Sem dados de medição",
+      "note": "Quando se executam várias épocas seguidas, é apresentado o valor da última. O número de operações é uma estimativa do número de combinações nas principais comparações, calculada a partir da dimensão da cidade.",
+      "colGroup": "Processo",
+      "colTime": "Tempo",
+      "colWorkload": "Operações",
+      "workloadHint": "Estimativa do número de combinações nas principais comparações (elementos das matrizes). Passe o rato sobre um valor para ver a decomposição.",
+      "seconds": "{{value}} s",
+      "ms": "{{value}} ms"
+    },
+    "group": {
+      "market": "Mercado de bens",
+      "realestate": "Mercado imobiliário",
+      "labor": "Mercado de trabalho",
+      "building_spawn": "Aparecimento de edifícios",
+      "agent_spawn": "Aparecimento de agentes económicos",
+      "routing": "Cálculo de percursos dos cidadãos",
+      "transit": "Cálculo de percursos em transportes públicos",
+      "environment": "Ambiente residencial",
+      "other": "Outros"
+    },
+    "workload": {
+      "market": "Compradores {{demanders}} × vendedores {{suppliers}} (multiplicado por produto e somado)",
+      "realestate": "Agregados a pensar mudar de casa {{movers}} × edifícios com habitação {{housing}}",
+      "labor": "Pessoas à procura de emprego {{seekers}} × empregadores {{employers}}",
+      "building_spawn": "Lotes candidatos {{parcels}} × tipos de edifício × n.º de pisos × usos dos pisos",
+      "agent_spawn": "Produtos × bairros {{zones}} × bairros {{zones}}",
+      "routing": "2 meios de transporte × bairros {{zones}} × bairros {{zones}} × 3 percursos candidatos × traçados {{paths}}",
+      "transit": "Paragens {{stops}} × nós {{nodes}}",
+      "environment": "Grelha {{width}} × {{height}} × posições do sol"
+    },
+    "entities": {
+      "colMetric": "Item",
+      "colCount": "Quantidade",
+      "title": "Número de entidades",
+      "agents": "Agentes económicos",
+      "households": "Agregados familiares",
+      "businesses": "Estabelecimentos",
+      "publicFacilities": "Equipamentos públicos",
+      "buildings": "Edifícios",
+      "citizens": "Cidadãos",
+      "population": "População",
+      "zones": "Bairros",
+      "parcels": "Lotes",
+      "paths": "Traçados",
+      "roads": "Estradas",
+      "tracks": "Vias férreas",
+      "infra": "Redes de infraestruturas",
+      "nodes": "Nós"
+    },
+    "approximation": {
+      "title": "Aproximações da simulação",
+      "intro": "Está prevista a introdução de opções para simplificar os cálculos em cidades de grande dimensão. De momento, não podem ser alteradas.",
+      "warning": "Pode afetar o equilíbrio do jogo. Não é possível reverter",
+      "irreversible": "As alterações causadas pelas aproximações mantêm-se nas épocas seguintes. Depois de ativada, uma aproximação não pode ser desativada nem reduzida.",
+      "undecided": "A definir",
+      "candidates": "candidatos no máx.",
+      "epochs": "épocas entre revisões",
+      "off": "Desligado",
+      "on": "Ligado",
+      "goods": {
+        "label": "Candidatos para compras",
+        "description": "Limita o número de fornecedores comparados por preço e distância."
+      },
+      "jobs": {
+        "label": "Candidatos para emprego",
+        "description": "Limita o número de empregadores comparados por salário e condições de deslocação."
+      },
+      "housing": {
+        "label": "Candidatos para mudança de casa",
+        "description": "Limita o número de habitações comparadas por renda e localização."
+      },
+      "interval": {
+        "label": "Intervalo das decisões periódicas",
+        "description": "Reduz a frequência com que se reveem os locais de compras, de trabalho e de residência."
+      },
+      "aggregation": {
+        "label": "Agrupar cidadãos e agregados semelhantes",
+        "description": "Trata como grupo algumas decisões de cidadãos ou agregados em circunstâncias semelhantes."
+      }
+    },
+    "status": {
+      "title": "Estado do sistema",
+      "gpuDisabled": "Aceleração por GPU: desativada",
+      "coreSimulator": "Simulador principal",
+      "currentMemory": "Utilização de memória atual: {{value}}",
+      "peakMemory": "Utilização máxima de memória desde o arranque: {{value}}",
+      "graphic": "3D",
+      "currentVram": "Utilização de VRAM atual: {{value}}",
+      "usageTooltip": "PC inteiro {{pc}} / este jogo {{game}} / instalada {{total}}",
+      "legendPc": "PC inteiro",
+      "legendGame": "Este jogo"
+    }
+  }
+}

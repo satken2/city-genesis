@@ -1,0 +1,323 @@
+{
+  "policy": {
+    "pending": "Simulare în curs",
+    "noData": "Fără date",
+    "actionError": "Ecranul acțiunii nu a putut fi deschis.",
+    "indicators": {
+      "unemployment": {
+        "tab": "Șomaj",
+        "issue": "Șomajul este ridicat",
+        "clear": "Nu s-au găsit probleme legate de șomaj",
+        "evidence": "Rata șomajului: {{value}}"
+      },
+      "income": {
+        "tab": "Venituri",
+        "issue": "Veniturile gospodăriilor sunt mici",
+        "clear": "Nu s-au găsit probleme legate de venituri",
+        "evidence": "Venitul mediu al gospodăriilor: {{value}}"
+      },
+      "tourism": {
+        "tab": "Turism",
+        "issue": "Vin puțini turiști",
+        "clear": "Nu s-au găsit probleme legate de turism",
+        "evidence": "Turiști cazați: {{value}} · capacitate: {{capacity}}"
+      },
+      "crime": {
+        "tab": "Criminalitate",
+        "issue": "Au loc infracțiuni și conflicte",
+        "clear": "Nu s-au găsit probleme legate de criminalitate",
+        "evidence": "Prejudicii din infracțiuni: {{value}} · conflicte: {{incidents}}"
+      },
+      "sanitation": {
+        "tab": "Igienă",
+        "issue": "Există probleme de igienă",
+        "clear": "Nu s-au găsit probleme de igienă",
+        "evidence": "Gospodării cu igienă în declin: {{value}}"
+      },
+      "water": {
+        "tab": "Apă",
+        "issue": "Aprovizionarea cu apă este insuficientă",
+        "clear": "Nu s-au găsit probleme în aprovizionarea cu apă",
+        "evidence": "Gospodăriile și facilitățile au primit {{value}} din comenzi"
+      },
+      "electricity": {
+        "tab": "Electricitate",
+        "issue": "Aprovizionarea cu electricitate este insuficientă",
+        "clear": "Nu s-au găsit probleme în aprovizionarea cu electricitate",
+        "evidence": "Gospodăriile și facilitățile au primit {{value}} din comenzi"
+      },
+      "internet": {
+        "tab": "Telecomunicații",
+        "issue": "Serviciile de telecomunicații sunt insuficiente",
+        "clear": "Nu s-au găsit probleme în furnizarea telecomunicațiilor",
+        "evidence": "Gospodăriile și facilitățile au primit {{value}} din comenzi"
+      },
+      "high_water": {
+        "tab": "Apă de înaltă presiune",
+        "issue": "Aprovizionarea cu apă de înaltă presiune este insuficientă",
+        "clear": "Nu s-au găsit probleme în aprovizionarea cu apă de înaltă presiune",
+        "evidence": "Facilitățile au primit {{value}} din comenzi"
+      },
+      "high_electricity": {
+        "tab": "Înaltă tensiune",
+        "issue": "Aprovizionarea cu electricitate de înaltă tensiune este insuficientă",
+        "clear": "Nu s-au găsit probleme în aprovizionarea cu electricitate de înaltă tensiune",
+        "evidence": "Facilitățile au primit {{value}} din comenzi"
+      },
+      "upkeep": {
+        "tab": "Întreținerea facilităților",
+        "issue": "Întreținerea clădirilor publice, a drumurilor și a căilor ferate este insuficientă",
+        "clear": "Nu s-au găsit probleme de întreținere",
+        "evidence": "S-a primit {{value}} din întreținerea necesară"
+      }
+    },
+    "nodes": {
+      "no_vacancies": {
+        "title": "Locurile de muncă disponibile sunt toate ocupate",
+        "evidence": "Persoane în căutarea unui loc de muncă: {{count}}"
+      },
+      "unfilled_jobs": {
+        "title": "Există simultan posturi libere și șomaj",
+        "evidence": "Persoane în căutarea unui loc de muncă: {{count}} · posturi libere: {{vacancies}} (forță de muncă efectivă)"
+      },
+      "public_budget": {
+        "title": "Facilitățile publice sunt limitate de buget",
+        "evidence": "Facilități cu planuri reduse din cauza bugetului de funcționare: {{count}}"
+      },
+      "education_gap": {
+        "title": "Unele persoane care caută de lucru nu au terminat educația de bază",
+        "evidence": "Persoane în căutarea unui loc de muncă fără educație de bază: {{count}}"
+      },
+      "school_capacity": {
+        "title": "Locurile în educația de bază sunt insuficiente",
+        "evidence": "Înscriși: {{enrolled}} · neînscriși: {{waiting}} / capacitate: {{capacity}}"
+      },
+      "immigrant_education_gap": {
+        "title": "Printre cei care caută de lucru fără educație de bază sunt și imigranți",
+        "evidence": "Imigranți în această situație: {{count}}"
+      },
+      "specialists": {
+        "title": "Unele facilități nu pot funcționa din lipsă de specialiști",
+        "evidence": "Facilități fără destui specialiști: {{count}}"
+      },
+      "household_unemployment": {
+        "title": "Unele gospodării au adulți fără loc de muncă",
+        "evidence": "Gospodării cu adulți fără loc de muncă: {{count}}"
+      },
+      "security_response": {
+        "title": "Poliția nu reușește să prevină toate prejudiciile",
+        "evidence": "Infracțiuni cu prejudicii în ultima lună: {{count}}",
+        "evidence_week": "Infracțiuni cu prejudicii în ultima săptămână: {{count}}"
+      },
+      "no_police": {
+        "title": "Nu funcționează nicio secție de poliție"
+      },
+      "police_staff": {
+        "title": "Secțiile de poliție nu au destul personal",
+        "evidence": "Secții de poliție cu lipsă de personal: {{count}}"
+      },
+      "police_budget": {
+        "title": "Bugetul poliției este insuficient",
+        "evidence": "Secții de poliție fără buget suficient: {{count}}"
+      },
+      "police_inputs": {
+        "title": "Secțiile de poliție duc lipsă de materiale",
+        "evidence": "Secții de poliție cu lipsă de materiale: {{count}}"
+      },
+      "unemployment_pressure": {
+        "title": "Șomajul contribuie la scăderea siguranței publice",
+        "evidence": "Adulți fără loc de muncă: {{count}}"
+      },
+      "citizen_criminality": {
+        "title": "Unii cetățeni au înclinații infracționale",
+        "evidence": "Cetățeni cu înclinații infracționale: {{count}}"
+      },
+      "children_in_poverty": {
+        "title": "Unii copii cresc în gospodării care nu-și pot acoperi costul vieții",
+        "evidence": "Copii din gospodării sub costul vieții: {{count}}"
+      },
+      "children_in_crime_zones": {
+        "title": "Unii copii cresc în cartiere cu infracțiuni",
+        "evidence": "Copii din cartiere cu infracțiuni în ultima lună: {{count}}",
+        "evidence_week": "Copii din cartiere cu infracțiuni în ultima săptămână: {{count}}"
+      },
+      "service_no_facility": {
+        "title": "Nu există nicio facilitate care furnizează serviciul",
+        "title_named": "Lipsesc: {{suppliers}}"
+      },
+      "service_facility_limited": {
+        "title": "Unele facilități nu pot funcționa ({{kinds}})",
+        "evidence": "Facilități care practic nu funcționează: {{count}}"
+      },
+      "repair_budget_exhausted": {
+        "title": "Bugetul de reparații s-a epuizat și comenzile de întreținere au fost reduse",
+        "evidence": "Cheltuieli de reparații: {{expense}} / buget: {{budget}}"
+      },
+      "service_out_of_range": {
+        "title": "Unele gospodării sau facilități sunt în afara razei de deservire",
+        "evidence": "În afara razei oricărei facilități: {{count}} gospodării, {{facilities}} facilități",
+        "title_named": "Unele gospodării sau facilități sunt în afara razei de deservire ({{suppliers}})"
+      },
+      "facility_material_unmet": {
+        "title": "{{facility}} nu se poate aproviziona cu produsul {{product_name}}",
+        "evidence": "Primit {{received}} din necesarul de {{demand}}"
+      },
+      "facility_labor_shortage": {
+        "title": "{{facility}}: lipsă de personal",
+        "evidence": "Asigurat {{total_labor}} din necesarul de {{quota}} (forță de muncă efectivă)"
+      },
+      "facility_high_skill_shortage": {
+        "title": "{{facility}}: nu se pot asigura specialiști"
+      },
+      "facility_budget_capped": {
+        "title": "{{facility}}: plan redus din lipsă de buget"
+      },
+      "facility_inactive": {
+        "title": "{{facility}}: nu funcționează"
+      },
+      "facility_infra_disconnected": {
+        "title": "{{facility}}: neconectat la rețeaua pentru {{product_name}}"
+      },
+      "slum_sanitation": {
+        "title": "Există gospodării care locuiesc în mahala",
+        "evidence": "Gospodării care locuiesc în mahala: {{count}}"
+      },
+      "service_shortage": {
+        "title": "Gospodăriile nu primesc destul din: {{product_name}}",
+        "evidence": "Gospodăriile au primit {{percent}}% din cantitatea de referință"
+      },
+      "tourism_no_attraction": {
+        "title": "Nu există atracții turistice"
+      },
+      "tourism_no_gateway": {
+        "title": "Nu există o poartă de intrare pentru turiști"
+      },
+      "tourism_no_trade_hub": {
+        "title": "Nu există un nod comercial care să plătească banii de călătorie"
+      },
+      "tourists_without_lodging": {
+        "title": "Unii turiști nu găsesc cazare",
+        "evidence": "Turiști care așteaptă cazare: {{count}}"
+      },
+      "tourism_lodging_costly": {
+        "title": "Cazarea este scumpă față de bugetul de călătorie",
+        "evidence": "Cererile turiștilor noi sunt la {{percent}}% din nivelul normal"
+      },
+      "tourists_dissatisfied": {
+        "title": "Satisfacția turiștilor este scăzută",
+        "evidence": "Cereri noi la {{percent}}% din nivelul normal · plecați acasă nemulțumiți: {{count}}"
+      },
+      "tourism_experience_short": {
+        "title": "Turiștii nu primesc destule experiențe turistice",
+        "evidence": "Experiențe turistice primite: {{percent}}%"
+      },
+      "tourism_leisure_short": {
+        "title": "Turiștii nu au destule activități de divertisment și timp liber",
+        "evidence": "Divertisment și timp liber primite: {{percent}}%"
+      }
+    },
+    "actions": {
+      "public_jobs": {
+        "title": "Creează locuri de muncă în facilitățile publice"
+      },
+      "population": {
+        "title": "Redu populația expulzând cetățeni"
+      },
+      "budget": {
+        "title": "Alocă bugete de funcționare"
+      },
+      "education": {
+        "title": "Construiește mai multe școli"
+      },
+      "higher_education": {
+        "title": "Formează specialiști prin învățământ superior"
+      },
+      "welfare": {
+        "title": "Mărește ajutoarele și asistența socială"
+      },
+      "employment": {
+        "title": "Analizează condițiile de angajare în statisticile ocupării"
+      },
+      "police": {
+        "title": "Construiește secții de poliție"
+      },
+      "facilities": {
+        "title": "Verifică starea facilităților"
+      },
+      "immigration_skills": {
+        "title": "Revizuiește cerințele de calificare pentru imigranți"
+      },
+      "immigration_limit": {
+        "title": "Limitează imigrația"
+      },
+      "criminality": {
+        "title": "Verifică înclinațiile infracționale ale cetățenilor"
+      },
+      "service_facility": {
+        "title": "Construiește o facilitate care furnizează serviciul",
+        "title_named": "Construiește: {{suppliers}}",
+        "title_tourism_no_attraction": "Construiește o atracție turistică",
+        "title_tourism_no_gateway": "Construiește un port sau un aeroport"
+      },
+      "parcel": {
+        "title": "Pregătește o parcelă mai mare"
+      },
+      "transit": {
+        "title": "Revizuiește frecvența curselor și căile ferate"
+      },
+      "entity_detail": {
+        "title": "Deschide detaliile"
+      }
+    },
+    "selectorTitle": "Ce vrei să investighezi?",
+    "eventsTitle": "Ce se întâmplă",
+    "causeTitle": "Cauza",
+    "adviceTitle": "Măsuri recomandate",
+    "needsAttention": "Se poate îmbunătăți",
+    "values": {
+      "money": "{{value}} / gospodărie / zi",
+      "per_thousand": "{{value}} cazuri la 1.000 de locuitori (ultima lună)",
+      "per_thousand_week": "{{value}} cazuri la 1.000 de locuitori (ultima săptămână)"
+    },
+    "collapse": "Restrânge",
+    "investigate": {
+      "crime": "Investighează cauzele criminalității",
+      "unemployment": "Investighează cauzele șomajului",
+      "income": "Investighează cauzele veniturilor mici",
+      "water": "Investighează cauzele lipsei de apă",
+      "electricity": "Investighează cauzele lipsei de electricitate",
+      "internet": "Investighează cauzele lipsei de telecomunicații",
+      "upkeep": "Investighează cauzele întreținerii insuficiente",
+      "high_water": "Investighează cauzele lipsei de apă de înaltă presiune",
+      "high_electricity": "Investighează cauzele lipsei de electricitate de înaltă tensiune",
+      "facility": "Investighează această facilitate"
+    },
+    "facilityFinding": "{{facility}}: {{title}}",
+    "indicatorsTitle": "Indicatori",
+    "problems": {
+      "resource_runway": "Resursa „{{name}}” se va epuiza în aproximativ {{remaining_epochs}} epoci",
+      "resource_depleted": "Resursa „{{name}}” s-a epuizat",
+      "facility_inoperative": "Facilitatea publică „{{name}}” nu funcționează",
+      "facility_inoperative_labor": "Facilitatea publică „{{name}}” nu funcționează din lipsă de forță de muncă",
+      "facility_inoperative_material": "Facilitatea publică „{{name}}” nu funcționează din lipsă de materii prime",
+      "facility_inoperative_high_skill": "Facilitatea publică „{{name}}” funcționează la capacitate redusă din lipsă de specialiști",
+      "facility_inoperative_budget": "Facilitatea publică „{{name}}” funcționează la capacitate redusă din lipsă de buget",
+      "education_low_enrollment": "Instituția de învățământ „{{name}}” este subutilizată – are prea puțini elevi (înscriși: {{enrolled}} / locuri: {{max_students}})",
+      "infra_facility_down": "Facilitatea de infrastructură „{{name}}” este oprită",
+      "infra_disconnected": "Facilități neconectate la rețeaua de infrastructură: {{count}}",
+      "rail_capacity_exceeded": "Tronsoane de cale ferată pe care numărul de trenuri depășește capacitatea: {{count}}",
+      "collapse": "Clădiri și drumuri prăbușite: {{count}}",
+      "collapse_with_deaths": "Clădiri și drumuri prăbușite: {{count}} · decese: {{deaths}}",
+      "deaths_traffic": "Decese în accidente rutiere: {{count}}",
+      "tenant_blocked_by_parcel_size": "În cartierul „{{zone_name}}” nu se poate construi nicio clădire pentru „{{tenant_name}}” (necesar: {{required}} m2, maximum posibil pe parcelă: {{max_capacity}} m2)",
+      "unknown": "A avut loc un eveniment grav",
+      "sanitation": "Gospodării cu igienă în declin: {{count}}"
+    },
+    "facilitiesTitle": "Facilități care nu funcționează",
+    "otherProblemsTitle": "Alte probleme",
+    "facility": {
+      "title": "{{facility}}: nu poate funcționa",
+      "evidence": "Producția este la {{percent}}% din plan"
+    }
+  }
+}

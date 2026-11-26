@@ -1,0 +1,51 @@
+{
+  "citizenTracking": {
+    "tabBasic": "Översikt",
+    "tabActivity": "Aktivitet",
+    "follow": "Följ med kameran",
+    "unfollow": "Sluta följa med kameran",
+    "track": "Lägg till i bevakningslistan",
+    "trackRandom": "Bevaka en slumpvis medborgare",
+    "noUntrackedCitizens": "Det finns inga obevakade medborgare att bevaka.",
+    "trackRandomError": "Det gick inte att bevaka en medborgare.",
+    "untrack": "Ta bort från bevakningslistan",
+    "home": "Bostad",
+    "mobility": "Färdsätt",
+    "mode": {
+      "automobile": "Bil",
+      "pedestrian": "Till fots och kollektivtrafik"
+    },
+    "visits": "Resmål",
+    "visitKind": {
+      "home": "Hem",
+      "work": "Arbete",
+      "school": "Skola",
+      "shop": "Handla"
+    },
+    "legs": {
+      "walk": "Till fots",
+      "drive": "Bil",
+      "transit": "Kollektivtrafik",
+      "conveyor": "Persontransportsystem"
+    },
+    "trip": "Enkel väg {{minutes}} min · {{route}}",
+    "noRoute": "Ingen resväg",
+    "noVisits": "Har ingenstans att åka.",
+    "status": {
+      "not_ready": "Visas när simuleringen har körts.",
+      "busy": "Kan inte visas medan simuleringen körs.",
+      "no_home": "Väntar på bostad, så ingen aktivitet finns registrerad.",
+      "missing": "Medborgaren bor inte längre i staden.",
+      "error": "Det gick inte att hämta."
+    },
+    "empty": "Inga medborgare bevakas.",
+    "pickFailed": {
+      "not_ready": "Kör simuleringen så kan du klicka på bilar och fotgängare för att se vilka medborgare det är.",
+      "busy": "Medborgare kan inte visas medan simuleringen körs.",
+      "none": "Det gick inte att hitta vem som sitter i bilen eller går här.",
+      "missing": "Medborgaren bor inte längre i staden.",
+      "no_home": "Medborgaren väntar på bostad.",
+      "error": "Det gick inte att visa medborgaren."
+    }
+  }
+}

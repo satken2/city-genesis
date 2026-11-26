@@ -1,0 +1,202 @@
+{
+  "diagnosis": {
+    "refresh": "Diagnostisera igen",
+    "note": "Spårar orsakerna till problemet steg för steg utifrån det senaste simuleringsresultatet. När du har åtgärdat det uppdateras resultatet när du kör nästa epok.",
+    "noProblem": {
+      "title": "Inga problem hittades",
+      "description": "Det finns för närvarande inga problem att rapportera för den här ekonomiska aktören."
+    },
+    "target": {
+      "agent": "Anläggning #{{id}}",
+      "path": "Sträckning #{{id}}",
+      "node": "Knutpunkt #{{id}}",
+      "nodeAt": "Punkt ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": {
+        "title": "Den ekonomiska aktören hittades inte",
+        "description": ""
+      },
+      "cycle": {
+        "title": "Orsakerna går i cirkel",
+        "description": "Den här anläggningens problem diagnostiseras redan längre upp (de är beroende av varandra)."
+      },
+      "depth_limit": {
+        "title": "Ingen djupare analys",
+        "description": "Orsakskedjan är för lång, så analysen avbröts här. Diagnostisera anläggningen direkt."
+      },
+      "no_alert": {
+        "title": "Anläggningen själv har inga problem",
+        "description": "Att utbudet inte räcker kan bero på anläggningens storlek eller mål för kapacitetsutnyttjande."
+      },
+      "facility_inactive": {
+        "title": "Anläggningen är inte i drift",
+        "description": "Den producerar inte eftersom den byggs, är pausad, har rasat eller liknande. Se anläggningens detaljer."
+      },
+      "producer_ref": {
+        "title": "Leverantörsanläggning",
+        "description": ""
+      },
+      "material_shortage": {
+        "title": "Råvarorna kan inte anskaffas",
+        "description": "En del av de råvaror som behövs kom inte fram, så produktionen blev lägre än planerat."
+      },
+      "material_unmet": {
+        "title": "Brist på {{product_name}}",
+        "description": "Mottaget: {{received}} av behovet {{demand}} ({{ratio}} %)."
+      },
+      "material_unmet_unknown": {
+        "title": "Det gick inte att avgöra vilken råvara som saknades",
+        "description": "Det kan hända t.ex. direkt efter att efterfrågan har minskat. Se resultatet för nästa epok."
+      },
+      "infra_disconnected": {
+        "title": "Inte ansluten till nätet för {{product_name}}",
+        "description": ""
+      },
+      "infra_no_terminal": {
+        "title": "Ingen anslutningspunkt",
+        "description": "Anläggningen har ingen anslutningspunkt för {{product_name}}."
+      },
+      "infra_terminal_unconnected": {
+        "title": "Ingen sträckning är kopplad till anslutningspunkten",
+        "description": ""
+      },
+      "infra_link_not_active": {
+        "title": "Matarsträckningen är inte i drift än",
+        "description": "Sträckningar till anslutningspunkten som byggs eller inte har påbörjats: {{count}} st."
+      },
+      "infra_link_incompatible": {
+        "title": "Matarsträckningen kan inte överföra {{product_name}}",
+        "description": "Sträckningen till anslutningspunkten är av en typ som inte kan överföra den här varan (t.ex. ett icke elektrifierat spår)."
+      },
+      "infra_no_producer": {
+        "title": "Det finns ingen producent av {{product_name}} i staden",
+        "description": ""
+      },
+      "infra_producers_inactive": {
+        "title": "Producenterna av {{product_name}} är inte i drift",
+        "description": "Ingen av stadens {{count}} producenter är i drift."
+      },
+      "infra_producers_unconnected": {
+        "title": "Producenterna är inte anslutna till nätet",
+        "description": "{{count}} producenter är i drift, men ingen av dem är ansluten till nätet för {{product_name}}."
+      },
+      "infra_network_split": {
+        "title": "Det här nätet har ingen producent",
+        "description": "Producenterna av {{product_name}} ({{producers}} st.) är anslutna till ett annat nät. De två näten är avbrutna på vägen eller har aldrig kopplats ihop."
+      },
+      "infra_link_under_construction": {
+        "title": "En sträckning som förbinder näten byggs",
+        "description": "Sträckningar som ska anslutas till det här nätet: {{count}} st."
+      },
+      "infra_gap_detected": {
+        "title": "Här är nätet avbrutet",
+        "description": "De två nätens ändpunkter ligger bara {{distance}} m från varandra."
+      },
+      "infra_tap_missing": {
+        "title": "Inte ansluten till producenternas nät",
+        "description": ""
+      },
+      "infra_generation_shortage": {
+        "title": "Det produceras för lite {{product_name}}",
+        "description": "Nätet producerar {{supply}} mot en efterfrågan på {{demand}} ({{producers}} producenter)."
+      },
+      "infra_transmission_bottleneck": {
+        "title": "Nätets kapacitet räcker inte",
+        "description": "{{count}} sträckningar används till full kapacitet."
+      },
+      "infra_unexplained": {
+        "title": "Nätet ser ut att fungera normalt",
+        "description": "Både produktion och anslutningar räcker, så bristen kan ha varit tillfällig. Se resultatet för nästa epok."
+      },
+      "market_no_supplier": {
+        "title": "Det finns ingen leverantör av {{product_name}} i staden",
+        "description": "Det finns ingen inhemsk producent i drift och ingen import."
+      },
+      "market_supply_insufficient": {
+        "title": "Utbudet av {{product_name}} når inte upp till efterfrågan",
+        "description": "Utbud {{supply}} mot beställningar för hela staden på {{demand}} ({{producers}} producenter, {{hubs}} importnoder)."
+      },
+      "market_unmatched": {
+        "title": "Det gick inte att köpa in {{product_name}} på marknaden",
+        "description": "För staden som helhet täcker utbudet {{supply}} beställningarna {{demand}}, men det nådde inte den här anläggningen. Avstånd eller pris kan vara orsaken."
+      },
+      "service_out_of_range": {
+        "title": "Utanför serviceområdet för {{product_name}}",
+        "description": "Anläggningens byggplats ligger inte inom räckvidden för någon anläggning som tillhandahåller {{product_name}} ({{producers}} i staden)."
+      },
+      "high_skill_shortage": {
+        "title": "Specialister kan inte rekryteras",
+        "description": "Det finns inte tillräckligt med högkvalificerad arbetskraft, så produktionsplanen har minskats till vad befintlig personal klarar. Högkvalificerad arbetskraft utbildas på universitet: bygg ut universiteten och fördela antagningsplatserna till den kompetens som behövs."
+      },
+      "labor_shortage": {
+        "title": "För få anställda",
+        "description": "Anskaffad arbetskraft: {{total_labor}} av behovet {{quota}}."
+      },
+      "labor_market_tight": {
+        "title": "Det finns ingen arbetskraft kvar i staden",
+        "description": "Arbetslösheten är bara {{unemployment_rate}} %, så det finns ingen att anställa. Bygg fler bostäder för att locka invånare."
+      },
+      "labor_unfilled": {
+        "title": "Det finns arbetssökande, men de kommer inte",
+        "description": "Arbetslösheten är {{unemployment_rate}} %. Trolig orsak är lång pendling, låga löner eller fel kompetens."
+      },
+      "budget_capped": {
+        "title": "Budgeten räcker inte",
+        "description": "Den tilldelade budgeten ligger långt under det som behövs. Se över budgetfördelningen."
+      },
+      "construction_shortage": {
+        "title": "{{product_name}} kan inte anskaffas",
+        "description": ""
+      },
+      "line_paused_route_disconnected": {
+        "title": "Resvägen mellan hållplatserna är avbruten",
+        "description": "Hållplatser som följer på varandra i slingan är inte förbundna med spår eller gator som går att trafikera i rätt riktning. Bygg upp den avbrutna delen igen eller se över resvägen. För att vända på enkelriktade spår: vänd vid en station på ett spår som kan trafikeras i båda riktningarna (t.ex. dubbelspår lagt som en enda sträckning), eller låt tågen byta till motsatt spår genom att samla spåren i en nod eller lägga en växelförbindelse, och placera returhållplatserna vid plattformarna för motsatt riktning."
+      },
+      "line_paused_no_underlay": {
+        "title": "Hållplatsen saknar underliggande sträckning",
+        "description": "Spåret eller gatan som hållplatsen låg på finns inte längre."
+      },
+      "line_paused_train_too_long": {
+        "title": "Tågsättet är längre än hållplatsens delsträcka",
+        "description": "Minska antalet vagnar per tågsätt eller förläng delsträckan som hållplatsen ligger på (en stationsplattform eller en del av en gata eller ett spår)."
+      },
+      "line_no_vehicle_product": {
+        "title": "Inga fordon är definierade för den här linjetypen",
+        "description": ""
+      },
+      "line_vehicle_shortage": {
+        "title": "Fordon kan inte anskaffas",
+        "description": "Anskaffade vagnar: {{received}} av behovet {{required}}."
+      },
+      "line_off_network": {
+        "title": "Linjen ligger inte på något trafiknät",
+        "description": "Linjens underliggande resväg är inte kopplad till något spår eller någon gata."
+      },
+      "transit_no_depot": {
+        "title": "Det finns ingen depå för {{product_name}} i staden",
+        "description": "Bygg en depå och anslut den till trafiknätet."
+      },
+      "transit_depots_inactive": {
+        "title": "Depåerna är inte i drift",
+        "description": "Ingen av stadens {{count}} depåer är i drift."
+      },
+      "transit_depots_unconnected": {
+        "title": "Depåerna är inte anslutna till trafiknätet",
+        "description": "Ingen av de {{count}} depåerna är kopplad till spår eller gata. För järnväg: lägg ett anslutningsspår från huvudspåret till depåns anslutningspunkt."
+      },
+      "transit_depot_other_network": {
+        "title": "Depåerna ligger på ett annat trafiknät",
+        "description": "{{count}} depåer är anslutna till ett annat spårnät som inte når den här linjen. Förbind näten med spår eller bygg en depå på det här nätet."
+      },
+      "transit_vehicle_insufficient": {
+        "title": "Det produceras för få fordon",
+        "description": "Depåerna på det här nätet ({{depots}} st.) levererar {{supply}} vagnar, medan linjerna behöver {{demand}}."
+      },
+      "transit_unexplained": {
+        "title": "Depåerna ser ut att fungera normalt",
+        "description": "Både leveranser och anslutningar räcker, så bristen kan ha varit tillfällig. Se resultatet för nästa epok."
+      }
+    }
+  }
+}

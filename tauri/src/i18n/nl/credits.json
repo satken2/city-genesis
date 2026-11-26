@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Deze game maakt gebruik van de onderstaande materialen. Namen van makers en bronnen, licentienamen en door licenties voorgeschreven vermeldingen zijn letterlijk overgenomen.",
+    "empty": "Geen vermeldingen.",
+    "requiredText": "Voorgeschreven vermelding",
+    "categories": {
+      "bgm": "Muziek",
+      "sfx": "Geluidseffecten",
+      "image": "Afbeeldingen en iconen",
+      "font": "Lettertypen",
+      "model": "3D-modellen",
+      "texture": "Texturen"
+    }
+  }
+}

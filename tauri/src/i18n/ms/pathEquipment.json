@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Kelengkapan jalan",
+    "streetlight_type": "Lampu jalan",
+    "fence_type": "Pagar",
+    "street_tree_type": "Pokok tepi jalan",
+    "utility_mode": "Kaedah pendawaian",
+    "none": "Tiada",
+    "standard": "Standard",
+    "overhead": "Pendawaian atas",
+    "underground": "Pendawaian bawah tanah",
+    "apply": "Guna",
+    "bench_type": "Bangku",
+    "bin_type": "Tong sampah",
+    "planter_type": "Petak tanaman",
+    "advert_type": "Iklan"
+  }
+}

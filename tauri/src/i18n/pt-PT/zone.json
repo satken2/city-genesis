@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Bairro n.º {{id}}",
+    "color": "Cor do bairro",
+    "colorUpdateFailed": "Não foi possível atualizar a cor do bairro",
+    "basicInfo": "Informações gerais",
+    "area": "Área",
+    "zonePopulation": "População residente",
+    "daytimePopulation": "População diurna",
+    "spaceAmount": "Área ocupada",
+    "slotStarvationTitle": "Há procura de ocupação que não pode ser construída",
+    "slotStarvationWarning": "«{{tenant}}» precisa de pelo menos {{required}} m2 de área num só edifício, mas o máximo que se pode construir nos lotes deste bairro é {{max}} m2. Disponibilize um lote maior.",
+    "restrictions": "Regulamentos de construção",
+    "restrictionUpdateFailed": "Não foi possível atualizar os regulamentos do bairro",
+    "restrictionRequired": "O índice de implantação, o índice de construção e a altura não podem ficar vazios",
+    "mergeConfirm": "«{{source}}» vai ser fundido em «{{target}}». O bairro de origem desaparece, bem como os seus regulamentos.",
+    "mergeAction": "Fundir",
+    "mergeFailed": "Não foi possível fundir os bairros (só é possível fundir bairros contíguos)",
+    "mergeNoRequest": "Não foi selecionado nenhum bairro para fundir",
+    "edit": {
+      "toolHeading": "Operação",
+      "toolCreate": "Criar novo bairro",
+      "toolExpand": "Expandir bairro existente",
+      "toolExpandZone": "Expandir: {{name}}",
+      "modeHeading": "Modo de seleção",
+      "modeBlock": "Quarteirão inteiro",
+      "modeRoad": "Lado da rua",
+      "hint": {
+        "create": {
+          "block": "Mantenha Ctrl premido e arraste sobre os quarteirões delimitados por ruas; os quarteirões pintados, com os respetivos lotes, passam a formar um novo bairro. Arraste para deslocar o mapa e use a roda do rato para aproximar ou afastar.",
+          "road": "Mantenha Ctrl premido e arraste sobre um dos lados de uma rua (metade da faixa ou os lotes que lhe dão frente); esse lado da rua, com os respetivos lotes, passa a formar um novo bairro. Arraste para deslocar o mapa e use a roda do rato para aproximar ou afastar."
+        },
+        "expand": {
+          "block": "Passe o rato sobre um bairro, mantenha Ctrl premido e arraste sobre os quarteirões para os incluir, com os respetivos lotes, nesse bairro. Arraste para deslocar o mapa e use a roda do rato para aproximar ou afastar.",
+          "road": "Passe o rato sobre um bairro, mantenha Ctrl premido e arraste sobre um dos lados de uma rua (metade da faixa ou os lotes que lhe dão frente) para incluir esse lado, com os respetivos lotes, nesse bairro. Arraste para deslocar o mapa e use a roda do rato para aproximar ou afastar."
+        }
+      },
+      "failed": "Não foi possível alterar o bairro."
+    }
+  }
+}

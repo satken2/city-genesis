@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Mimoúrovňová křižovatka",
+      "jct": "Dálniční křižovatka"
+    },
+    "fallbackName": {
+      "ic": "MÚK č. {{id}}",
+      "jct": "Dálniční křižovatka č. {{id}}"
+    },
+    "connections": {
+      "from": "Odkud",
+      "to": "Kam",
+      "road": "{{type}} č. {{id}}",
+      "none": "Žádné propojené dvojice silnic.",
+      "direction": {
+        "n": "Sever",
+        "ne": "Severovýchod",
+        "e": "Východ",
+        "se": "Jihovýchod",
+        "s": "Jih",
+        "sw": "Jihozápad",
+        "w": "Západ",
+        "nw": "Severozápad"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

@@ -42,6 +42,8 @@ type Pending = { kind: "load" | "delete"; entry: SaveEntry };
 const LANGUAGE_FLAGS: Record<SupportedLanguage, string> = {
   ja: "🇯🇵", en: "🇺🇸", "es-419": "🇲🇽", "zh-Hans": "🇨🇳", "zh-Hant": "🇹🇼", fr: "🇫🇷", ko: "🇰🇷",
   de: "🇩🇪", pl: "🇵🇱", ru: "🇷🇺", "pt-BR": "🇧🇷", "es-ES": "🇪🇸", tr: "🇹🇷", it: "🇮🇹", id: "🇮🇩", ar: "🇪🇬",
+  "pt-PT": "🇵🇹", uk: "🇺🇦", th: "🇹🇭", vi: "🇻🇳", ms: "🇲🇾", nl: "🇳🇱", sv: "🇸🇪", nb: "🇳🇴", da: "🇩🇰", fi: "🇫🇮",
+  cs: "🇨🇿", hu: "🇭🇺", ro: "🇷🇴", bg: "🇧🇬", el: "🇬🇷",
 };
 
 /** Format real saved_at timestamps ("20240115_123045") in the display locale. Preserve the original string if its format differs. */

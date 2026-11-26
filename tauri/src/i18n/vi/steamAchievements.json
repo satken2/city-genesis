@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Tiếp",
+    "close": "Đóng",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "Bước đầu xây phố",
+        "description": "Hoàn thành tòa nhà đầu tiên. Lịch sử thành phố bắt đầu từ đây."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Thành phố vươn ra biển",
+        "description": "Hoàn thành nhà máy điện gió ngoài khơi hoặc giàn khoan dầu ngoài khơi đầu tiên. Công nghiệp thành phố đã vươn ra biển khơi."
+      },
+      "RAIL_LINES_1": {
+        "name": "Tàu chuyển bánh!",
+        "description": "Khai trương một tuyến đường sắt"
+      },
+      "RAIL_LINES_20": {
+        "name": "Vương quốc đường sắt",
+        "description": "Vận hành 20 tuyến đường sắt trong một thành phố. Sơ đồ tuyến trông cũng hoành tráng lắm đấy."
+      },
+      "BUS_LINES_1": {
+        "name": "Phố có xe buýt rồi",
+        "description": "Khai trương một tuyến xe buýt"
+      },
+      "BUS_LINES_20": {
+        "name": "Xe buýt đi muôn nơi",
+        "description": "Vận hành 20 tuyến xe buýt trong một thành phố"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Đường đi làm trên không",
+        "description": "Khai trương một tuyến tàu một ray. Ngắm phố phường quen thuộc từ trên cao một chút."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Thành phố trên không",
+        "description": "Vận hành 20 tuyến tàu một ray trong một thành phố"
+      },
+      "LRT_LINES_1": {
+        "name": "Tàu điện về phố",
+        "description": "Khai trương một tuyến LRT"
+      },
+      "LRT_LINES_20": {
+        "name": "Kinh đô tàu điện",
+        "description": "Vận hành 20 tuyến LRT trong một thành phố"
+      },
+      "POPULATION_10K": {
+        "name": "Mái nhà của 10.000 người",
+        "description": "Đạt dân số 10.000 người"
+      },
+      "POPULATION_100K": {
+        "name": "Đô thị vùng sầm uất",
+        "description": "Đạt dân số 100.000 người"
+      },
+      "POPULATION_500K": {
+        "name": "Gia nhập hàng đô thị lớn",
+        "description": "Đạt dân số 500.000 người"
+      },
+      "POPULATION_1M": {
+        "name": "Thành phố triệu dân",
+        "description": "Đạt dân số 1.000.000 người. Một đô thị lớn nâng đỡ cả triệu cuộc sống."
+      },
+      "FLOORS_5": {
+        "name": "Thành phố vươn cao",
+        "description": "Hoàn thành một tòa nhà tư nhân cao từ 5 tầng trở lên"
+      },
+      "FLOORS_10": {
+        "name": "Bước đầu lên cao tầng",
+        "description": "Hoàn thành một tòa nhà tư nhân cao từ 10 tầng trở lên. May mà có thang máy."
+      },
+      "FLOORS_20": {
+        "name": "Phố phường chọc trời",
+        "description": "Hoàn thành một tòa nhà tư nhân cao từ 20 tầng trở lên"
+      },
+      "FLOORS_40": {
+        "name": "Nhà chọc trời",
+        "description": "Hoàn thành một tòa nhà tư nhân cao từ 40 tầng trở lên. Biểu tượng mới của thành phố."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Ngành công nghiệp vì sức khỏe",
+        "description": "Một nhà máy dược phẩm bắt đầu hoạt động trong thành phố. Hãy chăm lo sức khỏe mọi người, bắt đầu từ chính nơi đây."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Thành phố silicon",
+        "description": "Một nhà máy bán dẫn bắt đầu hoạt động trong thành phố. Con chip nhỏ, ngành công nghiệp lớn."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Thành phố của kỹ thuật chính xác",
+        "description": "Một nhà máy thiết bị chính xác bắt đầu hoạt động trong thành phố. Tay nghề vững vàng trở thành sức mạnh của thành phố."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Miền đất mới của phần mềm",
+        "description": "Một công ty phần mềm bắt đầu kinh doanh trong thành phố. Nơi những ý tưởng mới nảy mầm."
+      },
+      "TOURISTS_1": {
+        "name": "Chào mừng đến thành phố",
+        "description": "Lần đầu tiên có khách du lịch lưu trú tại thành phố"
+      },
+      "TOURISTS_1K": {
+        "name": "Điểm đến được yêu thích",
+        "description": "Có 1.000 khách du lịch lưu trú tại thành phố cùng lúc"
+      },
+      "TOURISTS_10K": {
+        "name": "Cả thế giới ghé thăm",
+        "description": "Có 10.000 khách du lịch lưu trú tại thành phố cùng lúc"
+      },
+      "YEARS_10": {
+        "name": "10 năm cùng thành phố",
+        "description": "Chơi 10 năm trong một thành phố. Hành trình xây phố vẫn còn tiếp diễn."
+      },
+      "YEARS_100": {
+        "name": "Đô thị trăm năm",
+        "description": "Chơi 100 năm trong một thành phố. Hãy dõi theo trọn một thế kỷ của thành phố."
+      },
+      "YEARS_500": {
+        "name": "Thành phố ghi dấu lịch sử",
+        "description": "Chơi 500 năm trong một thành phố. Thế hệ nối tiếp thế hệ, thành phố vẫn tiếp tục."
+      },
+      "YEARS_1000": {
+        "name": "Kinh đô nghìn năm",
+        "description": "Chơi 1.000 năm trong một thành phố. Hãy xây dựng một kinh đô có lịch sử nghìn năm."
+      },
+      "YEARS_10000": {
+        "name": "Kinh đô vĩnh cửu",
+        "description": "Chơi 10.000 năm trong một thành phố. Nhiệm kỳ thị trưởng này cũng dài thật đấy."
+      }
+    }
+  }
+}

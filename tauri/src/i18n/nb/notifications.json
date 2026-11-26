@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Varsler for byen",
+    "empty": "Ingen problemer krever handling akkurat nå",
+    "loadFailed": "Kunne ikke hente varsler",
+    "types": {
+      "resource_runway": "Ressursen «{{name}}» er etter planen tømt om ca. {{remaining_epochs}} epoker",
+      "resource_depleted": "Ressursen «{{name}}» er tømt",
+      "facility_inoperative": "Det offentlige anlegget «{{name}}» er ikke i drift",
+      "facility_inoperative_labor": "Det offentlige anlegget «{{name}}» er ikke i drift på grunn av mangel på arbeidskraft",
+      "facility_inoperative_material": "Det offentlige anlegget «{{name}}» er ikke i drift på grunn av råvaremangel",
+      "facility_inoperative_high_skill": "Det offentlige anlegget «{{name}}» har redusert driften på grunn av mangel på fagfolk",
+      "facility_inoperative_budget": "Det offentlige anlegget «{{name}}» har redusert driften på grunn av for lite budsjett",
+      "education_low_enrollment": "Utdanningsinstitusjonen «{{name}}» har lav utnyttelse fordi få elever søker seg dit ({{enrolled}} av {{max_students}} plasser)",
+      "infra_facility_down": "Infrastrukturanlegget «{{name}}» er ute av drift",
+      "infra_disconnected": "{{count}} anlegg er ikke koblet til infrastrukturnettet",
+      "rail_capacity_exceeded": "Sporstrekninger der antall tog overstiger sporkapasiteten: {{count}}",
+      "collapse": "Kollapsede bygninger og veier: {{count}}",
+      "collapse_with_deaths": "Kollapsede bygninger og veier: {{count}}. Antall omkomne: {{deaths}}",
+      "deaths_traffic": "Omkomne i trafikkulykker: {{count}}",
+      "tenant_blocked_by_parcel_size": "Det kan ikke bygges noe for «{{tenant_name}}» i bydelen «{{zone_name}}» (trenger {{required}} m2, største mulige er {{max_capacity}} m2). En større parsell er nødvendig",
+      "unknown": "Det har skjedd en alvorlig hendelse",
+      "sanitation": "Hygieneforholdene blir dårligere – berørte husholdninger: {{count}}. Forbedre avløps- og avfallshåndteringen."
+    }
+  }
+}

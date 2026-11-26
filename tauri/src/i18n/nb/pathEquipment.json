@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "Veiutstyr",
+    "streetlight_type": "Gatelys",
+    "fence_type": "Gjerder",
+    "street_tree_type": "Gatetrær",
+    "utility_mode": "Ledningsføring",
+    "none": "Ingen",
+    "standard": "Standard",
+    "overhead": "Luftledning",
+    "underground": "Jordkabel",
+    "apply": "Bruk",
+    "bench_type": "Benker",
+    "bin_type": "Søppelkasser",
+    "planter_type": "Beplantning",
+    "advert_type": "Reklame"
+  }
+}

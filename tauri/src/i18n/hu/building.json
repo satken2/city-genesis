@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Szintek kiosztása",
+    "parking": "Parkolás",
+    "type": "Épülettípus",
+    "durability": "Tartósság",
+    "floors": "Szintek",
+    "floorsValue": "{{floors}} szint (alapterület: {{area, number}} ㎡)",
+    "heightLabel": "Magasság: {{value}} m",
+    "baseAreaLabel": "Beépített terület: {{area, number}} ㎡",
+    "underMaintenance": "Felújítás alatt",
+    "parkingCapacity": "Parkolóhelyek",
+    "parkingCapacityValue": "{{capacity}} hely",
+    "parkingDay": "Nappal",
+    "parkingNight": "Éjjel",
+    "parkingUsage": "{{used}} / {{capacity}} hely"
+  },
+  "building_appearance": {
+    "variantLabel": "{{index}}. megjelenés",
+    "layoutHint": "Kártya húzása az építési telekre: elhelyezés / húzás: mozgatás / Shift+húzás: forgatás / Delete billentyű: törlés",
+    "sizeLabel": "{{width}}×{{height}} m",
+    "deleteSelected": "Kijelölt épületrész törlése",
+    "apply": "Alkalmaz",
+    "saveFailed": "Nem sikerült menteni a megjelenést",
+    "noSubbuildings": "Ehhez az épülettípushoz nincsenek épületrészek megadva"
+  }
+}

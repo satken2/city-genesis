@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Καιρός",
+    "choose": "Επιλογή καιρού",
+    "loading": "Έλεγχος καιρού…",
+    "unknown": "Άγνωστος",
+    "automatic": "{{weather}} (αυτόματα)",
+    "failed": "Δεν ήταν δυνατή η αλλαγή του καιρού",
+    "names": {
+      "clear": "Αίθριος",
+      "high_clouds": "Λεπτή νέφωση",
+      "fair": "Λιακάδα",
+      "broken_clouds": "Διαστήματα ηλιοφάνειας",
+      "overcast": "Συννεφιά",
+      "rain_clouds": "Βροχοφόρα νέφη",
+      "fog": "Ομίχλη",
+      "drizzle": "Ψιχάλα",
+      "rain": "Βροχή",
+      "heavy_rain": "Ισχυρή βροχή",
+      "light_snow": "Ελαφριά χιονόπτωση",
+      "snow": "Χιόνι",
+      "blizzard": "Χιονοθύελλα"
+    },
+    "epochClimate": "Κλίμα περιόδου",
+    "temperature": "Θερμοκρασία",
+    "precipitation": "Υετός",
+    "sunlight": "Ένταση ηλιοφάνειας",
+    "windSpeed": "Ταχύτητα ανέμου"
+  }
+}

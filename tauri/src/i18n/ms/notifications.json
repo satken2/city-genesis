@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Pemberitahuan bandar",
+    "empty": "Tiada masalah yang perlu ditangani buat masa ini",
+    "loadFailed": "Gagal memuatkan pemberitahuan",
+    "types": {
+      "resource_runway": "Sumber “{{name}}” dijangka habis dalam kira-kira {{remaining_epochs}} epok",
+      "resource_depleted": "Sumber “{{name}}” telah habis",
+      "facility_inoperative": "Kemudahan awam “{{name}}” tidak dapat beroperasi",
+      "facility_inoperative_labor": "Kemudahan awam “{{name}}” tidak dapat beroperasi kerana kekurangan tenaga kerja",
+      "facility_inoperative_material": "Kemudahan awam “{{name}}” tidak dapat beroperasi kerana kekurangan bahan mentah",
+      "facility_inoperative_high_skill": "Kemudahan awam “{{name}}” mengurangkan operasi kerana kekurangan tenaga pakar",
+      "facility_inoperative_budget": "Kemudahan awam “{{name}}” mengurangkan operasi kerana belanjawan tidak mencukupi",
+      "education_low_enrollment": "Institusi pendidikan “{{name}}” kurang digunakan kerana pelajar tidak ramai ({{enrolled}} daripada {{max_students}} tempat diisi)",
+      "infra_facility_down": "Kemudahan infrastruktur “{{name}}” terhenti",
+      "infra_disconnected": "{{count}} kemudahan tidak bersambung ke rangkaian infrastruktur",
+      "rail_capacity_exceeded": "Kekerapan tren melebihi kapasiti landasan di {{count}} segmen landasan",
+      "collapse": "{{count}} bangunan/jalan telah runtuh",
+      "collapse_with_deaths": "{{count}} bangunan/jalan telah runtuh dan {{deaths}} orang terkorban",
+      "deaths_traffic": "{{count}} orang terkorban dalam kemalangan jalan raya",
+      "tenant_blocked_by_parcel_size": "Tiada bangunan untuk “{{tenant_name}}” boleh dibina di daerah “{{zone_name}}” (perlu {{required}} m2, maksimum lot {{max_capacity}} m2). Lot yang lebih besar diperlukan",
+      "unknown": "Kejadian serius telah berlaku",
+      "sanitation": "Kebersihan semakin teruk bagi {{count}} isi rumah. Perbaiki rawatan kumbahan dan sisa."
+    }
+  }
+}

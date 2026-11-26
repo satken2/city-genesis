@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Projeto de construção",
+    "none": "(Sem etiqueta)",
+    "createNew": "+ Nova etiqueta…",
+    "newPlaceholder": "Nome da etiqueta",
+    "add": "Adicionar",
+    "cancel": "Cancelar",
+    "saveFailed": "Não foi possível guardar a etiqueta",
+    "showObject": "Mostrar na vista 3D",
+    "hideObject": "Ocultar na vista 3D"
+  },
+  "constructionProjects": {
+    "all": "Todos",
+    "empty": "Ainda não há obras. Para agrupar as obras por projeto, escolha uma etiqueta ao colocar algo num painel de construção, ou adicione-a no painel de detalhes de um equipamento público ou estrada planeado ou em construção.",
+    "loadFailed": "Não foi possível obter os projetos de construção",
+    "totalCost": "Custo de construção (previsto)",
+    "duration": "Duração da obra (restante)",
+    "progress": "Progresso",
+    "progressValue": "{{done}} / {{total}} concluídas",
+    "monthsValue": "{{value}} meses",
+    "stalled": "Parado",
+    "stalledWarning": "Obras sem avanço por terem velocidade de construção 0: {{count}} (excluídas do total da duração).",
+    "done": "Concluído",
+    "unnamed": "n.º {{id}}",
+    "showAll": "Voltar a mostrar tudo ({{count}})",
+    "showTag": "Mostrar este projeto na vista 3D",
+    "hideTag": "Ocultar este projeto na vista 3D",
+    "showObject": "Mostrar na vista 3D",
+    "hideObject": "Ocultar na vista 3D",
+    "deleteTag": "Eliminar etiqueta",
+    "confirmDeleteTag": "Eliminar a etiqueta «{{tag}}»? Será retirada dos respetivos edifícios e estradas (as obras em si mantêm-se).",
+    "columns": {
+      "name": "Elemento",
+      "status": "Estado",
+      "cost": "Custo restante",
+      "remaining": "Tempo restante"
+    }
+  }
+}

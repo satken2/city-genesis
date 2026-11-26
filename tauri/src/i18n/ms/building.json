@@ -1,0 +1,27 @@
+{
+  "building": {
+    "floorConfiguration": "Susunan tingkat",
+    "parking": "Tempat letak kereta",
+    "type": "Jenis bangunan",
+    "durability": "Ketahanan",
+    "floors": "Bil. tingkat",
+    "floorsValue": "{{floors}} tingkat (keluasan lantai {{area, number}}㎡)",
+    "heightLabel": "Ketinggian: {{value}}m",
+    "baseAreaLabel": "Keluasan binaan: {{area, number}}㎡",
+    "underMaintenance": "Sedang dibaiki",
+    "parkingCapacity": "Kapasiti tempat letak kereta",
+    "parkingCapacityValue": "{{capacity}} kereta",
+    "parkingDay": "Siang",
+    "parkingNight": "Malam",
+    "parkingUsage": "{{used}} / {{capacity}} kereta"
+  },
+  "building_appearance": {
+    "variantLabel": "Rupa {{index}}",
+    "layoutHint": "Seret kad ke tapak untuk meletakkan / Seret untuk mengalih / Shift+seret untuk memutar / Kekunci Delete untuk membuang",
+    "sizeLabel": "{{width}}×{{height}}m",
+    "deleteSelected": "Buang blok dipilih",
+    "apply": "Guna",
+    "saveFailed": "Gagal menyimpan rupa",
+    "noSubbuildings": "Tiada sub-bangunan ditakrifkan untuk jenis bangunan ini"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Typ",
+    "kind": {
+      "land": "Markplanering",
+      "shore": "Utfyllnad"
+    },
+    "baseHeight": "Referenshöjd",
+    "targetHeight": "Målhöjd",
+    "cutVolume": "Schaktvolym",
+    "fillVolume": "Fyllnadsvolym",
+    "quayLength": "Kajlängd",
+    "quayArea": "Kajens yta",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Höjd (skillnad mot referens)",
+    "seaLevelHeight": "Höjd (över havet)",
+    "baseNote": {
+      "frontage": "0 är vägbanans höjd på den angränsande vägen ({{value}} m)",
+      "terrain_mean": "0 är områdets nuvarande medelhöjd ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "Områdets form är ogiltig. Rita det så att kanterna inte korsar varandra.",
+      "outside_city": "Området sträcker sig utanför staden.",
+      "too_large": "Området är för stort (gräns: {{limit}} km²).",
+      "on_water": "Ett område som bara ligger över havet kan inte bearbetas. Rita det så att det når land.",
+      "no_land_overlap": "Rita området så att det överlappar land (annars blir en remsa hav kvar mellan stranden och området).",
+      "overlaps_parcel": "Området överlappar en befintlig tomt.",
+      "overlaps_path": "Området överlappar en väg, ett spår eller en annan sträckning.",
+      "overlaps_water": "Området når in i en flod eller sjö.",
+      "overlaps_quay_band": "Området överlappar kajen kring utfylld mark.",
+      "invalid_height_offset": "Höjden ligger utanför tillåtet intervall (högst ±{{offsetLimit}} m från referenshöjden).",
+      "below_sea_level": "Höjden kan inte vara lägre än havsytan.",
+      "too_narrow": "Området är för smalt – det finns inget kvar att fylla innanför kajen.",
+      "no_work": "Marken har redan målhöjden, så inget arbete behövs.",
+      "insufficient_funds": "Det går inte att beställa eftersom pengarna inte räcker."
+    },
+    "confirm": "Bekräfta",
+    "confirming": "Bekräftar…",
+    "cancel": "Avbryt",
+    "confirmFailed": "Det gick inte att beställa markarbetena."
+  }
+}

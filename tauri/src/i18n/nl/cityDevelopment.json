@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritme",
+    "roadVariants": "Wegtypen",
+    "patterns": {
+      "grid_1": "Raster 1",
+      "grid_2": "Raster 2",
+      "sprawl_1": "Wildgroei 1",
+      "sprawl_2": "Wildgroei 2",
+      "sprawl_3": "Wildgroei 3",
+      "planned_city_1": "Planstad 1",
+      "split_1": "Opdelen 1"
+    },
+    "spacing": "Wegafstand",
+    "blockLength": "Bloklengte",
+    "splitHint": "Neem hele bouwblokken die door wegen worden omsloten op in het gebied. Wegen evenwijdig aan de lange zijde van een blok komen om de “Wegafstand”, dwarswegen om de “Bloklengte”.",
+    "createParcels": "Percelen maken",
+    "parcelArea": "Perceeloppervlakte",
+    "hint": "Ctrl + slepen met links: gebied voor ontwikkeling inkleuren. Slepen met links: kaart verschuiven. Scrollwiel: in- en uitzoomen.",
+    "clear": "Wissen",
+    "preview": "Voorbeeld",
+    "previewing": "Berekenen…",
+    "create": "Bevestigen",
+    "creating": "Aanmaken…",
+    "previewed": "Het terrein in het gebied ({{area}}) wordt licht geëffend. Te plannen – wegdelen: {{roads}}, percelen: {{parcels}} (afgewezen: {{rejected}})",
+    "created": "Terrein geëffend en gepland – wegdelen: {{roads}}, percelen: {{parcels}} (afgewezen: {{rejected}})"
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Klimatinställningar",
+    "name": "Klimatets namn",
+    "probabilities": "Väderfördelning per månad",
+    "probabilityHint": "Dra färggränserna åt vänster eller höger för att justera. I fälten nedanför kan du också ställa in väder som ligger på 0 %.",
+    "month": "Månad {{month}}",
+    "preset": "Klimatförval",
+    "current": "Nuvarande inställningar",
+    "chartHint": "Välj en serie i teckenförklaringen och dra sedan månadspunkterna uppåt eller nedåt.",
+    "averageHint": "Temperatur, nederbörd och solsken är månadsmedelvärden. De faktiska värdena varierar varje epok kring dessa medelvärden.",
+    "apply": "Verkställ",
+    "chart": "Klimatdiagram per månad"
+  }
+}

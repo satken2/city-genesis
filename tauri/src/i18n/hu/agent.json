@@ -1,0 +1,212 @@
+{
+  "agent": {
+    "back": "Vissza",
+    "editAppearance": "Megjelenés módosítása",
+    "relocateCityHall": "Városháza áthelyezése",
+    "publicFacility": "Közlétesítmény",
+    "underAcquisition": "Felvásárlási tárgyalás folyik",
+    "publicFacilityPanel": {
+      "title": "Köz- és önkormányzati létesítmény"
+    },
+    "abandon": "Feladás",
+    "abandonHint": "A fenntartás feladása: felújítás nélkül hagyja elöregedni",
+    "statusSince": {
+      "founded": "Alapítás dátuma",
+      "householdFormed": "Háztartás létrejötte",
+      "arrived": "Érkezés dátuma",
+      "opened": "Nyitás dátuma",
+      "schoolOpened": "Iskolanyitás dátuma",
+      "completed": "Elkészülés dátuma",
+      "operatingSince": "Üzembe helyezés dátuma",
+      "resumed": "Újraindítás dátuma",
+      "paused": "Leállítás dátuma",
+      "suspended": "Szüneteltetés kezdete",
+      "schoolClosed": "Oktatás szüneteltetésének kezdete",
+      "constructionStarted": "Építés megkezdése",
+      "demolitionScheduled": "Bontás elrendelése",
+      "demolitionStarted": "Bontás megkezdése",
+      "demolished": "Bontás befejezése",
+      "collapsed": "Összeomlás dátuma",
+      "burnedDown": "Leégés dátuma",
+      "default": "Állapotváltozás dátuma"
+    },
+    "reserves": "Pénzeszközök",
+    "revenues": "Bevétel",
+    "expenses": "Kiadás",
+    "zone": "Kerület",
+    "building": "Épület",
+    "rent": "Bérleti díj",
+    "floorOccupancy": "Elfoglalt alapterület",
+    "tenants": "Bérlők",
+    "guests": "Vendégek",
+    "tabBasicInfo": "Alapadatok",
+    "utilizationTarget": "Célkihasználtság",
+    "currentUtilization": "Jelenlegi kihasználtság",
+    "constructionSpeed": "Építési sebesség",
+    "constructionCostPerEpoch": "Építési költség / korszak",
+    "remainingConstruction": "Hátralévő építési idő",
+    "remainingEpochs": "kb. {{n}} korszak",
+    "tabBuildingInfo": "Épület adatai",
+    "tabCargoInfo": "Rakodás",
+    "tabTradeInfo": "Kereslet, kínálat, kereskedelem",
+    "tabTourismInfo": "Turizmus",
+    "tabEmploymentInfo": "Foglalkoztatás",
+    "action": {
+      "purchase": "Felvásárlás",
+      "bulldoze": "Lebontás",
+      "cancelBulldoze": "Lebontás visszavonása",
+      "pause": "Szüneteltetés",
+      "resume": "Folytatás",
+      "delete": "Törlés",
+      "repair": "Felújítás",
+      "rebuild": "Újjáépítés",
+      "edit": "Szerkesztés",
+      "startConstruction": "Építés megkezdése",
+      "stopConstruction": "Felfüggesztés",
+      "cancelAbandon": "Feladás visszavonása",
+      "explode": "Felrobbantás",
+      "explodeConfirm": "Felrobbantod az épületet, és balesetnek álcázod?\nAz épület azonnal összeomlik, a benne lakók és dolgozók meghalnak. A közhangulat súlyosan romlik, és a művelet nem vonható vissza.",
+      "explodeTitle": "Épület felrobbantása",
+      "explodeConfirmAction": "Felrobbantás"
+    },
+    "pendingWarning": "Ez az épület még csak terv. Rendeld el az építés megkezdését.",
+    "alerts": {
+      "diagnoseHint": "Kattints az ok kiderítéséhez",
+      "title": "Figyelmeztetések",
+      "constructionShortage": {
+        "title": "Építőipari szolgáltatás hiánya",
+        "description": "Az építési költségvetés nem elegendő, ezért az építkezés késik."
+      },
+      "onFire": {
+        "title": "Tűz ütött ki!",
+        "description": "Az épületben tűz ütött ki."
+      },
+      "accidentalFire": {
+        "title": "Kisebb tűzeset",
+        "description": "Az épületben tűz keletkezett, de sikerült idejében megfékezni."
+      },
+      "infraDisconnected": {
+        "title": "Nincs csatlakozva az infrastruktúra-hálózathoz",
+        "description": "A létesítmény csatlakozási pontjához nem kapcsolódik infrastruktúra-nyomvonal. Amíg nem csatlakozik a hálózathoz, nem tud ellátást adni és fogadni."
+      },
+      "capacityTight": {
+        "title": "Kapacitás határán",
+        "description": "A létesítmény forgalma elérte kapacitásának legalább 90%-át. További keresletet már alig tud kiszolgálni."
+      },
+      "nonconforming": {
+        "title": "Nem felel meg a szabályozásnak",
+        "description": "Az épület nem felel meg a telek építési szabályozásának. Nem újítják fel, és ha leromlik, lebontják."
+      },
+      "crime": {
+        "title": "Bűncselekmény történt",
+        "description": "Ebben az épületben bűncselekmény történt."
+      },
+      "crimeSign": {
+        "title": "Bűnözés jelei",
+        "description": "Ebben az épületben bűnözésre utaló jeleket észleltek. Figyelj, nehogy romoljon a közbiztonság."
+      },
+      "laborShortage": {
+        "title": "Munkaerőhiány",
+        "description": "Nincs elég dolgozó, ezért a termelés és a szolgáltatás elmarad a tervtől."
+      },
+      "materialShortage": {
+        "title": "Alapanyaghiány",
+        "description": "Nem sikerül elég alapanyagot beszerezni, ezért a termelés és a szolgáltatás elmarad a tervtől."
+      },
+      "highSkillShortage": {
+        "title": "Szakemberhiány",
+        "description": "Nincs elég magasan képzett munkaerő, ezért a termelést a meglévő létszám által ellátható szintre csökkentették."
+      },
+      "budgetCapped": {
+        "title": "Elégtelen költségvetés",
+        "description": "A kiutalt költségvetés jóval elmarad a szükséges összegtől, ezért visszafogták a működést. Vizsgáld felül a költségvetés elosztását."
+      },
+      "facilityWarning": {
+        "title": "Működésképtelen közlétesítmény",
+        "description": "A létesítmény szolgáltatása jóval elmarad a céltól. Ellenőrizd a munkaerő- és alapanyag-beszerzést."
+      },
+      "sanitationWarning": {
+        "title": "Romló higiénia",
+        "description": "Az épület telkén súlyosan romlott a higiénia, ami kihat az itt lakó háztartásokra. Javítsd a szennyvíz- és hulladékkezelés ellátását."
+      },
+      "infraWarning": {
+        "title": "Leállt vagy összeomlott infrastruktúra-létesítmény",
+        "description": "A létesítmény leállása vagy összeomlása miatt zavar van az infrastruktúra-ellátásban. Ellenőrizd a létesítmény állapotát és az ellátási útvonalakat."
+      },
+      "farFromRoad": {
+        "title": "Messze van az úttól",
+        "description": "A legközelebbi út kb. {{distance}} m-re van. Ez jelentősen megnehezíti az ellátást, az ingázást és a vásárlást, ezért érdemes közelebb vezetni egy utat."
+      },
+      "noRoadAccess": {
+        "title": "Nincs csatlakoztatható út",
+        "description": "Ez az épület egyetlen úthoz sem tud csatlakozni. Ez jelentősen megnehezíti az ellátást, az ingázást és a vásárlást, ezért építs utat a közelébe."
+      }
+    },
+    "infra": {
+      "title": "Infrastruktúra-csatlakozás",
+      "connected": "Csatlakoztatva",
+      "disconnected": "Nincs csatlakoztatva",
+      "received": "Fogadott mennyiség"
+    },
+    "tabConstructionInfo": "Építkezés",
+    "tabEducationInfo": "Oktatás",
+    "education": {
+      "totalStudents": "Beiratkozott diákok",
+      "totalCapacity": "Teljes férőhely",
+      "statusTitle": "Beiratkozás",
+      "enrolled": "Beiratkozott",
+      "vacant": "Szabad hely",
+      "noCapacity": "Nincs férőhely",
+      "countLabel": "Létszám",
+      "enrollmentBySkill": "Beiratkozás képzettség szerint",
+      "settingsTitle": "Felvételi keretek",
+      "settingsHint": "Állítsd be az egyes képzettségek súlyát. A teljes férőhelyszám a súlyok arányában oszlik meg.",
+      "skillHeader": "Képzettség",
+      "weightHeader": "Súly",
+      "previewHeader": "Férőhely",
+      "save": "Mentés",
+      "saving": "Mentés…",
+      "saveFailed": "Nem sikerült menteni",
+      "sumMustBePositive": "A keretek összege legalább 1 legyen",
+      "invalidWeight": "A súly 0 vagy annál nagyobb egész szám legyen",
+      "studentsList": "Diákok listája",
+      "noStudents": "Nincsenek diákok",
+      "showMore": "Továbbiak ({{count}} fő)"
+    }
+  },
+  "agentList": {
+    "filterType": "Típus",
+    "filterVariant": "Változat",
+    "filterZone": "Kerület",
+    "allVariants": "Minden változat",
+    "allZones": "Minden kerület",
+    "resultCount": "{{count}} találat",
+    "capped": "(összesen {{total}})",
+    "loading": "Betöltés…",
+    "noResults": "Nincs megfelelő gazdasági szereplő",
+    "colStatus": "Állapot",
+    "colVariant": "Változat",
+    "colName": "Név",
+    "colProduct": "Termék",
+    "colPrice": "Ár",
+    "colProduction": "Termelés",
+    "colStock": "Készlet",
+    "colSold": "Eladott",
+    "colWage": "Bérráta",
+    "colEmployment": "Foglalkoztatás",
+    "colUtilization": "Kihasználtság",
+    "colBdType": "Épülettípus",
+    "colDurability": "Tartósság",
+    "colRent": "Bérleti díj",
+    "colFloors": "Szintek",
+    "colFloorArea": "Alapterület",
+    "colOccupancy": "Betöltöttség",
+    "colFamilyType": "Háztartástípus",
+    "colDiscretionaryIncome": "Rendelkezésre álló jövedelem",
+    "colSatisNutrition": "Táplálkozás",
+    "colSatisHealthcare": "Egészségügy",
+    "colSatisLeisure": "Szórakozás, szabadidő",
+    "colSatisResidential": "Lakhatás",
+    "colAutomobile": "Saját autó"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Data curentă",
+    "afterDate": "Data după rulare",
+    "epochCount": "Număr de epoci",
+    "message": "Închei acțiunile din această tură și dai timpul înainte?",
+    "yes": "Da",
+    "no": "Nu",
+    "executing": "Simularea rulează…",
+    "errorSteamLimit": "Autentificarea Steam nu a putut fi confirmată, așa că nu mai poți rula epoci. (Fără autentificare, poți juca până la o populație de {{limit}}.)",
+    "errorAlreadyRunning": "Rulează deja o altă epocă. Încearcă din nou după ce se termină.",
+    "errorFailed": "Rularea epocii a eșuat: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "(epoci rulate: {{count}})",
+    "sectionConstruction": "Stadiul construcțiilor",
+    "kindPath": "Drum",
+    "kindBuilding": "Facilitate",
+    "kindProject": "Proiect",
+    "noItems": "Nimic",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Finalizat",
+    "sectionStatistics": "Statistici",
+    "sectionScore": "Scor",
+    "scoreGain": "Puncte câștigate",
+    "scoreLoss": "Puncte pierdute",
+    "questState": {
+      "completed": "Îndeplinită",
+      "active": "În desfășurare",
+      "locked": "Blocată",
+      "failed": "Eșuată"
+    },
+    "trendHint": "Tendința în ultimele epoci ({{count}}): {{trend}}",
+    "trend": {
+      "up": "În creștere",
+      "flat": "Constant",
+      "down": "În scădere",
+      "none": "Istoric insuficient"
+    },
+    "statPopulation": "Populație",
+    "statTourists": "Turiști",
+    "statGdp": "PIB",
+    "statPrice": "Prețuri",
+    "statIncome": "Venituri",
+    "statUnemployment": "Șomaj",
+    "statHealthcare": "Asistență medicală",
+    "statNutrition": "Nutriție",
+    "statLeisure": "Divertisment și timp liber",
+    "statFire": "Incendii",
+    "statTraffic": "Accidente rutiere",
+    "statCrime": "Criminalitate",
+    "questCompleted": "Îndeplinită!",
+    "questFailed": "Termen depășit"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Se analizează rețeaua de transport",
+      "prepare": "Se pregătește perioada curentă",
+      "transit": "Se organizează transportul public",
+      "market": "Se tranzacționează mărfuri",
+      "production": "Se produce și se consumă",
+      "commute": "Lumea merge la muncă și la școală",
+      "growth": "Cetățenii cresc",
+      "evaluate": "Se evaluează orașul",
+      "immigration": "Se primesc imigranți",
+      "labor": "Se caută locuri de muncă",
+      "spawn": "Se deschid magazine și firme noi",
+      "relocate": "Gospodăriile se mută",
+      "construction": "Se construiesc clădiri",
+      "finance": "Se fac socotelile",
+      "plan": "Se planifică perioada următoare",
+      "incident": "Se intervine la incendii și accidente",
+      "finalize": "Se centralizează statisticile"
+    }
+  }
+}

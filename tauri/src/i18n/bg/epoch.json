@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Текуща дата",
+    "afterDate": "Дата след изпълнението",
+    "epochCount": "Брой епохи",
+    "message": "Да приключи ли този ход и да продължи ли времето напред?",
+    "yes": "Да",
+    "no": "Не",
+    "executing": "Симулацията се изпълнява…",
+    "errorSteamLimit": "Удостоверяването в Steam не е потвърдено, затова не могат да се изпълняват повече епохи. (Без удостоверяване можете да играете до население {{limit}} души.)",
+    "errorAlreadyRunning": "Вече се изпълнява друга епоха. Опитайте отново, след като приключи.",
+    "errorFailed": "Епохата не можа да бъде изпълнена: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "(изпълнени епохи: {{count}})",
+    "sectionConstruction": "Строителство",
+    "kindPath": "Път",
+    "kindBuilding": "Обект",
+    "kindProject": "Проект",
+    "noItems": "Няма",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Завършено",
+    "sectionStatistics": "Статистика",
+    "sectionScore": "Оценка",
+    "scoreGain": "Плюсове",
+    "scoreLoss": "Минуси",
+    "questState": {
+      "completed": "Изпълнена",
+      "active": "В ход",
+      "locked": "Заключена",
+      "failed": "Неуспешна"
+    },
+    "trendHint": "Тенденция за последните {{count}} епохи: {{trend}}",
+    "trend": {
+      "up": "Възходяща",
+      "flat": "Без промяна",
+      "down": "Низходяща",
+      "none": "Недостатъчна история"
+    },
+    "statPopulation": "Население",
+    "statTourists": "Туристи",
+    "statGdp": "БВП",
+    "statPrice": "Цени",
+    "statIncome": "Доходи",
+    "statUnemployment": "Безработица",
+    "statHealthcare": "Здравеопазване",
+    "statNutrition": "Хранене",
+    "statLeisure": "Отдих и развлечения",
+    "statFire": "Пожари",
+    "statTraffic": "Пътни произшествия",
+    "statCrime": "Престъпност",
+    "questCompleted": "Изпълнена!",
+    "questFailed": "Срокът изтече"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Проучване на транспортната мрежа",
+      "prepare": "Подготовка за текущия период",
+      "transit": "Организиране на обществения транспорт",
+      "market": "Търговия със стоки",
+      "production": "Производство и потребление",
+      "commute": "Пътуване до работа и училище",
+      "growth": "Гражданите растат",
+      "evaluate": "Оценяване на града",
+      "immigration": "Посрещане на имигранти",
+      "labor": "Търсене на работа",
+      "spawn": "Откриват се нови магазини и фирми",
+      "relocate": "Преместване на домакинства",
+      "construction": "Строеж на сгради",
+      "finance": "Уреждане на паричните потоци",
+      "plan": "Планиране на следващия период",
+      "incident": "Реагиране на пожари и произшествия",
+      "finalize": "Обобщаване на статистиката"
+    }
+  }
+}

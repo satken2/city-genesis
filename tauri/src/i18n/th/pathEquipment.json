@@ -1,0 +1,18 @@
+{
+  "pathEquipment": {
+    "title": "อุปกรณ์ริมถนน",
+    "streetlight_type": "ไฟถนน",
+    "fence_type": "รั้ว",
+    "street_tree_type": "ต้นไม้ริมทาง",
+    "utility_mode": "รูปแบบการเดินสาย",
+    "none": "ไม่มี",
+    "standard": "มาตรฐาน",
+    "overhead": "สายอากาศ",
+    "underground": "สายใต้ดิน",
+    "apply": "ใช้",
+    "bench_type": "ม้านั่ง",
+    "bin_type": "ถังขยะ",
+    "planter_type": "แปลงไม้ประดับ",
+    "advert_type": "ป้ายโฆษณา"
+  }
+}

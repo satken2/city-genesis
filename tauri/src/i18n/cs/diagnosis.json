@@ -1,0 +1,202 @@
+{
+  "diagnosis": {
+    "refresh": "Znovu diagnostikovat",
+    "note": "Na základě posledních výsledků simulace postupně dohledává příčiny problému. Po nápravě spusťte další epochu a výsledek se aktualizuje.",
+    "noProblem": {
+      "title": "Nebyly nalezeny žádné problémy",
+      "description": "U tohoto ekonomického subjektu teď není co hlásit."
+    },
+    "target": {
+      "agent": "Zařízení č. {{id}}",
+      "path": "Liniová stavba č. {{id}}",
+      "node": "Uzel č. {{id}}",
+      "nodeAt": "Bod ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": {
+        "title": "Ekonomický subjekt nebyl nalezen",
+        "description": ""
+      },
+      "cycle": {
+        "title": "Kruhová příčina",
+        "description": "Potíže tohoto zařízení se již diagnostikují o úroveň výše (vzájemná závislost)."
+      },
+      "depth_limit": {
+        "title": "Dál se nepátrá",
+        "description": "Řetězec příčin je příliš dlouhý, proto zde byl ukončen. Diagnostikujte přímo dané zařízení."
+      },
+      "no_alert": {
+        "title": "Zařízení samo žádné potíže nehlásí",
+        "description": "Nedostatečné dodávky mohou být dány velikostí zařízení nebo cílovým vytížením."
+      },
+      "facility_inactive": {
+        "title": "Zařízení není v provozu",
+        "description": "Nevyrábí, protože je ve výstavbě, pozastavené, zřícené apod. Zkontrolujte podrobnosti zařízení."
+      },
+      "producer_ref": {
+        "title": "Dodávající zařízení",
+        "description": ""
+      },
+      "material_shortage": {
+        "title": "Nelze obstarat suroviny",
+        "description": "Část potřebných surovin nedorazila, takže výroba zaostává za plánem."
+      },
+      "material_unmet": {
+        "title": "Nedostatek: {{product_name}}",
+        "description": "Z potřebného množství {{demand}} dorazilo jen {{received}} ({{ratio}} %)."
+      },
+      "material_unmet_unknown": {
+        "title": "Chybějící surovinu se nepodařilo určit",
+        "description": "To se může stát například hned po poklesu poptávky. Zkontrolujte výsledek příští epochy."
+      },
+      "infra_disconnected": {
+        "title": "Nepřipojeno k síti: {{product_name}}",
+        "description": ""
+      },
+      "infra_no_terminal": {
+        "title": "Chybí přípojný bod",
+        "description": "Zařízení nemá přípojný bod pro: {{product_name}}"
+      },
+      "infra_terminal_unconnected": {
+        "title": "K přípojnému bodu nevede žádná liniová stavba",
+        "description": ""
+      },
+      "infra_link_not_active": {
+        "title": "Přípojka ještě není v provozu",
+        "description": "Liniové stavby vedoucí k přípojnému bodu jsou ve výstavbě nebo ještě nezačaly (počet: {{count}})"
+      },
+      "infra_link_incompatible": {
+        "title": "Přípojka nemůže přenášet: {{product_name}}",
+        "description": "Liniová stavba vedoucí k přípojnému bodu toto zboží přenášet neumí (např. neelektrifikovaná trať)"
+      },
+      "infra_no_producer": {
+        "title": "Ve městě není výrobce: {{product_name}}",
+        "description": ""
+      },
+      "infra_producers_inactive": {
+        "title": "Výrobci nejsou v provozu: {{product_name}}",
+        "description": "Žádné z výrobních zařízení ve městě není v provozu (počet: {{count}})"
+      },
+      "infra_producers_unconnected": {
+        "title": "Výrobci nejsou připojeni k síti",
+        "description": "Výrobní zařízení jsou v provozu (počet: {{count}}), ale žádné není připojené k síti: {{product_name}}"
+      },
+      "infra_network_split": {
+        "title": "V této síti není žádný výrobce",
+        "description": "Výrobci ({{product_name}}, počet: {{producers}}) jsou připojeni k jiné síti. Obě sítě jsou někde přerušené, nebo nebyly nikdy propojeny"
+      },
+      "infra_link_under_construction": {
+        "title": "Propojovací liniová stavba je ve výstavbě",
+        "description": "Počet liniových staveb, které se k této síti teprve připojí: {{count}}"
+      },
+      "infra_gap_detected": {
+        "title": "Zde je síť přerušená",
+        "description": "Koncové body obou sítí jsou od sebe jen {{distance}} m"
+      },
+      "infra_tap_missing": {
+        "title": "Nepřipojeno k síti výrobců",
+        "description": ""
+      },
+      "infra_generation_shortage": {
+        "title": "Nedostatečná výroba: {{product_name}}",
+        "description": "Výroba v této síti {{supply}} proti poptávce {{demand}} (výrobních zařízení: {{producers}})"
+      },
+      "infra_transmission_bottleneck": {
+        "title": "Kapacita sítě je vyčerpána",
+        "description": "Počet liniových staveb vytížených na plnou kapacitu: {{count}}"
+      },
+      "infra_unexplained": {
+        "title": "Síť vypadá v pořádku",
+        "description": "Výroba i připojení jsou dostatečné, šlo tedy možná o přechodný nedostatek. Zkontrolujte výsledek příští epochy."
+      },
+      "market_no_supplier": {
+        "title": "Ve městě není dodavatel: {{product_name}}",
+        "description": "Není tu žádný domácí výrobce v provozu ani dovoz"
+      },
+      "market_supply_insufficient": {
+        "title": "Nabídka nepokrývá poptávku: {{product_name}}",
+        "description": "Nabídka {{supply}} proti objednávkám celého města {{demand}} (výrobců: {{producers}}, dovozních center: {{hubs}})"
+      },
+      "market_unmatched": {
+        "title": "Nepodařilo se obstarat na trhu: {{product_name}}",
+        "description": "Nabídka ve městě ({{supply}}) pokrývá objednávky ({{demand}}), ale k tomuto zařízení se nedostala. Příčinou může být vzdálenost nebo cena."
+      },
+      "service_out_of_range": {
+        "title": "Mimo dosah služby: {{product_name}}",
+        "description": "Pozemek tohoto zařízení neleží v dosahu žádného zařízení, které poskytuje: {{product_name}} (počet ve městě: {{producers}})"
+      },
+      "high_skill_shortage": {
+        "title": "Nelze zajistit odborníky",
+        "description": "Chybí pracovníci s vysokou kvalifikací, a proto je plán výroby snížen na to, co zvládnou stávající zaměstnanci. Vysoce kvalifikované pracovníky vychovávají univerzity: postavte univerzitu a přidělte její studijní místa potřebné kvalifikaci."
+      },
+      "labor_shortage": {
+        "title": "Nedostatek zaměstnanců",
+        "description": "Z potřebné pracovní síly {{quota}} se podařilo zajistit {{total_labor}}."
+      },
+      "labor_market_tight": {
+        "title": "Ve městě nezbývají pracovníci",
+        "description": "Nezaměstnanost je jen {{unemployment_rate}} %, takže není koho zaměstnat. Postavte víc bydlení a přilákejte obyvatele."
+      },
+      "labor_unfilled": {
+        "title": "Uchazeči jsou, ale nepřicházejí",
+        "description": "Nezaměstnanost je {{unemployment_rate}} %. Možnou příčinou je dlouhé dojíždění, nízké mzdy nebo nevhodná kvalifikace."
+      },
+      "budget_capped": {
+        "title": "Nedostatečný rozpočet",
+        "description": "Přidělený rozpočet je hluboko pod potřebnou částkou. Upravte rozdělení rozpočtu."
+      },
+      "construction_shortage": {
+        "title": "Nelze obstarat: {{product_name}}",
+        "description": ""
+      },
+      "line_paused_route_disconnected": {
+        "title": "Trasa mezi zastávkami je přerušená",
+        "description": "Zastávky, které po sobě na lince následují, nespojuje kolej ani ulice sjízdná v potřebném směru. Obnovte přerušený úsek nebo upravte trasu. Chcete-li na jednosměrných kolejích obracet, obracejte ve stanici na koleji sjízdné oběma směry (např. dvoukolejná trať položená jako jedna liniová stavba), nebo umožněte přejezd na protisměrnou kolej spojením kolejí v jednom uzlu či položením kolejové spojky; zastávky zpáteční cesty pak umístěte na nástupiště opačného směru."
+      },
+      "line_paused_no_underlay": {
+        "title": "Zastávka nemá podkladovou liniovou stavbu",
+        "description": "Kolej nebo ulice, na které zastávka stála, již neexistuje."
+      },
+      "line_paused_train_too_long": {
+        "title": "Souprava je delší než úsek se zastávkou",
+        "description": "Snižte počet vozů v soupravě, nebo prodlužte úsek se zastávkou (nástupiště stanice či úsek silnice nebo kolejí)."
+      },
+      "line_no_vehicle_product": {
+        "title": "Pro tento typ linky není definováno vozidlo",
+        "description": ""
+      },
+      "line_vehicle_shortage": {
+        "title": "Nelze obstarat vozidla",
+        "description": "Z potřebného počtu vozů {{required}} se podařilo obstarat {{received}}."
+      },
+      "line_off_network": {
+        "title": "Linka neleží na dopravní síti",
+        "description": "Podkladová trasa linky není spojena s žádnou kolejí ani ulicí."
+      },
+      "transit_no_depot": {
+        "title": "Ve městě není depo: {{product_name}}",
+        "description": "Postavte depo a připojte ho k dopravní síti."
+      },
+      "transit_depots_inactive": {
+        "title": "Depa nejsou v provozu",
+        "description": "Žádné z dep ve městě není v provozu (počet: {{count}})."
+      },
+      "transit_depots_unconnected": {
+        "title": "Depa nejsou připojena k dopravní síti",
+        "description": "Žádné z dep (počet: {{count}}) není spojeno s kolejí ani ulicí. U železnice položte vlečku z hlavní tratě k přípojnému bodu depa."
+      },
+      "transit_depot_other_network": {
+        "title": "Depa jsou v jiné síti",
+        "description": "Depa (počet: {{count}}) jsou připojena k jiné kolejové síti, která na tuto linku nenavazuje. Propojte sítě kolejí, nebo postavte depo v této síti."
+      },
+      "transit_vehicle_insufficient": {
+        "title": "Nedostatečná výroba vozidel",
+        "description": "Depa v této síti (počet: {{depots}}) dodávají vozy v počtu {{supply}}, linky jich však potřebují {{demand}}."
+      },
+      "transit_unexplained": {
+        "title": "Depa vypadají v pořádku",
+        "description": "Dodávky i připojení jsou dostatečné, šlo tedy možná o přechodný nedostatek. Zkontrolujte výsledek příští epochy."
+      }
+    }
+  }
+}

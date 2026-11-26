@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "Kimerült",
+    "unhappy": "Elégedetlen",
+    "neutral": "Közömbös",
+    "happy": "Elégedett",
+    "delighted": "Nagyon elégedett",
+    "zero": "Nulla elégedettség"
+  }
+}

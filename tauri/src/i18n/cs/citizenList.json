@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Hledat občany",
+    "tabTracking": "Sledovaní",
+    "name": "Jméno",
+    "age": "Věk",
+    "ageSeparator": "–",
+    "search": "Hledat",
+    "noResults": "Podmínkám neodpovídá žádný občan.",
+    "truncated": "Zobrazeno {{shown, number}} z {{total, number}} odpovídajících občanů."
+  }
+}

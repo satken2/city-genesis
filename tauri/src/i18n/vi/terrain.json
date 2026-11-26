@@ -1,0 +1,23 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Đang chờ dữ liệu từ trình chỉnh sửa địa hình…"
+  },
+  "groundCover": {
+    "label": "Loại mặt đất",
+    "hint": "Đổi màu sắc và chất liệu mặt đất trong trò chơi cùng bảng màu của chế độ xem 2D. Không ảnh hưởng đến mô phỏng.",
+    "1": "Đồng cỏ",
+    "2": "Sa mạc",
+    "3": "Đồng cỏ rậm",
+    "4": "Đồng tuyết",
+    "5": "Vùng khô hạn",
+    "6": "Lưới"
+  },
+  "climate": {
+    "label": "Khí hậu",
+    "hint": "Sao chép nhiệt độ, lượng mưa, nắng và tỷ lệ thời tiết theo tháng từ mẫu có sẵn. Có thể chỉnh chi tiết trong “Cài đặt khí hậu” ở chế độ tạo kịch bản."
+  },
+  "assetPack": {
+    "label": "Gói tài nguyên",
+    "standard": "Tiêu chuẩn"
+  }
+}

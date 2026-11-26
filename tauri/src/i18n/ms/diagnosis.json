@@ -1,0 +1,202 @@
+{
+  "diagnosis": {
+    "refresh": "Diagnosis semula",
+    "note": "Menjejak punca masalah satu demi satu berdasarkan keputusan simulasi terakhir. Selepas mengambil tindakan, jalankan epok seterusnya untuk mengemas kini keputusan.",
+    "noProblem": {
+      "title": "Tiada masalah ditemui",
+      "description": "Buat masa ini tiada masalah yang perlu dilaporkan bagi entiti ekonomi ini."
+    },
+    "target": {
+      "agent": "Kemudahan #{{id}}",
+      "path": "Jajaran #{{id}}",
+      "node": "Titik sambungan #{{id}}",
+      "nodeAt": "Titik ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": {
+        "title": "Entiti ekonomi tidak ditemui",
+        "description": ""
+      },
+      "cycle": {
+        "title": "Punca berulang dalam kitaran",
+        "description": "Masalah kemudahan ini sudah didiagnosis di peringkat atas (hubungan saling bergantung)."
+      },
+      "depth_limit": {
+        "title": "Penjejakan dihentikan di sini",
+        "description": "Rantaian punca terlalu panjang, jadi penjejakan dihentikan di sini. Diagnosis kemudahan tersebut secara terus."
+      },
+      "no_alert": {
+        "title": "Kemudahan ini sendiri tiada masalah",
+        "description": "Bekalan yang tidak mencukupi mungkin disebabkan oleh saiz kemudahan atau sasaran kadar operasinya."
+      },
+      "facility_inactive": {
+        "title": "Kemudahan tidak beroperasi",
+        "description": "Kemudahan ini tidak mengeluarkan apa-apa kerana sedang dibina, dihentikan, runtuh atau seumpamanya. Semak butiran kemudahan."
+      },
+      "producer_ref": {
+        "title": "Kemudahan pembekal",
+        "description": ""
+      },
+      "material_shortage": {
+        "title": "Tidak dapat memperoleh bahan mentah",
+        "description": "Sebahagian bahan mentah yang diperlukan tidak sampai, jadi pengeluaran kurang daripada yang dirancang."
+      },
+      "material_unmet": {
+        "title": "Kekurangan {{product_name}}",
+        "description": "Diterima {{received}} daripada keperluan {{demand}} ({{ratio}}%)."
+      },
+      "material_unmet_unknown": {
+        "title": "Bahan mentah yang kurang tidak dapat dikenal pasti",
+        "description": "Ini boleh berlaku sejurus selepas permintaan menurun. Semak keputusan epok seterusnya."
+      },
+      "infra_disconnected": {
+        "title": "Tidak bersambung ke rangkaian {{product_name}}",
+        "description": ""
+      },
+      "infra_no_terminal": {
+        "title": "Tiada titik sambungan",
+        "description": "Kemudahan ini tiada nod titik sambungan untuk {{product_name}}."
+      },
+      "infra_terminal_unconnected": {
+        "title": "Tiada jajaran yang sampai ke titik sambungan",
+        "description": ""
+      },
+      "infra_link_not_active": {
+        "title": "Jajaran penyambung belum aktif",
+        "description": "{{count}} jajaran yang sampai ke titik sambungan sedang dibina atau belum mula dibina."
+      },
+      "infra_link_incompatible": {
+        "title": "Jajaran penyambung tidak dapat mengalirkan {{product_name}}",
+        "description": "Jajaran yang sampai ke titik sambungan ialah jenis yang tidak dapat mengangkut barangan ini (contohnya landasan tidak berelektrik)."
+      },
+      "infra_no_producer": {
+        "title": "Tiada kemudahan pengeluar {{product_name}} di bandar",
+        "description": ""
+      },
+      "infra_producers_inactive": {
+        "title": "Kemudahan pengeluar {{product_name}} tidak beroperasi",
+        "description": "Tiada satu pun daripada {{count}} kemudahan pengeluar di bandar yang beroperasi."
+      },
+      "infra_producers_unconnected": {
+        "title": "Kemudahan pengeluar tidak bersambung ke rangkaian",
+        "description": "{{count}} kemudahan pengeluar beroperasi, tetapi tiada satu pun yang bersambung ke rangkaian {{product_name}}."
+      },
+      "infra_network_split": {
+        "title": "Rangkaian ini tiada kemudahan pengeluar",
+        "description": "Kemudahan pengeluar {{product_name}} ({{producers}}) berada dalam rangkaian lain. Kedua-dua rangkaian terputus di tengah jalan atau tidak pernah disambungkan."
+      },
+      "infra_link_under_construction": {
+        "title": "Jajaran penyambung rangkaian sedang dibina",
+        "description": "Ada {{count}} jajaran yang akan disambungkan ke rangkaian ini."
+      },
+      "infra_gap_detected": {
+        "title": "Rangkaian terputus di sini",
+        "description": "Titik hujung kedua-dua rangkaian hanya {{distance}} m jaraknya."
+      },
+      "infra_tap_missing": {
+        "title": "Tidak bersambung ke rangkaian pihak pengeluar",
+        "description": ""
+      },
+      "infra_generation_shortage": {
+        "title": "Pengeluaran {{product_name}} tidak mencukupi",
+        "description": "Rangkaian ini mengeluarkan {{supply}} berbanding permintaan {{demand}} ({{producers}} kemudahan pengeluar)."
+      },
+      "infra_transmission_bottleneck": {
+        "title": "Kapasiti rangkaian tidak mencukupi",
+        "description": "{{count}} jajaran digunakan sehingga kapasiti penuh."
+      },
+      "infra_unexplained": {
+        "title": "Keadaan rangkaian kelihatan normal",
+        "description": "Pengeluaran dan sambungan mencukupi, jadi kekurangan itu mungkin hanya sementara. Semak keputusan epok seterusnya."
+      },
+      "market_no_supplier": {
+        "title": "Tiada pembekal {{product_name}} di bandar",
+        "description": "Tiada pengeluar tempatan yang beroperasi dan tiada import."
+      },
+      "market_supply_insufficient": {
+        "title": "Penawaran {{product_name}} tidak memenuhi permintaan",
+        "description": "Penawaran {{supply}} berbanding tempahan seluruh bandar sebanyak {{demand}} ({{producers}} pengeluar, {{hubs}} hab import)."
+      },
+      "market_unmatched": {
+        "title": "Tidak dapat memperoleh {{product_name}} di pasaran",
+        "description": "Penawaran seluruh bandar {{supply}} mencukupi untuk tempahan {{demand}}, tetapi tidak sampai ke kemudahan ini. Jarak atau harga mungkin puncanya."
+      },
+      "service_out_of_range": {
+        "title": "Di luar julat perkhidmatan {{product_name}}",
+        "description": "Tapak kemudahan ini tidak berada dalam julat kesan mana-mana kemudahan yang membekalkan {{product_name}} ({{producers}} di bandar)."
+      },
+      "high_skill_shortage": {
+        "title": "Tidak dapat memperoleh tenaga pakar",
+        "description": "Pekerja berkemahiran tinggi tidak mencukupi, jadi rancangan pengeluaran dikurangkan setakat yang mampu dikendalikan oleh kakitangan sedia ada. Pekerja berkemahiran tinggi dilatih di universiti. Bina universiti dan peruntukkan kuota kemasukannya kepada kemahiran yang diperlukan."
+      },
+      "labor_shortage": {
+        "title": "Pekerja tidak mencukupi",
+        "description": "Tenaga kerja yang diperoleh {{total_labor}} daripada keperluan {{quota}}."
+      },
+      "labor_market_tight": {
+        "title": "Tiada lagi pekerja di bandar",
+        "description": "Kadar pengangguran hanya {{unemployment_rate}}%, jadi tiada siapa yang boleh diambil bekerja. Tambah perumahan untuk menarik penduduk."
+      },
+      "labor_unfilled": {
+        "title": "Pencari kerja ada, tetapi tidak datang",
+        "description": "Kadar pengangguran ialah {{unemployment_rate}}%. Puncanya mungkin perjalanan ke tempat kerja yang jauh, gaji rendah atau kemahiran yang tidak sepadan."
+      },
+      "budget_capped": {
+        "title": "Belanjawan tidak mencukupi",
+        "description": "Belanjawan yang diperuntukkan jauh lebih rendah daripada jumlah yang diperlukan. Kaji semula peruntukan belanjawan."
+      },
+      "construction_shortage": {
+        "title": "Tidak dapat memperoleh {{product_name}}",
+        "description": ""
+      },
+      "line_paused_route_disconnected": {
+        "title": "Rute antara hentian terputus",
+        "description": "Hentian yang bersebelahan dalam urutan pusingan tidak dihubungkan oleh landasan atau jalan yang boleh dilalui mengikut arah yang diperlukan. Bina semula bahagian yang terputus atau semak semula rute. Untuk berpatah balik pada landasan sehala, patah balik di stesen pada landasan yang boleh dilalui dua hala (contohnya landasan berkembar yang dibina sebagai satu jajaran), atau benarkan tren beralih ke landasan bertentangan dengan menyatukan kedua-dua landasan pada satu nod atau membina landasan lintas, dan letakkan hentian perjalanan pulang di platform bagi arah bertentangan."
+      },
+      "line_paused_no_underlay": {
+        "title": "Hentian tiada jajaran asas",
+        "description": "Landasan atau jalan tempat hentian itu terletak sudah tiada."
+      },
+      "line_paused_train_too_long": {
+        "title": "Tren lebih panjang daripada segmen hentiannya",
+        "description": "Kurangkan bilangan gerabak bagi setiap tren, atau panjangkan segmen tempat hentian itu terletak (platform stesen, atau segmen jalan atau landasan)."
+      },
+      "line_no_vehicle_product": {
+        "title": "Tiada kenderaan ditetapkan untuk jenis laluan ini",
+        "description": ""
+      },
+      "line_vehicle_shortage": {
+        "title": "Tidak dapat memperoleh kenderaan",
+        "description": "Diperoleh {{received}} daripada {{required}} gerabak yang diperlukan."
+      },
+      "line_off_network": {
+        "title": "Laluan tidak berada dalam rangkaian perjalanan",
+        "description": "Rute asas laluan ini tidak dihubungkan dengan mana-mana landasan atau jalan."
+      },
+      "transit_no_depot": {
+        "title": "Tiada depoh {{product_name}} di bandar",
+        "description": "Bina depoh dan sambungkannya ke rangkaian perjalanan."
+      },
+      "transit_depots_inactive": {
+        "title": "Depoh tidak beroperasi",
+        "description": "Tiada satu pun daripada {{count}} depoh di bandar yang beroperasi."
+      },
+      "transit_depots_unconnected": {
+        "title": "Depoh tidak bersambung ke rangkaian perjalanan",
+        "description": "Tiada satu pun daripada {{count}} depoh yang bersambung ke landasan atau jalan. Bagi kereta api, bina landasan cabang dari landasan utama ke titik sambungan depoh."
+      },
+      "transit_depot_other_network": {
+        "title": "Depoh berada dalam rangkaian lain",
+        "description": "{{count}} depoh bersambung ke rangkaian landasan lain yang tidak berhubung dengan laluan ini. Sambungkan dengan landasan, atau bina depoh dalam rangkaian ini."
+      },
+      "transit_vehicle_insufficient": {
+        "title": "Pengeluaran kenderaan tidak mencukupi",
+        "description": "Depoh dalam rangkaian ini ({{depots}}) membekalkan {{supply}} gerabak, sedangkan laluan memerlukan {{demand}} gerabak."
+      },
+      "transit_unexplained": {
+        "title": "Keadaan depoh kelihatan normal",
+        "description": "Bekalan dan sambungan mencukupi, jadi kekurangan itu mungkin hanya sementara. Semak keputusan epok seterusnya."
+      }
+    }
+  }
+}

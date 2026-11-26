@@ -1,0 +1,63 @@
+{
+  "mapNavigation": {
+    "title": "Teroka bandar",
+    "openSidebar": "Buka bar sisi",
+    "closeSidebar": "Tutup bar sisi",
+    "back": "Kembali",
+    "search": "Cari tempat",
+    "origin": "Cari tempat bertolak",
+    "destination": "Cari destinasi",
+    "clear": "Kosongkan",
+    "searching": "Mencari…",
+    "error": "Tidak dapat bersambung. Muat semula dan cuba lagi.",
+    "noResults": "Tiada tempat ditemui",
+    "mode": "Cara perjalanan",
+    "pedestrian": "Berjalan kaki & pengangkutan awam",
+    "automobile": "Kereta",
+    "pickOrigin": "Pilih tempat bertolak pada peta",
+    "pickDestination": "Pilih destinasi pada peta",
+    "swap": "Tukar",
+    "cancel": "Batal",
+    "directions": "Cara ke sini",
+    "intro": "Cari kemudahan, stesen, daerah atau jalan, atau pilih tempat pada peta.",
+    "chooseOrigin": "Cari tempat bertolak atau pilih pada peta.",
+    "routing": "Mencari rute…",
+    "showRoute": "Papar keseluruhan rute",
+    "mapPoint": "Titik pada peta",
+    "minutes": "Kira-kira {{count}} minit",
+    "unnamed": "{{kind}} {{id}}",
+    "snapshot": "Anggaran berdasarkan rangkaian jalan daripada pengiraan rute #{{epoch}}. Garis putus-putus menunjukkan berjalan kaki dan sambungan ke jalan.",
+    "busy": "Simulasi sedang berjalan. Keputusan akan dikemas kini apabila selesai.",
+    "not_ready": "Belum ada data rute. Jalankan simulasi di bandar ini untuk memaparkan rute.",
+    "unreachable": "Tiada rute yang menghubungkan kedua-dua tempat ini.",
+    "no_access": "Tiada jalan yang boleh digunakan ditemui berhampiran tempat yang dipilih.",
+    "geometry_unavailable": "Bentuk perjalanan pengangkutan awam untuk rute ini tidak dapat diperoleh.",
+    "place_missing": "Tempat yang dipilih telah dipadam. Pilih semula.",
+    "kind": {
+      "agent": "Kemudahan",
+      "zone": "Daerah",
+      "stop": "Hentian",
+      "station": "Stesen",
+      "point": "Titik",
+      "road": "Jalan"
+    },
+    "leg": {
+      "walk": "Berjalan kaki",
+      "drive": "Kereta",
+      "transit": "Pengangkutan awam",
+      "conveyor": "Pengangkut penumpang",
+      "access": "Sambungan ke jalan",
+      "turn": "Pusingan di persimpangan"
+    },
+    "picking": {
+      "origin": "Klik tempat bertolak anda pada peta.",
+      "destination": "Klik destinasi anda pada peta."
+    },
+    "pins": {
+      "tab": "Pin",
+      "hint": "Klik peta untuk meletakkan pin dengan warna yang dipilih. Klik kanan pada pin untuk memadamnya.",
+      "list": "Senarai pin",
+      "remove": "Padam pin"
+    }
+  }
+}

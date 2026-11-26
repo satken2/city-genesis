@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Tilbud",
+    "product": "Vare",
+    "amount": "Tilbudt mengde",
+    "price": "Tilbudspris",
+    "soldAmount": "Solgt mengde",
+    "profitRate": "Fortjenestemargin",
+    "utilization": "Kapasitetsutnyttelse"
+  },
+  "tourismSupply": {
+    "title": "Mottak av turister",
+    "touristCapacity": "Mottakskapasitet for turister",
+    "persons": "{{value}} pers.",
+    "218": {
+      "price": "Inngangspenger",
+      "amount": "Besøkskapasitet (totalt)",
+      "soldAmount": "Besøkende (totalt)"
+    },
+    "219": {
+      "price": "Billettpris",
+      "amount": "Passasjerkapasitet (totalt)",
+      "soldAmount": "Passasjerer (totalt)"
+    }
+  },
+  "demand": {
+    "product": "Vare",
+    "demandAmount": "Etterspørsel",
+    "receivedAmount": "Anskaffet",
+    "acquiredAmount": "Lager"
+  },
+  "cargo": {
+    "title": "Godshåndtering",
+    "description": "Denne terminalen importerer varer utenfra for å forsyne markedene i byen, og kjøper opp byens overskuddsproduksjon for å eksportere den ut av regionen.",
+    "capacity": "Håndteringskapasitet",
+    "perPeriod": "/mnd.",
+    "perPeriod_week": "/uke",
+    "materialCapacity": "Grense etter mottatte råvarer",
+    "areaCapacity": "Grense etter gulvareal",
+    "importHandled": "Håndtert import",
+    "exportHandled": "Håndtert eksport",
+    "utilization": "Kapasitetsutnyttelse",
+    "importSectionTitle": "Import",
+    "exportSectionTitle": "Eksport",
+    "handledImport": "Solgt",
+    "handledExport": "Kjøpt opp",
+    "allocation": "Tildelt",
+    "priceImport": "Salgspris",
+    "priceExport": "Innkjøpspris",
+    "lost": "Tapt salg",
+    "noProducts": "Ingen varer håndteres"
+  }
+}

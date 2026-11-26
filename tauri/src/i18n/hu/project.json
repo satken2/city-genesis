@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Építési projekt",
+    "none": "(nincs címke)",
+    "createNew": "+ Új címke…",
+    "newPlaceholder": "Add meg a címke nevét",
+    "add": "Hozzáadás",
+    "cancel": "Mégse",
+    "saveFailed": "Nem sikerült menteni a címkét",
+    "showObject": "Megjelenítés a 3D nézetben",
+    "hideObject": "Elrejtés a 3D nézetben"
+  },
+  "constructionProjects": {
+    "all": "Összes",
+    "empty": "Még nincsenek építési munkák. Ha az építési panelen elhelyezéskor címkét választasz, vagy egy tervezett, illetve épülő közlétesítmény vagy út adatpaneljén címkét adsz hozzá, a munkákat projektenként csoportosítva tekintheted át.",
+    "loadFailed": "Nem sikerült betölteni az építési projekteket",
+    "totalCost": "Becsült költség",
+    "duration": "Hátralévő idő",
+    "progress": "Haladás",
+    "progressValue": "{{done}} / {{total}} kész",
+    "monthsValue": "{{value}} hónap",
+    "stalled": "Áll",
+    "stalledWarning": "{{count}} munka nem halad, mert az építési sebesség 0 (az építési idő összesítéséből kimarad).",
+    "done": "Kész",
+    "unnamed": "#{{id}}",
+    "showAll": "Minden megjelenítése újra ({{count}})",
+    "showTag": "A projekt megjelenítése a 3D nézetben",
+    "hideTag": "A projekt elrejtése a 3D nézetben",
+    "showObject": "Megjelenítés a 3D nézetben",
+    "hideObject": "Elrejtés a 3D nézetben",
+    "deleteTag": "Címke törlése",
+    "confirmDeleteTag": "Törlöd ezt a címkét: „{{tag}}”? A címke lekerül az érintett épületekről és utakról (maguk a munkák megmaradnak).",
+    "columns": {
+      "name": "Tárgy",
+      "status": "Állapot",
+      "cost": "Hátralévő költség",
+      "remaining": "Hátralévő idő"
+    }
+  }
+}

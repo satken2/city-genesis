@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "Clima medie a lunii",
+    "currentClimate_week": "Clima medie a săptămânii",
+    "title": "Eficiența producției facilităților în funcție de climă",
+    "facility": "Facilitate",
+    "factor": "Eficiența producției"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Nút giao liên thông",
+      "jct": "Nút giao giữa cao tốc"
+    },
+    "fallbackName": {
+      "ic": "IC #{{id}}",
+      "jct": "JCT #{{id}}"
+    },
+    "connections": {
+      "from": "Đường đi",
+      "to": "Đường đến",
+      "road": "{{type}} #{{id}}",
+      "none": "Không có cặp đường nào được nối với nhau",
+      "direction": {
+        "n": "Bắc",
+        "ne": "Đông Bắc",
+        "e": "Đông",
+        "se": "Đông Nam",
+        "s": "Nam",
+        "sw": "Tây Nam",
+        "w": "Tây",
+        "nw": "Tây Bắc"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

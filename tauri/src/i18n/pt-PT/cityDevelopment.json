@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritmo",
+    "roadVariants": "Tipos de estrada",
+    "patterns": {
+      "grid_1": "Quadrícula 1",
+      "grid_2": "Quadrícula 2",
+      "sprawl_1": "Expansão dispersa 1",
+      "sprawl_2": "Expansão dispersa 2",
+      "sprawl_3": "Expansão dispersa 3",
+      "planned_city_1": "Cidade planeada 1",
+      "split_1": "Subdivisão 1"
+    },
+    "spacing": "Espaçamento entre estradas",
+    "blockLength": "Comprimento do quarteirão",
+    "splitHint": "Inclua na área quarteirões inteiros delimitados por estradas. São traçadas estradas paralelas ao lado mais comprido de cada quarteirão a intervalos de «Espaçamento entre estradas» e estradas perpendiculares a intervalos de «Comprimento do quarteirão».",
+    "createParcels": "Criar lotes",
+    "parcelArea": "Área do lote",
+    "hint": "Mantenha Ctrl premido e arraste com o botão esquerdo para pintar a área a desenvolver. Arraste com o botão esquerdo para deslocar o mapa e use a roda para aproximar ou afastar.",
+    "clear": "Limpar",
+    "preview": "Pré-visualizar",
+    "previewing": "A calcular…",
+    "create": "Confirmar",
+    "creating": "A criar…",
+    "previewed": "Aplana ligeiramente o terreno em {{area}} e permite planear estradas: {{roads}}, lotes: {{parcels}} (rejeitadas: {{rejected}})",
+    "created": "Terreno aplanado. Estradas planeadas: {{roads}}, lotes: {{parcels}} (rejeitadas: {{rejected}})"
+  }
+}

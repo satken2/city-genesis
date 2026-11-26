@@ -1,0 +1,202 @@
+{
+  "diagnosis": {
+    "refresh": "Diagnosoi uudelleen",
+    "note": "Jäljittää ongelman syyt vaihe vaiheelta edellisen simulaation tulosten perusteella. Kun olet korjannut ongelman, aja seuraava kausi, niin tulokset päivittyvät.",
+    "noProblem": {
+      "title": "Ongelmia ei löytynyt",
+      "description": "Tällä taloustoimijalla ei ole tällä hetkellä raportoitavia ongelmia."
+    },
+    "target": {
+      "agent": "Laitos #{{id}}",
+      "path": "Väylä #{{id}}",
+      "node": "Solmu #{{id}}",
+      "nodeAt": "Piste ({{x}}, {{z}})"
+    },
+    "nodes": {
+      "agent_not_found": {
+        "title": "Taloustoimijaa ei löytynyt",
+        "description": ""
+      },
+      "cycle": {
+        "title": "Syyt kiertävät kehää",
+        "description": "Tämän laitoksen ongelmaa diagnosoidaan jo ylempänä (laitokset ovat riippuvaisia toisistaan)."
+      },
+      "depth_limit": {
+        "title": "Syvemmälle ei jatketa",
+        "description": "Syyketju on liian pitkä, joten jäljitys keskeytettiin tähän. Diagnosoi kyseinen laitos suoraan."
+      },
+      "no_alert": {
+        "title": "Laitoksella itsellään ei ole ongelmia",
+        "description": "Tarjonnan riittämättömyys voi johtua laitoksen koosta tai käyttöastetavoitteesta."
+      },
+      "facility_inactive": {
+        "title": "Laitos ei ole toiminnassa",
+        "description": "Laitos ei tuota, koska se on rakenteilla, pysäytetty, romahtanut tai vastaavassa tilassa. Tarkista laitoksen tiedot."
+      },
+      "producer_ref": {
+        "title": "Toimittajalaitos",
+        "description": ""
+      },
+      "material_shortage": {
+        "title": "Raaka-aineita ei saada hankittua",
+        "description": "Osa tarvittavista raaka-aineista ei saapunut, joten tuotanto jäi suunnitellusta."
+      },
+      "material_unmet": {
+        "title": "Puute: {{product_name}}",
+        "description": "Tarvittiin {{demand}}, saatiin {{received}} ({{ratio}} %)."
+      },
+      "material_unmet_unknown": {
+        "title": "Puuttuvaa raaka-ainetta ei voitu tunnistaa",
+        "description": "Näin voi käydä esimerkiksi heti kysynnän pienennyttyä. Tarkista seuraavan kauden tulos."
+      },
+      "infra_disconnected": {
+        "title": "Ei liitetty verkkoon: {{product_name}}",
+        "description": ""
+      },
+      "infra_no_terminal": {
+        "title": "Ei liitäntäpistettä",
+        "description": "Laitoksella ei ole liitäntäpistettä verkolle: {{product_name}}."
+      },
+      "infra_terminal_unconnected": {
+        "title": "Liitäntäpisteeseen ei ole liitetty yhtään väylää",
+        "description": ""
+      },
+      "infra_link_not_active": {
+        "title": "Liittymäväylä ei ole vielä käytössä",
+        "description": "Liitäntäpisteeseen johtavia väyliä on rakenteilla tai aloittamatta: {{count}} kpl."
+      },
+      "infra_link_incompatible": {
+        "title": "Liittymäväylä ei voi siirtää hyödykettä: {{product_name}}",
+        "description": "Liitäntäpisteeseen johtava väylä on tyyppiä, joka ei voi siirtää tätä hyödykettä (esim. sähköistämätön raide)."
+      },
+      "infra_no_producer": {
+        "title": "Kaupungissa ei ole tuottajaa: {{product_name}}",
+        "description": ""
+      },
+      "infra_producers_inactive": {
+        "title": "Tuotantolaitokset eivät ole toiminnassa: {{product_name}}",
+        "description": "Yksikään kaupungin tuotantolaitoksista ({{count}} kpl) ei ole toiminnassa."
+      },
+      "infra_producers_unconnected": {
+        "title": "Tuotantolaitoksia ei ole liitetty verkkoon",
+        "description": "Tuotantolaitoksia on toiminnassa {{count}} kpl, mutta yhtäkään ei ole liitetty verkkoon: {{product_name}}."
+      },
+      "infra_network_split": {
+        "title": "Tässä verkossa ei ole tuotantolaitosta",
+        "description": "Tuotantolaitokset ({{producers}} kpl, {{product_name}}) ovat eri verkossa. Verkot ovat katkenneet välistä tai niitä ei ole koskaan yhdistetty."
+      },
+      "infra_link_under_construction": {
+        "title": "Verkkoja yhdistävä väylä on rakenteilla",
+        "description": "Tähän verkkoon liittyviä väyliä odottaa: {{count}} kpl."
+      },
+      "infra_gap_detected": {
+        "title": "Verkko katkeaa tässä",
+        "description": "Verkkojen päätepisteet ovat vain {{distance}} m:n päässä toisistaan."
+      },
+      "infra_tap_missing": {
+        "title": "Ei liitetty tuotantolaitosten verkkoon",
+        "description": ""
+      },
+      "infra_generation_shortage": {
+        "title": "Tuotanto ei riitä: {{product_name}}",
+        "description": "Verkon tuotanto on {{supply}} ja kysyntä {{demand}} (tuotantolaitoksia {{producers}} kpl)."
+      },
+      "infra_transmission_bottleneck": {
+        "title": "Verkon kapasiteetti on täynnä",
+        "description": "Väyliä täydellä kapasiteetilla: {{count}} kpl."
+      },
+      "infra_unexplained": {
+        "title": "Verkko näyttää olevan kunnossa",
+        "description": "Tuotanto ja liitännät riittävät, joten puute saattoi olla tilapäinen. Tarkista seuraavan kauden tulos."
+      },
+      "market_no_supplier": {
+        "title": "Kaupungissa ei ole toimittajaa: {{product_name}}",
+        "description": "Kotimaisia toimivia tuottajia ei ole, eikä tuontia ole."
+      },
+      "market_supply_insufficient": {
+        "title": "Tarjonta ei riitä kysyntään: {{product_name}}",
+        "description": "Tarjonta {{supply}}, koko kaupungin tilaukset {{demand}} (tuottajia {{producers}}, tuontikeskuksia {{hubs}})."
+      },
+      "market_unmatched": {
+        "title": "Hankinta markkinoilta epäonnistui: {{product_name}}",
+        "description": "Koko kaupungin tarjonta {{supply}} kattaa tilaukset {{demand}}, mutta se ei päätynyt tälle laitokselle. Syynä voi olla etäisyys tai hinta."
+      },
+      "service_out_of_range": {
+        "title": "Palvelualueen ulkopuolella: {{product_name}}",
+        "description": "Laitoksen rakennuspaikka ei ole minkään palvelua tarjoavan laitoksen vaikutusalueella ({{product_name}}, laitoksia kaupungissa {{producers}})."
+      },
+      "high_skill_shortage": {
+        "title": "Asiantuntijoita ei saada palkattua",
+        "description": "Korkean osaamisen työntekijöitä ei ole tarpeeksi, joten tuotantosuunnitelmaa on supistettu siihen, mihin nykyinen henkilöstö riittää. Korkean osaamisen työntekijät koulutetaan yliopistoissa: rakenna yliopisto ja kohdista sen aloituspaikat tarvittavaan osaamiseen."
+      },
+      "labor_shortage": {
+        "title": "Työntekijöitä ei ole tarpeeksi",
+        "description": "Työvoimaa tarvitaan {{quota}}, saatiin {{total_labor}}."
+      },
+      "labor_market_tight": {
+        "title": "Kaupungissa ei ole vapaata työvoimaa",
+        "description": "Työttömyysaste on vain {{unemployment_rate}} %, joten palkattavia ei ole. Rakenna asuntoja houkutellaksesi asukkaita."
+      },
+      "labor_unfilled": {
+        "title": "Työnhakijoita on, mutta he eivät tule",
+        "description": "Työttömyysaste on {{unemployment_rate}} %. Syynä voivat olla pitkät työmatkat, matala palkka tai osaamisen yhteensopimattomuus."
+      },
+      "budget_capped": {
+        "title": "Budjetti ei riitä",
+        "description": "Myönnetty budjetti jää selvästi tarvittavasta. Tarkista budjetin jako."
+      },
+      "construction_shortage": {
+        "title": "Hankinta epäonnistui: {{product_name}}",
+        "description": ""
+      },
+      "line_paused_route_disconnected": {
+        "title": "Pysäkkien välinen reitti on katki",
+        "description": "Kierrossa peräkkäisten pysäkkien välillä ei ole raidetta tai katua, jota voisi kulkea tarvittavaan suuntaan. Rakenna katkennut kohta uudelleen tai muuta reittiä. Jos haluat kääntyä takaisin yksisuuntaisilla raiteilla, käänny asemalla, jonka raidetta voi kulkea molempiin suuntiin (esim. yhtenä väylänä rakennettu kaksoisraide), tai anna junien siirtyä vastakkaiselle raiteelle yhdistämällä raiteet samaan solmuun tai rakentamalla vaihtoyhteys, ja sijoita paluusuunnan pysäkit vastakkaisen suunnan laitureille."
+      },
+      "line_paused_no_underlay": {
+        "title": "Pysäkin alla ei ole väylää",
+        "description": "Raide tai katu, jolla pysäkki oli, ei ole enää olemassa."
+      },
+      "line_paused_train_too_long": {
+        "title": "Juna on pidempi kuin pysäkin osuus",
+        "description": "Vähennä junan vaunuja tai pidennä osuutta, jolla pysäkki on (asemalaituri tai tie- tai raideosuus)."
+      },
+      "line_no_vehicle_product": {
+        "title": "Tälle linjatyypille ei ole määritetty kalustoa",
+        "description": ""
+      },
+      "line_vehicle_shortage": {
+        "title": "Kalustoa ei saada hankittua",
+        "description": "Vaunuja tarvitaan {{required}}, hankittiin {{received}}."
+      },
+      "line_off_network": {
+        "title": "Linja ei ole liikenneverkossa",
+        "description": "Linjan reittiä ei ole liitetty mihinkään raiteeseen tai katuun."
+      },
+      "transit_no_depot": {
+        "title": "Kaupungissa ei ole varikkoa: {{product_name}}",
+        "description": "Rakenna varikko ja liitä se liikenneverkkoon."
+      },
+      "transit_depots_inactive": {
+        "title": "Varikot eivät ole toiminnassa",
+        "description": "Yksikään kaupungin varikoista ({{count}} kpl) ei ole toiminnassa."
+      },
+      "transit_depots_unconnected": {
+        "title": "Varikkoja ei ole liitetty liikenneverkkoon",
+        "description": "Yhtäkään varikoista ({{count}} kpl) ei ole liitetty raiteeseen tai katuun. Rautateillä rakenna sivuraide pääväylältä varikon liitäntäpisteeseen."
+      },
+      "transit_depot_other_network": {
+        "title": "Varikot ovat eri liikenneverkossa",
+        "description": "Varikot ({{count}} kpl) on liitetty raideverkkoon, joka ei ulotu tälle linjalle. Yhdistä verkot tai rakenna varikko tähän verkkoon."
+      },
+      "transit_vehicle_insufficient": {
+        "title": "Kalustoa ei tuoteta tarpeeksi",
+        "description": "Tämän verkon varikot ({{depots}} kpl) tarjoavat {{supply}} vaunua, kun linjat tarvitsevat {{demand}}."
+      },
+      "transit_unexplained": {
+        "title": "Varikot näyttävät olevan kunnossa",
+        "description": "Tarjonta ja liitännät riittävät, joten puute saattoi olla tilapäinen. Tarkista seuraavan kauden tulos."
+      }
+    }
+  }
+}

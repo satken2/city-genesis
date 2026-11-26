@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Stadsdel #{{id}}",
+    "color": "Stadsdelens färg",
+    "colorUpdateFailed": "Det gick inte att ändra stadsdelens färg",
+    "basicInfo": "Grundinfo",
+    "area": "Yta",
+    "zonePopulation": "Invånare",
+    "daytimePopulation": "Dagbefolkning",
+    "spaceAmount": "Upptagen våningsyta",
+    "slotStarvationTitle": "Väntande hyresgäster får inte plats",
+    "slotStarvationWarning": "”{{tenant}}” behöver minst {{required}} m2 våningsyta i en och samma byggnad, men det största som kan byggas på tomterna i den här stadsdelen är {{max}} m2. Skapa en större tomt.",
+    "restrictions": "Byggregler",
+    "restrictionUpdateFailed": "Det gick inte att ändra stadsdelens regler",
+    "restrictionRequired": "Byggnadsandel, exploateringstal och höjd får inte vara tomma",
+    "mergeConfirm": "”{{source}}” slås ihop med ”{{target}}”. Den sammanslagna stadsdelen försvinner och dess regler går förlorade.",
+    "mergeAction": "Slå ihop",
+    "mergeFailed": "Det gick inte att slå ihop stadsdelarna (stadsdelar som inte gränsar till varandra kan inte slås ihop)",
+    "mergeNoRequest": "Ingen stadsdel har valts för sammanslagning",
+    "edit": {
+      "toolHeading": "Åtgärd",
+      "toolCreate": "Skapa ny stadsdel",
+      "toolExpand": "Utöka stadsdel",
+      "toolExpandZone": "Utöka {{name}}",
+      "modeHeading": "Markeringssätt",
+      "modeBlock": "Hela kvarter",
+      "modeRoad": "Gatusida",
+      "hint": {
+        "create": {
+          "block": "Håll ned Ctrl och dra över kvarter som omges av gator. De målade kvarteren blir tillsammans med sina tomter en ny stadsdel. Dra för att flytta kartan och scrolla för att zooma.",
+          "road": "Håll ned Ctrl och dra över ena sidan av en gata (halva körbanan eller tomterna längs den). Den sidan av gatan blir tillsammans med sina tomter en ny stadsdel. Dra för att flytta kartan och scrolla för att zooma."
+        },
+        "expand": {
+          "block": "Håll muspekaren över en stadsdel, håll sedan ned Ctrl och dra över kvarter för att lägga till dem och deras tomter i stadsdelen. Dra för att flytta kartan och scrolla för att zooma.",
+          "road": "Håll muspekaren över en stadsdel, håll sedan ned Ctrl och dra över ena sidan av en gata (halva körbanan eller tomterna längs den) för att lägga till den sidan och dess tomter i stadsdelen. Dra för att flytta kartan och scrolla för att zooma."
+        }
+      },
+      "failed": "Det gick inte att ändra stadsdelen."
+    }
+  }
+}

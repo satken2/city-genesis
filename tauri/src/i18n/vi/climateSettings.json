@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Cài đặt khí hậu",
+    "name": "Tên khí hậu",
+    "probabilities": "Tỷ lệ thời tiết theo tháng",
+    "probabilityHint": "Kéo ranh giới màu sang trái hoặc phải để điều chỉnh. Có thể đặt cả thời tiết 0% ở các ô số bên dưới.",
+    "month": "Tháng {{month}}",
+    "preset": "Mẫu khí hậu có sẵn",
+    "current": "Cài đặt hiện tại",
+    "chartHint": "Chọn mục trong chú giải, rồi kéo các điểm của từng tháng lên xuống để điều chỉnh.",
+    "averageHint": "Nhiệt độ, lượng mưa và số giờ nắng là giá trị trung bình theo tháng. Giá trị thực tế của mỗi kỳ dao động quanh mức trung bình này.",
+    "apply": "Áp dụng",
+    "chart": "Biểu đồ khí hậu theo tháng"
+  }
+}

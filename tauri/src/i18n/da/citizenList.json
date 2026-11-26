@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Søg efter borgere",
+    "tabTracking": "Fulgte borgere",
+    "name": "Navn",
+    "age": "Alder",
+    "ageSeparator": "til",
+    "search": "Søg",
+    "noResults": "Ingen borgere matcher.",
+    "truncated": "Viser {{shown, number}} af {{total, number}} borgere, der matcher."
+  }
+}

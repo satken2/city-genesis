@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Notificările orașului",
+    "empty": "Momentan nu există probleme care necesită atenție",
+    "loadFailed": "Notificările nu au putut fi încărcate",
+    "types": {
+      "resource_runway": "Resursa „{{name}}” se va epuiza probabil în aprox. {{remaining_epochs}} epoci",
+      "resource_depleted": "Resursa „{{name}}” s-a epuizat",
+      "facility_inoperative": "Facilitatea publică „{{name}}” nu funcționează",
+      "facility_inoperative_labor": "Facilitatea publică „{{name}}” nu funcționează din cauza lipsei de personal",
+      "facility_inoperative_material": "Facilitatea publică „{{name}}” nu funcționează din cauza lipsei de materii prime",
+      "facility_inoperative_high_skill": "Facilitatea publică „{{name}}” funcționează la capacitate redusă din cauza lipsei de specialiști",
+      "facility_inoperative_budget": "Facilitatea publică „{{name}}” funcționează la capacitate redusă din cauza bugetului insuficient",
+      "education_low_enrollment": "Instituția de învățământ „{{name}}” e slab folosită, are prea puțini elevi (înscriși: {{enrolled}} / locuri: {{max_students}})",
+      "infra_facility_down": "Instalația de infrastructură „{{name}}” este oprită",
+      "infra_disconnected": "Facilități neracordate la rețeaua de infrastructură: {{count}}",
+      "rail_capacity_exceeded": "Tronsoane de cale ferată pe care frecvența trenurilor depășește capacitatea: {{count}}",
+      "collapse": "Clădiri sau drumuri prăbușite: {{count}}",
+      "collapse_with_deaths": "Clădiri sau drumuri prăbușite: {{count}}; morți: {{deaths}}",
+      "deaths_traffic": "Morți în accidente rutiere: {{count}}",
+      "tenant_blocked_by_parcel_size": "În cartierul „{{zone_name}}” nu se poate construi nicio clădire pentru „{{tenant_name}}” (necesar {{required}} m2, maximum posibil pe parcelă {{max_capacity}} m2). Este nevoie de o parcelă mai mare",
+      "unknown": "A avut loc un eveniment grav",
+      "sanitation": "Gospodării în care condițiile sanitare se înrăutățesc: {{count}}. Îmbunătățește canalizarea și gestionarea deșeurilor."
+    }
+  }
+}

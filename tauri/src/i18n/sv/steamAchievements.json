@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Nästa",
+    "close": "Stäng",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "Stadens första steg",
+        "description": "Färdigställ din första byggnad. Här börjar stadens historia."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "En stad som når ut till havs",
+        "description": "Färdigställ din första havsbaserade vindkraftspark eller oljeplattform till havs. Stadens industri tar steget ut på havet."
+      },
+      "RAIL_LINES_1": {
+        "name": "Tåget avgår!",
+        "description": "Öppna en järnvägslinje"
+      },
+      "RAIL_LINES_20": {
+        "name": "Järnvägsriket",
+        "description": "Trafikera 20 järnvägslinjer i en och samma stad. Linjekartan börjar bli riktigt imponerande."
+      },
+      "BUS_LINES_1": {
+        "name": "Bussen har kommit till stan",
+        "description": "Öppna en busslinje"
+      },
+      "BUS_LINES_20": {
+        "name": "Med buss överallt",
+        "description": "Trafikera 20 busslinjer i en och samma stad"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Pendling i höjd",
+        "description": "Öppna en monorailslinje. Se de välbekanta gatorna från lite högre höjd."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Staden i skyn",
+        "description": "Trafikera 20 monorailslinjer i en och samma stad"
+      },
+      "LRT_LINES_1": {
+        "name": "Spårvagnen har kommit till stan",
+        "description": "Öppna en LRT-linje"
+      },
+      "LRT_LINES_20": {
+        "name": "Spårvagnarnas stad",
+        "description": "Trafikera 20 LRT-linjer i en och samma stad"
+      },
+      "POPULATION_10K": {
+        "name": "Hem för 10 000",
+        "description": "Nå en befolkning på 10 000"
+      },
+      "POPULATION_100K": {
+        "name": "En livlig regionstad",
+        "description": "Nå en befolkning på 100 000"
+      },
+      "POPULATION_500K": {
+        "name": "Bland de stora städerna",
+        "description": "Nå en befolkning på 500 000"
+      },
+      "POPULATION_1M": {
+        "name": "Miljonstaden",
+        "description": "Nå en befolkning på 1 000 000. En storstad som bär en miljon liv."
+      },
+      "FLOORS_5": {
+        "name": "Staden växer på höjden",
+        "description": "Få en privat byggnad med minst 5 våningar färdigställd"
+      },
+      "FLOORS_10": {
+        "name": "Första steget mot höghusen",
+        "description": "Få en privat byggnad med minst 10 våningar färdigställd. Tur att hissen finns."
+      },
+      "FLOORS_20": {
+        "name": "En skyline tar form",
+        "description": "Få en privat byggnad med minst 20 våningar färdigställd"
+      },
+      "FLOORS_40": {
+        "name": "Skyskrapa",
+        "description": "Få en privat byggnad med minst 40 våningar färdigställd. En ny symbol för din stad."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "Industri för folkhälsan",
+        "description": "Få en läkemedelsfabrik att starta i din stad. Här börjar arbetet för människors hälsa."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Kiselstaden",
+        "description": "Få en halvledarfabrik att starta i din stad. Små chip, stor industri."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Precisionens stad",
+        "description": "Få en fabrik för precisionsinstrument att starta i din stad. Gedigen teknik blir stadens styrka."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "Ett nytt hem för mjukvara",
+        "description": "Få ett mjukvaruföretag att öppna i din stad. En plats där nya idéer får växa."
+      },
+      "TOURISTS_1": {
+        "name": "Välkommen till vår stad",
+        "description": "Få en turist att bo i din stad för första gången"
+      },
+      "TOURISTS_1K": {
+        "name": "En stad värd resan",
+        "description": "Ha 1 000 turister i din stad samtidigt"
+      },
+      "TOURISTS_10K": {
+        "name": "Hela världen kommer på besök",
+        "description": "Ha 10 000 turister i din stad samtidigt"
+      },
+      "YEARS_10": {
+        "name": "Tio år med staden",
+        "description": "Spela i 10 år i en och samma stad. Stadsbyggandet har bara börjat."
+      },
+      "YEARS_100": {
+        "name": "Hundraårsstaden",
+        "description": "Spela i 100 år i en och samma stad. Följ din stad genom ett helt sekel."
+      },
+      "YEARS_500": {
+        "name": "En stad som skriver historia",
+        "description": "Spela i 500 år i en och samma stad. Generationer kommer och går, staden består."
+      },
+      "YEARS_1000": {
+        "name": "Tusenårsstaden",
+        "description": "Spela i 1 000 år i en och samma stad. Bygg en stad med tusen års historia."
+      },
+      "YEARS_10000": {
+        "name": "Den eviga staden",
+        "description": "Spela i 10 000 år i en och samma stad. Det börjar bli en lång mandatperiod, borgmästare."
+      }
+    }
+  }
+}

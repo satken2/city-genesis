@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Påkrevd kompetanse",
+    "wage": "Lønnssats",
+    "quota": "Nødvendig arbeidskraft",
+    "totalLabor": "Ansatt arbeidskraft",
+    "employees": "Ansatte",
+    "hired": "Ansatt",
+    "vacant": "Ubesatt",
+    "noQuota": "Trenger ingen arbeidskraft",
+    "noEmployees": "Ingen ansatte",
+    "statusTitle": "Bemanning"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Kerület #{{id}}",
+    "color": "Kerület színe",
+    "colorUpdateFailed": "Nem sikerült módosítani a kerület színét",
+    "basicInfo": "Alapadatok",
+    "area": "Terület",
+    "zonePopulation": "Lakónépesség",
+    "daytimePopulation": "Nappali népesség",
+    "spaceAmount": "Szintterület-kihasználás",
+    "slotStarvationTitle": "Vannak beköltözni váró bérlők, akiknek nem épülhet hely",
+    "slotStarvationWarning": "„{{tenant}}” beköltözéséhez egy épületben legalább {{required}} m2 szintterület kell, de ennek a kerületnek a telkein legfeljebb {{max}} m2 építhető. Biztosíts nagyobb telket.",
+    "restrictions": "Építési szabályozás",
+    "restrictionUpdateFailed": "Nem sikerült módosítani a kerület szabályozását",
+    "restrictionRequired": "A beépítési arány, a szintterületi mutató és a magasság nem lehet üres",
+    "mergeConfirm": "Összevonás: „{{source}}” → „{{target}}”. A beolvasztott kerület megszűnik, és a szabályozási beállításai is elvesznek.",
+    "mergeAction": "Összevonás",
+    "mergeFailed": "Nem sikerült összevonni a kerületeket (nem szomszédos kerületek nem vonhatók össze)",
+    "mergeNoRequest": "Nincs kijelölve összevonandó kerület",
+    "edit": {
+      "toolHeading": "Művelet",
+      "toolCreate": "Új kerület létrehozása",
+      "toolExpand": "Kerület bővítése",
+      "toolExpandZone": "{{name}} bővítése",
+      "modeHeading": "Kijelölés módja",
+      "modeBlock": "Teljes háztömb",
+      "modeRoad": "Utcaoldal",
+      "hint": {
+        "create": {
+          "block": "A Ctrl lenyomása mellett húzd az egeret az utakkal körülvett háztömbök fölött: a befestett háztömbök a bennük lévő telkekkel együtt új kerületté válnak. Húzással mozgathatod a térképet, görgővel nagyíthatsz és kicsinyíthetsz.",
+          "road": "A Ctrl lenyomása mellett húzd az egeret egy utca egyik oldala (az úttest fele vagy az oda néző telkek) fölött: az utcának az az oldala a telkekkel együtt új kerületté válik. Húzással mozgathatod a térképet, görgővel nagyíthatsz és kicsinyíthetsz."
+        },
+        "expand": {
+          "block": "Vidd az egeret egy kerület fölé, majd a Ctrl lenyomása mellett húzd a háztömbök fölött: a háztömbök a bennük lévő telkekkel együtt ahhoz a kerülethez kerülnek. Húzással mozgathatod a térképet, görgővel nagyíthatsz és kicsinyíthetsz.",
+          "road": "Vidd az egeret egy kerület fölé, majd a Ctrl lenyomása mellett húzd egy utca egyik oldala (az úttest fele vagy az oda néző telkek) fölött: az utcának az az oldala a telkekkel együtt ahhoz a kerülethez kerül. Húzással mozgathatod a térképet, görgővel nagyíthatsz és kicsinyíthetsz."
+        }
+      },
+      "failed": "Nem sikerült módosítani a kerületet."
+    }
+  }
+}

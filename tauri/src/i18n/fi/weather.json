@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Sää",
+    "choose": "Valitse sää",
+    "loading": "Tarkistetaan säätä…",
+    "unknown": "Tuntematon",
+    "automatic": "{{weather}} (automaattinen)",
+    "failed": "Sään vaihtaminen epäonnistui",
+    "names": {
+      "clear": "Selkeää",
+      "high_clouds": "Ohutta pilveä",
+      "fair": "Poutaa",
+      "broken_clouds": "Puolipilvistä",
+      "overcast": "Pilvistä",
+      "rain_clouds": "Sadepilviä",
+      "fog": "Sumua",
+      "drizzle": "Tihkusadetta",
+      "rain": "Sadetta",
+      "heavy_rain": "Rankkasadetta",
+      "light_snow": "Heikkoa lumisadetta",
+      "snow": "Lumisadetta",
+      "blizzard": "Lumimyräkkä"
+    },
+    "epochClimate": "Kauden ilmasto",
+    "temperature": "Lämpötila",
+    "precipitation": "Sademäärä",
+    "sunlight": "Auringon voimakkuus",
+    "windSpeed": "Tuulen nopeus"
+  }
+}

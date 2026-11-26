@@ -1,0 +1,9 @@
+{
+  "climateEffects": {
+    "currentClimate": "Kuukauden keskimääräinen ilmasto",
+    "currentClimate_week": "Viikon keskimääräinen ilmasto",
+    "title": "Laitosten tuotantotehokkuus ilmaston mukaan",
+    "facility": "Laitos",
+    "factor": "Tuotantotehokkuus"
+  }
+}

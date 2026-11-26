@@ -1,0 +1,40 @@
+{
+  "citizenAction": {
+    "name": {
+      "label": "Een naam schenken",
+      "message": "Voer de naam in die je {{name}} wilt schenken.",
+      "inputLabel": "Nieuwe naam",
+      "confirm": "Schenken"
+    },
+    "reward": {
+      "label": "Beloning geven",
+      "message": "Geef het huishouden van {{name}} een beloning uit de gemeentekas.\nLiquide middelen gemeente: {{available}}",
+      "confirm": "Geven"
+    },
+    "expel": {
+      "label": "Veel succes wensen buiten de stad",
+      "message": "{{name}} uit de stad verbannen?",
+      "confirm": "Verbannen",
+      "results": {
+        "0": "{{name}} heeft de spullen gepakt en is stilletjes vertrokken. Niemand kwam afscheid nemen.",
+        "1": "{{name}} stak de gemeentegrens over en riep nog: “Hier kom ik nooit meer terug!”",
+        "2": "{{name}} is beleefd tot voorbij de gemeentegrens begeleid. We wensen {{name}} veel succes elders."
+      }
+    },
+    "donation": {
+      "label": "Om een donatie vragen",
+      "message": "Vraag het huishouden van {{name}} om een donatie aan de gemeente.\nLiquide middelen huishouden: {{available}}",
+      "confirm": "Vragen"
+    },
+    "relocate": {
+      "label": "Een nieuwe woning voorstellen",
+      "message": "Het huishouden van {{name}} uit de huidige woning zetten?\nHet gaat in het volgende tijdvak op zoek naar een nieuwe woning.",
+      "confirm": "Uitzetten",
+      "results": {
+        "0": "Het gezin van {{name}} is uit huis gezet. De meubels staan opgestapeld langs de weg.",
+        "1": "De sloten van het huis van {{name}} zijn vervangen. Het gezin is op zoek naar een nieuwe plek.",
+        "2": "Het gezin van {{name}} heeft een nieuwe woning aangeboden gekregen. Terug naar het oude huis kan niet meer."
+      }
+    }
+  }
+}

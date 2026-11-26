@@ -1,0 +1,128 @@
+{
+  "steamAchievements": {
+    "next": "Următorul",
+    "close": "Închide",
+    "items": {
+      "FIRST_BUILDING": {
+        "name": "Primul pas al orașului",
+        "description": "Finalizează prima clădire. De aici începe povestea orașului tău."
+      },
+      "FIRST_OFFSHORE": {
+        "name": "Un oraș care cucerește marea",
+        "description": "Finalizează primul parc eolian offshore sau prima platformă petrolieră offshore. Industria orașului pornește în larg."
+      },
+      "RAIL_LINES_1": {
+        "name": "Urcarea în tren!",
+        "description": "Deschide o linie de cale ferată"
+      },
+      "RAIL_LINES_20": {
+        "name": "Imperiul feroviar",
+        "description": "Operează 20 de linii de cale ferată într-un singur oraș. Harta rețelei arată deja impresionant."
+      },
+      "BUS_LINES_1": {
+        "name": "Vine autobuzul!",
+        "description": "Deschide o linie de autobuz"
+      },
+      "BUS_LINES_20": {
+        "name": "Peste tot cu autobuzul",
+        "description": "Operează 20 de linii de autobuz într-un singur oraș"
+      },
+      "MONORAIL_LINES_1": {
+        "name": "Naveta de deasupra orașului",
+        "description": "Deschide o linie de monorai. Vezi străzile cunoscute de puțin mai sus."
+      },
+      "MONORAIL_LINES_20": {
+        "name": "Orașul din înalt",
+        "description": "Operează 20 de linii de monorai într-un singur oraș"
+      },
+      "LRT_LINES_1": {
+        "name": "A sosit tramvaiul",
+        "description": "Deschide o linie de LRT"
+      },
+      "LRT_LINES_20": {
+        "name": "Orașul tramvaielor",
+        "description": "Operează 20 de linii de LRT într-un singur oraș"
+      },
+      "POPULATION_10K": {
+        "name": "Casă pentru 10.000 de oameni",
+        "description": "Atinge o populație de 10.000 de locuitori"
+      },
+      "POPULATION_100K": {
+        "name": "Un oraș regional înfloritor",
+        "description": "Atinge o populație de 100.000 de locuitori"
+      },
+      "POPULATION_500K": {
+        "name": "În liga marilor orașe",
+        "description": "Atinge o populație de 500.000 de locuitori"
+      },
+      "POPULATION_1M": {
+        "name": "Orașul milionului",
+        "description": "Atinge o populație de 1.000.000 de locuitori. O metropolă care susține un milion de vieți."
+      },
+      "FLOORS_5": {
+        "name": "Un oraș care crește pe verticală",
+        "description": "Finalizează o clădire privată cu cel puțin 5 etaje"
+      },
+      "FLOORS_10": {
+        "name": "Începuturile clădirilor înalte",
+        "description": "Finalizează o clădire privată cu cel puțin 10 etaje. Noroc cu liftul!"
+      },
+      "FLOORS_20": {
+        "name": "Se conturează silueta orașului",
+        "description": "Finalizează o clădire privată cu cel puțin 20 de etaje"
+      },
+      "FLOORS_40": {
+        "name": "Zgârie-nori",
+        "description": "Finalizează o clădire privată cu cel puțin 40 de etaje. Un nou simbol al orașului."
+      },
+      "INDUSTRY_PHARMACEUTICAL": {
+        "name": "O industrie pentru sănătate",
+        "description": "O fabrică de medicamente începe să funcționeze în oraș. De aici pornește grija pentru sănătatea oamenilor."
+      },
+      "INDUSTRY_SEMICONDUCTOR": {
+        "name": "Orașul siliciului",
+        "description": "O fabrică de semiconductori începe să funcționeze în oraș. Cipuri mici, industrie mare."
+      },
+      "INDUSTRY_PRECISION": {
+        "name": "Orașul preciziei",
+        "description": "O fabrică de aparatură de precizie începe să funcționeze în oraș. Priceperea tehnică devine forța orașului."
+      },
+      "INDUSTRY_SOFTWARE": {
+        "name": "O nouă casă pentru software",
+        "description": "O firmă de software își începe activitatea în oraș. Un loc unde ideile noi pot crește."
+      },
+      "TOURISTS_1": {
+        "name": "Bun venit în orașul nostru",
+        "description": "Primul turist se cazează în oraș"
+      },
+      "TOURISTS_1K": {
+        "name": "Un oraș care merită vizitat",
+        "description": "1.000 de turiști sunt cazați în oraș în același timp"
+      },
+      "TOURISTS_10K": {
+        "name": "Lumea vine în vizită",
+        "description": "10.000 de turiști sunt cazați în oraș în același timp"
+      },
+      "YEARS_10": {
+        "name": "Zece ani alături de oraș",
+        "description": "Joacă 10 ani în același oraș. Iar povestea orașului continuă."
+      },
+      "YEARS_100": {
+        "name": "Orașul centenar",
+        "description": "Joacă 100 de ani în același oraș. Urmărește un secol întreg din viața orașului."
+      },
+      "YEARS_500": {
+        "name": "Un oraș care scrie istorie",
+        "description": "Joacă 500 de ani în același oraș. Generațiile trec, orașul rămâne."
+      },
+      "YEARS_1000": {
+        "name": "Orașul mileniului",
+        "description": "Joacă 1.000 de ani în același oraș. Clădește un oraș cu o istorie de o mie de ani."
+      },
+      "YEARS_10000": {
+        "name": "Orașul etern",
+        "description": "Joacă 10.000 de ani în același oraș. Ce mandat lung, domnule primar!"
+      }
+    }
+  }
+}

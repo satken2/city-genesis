@@ -1,0 +1,23 @@
+{
+  "station": {
+    "sectionTitle": "Nhà ga",
+    "name": "Tên ga",
+    "ridership": "Lượt lên tàu",
+    "platforms": "Danh sách sân ga",
+    "noPlatforms": "Không có sân ga nào thuộc nhà ga này (các sân ga cắt qua đường nhà ga sẽ thuộc về đây)",
+    "lines": "Tuyến dừng tại ga",
+    "noLines": "Không có tuyến nào dừng tại ga này",
+    "stops": "Lượt lên xe theo điểm dừng",
+    "noStops": "Không có điểm dừng nào tại ga này",
+    "lineRunning": "Đang chạy",
+    "lineSuspended": "Tạm ngừng chạy",
+    "houseEnds": "Vị trí tòa nhà ga",
+    "houseEnds_both": "Hai đầu",
+    "houseEnds_start": "Điểm đầu",
+    "houseEnds_end": "Điểm cuối",
+    "passageMode": "Vị trí lối đi",
+    "passageMode_elevated": "Trên cao",
+    "passageMode_ground": "Mặt đất",
+    "passageMode_underground": "Dưới lòng đất"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "terrain3dPreview": {
+    "waitingForEditor": "Venter på data fra terrengredigeringen …"
+  },
+  "groundCover": {
+    "label": "Grunndekke",
+    "hint": "Bytter farge og tekstur på bakken i spillet og fargene i 2D-visningen. Påvirker ikke simuleringen.",
+    "1": "Gressmark",
+    "2": "Ørken",
+    "3": "Frodig eng",
+    "4": "Snødekt mark",
+    "5": "Tørrlendt",
+    "6": "Rutenett"
+  },
+  "climate": {
+    "label": "Klima",
+    "hint": "Kopierer månedlig temperatur, nedbør, soltimer og værfordeling fra en forhåndsinnstilling. Detaljene kan redigeres under «Klimainnstillinger» i scenarioredigeringen."
+  },
+  "assetPack": {
+    "label": "Ressurspakke",
+    "standard": "Standard"
+  }
+}

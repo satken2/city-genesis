@@ -1,0 +1,29 @@
+{
+  "interchange": {
+    "kind": {
+      "ic": "Tilslutningsanlæg",
+      "jct": "Motorvejskryds"
+    },
+    "fallbackName": {
+      "ic": "Afkørsel #{{id}}",
+      "jct": "Motorvejskryds #{{id}}"
+    },
+    "connections": {
+      "from": "Fra vej",
+      "to": "Til vej",
+      "road": "{{type}} #{{id}}",
+      "none": "Ingen forbundne vejpar.",
+      "direction": {
+        "n": "Nord",
+        "ne": "Nordøst",
+        "e": "Øst",
+        "se": "Sydøst",
+        "s": "Syd",
+        "sw": "Sydvest",
+        "w": "Vest",
+        "nw": "Nordvest"
+      },
+      "sideZone": "{{direction}} · {{zone}}"
+    }
+  }
+}

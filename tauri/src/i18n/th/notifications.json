@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "การแจ้งเตือนของเมือง",
+    "empty": "ขณะนี้ไม่มีปัญหาที่ต้องจัดการ",
+    "loadFailed": "ดึงการแจ้งเตือนไม่สำเร็จ",
+    "types": {
+      "resource_runway": "คาดว่าทรัพยากร “{{name}}” จะหมดในอีกประมาณ {{remaining_epochs}} รอบ",
+      "resource_depleted": "ทรัพยากร “{{name}}” หมดแล้ว",
+      "facility_inoperative": "อาคารสาธารณะ “{{name}}” ดำเนินงานไม่ได้",
+      "facility_inoperative_labor": "อาคารสาธารณะ “{{name}}” ดำเนินงานไม่ได้เพราะขาดแรงงาน",
+      "facility_inoperative_material": "อาคารสาธารณะ “{{name}}” ดำเนินงานไม่ได้เพราะขาดวัตถุดิบ",
+      "facility_inoperative_high_skill": "อาคารสาธารณะ “{{name}}” ลดการดำเนินงานลงเพราะขาดบุคลากรเฉพาะทาง",
+      "facility_inoperative_budget": "อาคารสาธารณะ “{{name}}” ลดการดำเนินงานลงเพราะงบประมาณไม่พอ",
+      "education_low_enrollment": "สถานศึกษา “{{name}}” มีนักเรียนน้อยจนใช้งานต่ำ (นักเรียน {{enrolled}} คน / รับได้ {{max_students}} คน)",
+      "infra_facility_down": "สถานที่สาธารณูปโภค “{{name}}” หยุดทำงาน",
+      "infra_disconnected": "มีสถานที่ {{count}} แห่งที่ไม่ได้เชื่อมต่อกับโครงข่ายสาธารณูปโภค",
+      "rail_capacity_exceeded": "มีรางรถไฟ {{count}} เส้นที่จำนวนเที่ยวรถไฟเกินความจุของราง",
+      "collapse": "อาคารหรือถนนพังถล่ม {{count}} แห่ง",
+      "collapse_with_deaths": "อาคารหรือถนนพังถล่ม {{count}} แห่ง มีผู้เสียชีวิต {{deaths}} คน",
+      "deaths_traffic": "มีผู้เสียชีวิตจากอุบัติเหตุจราจร {{count}} คน",
+      "tenant_blocked_by_parcel_size": "ในเขต “{{zone_name}}” สร้างอาคารที่ “{{tenant_name}}” เข้าอยู่ได้ไม่ได้ (ต้องการ {{required}} m2 แต่แปลงที่ดินรองรับได้สูงสุด {{max_capacity}} m2) ต้องใช้แปลงที่ดินที่ใหญ่กว่านี้",
+      "unknown": "เกิดเหตุการณ์ร้ายแรง",
+      "sanitation": "สุขอนามัยของ {{count}} ครัวเรือนกำลังแย่ลง โปรดปรับปรุงการบำบัดน้ำเสียและการจัดการขยะ"
+    }
+  }
+}

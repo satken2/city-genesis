@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "Vyčerpání",
+    "unhappy": "Nespokojenost",
+    "neutral": "Neutrální",
+    "happy": "Spokojenost",
+    "delighted": "Nadšení",
+    "zero": "Nulová spokojenost"
+  }
+}

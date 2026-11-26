@@ -1,0 +1,14 @@
+{
+  "employment": {
+    "requiredSkill": "Kỹ năng yêu cầu",
+    "wage": "Đơn giá lương",
+    "quota": "Lao động cần thiết",
+    "totalLabor": "Lao động đã tuyển",
+    "employees": "Danh sách nhân viên",
+    "hired": "Đã tuyển",
+    "vacant": "Còn trống",
+    "noQuota": "Không cần lao động",
+    "noEmployees": "Không có nhân viên",
+    "statusTitle": "Tình hình tuyển dụng"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "citizenList": {
+    "tabSearch": "Hae kaupunkilaisia",
+    "tabTracking": "Seurantalista",
+    "name": "Nimi",
+    "age": "Ikä",
+    "ageSeparator": "–",
+    "search": "Hae",
+    "noResults": "Ehtoja vastaavia kaupunkilaisia ei ole.",
+    "truncated": "Näytetään {{shown, number}} / {{total, number}} ehtoja vastaavaa kaupunkilaista."
+  }
+}

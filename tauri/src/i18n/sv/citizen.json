@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} år",
+    "male": "Man",
+    "female": "Kvinna",
+    "single": "Ogift",
+    "married": "Gift",
+    "household": "Hushåll",
+    "employer": "Arbetsplats",
+    "unemployed": "Arbetslös",
+    "school": "Skola",
+    "notEnrolled": "Går inte i skolan",
+    "major": "Huvudkompetens",
+    "higherEducation": "Högre utbildning",
+    "graduated": "Avslutad",
+    "notGraduated": "Inte avslutad",
+    "skills": "Kompetenser",
+    "criminality": "Benägenhet för brott",
+    "commuteTime": "Pendlingstid",
+    "automobile": "Bil",
+    "automobileOwned": "Ja",
+    "automobileNone": "Nej",
+    "householdStatus": "Hushållets situation"
+  },
+  "household": {
+    "title": "Hushåll",
+    "familyType": "Hushållstyp",
+    "familySingle": "Ensamstående",
+    "familyCouple": "Par",
+    "familyFamily": "Familj",
+    "familySenior": "Pensionärer",
+    "hasAutomobile": "Har bil",
+    "noAutomobile": "Ingen bil",
+    "discretionaryIncome": "Disponibel inkomst",
+    "livingStandard": "Levnadsstandard",
+    "livingStandardLevel": {
+      "0": "Utblottad",
+      "1": "Fattig",
+      "2": "Medelklass",
+      "3": "Välbärgad"
+    },
+    "satisNutrition": "Mat",
+    "satisHealthcare": "Vård",
+    "satisLeisure": "Nöje och fritid",
+    "satisTourism": "Turism",
+    "tourist": "Turister",
+    "partySize": "Antal i sällskapet",
+    "members": "Medlemmar"
+  },
+  "education": {
+    "people": "personer"
+  }
+}

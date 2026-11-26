@@ -1,0 +1,47 @@
+{
+  "grading": {
+    "kindLabel": "Soort",
+    "kind": {
+      "land": "Egalisatie",
+      "shore": "Landaanwinning"
+    },
+    "baseHeight": "Basishoogte",
+    "targetHeight": "Doelhoogte",
+    "cutVolume": "Ontgravingsvolume",
+    "fillVolume": "Ophoogvolume",
+    "quayLength": "Kadelengte",
+    "quayArea": "Oppervlak kademuur",
+    "unit": {
+      "height": "{{value}} m",
+      "length": "{{value, number}} m",
+      "area": "{{value, number}} m²",
+      "volume": "{{value, number}} m³"
+    },
+    "heightOffset": "Hoogte (t.o.v. basis)",
+    "seaLevelHeight": "Hoogte (boven zeeniveau)",
+    "baseNote": {
+      "frontage": "0 is het wegdek van de aangrenzende weg ({{value}} m)",
+      "terrain_mean": "0 is de huidige gemiddelde hoogte van het gebied ({{value}} m)"
+    },
+    "reasons": {
+      "invalid_polygon": "De vorm van het gebied is ongeldig. Teken het zonder elkaar kruisende zijden.",
+      "outside_city": "Het gebied steekt buiten de stad uit.",
+      "too_large": "Het gebied is te groot (maximaal {{limit}} km²).",
+      "on_water": "Voor een gebied dat helemaal op zee ligt, is geen grondwerk mogelijk. Teken het zo dat het tot op het land reikt.",
+      "no_land_overlap": "Teken het gebied zo dat het het land overlapt (anders blijft er een strook zee tussen de kust en het gebied).",
+      "overlaps_parcel": "Het gebied overlapt met een bestaand perceel.",
+      "overlaps_path": "Het gebied overlapt met een weg, spoor of ander tracé.",
+      "overlaps_water": "Het gebied raakt een rivier of meer.",
+      "overlaps_quay_band": "Het gebied overlapt met de kade van opgespoten land.",
+      "invalid_height_offset": "De opgegeven hoogte valt buiten het bereik (maximaal ±{{offsetLimit}} m t.o.v. de basishoogte).",
+      "below_sea_level": "De hoogte kan niet onder zeeniveau liggen.",
+      "too_narrow": "Het gebied is te smal; binnen de kademuur blijft niets over om op te hogen.",
+      "no_work": "De grond ligt al op de doelhoogte, dus er is geen werk nodig.",
+      "insufficient_funds": "Onvoldoende middelen om deze opdracht te geven."
+    },
+    "confirm": "Bevestigen",
+    "confirming": "Bevestigen…",
+    "cancel": "Annuleren",
+    "confirmFailed": "Opdracht voor het grondwerk mislukt."
+  }
+}

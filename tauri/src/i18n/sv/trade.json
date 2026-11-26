@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Utbud",
+    "product": "Produkt",
+    "amount": "Utbudsmängd",
+    "price": "Pris",
+    "soldAmount": "Såld mängd",
+    "profitRate": "Vinstmarginal",
+    "utilization": "Kapacitetsutnyttjande"
+  },
+  "tourismSupply": {
+    "title": "Mottagning av turister",
+    "touristCapacity": "Mottagningskapacitet för turister",
+    "persons": "{{value}} pers.",
+    "218": {
+      "price": "Inträde",
+      "amount": "Besökskapacitet (totalt)",
+      "soldAmount": "Besökare (totalt)"
+    },
+    "219": {
+      "price": "Biljettpris",
+      "amount": "Transportkapacitet (totalt)",
+      "soldAmount": "Resenärer (totalt)"
+    }
+  },
+  "demand": {
+    "product": "Produkt",
+    "demandAmount": "Efterfrågan",
+    "receivedAmount": "Erhållen mängd",
+    "acquiredAmount": "Lager"
+  },
+  "cargo": {
+    "title": "Godshantering",
+    "description": "Den här terminalen importerar varor utifrån för att försörja stadens marknader och köper upp stadens överskottsproduktion för export.",
+    "capacity": "Hanteringskapacitet",
+    "perPeriod": "/mån.",
+    "perPeriod_week": "/vecka",
+    "materialCapacity": "Gräns enligt mottagna råvaror",
+    "areaCapacity": "Gräns enligt yta",
+    "importHandled": "Hanterad import",
+    "exportHandled": "Hanterad export",
+    "utilization": "Kapacitetsutnyttjande",
+    "importSectionTitle": "Import",
+    "exportSectionTitle": "Export",
+    "handledImport": "Såld mängd",
+    "handledExport": "Uppköpt mängd",
+    "allocation": "Tilldelad mängd",
+    "priceImport": "Försäljningspris",
+    "priceExport": "Uppköpspris",
+    "lost": "Missad försäljning",
+    "noProducts": "Inga varor hanteras"
+  }
+}

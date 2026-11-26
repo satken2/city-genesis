@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Kaupungin ilmoitukset",
+    "empty": "Ei huomiota vaativia ongelmia",
+    "loadFailed": "Ilmoitusten lataus epäonnistui",
+    "types": {
+      "resource_runway": "Luonnonvara ”{{name}}” ehtyy arviolta noin {{remaining_epochs}} kauden kuluttua",
+      "resource_depleted": "Luonnonvara ”{{name}}” on ehtynyt",
+      "facility_inoperative": "Julkinen laitos ”{{name}}” ei toimi",
+      "facility_inoperative_labor": "Julkinen laitos ”{{name}}” ei toimi työvoimapulan vuoksi",
+      "facility_inoperative_material": "Julkinen laitos ”{{name}}” ei toimi raaka-ainepulan vuoksi",
+      "facility_inoperative_high_skill": "Julkinen laitos ”{{name}}” toimii supistetusti asiantuntijapulan vuoksi",
+      "facility_inoperative_budget": "Julkinen laitos ”{{name}}” toimii supistetusti budjettivajeen vuoksi",
+      "education_low_enrollment": "Oppilaitos ”{{name}}” on vajaakäytössä – opiskelijoita on vähän ({{enrolled}}/{{max_students}} paikkaa)",
+      "infra_facility_down": "Infralaitos ”{{name}}” on poissa käytöstä",
+      "infra_disconnected": "Infraverkkoon liittämättömiä laitoksia: {{count}}",
+      "rail_capacity_exceeded": "Junavuorot ylittävät raidekapasiteetin {{count}} raideosuudella",
+      "collapse": "Rakennuksia tai teitä romahtanut: {{count}}",
+      "collapse_with_deaths": "Rakennuksia tai teitä romahtanut: {{count}}, kuolleita: {{deaths}}",
+      "deaths_traffic": "Liikenneonnettomuuksissa kuolleita: {{count}}",
+      "tenant_blocked_by_parcel_size": "Kaupunginosaan ”{{zone_name}}” ei voi rakentaa rakennusta vuokralaiselle ”{{tenant_name}}” (tarve {{required}} m2, suurin mahdollinen {{max_capacity}} m2). Tarvitaan suurempi tontti",
+      "unknown": "Tapahtui vakava tapahtuma",
+      "sanitation": "Hygienia heikkenee {{count}} kotitaloudessa. Paranna jätevesi- ja jätehuoltoa."
+    }
+  }
+}

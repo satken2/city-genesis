@@ -1,0 +1,26 @@
+{
+  "notifications": {
+    "trayTooltip": "Stadsmeldingen",
+    "empty": "Er zijn op dit moment geen problemen die aandacht vragen",
+    "loadFailed": "Meldingen ophalen mislukt",
+    "types": {
+      "resource_runway": "Hulpbron “{{name}}” raakt naar verwachting over ca. {{remaining_epochs}} tijdvak(ken) uitgeput",
+      "resource_depleted": "Hulpbron “{{name}}” is uitgeput",
+      "facility_inoperative": "Openbare voorziening “{{name}}” functioneert niet",
+      "facility_inoperative_labor": "Openbare voorziening “{{name}}” functioneert niet door personeelstekort",
+      "facility_inoperative_material": "Openbare voorziening “{{name}}” functioneert niet door een tekort aan grondstoffen",
+      "facility_inoperative_high_skill": "Openbare voorziening “{{name}}” werkt met beperkte capaciteit door een tekort aan gespecialiseerd personeel",
+      "facility_inoperative_budget": "Openbare voorziening “{{name}}” werkt met beperkte capaciteit door een budgettekort",
+      "education_low_enrollment": "Onderwijsinstelling “{{name}}” wordt weinig benut: te weinig leerlingen (ingeschreven {{enrolled}} / capaciteit {{max_students}})",
+      "infra_facility_down": "Infrastructuurvoorziening “{{name}}” ligt stil",
+      "infra_disconnected": "Voorzieningen niet aangesloten op het infrastructuurnet: {{count}}",
+      "rail_capacity_exceeded": "Spoordelen waar de treinfrequentie de capaciteit overschrijdt: {{count}}",
+      "collapse": "Ingestorte gebouwen/wegen: {{count}}",
+      "collapse_with_deaths": "Ingestorte gebouwen/wegen: {{count}}, aantal doden: {{deaths}}",
+      "deaths_traffic": "Doden door verkeersongevallen: {{count}}",
+      "tenant_blocked_by_parcel_size": "In wijk “{{zone_name}}” kan geen gebouw voor “{{tenant_name}}” worden gebouwd (nodig: {{required}} m2, max. op een perceel: {{max_capacity}} m2). Er is een groter perceel nodig",
+      "unknown": "Er heeft zich een ernstige gebeurtenis voorgedaan",
+      "sanitation": "Huishoudens met verslechterende hygiëne: {{count}}. Verbeter de riolering en de afvalverwerking."
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "supply": {
+    "title": "Maklumat bekalan",
+    "product": "Barangan dibekalkan",
+    "amount": "Jumlah bekalan",
+    "price": "Harga bekalan",
+    "soldAmount": "Jumlah dijual",
+    "profitRate": "Kadar untung",
+    "utilization": "Kadar penggunaan"
+  },
+  "tourismSupply": {
+    "title": "Penerimaan pelancong",
+    "touristCapacity": "Kapasiti penerimaan pelancong",
+    "persons": "{{value}} orang",
+    "218": {
+      "price": "Bayaran masuk",
+      "amount": "Kapasiti pengunjung (kumulatif)",
+      "soldAmount": "Pengunjung (kumulatif)"
+    },
+    "219": {
+      "price": "Tambang",
+      "amount": "Kapasiti penumpang (kumulatif)",
+      "soldAmount": "Penumpang (kumulatif)"
+    }
+  },
+  "demand": {
+    "product": "Barangan",
+    "demandAmount": "Permintaan",
+    "receivedAmount": "Diperoleh",
+    "acquiredAmount": "Inventori"
+  },
+  "cargo": {
+    "title": "Maklumat pengendalian kargo",
+    "description": "Hab ini mengimport barangan dari luar wilayah untuk membekalkan pasaran dalam bandar, dan membeli lebihan pengeluaran bandar untuk dieksport ke luar wilayah.",
+    "capacity": "Kapasiti pengendalian",
+    "perPeriod": "/bulan",
+    "perPeriod_week": "/minggu",
+    "materialCapacity": "Had mengikut bahan mentah",
+    "areaCapacity": "Had mengikut keluasan",
+    "importHandled": "Import dikendalikan",
+    "exportHandled": "Eksport dikendalikan",
+    "utilization": "Kadar penggunaan",
+    "importSectionTitle": "Import",
+    "exportSectionTitle": "Eksport",
+    "handledImport": "Jumlah dijual",
+    "handledExport": "Jumlah dibeli",
+    "allocation": "Peruntukan",
+    "priceImport": "Harga jualan seunit",
+    "priceExport": "Harga belian seunit",
+    "lost": "Jualan terlepas",
+    "noProducts": "Tiada barangan dikendalikan"
+  }
+}

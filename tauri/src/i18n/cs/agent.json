@@ -1,0 +1,212 @@
+{
+  "agent": {
+    "back": "Zpět",
+    "editAppearance": "Změnit vzhled",
+    "relocateCityHall": "Přestěhovat radnici",
+    "publicFacility": "Veřejné zařízení",
+    "underAcquisition": "Probíhá vyjednávání o výkupu",
+    "publicFacilityPanel": {
+      "title": "Veřejné / obecní zařízení"
+    },
+    "abandon": "Opustit",
+    "abandonHint": "Ukončí údržbu; budova se nebude opravovat a nechá se chátrat",
+    "statusSince": {
+      "founded": "Datum založení",
+      "householdFormed": "Vznik domácnosti",
+      "arrived": "Datum příjezdu",
+      "opened": "Datum otevření",
+      "schoolOpened": "Zahájení výuky",
+      "completed": "Dokončení stavby",
+      "operatingSince": "V provozu od",
+      "resumed": "Obnoveno",
+      "paused": "Pozastaveno",
+      "suspended": "Uzavřeno od",
+      "schoolClosed": "Výuka přerušena",
+      "constructionStarted": "Zahájení stavby",
+      "demolitionScheduled": "Demolice rozhodnuta",
+      "demolitionStarted": "Zahájení demolice",
+      "demolished": "Demolice dokončena",
+      "collapsed": "Datum zřícení",
+      "burnedDown": "Datum vyhoření",
+      "default": "Změna stavu"
+    },
+    "reserves": "Hotovost",
+    "revenues": "Příjmy",
+    "expenses": "Výdaje",
+    "zone": "Čtvrť",
+    "building": "Budova",
+    "rent": "Nájemné",
+    "floorOccupancy": "Obsazená plocha",
+    "tenants": "Nájemci",
+    "guests": "Ubytovaní hosté",
+    "tabBasicInfo": "Základní informace",
+    "utilizationTarget": "Cílové vytížení",
+    "currentUtilization": "Aktuální vytížení",
+    "constructionSpeed": "Rychlost výstavby",
+    "constructionCostPerEpoch": "Náklady na výstavbu za epochu",
+    "remainingConstruction": "Zbývající doba výstavby",
+    "remainingEpochs": "cca {{n}} epoch",
+    "tabBuildingInfo": "Budova",
+    "tabCargoInfo": "Překládka",
+    "tabTradeInfo": "Nabídka, poptávka a obchod",
+    "tabTourismInfo": "Cestovní ruch",
+    "tabEmploymentInfo": "Zaměstnanost",
+    "action": {
+      "purchase": "Vykoupit",
+      "bulldoze": "Zbourat",
+      "cancelBulldoze": "Zrušit zbourání",
+      "pause": "Pozastavit",
+      "resume": "Obnovit",
+      "delete": "Smazat",
+      "repair": "Opravit",
+      "rebuild": "Obnovit stavbu",
+      "edit": "Upravit",
+      "startConstruction": "Zahájit stavbu",
+      "stopConstruction": "Pozastavit stavbu",
+      "cancelAbandon": "Zrušit opuštění",
+      "explode": "Odpálit",
+      "explodeConfirm": "Odpálit tuto budovu a vydávat to za nehodu?\nBudova se okamžitě zřítí a všichni obyvatelé i zaměstnanci uvnitř zahynou. Nálada obyvatel se výrazně zhorší a tuto akci nelze vrátit zpět.",
+      "explodeTitle": "Odpálení budovy",
+      "explodeConfirmAction": "Odpálit"
+    },
+    "pendingWarning": "Tato budova je ve fázi plánu. Zadejte pokyn k zahájení stavby.",
+    "alerts": {
+      "diagnoseHint": "Kliknutím zjistíte příčinu",
+      "title": "Upozornění",
+      "constructionShortage": {
+        "title": "Nedostatek stavebních služeb",
+        "description": "Kvůli nedostatečnému rozpočtu na výstavbu se stavba zpožďuje."
+      },
+      "onFire": {
+        "title": "Požár!",
+        "description": "V budově vypukl požár."
+      },
+      "accidentalFire": {
+        "title": "Malý požár z nedbalosti",
+        "description": "V budově vznikl požár z nedbalosti, podařilo se ho však udržet v malém rozsahu."
+      },
+      "infraDisconnected": {
+        "title": "Nepřipojeno k infrastrukturní síti",
+        "description": "K přípojnému bodu tohoto zařízení není připojena žádná infrastrukturní liniová stavba. Dokud nebude připojeno k síti, nemůže dodávat ani přijímat."
+      },
+      "capacityTight": {
+        "title": "Kapacita téměř vyčerpána",
+        "description": "Objem provozu dosáhl 90 % nebo více kapacity tohoto zařízení. Další poptávku už téměř nedokáže pokrýt."
+      },
+      "nonconforming": {
+        "title": "Nesplňuje stavební regulace",
+        "description": "Budova nesplňuje stavební regulace své parcely. Nebude se opravovat, a jakmile zchátrá, bude zbourána."
+      },
+      "crime": {
+        "title": "Došlo k trestnému činu",
+        "description": "V této budově došlo k trestnému činu."
+      },
+      "crimeSign": {
+        "title": "Známky kriminality",
+        "description": "V této budově byly zjištěny známky kriminality. Dávejte pozor na zhoršování bezpečnosti."
+      },
+      "laborShortage": {
+        "title": "Nedostatek pracovníků",
+        "description": "Chybí zaměstnanci, proto výroba a poskytování služeb zaostávají za plánem."
+      },
+      "materialShortage": {
+        "title": "Nedostatek surovin",
+        "description": "Nedaří se zajistit dostatek surovin, proto výroba a poskytování služeb zaostávají za plánem."
+      },
+      "highSkillShortage": {
+        "title": "Nedostatek odborníků",
+        "description": "Chybí potřební vysoce kvalifikovaní pracovníci, proto se výroba omezuje na objem, který zvládnou stávající pracovníci."
+      },
+      "budgetCapped": {
+        "title": "Nedostatek rozpočtu",
+        "description": "Přidělený rozpočet je výrazně nižší než potřebná částka, proto byl provoz omezen. Zkontrolujte rozdělení rozpočtu."
+      },
+      "facilityWarning": {
+        "title": "Veřejné zařízení nemůže fungovat",
+        "description": "Toto zařízení poskytuje výrazně méně služeb, než je cíl. Zkontrolujte zajištění pracovníků a surovin."
+      },
+      "sanitationWarning": {
+        "title": "Zhoršení hygieny",
+        "description": "Hygienické podmínky na pozemku této budovy se vážně zhoršily a mají dopad na obývající domácnosti. Zlepšete dodávky čištění odpadních vod a zpracování odpadu."
+      },
+      "infraWarning": {
+        "title": "Infrastrukturní zařízení mimo provoz nebo zřícené",
+        "description": "Kvůli odstávce nebo zřícení tohoto zařízení jsou ovlivněny dodávky infrastruktury. Zkontrolujte stav zařízení a trasy dodávek."
+      },
+      "farFromRoad": {
+        "title": "Daleko od silnice",
+        "description": "Nejbližší silnice je vzdálena přibližně {{distance}} m. Zásobování, dojíždění do práce i nakupování jsou tím výrazně znevýhodněny; zvažte prodloužení silnice blíže k budově."
+      },
+      "noRoadAccess": {
+        "title": "Žádná silnice k připojení",
+        "description": "Tato budova se nemá kam připojit k silnici. Zásobování, dojíždění do práce i nakupování jsou tím výrazně znevýhodněny; postavte poblíž silnici."
+      }
+    },
+    "infra": {
+      "title": "Připojení k infrastruktuře",
+      "connected": "Připojeno",
+      "disconnected": "Nepřipojeno",
+      "received": "Přijaté množství"
+    },
+    "tabConstructionInfo": "Výstavba",
+    "tabEducationInfo": "Vzdělávání",
+    "education": {
+      "totalStudents": "Zapsaní žáci",
+      "totalCapacity": "Celková kapacita",
+      "statusTitle": "Stav zápisu",
+      "enrolled": "Zapsáno",
+      "vacant": "Volná místa",
+      "noCapacity": "Bez kapacity",
+      "countLabel": "Počet",
+      "enrollmentBySkill": "Zápis podle kvalifikace",
+      "settingsTitle": "Nastavení přijímacích kvót",
+      "settingsHint": "Nastavte váhu rozdělení pro každou kvalifikaci. Celková kapacita se rozdělí v poměru vah.",
+      "skillHeader": "Kvalifikace",
+      "weightHeader": "Váha",
+      "previewHeader": "Kapacita",
+      "save": "Uložit",
+      "saving": "Ukládání…",
+      "saveFailed": "Uložení se nezdařilo",
+      "sumMustBePositive": "Součet kvót musí být alespoň 1",
+      "invalidWeight": "Váhy zadejte jako celá čísla od 0 výše",
+      "studentsList": "Seznam žáků",
+      "noStudents": "Žádní žáci",
+      "showMore": "Zobrazit další ({{count}})"
+    }
+  },
+  "agentList": {
+    "filterType": "Typ",
+    "filterVariant": "Varianta",
+    "filterZone": "Čtvrť",
+    "allVariants": "Všechny varianty",
+    "allZones": "Všechny čtvrti",
+    "resultCount": "Výsledků: {{count}}",
+    "capped": "(z celkem {{total}})",
+    "loading": "Načítání…",
+    "noResults": "Žádné odpovídající ekonomické subjekty",
+    "colStatus": "Stav",
+    "colVariant": "Varianta",
+    "colName": "Název",
+    "colProduct": "Produkt",
+    "colPrice": "Cena",
+    "colProduction": "Výroba",
+    "colStock": "Zásoby",
+    "colSold": "Prodáno",
+    "colWage": "Mzdová sazba",
+    "colEmployment": "Zaměstnanost",
+    "colUtilization": "Vytížení",
+    "colBdType": "Typ budovy",
+    "colDurability": "Životnost",
+    "colRent": "Nájemné",
+    "colFloors": "Podlaží",
+    "colFloorArea": "Podlahová plocha",
+    "colOccupancy": "Obsazenost",
+    "colFamilyType": "Typ domácnosti",
+    "colDiscretionaryIncome": "Disponibilní příjem",
+    "colSatisNutrition": "Strava",
+    "colSatisHealthcare": "Zdravotní péče",
+    "colSatisLeisure": "Zábava a volný čas",
+    "colSatisResidential": "Bydlení",
+    "colAutomobile": "Osobní auto"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Proiect de construcție",
+    "none": "(Fără etichetă)",
+    "createNew": "+ Etichetă nouă…",
+    "newPlaceholder": "Introdu numele etichetei",
+    "add": "Adaugă",
+    "cancel": "Anulează",
+    "saveFailed": "Eticheta nu a putut fi salvată",
+    "showObject": "Afișează în vizualizarea 3D",
+    "hideObject": "Ascunde în vizualizarea 3D"
+  },
+  "constructionProjects": {
+    "all": "Toate",
+    "empty": "Nu există lucrări. Alege o etichetă când amplasezi ceva dintr-un panou de construcție sau adaugă una din panoul de detalii al unei facilități publice ori al unui drum planificat sau în construcție, ca să vezi lucrările grupate pe proiecte.",
+    "loadFailed": "Proiectele de construcție nu au putut fi încărcate",
+    "totalCost": "Cost estimat",
+    "duration": "Durată rămasă",
+    "progress": "Progres",
+    "progressValue": "{{done}} / {{total}} finalizate",
+    "monthsValue": "{{value}} luni",
+    "stalled": "Blocat",
+    "stalledWarning": "Lucrări care nu avansează deoarece viteza de construcție este 0: {{count}} (nu sunt incluse în totalul duratei).",
+    "done": "Finalizat",
+    "unnamed": "#{{id}}",
+    "showAll": "Afișează din nou tot ({{count}})",
+    "showTag": "Afișează acest proiect în vizualizarea 3D",
+    "hideTag": "Ascunde acest proiect în vizualizarea 3D",
+    "showObject": "Afișează în vizualizarea 3D",
+    "hideObject": "Ascunde în vizualizarea 3D",
+    "deleteTag": "Șterge eticheta",
+    "confirmDeleteTag": "Ștergi eticheta „{{tag}}”? Va fi scoasă de pe clădirile și drumurile respective (lucrările rămân).",
+    "columns": {
+      "name": "Obiect",
+      "status": "Stare",
+      "cost": "Cost rămas",
+      "remaining": "Durată rămasă"
+    }
+  }
+}

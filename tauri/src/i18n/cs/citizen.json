@@ -1,0 +1,53 @@
+{
+  "citizen": {
+    "ageValue": "{{age}} r.",
+    "male": "Muž",
+    "female": "Žena",
+    "single": "Svobodný/á",
+    "married": "Ženatý/vdaná",
+    "household": "Domácnost",
+    "employer": "Zaměstnavatel",
+    "unemployed": "Bez práce",
+    "school": "Škola",
+    "notEnrolled": "Nestuduje",
+    "major": "Obor studia",
+    "higherEducation": "Vysokoškolské vzdělání",
+    "graduated": "Dokončeno",
+    "notGraduated": "Nedokončeno",
+    "skills": "Kvalifikace",
+    "criminality": "Sklon ke kriminalitě",
+    "commuteTime": "Doba dojíždění",
+    "automobile": "Auto",
+    "automobileOwned": "Ano",
+    "automobileNone": "Ne",
+    "householdStatus": "Situace domácnosti"
+  },
+  "household": {
+    "title": "Domácnost",
+    "familyType": "Typ domácnosti",
+    "familySingle": "Jednotlivec",
+    "familyCouple": "Pár",
+    "familyFamily": "Rodina",
+    "familySenior": "Senioři",
+    "hasAutomobile": "Vlastní auto",
+    "noAutomobile": "Bez auta",
+    "discretionaryIncome": "Disponibilní příjem",
+    "livingStandard": "Životní úroveň",
+    "livingStandardLevel": {
+      "0": "Bída",
+      "1": "Chudoba",
+      "2": "Střední třída",
+      "3": "Blahobyt"
+    },
+    "satisNutrition": "Strava",
+    "satisHealthcare": "Zdravotní péče",
+    "satisLeisure": "Zábava a volný čas",
+    "satisTourism": "Cestovní ruch",
+    "tourist": "Turisté",
+    "partySize": "Počet osob",
+    "members": "Členové domácnosti"
+  },
+  "education": {
+    "people": "osob"
+  }
+}

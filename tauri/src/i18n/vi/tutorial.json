@@ -1,0 +1,756 @@
+{
+  "tutorial": {
+    "startButton": "Bắt đầu",
+    "controls": {
+      "title": "Thao tác cơ bản",
+      "description": "Tìm hiểu mục tiêu xây dựng thành phố của một thị trưởng và cách chơi “lập kế hoạch trước, cho thời gian trôi sau”. Sau khi nắm ý nghĩa các thông tin trên màn hình, công dụng của từng nút và cách điều khiển camera, bạn sẽ thực hành kéo dài một con đường để tạo khu dân cư mới, rồi xây nhà ở và đưa điện, nước đến đó.",
+      "step1": {
+        "title": "Bắt đầu xây dựng thành phố với vai trò thị trưởng",
+        "role": "City Genesis là trò chơi bạn phát triển thành phố trong vai thị trưởng. Bạn lập kế hoạch xây đường sá và công trình, quyết định cách sử dụng đất, thuế và ngân sách cho dịch vụ công. Việc của thị trưởng là tạo môi trường giúp cư dân và doanh nghiệp sinh sống, hoạt động. Nhấn “Tiếp theo” để đọc tiếp.",
+        "goal": "Mục tiêu là một thành phố nơi cư dân có cuộc sống sung túc và an tâm. Hãy tăng thêm chỗ ở và việc làm, đưa điện, nước, y tế… đến với mọi người. Mở rộng thành phố cũng cần tiền. Hãy cân nhắc cả đời sống cư dân lẫn tài chính của thành phố khi quyết định cần cải thiện điều gì.",
+        "epoch": "Trong trò chơi này, thời gian trôi theo từng tháng. Trước tiên, hãy quyết định ngân sách và kế hoạch xây dựng, khi đã sẵn sàng thì nhấn “Bắt đầu”. Khi nhấn nút, thời gian trôi đi, công trình được thi công, cư dân và doanh nghiệp hoạt động; bạn xem kết quả rồi tính kế hoạch tiếp theo. Ngày tháng không thay đổi cho đến khi bạn nhấn “Bắt đầu”, nên cứ thong thả suy nghĩ.",
+        "epoch_week": "Trong trò chơi này, thời gian trôi theo từng tuần. Trước tiên, hãy quyết định ngân sách và kế hoạch xây dựng, khi đã sẵn sàng thì nhấn “Bắt đầu”. Khi nhấn nút, thời gian trôi đi, công trình được thi công, cư dân và doanh nghiệp hoạt động; bạn xem kết quả rồi tính kế hoạch tiếp theo. Ngày tháng không thay đổi cho đến khi bạn nhấn “Bắt đầu”, nên cứ thong thả suy nghĩ."
+      },
+      "step2": {
+        "title": "Nắm tình hình thành phố qua buồng lái",
+        "tools": "Buồng lái ở cuối màn hình là nơi kiểm tra tình hình thành phố và cân nhắc việc cần làm tiếp theo. Với “Hiển thị”, bạn có thể tô màu để tìm những nơi đang thiếu hụt hoặc có vấn đề. Với “Bản đồ”, bạn có thể xem vị trí tương quan của toàn thành phố. Dù thành phố rộng đến đâu, chúng cũng giúp bạn tìm ra nơi cần đến.",
+        "tracking": "“Danh sách công dân” là nút để tìm cư dân theo tên…, hoặc xem lại cuộc sống và việc đi làm của những cư dân bạn quan tâm. Nếu thêm một người vào danh sách theo dõi trong chi tiết công dân, bạn có thể mở thông tin của người đó từ đây. Hãy dùng khi muốn hiểu cuộc sống của từng người mà con số chung của thành phố không cho thấy.",
+        "bulldozer": "“Xe ủi” dùng để xóa lô đất trống hoặc hủy tòa nhà, con đường đang quy hoạch. Nhấn nút, rồi nhấp vào đối tượng trên màn hình 3D; xong thì nhấn lại nút để tắt. Muốn dỡ bỏ tòa nhà hoặc con đường đã hoàn công, hãy mở chi tiết của đối tượng đó và chọn giải tỏa.",
+        "services": "Các đồng hồ tia sét, giọt nước và con tàu cho biết điện, nước và năng lực xuất nhập khẩu còn dư bao nhiêu. Đồng hồ càng gần đầy thì nhu cầu hoặc lượng xử lý càng lớn và phần dư càng ít. Nhấn vào để xem công trình công cộng và cơ sở xuất nhập khẩu. Trước khi mở rộng thành phố, hãy kiểm tra xem có cần xây thêm cơ sở không.",
+        "score": "“Điểm” là chỉ số tổng hợp cho biết cư dân hài lòng với cuộc sống ở thành phố đến mức nào. Điểm càng cao, thành phố càng dễ sống. Cải thiện nhà ở, việc làm, y tế và môi trường sống sẽ giúp tăng điểm. Khi điểm giảm, hãy tìm xem cư dân đang gặp khó khăn gì.",
+        "budget": "“Ngân sách” cho biết khoản chi dự kiến tháng tới so với thu nhập tháng trước. Khi kim đồng hồ lệch sang phải, chi đang vượt thu. Ngược lại, khi kim lệch sang trái, thành phố đang dư tiền. Hãy kiểm tra trước khi cho thời gian trôi.",
+        "budget_week": "“Ngân sách” cho biết khoản chi dự kiến tuần tới so với thu nhập tuần trước. Khi kim đồng hồ lệch sang phải, chi đang vượt thu. Ngược lại, khi kim lệch sang trái, thành phố đang dư tiền. Hãy kiểm tra trước khi cho thời gian trôi.",
+        "budgetChanges": "Tăng thêm công trình đường sá, cơ sở hay đẩy mạnh mức hoạt động của cơ sở và tốc độ thi công sẽ làm số tiền cần chi tăng lên và đồng hồ ngân sách nhích lên. Giảm mức hoạt động hoặc tốc độ thi công sẽ giảm khoản chi dự kiến. Khi thu thuế tăng, cùng một khoản chi nhưng đồng hồ sẽ hạ xuống.",
+        "budgetPlanning": "Nếu đồng hồ ở mức thấp, thành phố còn dư tiền để chi cho việc phát triển. Hãy cân nhắc đầu tư vào những dịch vụ đang thiếu hoặc các cơ sở sắp cần đến.",
+        "date": "Ngày tháng cho biết thời gian của thành phố đã trôi đến đâu. Hãy dùng nó để theo dõi tiến độ xây dựng hay sự thay đổi của thành phố theo mùa. Trong lúc bạn lập kế hoạch, ngày tháng đứng yên và chỉ cập nhật khi bạn cho thời gian trôi bằng “Bắt đầu”.",
+        "climate": "Các bảng nhiệt độ, lượng mưa, nắng và tốc độ gió cho biết khí hậu trung bình của tháng này. Những điều kiện này ảnh hưởng đến hiệu suất sản xuất của nông nghiệp, điện gió và điện mặt trời. Khi sản lượng nông sản hoặc sản lượng điện thấp, hãy xem cả khí hậu.",
+        "climate_week": "Các bảng nhiệt độ, lượng mưa, nắng và tốc độ gió cho biết khí hậu trung bình của tuần này. Những điều kiện này ảnh hưởng đến hiệu suất sản xuất của nông nghiệp, điện gió và điện mặt trời. Khi sản lượng nông sản hoặc sản lượng điện thấp, hãy xem cả khí hậu.",
+        "climateEffects": "Nắng yếu thì điện mặt trời giảm công suất, gió yếu thì điện gió giảm công suất. Nông nghiệp còn chịu ảnh hưởng của nhiệt độ và lượng mưa. Nhấn vào bảng khí hậu để xem điều kiện tháng này ảnh hưởng thế nào đến hiệu suất sản xuất của từng cơ sở. Hãy tính đến việc nguồn cung thay đổi theo mùa khi xây dựng cơ sở.",
+        "climateEffects_week": "Nắng yếu thì điện mặt trời giảm công suất, gió yếu thì điện gió giảm công suất. Nông nghiệp còn chịu ảnh hưởng của nhiệt độ và lượng mưa. Nhấn vào bảng khí hậu để xem điều kiện tuần này ảnh hưởng thế nào đến hiệu suất sản xuất của từng cơ sở. Hãy tính đến việc nguồn cung thay đổi theo mùa khi xây dựng cơ sở.",
+        "notifications": "Con số ở “Thông báo” là số cảnh báo và lưu ý bạn nên xem ngay. Số màu đỏ và nhấp nháy là những vấn đề đang làm ảnh hưởng đến hoạt động của thành phố, cần xử lý sớm. Số màu vàng là các lưu ý, như chuẩn bị cho tăng trưởng hoặc những vấn đề cần thời gian để cải thiện. Trước hết, hãy nhấn nút để xem nội dung.",
+        "notificationActions": "Khi thông báo có cơ sở hoặc khu vực liên quan, bạn có thể nhấn vào dòng đó để xem chi tiết. Hãy xử lý theo nguyên nhân: đường dây điện chưa nối thì nối lại, cơ sở thiếu nguyên liệu thì tìm cách cung ứng… Thông báo về vấn đề kéo dài sẽ biến mất khi nguyên nhân được khắc phục. Sau khi xử lý, hãy xem kết quả của tháng tiếp theo."
+      },
+      "step3": {
+        "title": "Đổi chế độ hiển thị để tìm vấn đề",
+        "open": "Chỉ nhìn bề ngoài thì khó biết thành phố đang thiếu điện hay kẹt xe. Hãy dùng “Hiển thị” để thấy thông tin cần biết ngay trên bản đồ. Nhấn “Hiển thị” trên buồng lái để mở bảng.",
+        "tabs": "Với các thẻ xếp dọc, bạn có thể chọn đối tượng cần xem như tòa nhà, đường, lô đất, khu vực… Khi thông tin chồng lên nhau khó nhìn, bạn cũng có thể ẩn những đối tượng không cần. Nhấn “Tiếp theo” để xem cách dùng chế độ hiển thị.",
+        "modes": "Các nút trong mỗi thẻ cho phép chọn tô màu đối tượng theo thông tin nào. Hãy tìm những con đường đang kẹt xe hay tòa nhà đang có vấn đề để làm manh mối tìm giải pháp. Có thể nhấp vào đối tượng trên màn hình 3D để xem kỹ hơn. Nhấn “Tiếp theo”."
+      },
+      "step4": {
+        "title": "Làm quen với công cụ xây dựng thành phố",
+        "grading": "Lần lượt giới thiệu các nút bên trái màn hình từ trên xuống. “San lấp mặt bằng” dùng để san phẳng sườn dốc khó đặt tòa nhà, hoặc lấn biển để có thêm đất sử dụng. Khi muốn tăng nhà ở hay nơi làm việc mà thiếu đất, công cụ này mở rộng dư địa phát triển cho thành phố.",
+        "road": "“Đường, đường sắt và hạ tầng” là nút để tạo lối đi cho người, hàng hóa, điện và nước. Đường nối nhà ở với nơi làm việc, đường ray nối những nơi xa, đường dây điện và ống nước nối các cơ sở với nhau. Dùng để hỗ trợ việc đi lại của cư dân, giao dịch của doanh nghiệp và việc cung cấp điện, nước.",
+        "land": "“Lô đất” là nút để chuẩn bị khuôn viên cho tòa nhà. Chỉ có đất thôi thì tòa nhà chưa thể mọc lên. Dù muốn tăng nhà ở hay đón một cơ sở lớn, bạn đều cần khuôn viên có diện tích phù hợp.",
+        "landDevelopment": "Khi chuẩn bị lô đất, thành phố có thể dùng làm nơi xây tòa nhà, và đó cũng là nơi nhà ở, doanh nghiệp tư nhân phát triển. Tòa nhà tư nhân được xây tùy theo nhu cầu và quy định xây dựng của khu vực. Khi muốn tăng nhà ở hay nơi làm việc, hãy kiểm tra xem có đủ lô đất trống không.",
+        "district": "“Khu vực” là nút để quản lý từng phần của thành phố như một khối. Bạn có thể đặt định hướng riêng cho từng nơi, như vùng chủ yếu là nhà ở hay vùng muốn tập trung nhà máy. Vì có thể giới hạn loại tòa nhà được xây theo từng khu vực, bạn có thể quyết định định hướng xây dựng phù hợp với cả vùng.",
+        "districtRules": "Trong chi tiết khu vực, bạn có thể quyết định loại tòa nhà được phép xây. Hãy dùng tùy theo thành phố bạn muốn xây dựng, chẳng hạn không để nhà máy lẫn vào khu dân cư. Bạn cũng có thể so sánh dân số và đời sống giữa các khu vực, giúp xác định nơi nào cần hỗ trợ.",
+        "construction": "“Xây dựng” là nút để thành phố lên kế hoạch xây những tòa nhà cần thiết. Bạn có thể xây nhà ở, nơi làm việc, bệnh viện, trường học, nhà máy điện… Dùng để tăng chỗ ở, việc làm, hoặc bù đắp các dịch vụ thành phố đang thiếu như y tế, giáo dục, điện.",
+        "transport": "“Giao thông công cộng” là nút để hỗ trợ việc đi lại của cư dân bằng xe buýt và tàu hỏa. Bạn có thể đặt tuyến, điểm dừng và điều chỉnh giá vé, giãn cách chuyến. Dùng để nối nhà ở với nơi làm việc, trường học, giảm gánh nặng đi làm, đi học.",
+        "propPlacement": "“Đặt vật trang trí” là nút để đặt cây cối, đá… nhằm tô điểm cảnh quan thành phố. Hãy dùng khi muốn thêm mảng xanh cho phố phường hoặc trang trí địa hình.",
+        "cityDevelopment": "“Tự động phát triển đô thị” là nút để quy hoạch cùng lúc đường và lô đất trên một vùng rộng. Tô vùng muốn phát triển trên bản đồ và chọn kiểu phố, đường và lô đất sẽ được chuẩn bị một lượt. Hãy dùng khi khai phá khu dân cư hay khu đô thị mới từ đầu.",
+        "constructionProjects": "Trong “Dự án xây dựng”, bạn có thể xem tổng hợp các công trình đang quy hoạch và đang thi công. Hãy xem công trình nào đang tiến triển, chi phí đang dồn vào đâu để quyết định nên đẩy công trình nào.",
+        "regulation": "“Quy định” là nơi đặt ra các quy tắc để sống và làm việc trong thành phố. Bạn có thể thiết lập tốc độ tối đa, giờ làm việc, tiếp nhận người nhập cư, an sinh xã hội… Hãy cân nhắc nên coi trọng an toàn, sự thoải mái trong cuộc sống hay tăng trưởng, rồi điều chỉnh theo tình hình.",
+        "stat": "“Thống kê” là nút để xem kết quả xây dựng thành phố. Bạn có thể xem biểu đồ biến động của dân số, thu nhập, việc đi làm, mức hài lòng của cư dân, quy mô kinh tế, giá cả… Sau khi thay đổi chính sách hay cơ sở, hãy kiểm tra xem đời sống có tốt lên không và còn thiếu gì. Trên đây là các nút bên trái."
+      },
+      "step5": {
+        "title": "Thực hiện kế hoạch và xem kết quả",
+        "flow": "Sau khi xem tình hình thành phố và tính toán việc xây dựng, phân bổ ngân sách cần thiết, hãy nhấn “Bắt đầu” trên buồng lái để cho thời gian trôi. Công trình được thi công, cư dân đi làm, doanh nghiệp sản xuất, thu chi và điểm của thành phố thay đổi. Có khi phải mất vài tháng kế hoạch mới phát huy tác dụng.",
+        "execute": "Sau khi cho thời gian trôi, hãy xem kết quả và thông báo. Nếu có vấn đề, hãy xử lý trong kế hoạch tiếp theo rồi lại cho thời gian trôi. Bạn phát triển thành phố bằng cách lặp lại “lập kế hoạch → cho thời gian trôi → xem kết quả”. Lúc này chưa cần nhấn “Bắt đầu”. Nhấn “Tiếp theo” để chuyển sang phần điều khiển camera."
+      },
+      "step6": {
+        "title": "Di chuyển camera",
+        "description": "Bạn có thể điều khiển camera như sau: kéo chuột trái để dời góc nhìn, kéo chuột phải để xoay, W, A, S, D (phím mũi tên) để di chuyển, Q, E để xoay, R, F để đổi độ cao, cuộn chuột để phóng to/thu nhỏ. Thử di chuyển thoải mái rồi nhấn “Tiếp theo” nhé."
+      },
+      "step7": {
+        "title": "Chế độ bay và chế độ quay phim",
+        "description": "Camera có hai chế độ đặc biệt. Vào “chế độ bay” bằng Shift+F: dùng W, A, S, D để tiến theo hướng nhìn, chuột để nhìn quanh, R, F để bay lên, hạ xuống, và Esc để thoát. “Chế độ quay phim” bắt đầu bằng nút ở góc trên bên trái màn hình, giúp bạn vừa bay vòng quanh vừa ngắm thành phố: dùng chuột để nhìn quanh, Shift để chuyển giữa bay vòng và di chuyển, Space để tạm dừng, Backspace để phát ngược, Esc để kết thúc. Trong cả hai chế độ, các bảng trên màn hình sẽ ẩn đi và hiện lại khi nhấn Esc để thoát. Thử xong, hãy thoát cả hai chế độ rồi nhấn “Tiếp theo” nhé."
+      },
+      "step8": {
+        "title": "Xem ranh giới thành phố",
+        "description": "Camera đã được đưa đến rìa phía đông của thành phố. Phần có thể dùng làm thành phố là vùng hình vuông có địa hình chi tiết này, và camera cũng không thể ra ngoài ranh giới đó. Phần giới thiệu màn hình và thao tác đến đây là hết. Tiếp theo, hãy thử tạo một khu dân cư mới nhé. Nhấn “Tiếp theo” nào."
+      },
+      "step9": {
+        "title": "Kéo dài con đường",
+        "description": "Từ đây, bạn sẽ thực sự tạo một khu dân cư để đón cư dân mới. Nhà ở hay nơi làm việc mà không được nối bằng đường thì người không qua lại được, hàng hóa cũng không đến được. Trước tiên, hãy kéo dài con phố đông – tây của thị trấn về phía tây để làm lối vào khu dân cư. Nhấn “Đường, đường sắt và hạ tầng” trên bảng biểu tượng để mở bảng xây dựng.",
+        "confirm": "Đất dọc theo đường sẽ được chia thành lô đất khi con đường hoàn công. Diện tích mỗi lô có thể chọn riêng cho từng bên đường tại mục “Lô đất ven đường tạo khi hoàn công” trong bảng xây dựng. Hãy quyết định theo loại tòa nhà muốn đón: khu dân cư thì lô nhỏ, nhà máy hay đất nông nghiệp thì lô rộng. Lần này là khu dân cư nên cứ giữ nguyên. Nhấn “Xác nhận” trong bảng xây dựng để lưu, rồi nhấn nút “Tiếp”."
+      },
+      "step10": {
+        "title": "Hoàn thành con đường",
+        "description": "Con đường vẫn đang ở trạng thái “Đã lên kế hoạch xây dựng”. Chỉ lập kế hoạch thì chưa dùng được; phải thi công xong thì người và xe mới qua lại được. Hãy nhấn “Bắt đầu” trên buồng lái 2–3 lần để cho thời gian trôi và chờ đường hoàn công. Trong thời gian thi công, mỗi tháng đều tốn chi phí xây dựng.",
+        "description_week": "Con đường vẫn đang ở trạng thái “Đã lên kế hoạch xây dựng”. Chỉ lập kế hoạch thì chưa dùng được; phải thi công xong thì người và xe mới qua lại được. Hãy nhấn “Bắt đầu” trên buồng lái 2–3 lần để cho thời gian trôi và chờ đường hoàn công. Trong thời gian thi công, mỗi tuần đều tốn chi phí xây dựng."
+      },
+      "step11": {
+        "title": "Đã có lô đất",
+        "description": "Con đường đã hoàn công và các lô đất đã hình thành dọc theo đường. Tòa nhà chỉ có thể xây trên lô đất, và nhờ lô đất giáp đường mà người và hàng hóa có thể ra vào. Khi muốn thêm lô đất dọc theo con đường có sẵn, bạn có thể tạo bằng “Lô đất” trên bảng biểu tượng."
+      },
+      "step12": {
+        "title": "Tạo khu vực",
+        "description": "Trước khi xây tòa nhà, hãy quyết định con phố này sẽ phát triển thành nơi như thế nào. Nếu không có định hướng, nhà máy có thể mọc ngay cạnh nhà ở. Định hướng cho từng nơi được đặt theo đơn vị “khu vực”. Khu vực được đặt theo từng con đường, và lô đất thuộc khu vực của con đường mà nó giáp mặt. Nhấn “Khu vực” trên bảng biểu tượng để mở cửa sổ chỉnh sửa khu vực, bạn sẽ thấy hiện cả thị trấn đang là một khu vực duy nhất.",
+        "create": "Chọn cách tô “Theo bên đường”. Chuyển công cụ sang “Tạo khu vực mới”, rồi giữ phím Ctrl và vẽ dọc theo con đường vừa kéo dài. Hai bên con đường đã vẽ cùng các lô đất giáp với nó sẽ trở thành khu vực mới."
+      },
+      "step13": {
+        "title": "Đã chia khu vực",
+        "description": "Con phố mới đã được tách thành một khu vực riêng với trung tâm thị trấn. Vì có thể xem tổng hợp dân số, giá cả hay quyết định loại tòa nhà được xây theo từng khu vực, bạn có thể xây dựng thành phố phù hợp với từng nơi. Xem xong, hãy đóng cửa sổ chỉnh sửa khu vực."
+      },
+      "step14": {
+        "title": "Mở chi tiết khu vực",
+        "description": "Hãy thiết lập để khu vực mới thành khu dân cư. Dùng biểu tượng ở góc dưới bên trái màn hình để hiện khu vực, nhấp vào nhãn của khu vực vừa tạo để mở chi tiết khu vực."
+      },
+      "step15": {
+        "title": "Chọn làm khu dân cư",
+        "description": "Trong phần quy định xây dựng ở phía dưới bảng, bạn có thể chọn loại tòa nhà được xây trên các lô đất của khu vực này. Vì muốn nơi đây là khu dân cư yên bình, hãy nhấp để tắt tất cả các loại tòa nhà trừ “Chung cư” và “Nhà riêng”."
+      },
+      "step16": {
+        "title": "Kiểm tra lô đất",
+        "description": "Quy định đặt cho khu vực sẽ áp dụng cho tất cả lô đất trong khu vực đó. Hãy nhấp vào lô đất có điểm đánh dấu màu vàng để mở chi tiết lô đất."
+      },
+      "step17": {
+        "title": "Quy định đã được áp dụng",
+        "description": "Nhìn xuống phía dưới bảng lô đất, bạn sẽ thấy quy định chỉ cho phép “Chung cư” và “Nhà riêng” mà bạn đặt cho khu vực đã được áp dụng. Giờ đây, các lô đất trên con phố này chỉ có thể xây nhà ở. Không cần thiết lập từng lô, chỉ cần đặt định hướng cho khu vực là cả con phố sẽ theo định hướng đó."
+      },
+      "step18": {
+        "title": "Xây nhà ở",
+        "description": "Đã đến lúc chuẩn bị chỗ ở. Thông thường, khi có người muốn đến sống, khu vực tư nhân sẽ tự động xây nhà ở; nhưng nếu thành phố xây nhà ở công, tình trạng thiếu nhà sẽ được bù đắp ngay. Ở đây, hãy xây một chung cư công. Nhấn “Xây dựng” trên bảng biểu tượng.",
+        "select": "Chọn “Chung cư” trong nhóm “Nhà ở”, nhấp vào một lô đất tùy ý trong khu vực mới để chọn làm nơi xây dựng, rồi nhấn “Xác nhận”."
+      },
+      "step19": {
+        "title": "Hoàn thành nhà ở",
+        "description": "Cũng như đường, tòa nhà chỉ mới được quy hoạch thì chưa thể ở. Chung cư cần hơn nửa năm để hoàn công. Hãy nhấn “Bắt đầu” để cho thời gian trôi và chờ hoàn công."
+      },
+      "step20": {
+        "title": "Kiểm tra xem điện đã đến chưa",
+        "description": "Có nhà ở mà không có điện, nước thì cuộc sống không thể vận hành. Thị trấn này vẫn chưa có nhà máy điện lẫn hệ thống cấp nước. Hãy nhấp vào chung cư có điểm đánh dấu màu vàng nơi người dân đang sống để mở chi tiết, chọn một bên thuê trong thẻ “Thông tin tòa nhà”, rồi mở thẻ “Cung cầu và giao dịch”; bạn sẽ thấy lượng điện nhận được đang là 0."
+      },
+      "step21": {
+        "title": "Xây nhà máy điện mặt trời",
+        "description": "Muốn đưa điện đến, trước hết cần có nhà máy điện để tạo ra điện. Hãy xây “Nhà máy điện mặt trời” trên lô đất có điểm đánh dấu màu vàng. Bình thường cần thời gian để hoàn công, nhưng vì đây là phần hướng dẫn nên thời gian thi công sẽ được bỏ qua."
+      },
+      "step22": {
+        "title": "Xây trạm biến áp",
+        "description": "Điện cao thế do nhà máy điện tạo ra chưa thể dùng ngay trong gia đình. Trạm biến áp sẽ chuyển nó thành điện dùng cho gia đình và phân phối đến các tòa nhà xung quanh được nối bằng đường. Hãy xây “Trạm biến áp” trên lô đất có điểm đánh dấu màu vàng gần chung cư."
+      },
+      "step23": {
+        "title": "Nối bằng đường dây điện",
+        "description": "Dù nhà máy điện và trạm biến áp cách xa nhau, chỉ cần có đường dẫn điện là chúng sẽ được nối với nhau. Mở “Đường, đường sắt và hạ tầng” trên bảng biểu tượng, chọn “Đường dây điện” trong mục “Điện”, rồi kéo dây từ điểm đấu nối của nhà máy điện mặt trời đến điểm đấu nối của trạm biến áp. Nếu nối thẳng hai điểm đấu nối, bạn chỉ cần kéo một đường."
+      },
+      "step24": {
+        "title": "Kiểm tra việc cấp điện",
+        "description": "Nối xong rồi, hãy kiểm tra xem điện có thực sự chạy không. Nhấn “Bắt đầu” để cho thời gian trôi, nhấp vào trạm biến áp để mở chi tiết, rồi kiểm tra trong thẻ “Cung cầu và giao dịch” rằng lượng điện cao thế nhận vào khác 0. Có thể mất vài tháng để nhà máy điện bắt đầu hoạt động và điện đến nơi."
+      },
+      "step25": {
+        "title": "Điện đã đến từng nhà",
+        "description": "Từ chi tiết chung cư, mở thẻ “Cung cầu và giao dịch” của bên thuê như lần kiểm tra đầu tiên, và xác nhận lượng điện nhận được đã khác 0. Đôi khi cần cho thời gian trôi thêm 1–2 tháng nữa thì điện mới đến các hộ gia đình. Nhà máy điện tạo ra điện, đường dây điện truyền tải, trạm biến áp phân phối. Chỉ khi cả ba được nối với nhau, điện mới đến được từng nhà."
+      },
+      "step26": {
+        "title": "Tìm nguồn nước",
+        "description": "Tiếp theo là nước máy. Nước máy được bơm từ nước ngầm lên rồi đưa vào thị trấn. Trước hết, hãy tìm xem nơi nào có thể bơm nước lên. Nhấn “Hiển thị” trên buồng lái để mở bảng hiển thị.",
+        "show": "Chọn “Tài nguyên thiên nhiên” trong các thẻ xếp dọc, rồi chuyển sang “Hiện”. Những chỗ màu xanh nhạt trên bản đồ là nguồn nước. Hãy nhấp vào nguồn nước có điểm đánh dấu màu vàng để mở chi tiết."
+      },
+      "step27": {
+        "title": "Xây trạm bơm nước ngầm",
+        "description": "Trạm bơm nước ngầm là cơ sở bơm nước dưới lòng đất lên, nên phải xây ở nơi có nguồn nước. Để vận hành còn cần điện và người làm, đó là lý do ta đưa điện đến trước. Hãy xây “Trạm bơm nước ngầm” trên lô đất có điểm đánh dấu màu vàng nằm trên nguồn nước. Vì đây là phần hướng dẫn nên thời gian thi công sẽ được bỏ qua."
+      },
+      "step28": {
+        "title": "Xây trạm bơm cấp nước",
+        "description": "Nước bơm lên chưa thể phân phối ngay cho các hộ gia đình. Cũng như trạm biến áp phân phối điện, trạm bơm cấp nước sẽ phân phối nước đến các tòa nhà xung quanh được nối bằng đường. Hãy xây “Trạm bơm cấp nước” trên lô đất có điểm đánh dấu màu vàng gần chung cư."
+      },
+      "step29": {
+        "title": "Nối bằng ống dẫn nước",
+        "description": "Cần có đường ống để đưa nước từ trạm bơm nước ngầm đến trạm bơm cấp nước. Mở “Đường, đường sắt và hạ tầng” trên bảng biểu tượng, chọn “Ống dẫn nước” trong mục “Cấp nước”, rồi kéo ống từ điểm đấu nối của trạm bơm nước ngầm đến điểm đấu nối của trạm bơm cấp nước. Để không vướng vào đường và đường dây điện, hãy vòng rộng sang phía đông khi đặt ống."
+      },
+      "step30": {
+        "title": "Kiểm tra việc cấp nước",
+        "description": "Nhấn “Bắt đầu” để cho thời gian trôi, nhấp vào trạm bơm cấp nước để mở chi tiết, rồi kiểm tra trong thẻ “Cung cầu và giao dịch” rằng lượng nước cao áp nhận vào khác 0. Có thể mất vài tháng để trạm bơm nước ngầm tuyển đủ người làm và nước đến nơi."
+      },
+      "step31": {
+        "title": "Đã nắm được những điều cơ bản",
+        "description": "Nước đã đến trạm bơm cấp nước, nên các hộ gia đình xung quanh cũng có thể dùng nước máy. Làm đường, chuẩn bị lô đất, đặt định hướng cho khu vực, xây nhà ở, rồi đưa điện và nước đến. Đó là trình tự cơ bản của việc xây dựng thành phố. Nhấn “Tiếp theo” để hoàn tất phần hướng dẫn thao tác cơ bản."
+      }
+    },
+    "scenario4": {
+      "title": "Xây dựng đường sắt",
+      "description": "Chúng ta muốn nối khu dân cư với nơi làm việc bằng đường sắt, nhưng trên khu đất dự kiến lại có các tòa nhà tư nhân và một bệnh viện công. Trong phần hướng dẫn này, bạn sẽ học cách thu mua đất và dỡ bỏ công trình công cộng, làm cầu cạn phía trên đường, xây sân ga, nhà ga và depot, điều chỉnh đường cong và độ dốc, rồi cấp điện cho đến khi khai trương tuyến.",
+      "step1": {
+        "title": "Đặt sân ga trên cao",
+        "description": "Vào “Đường, đường sắt và hạ tầng” → đường sắt, xây “Sân ga trên cao tiêu chuẩn cao (hai bên)” ở phía tây thị trấn và “Sân ga đường ray đôi (hai bên)” ở phía đông. Nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận. Cả hai đều ở độ cao 6m.",
+        "open": "Vào “Đường, đường sắt và hạ tầng” → đường sắt, xây “Sân ga trên cao tiêu chuẩn cao (hai bên)” ở phía tây thị trấn và “Sân ga đường ray đôi (hai bên)” ở phía đông. Nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận. Cả hai đều ở độ cao 6m.",
+        "variant": "Vào “Đường, đường sắt và hạ tầng” → đường sắt, xây “Sân ga trên cao tiêu chuẩn cao (hai bên)” ở phía tây thị trấn và “Sân ga đường ray đôi (hai bên)” ở phía đông. Nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận. Cả hai đều ở độ cao 6m.",
+        "start": "Vào “Đường, đường sắt và hạ tầng” → đường sắt, xây “Sân ga trên cao tiêu chuẩn cao (hai bên)” ở phía tây thị trấn và “Sân ga đường ray đôi (hai bên)” ở phía đông. Nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận. Cả hai đều ở độ cao 6m.",
+        "end": "Vào “Đường, đường sắt và hạ tầng” → đường sắt, xây “Sân ga trên cao tiêu chuẩn cao (hai bên)” ở phía tây thị trấn và “Sân ga đường ray đôi (hai bên)” ở phía đông. Nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận. Cả hai đều ở độ cao 6m.",
+        "confirm": "Vào “Đường, đường sắt và hạ tầng” → đường sắt, xây “Sân ga trên cao tiêu chuẩn cao (hai bên)” ở phía tây thị trấn và “Sân ga đường ray đôi (hai bên)” ở phía đông. Nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận. Cả hai đều ở độ cao 6m.",
+        "town": "Xây “Sân ga trên cao tiêu chuẩn cao (hai bên)” ở phía tây. Ở độ cao 6m, hãy nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận.",
+        "new": "Giờ đến phía đông. Nhấn “Quay lại” trên bảng để về danh sách loại, rồi chọn “Sân ga đường ray đôi (hai bên)” trong mục đường sắt. Ở độ cao 6m, nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận. Nếu đã đóng bảng, bạn có thể mở lại từ “Đường, đường sắt và hạ tầng”.",
+        "east": "Giờ đến phía đông. Nhấn “Quay lại” trên bảng để về danh sách loại, rồi chọn “Sân ga đường ray đôi (hai bên)” trong mục đường sắt. Ở độ cao 6m, nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận. Nếu đã đóng bảng, bạn có thể mở lại từ “Đường, đường sắt và hạ tầng”."
+      },
+      "step2": {
+        "title": "Xây nhà ga và lối vào",
+        "description": "Chọn “Nhà ga đơn giản”, rồi nối từng cặp hai điểm đánh dấu ở phía tây và phía đông để tạo một lối đi ngắn băng qua sân ga. Lối vào nằm ngay hai bên sân ga. Hãy nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận.",
+        "open": "Chọn “Nhà ga đơn giản”, rồi nối từng cặp hai điểm đánh dấu ở phía tây và phía đông để tạo một lối đi ngắn băng qua sân ga. Lối vào nằm ngay hai bên sân ga. Hãy nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận.",
+        "variant": "Chọn “Nhà ga đơn giản”, rồi nối từng cặp hai điểm đánh dấu ở phía tây và phía đông để tạo một lối đi ngắn băng qua sân ga. Lối vào nằm ngay hai bên sân ga. Hãy nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận.",
+        "start": "Chọn “Nhà ga đơn giản”, rồi nối từng cặp hai điểm đánh dấu ở phía tây và phía đông để tạo một lối đi ngắn băng qua sân ga. Lối vào nằm ngay hai bên sân ga. Hãy nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận.",
+        "end": "Chọn “Nhà ga đơn giản”, rồi nối từng cặp hai điểm đánh dấu ở phía tây và phía đông để tạo một lối đi ngắn băng qua sân ga. Lối vào nằm ngay hai bên sân ga. Hãy nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận.",
+        "confirm": "Chọn “Nhà ga đơn giản”, rồi nối từng cặp hai điểm đánh dấu ở phía tây và phía đông để tạo một lối đi ngắn băng qua sân ga. Lối vào nằm ngay hai bên sân ga. Hãy nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận.",
+        "town": "Chọn “Nhà ga đơn giản”, rồi nối từng cặp hai điểm đánh dấu ở phía tây và phía đông để tạo một lối đi ngắn băng qua sân ga. Lối vào nằm ngay hai bên sân ga. Hãy nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận.",
+        "new": "Chọn “Nhà ga đơn giản”, rồi nối từng cặp hai điểm đánh dấu ở phía tây và phía đông để tạo một lối đi ngắn băng qua sân ga. Lối vào nằm ngay hai bên sân ga. Hãy nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận.",
+        "east": "Chọn “Nhà ga đơn giản”, rồi nối từng cặp hai điểm đánh dấu ở phía tây và phía đông để tạo một lối đi ngắn băng qua sân ga. Lối vào nằm ngay hai bên sân ga. Hãy nhấp chuột trái vào điểm đầu và điểm cuối trong các vòng tròn, nhấp chuột phải để chốt hình dạng rồi xác nhận."
+      },
+      "step3": {
+        "title": "Quy hoạch đoạn cần thu mua đất",
+        "description": "Chọn “Đường ray đôi”, rồi vẽ một đoạn thẳng ở độ cao 6m từ đầu phía đông của sân ga phía tây đến đầu phía tây của đường trục chính. Đoạn này đi qua các tòa nhà nên cần thu mua đất. Hãy xác nhận quy hoạch rồi nhấn “Tiếp”. Thời gian thi công của đoạn này sẽ không được bỏ qua.",
+        "open": "Chọn “Đường ray đôi”, rồi vẽ một đoạn thẳng ở độ cao 6m từ đầu phía đông của sân ga phía tây đến đầu phía tây của đường trục chính. Đoạn này đi qua các tòa nhà nên cần thu mua đất. Hãy xác nhận quy hoạch rồi nhấn “Tiếp”. Thời gian thi công của đoạn này sẽ không được bỏ qua.",
+        "variant": "Chọn “Đường ray đôi”, rồi vẽ một đoạn thẳng ở độ cao 6m từ đầu phía đông của sân ga phía tây đến đầu phía tây của đường trục chính. Đoạn này đi qua các tòa nhà nên cần thu mua đất. Hãy xác nhận quy hoạch rồi nhấn “Tiếp”. Thời gian thi công của đoạn này sẽ không được bỏ qua.",
+        "start": "Chọn “Đường ray đôi”, rồi vẽ một đoạn thẳng ở độ cao 6m từ đầu phía đông của sân ga phía tây đến đầu phía tây của đường trục chính. Đoạn này đi qua các tòa nhà nên cần thu mua đất. Hãy xác nhận quy hoạch rồi nhấn “Tiếp”. Thời gian thi công của đoạn này sẽ không được bỏ qua.",
+        "end": "Chọn “Đường ray đôi”, rồi vẽ một đoạn thẳng ở độ cao 6m từ đầu phía đông của sân ga phía tây đến đầu phía tây của đường trục chính. Đoạn này đi qua các tòa nhà nên cần thu mua đất. Hãy xác nhận quy hoạch rồi nhấn “Tiếp”. Thời gian thi công của đoạn này sẽ không được bỏ qua.",
+        "confirm": "Chọn “Đường ray đôi”, rồi vẽ một đoạn thẳng ở độ cao 6m từ đầu phía đông của sân ga phía tây đến đầu phía tây của đường trục chính. Đoạn này đi qua các tòa nhà nên cần thu mua đất. Hãy xác nhận quy hoạch rồi nhấn “Tiếp”. Thời gian thi công của đoạn này sẽ không được bỏ qua.",
+        "town": "Chọn “Đường ray đôi”, rồi vẽ một đoạn thẳng ở độ cao 6m từ đầu phía đông của sân ga phía tây đến đầu phía tây của đường trục chính. Đoạn này đi qua các tòa nhà nên cần thu mua đất. Hãy xác nhận quy hoạch rồi nhấn “Tiếp”. Thời gian thi công của đoạn này sẽ không được bỏ qua.",
+        "new": "Chọn “Đường ray đôi”, rồi vẽ một đoạn thẳng ở độ cao 6m từ đầu phía đông của sân ga phía tây đến đầu phía tây của đường trục chính. Đoạn này đi qua các tòa nhà nên cần thu mua đất. Hãy xác nhận quy hoạch rồi nhấn “Tiếp”. Thời gian thi công của đoạn này sẽ không được bỏ qua.",
+        "east": "Chọn “Đường ray đôi”, rồi vẽ một đoạn thẳng ở độ cao 6m từ đầu phía đông của sân ga phía tây đến đầu phía tây của đường trục chính. Đoạn này đi qua các tòa nhà nên cần thu mua đất. Hãy xác nhận quy hoạch rồi nhấn “Tiếp”. Thời gian thi công của đoạn này sẽ không được bỏ qua."
+      },
+      "step4": {
+        "title": "Ra lệnh dỡ bỏ bệnh viện",
+        "description": "Với đất của các tòa nhà tư nhân, việc đàm phán thu mua sẽ tự động bắt đầu; nhưng bệnh viện là công trình công cộng của thành phố nên không tự động bị dỡ bỏ, và đang khiến đường ray không thể khởi công. Hãy nhấp vào bệnh viện rồi nhấn “Giải tỏa” trong các nút phía trên. Khi trạng thái chuyển thành “Đã lên kế hoạch phá dỡ”, hãy nhấn “Tiếp”.",
+        "open": "Với đất của các tòa nhà tư nhân, việc đàm phán thu mua sẽ tự động bắt đầu; nhưng bệnh viện là công trình công cộng của thành phố nên không tự động bị dỡ bỏ, và đang khiến đường ray không thể khởi công. Hãy nhấp vào bệnh viện rồi nhấn “Giải tỏa” trong các nút phía trên. Khi trạng thái chuyển thành “Đã lên kế hoạch phá dỡ”, hãy nhấn “Tiếp”.",
+        "variant": "Với đất của các tòa nhà tư nhân, việc đàm phán thu mua sẽ tự động bắt đầu; nhưng bệnh viện là công trình công cộng của thành phố nên không tự động bị dỡ bỏ, và đang khiến đường ray không thể khởi công. Hãy nhấp vào bệnh viện rồi nhấn “Giải tỏa” trong các nút phía trên. Khi trạng thái chuyển thành “Đã lên kế hoạch phá dỡ”, hãy nhấn “Tiếp”.",
+        "start": "Với đất của các tòa nhà tư nhân, việc đàm phán thu mua sẽ tự động bắt đầu; nhưng bệnh viện là công trình công cộng của thành phố nên không tự động bị dỡ bỏ, và đang khiến đường ray không thể khởi công. Hãy nhấp vào bệnh viện rồi nhấn “Giải tỏa” trong các nút phía trên. Khi trạng thái chuyển thành “Đã lên kế hoạch phá dỡ”, hãy nhấn “Tiếp”.",
+        "end": "Với đất của các tòa nhà tư nhân, việc đàm phán thu mua sẽ tự động bắt đầu; nhưng bệnh viện là công trình công cộng của thành phố nên không tự động bị dỡ bỏ, và đang khiến đường ray không thể khởi công. Hãy nhấp vào bệnh viện rồi nhấn “Giải tỏa” trong các nút phía trên. Khi trạng thái chuyển thành “Đã lên kế hoạch phá dỡ”, hãy nhấn “Tiếp”.",
+        "confirm": "Với đất của các tòa nhà tư nhân, việc đàm phán thu mua sẽ tự động bắt đầu; nhưng bệnh viện là công trình công cộng của thành phố nên không tự động bị dỡ bỏ, và đang khiến đường ray không thể khởi công. Hãy nhấp vào bệnh viện rồi nhấn “Giải tỏa” trong các nút phía trên. Khi trạng thái chuyển thành “Đã lên kế hoạch phá dỡ”, hãy nhấn “Tiếp”.",
+        "town": "Với đất của các tòa nhà tư nhân, việc đàm phán thu mua sẽ tự động bắt đầu; nhưng bệnh viện là công trình công cộng của thành phố nên không tự động bị dỡ bỏ, và đang khiến đường ray không thể khởi công. Hãy nhấp vào bệnh viện rồi nhấn “Giải tỏa” trong các nút phía trên. Khi trạng thái chuyển thành “Đã lên kế hoạch phá dỡ”, hãy nhấn “Tiếp”.",
+        "new": "Với đất của các tòa nhà tư nhân, việc đàm phán thu mua sẽ tự động bắt đầu; nhưng bệnh viện là công trình công cộng của thành phố nên không tự động bị dỡ bỏ, và đang khiến đường ray không thể khởi công. Hãy nhấp vào bệnh viện rồi nhấn “Giải tỏa” trong các nút phía trên. Khi trạng thái chuyển thành “Đã lên kế hoạch phá dỡ”, hãy nhấn “Tiếp”.",
+        "east": "Với đất của các tòa nhà tư nhân, việc đàm phán thu mua sẽ tự động bắt đầu; nhưng bệnh viện là công trình công cộng của thành phố nên không tự động bị dỡ bỏ, và đang khiến đường ray không thể khởi công. Hãy nhấp vào bệnh viện rồi nhấn “Giải tỏa” trong các nút phía trên. Khi trạng thái chuyển thành “Đã lên kế hoạch phá dỡ”, hãy nhấn “Tiếp”."
+      },
+      "step5": {
+        "title": "Chờ đoạn thu mua đất hoàn thành",
+        "description": "Cho thời gian trôi để chờ việc thu mua đất tư nhân, dỡ bỏ bệnh viện và thi công đường ray hoàn tất. Việc này mất vài tháng. Ở đoạn này, thời gian thi công không được bỏ qua; hãy xác nhận rằng đường ray hoàn thành theo quy trình thi công bình thường.",
+        "open": "Cho thời gian trôi để chờ việc thu mua đất tư nhân, dỡ bỏ bệnh viện và thi công đường ray hoàn tất. Việc này mất vài tháng. Ở đoạn này, thời gian thi công không được bỏ qua; hãy xác nhận rằng đường ray hoàn thành theo quy trình thi công bình thường.",
+        "variant": "Cho thời gian trôi để chờ việc thu mua đất tư nhân, dỡ bỏ bệnh viện và thi công đường ray hoàn tất. Việc này mất vài tháng. Ở đoạn này, thời gian thi công không được bỏ qua; hãy xác nhận rằng đường ray hoàn thành theo quy trình thi công bình thường.",
+        "start": "Cho thời gian trôi để chờ việc thu mua đất tư nhân, dỡ bỏ bệnh viện và thi công đường ray hoàn tất. Việc này mất vài tháng. Ở đoạn này, thời gian thi công không được bỏ qua; hãy xác nhận rằng đường ray hoàn thành theo quy trình thi công bình thường.",
+        "end": "Cho thời gian trôi để chờ việc thu mua đất tư nhân, dỡ bỏ bệnh viện và thi công đường ray hoàn tất. Việc này mất vài tháng. Ở đoạn này, thời gian thi công không được bỏ qua; hãy xác nhận rằng đường ray hoàn thành theo quy trình thi công bình thường.",
+        "confirm": "Cho thời gian trôi để chờ việc thu mua đất tư nhân, dỡ bỏ bệnh viện và thi công đường ray hoàn tất. Việc này mất vài tháng. Ở đoạn này, thời gian thi công không được bỏ qua; hãy xác nhận rằng đường ray hoàn thành theo quy trình thi công bình thường.",
+        "town": "Cho thời gian trôi để chờ việc thu mua đất tư nhân, dỡ bỏ bệnh viện và thi công đường ray hoàn tất. Việc này mất vài tháng. Ở đoạn này, thời gian thi công không được bỏ qua; hãy xác nhận rằng đường ray hoàn thành theo quy trình thi công bình thường.",
+        "new": "Cho thời gian trôi để chờ việc thu mua đất tư nhân, dỡ bỏ bệnh viện và thi công đường ray hoàn tất. Việc này mất vài tháng. Ở đoạn này, thời gian thi công không được bỏ qua; hãy xác nhận rằng đường ray hoàn thành theo quy trình thi công bình thường.",
+        "east": "Cho thời gian trôi để chờ việc thu mua đất tư nhân, dỡ bỏ bệnh viện và thi công đường ray hoàn tất. Việc này mất vài tháng. Ở đoạn này, thời gian thi công không được bỏ qua; hãy xác nhận rằng đường ray hoàn thành theo quy trình thi công bình thường."
+      },
+      "step6": {
+        "title": "Đặt đường ray ngay phía trên đường trục chính",
+        "description": "Dùng “Đường ray đôi”, đặt ray ở độ cao 6m từ đầu phía tây đến đầu phía đông của đường trục chính. Nếu đi ngay phía trên tim đường, tuyến sẽ không chạm vào các lô đất tư nhân ven đường và tránh được việc thu mua đất. Nếu lệch khỏi đường và đi qua các tòa nhà, bạn sẽ phải thu mua đất hoặc dỡ bỏ công trình công cộng.",
+        "open": "Dùng “Đường ray đôi”, đặt ray ở độ cao 6m từ đầu phía tây đến đầu phía đông của đường trục chính. Nếu đi ngay phía trên tim đường, tuyến sẽ không chạm vào các lô đất tư nhân ven đường và tránh được việc thu mua đất. Nếu lệch khỏi đường và đi qua các tòa nhà, bạn sẽ phải thu mua đất hoặc dỡ bỏ công trình công cộng.",
+        "variant": "Dùng “Đường ray đôi”, đặt ray ở độ cao 6m từ đầu phía tây đến đầu phía đông của đường trục chính. Nếu đi ngay phía trên tim đường, tuyến sẽ không chạm vào các lô đất tư nhân ven đường và tránh được việc thu mua đất. Nếu lệch khỏi đường và đi qua các tòa nhà, bạn sẽ phải thu mua đất hoặc dỡ bỏ công trình công cộng.",
+        "start": "Dùng “Đường ray đôi”, đặt ray ở độ cao 6m từ đầu phía tây đến đầu phía đông của đường trục chính. Nếu đi ngay phía trên tim đường, tuyến sẽ không chạm vào các lô đất tư nhân ven đường và tránh được việc thu mua đất. Nếu lệch khỏi đường và đi qua các tòa nhà, bạn sẽ phải thu mua đất hoặc dỡ bỏ công trình công cộng.",
+        "end": "Dùng “Đường ray đôi”, đặt ray ở độ cao 6m từ đầu phía tây đến đầu phía đông của đường trục chính. Nếu đi ngay phía trên tim đường, tuyến sẽ không chạm vào các lô đất tư nhân ven đường và tránh được việc thu mua đất. Nếu lệch khỏi đường và đi qua các tòa nhà, bạn sẽ phải thu mua đất hoặc dỡ bỏ công trình công cộng.",
+        "confirm": "Dùng “Đường ray đôi”, đặt ray ở độ cao 6m từ đầu phía tây đến đầu phía đông của đường trục chính. Nếu đi ngay phía trên tim đường, tuyến sẽ không chạm vào các lô đất tư nhân ven đường và tránh được việc thu mua đất. Nếu lệch khỏi đường và đi qua các tòa nhà, bạn sẽ phải thu mua đất hoặc dỡ bỏ công trình công cộng.",
+        "town": "Dùng “Đường ray đôi”, đặt ray ở độ cao 6m từ đầu phía tây đến đầu phía đông của đường trục chính. Nếu đi ngay phía trên tim đường, tuyến sẽ không chạm vào các lô đất tư nhân ven đường và tránh được việc thu mua đất. Nếu lệch khỏi đường và đi qua các tòa nhà, bạn sẽ phải thu mua đất hoặc dỡ bỏ công trình công cộng.",
+        "new": "Dùng “Đường ray đôi”, đặt ray ở độ cao 6m từ đầu phía tây đến đầu phía đông của đường trục chính. Nếu đi ngay phía trên tim đường, tuyến sẽ không chạm vào các lô đất tư nhân ven đường và tránh được việc thu mua đất. Nếu lệch khỏi đường và đi qua các tòa nhà, bạn sẽ phải thu mua đất hoặc dỡ bỏ công trình công cộng.",
+        "east": "Cuối cùng, hãy đặt “Đường ray đôi” ở độ cao 6m từ đầu phía đông của đường trục chính đến đầu phía tây của sân ga phía đông. Khi hai sân ga đã được nối với nhau, nhấn “Tiếp” để bỏ qua thời gian thi công."
+      },
+      "step7": {
+        "title": "Xây depot",
+        "description": "Trên bảng xây dựng, chọn “Depot đường sắt” và xây trên lô đất màu vàng ở phía bắc thị trấn. Lần này bạn cũng tự chọn vị trí. Nhấn “Tiếp” để bỏ qua thời gian thi công và hoàn thành depot.",
+        "open": "Trên bảng xây dựng, chọn “Depot đường sắt” và xây trên lô đất màu vàng ở phía bắc thị trấn. Lần này bạn cũng tự chọn vị trí. Nhấn “Tiếp” để bỏ qua thời gian thi công và hoàn thành depot.",
+        "variant": "Trên bảng xây dựng, chọn “Depot đường sắt” và xây trên lô đất màu vàng ở phía bắc thị trấn. Lần này bạn cũng tự chọn vị trí. Nhấn “Tiếp” để bỏ qua thời gian thi công và hoàn thành depot.",
+        "start": "Trên bảng xây dựng, chọn “Depot đường sắt” và xây trên lô đất màu vàng ở phía bắc thị trấn. Lần này bạn cũng tự chọn vị trí. Nhấn “Tiếp” để bỏ qua thời gian thi công và hoàn thành depot.",
+        "end": "Trên bảng xây dựng, chọn “Depot đường sắt” và xây trên lô đất màu vàng ở phía bắc thị trấn. Lần này bạn cũng tự chọn vị trí. Nhấn “Tiếp” để bỏ qua thời gian thi công và hoàn thành depot.",
+        "confirm": "Trên bảng xây dựng, chọn “Depot đường sắt” và xây trên lô đất màu vàng ở phía bắc thị trấn. Lần này bạn cũng tự chọn vị trí. Nhấn “Tiếp” để bỏ qua thời gian thi công và hoàn thành depot.",
+        "town": "Trên bảng xây dựng, chọn “Depot đường sắt” và xây trên lô đất màu vàng ở phía bắc thị trấn. Lần này bạn cũng tự chọn vị trí. Nhấn “Tiếp” để bỏ qua thời gian thi công và hoàn thành depot.",
+        "new": "Trên bảng xây dựng, chọn “Depot đường sắt” và xây trên lô đất màu vàng ở phía bắc thị trấn. Lần này bạn cũng tự chọn vị trí. Nhấn “Tiếp” để bỏ qua thời gian thi công và hoàn thành depot.",
+        "east": "Trên bảng xây dựng, chọn “Depot đường sắt” và xây trên lô đất màu vàng ở phía bắc thị trấn. Lần này bạn cũng tự chọn vị trí. Nhấn “Tiếp” để bỏ qua thời gian thi công và hoàn thành depot."
+      },
+      "step8": {
+        "title": "Điều chỉnh đường cong và độ dốc để nối vào đường chính",
+        "description": "Dùng “Đường ray đơn”, xuất phát từ điểm đấu nối mặt đất ở phía đông depot, vòng rộng về phía đông, đi qua điểm đánh dấu ở phía đông bắc rồi nối vào điểm nhập ở độ cao 6m của đường chính. Hãy lấy các điểm trung gian màu vàng làm mốc để không vượt giới hạn độ cong và độ dốc. Sau khi nhấp chuột phải để chốt hình dạng, bạn có thể kéo các đỉnh và điểm điều khiển để chỉnh lại.",
+        "open": "Dùng “Đường ray đơn”, xuất phát từ điểm đấu nối mặt đất ở phía đông depot, vòng rộng về phía đông, đi qua điểm đánh dấu ở phía đông bắc rồi nối vào điểm nhập ở độ cao 6m của đường chính. Hãy lấy các điểm trung gian màu vàng làm mốc để không vượt giới hạn độ cong và độ dốc. Sau khi nhấp chuột phải để chốt hình dạng, bạn có thể kéo các đỉnh và điểm điều khiển để chỉnh lại.",
+        "variant": "Dùng “Đường ray đơn”, xuất phát từ điểm đấu nối mặt đất ở phía đông depot, vòng rộng về phía đông, đi qua điểm đánh dấu ở phía đông bắc rồi nối vào điểm nhập ở độ cao 6m của đường chính. Hãy lấy các điểm trung gian màu vàng làm mốc để không vượt giới hạn độ cong và độ dốc. Sau khi nhấp chuột phải để chốt hình dạng, bạn có thể kéo các đỉnh và điểm điều khiển để chỉnh lại.",
+        "start": "Dùng “Đường ray đơn”, xuất phát từ điểm đấu nối mặt đất ở phía đông depot, vòng rộng về phía đông, đi qua điểm đánh dấu ở phía đông bắc rồi nối vào điểm nhập ở độ cao 6m của đường chính. Hãy lấy các điểm trung gian màu vàng làm mốc để không vượt giới hạn độ cong và độ dốc. Sau khi nhấp chuột phải để chốt hình dạng, bạn có thể kéo các đỉnh và điểm điều khiển để chỉnh lại.",
+        "end": "Dùng “Đường ray đơn”, xuất phát từ điểm đấu nối mặt đất ở phía đông depot, vòng rộng về phía đông, đi qua điểm đánh dấu ở phía đông bắc rồi nối vào điểm nhập ở độ cao 6m của đường chính. Hãy lấy các điểm trung gian màu vàng làm mốc để không vượt giới hạn độ cong và độ dốc. Sau khi nhấp chuột phải để chốt hình dạng, bạn có thể kéo các đỉnh và điểm điều khiển để chỉnh lại.",
+        "confirm": "Dùng “Đường ray đơn”, xuất phát từ điểm đấu nối mặt đất ở phía đông depot, vòng rộng về phía đông, đi qua điểm đánh dấu ở phía đông bắc rồi nối vào điểm nhập ở độ cao 6m của đường chính. Hãy lấy các điểm trung gian màu vàng làm mốc để không vượt giới hạn độ cong và độ dốc. Sau khi nhấp chuột phải để chốt hình dạng, bạn có thể kéo các đỉnh và điểm điều khiển để chỉnh lại.",
+        "town": "Dùng “Đường ray đơn”, xuất phát từ điểm đấu nối mặt đất ở phía đông depot, vòng rộng về phía đông, đi qua điểm đánh dấu ở phía đông bắc rồi nối vào điểm nhập ở độ cao 6m của đường chính. Hãy lấy các điểm trung gian màu vàng làm mốc để không vượt giới hạn độ cong và độ dốc. Sau khi nhấp chuột phải để chốt hình dạng, bạn có thể kéo các đỉnh và điểm điều khiển để chỉnh lại.",
+        "new": "Dùng “Đường ray đơn”, xuất phát từ điểm đấu nối mặt đất ở phía đông depot, vòng rộng về phía đông, đi qua điểm đánh dấu ở phía đông bắc rồi nối vào điểm nhập ở độ cao 6m của đường chính. Hãy lấy các điểm trung gian màu vàng làm mốc để không vượt giới hạn độ cong và độ dốc. Sau khi nhấp chuột phải để chốt hình dạng, bạn có thể kéo các đỉnh và điểm điều khiển để chỉnh lại.",
+        "east": "Dùng “Đường ray đơn”, xuất phát từ điểm đấu nối mặt đất ở phía đông depot, vòng rộng về phía đông, đi qua điểm đánh dấu ở phía đông bắc rồi nối vào điểm nhập ở độ cao 6m của đường chính. Hãy lấy các điểm trung gian màu vàng làm mốc để không vượt giới hạn độ cong và độ dốc. Sau khi nhấp chuột phải để chốt hình dạng, bạn có thể kéo các đỉnh và điểm điều khiển để chỉnh lại."
+      },
+      "step9": {
+        "title": "Cấp điện cho depot từ nhà máy điện có sẵn",
+        "description": "Muốn tàu điện chạy được, bạn cần nối đường dây điện từ nhà máy điện. Dùng “Đường dây điện”, nối từ điểm đấu nối của nhà máy điện đến điểm đấu nối dùng chung ở phía đông depot rồi xác nhận.",
+        "open": "Muốn tàu điện chạy được, bạn cần nối đường dây điện từ nhà máy điện. Dùng “Đường dây điện”, nối từ điểm đấu nối của nhà máy điện đến điểm đấu nối dùng chung ở phía đông depot rồi xác nhận.",
+        "variant": "Muốn tàu điện chạy được, bạn cần nối đường dây điện từ nhà máy điện. Dùng “Đường dây điện”, nối từ điểm đấu nối của nhà máy điện đến điểm đấu nối dùng chung ở phía đông depot rồi xác nhận.",
+        "start": "Muốn tàu điện chạy được, bạn cần nối đường dây điện từ nhà máy điện. Dùng “Đường dây điện”, nối từ điểm đấu nối của nhà máy điện đến điểm đấu nối dùng chung ở phía đông depot rồi xác nhận.",
+        "end": "Muốn tàu điện chạy được, bạn cần nối đường dây điện từ nhà máy điện. Dùng “Đường dây điện”, nối từ điểm đấu nối của nhà máy điện đến điểm đấu nối dùng chung ở phía đông depot rồi xác nhận.",
+        "confirm": "Muốn tàu điện chạy được, bạn cần nối đường dây điện từ nhà máy điện. Dùng “Đường dây điện”, nối từ điểm đấu nối của nhà máy điện đến điểm đấu nối dùng chung ở phía đông depot rồi xác nhận.",
+        "town": "Muốn tàu điện chạy được, bạn cần nối đường dây điện từ nhà máy điện. Dùng “Đường dây điện”, nối từ điểm đấu nối của nhà máy điện đến điểm đấu nối dùng chung ở phía đông depot rồi xác nhận.",
+        "new": "Muốn tàu điện chạy được, bạn cần nối đường dây điện từ nhà máy điện. Dùng “Đường dây điện”, nối từ điểm đấu nối của nhà máy điện đến điểm đấu nối dùng chung ở phía đông depot rồi xác nhận.",
+        "east": "Muốn tàu điện chạy được, bạn cần nối đường dây điện từ nhà máy điện. Dùng “Đường dây điện”, nối từ điểm đấu nối của nhà máy điện đến điểm đấu nối dùng chung ở phía đông depot rồi xác nhận."
+      },
+      "step10": {
+        "title": "Khai trương tuyến đường sắt",
+        "description": "Vào “Giao thông công cộng” → “+ Mở tuyến mới” và chọn “Tuyến đường sắt liên vùng”. Đặt điểm dừng trên các sân ga trên cao ở phía tây và phía đông, rồi nhấp vào điểm dừng đầu tiên để khép vòng. Đặt giá vé 0, giãn cách chuyến mục tiêu 5 phút rồi xác nhận.",
+        "open": "Vào “Giao thông công cộng” → “+ Mở tuyến mới” và chọn “Tuyến đường sắt liên vùng”. Đặt điểm dừng trên các sân ga trên cao ở phía tây và phía đông, rồi nhấp vào điểm dừng đầu tiên để khép vòng. Đặt giá vé 0, giãn cách chuyến mục tiêu 5 phút rồi xác nhận.",
+        "variant": "Vào “Giao thông công cộng” → “+ Mở tuyến mới” và chọn “Tuyến đường sắt liên vùng”. Đặt điểm dừng trên các sân ga trên cao ở phía tây và phía đông, rồi nhấp vào điểm dừng đầu tiên để khép vòng. Đặt giá vé 0, giãn cách chuyến mục tiêu 5 phút rồi xác nhận.",
+        "start": "Vào “Giao thông công cộng” → “+ Mở tuyến mới” và chọn “Tuyến đường sắt liên vùng”. Đặt điểm dừng trên các sân ga trên cao ở phía tây và phía đông, rồi nhấp vào điểm dừng đầu tiên để khép vòng. Đặt giá vé 0, giãn cách chuyến mục tiêu 5 phút rồi xác nhận.",
+        "end": "Vào “Giao thông công cộng” → “+ Mở tuyến mới” và chọn “Tuyến đường sắt liên vùng”. Đặt điểm dừng trên các sân ga trên cao ở phía tây và phía đông, rồi nhấp vào điểm dừng đầu tiên để khép vòng. Đặt giá vé 0, giãn cách chuyến mục tiêu 5 phút rồi xác nhận.",
+        "confirm": "Vào “Giao thông công cộng” → “+ Mở tuyến mới” và chọn “Tuyến đường sắt liên vùng”. Đặt điểm dừng trên các sân ga trên cao ở phía tây và phía đông, rồi nhấp vào điểm dừng đầu tiên để khép vòng. Đặt giá vé 0, giãn cách chuyến mục tiêu 5 phút rồi xác nhận.",
+        "town": "Vào “Giao thông công cộng” → “+ Mở tuyến mới” và chọn “Tuyến đường sắt liên vùng”. Đặt điểm dừng trên các sân ga trên cao ở phía tây và phía đông, rồi nhấp vào điểm dừng đầu tiên để khép vòng. Đặt giá vé 0, giãn cách chuyến mục tiêu 5 phút rồi xác nhận.",
+        "new": "Vào “Giao thông công cộng” → “+ Mở tuyến mới” và chọn “Tuyến đường sắt liên vùng”. Đặt điểm dừng trên các sân ga trên cao ở phía tây và phía đông, rồi nhấp vào điểm dừng đầu tiên để khép vòng. Đặt giá vé 0, giãn cách chuyến mục tiêu 5 phút rồi xác nhận.",
+        "east": "Vào “Giao thông công cộng” → “+ Mở tuyến mới” và chọn “Tuyến đường sắt liên vùng”. Đặt điểm dừng trên các sân ga trên cao ở phía tây và phía đông, rồi nhấp vào điểm dừng đầu tiên để khép vòng. Đặt giá vé 0, giãn cách chuyến mục tiêu 5 phút rồi xác nhận."
+      },
+      "step11": {
+        "title": "Kiểm tra phương tiện và việc vận hành",
+        "description": "Cho thời gian trôi, rồi kiểm tra năng lực vận chuyển và giãn cách chuyến của tuyến trong màn hình quản lý giao thông công cộng. Depot cần vài tháng để có được phương tiện. Khi tuyến có năng lực vận chuyển là việc khai trương đã hoàn tất. Cư dân chọn lộ trình có tính cả đi bộ, nên với các ga gần nhau thế này, có thể vẫn chưa có hành khách.",
+        "open": "Cho thời gian trôi, rồi kiểm tra năng lực vận chuyển và giãn cách chuyến của tuyến trong màn hình quản lý giao thông công cộng. Depot cần vài tháng để có được phương tiện. Khi tuyến có năng lực vận chuyển là việc khai trương đã hoàn tất. Cư dân chọn lộ trình có tính cả đi bộ, nên với các ga gần nhau thế này, có thể vẫn chưa có hành khách.",
+        "variant": "Cho thời gian trôi, rồi kiểm tra năng lực vận chuyển và giãn cách chuyến của tuyến trong màn hình quản lý giao thông công cộng. Depot cần vài tháng để có được phương tiện. Khi tuyến có năng lực vận chuyển là việc khai trương đã hoàn tất. Cư dân chọn lộ trình có tính cả đi bộ, nên với các ga gần nhau thế này, có thể vẫn chưa có hành khách.",
+        "start": "Cho thời gian trôi, rồi kiểm tra năng lực vận chuyển và giãn cách chuyến của tuyến trong màn hình quản lý giao thông công cộng. Depot cần vài tháng để có được phương tiện. Khi tuyến có năng lực vận chuyển là việc khai trương đã hoàn tất. Cư dân chọn lộ trình có tính cả đi bộ, nên với các ga gần nhau thế này, có thể vẫn chưa có hành khách.",
+        "end": "Cho thời gian trôi, rồi kiểm tra năng lực vận chuyển và giãn cách chuyến của tuyến trong màn hình quản lý giao thông công cộng. Depot cần vài tháng để có được phương tiện. Khi tuyến có năng lực vận chuyển là việc khai trương đã hoàn tất. Cư dân chọn lộ trình có tính cả đi bộ, nên với các ga gần nhau thế này, có thể vẫn chưa có hành khách.",
+        "confirm": "Cho thời gian trôi, rồi kiểm tra năng lực vận chuyển và giãn cách chuyến của tuyến trong màn hình quản lý giao thông công cộng. Depot cần vài tháng để có được phương tiện. Khi tuyến có năng lực vận chuyển là việc khai trương đã hoàn tất. Cư dân chọn lộ trình có tính cả đi bộ, nên với các ga gần nhau thế này, có thể vẫn chưa có hành khách.",
+        "town": "Cho thời gian trôi, rồi kiểm tra năng lực vận chuyển và giãn cách chuyến của tuyến trong màn hình quản lý giao thông công cộng. Depot cần vài tháng để có được phương tiện. Khi tuyến có năng lực vận chuyển là việc khai trương đã hoàn tất. Cư dân chọn lộ trình có tính cả đi bộ, nên với các ga gần nhau thế này, có thể vẫn chưa có hành khách.",
+        "new": "Cho thời gian trôi, rồi kiểm tra năng lực vận chuyển và giãn cách chuyến của tuyến trong màn hình quản lý giao thông công cộng. Depot cần vài tháng để có được phương tiện. Khi tuyến có năng lực vận chuyển là việc khai trương đã hoàn tất. Cư dân chọn lộ trình có tính cả đi bộ, nên với các ga gần nhau thế này, có thể vẫn chưa có hành khách.",
+        "east": "Cho thời gian trôi, rồi kiểm tra năng lực vận chuyển và giãn cách chuyến của tuyến trong màn hình quản lý giao thông công cộng. Depot cần vài tháng để có được phương tiện. Khi tuyến có năng lực vận chuyển là việc khai trương đã hoàn tất. Cư dân chọn lộ trình có tính cả đi bộ, nên với các ga gần nhau thế này, có thể vẫn chưa có hành khách."
+      },
+      "step12": {
+        "title": "Nhìn lại quá trình xây dựng đường sắt",
+        "description": "Camera đã được đưa đến ga phía tây. Hãy ngắm đoàn tàu dừng ở sân ga nhé. Bạn đã hoàn thiện sân ga, nhà ga, đường chính, depot cùng đường nhánh vào depot, việc cấp điện và thiết lập tuyến. Bạn đã trải qua việc thu mua đất tư nhân và dỡ bỏ công trình công cộng, đồng thời tránh được thu mua đất ở đoạn đi ngay phía trên đường. Hãy áp dụng cách vừa kiểm tra bán kính cong và độ dốc vừa điều chỉnh hướng tuyến cho những công trình đường sắt khác.",
+        "open": "Camera đã được đưa đến ga phía tây. Hãy ngắm đoàn tàu dừng ở sân ga nhé. Bạn đã hoàn thiện sân ga, nhà ga, đường chính, depot cùng đường nhánh vào depot, việc cấp điện và thiết lập tuyến. Bạn đã trải qua việc thu mua đất tư nhân và dỡ bỏ công trình công cộng, đồng thời tránh được thu mua đất ở đoạn đi ngay phía trên đường. Hãy áp dụng cách vừa kiểm tra bán kính cong và độ dốc vừa điều chỉnh hướng tuyến cho những công trình đường sắt khác.",
+        "variant": "Camera đã được đưa đến ga phía tây. Hãy ngắm đoàn tàu dừng ở sân ga nhé. Bạn đã hoàn thiện sân ga, nhà ga, đường chính, depot cùng đường nhánh vào depot, việc cấp điện và thiết lập tuyến. Bạn đã trải qua việc thu mua đất tư nhân và dỡ bỏ công trình công cộng, đồng thời tránh được thu mua đất ở đoạn đi ngay phía trên đường. Hãy áp dụng cách vừa kiểm tra bán kính cong và độ dốc vừa điều chỉnh hướng tuyến cho những công trình đường sắt khác.",
+        "start": "Camera đã được đưa đến ga phía tây. Hãy ngắm đoàn tàu dừng ở sân ga nhé. Bạn đã hoàn thiện sân ga, nhà ga, đường chính, depot cùng đường nhánh vào depot, việc cấp điện và thiết lập tuyến. Bạn đã trải qua việc thu mua đất tư nhân và dỡ bỏ công trình công cộng, đồng thời tránh được thu mua đất ở đoạn đi ngay phía trên đường. Hãy áp dụng cách vừa kiểm tra bán kính cong và độ dốc vừa điều chỉnh hướng tuyến cho những công trình đường sắt khác.",
+        "end": "Camera đã được đưa đến ga phía tây. Hãy ngắm đoàn tàu dừng ở sân ga nhé. Bạn đã hoàn thiện sân ga, nhà ga, đường chính, depot cùng đường nhánh vào depot, việc cấp điện và thiết lập tuyến. Bạn đã trải qua việc thu mua đất tư nhân và dỡ bỏ công trình công cộng, đồng thời tránh được thu mua đất ở đoạn đi ngay phía trên đường. Hãy áp dụng cách vừa kiểm tra bán kính cong và độ dốc vừa điều chỉnh hướng tuyến cho những công trình đường sắt khác.",
+        "confirm": "Camera đã được đưa đến ga phía tây. Hãy ngắm đoàn tàu dừng ở sân ga nhé. Bạn đã hoàn thiện sân ga, nhà ga, đường chính, depot cùng đường nhánh vào depot, việc cấp điện và thiết lập tuyến. Bạn đã trải qua việc thu mua đất tư nhân và dỡ bỏ công trình công cộng, đồng thời tránh được thu mua đất ở đoạn đi ngay phía trên đường. Hãy áp dụng cách vừa kiểm tra bán kính cong và độ dốc vừa điều chỉnh hướng tuyến cho những công trình đường sắt khác.",
+        "town": "Camera đã được đưa đến ga phía tây. Hãy ngắm đoàn tàu dừng ở sân ga nhé. Bạn đã hoàn thiện sân ga, nhà ga, đường chính, depot cùng đường nhánh vào depot, việc cấp điện và thiết lập tuyến. Bạn đã trải qua việc thu mua đất tư nhân và dỡ bỏ công trình công cộng, đồng thời tránh được thu mua đất ở đoạn đi ngay phía trên đường. Hãy áp dụng cách vừa kiểm tra bán kính cong và độ dốc vừa điều chỉnh hướng tuyến cho những công trình đường sắt khác.",
+        "new": "Camera đã được đưa đến ga phía tây. Hãy ngắm đoàn tàu dừng ở sân ga nhé. Bạn đã hoàn thiện sân ga, nhà ga, đường chính, depot cùng đường nhánh vào depot, việc cấp điện và thiết lập tuyến. Bạn đã trải qua việc thu mua đất tư nhân và dỡ bỏ công trình công cộng, đồng thời tránh được thu mua đất ở đoạn đi ngay phía trên đường. Hãy áp dụng cách vừa kiểm tra bán kính cong và độ dốc vừa điều chỉnh hướng tuyến cho những công trình đường sắt khác.",
+        "east": "Camera đã được đưa đến ga phía tây. Hãy ngắm đoàn tàu dừng ở sân ga nhé. Bạn đã hoàn thiện sân ga, nhà ga, đường chính, depot cùng đường nhánh vào depot, việc cấp điện và thiết lập tuyến. Bạn đã trải qua việc thu mua đất tư nhân và dỡ bỏ công trình công cộng, đồng thời tránh được thu mua đất ở đoạn đi ngay phía trên đường. Hãy áp dụng cách vừa kiểm tra bán kính cong và độ dốc vừa điều chỉnh hướng tuyến cho những công trình đường sắt khác."
+      }
+    },
+    "complete": {
+      "title": "Hoàn thành hướng dẫn",
+      "description": "Chúc mừng! Bạn đã hoàn thành phần hướng dẫn. Nhấn “Kết thúc” để đóng phần chỉ dẫn và tiếp tục chơi tự do với thành phố này.",
+      "button": "Kết thúc"
+    },
+    "nextButton": "Tiếp",
+    "checking": "Đang kiểm tra…",
+    "failed": "Chưa đạt điều kiện. Hãy thử lại.",
+    "completed": "Hoàn thành hướng dẫn! Bạn đã làm rất tốt.",
+    "stepProgress": "Bước {{current}} / {{total}}",
+    "guide": {
+      "openRoad": "Nhấn biểu tượng đường để mở bảng xây dựng.",
+      "selectRoad": "Chọn đường 2 làn mặt đất trong mục “Đường phố”. Chỉ có thể chọn những loại được cho phép.",
+      "placeStart": "Nhấp chuột trái bên trong vòng tròn màu xanh nhạt để đặt điểm đầu của con đường.",
+      "placeEnd": "Nhấp chuột trái bên trong vòng tròn màu vàng để đặt điểm cuối của con đường.",
+      "finalizeRoad": "Nhấp chuột phải trong màn hình 3D để chốt hình dạng con đường.",
+      "confirmRoad": "Nhấn “Xác nhận” trên bảng xây dựng để lưu, rồi nhấn nút “Tiếp”.",
+      "failed": "Chuẩn bị hoặc kết nối thất bại. Nếu thử lại vẫn không được, hãy thoát ra và bắt đầu phần hướng dẫn trong một thành phố mới.",
+      "retry": "Thử lại",
+      "placementRequired": "Hãy đặt đúng loại và vị trí được chỉ dẫn.",
+      "preparing": "Đang chuẩn bị trạng thái ban đầu của phần hướng dẫn.",
+      "finishFailed": "Không thể kết thúc phần hướng dẫn. Hãy thử lại."
+    },
+    "trade": {
+      "title": "Giao thương quốc tế",
+      "description": "Một nhà máy địa phương đang tìm đầu ra ở nước ngoài. Trong phần hướng dẫn này, bạn sẽ học cách xuất khẩu thực phẩm qua cảng và nhập khẩu hàng hóa bằng đường sắt chở hàng nối sang nước láng giềng.",
+      "step1": {
+        "description": "Cần có bến xuất khẩu để đưa thực phẩm sản xuất trên đảo này ra nước ngoài. Hãy xây “Cảng container” trên lô đất ven biển có điểm đánh dấu màu vàng. Vì đây là hướng dẫn nên thời gian thi công sẽ được bỏ qua.",
+        "title": "Xây cảng container"
+      },
+      "step2": {
+        "description": "Phải mất vài tháng để nhà máy đi vào sản xuất và vận chuyển, vì vậy hãy cho thời gian trôi rồi xem kết quả xuất khẩu của cảng. Đóng bảng chi tiết của cảng container rồi mở lại, bạn sẽ xem được kết quả xuất nhập khẩu trong thông tin bốc dỡ hàng.",
+        "title": "Kiểm tra xuất khẩu thực phẩm"
+      },
+      "step3": {
+        "description": "Vậy là bạn đã có nơi xuất nhập khẩu bằng tàu biển. Tiếp theo, hãy xây nơi xuất nhập khẩu hàng hóa bằng đường sắt. Hãy xây “Ga hàng hóa quốc tế” trên lô đất ven đường có điểm đánh dấu màu vàng. Ở biên giới phía đông có đường ray dẫn sang nước láng giềng và một ga hàng hóa biên giới.",
+        "title": "Xây ga hàng hóa quốc tế"
+      },
+      "step4": {
+        "open": "Mở “Đường, đường sắt và hạ tầng” trên bảng biểu tượng, rồi chọn “Sân ga hàng container” trong mục “Đường sắt”.",
+        "place": "Đặt một sân ga ở phía bắc ga hàng hóa quốc tế, song song với nhà ga. Nhấp chuột trái bên trong vòng tròn xanh nhạt (phía tây) để đặt điểm đầu, bên trong vòng tròn vàng (phía đông) để đặt điểm cuối, rồi nhấp chuột phải trong màn hình 3D để chốt hình dạng. Chuyển “Phía đặt sân ga” sang “Bên trong”, kiểm tra sân ga nằm về phía nhà ga (phía nam) rồi mới xác nhận. Đặt xong, hãy nhấn nút “Tiếp”.",
+        "title": "Xây sân ga cạnh nhà ga"
+      },
+      "step5": {
+        "description": "Nhấn “Quay lại” để về danh sách, chọn “Đường ray đơn”, rồi đặt ray từ đầu phía đông của sân ga đến đầu phía tây của đường ray kéo dài từ ga hàng hóa biên giới bên ngoài thành phố.",
+        "title": "Đặt đường ray đến biên giới"
+      },
+      "step6": {
+        "title": "Xây depot",
+        "description": "Hãy xây “Depot đường sắt” trên lô đất ven đường ray có điểm đánh dấu màu vàng. Vì đây là hướng dẫn, khi nhấn “Tiếp”, thời gian thi công sẽ được bỏ qua và depot hoàn thành ngay."
+      },
+      "step7": {
+        "title": "Nối depot vào đường chính",
+        "description": "Đặt đường nhánh từ điểm đấu nối ở đầu phía đông depot vào đường chính. Hãy cho nhập vào đường chính theo góc nhỏ hướng về phía đông, không phải vuông góc. Đặt xong, hãy nhấn nút “Tiếp”."
+      },
+      "step8": {
+        "description": "Mở “Đường, đường sắt và hạ tầng” trên bảng biểu tượng, rồi dùng “Đường dây điện” trong mục “Điện” để nối điểm đấu nối của nhà máy điện mặt trời phía đông thị trấn với điểm đấu nối của depot.",
+        "title": "Cấp điện cho depot"
+      },
+      "step9": {
+        "description": "Trong “Giao thông công cộng”, nhấn “+ Mở tuyến mới” và chọn loại “Tuyến vận tải hàng hóa quốc tế”. Đặt điểm dừng trên sân ga của ga hàng hóa quốc tế và ga hàng hóa biên giới, nhấp vào điểm dừng đầu tiên để khép vòng rồi khai trương tuyến. Vì trên đường đơn tàu không thể tránh nhau, hãy đặt giãn cách chuyến mục tiêu 45 phút để một đoàn tàu kịp chạy khứ hồi.",
+        "title": "Khai trương tuyến vận tải hàng hóa quốc tế"
+      },
+      "step10": {
+        "description": "Cho thời gian trôi và xác nhận tàu hàng bắt đầu chạy trên tuyến vận tải hàng hóa quốc tế. Depot cần vài tháng để tuyển người, mua vật tư và chuẩn bị phương tiện.",
+        "title": "Cho tàu hàng chạy"
+      }
+    },
+    "highway": {
+      "title": "Làm đường cao tốc",
+      "description": "Để chuẩn bị cho sự phát triển của thị trấn, cần có thêm một lối đi mới cho xe cộ. Trong phần hướng dẫn này, bạn sẽ học cách làm đường cao tốc trên cao vượt qua đường thường, rồi nối chúng bằng nhánh nối để tạo nút giao liên thông.",
+      "step1": {
+        "title": "Vượt qua bằng cầu cạn",
+        "open": "Dùng đường cao tốc trên cao để vượt qua con đường thường ở giữa. Mở “Đường, đường sắt và hạ tầng” trên bảng biểu tượng, rồi chọn “Đường cao tốc 2 làn” trong mục “Đường cao tốc”.",
+        "start": "Nhấp chuột trái bên trong vòng tròn xanh nhạt để đặt điểm đầu của đường cao tốc. Điểm đầu sẽ tự bắt vào vị trí cầu cạn cao 7m.",
+        "end": "Nhấp chuột trái bên trong vòng tròn vàng để đặt điểm cuối. Điểm cuối sẽ tự bắt vào vị trí cùng độ cao 7m ở phía bên kia con đường thường.",
+        "confirm": "Nhấn “Xác nhận” trên bảng xây dựng để lưu, rồi nhấn nút “Tiếp”. Vì đây là hướng dẫn nên thời gian thi công sẽ được bỏ qua và đường hoàn thành ngay."
+      },
+      "step2": {
+        "title": "Đặt tên cho đường cao tốc",
+        "description": "Bạn có thể đặt tên cho các con đường để dễ quản lý. Ở trên cùng cửa sổ chi tiết của đường cao tốc vừa làm, mục tuyến đường mà nó thuộc về hiện đang là “Không có (đường vô danh)”, hãy đặt cho nó một cái tên tùy thích."
+      },
+      "step3": {
+        "title": "Làm nhánh nối",
+        "description": "Hãy làm nhánh nối để kết nối với đường thường. Chọn loại đường “Nhánh nối”, rồi kéo một nhánh nối cong mượt từ vị trí điểm đánh dấu màu vàng trên màn hình vào đường cao tốc."
+      },
+      "step4": {
+        "title": "Kiểm tra nút giao liên thông",
+        "description": "Nhấp vào “IC1” hiển thị quanh nhánh nối để mở bảng chi tiết của nút giao liên thông. Hãy kiểm tra xem đường thường và đường cao tốc đã được nối với nhau chưa."
+      }
+    },
+    "mining": {
+      "title": "Khai thác tài nguyên",
+      "description": "Hòn đảo ẩn chứa nguồn tài nguyên quý giá nhưng lại không có cách nào chở ra ngoài. Trong phần hướng dẫn này, bạn sẽ học toàn bộ quy trình: xây mỏ, đường sắt chở hàng và cảng, khai thác quặng, vận chuyển rồi xuất khẩu ra nước ngoài.",
+      "step1": {
+        "description": "Bật hiển thị tài nguyên thiên nhiên và mở bảng chi tiết của mạch quặng ở phía đông nam.",
+        "title": "Kiểm tra mạch quặng"
+      },
+      "step2": {
+        "description": "Hãy xây “Mỏ” trên lô đất màu vàng nằm trên mạch quặng phía đông nam. Vì đây là hướng dẫn nên thời gian thi công sẽ được bỏ qua.",
+        "title": "Xây mỏ"
+      },
+      "step3": {
+        "description": "Xây “Ga xếp quặng” trên lô đất lớn có sẵn ở phía đông nam mỏ. Tại ga xếp quặng, quặng khai thác từ mỏ được xếp lên tàu.",
+        "title": "Xây ga xếp quặng cạnh mỏ"
+      },
+      "step4": {
+        "description": "Xây “Ga dỡ quặng” trên lô đất lớn có sẵn ở phía nam cảng. Tại ga dỡ quặng, quặng được tàu chở đến sẽ được dỡ xuống và đưa đi.",
+        "title": "Xây ga dỡ quặng gần cảng"
+      },
+      "step5": {
+        "description": "Hãy xây “Cảng hàng rời” trên lô đất màu vàng ven biển.",
+        "title": "Xây cảng hàng rời"
+      },
+      "step6": {
+        "open": "Chọn “Sân ga hàng quặng” trong mục đường sắt, rồi nối từng cặp hai điểm đánh dấu ở phía tây nam ga xếp quặng và phía nam ga dỡ quặng. Hướng mỗi sân ga về phía công trình của nó.",
+        "loading": "Chọn “Sân ga hàng quặng” trong mục đường sắt, rồi nối từng cặp hai điểm đánh dấu ở phía tây nam ga xếp quặng và phía nam ga dỡ quặng. Hướng mỗi sân ga về phía công trình của nó.",
+        "unloading": "Chọn “Sân ga hàng quặng” trong mục đường sắt, rồi nối từng cặp hai điểm đánh dấu ở phía tây nam ga xếp quặng và phía nam ga dỡ quặng. Hướng mỗi sân ga về phía công trình của nó.",
+        "title": "Xây sân ga cạnh nhà ga"
+      },
+      "step7": {
+        "town": "Đặt đường ray chở hàng từ đầu phía đông của sân ga phía cảng, đi qua phía nam điểm giữa của con đường, đến đầu phía tây bắc của sân ga phía núi. Đường ray chưa được nối nên bạn hãy tự đặt. Dùng đường cong để khớp hướng chạy, với đoạn leo núi hãy chuyển “Bám địa hình” sang “Không bám”, rồi chỉnh hình dạng cho đến khi không còn lỗi độ dốc, độ cong màu đỏ. Thêm điểm trung gian để mỗi đoạn không dài quá 500m.",
+        "climb": "Đặt đường ray chở hàng từ đầu phía đông của sân ga phía cảng, đi qua phía nam điểm giữa của con đường, đến đầu phía tây bắc của sân ga phía núi. Đường ray chưa được nối nên bạn hãy tự đặt. Dùng đường cong để khớp hướng chạy, với đoạn leo núi hãy chuyển “Bám địa hình” sang “Không bám”, rồi chỉnh hình dạng cho đến khi không còn lỗi độ dốc, độ cong màu đỏ. Thêm điểm trung gian để mỗi đoạn không dài quá 500m.",
+        "title": "Nối hai ga bằng đường ray"
+      },
+      "step8": {
+        "title": "Xây depot",
+        "description": "Xây “Depot đường sắt” trên lô đất có sẵn ở phía tây nam cảng. Hãy đặt theo hướng sao cho có thể kéo đường nhánh từ điểm đấu nối ở đầu phía đông vào sân ga phía cảng."
+      },
+      "step9": {
+        "title": "Nối depot vào đường chính",
+        "description": "Đặt đường nhánh từ điểm đấu nối mặt đất ở đầu phía đông depot đến đầu phía tây của sân ga phía cảng. Hãy cho nhập vào thật mượt theo góc nhỏ."
+      },
+      "step10": {
+        "description": "Đặt đường dây điện từ điểm đấu nối của nhà máy điện mặt trời có sẵn đến điểm đấu nối dùng chung ở đầu phía đông depot.",
+        "title": "Cấp điện cho depot"
+      },
+      "step11": {
+        "description": "Vào Giao thông công cộng → Mở tuyến mới → Tuyến vận chuyển quặng, đặt điểm dừng trên sân ga hàng quặng phía núi và phía cảng, rồi nhấp vào điểm dừng đầu tiên để khép vòng. Vì trên đường đơn tàu không thể tránh nhau, hãy đặt giãn cách chuyến mục tiêu 45 phút để một đoàn tàu kịp chạy khứ hồi, rồi xác nhận.",
+        "title": "Khai trương tuyến vận chuyển quặng"
+      },
+      "step12": {
+        "description": "Hãy cho thời gian trôi để vận hành chuỗi khai thác, xếp hàng, vận chuyển đường sắt, dỡ hàng và xuất khẩu. Việc mua phương tiện và khởi động vận chuyển mất vài tháng.",
+        "title": "Cho thời gian trôi"
+      },
+      "step13": {
+        "description": "Cho thời gian trôi, rồi kiểm tra lượng quặng nhận về và xuất khẩu trong bảng chi tiết của cảng hàng rời ven biển. Việc mua phương tiện, khai thác và vận chuyển mất vài tháng.",
+        "title": "Kiểm tra xuất khẩu quặng"
+      }
+    },
+    "tourism": {
+      "title": "Phát triển du lịch",
+      "description": "Hòn đảo chưa có cảng và chỗ nghỉ để đón du khách đến thăm khu di tích, cũng chưa có tuyến xe buýt dành cho du khách. Trong phần hướng dẫn này, bạn sẽ học cách xây khách sạn và bến tàu khách, mở tuyến xe buýt, rồi kiểm tra lượng du khách đến, doanh thu của quán ăn và lượng người đi xe buýt.",
+      "step1": {
+        "description": "Hãy xây “Khách sạn du lịch” trên lô đất có điểm đánh dấu màu vàng ở phía tây khu di tích cổ. Vì đây là hướng dẫn nên thời gian thi công sẽ được bỏ qua.",
+        "title": "Xây khách sạn cạnh khu di tích"
+      },
+      "step2": {
+        "description": "Cần có cảng để đón du khách. Hãy xây “Bến tàu du lịch” trên lô đất có điểm đánh dấu ở cảng.",
+        "title": "Xây bến tàu khách"
+      },
+      "step3": {
+        "description": "Du khách không có xe riêng nên cần phải có giao thông công cộng. Vào “Giao thông công cộng” → “Mở tuyến mới” và chọn “Tuyến xe buýt”. Trên các con đường có điểm đánh dấu màu vàng, đặt điểm dừng theo thứ tự cảng → trước khu nhà ở → trước khu di tích → trước khu nhà ở, cuối cùng nhấp vào điểm dừng ở cảng để khép vòng. Đặt giá vé 0, giãn cách chuyến mục tiêu 1 phút rồi xác nhận.",
+        "title": "Mở tuyến xe buýt nối cảng với khu di tích"
+      },
+      "step4": {
+        "description": "Hãy cho thời gian trôi để đón du khách. Các cơ sở cần vài tháng để đi vào hoạt động và mua xe buýt.",
+        "title": "Cho thời gian trôi"
+      },
+      "step5": {
+        "description": "Hãy kiểm tra doanh thu của quán ăn trước khu di tích và số hành khách của tuyến xe buýt vừa mở. Bước này hoàn thành khi du khách đã đến, doanh thu của quán ăn tăng so với lúc bắt đầu và xe buýt có người đi. Nếu cần, hãy cho thời gian trôi thêm.",
+        "title": "Kiểm tra doanh thu và hành khách xe buýt"
+      }
+    },
+    "intro": {
+      "controls": "Bạn vừa nhậm chức thị trưởng, và người dân mong bạn xây dựng một thành phố nơi họ có thể sống yên ổn. Thị trấn này chưa có nhà ở để đón cư dân mới, cũng chưa có điện và nước, những thứ không thể thiếu trong cuộc sống. Trong phần hướng dẫn này, bạn sẽ tìm hiểu vai trò của thị trưởng, cách cho thời gian trôi, cách nắm bắt tình trạng thành phố, cách dùng các nút và điều khiển camera; sau đó lần lượt học quy trình xây dựng thành phố: chuẩn bị đường và lô đất, định hướng cho khu vực, xây nhà ở rồi đưa điện và nước đến.",
+      "scenario4": "Chúng ta muốn nối khu dân cư với nơi làm việc bằng đường sắt, nhưng trên khu đất dự kiến lại có các tòa nhà tư nhân và một bệnh viện công. Trong phần hướng dẫn này, bạn sẽ học cách thu mua đất và dỡ bỏ công trình công cộng, làm cầu cạn phía trên đường, xây sân ga, nhà ga và depot, điều chỉnh đường cong và độ dốc, rồi cấp điện cho đến khi khai trương tuyến.",
+      "trade": "Nhà máy thực phẩm địa phương muốn đưa sản phẩm ra cả thị trường nước ngoài. Thị trấn cũng cần có đường để nhập về từ nước ngoài những mặt hàng mình cần. Trong phần hướng dẫn này, bạn sẽ học cách xuất khẩu thực phẩm qua cảng và nhập khẩu hàng hóa bằng đường sắt chở hàng nối sang nước láng giềng.",
+      "highway": "Khi thị trấn phát triển, xe chở người và hàng hóa cũng sẽ ngày một nhiều. Để cả những xe chỉ đi ngang qua thị trấn không dồn hết vào đường thường, cần chuẩn bị sẵn một lối đi khác ngay từ bây giờ. Trong phần hướng dẫn này, bạn sẽ học cách làm đường cao tốc trên cao vượt qua đường thường, rồi nối chúng bằng nhánh nối để tạo nút giao liên thông.",
+      "mining": "Hòn đảo này ẩn chứa nguồn tài nguyên quý giá. Thế nhưng không có cách nào chở chúng từ núi ra cảng, nên tài nguyên quý ấy vẫn chưa thể phục vụ các ngành nghề của đảo. Trong phần hướng dẫn này, bạn sẽ học toàn bộ quy trình: xây mỏ, đường sắt chở hàng và cảng, khai thác quặng, vận chuyển rồi xuất khẩu ra nước ngoài.",
+      "tourism": "Người dân trên đảo mong có thêm nhiều người đến thăm khu di tích cổ trong đất liền. Nhưng đảo chưa có cảng và chỗ nghỉ để đón du khách, cũng chưa có tuyến xe buýt từ cảng vào thị trấn. Trong phần hướng dẫn này, bạn sẽ học cách xây khách sạn và bến tàu khách, mở tuyến xe buýt, rồi kiểm tra lượng du khách đến, doanh thu của quán ăn và lượng người đi xe buýt.",
+      "heading": "Lời đề nghị gửi thị trưởng",
+      "windowTitle": "Hướng dẫn",
+      "marine": "Thị trấn bên vịnh này vẫn chưa có cảng cũng như cơ sở dầu mỏ. Trong phần hướng dẫn này, bạn sẽ học toàn bộ quy trình: lấn biển để xây cầu cảng dầu, bắc cầu treo qua cửa vịnh, đưa dầu thô bơm lên từ mỏ dầu dưới đáy biển qua đường ống để xuất khẩu, và nối hòn đảo ngoài khơi với thị trấn bằng phà."
+    },
+    "marine": {
+      "title": "Phát triển vùng biển",
+      "description": "Thị trấn bên vịnh này vẫn chưa có cảng cũng như cơ sở dầu mỏ. Trong phần hướng dẫn này, bạn sẽ học toàn bộ quy trình: lấn biển để xây cầu cảng dầu, bắc cầu treo qua cửa vịnh, đưa dầu thô bơm lên từ mỏ dầu dưới đáy biển qua đường ống để xuất khẩu, và nối hòn đảo ngoài khơi với thị trấn bằng phà.",
+      "step1": {
+        "title": "Quy hoạch công trình lấn biển",
+        "description": "Muốn có cảng thì cần bờ kè cho tàu lớn cập vào và đất để xây các công trình. Hãy lấn biển ở phía trong vịnh để tạo đất mở cảng. Nhấn biểu tượng san lấp mặt bằng, lần lượt nhấp chuột trái vào bốn điểm đánh dấu màu vàng để vẽ phạm vi, rồi nhấp chuột phải để khép lại. Kiểm tra loại dự toán là “Lấn biển” rồi xác nhận công trình."
+      },
+      "step2": {
+        "title": "Hoàn thành khu đất lấn biển",
+        "description": "Nhấn “Bắt đầu” để cho thời gian trôi ít nhất 1 tháng, rồi nhấn “Tiếp”. Vì bài hướng dẫn này không có nhà thầu thi công, nhấn “Tiếp” sẽ bỏ qua thời gian thi công lấn biển. Khi hoàn thành, vùng từng là biển sẽ thành đất liền, và mép giáp biển sẽ thành bờ kè cho tàu cập vào."
+      },
+      "step3": {
+        "title": "Làm đường ra khu đất lấn biển",
+        "description": "Dù xây cảng hay trạm dầu trên khu đất lấn biển, nếu không có đường nối tới thì người dân không thể đến làm việc, hàng hóa cũng không chở đi được. Hãy làm đường từ cuối con đường của thị trấn ra khu đất lấn biển. Trong bài hướng dẫn này, đường sẽ hoàn thành ngay khi xác nhận. Nhấn “Đường, đường sắt và hạ tầng” trên bảng biểu tượng để mở bảng xây dựng."
+      },
+      "step4": {
+        "title": "Xây cầu cảng dầu",
+        "description": "Tàu chở dầu thô là tàu lớn, nên chỉ có thể xây cảng ở nơi vùng biển trước bờ kè đủ sâu. Bờ kè của khu đất lấn biển giáp vùng nước sâu nên rất hợp để làm cảng. Nhấn biểu tượng tòa nhà, chọn “Cầu cảng dầu” trong danh mục “Cảng”, nhấp chuột trái bên trong vòng tròn màu vàng trên bờ kè để chọn vị trí, rồi nhấn “Xác nhận” trên bảng xây dựng. Khi xây cảng, một luồng kết nối sẽ tự động được vạch ra đến luồng tàu viễn dương ngoài khơi để tàu có thể ra vào. Bài hướng dẫn này bỏ qua thời gian thi công."
+      },
+      "step5": {
+        "title": "Bắc cầu treo qua cửa vịnh",
+        "description": "Đường cao tốc đang bị đứt ở hai bờ cửa vịnh. Cửa vịnh rộng tới 1,6 km, cầu thông thường với hàng trụ cầu không thể vượt qua, nên hãy nối bằng cầu treo có thể vượt khoảng cách dài chỉ trong một nhịp. Bên dưới cầu có luồng tàu viễn dương đi qua, nên cầu phải được bắc đủ cao để tàu không va phải. Hai đầu đường cao tốc ở hai bờ đã được làm sẵn ở độ cao đó. Mở “Đường, đường sắt và hạ tầng” trên bảng biểu tượng, chọn “Cầu treo đường bộ 4 làn” trong mục “Đường cao tốc”, rồi kéo từ đầu phía bắc (vòng tròn xanh nhạt) đến đầu phía nam (vòng tròn vàng). Nhấp chuột phải để chốt hình dạng, nhấn “Xác nhận” trên bảng xây dựng rồi nhấn “Tiếp”."
+      },
+      "step6": {
+        "title": "Tìm mỏ dầu dưới đáy biển",
+        "description": "Tiếp theo, hãy tận dụng tài nguyên biển. Trước khi xây trạm dầu, hãy kiểm tra xem dưới đáy biển gần đó có mỏ dầu không. Nhấn “Hiển thị” trên bảng điều khiển để mở bảng hiển thị.",
+        "show": "Chọn “Tài nguyên thiên nhiên” trong các thẻ xếp dọc và chuyển sang “Hiện”. Bạn sẽ thấy mỏ dầu trải rộng dưới đáy vịnh. Nhấp vào mỏ dầu gần điểm đánh dấu màu vàng để mở bảng chi tiết."
+      },
+      "step7": {
+        "title": "Xây trạm dầu",
+        "description": "Dầu thô bơm lên từ mỏ dầu dưới đáy biển được đưa qua đường ống đến trạm dầu trên bờ, rồi từ đó bán ra thị trường. Trạm dầu được xây giáp bờ kè, nơi có thể kéo đường ống vào. Nhấn biểu tượng tòa nhà, chọn “Trạm tiếp nhận đường ống dầu” trong danh mục “Cảng”, nhấp chuột trái bên trong vòng tròn màu vàng trên bờ kè để chọn vị trí, rồi nhấn “Xác nhận” trên bảng xây dựng. Bài hướng dẫn này bỏ qua thời gian thi công."
+      },
+      "step8": {
+        "title": "Xây giàn khoan dầu",
+        "description": "Giàn khoan bơm dầu thô phải được xây trên biển, ngay phía trên mỏ dầu. Nhấn biểu tượng tòa nhà, chọn “Giàn khoan dầu ngoài khơi” trong danh mục “Nông nghiệp và tài nguyên”, nhấp chuột trái bên trong vòng tròn màu vàng trên mặt biển để chọn vị trí, rồi nhấn “Xác nhận” trên bảng xây dựng. Bài hướng dẫn này bỏ qua thời gian thi công."
+      },
+      "step9": {
+        "title": "Nối bằng đường ống",
+        "description": "Hãy đưa dầu thô bơm lên từ giàn khoan đến trạm dầu qua đường ống dưới đáy biển. Mở “Đường, đường sắt và hạ tầng” trên bảng biểu tượng, chọn “Đường ống dẫn dầu dưới biển” trong mục “Dầu mỏ”, rồi kéo từ điểm đấu nối của giàn khoan đến điểm đấu nối của trạm dầu. Sau khi xác nhận, nhấn “Tiếp” là đường ống hoàn thành ngay."
+      },
+      "step10": {
+        "title": "Xuất khẩu dầu thô",
+        "description": "Trạm dầu bán dầu thô nhận được ra thị trường, còn cầu cảng dầu mua lại và xuất khẩu ra nước ngoài bằng tàu. Phải mất vài tháng để có người đến làm việc và dầu thô bắt đầu bán được. Nhấn “Bắt đầu” để cho thời gian trôi vài tháng rồi nhấn “Tiếp”. Nếu vẫn chưa xuất khẩu, hãy cho thời gian trôi thêm một chút rồi nhấn lại."
+      },
+      "step11": {
+        "title": "Xây bến phà",
+        "description": "Hòn đảo ngoài khơi không có cách nào sang thị trấn. Hãy mở tuyến phà để cư dân trên đảo có thể qua lại thị trấn. Trước hết, xây bến phà ở bờ biển của thị trấn. Mở “Đường, đường sắt và hạ tầng” trên bảng biểu tượng, chọn “Bến phà” trong mục “Luồng tàu thủy”, rồi kéo từ trên bờ (vòng tròn xanh nhạt) ra mặt biển (vòng tròn vàng). Nhấp chuột phải để chốt hình dạng, nhấn “Xác nhận” trên bảng xây dựng rồi nhấn “Tiếp”."
+      },
+      "step12": {
+        "title": "Vạch luồng phà",
+        "description": "Tiếp theo, vạch luồng cho tàu đi từ bến phà trên đảo đến bến phà của thị trấn. Luồng tàu không thể đi qua đất liền, nên hãy vòng qua phía bắc hòn đảo, luồn dưới cầu treo ở cửa vịnh rồi đi vào vịnh, vừa kéo vừa nhấp chuột trái để đặt các điểm dọc đường. Chọn “Luồng phà” trong mục “Luồng tàu thủy”, nối từ đầu bến phà trên đảo đến đầu bến phà của thị trấn, xác nhận rồi nhấn “Tiếp”."
+      },
+      "step13": {
+        "title": "Mở tuyến phà",
+        "description": "Cuối cùng, hãy tạo tuyến phà chạy trên luồng. Vào Giao thông công cộng → Mở tuyến mới → Tuyến phà, đặt điểm dừng tại bến phà trên đảo và bến phà của thị trấn, nhấp vào điểm dừng đầu tiên để khép vòng rồi xác nhận. Khi tuyến được tạo, phần hướng dẫn này hoàn thành. Để tàu thực sự chạy, bạn còn cần một ụ bảo dưỡng cho thuê tàu."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Bắt đầu chơi",
+    "nowLoading": "Đang tải…",
+    "startError": "Không thể bắt đầu. Hãy thử lại.",
+    "todaysTips": "Mẹo hôm nay",
+    "gotIt": "Đóng",
+    "items": {
+      "tip1": {
+        "title": "Đồng tiền xoay vòng",
+        "description": "Chi phí công trình và tiền lương ở các công trình công cộng của thành phố sẽ trở thành thu nhập của doanh nghiệp và hộ gia đình, giúp họ mua sắm và tiếp tục sản xuất. Chỉ thu thuế thôi thì kinh tế không vận hành được. Hãy phân bổ ngân sách cho các dịch vụ và việc sửa chữa cần thiết để đưa tiền trở lại thành phố."
+      },
+      "tip2": {
+        "title": "Cuộc chiến trường kỳ vì an ninh",
+        "description": "Công dân lớn lên trong môi trường an ninh kém vẫn dễ phạm tội ngay cả khi đã trưởng thành. Hãy kiên trì vừa để cảnh sát trấn áp tội phạm, vừa cải thiện môi trường trẻ em lớn lên. Muốn cải thiện an ninh tận gốc, cần ít nhất một thế hệ."
+      },
+      "tip3": {
+        "title": "Tránh đường!",
+        "description": "Lính cứu hỏa chỉ phát huy tác dụng khi đến được hiện trường. Dù có trạm cứu hỏa, nếu quá xa hoặc đường đi bị tắc thì thiệt hại sẽ lan rộng. Bên cạnh ngân sách, hãy xem lại cả vị trí đặt trạm và đường đến hiện trường."
+      },
+      "tip5": {
+        "title": "Con đường gian nan",
+        "description": "Đường đi qua sườn dốc đứng tốn công thi công hơn nhiều so với đất bằng. Đường ngắn nhất trên bản đồ chưa chắc đã là lộ trình rẻ nhất. Hãy so sánh địa hình với dự toán chi phí xây dựng và cân nhắc cả phương án đi vòng một chút."
+      },
+      "tip6": {
+        "title": "Tính trước kẻo lỡ",
+        "description": "Dân số và nhà máy tăng thì nhu cầu điện, nước cũng tăng. Đợi thiếu rồi mới xây thì phải chờ đến khi công trình hoàn thành. Trước khi phát triển khu vực mới, hãy kiểm tra xem nguồn cung còn dư hay không."
+      },
+      "tip7": {
+        "title": "Dục tốc bất đạt",
+        "description": "Nâng giới hạn tốc độ giúp di chuyển nhanh hơn nhưng cũng tăng nguy cơ tai nạn. Khúc cua gấp cũng cần chú ý. Ở những nơi hay xảy ra tai nạn, hãy xem lại hình dạng con đường và giới hạn tốc độ."
+      },
+      "tip8": {
+        "title": "Đầu tư cho tương lai",
+        "description": "Tình trạng thiếu nhân lực ở bệnh viện hay nhà máy công nghệ cao không thể giải quyết chỉ bằng cách tăng dân số. Hãy sắp xếp chuyên ngành và chỉ tiêu tuyển sinh của trường đại học để đào tạo nhân lực trình độ cao trong lĩnh vực cần thiết, và lên kế hoạch có tính đến thời gian chờ sinh viên tốt nghiệp."
+      },
+      "tip9": {
+        "title": "Dùng cho bền",
+        "description": "Lơ là sửa chữa thì tòa nhà và đường sá sẽ xuống cấp, dẫn đến sập đổ. Hỏa hoạn và sập đổ còn làm lòng dân xấu đi, nên dồn hết ngân sách cho xây mới là rất nguy hiểm. Hãy chừa ngân sách cho việc sửa chữa công trình hiện có và cho cứu hỏa."
+      },
+      "tip10": {
+        "title": "Đại hỏa hoạn",
+        "description": "Khi các tòa nhà san sát nhau, đám cháy ở một tòa dễ lan sang xung quanh. Bên cạnh lực lượng cứu hỏa, việc chừa khoảng cách giữa các tòa nhà cũng giúp phòng chống thảm họa."
+      },
+      "tip11": {
+        "title": "Cứ đào đi",
+        "description": "Hãy kiểm tra sự phân bố tài nguyên để chọn vị trí cho mỏ và mỏ dầu. Khai thác mãi thì trữ lượng sẽ giảm. Thành phố sống nhờ khai khoáng cần tính trước việc làm và nguồn thu thuế sau khi tài nguyên cạn kiệt."
+      },
+      "tip12": {
+        "title": "Cây hái ra tiền",
+        "description": "Khi thị trưởng xây nhà ở hay tòa nhà thương mại, thành phố sẽ thu được tiền thuê từ người thuê. Chỗ trống thì không mang lại thu nhập, nên hãy kiểm tra công năng đang có nhu cầu, tình trạng bỏ trống xung quanh và vị trí."
+      },
+      "tip13": {
+        "title": "Tận thu từng đồng",
+        "description": "Thuế suất không chỉ ảnh hưởng đến nguồn thu của thành phố mà còn đến gánh nặng và lợi nhuận của doanh nghiệp. Bạn cũng có thể dùng thuế làm chính sách công nghiệp, chẳng hạn giảm thuế cho ngành muốn phát triển. Ngay cả khi thiếu nguồn thu, hãy xem tình hình từng ngành trước khi tăng thuế đồng loạt."
+      },
+      "tip14": {
+        "title": "Phương án dự phòng",
+        "description": "Khi nhà máy điện hay đường dây điện ngừng hoạt động do sự cố hoặc thiên tai, ảnh hưởng sẽ lan đến các nhà máy dùng điện và đời sống của công dân. Với hạ tầng quan trọng, hãy chuẩn bị dự phòng cho cả cơ sở cung cấp lẫn đường truyền tải, để một chỗ hỏng không làm cả thành phố tê liệt."
+      },
+      "tip15": {
+        "title": "Đi tìm mái nhà",
+        "description": "Nếu bỏ mặc đất trống ở trung tâm thành phố, những người mất nhà sẽ tụ tập ở đó và dễ hình thành khu ổ chuột. Khi có nhà ở với giá thuê vừa túi tiền, cư dân sẽ dần chuyển sang đó và khu ổ chuột sẽ tự thu hẹp."
+      },
+      "tip16": {
+        "title": "Cụm công nghiệp",
+        "description": "Khi các ngành giống nhau hoặc các ngành sản xuất nguyên liệu cho chúng tập trung gần nhau, vị trí đó sẽ thuận lợi cho sản xuất. Thay vì rải nhà máy khắp thành phố, hãy cân nhắc gom các ngành liên quan lại một chỗ. Tuy nhiên, gần khu dân cư thì cần chú ý tiếng ồn và ô nhiễm không khí."
+      },
+      "tip17": {
+        "title": "Cày cả ngày lẫn đêm",
+        "description": "Kéo dài giờ làm việc trong bảng Quy định giúp cùng một lực lượng lao động gánh được nhiều sản xuất hơn. Đổi lại, sức khỏe và thời gian rảnh bị ảnh hưởng, chi tiêu cho giải trí giảm. Dành quá nhiều thời gian để kiếm tiền thì sẽ không còn thời gian để tiêu."
+      },
+      "tip18": {
+        "title": "Địa ngục đi làm",
+        "description": "Thời gian đi làm dài làm giảm thời gian rảnh, kéo theo chi tiêu cho giải trí. Hãy xem lại khoảng cách giữa nhà và nơi làm việc cũng như tình trạng tắc đường trên đường đi làm. Với người dân chỉ về nhà để ngủ, khu phố sầm uất của bạn cũng chỉ là cảnh vật lướt qua ô cửa xe."
+      },
+      "tip19": {
+        "title": "Nhìn xa trông rộng",
+        "description": "Đoàn tàu dài chỉ chạy được nếu vừa với sân ga ở mọi ga trên tuyến. Để chuẩn bị cho lượng khách tăng trong tương lai, hãy tính đến chiều dài sân ga ngay từ khi xây ga. Kéo dài một ga thôi mà các ga khác vẫn ngắn thì giới hạn vẫn còn đó."
+      },
+      "tip20": {
+        "title": "Chôn đi cho êm",
+        "description": "Đường đi ngầm không gây tiếng ồn hay ô nhiễm không khí, là một lựa chọn để bảo vệ môi trường sống của khu dân cư. Có những vấn đề cứ đem chôn là xong."
+      },
+      "tip21": {
+        "title": "Kẹt giữa những tòa cao ốc",
+        "description": "Tòa nhà cao đổ bóng về phía bắc, làm môi trường sống của khu xung quanh xấu đi. Hãy chú ý cả chiều cao và khoảng cách giữa các tòa nhà. Địa hình như núi cũng tạo bóng râm. Tương lai thành phố có thể rất tươi sáng, nhưng dưới chân có khi lại tối om."
+      },
+      "tip22": {
+        "title": "Bỏ xe, mua vé tháng",
+        "description": "Khi giao thông công cộng giúp đến nơi làm việc, trường học và chỗ mua sắm dễ dàng hơn, các hộ gia đình sẽ dễ chọn cuộc sống không cần ô tô. Tiền nuôi xe tiết kiệm được có thể dành cho những khoản chi tiêu khác."
+      },
+      "tip23": {
+        "title": "Chở không khí",
+        "description": "Xe buýt dù không có khách vẫn góp vào lưu lượng giao thông trên đường. Tăng chuyến quá nhiều có khi lại khiến việc chống tắc đường phản tác dụng. Hãy xem số hành khách và giãn cách chuyến để quyết định số chuyến cần thiết."
+      },
+      "tip24": {
+        "title": "Chuột chũi không trả tiền đất",
+        "description": "Đường hầm đủ sâu có thể đi qua mà không cần thu mua đất phía trên. Đoạn nông vẫn cần thu mua đất, nên hãy kiểm tra độ sâu và dự toán. Nếu đàm phán khó khăn, cứ đào sâu thêm."
+      },
+      "tip25": {
+        "title": "Đi làm giữa không trung",
+        "description": "Ở núi hay sườn dốc khó làm đường, cáp treo vẫn có thể giúp phát triển giao thông công cộng. Hãy lo cả đường đến ga cáp treo và việc chuyển tuyến. Nếu đi dưới đất quá vất vả, bạn có thể treo công dân lơ lửng trên không."
+      },
+      "tip26": {
+        "title": "Tắc đường… điện",
+        "description": "Dù sản lượng điện còn dư, nếu đường dây điện không đủ công suất thì điện vẫn không đến được. Trước khi xây thêm nhà máy điện, hãy kiểm tra kết nối và công suất truyền tải đến khu vực đang thiếu điện. Một đoạn đường dây nhỏ giữa chừng có thể đang giới hạn nguồn cung của cả thành phố."
+      },
+      "tip27": {
+        "title": "Tai nạn ngoài ý muốn",
+        "description": "Bạn có thể cho nổ tung tòa nhà cản trở việc phát triển rồi ngụy trang thành tai nạn. Tuy nhiên, lòng dân sẽ xấu đi nghiêm trọng. Khi muốn giải phóng mặt bằng, hãy cân nhắc giữa chi phí thu mua rồi giải tỏa và hậu quả mà biện pháp mạnh tay để lại cho thành phố."
+      },
+      "tip28": {
+        "title": "Vươn ra biển lớn",
+        "description": "Thiếu đất thì có thể lấn biển để tạo mặt bằng mới. Ở nơi có tài nguyên dưới đáy biển, bạn còn có thể xây giàn khoan dầu."
+      },
+      "tip29": {
+        "title": "Địa ngục đèn đỏ",
+        "description": "Càng nhiều nút giao có đèn tín hiệu, thời gian chờ đèn càng cộng dồn vào mỗi chuyến đi. Trên đường trục chính, hãy hạn chế bớt nút giao. Cứ cho đường giao nhau đều tăm tắp thì có khi trời tối mà chưa một lần được thấy đèn xanh."
+      },
+      "tip30": {
+        "title": "Tầm nhìn thoáng đãng",
+        "description": "Trạm phát sóng đặt ở nơi càng cao và xây càng cao thì càng dễ phủ sóng rộng. Hãy kiểm tra xem giữa trạm và nơi chưa có sóng có núi hay vật cản nào không. Sóng đã bị chặn thì quyết tâm tăng công suất đến mấy cũng vô ích."
+      },
+      "tip31": {
+        "title": "Quà tặng của biển",
+        "description": "Thành phố không có nguồn nước gần đó vẫn có thể cấp nước nhờ nhà máy khử mặn nước biển ven bờ. Nhưng nhà máy cần điện để vận hành. Tìm xong nguồn nước thì lại đến lượt tìm nguồn điện."
+      },
+      "tip32": {
+        "title": "Một cách phòng chống tội phạm khác",
+        "description": "Thất nghiệp là một trong những nguyên nhân làm an ninh xấu đi. Không chỉ cần thêm cảnh sát mà còn cần nơi để công dân làm việc. Khi có nhiều người thất nghiệp, hãy kiểm tra số việc làm đang tuyển, kỹ năng được yêu cầu và liệu người dân có đi làm đến đó được không."
+      },
+      "tip33": {
+        "title": "Món nợ để lại cho tương lai",
+        "description": "Tòa nhà hay đường sá đều tốn chi phí sửa chữa liên tục sau khi hoàn thành. Cứ mở rộng vì đủ tiền xây thì ngân sách tương lai sẽ bị chi phí duy trì nuốt hết. Thị trưởng của tương lai cũng chính là bạn."
+      },
+      "tip34": {
+        "title": "Bơm vừa thôi",
+        "description": "Nguồn nước hồi phục theo thời gian, nhưng nếu bơm vượt mức hồi phục thì trữ lượng sẽ giảm. Hãy tìm thêm nguồn nước khác trước khi nhu cầu tăng. Thêm máy bơm không có nghĩa là thêm nước."
+      },
+      "tip35": {
+        "title": "Sai một li",
+        "description": "Đường sá và tòa nhà một khi đã bắt đầu xây thì không dễ dời đi. Trước khi xác nhận xây dựng, hãy kiểm tra hướng, kết nối và phần đất còn lại xung quanh. Nhưng con đường lỡ tay vẽ cong, nhìn quen rồi cũng thành nét riêng của thành phố."
+      },
+      "tip36": {
+        "title": "Xã hội giám sát",
+        "description": "Nhấp vào người đi bộ hoặc ô tô để thêm công dân vào danh sách theo dõi. Hãy dùng khi muốn xem cuộc sống của một cư dân mà bạn quan tâm. Ngoài thống kê của toàn thành phố, bạn còn có thể ngắm thành phố qua cuộc sống của một con người."
+      },
+      "tip37": {
+        "title": "Nguồn điện nền",
+        "description": "Sản lượng điện mặt trời và điện gió thay đổi theo thời tiết. Nếu chỉ tính theo nguồn cung ngày đẹp trời, khi thời tiết thay đổi có thể bị thiếu điện. Hãy kết hợp cả những nguồn ít phụ thuộc vào thời tiết như nhiệt điện hay điện hạt nhân."
+      },
+      "tip38": {
+        "title": "Rộng còn hơn chật",
+        "description": "Có những tòa nhà không thể xây trên lô đất nhỏ. Nếu muốn xây một công trình nào đó, hãy kiểm tra diện tích cần thiết trước khi chia lô. Dù đất còn thừa, toàn lô nhỏ thì tòa nhà lớn cũng không vừa."
+      },
+      "tip39": {
+        "title": "Dịch vụ này có thu phí",
+        "description": "Các dịch vụ công như xử lý nước thải, xử lý rác, viễn thông, y tế có thể miễn phí theo mặc định. Nếu đặt mức phí, người dùng sẽ gánh một phần chi phí vận hành. Đặt giá thân thiện với công dân hay treo bảng giá mạnh tay là tùy thị trưởng."
+      },
+      "tip40": {
+        "title": "Thành phố sao chép",
+        "description": "Khi thị trưởng xây tòa nhà, có thể sao chép một tòa nhà có sẵn để xây. Nếu giữ nguyên loại và số tầng, và xây trên lô đất vừa với tòa gốc, chi phí xây dựng sẽ giảm. Phố xá trông sẽ đơn điệu, nhưng lại rất dễ chịu với ví tiền."
+      },
+      "tip41": {
+        "title": "Chọn nhà chỉ nhìn giá thuê?",
+        "description": "Cư dân so sánh nơi ở mới dựa trên giá thuê, gánh nặng đi làm, đi học và đi mua sắm, chất lượng nhà ở và môi trường sống. Tiếng ồn, ô nhiễm không khí, an ninh và ánh nắng cũng quan trọng. Nhà rẻ mà bất tiện thì khó được chọn; nhà tiện lợi cũng cần giá thuê hợp túi tiền và đủ rộng để dọn vào."
+      },
+      "tip42": {
+        "title": "Mắc cạn rồi thì đã muộn",
+        "description": "Các cảng lớn như cảng container, cảng hàng rời, cảng dầu cần độ sâu nước đủ lớn. Bờ biển có đáy dốc đứng thì gần vùng nước sâu, rất hợp để làm cảng. Ngay cả ở bờ biển bằng phẳng, nước nông kéo dài, nếu lấn biển đưa đất liền ra đến vùng nước sâu thì vẫn xây được cảng."
+      },
+      "tip43": {
+        "title": "Đỗ một chút thôi mà",
+        "description": "Xe đỗ dưới lòng đường càng nhiều thì xe qua lại càng chậm và càng dễ xảy ra tai nạn. Hãy xây bãi đỗ xe để có chỗ cho những chiếc xe tràn ra đường. Một câu “đỗ một chút thôi mà” có khi làm cả thành phố đứng hình."
+      },
+      "tip44": {
+        "title": "Ốc đảo giữa đất liền",
+        "description": "Có thể xây tòa nhà ở nơi xa đường, nhưng càng xa đường thì việc tiếp cận càng bất lợi. Nhà máy và cửa hàng mất nhiều thời gian hơn để nhập hàng, còn nhà ở thì gánh nặng đi làm và mua sắm tăng lên. Hãy xây tòa nhà dọc theo đường, hoặc kéo đường đến sát bên."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Bạn có thể chọn lô đất để quy hoạch tòa nhà. Từ khi quy hoạch đến khi xây xong sẽ mất một khoảng thời gian.",
+    "parcelCreation": "Giữ Ctrl để mở menu vòng và chọn cách tạo, rồi nhấp vào màn hình 3D để chọn đối tượng. Chỉnh kích thước trên bảng rồi xác nhận.",
+    "transitCreation": "Nhấp chuột trái để lần lượt đặt điểm dừng, nhấp vào điểm dừng đầu tiên để khép vòng. Kéo một đoạn để thêm điểm đi qua, kéo một điểm để di chuyển, nhấp chuột phải để xóa. Với tuyến chạy khứ hồi, hãy đặt cả điểm dừng chiều về. Nhấp lại vào điểm dừng đã đặt, hoặc thả điểm dừng chồng lên điểm dừng khác, để xe dừng lại ở đó thêm lần nữa.",
+    "transitManagement": "Danh sách các tuyến giao thông công cộng. Bạn có thể điều chỉnh giá vé, giãn cách chuyến, hoặc mở mới và xóa tuyến. Giá vé ảnh hưởng đến việc cư dân chọn lộ trình. Giá quá cao sẽ làm giảm người đi và tăng số người sở hữu ô tô.",
+    "pathConstruction": "Xây đường và đường ray. Hãy nhấp vào địa hình trong màn hình 3D. Nhấp chuột trái để thêm đỉnh, nhấp chuột phải để chốt hình dạng, kéo đỉnh để di chuyển. Giữ Ctrl để mở menu cài đặt (cong/thẳng, bắt điểm). Nhấn phím 3/4 để thay đổi độ cao đắp/đào.",
+    "pathConstructionElevated": "Xây đường và đường ray. Hãy nhấp vào địa hình trong màn hình 3D. Nhấp chuột trái để thêm đỉnh, nhấp chuột phải để chốt hình dạng, kéo đỉnh để di chuyển. Giữ Ctrl để mở menu cài đặt (cong/thẳng, bắt điểm). Nhấn PageUp/PageDown hoặc phím 1/2 để thay đổi độ cao, phím 3/4 để thay đổi độ cao đắp/đào.",
+    "districtEdit": "Tạo, mở rộng và gộp “khu vực”, đơn vị dùng cho các quy định và thống kê. Giữ Ctrl trong màn hình 3D để chuyển công cụ. Công cụ tạo: nhấp chuột trái vào một con đường để tạo khu vực mới với màu đó (màu thay đổi mỗi lần chọn công cụ). Công cụ mở rộng: nhấp chuột phải để chọn khu vực cần mở rộng, rồi nhấp chuột trái vào các con đường để gộp vào khu vực đó. Công cụ gộp: nhấp chuột phải để chọn khu vực đích, rồi nhấp chuột trái vào khu vực muốn gộp để mở bảng xác nhận. Màu và tên của khu vực đang chọn hiển thị bên cạnh con trỏ chuột. Nhấn nút một lần nữa để thoát.",
+    "bulldozer": "Chế độ máy ủi. Nhấp chuột trái để xóa đất trống, tòa nhà đang quy hoạch, đường đang quy hoạch và vật trang trí địa hình (vật trang trí đặt theo vùng sẽ bị xóa cả vùng sau khi xác nhận). Nhấn nút một lần nữa để thoát.",
+    "bulldozerInstant": "Chế độ máy ủi. Nhấp chuột trái để xóa ngay tòa nhà, đường, đất trống và vật trang trí địa hình mà không cần xác nhận. Tòa nhà bị xóa cùng các cơ sở đang thuê và công dân, địa hình không được khôi phục (không thể xóa tòa thị chính, trạm kiểm soát biên giới và các đoạn tuyến giao thông công cộng; riêng vật trang trí đặt theo vùng vẫn bị xóa cả vùng sau khi xác nhận). Nhấn nút một lần nữa để thoát.",
+    "cityBudget": "Quyết định cách phân bổ nguồn tiền thu được từ thuế và hoạt động kinh doanh cho kỳ tiếp theo. Khi chính quyền mua vật tư để xây đường hay vận hành công trình công cộng, chỉ có thể mua trong phạm vi ngân sách quyết định ở đây. Ngoài ra, nếu ngân sách không đủ, nhân viên của công trình công cộng có thể bị sa thải.",
+    "resourceEdit": "Tạo vùng tài nguyên thiên nhiên. Chọn loại tài nguyên rồi nhấp vào địa hình. Nhấp chuột trái để thêm đỉnh, nhấp vào cạnh để chèn đỉnh, nhấp chuột phải để xóa đỉnh. Kéo để di chuyển vị trí đỉnh.",
+    "grading": "Nhấp chuột trái để đặt đỉnh, nhấp chuột phải để chốt phạm vi."
+  }
+}

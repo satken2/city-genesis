@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Pandu",
+    "car": "Kereta",
+    "rail": "Kereta api & laluan",
+    "running": "Kenderaan sedang bergerak",
+    "standard": "Kereta penumpang",
+    "commercial": "Kenderaan komersial",
+    "truck": "Lori",
+    "finishEditing": "Selesaikan penyuntingan sebelum mula memandu.",
+    "noLines": "Tiada laluan kereta api aktif yang boleh dinaiki.",
+    "pickRail": "Klik landasan pada laluan yang dipilih.",
+    "pickRoad": "Klik jalan yang aktif.",
+    "pickVehicle": "Klik kereta, bas atau tren yang sedang bergerak (seret untuk menggerakkan peta).",
+    "clickStart": "Pilih kedudukan mula (seret untuk menggerakkan peta)",
+    "startSelected": "Kedudukan mula telah dipilih. Bertolak mengikut arah anak panah.",
+    "reverse": "Terbalikkan arah",
+    "start": "Bertolak",
+    "back": "Kembali",
+    "close": "Keluar (Esc)",
+    "invalidStart": "Tidak boleh bermula di sini. Pilih jalan yang boleh dipandu atau landasan pada laluan yang dipilih.",
+    "invalidVehicle": "Kenderaan tidak dapat dipilih. Klik kereta, bas atau tren yang sedang bergerak.",
+    "notReady": "Tidak boleh bertolak ke arah ini, atau kawasan sekitar sedang dimuatkan. Ubah arah atau kedudukan, atau tunggu sebentar dan cuba lagi."
+  }
+}

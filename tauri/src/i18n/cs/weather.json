@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Počasí",
+    "choose": "Vybrat počasí",
+    "loading": "Zjišťuje se počasí…",
+    "unknown": "Neznámé",
+    "automatic": "{{weather}} (automaticky)",
+    "failed": "Počasí se nepodařilo změnit",
+    "names": {
+      "clear": "Jasno",
+      "high_clouds": "Slabá oblačnost",
+      "fair": "Slunečno",
+      "broken_clouds": "Polojasno",
+      "overcast": "Zataženo",
+      "rain_clouds": "Dešťová oblačnost",
+      "fog": "Mlha",
+      "drizzle": "Mrholení",
+      "rain": "Déšť",
+      "heavy_rain": "Silný déšť",
+      "light_snow": "Slabé sněžení",
+      "snow": "Sněžení",
+      "blizzard": "Vánice"
+    },
+    "epochClimate": "Klima epochy",
+    "temperature": "Teplota",
+    "precipitation": "Srážky",
+    "sunlight": "Intenzita slunečního záření",
+    "windSpeed": "Rychlost větru"
+  }
+}

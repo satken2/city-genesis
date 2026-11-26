@@ -1,0 +1,756 @@
+{
+  "tutorial": {
+    "startButton": "Kezdés",
+    "controls": {
+      "title": "Alapok",
+      "description": "Megismered, milyen várost építhetsz polgármesterként, és hogyan zajlik a játék: előbb tervezel, aztán telik az idő. Miután megnézted, mit jelentenek a képernyőn látható adatok, mire valók az egyes gombok, és hogyan mozog a kamera, a gyakorlatban is meghosszabbítasz egy utat, új lakóterületet hozol létre, és ellátod lakásokkal, árammal és vízzel.",
+      "step1": {
+        "title": "Városépítés polgármesterként",
+        "role": "A City Genesisben polgármesterként fejleszted a városodat. Te tervezed meg az utak és létesítmények építését, és te döntesz a területhasználatról, az adókról és a közszolgáltatások költségvetéséről. A polgármester dolga, hogy megteremtse a lakók és a vállalkozások életéhez és működéséhez szükséges feltételeket. A „Tovább” gombbal olvashatsz tovább.",
+        "goal": "A cél egy olyan város, ahol a lakók jómódban és biztonságban élhetnek. Teremts lakóhelyeket és munkahelyeket, juttass el hozzájuk áramot, vizet, egészségügyi ellátást. A város bővítéséhez pénz is kell. Tartsd szem előtt a lakók életét és a város pénzügyeit is, amikor eldöntöd, mit fejlesztesz.",
+        "epoch": "Ebben a játékban az idő hónapról hónapra telik. Előbb állítsd be a költségvetést és az építési terveket, majd ha készen állsz, nyomd meg az „Indítás” gombot. Ekkor telik az idő: haladnak az építkezések, a lakók és a vállalkozások végzik a dolgukat, te pedig az eredmények alapján tervezed meg a következő lépést. Amíg nem nyomod meg az „Indítás” gombot, a dátum nem változik, így nyugodtan gondolkodhatsz.",
+        "epoch_week": "Ebben a játékban az idő hétről hétre telik. Előbb állítsd be a költségvetést és az építési terveket, majd ha készen állsz, nyomd meg az „Indítás” gombot. Ekkor telik az idő: haladnak az építkezések, a lakók és a vállalkozások végzik a dolgukat, te pedig az eredmények alapján tervezed meg a következő lépést. Amíg nem nyomod meg az „Indítás” gombot, a dátum nem változik, így nyugodtan gondolkodhatsz."
+      },
+      "step2": {
+        "title": "A város állapota a műszerfalon",
+        "tools": "A képernyő alján lévő műszerfalon ellenőrizheted a város állapotát, és itt döntheted el, mi legyen a következő lépés. A „Nézet” színekkel segít megtalálni a hiányokat és a problémás helyeket. A „Térkép” az egész város elrendezését mutatja. Ahogy a város nő, ezek segítenek megtalálni, amit keresel.",
+        "tracking": "A „Polgárlista” gombbal név vagy más adat alapján kereshetsz lakókat, és később visszanézheted azok életét és ingázását, akik érdekelnek. Ha egy polgár adatlapján követésre jelölöd, innen bármikor megnyithatod az adatait. Akkor hasznos, ha a városi átlagok mögött az egyes emberek életére is kíváncsi vagy.",
+        "bulldozer": "A „Buldózer” üres telkek törlésére, valamint tervezett épületek és utak visszavonására való. Nyomd meg a gombot, kattints a célpontra a 3D nézetben, a végén pedig nyomd meg újra a gombot a kilépéshez. Elkészült épület vagy út eltávolításához nyisd meg az adatlapját, és válaszd a lebontást.",
+        "services": "A villám, a vízcsepp és a hajó mérője azt mutatja, mennyi tartalék van még az áram-, a víz- és a külkereskedelmi kapacitásban. Minél jobban megtelik, annál közelebb jár a kereslet vagy a forgalom a kapacitás határához. Rájuk kattintva áttekintheted a közlétesítményeket és a külkereskedelmi csomópontokat. A város bővítése előtt nézd meg, nem kell-e több létesítmény.",
+        "score": "A „Pontszám” összesítve mutatja, mennyire elégedettek a lakók a városi élettel. Minél magasabb, annál élhetőbb a város. Javításához gondoskodj lakásról, munkáról, egészségügyről és kellemes lakókörnyezetről. Ha csökken, derítsd ki, milyen gondjai vannak a lakóknak.",
+        "budget": "A „Költségvetés” a jövő havi várható kiadásokat mutatja az előző havi bevételhez képest. Ha a mutató jobbra leng ki, a kiadások meghaladják a bevételt. Ha balra, akkor marad pénz. Az idő léptetése előtt mindig nézd meg.",
+        "budget_week": "A „Költségvetés” a jövő heti várható kiadásokat mutatja az előző heti bevételhez képest. Ha a mutató jobbra leng ki, a kiadások meghaladják a bevételt. Ha balra, akkor marad pénz. Az idő léptetése előtt mindig nézd meg.",
+        "budgetChanges": "Ha több utat vagy létesítményt építesz, vagy növeled a létesítmények kihasználtságát, illetve az építkezések ütemét, több pénz kell, és a költségvetés mutatója felfelé mozdul. A kihasználtság vagy az építési ütem csökkentésével mérsékelheted a várható kiadásokat. Ha nőnek az adóbevételek, ugyanakkora kiadás mellett is lejjebb megy a mutató.",
+        "budgetPlanning": "Ha a mutató alacsonyan áll, van szabad pénzed a város fejlesztésére. Gondolkodj el, milyen hiányzó szolgáltatásokba vagy hamarosan szükséges létesítményekbe érdemes befektetni.",
+        "date": "A dátum azt mutatja, meddig jutott el a város ideje. Ehhez mérheted az építkezések haladását és az évszakok változását. Tervezés közben a dátum nem változik, csak akkor frissül, amikor az „Indítás” gombbal léptetsz.",
+        "climate": "A hőmérséklet, a csapadék, a napsütés és a szélsebesség panelje az adott hónap átlagos éghajlatát mutatja. Ezek a feltételek befolyásolják a mezőgazdaság, a szélerőművek és a napelemes erőművek termelékenységét. Ha kevés a termés vagy az áram, nézd meg az éghajlatot is.",
+        "climate_week": "A hőmérséklet, a csapadék, a napsütés és a szélsebesség panelje az adott hét átlagos éghajlatát mutatja. Ezek a feltételek befolyásolják a mezőgazdaság, a szélerőművek és a napelemes erőművek termelékenységét. Ha kevés a termés vagy az áram, nézd meg az éghajlatot is.",
+        "climateEffects": "Gyenge napsütésnél a napelemes, gyenge szélnél a szélerőművek teljesítménye csökken. A mezőgazdaságra a hőmérséklet és a csapadék mennyisége is hat. Az éghajlati panelre kattintva megnézheted, hogyan befolyásolják e havi feltételek az egyes létesítmények termelékenységét. A létesítmények tervezésekor számolj azzal, hogy a kínálat évszakonként változik.",
+        "climateEffects_week": "Gyenge napsütésnél a napelemes, gyenge szélnél a szélerőművek teljesítménye csökken. A mezőgazdaságra a hőmérséklet és a csapadék mennyisége is hat. Az éghajlati panelre kattintva megnézheted, hogyan befolyásolják e heti feltételek az egyes létesítmények termelékenységét. A létesítmények tervezésekor számolj azzal, hogy a kínálat évszakonként változik.",
+        "notifications": "Az „Értesítések” gombon lévő szám a most átnézendő figyelmeztetések és jelzések száma. A piros szám és a villogás azt jelenti, hogy a város működése zavart szenved, és mielőbb lépni kell. A sárga szám figyelmeztetés, például a növekedésre való felkészülésről vagy lassan orvosolható problémákról. Először nyomd meg a gombot, és olvasd el őket.",
+        "notificationActions": "Ha egy értesítés létesítményre vagy kerületre vonatkozik, a sorára kattintva részletesen megnézheted. Az okhoz igazodva lépj: kösd be a hiányzó távvezetéket, vagy gondoskodj az alapanyagról annak a létesítménynek, amelyiknek nincs elég. A folyamatban lévő problémákról szóló értesítések eltűnnek, amint megszűnik az okuk. Beavatkozás után nézd meg a következő havi eredményeket."
+      },
+      "step3": {
+        "title": "Problémák keresése a nézetváltással",
+        "open": "A város látványából nehéz észrevenni az áramhiányt vagy a forgalmi dugókat. A „Nézet” segítségével a térképen is megjelenítheted, amire kíváncsi vagy. Nyomd meg a műszerfalon a „Nézet” gombot a panel megnyitásához.",
+        "tabs": "A függőlegesen sorakozó lapokon kiválaszthatod, mit szeretnél vizsgálni: épületeket, utakat, telkeket, kerületeket és így tovább. Ha az egymást takaró adatok miatt nehéz eligazodni, a felesleges elemeket el is rejtheted. A „Tovább” gombbal megnézheted, hogyan használd a nézeteket.",
+        "modes": "Az egyes lapok gombjaival kiválaszthatod, milyen adat szerint színeződjenek az elemek. Keresd meg a zsúfolt utakat vagy a problémás épületeket, és ezekből kiindulva tervezd meg a teendőidet. A részletesebb vizsgálathoz kattints az elemre a 3D nézetben. Nyomd meg a „Tovább” gombot."
+      },
+      "step4": {
+        "title": "A városépítés eszközei",
+        "grading": "Nézzük meg a bal oldali gombokat fentről lefelé. A „Földmunka” segítségével elegyengetheted a beépítésre alkalmatlan lejtőket, vagy feltöltheted a tengert, hogy több hasznosítható terület legyen. Ha több lakásra vagy munkahelyre lenne szükség, de kevés a terület, így teremthetsz helyet a fejlődésnek.",
+        "road": "Az „Utak, vasút, infrastruktúra” gombbal építheted ki az emberek, áruk, áram és víz útját. Utakkal kötheted össze a lakásokat és a munkahelyeket, vasúttal a távoli helyeket, távvezetékekkel és vízvezetékekkel pedig a létesítményeket. Ezek a hálózatok teszik lehetővé a lakók közlekedését, a vállalkozások kereskedelmét és a közművek ellátását.",
+        "land": "A „Telkek” gombbal készítheted elő az épületek építési telkeit. Pusztán attól, hogy van föld, még nem épül rajta semmi. Több lakáshoz és nagy létesítményekhez egyaránt megfelelő méretű építési telek kell.",
+        "landDevelopment": "Az előkészített telkeken a város építhet, de a magánlakások és vállalkozások is ott jelennek meg. A magánépületek a keresletnek és a kerület építési szabályozásának megfelelően épülnek fel. Ha több lakást vagy munkahelyet szeretnél, ellenőrizd, van-e elég szabad telek.",
+        "district": "A „Kerületek” gombbal a város egyes részeit egységként kezelheted. Helyenként eltérő irányt szabhatsz: lehet egy terület főleg lakóövezet, egy másik ipari terület. Kerületenként korlátozhatod az építhető épületek típusát, így az egész környékhez illő fejlesztési irányt adhatsz.",
+        "districtRules": "A kerület adatlapján megadhatod, milyen típusú épületek építhetők. Használd aszerint, milyen várost szeretnél, például hogy a lakóövezetbe ne kerüljenek gyárak. A kerületek népessége és életkörülményei is összevethetők, így könnyebb eldönteni, hol van szükség támogatásra.",
+        "construction": "Az „Építés” gombbal tervezheted meg a város számára szükséges épületeket. Építhetsz lakásokat, munkahelyeket, kórházakat, iskolákat, erőműveket. Akkor használd, ha több lakás vagy munkahely kell, vagy ha pótolni szeretnéd a hiányzó egészségügyi, oktatási, energetikai és egyéb szolgáltatásokat.",
+        "transport": "A „Tömegközlekedés” gombbal busszal és vasúttal segítheted a lakók közlekedését. Megadhatod a vonalakat és a megállókat, és beállíthatod a viteldíjat és a követési időt. Ha összekötöd a lakóterületeket a munkahelyekkel és az iskolákkal, csökken az ingázás terhe.",
+        "propPlacement": "A „Díszelemek elhelyezése” gombbal fákat, sziklákat és más díszelemeket helyezhetsz el a városkép szépítésére. Használd, ha zöldet vinnél az utcákra, vagy díszítenéd a tájat.",
+        "cityDevelopment": "Az „Automatikus városfejlesztés” gombbal egyszerre tervezhetsz utakat és telkeket egy nagy területen. Fesd be a térképen a fejlesztendő területet, válassz egy utcaszerkezetet, és az utak és telkek egy lépésben elkészülnek. Akkor használd, ha a semmiből nyitnál új lakóterületet vagy városrészt.",
+        "constructionProjects": "Az „Építési projektek” alatt egy helyen láthatod a tervezett és folyamatban lévő munkákat. Nézd meg, melyik munka hogyan halad, és mire megy el a pénz, és ez alapján döntsd el, melyik munkát viszed tovább.",
+        "regulation": "A „Szabályozás” alatt határozhatod meg a városi élet és munka szabályait: a sebességkorlátozást, a munkaidőt, a bevándorlást, a szociális ellátást és egyebeket. Gondold át, mi a fontosabb: a biztonság, a nyugodt élet vagy a város növekedése, és a helyzethez igazítva állítsd be őket.",
+        "stat": "A „Statisztika” gombbal ellenőrizheted a városépítés eredményeit. Grafikonokon követheted a népesség, a jövedelmek, az ingázás, a lakók elégedettsége, a gazdaság mérete és az árak változását. Ha módosítottál egy intézkedést vagy létesítményt, nézd meg, javul-e az élet, és mi hiányzik még. Ezzel végeztünk a bal oldali gombokkal."
+      },
+      "step5": {
+        "title": "A tervek végrehajtása és az eredmények",
+        "flow": "Ha átnézted a város állapotát, és végiggondoltad a szükséges építkezéseket és a költségvetést, a műszerfal „Indítás” gombjával léptesd az időt. Haladnak a munkák, a lakók dolgoznak, a vállalkozások termelnek, és változik a város egyenlege és pontszáma. Előfordulhat, hogy egy terv hatása csak néhány hónap múlva látszik.",
+        "execute": "Az idő léptetése után nézd át az eredményeket és az értesítéseket. Ha valami gond van, kezeld a következő tervben, majd léptesd újra az időt. A várost a „tervezés → léptetés → ellenőrzés” ismétlésével fejleszted. Most nem kell megnyomnod az „Indítás” gombot. A „Tovább” gombbal folytasd a kamerakezeléssel."
+      },
+      "step6": {
+        "title": "A kamera mozgatása",
+        "description": "A kamerát így mozgathatod: bal gombos húzással mozgatod a nézetet, jobb gombos húzással forgatod, W/A/S/D (vagy a nyílbillentyűk) – mozgatás, Q/E – forgatás, R/F – magasság, egérgörgő – nagyítás. Próbáld ki nyugodtan, aztán nyomd meg a „Tovább” gombot."
+      },
+      "step7": {
+        "title": "Repülő mód és filmes mód",
+        "description": "A kamerának két különleges módja van. A „repülő mód” a Shift+F billentyűkkel indul: W/A/S/D-vel haladsz a nézés irányába, az egérrel nézelődsz, R/F-fel emelkedsz és süllyedsz. Az Esc billentyűvel léphetsz ki. A „filmes mód” a képernyő bal felső sarkában lévő gombbal indul, és körbejárhatod vele a várost. Az egérrel nézelődhetsz, a Shift vált a keringés és a haladás között, a Szóköz megállítja, a Backspace visszafelé játssza le a mozgást, az Esc kilép. Mindkét módban elrejtőznek a képernyő panelek, és az Esc megnyomásakor visszatérnek. Ha kipróbáltad, lépj ki mindkét módból, és nyomd meg a „Tovább” gombot."
+      },
+      "step8": {
+        "title": "A város határa",
+        "description": "A kamerát a város keleti szélére vittük. Városként csak ezt a téglalap alakú területet használhatod, ahol részletes terep készült, és a kamera sem léphet ki ebből a határból. Ennyit a képernyőről és a kezelésről. Most pedig hozzunk létre egy új lakóterületet! Nyomd meg a „Tovább” gombot."
+      },
+      "step9": {
+        "title": "Az út meghosszabbítása",
+        "description": "Most építsünk egy lakóterületet, ahol új lakókat fogadhatunk! A lakások és a munkahelyek semmit sem érnek, ha nem köti össze őket út: az emberek nem tudnak közlekedni, és az áruk sem érkeznek meg. Először hosszabbítsuk meg nyugat felé a település kelet–nyugati utcáját, hogy legyen út az új lakóterülethez. Nyomd meg az ikonpanelen az „Utak, vasút, infrastruktúra” gombot az építési panel megnyitásához.",
+        "confirm": "Az út menti földterület az út elkészülésekor telkekre oszlik. Az építési panel „Elkészüléskor létrehozott út menti telkek” beállításánál az út bal és jobb oldalára külön megadhatod a telkek méretét. Aszerint dönts, milyen épületeket vársz: lakásokhoz a kisebb, gyárakhoz és farmokhoz a nagyobb telkek valók. Ez az út lakóterülethez vezet, ezért hagyd így. A mentéshez nyomd meg az építési panel „Jóváhagyás” gombját, majd a „Tovább” gombot."
+      },
+      "step10": {
+        "title": "Az út befejezése",
+        "description": "Az út állapota egyelőre „Építés tervezve”. A tervezett utat még nem lehet használni: emberek és autók csak a munkák befejezése után közlekedhetnek rajta. Nyomd meg a műszerfalon 2–3 alkalommal az „Indítás” gombot az idő léptetéséhez, és várd meg, amíg elkészül. Az építkezés ideje alatt minden hónapban építési költség terheli a várost.",
+        "description_week": "Az út állapota egyelőre „Építés tervezve”. A tervezett utat még nem lehet használni: emberek és autók csak a munkák befejezése után közlekedhetnek rajta. Nyomd meg a műszerfalon 2–3 alkalommal az „Indítás” gombot az idő léptetéséhez, és várd meg, amíg elkészül. Az építkezés ideje alatt minden héten építési költség terheli a várost."
+      },
+      "step11": {
+        "title": "Elkészültek a telkek",
+        "description": "Az út elkészült, és mentén telkek jöttek létre. Épület csak telekre épülhet, és mivel a telek az útra néz, az emberek és az áruk ki-be járhatnak. Ha egy meglévő út mentén szeretnél telkeket létrehozni, azt az ikonpanel „Telkek” gombjával teheted meg."
+      },
+      "step12": {
+        "title": "Kerület létrehozása",
+        "description": "Mielőtt építkeznénk, döntsük el, mi legyen ebből az utcából. Ha nincs terv, könnyen épülhet gyár közvetlenül a házak mellé. A helyenkénti irányt kerületenként határozzuk meg. A kerületeket utanként kell kijelölni, a telek pedig annak az útnak a kerületéhez tartozik, amelyre néz. Nyomd meg az ikonpanelen a „Kerületek” gombot a „Kerületek szerkesztése” ablak megnyitásához: látni fogod, hogy most az egész település egyetlen kerület.",
+        "create": "A kijelölés módja legyen „Utcaoldal”. Állítsd a műveletet „Új kerület létrehozása” értékre, majd a Ctrl billentyűt nyomva tartva húzd végig az egeret a meghosszabbított úton. Az út mindkét oldala és az oda néző telkek új kerületté válnak."
+      },
+      "step13": {
+        "title": "A kerület elkülönült",
+        "description": "Az új utcát sikerült külön kerületbe választani a településközponttól. Kerületenként összesítve ellenőrizheted a népességet és az árakat, és meghatározhatod, milyen épületek épülhetnek ott, így minden környék a hozzá illő módon fejlődhet. Ha megnézted, zárd be a „Kerületek szerkesztése” ablakot."
+      },
+      "step14": {
+        "title": "A kerület adatainak megnyitása",
+        "description": "Állítsuk be az új kerületet lakóterületnek. A képernyő bal alsó sarkában lévő ikonnal jelenítsd meg a kerületeket, majd kattints az előbb létrehozott kerület feliratára az adatlap megnyitásához."
+      },
+      "step15": {
+        "title": "Legyen lakóterület",
+        "description": "A panel alsó részén lévő építési szabályozásnál választhatod ki, milyen épületek épülhetnek a kerület telkein. Itt nyugodt lakókörnyéket szeretnénk, ezért kattints a „Társasház” és a „Családi ház” kivételével az összes épületre, hogy letiltsd őket."
+      },
+      "step16": {
+        "title": "Egy telek ellenőrzése",
+        "description": "A kerületben meghatározott szabályozás a kerület összes telkére érvényes. Kattints a sárga jelölővel ellátott telekre, és nyisd meg az adatlapját."
+      },
+      "step17": {
+        "title": "A szabályozás érvénybe lépett",
+        "description": "A telek panelje alján látható, hogy érvényben van a kerületben megadott szabályozás, amely csak „Társasház” és „Családi ház” építését engedi. Így ebben az utcában már csak lakóházak épülhetnek. Nem kell egyenként beállítani a telkeket: ha a kerületnek megadod az irányt, az egész utca ahhoz igazodik."
+      },
+      "step18": {
+        "title": "Lakások építése",
+        "description": "Végre lakásokról gondoskodunk. Lakóházat általában a magánszektor épít automatikusan, ha vannak, akik ide szeretnének költözni, de ha a város önkormányzati lakásokat épít, azonnal enyhítheti a lakáshiányt. Építsünk most egy önkormányzati társasházat! Nyomd meg az ikonpanelen az „Építés” gombot.",
+        "select": "A „Lakóépületek” kategóriában válaszd a „Társasház” épületet, kattints az új kerület egyik tetszőleges telkére építési helyként, és nyomd meg az „Építés jóváhagyása” gombot."
+      },
+      "step19": {
+        "title": "A lakások befejezése",
+        "description": "Az épületekbe – akárcsak az utakra – nem lehet beköltözni pusztán attól, hogy megtervezted őket. Egy társasház több mint fél év alatt készül el. Az „Indítás” gombbal léptesd az időt, és várd meg, amíg elkészül."
+      },
+      "step20": {
+        "title": "Van-e áram?",
+        "description": "Lakás önmagában még nem elég az élethez: áram és víz is kell. Ebben a településben még nincs sem erőmű, sem vízellátás. Kattints a sárga jelölővel ellátott társasházra, ahol a település lakói élnek, és nyisd meg az adatlapját. Az „Épület adatai” lapon válassz ki egy bérlőt, majd nyisd meg a „Kereslet, kínálat, kereskedelem” lapot: láthatod, hogy az áram „Megszerzett” értéke 0."
+      },
+      "step21": {
+        "title": "Napelemes erőmű építése",
+        "description": "Az áram eljuttatásához először olyan erőmű kell, amely megtermeli. Építs „Naperőmű” létesítményt a sárga jelölővel ellátott telekre. Az építés rendes esetben időbe telik, de mivel ez oktatóanyag, az építési időt átugorjuk."
+      },
+      "step22": {
+        "title": "Transzformátorállomás építése",
+        "description": "Az erőmű által termelt nagyfeszültségű áramot a háztartások nem tudják közvetlenül használni. Az alállomás alakítja át háztartási árammá, és osztja el az úttal összekötött környező épületek között. Építs „Alállomás” létesítményt a társasház közelében lévő, sárga jelölővel ellátott telekre."
+      },
+      "step23": {
+        "title": "Bekötés távvezetékkel",
+        "description": "Ha az erőmű és az alállomás távol is van egymástól, az áram eljuthat egyiktől a másikig, ha van út számára. Nyisd meg az ikonpanelen az „Utak, vasút, infrastruktúra” menüt, válaszd az „Áram” csoportban a „Távvezeték” elemet, és húzz vezetéket a naperőmű csatlakozási pontjától az alállomás csatlakozási pontjáig. Ha egyenesen kötöd össze a csatlakozási pontokat, egyetlen vezetékkel megoldható."
+      },
+      "step24": {
+        "title": "Az áramellátás ellenőrzése",
+        "description": "Bekötés után győződj meg róla, hogy tényleg folyik az áram. Az „Indítás” gombbal léptesd az időt, kattints az alállomásra az adatlapja megnyitásához, és a „Kereslet, kínálat, kereskedelem” lapon ellenőrizd, hogy a nagyfeszültségű áram fogadott mennyisége nem 0. Néhány hónapba is beletelhet, mire az erőmű beindul, és megérkezik az áram."
+      },
+      "step25": {
+        "title": "Az áram eljutott az otthonokba",
+        "description": "Nyisd meg a társasház adatlapján – ugyanúgy, mint először – egy bérlő „Kereslet, kínálat, kereskedelem” lapját, és ellenőrizd, hogy az áram „Megszerzett” értéke már nem 0. Előfordulhat, hogy még egy-két hónapot léptetni kell, mire a háztartásokig is eljut. Az erőmű megtermeli, a távvezeték elszállítja, az alállomás elosztja: az áram csak akkor jut el az otthonokba, ha mindhárom össze van kötve."
+      },
+      "step26": {
+        "title": "Vízforrás keresése",
+        "description": "Most jöjjön a vízellátás. A vezetékes víz a föld alól kiszivattyúzott talajvíz, amelyet a településre juttatunk. Először derítsük ki, hol lehet vizet kiszivattyúzni. Nyomd meg a műszerfalon a „Nézet” gombot a nézetpanel megnyitásához.",
+        "show": "A függőlegesen sorakozó lapok közül válaszd a „Természeti erőforrások” lapot, és állítsd „Látható” értékre. A térképen világoskékkel jelölt területek a vízforrások. Kattints a sárga jelölővel ellátott vízforrásra az adatlapja megnyitásához."
+      },
+      "step27": {
+        "title": "Talajvízszivattyú építése",
+        "description": "A talajvízszivattyú a föld alól szivattyúzza fel a vizet, ezért vízforrás fölé kell építeni. Működéséhez áram és munkaerő is kell – ezért vezettük be előbb az áramot. Építs „Talajvízszivattyú” létesítményt a vízforrás fölötti, sárga jelölővel ellátott telekre. Mivel ez oktatóanyag, az építési időt átugorjuk."
+      },
+      "step28": {
+        "title": "Vízellátó szivattyútelep építése",
+        "description": "A felszivattyúzott vizet nem lehet közvetlenül eljuttatni a háztartásokhoz. Ahogy az alállomás az áramot, úgy osztja el a vízellátó szivattyútelep a vizet az úttal összekötött környező épületek között. Építs „Vízellátó szivattyútelep” létesítményt a társasház közelében lévő, sárga jelölővel ellátott telekre."
+      },
+      "step29": {
+        "title": "Bekötés vízvezetékkel",
+        "description": "Kell egy vezeték, amely a talajvízszivattyúból a vízellátó szivattyútelephez szállítja a vizet. Nyisd meg az ikonpanelen az „Utak, vasút, infrastruktúra” menüt, válaszd a „Víz” csoportban a „Vízvezeték” elemet, és fektesd le a talajvízszivattyú csatlakozási pontjától a vízellátó szivattyútelep csatlakozási pontjáig. Hogy ne ütközzön az utakkal és a távvezetékkel, nagy ívben kerüld meg keleti irányból."
+      },
+      "step30": {
+        "title": "A vízellátás ellenőrzése",
+        "description": "Az „Indítás” gombbal léptesd az időt, kattints a vízellátó szivattyútelepre az adatlapja megnyitásához, és a „Kereslet, kínálat, kereskedelem” lapon ellenőrizd, hogy a nagynyomású víz fogadott mennyisége nem 0. Néhány hónapba is beletelhet, mire a talajvízszivattyúhoz elég dolgozó érkezik, és megjön a víz."
+      },
+      "step31": {
+        "title": "Megvannak az alapok",
+        "description": "A víz eljutott a vízellátó szivattyútelephez, így a környező háztartásokban is lesz vezetékes víz. Utat építeni, telkeket előkészíteni, megszabni a kerületek irányát, lakásokat építeni, áramot és vizet juttatni el – ez a városépítés alapvető menete. Nyomd meg a „Tovább” gombot az alapokat bemutató oktatóanyag befejezéséhez."
+      }
+    },
+    "scenario4": {
+      "title": "Építsünk vasutat!",
+      "description": "A lakónegyedet és a munkahelyeket vasúttal kötnénk össze, de a tervezett nyomvonalon magánépületek és egy kórház áll. Ebben az oktatóanyagban megtanulod a telekvásárlást, a közlétesítmények elbontását, az utak fölötti emelt vasút építését, a peronok, az állomásépületek és a járműtelep építését, az ívek és emelkedők beállítását, végül az áramellátást és a vonal indítását.",
+      "step1": {
+        "title": "Emelt peronok építése",
+        "description": "Nyisd meg az „Utak, vasút, infrastruktúra” → Vasút menüt, és építs egy „Magasvasúti oldalperon (nagy kapacitású)” elemet a város nyugati oldalán, valamint egy „Kétvágányú oldalperon” elemet a keleti oldalán. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá. Mindkettő 6 m magasan legyen.",
+        "open": "Nyisd meg az „Utak, vasút, infrastruktúra” → Vasút menüt, és építs egy „Magasvasúti oldalperon (nagy kapacitású)” elemet a város nyugati oldalán, valamint egy „Kétvágányú oldalperon” elemet a keleti oldalán. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá. Mindkettő 6 m magasan legyen.",
+        "variant": "Nyisd meg az „Utak, vasút, infrastruktúra” → Vasút menüt, és építs egy „Magasvasúti oldalperon (nagy kapacitású)” elemet a város nyugati oldalán, valamint egy „Kétvágányú oldalperon” elemet a keleti oldalán. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá. Mindkettő 6 m magasan legyen.",
+        "start": "Nyisd meg az „Utak, vasút, infrastruktúra” → Vasút menüt, és építs egy „Magasvasúti oldalperon (nagy kapacitású)” elemet a város nyugati oldalán, valamint egy „Kétvágányú oldalperon” elemet a keleti oldalán. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá. Mindkettő 6 m magasan legyen.",
+        "end": "Nyisd meg az „Utak, vasút, infrastruktúra” → Vasút menüt, és építs egy „Magasvasúti oldalperon (nagy kapacitású)” elemet a város nyugati oldalán, valamint egy „Kétvágányú oldalperon” elemet a keleti oldalán. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá. Mindkettő 6 m magasan legyen.",
+        "confirm": "Nyisd meg az „Utak, vasút, infrastruktúra” → Vasút menüt, és építs egy „Magasvasúti oldalperon (nagy kapacitású)” elemet a város nyugati oldalán, valamint egy „Kétvágányú oldalperon” elemet a keleti oldalán. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá. Mindkettő 6 m magasan legyen.",
+        "town": "Építsd meg a nyugati „Magasvasúti oldalperon (nagy kapacitású)” elemet. 6 m magasan bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá.",
+        "new": "Most jön a keleti oldal. A panel „Vissza” gombjával térj vissza a típusok listájához, és a Vasút alatt válaszd a „Kétvágányú oldalperon” elemet. 6 m magasan bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá. Ha bezártad a panelt, az „Utak, vasút, infrastruktúra” menüből újra megnyithatod.",
+        "east": "Most jön a keleti oldal. A panel „Vissza” gombjával térj vissza a típusok listájához, és a Vasút alatt válaszd a „Kétvágányú oldalperon” elemet. 6 m magasan bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá. Ha bezártad a panelt, az „Utak, vasút, infrastruktúra” menüből újra megnyithatod."
+      },
+      "step2": {
+        "title": "Állomásépületek és bejáratok",
+        "description": "Válaszd az „Egyszerű állomásépület” elemet, és a nyugati, illetve a keleti oldalon kösd össze a két-két jelölőt egy rövid átjáróval, amely keresztezi a peront. A bejáratok közvetlenül a peron két oldalára kerüljenek. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá.",
+        "open": "Válaszd az „Egyszerű állomásépület” elemet, és a nyugati, illetve a keleti oldalon kösd össze a két-két jelölőt egy rövid átjáróval, amely keresztezi a peront. A bejáratok közvetlenül a peron két oldalára kerüljenek. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá.",
+        "variant": "Válaszd az „Egyszerű állomásépület” elemet, és a nyugati, illetve a keleti oldalon kösd össze a két-két jelölőt egy rövid átjáróval, amely keresztezi a peront. A bejáratok közvetlenül a peron két oldalára kerüljenek. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá.",
+        "start": "Válaszd az „Egyszerű állomásépület” elemet, és a nyugati, illetve a keleti oldalon kösd össze a két-két jelölőt egy rövid átjáróval, amely keresztezi a peront. A bejáratok közvetlenül a peron két oldalára kerüljenek. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá.",
+        "end": "Válaszd az „Egyszerű állomásépület” elemet, és a nyugati, illetve a keleti oldalon kösd össze a két-két jelölőt egy rövid átjáróval, amely keresztezi a peront. A bejáratok közvetlenül a peron két oldalára kerüljenek. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá.",
+        "confirm": "Válaszd az „Egyszerű állomásépület” elemet, és a nyugati, illetve a keleti oldalon kösd össze a két-két jelölőt egy rövid átjáróval, amely keresztezi a peront. A bejáratok közvetlenül a peron két oldalára kerüljenek. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá.",
+        "town": "Válaszd az „Egyszerű állomásépület” elemet, és a nyugati, illetve a keleti oldalon kösd össze a két-két jelölőt egy rövid átjáróval, amely keresztezi a peront. A bejáratok közvetlenül a peron két oldalára kerüljenek. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá.",
+        "new": "Válaszd az „Egyszerű állomásépület” elemet, és a nyugati, illetve a keleti oldalon kösd össze a két-két jelölőt egy rövid átjáróval, amely keresztezi a peront. A bejáratok közvetlenül a peron két oldalára kerüljenek. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá.",
+        "east": "Válaszd az „Egyszerű állomásépület” elemet, és a nyugati, illetve a keleti oldalon kösd össze a két-két jelölőt egy rövid átjáróval, amely keresztezi a peront. A bejáratok közvetlenül a peron két oldalára kerüljenek. Bal kattintással tedd le a körrel jelölt kezdő- és végpontot, jobb kattintással véglegesítsd az alakot, majd hagyd jóvá."
+      },
+      "step3": {
+        "title": "Telekvásárlást igénylő szakasz tervezése",
+        "description": "Válaszd a „Kétvágányú vasúti pálya” elemet, és fektess le egy egyenes vágányt 6 m magasan a nyugati peron keleti végétől a főút nyugati végéig. A szakasz épületeket érint, ezért telekvásárlásra van szükség. Hagyd jóvá a tervet, és nyomd meg a „Tovább” gombot. Ennél a szakasznál az építési időt nem ugorjuk át.",
+        "open": "Válaszd a „Kétvágányú vasúti pálya” elemet, és fektess le egy egyenes vágányt 6 m magasan a nyugati peron keleti végétől a főút nyugati végéig. A szakasz épületeket érint, ezért telekvásárlásra van szükség. Hagyd jóvá a tervet, és nyomd meg a „Tovább” gombot. Ennél a szakasznál az építési időt nem ugorjuk át.",
+        "variant": "Válaszd a „Kétvágányú vasúti pálya” elemet, és fektess le egy egyenes vágányt 6 m magasan a nyugati peron keleti végétől a főút nyugati végéig. A szakasz épületeket érint, ezért telekvásárlásra van szükség. Hagyd jóvá a tervet, és nyomd meg a „Tovább” gombot. Ennél a szakasznál az építési időt nem ugorjuk át.",
+        "start": "Válaszd a „Kétvágányú vasúti pálya” elemet, és fektess le egy egyenes vágányt 6 m magasan a nyugati peron keleti végétől a főút nyugati végéig. A szakasz épületeket érint, ezért telekvásárlásra van szükség. Hagyd jóvá a tervet, és nyomd meg a „Tovább” gombot. Ennél a szakasznál az építési időt nem ugorjuk át.",
+        "end": "Válaszd a „Kétvágányú vasúti pálya” elemet, és fektess le egy egyenes vágányt 6 m magasan a nyugati peron keleti végétől a főút nyugati végéig. A szakasz épületeket érint, ezért telekvásárlásra van szükség. Hagyd jóvá a tervet, és nyomd meg a „Tovább” gombot. Ennél a szakasznál az építési időt nem ugorjuk át.",
+        "confirm": "Válaszd a „Kétvágányú vasúti pálya” elemet, és fektess le egy egyenes vágányt 6 m magasan a nyugati peron keleti végétől a főút nyugati végéig. A szakasz épületeket érint, ezért telekvásárlásra van szükség. Hagyd jóvá a tervet, és nyomd meg a „Tovább” gombot. Ennél a szakasznál az építési időt nem ugorjuk át.",
+        "town": "Válaszd a „Kétvágányú vasúti pálya” elemet, és fektess le egy egyenes vágányt 6 m magasan a nyugati peron keleti végétől a főút nyugati végéig. A szakasz épületeket érint, ezért telekvásárlásra van szükség. Hagyd jóvá a tervet, és nyomd meg a „Tovább” gombot. Ennél a szakasznál az építési időt nem ugorjuk át.",
+        "new": "Válaszd a „Kétvágányú vasúti pálya” elemet, és fektess le egy egyenes vágányt 6 m magasan a nyugati peron keleti végétől a főút nyugati végéig. A szakasz épületeket érint, ezért telekvásárlásra van szükség. Hagyd jóvá a tervet, és nyomd meg a „Tovább” gombot. Ennél a szakasznál az építési időt nem ugorjuk át.",
+        "east": "Válaszd a „Kétvágányú vasúti pálya” elemet, és fektess le egy egyenes vágányt 6 m magasan a nyugati peron keleti végétől a főút nyugati végéig. A szakasz épületeket érint, ezért telekvásárlásra van szükség. Hagyd jóvá a tervet, és nyomd meg a „Tovább” gombot. Ennél a szakasznál az építési időt nem ugorjuk át."
+      },
+      "step4": {
+        "title": "A kórház lebontásának elrendelése",
+        "description": "A magánépületek telkeire automatikusan elindulnak a vételi tárgyalások, a kórházat viszont – mivel a város közlétesítménye – nem bontják le automatikusan, ezért akadályozza a vágány építésének megkezdését. Kattints a kórházra, és a felső gombok közül nyomd meg a „Lebontás” gombot. Ha az állapota „Bontás tervezve” lett, nyomd meg a „Tovább” gombot.",
+        "open": "A magánépületek telkeire automatikusan elindulnak a vételi tárgyalások, a kórházat viszont – mivel a város közlétesítménye – nem bontják le automatikusan, ezért akadályozza a vágány építésének megkezdését. Kattints a kórházra, és a felső gombok közül nyomd meg a „Lebontás” gombot. Ha az állapota „Bontás tervezve” lett, nyomd meg a „Tovább” gombot.",
+        "variant": "A magánépületek telkeire automatikusan elindulnak a vételi tárgyalások, a kórházat viszont – mivel a város közlétesítménye – nem bontják le automatikusan, ezért akadályozza a vágány építésének megkezdését. Kattints a kórházra, és a felső gombok közül nyomd meg a „Lebontás” gombot. Ha az állapota „Bontás tervezve” lett, nyomd meg a „Tovább” gombot.",
+        "start": "A magánépületek telkeire automatikusan elindulnak a vételi tárgyalások, a kórházat viszont – mivel a város közlétesítménye – nem bontják le automatikusan, ezért akadályozza a vágány építésének megkezdését. Kattints a kórházra, és a felső gombok közül nyomd meg a „Lebontás” gombot. Ha az állapota „Bontás tervezve” lett, nyomd meg a „Tovább” gombot.",
+        "end": "A magánépületek telkeire automatikusan elindulnak a vételi tárgyalások, a kórházat viszont – mivel a város közlétesítménye – nem bontják le automatikusan, ezért akadályozza a vágány építésének megkezdését. Kattints a kórházra, és a felső gombok közül nyomd meg a „Lebontás” gombot. Ha az állapota „Bontás tervezve” lett, nyomd meg a „Tovább” gombot.",
+        "confirm": "A magánépületek telkeire automatikusan elindulnak a vételi tárgyalások, a kórházat viszont – mivel a város közlétesítménye – nem bontják le automatikusan, ezért akadályozza a vágány építésének megkezdését. Kattints a kórházra, és a felső gombok közül nyomd meg a „Lebontás” gombot. Ha az állapota „Bontás tervezve” lett, nyomd meg a „Tovább” gombot.",
+        "town": "A magánépületek telkeire automatikusan elindulnak a vételi tárgyalások, a kórházat viszont – mivel a város közlétesítménye – nem bontják le automatikusan, ezért akadályozza a vágány építésének megkezdését. Kattints a kórházra, és a felső gombok közül nyomd meg a „Lebontás” gombot. Ha az állapota „Bontás tervezve” lett, nyomd meg a „Tovább” gombot.",
+        "new": "A magánépületek telkeire automatikusan elindulnak a vételi tárgyalások, a kórházat viszont – mivel a város közlétesítménye – nem bontják le automatikusan, ezért akadályozza a vágány építésének megkezdését. Kattints a kórházra, és a felső gombok közül nyomd meg a „Lebontás” gombot. Ha az állapota „Bontás tervezve” lett, nyomd meg a „Tovább” gombot.",
+        "east": "A magánépületek telkeire automatikusan elindulnak a vételi tárgyalások, a kórházat viszont – mivel a város közlétesítménye – nem bontják le automatikusan, ezért akadályozza a vágány építésének megkezdését. Kattints a kórházra, és a felső gombok közül nyomd meg a „Lebontás” gombot. Ha az állapota „Bontás tervezve” lett, nyomd meg a „Tovább” gombot."
+      },
+      "step5": {
+        "title": "Várd meg a szakasz elkészültét",
+        "description": "Haladj előre az időben, amíg a magántelkek megvásárlása, a kórház lebontása és a vágány építése befejeződik. Ez néhány hónapig tart. Ennél a szakasznál nem ugorjuk át az építési időt: a vágány a szokásos építkezéssel készül el.",
+        "open": "Haladj előre az időben, amíg a magántelkek megvásárlása, a kórház lebontása és a vágány építése befejeződik. Ez néhány hónapig tart. Ennél a szakasznál nem ugorjuk át az építési időt: a vágány a szokásos építkezéssel készül el.",
+        "variant": "Haladj előre az időben, amíg a magántelkek megvásárlása, a kórház lebontása és a vágány építése befejeződik. Ez néhány hónapig tart. Ennél a szakasznál nem ugorjuk át az építési időt: a vágány a szokásos építkezéssel készül el.",
+        "start": "Haladj előre az időben, amíg a magántelkek megvásárlása, a kórház lebontása és a vágány építése befejeződik. Ez néhány hónapig tart. Ennél a szakasznál nem ugorjuk át az építési időt: a vágány a szokásos építkezéssel készül el.",
+        "end": "Haladj előre az időben, amíg a magántelkek megvásárlása, a kórház lebontása és a vágány építése befejeződik. Ez néhány hónapig tart. Ennél a szakasznál nem ugorjuk át az építési időt: a vágány a szokásos építkezéssel készül el.",
+        "confirm": "Haladj előre az időben, amíg a magántelkek megvásárlása, a kórház lebontása és a vágány építése befejeződik. Ez néhány hónapig tart. Ennél a szakasznál nem ugorjuk át az építési időt: a vágány a szokásos építkezéssel készül el.",
+        "town": "Haladj előre az időben, amíg a magántelkek megvásárlása, a kórház lebontása és a vágány építése befejeződik. Ez néhány hónapig tart. Ennél a szakasznál nem ugorjuk át az építési időt: a vágány a szokásos építkezéssel készül el.",
+        "new": "Haladj előre az időben, amíg a magántelkek megvásárlása, a kórház lebontása és a vágány építése befejeződik. Ez néhány hónapig tart. Ennél a szakasznál nem ugorjuk át az építési időt: a vágány a szokásos építkezéssel készül el.",
+        "east": "Haladj előre az időben, amíg a magántelkek megvásárlása, a kórház lebontása és a vágány építése befejeződik. Ez néhány hónapig tart. Ennél a szakasznál nem ugorjuk át az építési időt: a vágány a szokásos építkezéssel készül el."
+      },
+      "step6": {
+        "title": "Vágány közvetlenül a főút fölött",
+        "description": "A „Kétvágányú vasúti pálya” elemmel fektess le vágányt 6 m magasan a főút nyugati végétől a keleti végéig. Ha az út közepe fölött vezeted, nem érinted az út menti magántelkeket, így nincs szükség telekvásárlásra. Ha letérsz az útról, és épületeket érintesz, telekvásárlásra vagy közlétesítmények lebontására lehet szükség.",
+        "open": "A „Kétvágányú vasúti pálya” elemmel fektess le vágányt 6 m magasan a főút nyugati végétől a keleti végéig. Ha az út közepe fölött vezeted, nem érinted az út menti magántelkeket, így nincs szükség telekvásárlásra. Ha letérsz az útról, és épületeket érintesz, telekvásárlásra vagy közlétesítmények lebontására lehet szükség.",
+        "variant": "A „Kétvágányú vasúti pálya” elemmel fektess le vágányt 6 m magasan a főút nyugati végétől a keleti végéig. Ha az út közepe fölött vezeted, nem érinted az út menti magántelkeket, így nincs szükség telekvásárlásra. Ha letérsz az útról, és épületeket érintesz, telekvásárlásra vagy közlétesítmények lebontására lehet szükség.",
+        "start": "A „Kétvágányú vasúti pálya” elemmel fektess le vágányt 6 m magasan a főút nyugati végétől a keleti végéig. Ha az út közepe fölött vezeted, nem érinted az út menti magántelkeket, így nincs szükség telekvásárlásra. Ha letérsz az útról, és épületeket érintesz, telekvásárlásra vagy közlétesítmények lebontására lehet szükség.",
+        "end": "A „Kétvágányú vasúti pálya” elemmel fektess le vágányt 6 m magasan a főút nyugati végétől a keleti végéig. Ha az út közepe fölött vezeted, nem érinted az út menti magántelkeket, így nincs szükség telekvásárlásra. Ha letérsz az útról, és épületeket érintesz, telekvásárlásra vagy közlétesítmények lebontására lehet szükség.",
+        "confirm": "A „Kétvágányú vasúti pálya” elemmel fektess le vágányt 6 m magasan a főút nyugati végétől a keleti végéig. Ha az út közepe fölött vezeted, nem érinted az út menti magántelkeket, így nincs szükség telekvásárlásra. Ha letérsz az útról, és épületeket érintesz, telekvásárlásra vagy közlétesítmények lebontására lehet szükség.",
+        "town": "A „Kétvágányú vasúti pálya” elemmel fektess le vágányt 6 m magasan a főút nyugati végétől a keleti végéig. Ha az út közepe fölött vezeted, nem érinted az út menti magántelkeket, így nincs szükség telekvásárlásra. Ha letérsz az útról, és épületeket érintesz, telekvásárlásra vagy közlétesítmények lebontására lehet szükség.",
+        "new": "A „Kétvágányú vasúti pálya” elemmel fektess le vágányt 6 m magasan a főút nyugati végétől a keleti végéig. Ha az út közepe fölött vezeted, nem érinted az út menti magántelkeket, így nincs szükség telekvásárlásra. Ha letérsz az útról, és épületeket érintesz, telekvásárlásra vagy közlétesítmények lebontására lehet szükség.",
+        "east": "Végül fektess le „Kétvágányú vasúti pálya” elemet 6 m magasan a főút keleti végétől a keleti peron nyugati végéig. Ha a két peron összeköttetésbe került, a „Tovább” gombbal átugorjuk az építési időt."
+      },
+      "step7": {
+        "title": "Járműtelep építése",
+        "description": "Az építési panelen válaszd a „Vasúti járműtelep” elemet, és építsd fel a város északi részén lévő sárga telekre. Ezt is magad helyezd el. A „Tovább” gombbal átugorjuk a telep építési idejét, és elkészül.",
+        "open": "Az építési panelen válaszd a „Vasúti járműtelep” elemet, és építsd fel a város északi részén lévő sárga telekre. Ezt is magad helyezd el. A „Tovább” gombbal átugorjuk a telep építési idejét, és elkészül.",
+        "variant": "Az építési panelen válaszd a „Vasúti járműtelep” elemet, és építsd fel a város északi részén lévő sárga telekre. Ezt is magad helyezd el. A „Tovább” gombbal átugorjuk a telep építési idejét, és elkészül.",
+        "start": "Az építési panelen válaszd a „Vasúti járműtelep” elemet, és építsd fel a város északi részén lévő sárga telekre. Ezt is magad helyezd el. A „Tovább” gombbal átugorjuk a telep építési idejét, és elkészül.",
+        "end": "Az építési panelen válaszd a „Vasúti járműtelep” elemet, és építsd fel a város északi részén lévő sárga telekre. Ezt is magad helyezd el. A „Tovább” gombbal átugorjuk a telep építési idejét, és elkészül.",
+        "confirm": "Az építési panelen válaszd a „Vasúti járműtelep” elemet, és építsd fel a város északi részén lévő sárga telekre. Ezt is magad helyezd el. A „Tovább” gombbal átugorjuk a telep építési idejét, és elkészül.",
+        "town": "Az építési panelen válaszd a „Vasúti járműtelep” elemet, és építsd fel a város északi részén lévő sárga telekre. Ezt is magad helyezd el. A „Tovább” gombbal átugorjuk a telep építési idejét, és elkészül.",
+        "new": "Az építési panelen válaszd a „Vasúti járműtelep” elemet, és építsd fel a város északi részén lévő sárga telekre. Ezt is magad helyezd el. A „Tovább” gombbal átugorjuk a telep építési idejét, és elkészül.",
+        "east": "Az építési panelen válaszd a „Vasúti járműtelep” elemet, és építsd fel a város északi részén lévő sárga telekre. Ezt is magad helyezd el. A „Tovább” gombbal átugorjuk a telep építési idejét, és elkészül."
+      },
+      "step8": {
+        "title": "Íves, emelkedő bekötés a fővonalba",
+        "description": "A „Vasúti vágány” elemmel indulj a telep keleti, talajszinti csatlakozási pontjától, kanyarodj nagy ívben kelet felé, haladj át az északkeleti jelölőn, és csatlakozz a fővonal 6 m magas becsatlakozási pontjához. A sárga köztes pontokat követve helyezd el a vágányt, hogy ne lépd túl az ívsugár és az emelkedő korlátait. Miután jobb kattintással véglegesítetted az alakot, a csúcspontok és a vezérlőpontok húzásával még módosíthatod.",
+        "open": "A „Vasúti vágány” elemmel indulj a telep keleti, talajszinti csatlakozási pontjától, kanyarodj nagy ívben kelet felé, haladj át az északkeleti jelölőn, és csatlakozz a fővonal 6 m magas becsatlakozási pontjához. A sárga köztes pontokat követve helyezd el a vágányt, hogy ne lépd túl az ívsugár és az emelkedő korlátait. Miután jobb kattintással véglegesítetted az alakot, a csúcspontok és a vezérlőpontok húzásával még módosíthatod.",
+        "variant": "A „Vasúti vágány” elemmel indulj a telep keleti, talajszinti csatlakozási pontjától, kanyarodj nagy ívben kelet felé, haladj át az északkeleti jelölőn, és csatlakozz a fővonal 6 m magas becsatlakozási pontjához. A sárga köztes pontokat követve helyezd el a vágányt, hogy ne lépd túl az ívsugár és az emelkedő korlátait. Miután jobb kattintással véglegesítetted az alakot, a csúcspontok és a vezérlőpontok húzásával még módosíthatod.",
+        "start": "A „Vasúti vágány” elemmel indulj a telep keleti, talajszinti csatlakozási pontjától, kanyarodj nagy ívben kelet felé, haladj át az északkeleti jelölőn, és csatlakozz a fővonal 6 m magas becsatlakozási pontjához. A sárga köztes pontokat követve helyezd el a vágányt, hogy ne lépd túl az ívsugár és az emelkedő korlátait. Miután jobb kattintással véglegesítetted az alakot, a csúcspontok és a vezérlőpontok húzásával még módosíthatod.",
+        "end": "A „Vasúti vágány” elemmel indulj a telep keleti, talajszinti csatlakozási pontjától, kanyarodj nagy ívben kelet felé, haladj át az északkeleti jelölőn, és csatlakozz a fővonal 6 m magas becsatlakozási pontjához. A sárga köztes pontokat követve helyezd el a vágányt, hogy ne lépd túl az ívsugár és az emelkedő korlátait. Miután jobb kattintással véglegesítetted az alakot, a csúcspontok és a vezérlőpontok húzásával még módosíthatod.",
+        "confirm": "A „Vasúti vágány” elemmel indulj a telep keleti, talajszinti csatlakozási pontjától, kanyarodj nagy ívben kelet felé, haladj át az északkeleti jelölőn, és csatlakozz a fővonal 6 m magas becsatlakozási pontjához. A sárga köztes pontokat követve helyezd el a vágányt, hogy ne lépd túl az ívsugár és az emelkedő korlátait. Miután jobb kattintással véglegesítetted az alakot, a csúcspontok és a vezérlőpontok húzásával még módosíthatod.",
+        "town": "A „Vasúti vágány” elemmel indulj a telep keleti, talajszinti csatlakozási pontjától, kanyarodj nagy ívben kelet felé, haladj át az északkeleti jelölőn, és csatlakozz a fővonal 6 m magas becsatlakozási pontjához. A sárga köztes pontokat követve helyezd el a vágányt, hogy ne lépd túl az ívsugár és az emelkedő korlátait. Miután jobb kattintással véglegesítetted az alakot, a csúcspontok és a vezérlőpontok húzásával még módosíthatod.",
+        "new": "A „Vasúti vágány” elemmel indulj a telep keleti, talajszinti csatlakozási pontjától, kanyarodj nagy ívben kelet felé, haladj át az északkeleti jelölőn, és csatlakozz a fővonal 6 m magas becsatlakozási pontjához. A sárga köztes pontokat követve helyezd el a vágányt, hogy ne lépd túl az ívsugár és az emelkedő korlátait. Miután jobb kattintással véglegesítetted az alakot, a csúcspontok és a vezérlőpontok húzásával még módosíthatod.",
+        "east": "A „Vasúti vágány” elemmel indulj a telep keleti, talajszinti csatlakozási pontjától, kanyarodj nagy ívben kelet felé, haladj át az északkeleti jelölőn, és csatlakozz a fővonal 6 m magas becsatlakozási pontjához. A sárga köztes pontokat követve helyezd el a vágányt, hogy ne lépd túl az ívsugár és az emelkedő korlátait. Miután jobb kattintással véglegesítetted az alakot, a csúcspontok és a vezérlőpontok húzásával még módosíthatod."
+      },
+      "step9": {
+        "title": "Áramellátás a meglévő erőműből",
+        "description": "A villamos vonatok közlekedéséhez az erőműből távvezetéket kell bekötni. A „Távvezeték” elemmel kösd össze az erőmű csatlakozási pontját a járműtelep keleti, közös csatlakozási pontjával, majd hagyd jóvá.",
+        "open": "A villamos vonatok közlekedéséhez az erőműből távvezetéket kell bekötni. A „Távvezeték” elemmel kösd össze az erőmű csatlakozási pontját a járműtelep keleti, közös csatlakozási pontjával, majd hagyd jóvá.",
+        "variant": "A villamos vonatok közlekedéséhez az erőműből távvezetéket kell bekötni. A „Távvezeték” elemmel kösd össze az erőmű csatlakozási pontját a járműtelep keleti, közös csatlakozási pontjával, majd hagyd jóvá.",
+        "start": "A villamos vonatok közlekedéséhez az erőműből távvezetéket kell bekötni. A „Távvezeték” elemmel kösd össze az erőmű csatlakozási pontját a járműtelep keleti, közös csatlakozási pontjával, majd hagyd jóvá.",
+        "end": "A villamos vonatok közlekedéséhez az erőműből távvezetéket kell bekötni. A „Távvezeték” elemmel kösd össze az erőmű csatlakozási pontját a járműtelep keleti, közös csatlakozási pontjával, majd hagyd jóvá.",
+        "confirm": "A villamos vonatok közlekedéséhez az erőműből távvezetéket kell bekötni. A „Távvezeték” elemmel kösd össze az erőmű csatlakozási pontját a járműtelep keleti, közös csatlakozási pontjával, majd hagyd jóvá.",
+        "town": "A villamos vonatok közlekedéséhez az erőműből távvezetéket kell bekötni. A „Távvezeték” elemmel kösd össze az erőmű csatlakozási pontját a járműtelep keleti, közös csatlakozási pontjával, majd hagyd jóvá.",
+        "new": "A villamos vonatok közlekedéséhez az erőműből távvezetéket kell bekötni. A „Távvezeték” elemmel kösd össze az erőmű csatlakozási pontját a járműtelep keleti, közös csatlakozási pontjával, majd hagyd jóvá.",
+        "east": "A villamos vonatok közlekedéséhez az erőműből távvezetéket kell bekötni. A „Távvezeték” elemmel kösd össze az erőmű csatlakozási pontját a járműtelep keleti, közös csatlakozási pontjával, majd hagyd jóvá."
+      },
+      "step10": {
+        "title": "A vasútvonal indítása",
+        "description": "A „Tömegközlekedés” → „+ Új vonal” menüben válaszd a „Elővárosi vasútvonal” típust. Helyezz el megállót a nyugati és a keleti emelt peronon, majd kattints az első megállóra a kör bezárásához. A viteldíj legyen 0, a tervezett követési idő 5 perc, végül hagyd jóvá.",
+        "open": "A „Tömegközlekedés” → „+ Új vonal” menüben válaszd a „Elővárosi vasútvonal” típust. Helyezz el megállót a nyugati és a keleti emelt peronon, majd kattints az első megállóra a kör bezárásához. A viteldíj legyen 0, a tervezett követési idő 5 perc, végül hagyd jóvá.",
+        "variant": "A „Tömegközlekedés” → „+ Új vonal” menüben válaszd a „Elővárosi vasútvonal” típust. Helyezz el megállót a nyugati és a keleti emelt peronon, majd kattints az első megállóra a kör bezárásához. A viteldíj legyen 0, a tervezett követési idő 5 perc, végül hagyd jóvá.",
+        "start": "A „Tömegközlekedés” → „+ Új vonal” menüben válaszd a „Elővárosi vasútvonal” típust. Helyezz el megállót a nyugati és a keleti emelt peronon, majd kattints az első megállóra a kör bezárásához. A viteldíj legyen 0, a tervezett követési idő 5 perc, végül hagyd jóvá.",
+        "end": "A „Tömegközlekedés” → „+ Új vonal” menüben válaszd a „Elővárosi vasútvonal” típust. Helyezz el megállót a nyugati és a keleti emelt peronon, majd kattints az első megállóra a kör bezárásához. A viteldíj legyen 0, a tervezett követési idő 5 perc, végül hagyd jóvá.",
+        "confirm": "A „Tömegközlekedés” → „+ Új vonal” menüben válaszd a „Elővárosi vasútvonal” típust. Helyezz el megállót a nyugati és a keleti emelt peronon, majd kattints az első megállóra a kör bezárásához. A viteldíj legyen 0, a tervezett követési idő 5 perc, végül hagyd jóvá.",
+        "town": "A „Tömegközlekedés” → „+ Új vonal” menüben válaszd a „Elővárosi vasútvonal” típust. Helyezz el megállót a nyugati és a keleti emelt peronon, majd kattints az első megállóra a kör bezárásához. A viteldíj legyen 0, a tervezett követési idő 5 perc, végül hagyd jóvá.",
+        "new": "A „Tömegközlekedés” → „+ Új vonal” menüben válaszd a „Elővárosi vasútvonal” típust. Helyezz el megállót a nyugati és a keleti emelt peronon, majd kattints az első megállóra a kör bezárásához. A viteldíj legyen 0, a tervezett követési idő 5 perc, végül hagyd jóvá.",
+        "east": "A „Tömegközlekedés” → „+ Új vonal” menüben válaszd a „Elővárosi vasútvonal” típust. Helyezz el megállót a nyugati és a keleti emelt peronon, majd kattints az első megállóra a kör bezárásához. A viteldíj legyen 0, a tervezett követési idő 5 perc, végül hagyd jóvá."
+      },
+      "step11": {
+        "title": "Járművek és forgalom ellenőrzése",
+        "description": "Haladj előre az időben, és a tömegközlekedés kezelőfelületén ellenőrizd a vonal szállítókapacitását és követési idejét. A járműtelepnek néhány hónap kell a járművek beszerzéséhez. Ha a vonalnak már van szállítókapacitása, a vonal elindult. A lakók a gyaloglást is figyelembe veszik az útvonal kiválasztásakor, ezért ilyen rövid állomástávolságnál előfordulhat, hogy még nincsenek utasok.",
+        "open": "Haladj előre az időben, és a tömegközlekedés kezelőfelületén ellenőrizd a vonal szállítókapacitását és követési idejét. A járműtelepnek néhány hónap kell a járművek beszerzéséhez. Ha a vonalnak már van szállítókapacitása, a vonal elindult. A lakók a gyaloglást is figyelembe veszik az útvonal kiválasztásakor, ezért ilyen rövid állomástávolságnál előfordulhat, hogy még nincsenek utasok.",
+        "variant": "Haladj előre az időben, és a tömegközlekedés kezelőfelületén ellenőrizd a vonal szállítókapacitását és követési idejét. A járműtelepnek néhány hónap kell a járművek beszerzéséhez. Ha a vonalnak már van szállítókapacitása, a vonal elindult. A lakók a gyaloglást is figyelembe veszik az útvonal kiválasztásakor, ezért ilyen rövid állomástávolságnál előfordulhat, hogy még nincsenek utasok.",
+        "start": "Haladj előre az időben, és a tömegközlekedés kezelőfelületén ellenőrizd a vonal szállítókapacitását és követési idejét. A járműtelepnek néhány hónap kell a járművek beszerzéséhez. Ha a vonalnak már van szállítókapacitása, a vonal elindult. A lakók a gyaloglást is figyelembe veszik az útvonal kiválasztásakor, ezért ilyen rövid állomástávolságnál előfordulhat, hogy még nincsenek utasok.",
+        "end": "Haladj előre az időben, és a tömegközlekedés kezelőfelületén ellenőrizd a vonal szállítókapacitását és követési idejét. A járműtelepnek néhány hónap kell a járművek beszerzéséhez. Ha a vonalnak már van szállítókapacitása, a vonal elindult. A lakók a gyaloglást is figyelembe veszik az útvonal kiválasztásakor, ezért ilyen rövid állomástávolságnál előfordulhat, hogy még nincsenek utasok.",
+        "confirm": "Haladj előre az időben, és a tömegközlekedés kezelőfelületén ellenőrizd a vonal szállítókapacitását és követési idejét. A járműtelepnek néhány hónap kell a járművek beszerzéséhez. Ha a vonalnak már van szállítókapacitása, a vonal elindult. A lakók a gyaloglást is figyelembe veszik az útvonal kiválasztásakor, ezért ilyen rövid állomástávolságnál előfordulhat, hogy még nincsenek utasok.",
+        "town": "Haladj előre az időben, és a tömegközlekedés kezelőfelületén ellenőrizd a vonal szállítókapacitását és követési idejét. A járműtelepnek néhány hónap kell a járművek beszerzéséhez. Ha a vonalnak már van szállítókapacitása, a vonal elindult. A lakók a gyaloglást is figyelembe veszik az útvonal kiválasztásakor, ezért ilyen rövid állomástávolságnál előfordulhat, hogy még nincsenek utasok.",
+        "new": "Haladj előre az időben, és a tömegközlekedés kezelőfelületén ellenőrizd a vonal szállítókapacitását és követési idejét. A járműtelepnek néhány hónap kell a járművek beszerzéséhez. Ha a vonalnak már van szállítókapacitása, a vonal elindult. A lakók a gyaloglást is figyelembe veszik az útvonal kiválasztásakor, ezért ilyen rövid állomástávolságnál előfordulhat, hogy még nincsenek utasok.",
+        "east": "Haladj előre az időben, és a tömegközlekedés kezelőfelületén ellenőrizd a vonal szállítókapacitását és követési idejét. A járműtelepnek néhány hónap kell a járművek beszerzéséhez. Ha a vonalnak már van szállítókapacitása, a vonal elindult. A lakók a gyaloglást is figyelembe veszik az útvonal kiválasztásakor, ezért ilyen rövid állomástávolságnál előfordulhat, hogy még nincsenek utasok."
+      },
+      "step12": {
+        "title": "A vasútépítés áttekintése",
+        "description": "A kamera a nyugati állomásra ugrott. Nézd meg a peronnál álló vonatokat! Elkészültek a peronok, az állomásépületek, a fővonal, a járműtelep a bekötő vágánnyal, az áramellátás és a vonal beállításai. Megismerted a magántelkek megvásárlását és a közlétesítmények lebontását, az út fölötti szakaszon pedig elkerülted a telekvásárlást. Az ívsugár és az emelkedő ellenőrzésével történő vonalvezetést más vasútépítéseknél is hasznosíthatod.",
+        "open": "A kamera a nyugati állomásra ugrott. Nézd meg a peronnál álló vonatokat! Elkészültek a peronok, az állomásépületek, a fővonal, a járműtelep a bekötő vágánnyal, az áramellátás és a vonal beállításai. Megismerted a magántelkek megvásárlását és a közlétesítmények lebontását, az út fölötti szakaszon pedig elkerülted a telekvásárlást. Az ívsugár és az emelkedő ellenőrzésével történő vonalvezetést más vasútépítéseknél is hasznosíthatod.",
+        "variant": "A kamera a nyugati állomásra ugrott. Nézd meg a peronnál álló vonatokat! Elkészültek a peronok, az állomásépületek, a fővonal, a járműtelep a bekötő vágánnyal, az áramellátás és a vonal beállításai. Megismerted a magántelkek megvásárlását és a közlétesítmények lebontását, az út fölötti szakaszon pedig elkerülted a telekvásárlást. Az ívsugár és az emelkedő ellenőrzésével történő vonalvezetést más vasútépítéseknél is hasznosíthatod.",
+        "start": "A kamera a nyugati állomásra ugrott. Nézd meg a peronnál álló vonatokat! Elkészültek a peronok, az állomásépületek, a fővonal, a járműtelep a bekötő vágánnyal, az áramellátás és a vonal beállításai. Megismerted a magántelkek megvásárlását és a közlétesítmények lebontását, az út fölötti szakaszon pedig elkerülted a telekvásárlást. Az ívsugár és az emelkedő ellenőrzésével történő vonalvezetést más vasútépítéseknél is hasznosíthatod.",
+        "end": "A kamera a nyugati állomásra ugrott. Nézd meg a peronnál álló vonatokat! Elkészültek a peronok, az állomásépületek, a fővonal, a járműtelep a bekötő vágánnyal, az áramellátás és a vonal beállításai. Megismerted a magántelkek megvásárlását és a közlétesítmények lebontását, az út fölötti szakaszon pedig elkerülted a telekvásárlást. Az ívsugár és az emelkedő ellenőrzésével történő vonalvezetést más vasútépítéseknél is hasznosíthatod.",
+        "confirm": "A kamera a nyugati állomásra ugrott. Nézd meg a peronnál álló vonatokat! Elkészültek a peronok, az állomásépületek, a fővonal, a járműtelep a bekötő vágánnyal, az áramellátás és a vonal beállításai. Megismerted a magántelkek megvásárlását és a közlétesítmények lebontását, az út fölötti szakaszon pedig elkerülted a telekvásárlást. Az ívsugár és az emelkedő ellenőrzésével történő vonalvezetést más vasútépítéseknél is hasznosíthatod.",
+        "town": "A kamera a nyugati állomásra ugrott. Nézd meg a peronnál álló vonatokat! Elkészültek a peronok, az állomásépületek, a fővonal, a járműtelep a bekötő vágánnyal, az áramellátás és a vonal beállításai. Megismerted a magántelkek megvásárlását és a közlétesítmények lebontását, az út fölötti szakaszon pedig elkerülted a telekvásárlást. Az ívsugár és az emelkedő ellenőrzésével történő vonalvezetést más vasútépítéseknél is hasznosíthatod.",
+        "new": "A kamera a nyugati állomásra ugrott. Nézd meg a peronnál álló vonatokat! Elkészültek a peronok, az állomásépületek, a fővonal, a járműtelep a bekötő vágánnyal, az áramellátás és a vonal beállításai. Megismerted a magántelkek megvásárlását és a közlétesítmények lebontását, az út fölötti szakaszon pedig elkerülted a telekvásárlást. Az ívsugár és az emelkedő ellenőrzésével történő vonalvezetést más vasútépítéseknél is hasznosíthatod.",
+        "east": "A kamera a nyugati állomásra ugrott. Nézd meg a peronnál álló vonatokat! Elkészültek a peronok, az állomásépületek, a fővonal, a járműtelep a bekötő vágánnyal, az áramellátás és a vonal beállításai. Megismerted a magántelkek megvásárlását és a közlétesítmények lebontását, az út fölötti szakaszon pedig elkerülted a telekvásárlást. Az ívsugár és az emelkedő ellenőrzésével történő vonalvezetést más vasútépítéseknél is hasznosíthatod."
+      }
+    },
+    "complete": {
+      "title": "Oktatóanyag teljesítve",
+      "description": "Gratulálunk! Teljesítetted az oktatóanyagot. A „Befejezés” gombbal bezárhatod az útmutatót, és szabadon játszhatsz tovább ezzel a várossal.",
+      "button": "Befejezés"
+    },
+    "nextButton": "Tovább",
+    "checking": "Ellenőrzés…",
+    "failed": "A feltétel nem teljesült. Próbáld újra.",
+    "completed": "Oktatóanyag teljesítve! Szép munka.",
+    "stepProgress": "{{current}}/{{total}}. lépés",
+    "guide": {
+      "openRoad": "Az út ikonra kattintva nyisd meg az építési panelt.",
+      "selectRoad": "Válaszd az „Utcák” közül a talajszinti kétsávos utat. Csak az engedélyezett típus választható.",
+      "placeStart": "Kattints bal gombbal a világoskék körön belülre, hogy letedd az út kezdőpontját.",
+      "placeEnd": "Kattints bal gombbal a sárga körön belülre, hogy letedd az út végpontját.",
+      "finalizeRoad": "Kattints jobb gombbal a 3D nézetben az út alakjának véglegesítéséhez.",
+      "confirmRoad": "Az építési panel „Jóváhagyás” gombjával mentsd az utat, majd nyomd meg a „Tovább” gombot.",
+      "failed": "Az előkészítés vagy a kommunikáció nem sikerült. Ha az újrapróbálkozás sem segít, lépj ki, és kezdd újra az oktatóanyagot egy új városban.",
+      "retry": "Újra",
+      "placementRequired": "Az útmutatóban jelzett típussal és helyre építs.",
+      "preparing": "Az oktatóanyag kezdőállapotának előkészítése…",
+      "finishFailed": "Nem sikerült befejezni az oktatóanyagot. Próbáld újra."
+    },
+    "trade": {
+      "title": "Kezdjünk nemzetközi kereskedelembe!",
+      "description": "Egy helyi gyár külföldi piacot keres. Ebben az oktatóanyagban megtanulod, hogyan exportálj élelmiszert kikötőn keresztül, és hogyan importálj árut a szomszédos országba vezető teherszállító vasúton.",
+      "step1": {
+        "description": "A szigeten megtermelt élelmiszer exportjához exportmóló kell. Építs „Konténerterminál” létesítményt a sárga jelölővel ellátott parti telekre. Mivel ez oktatóanyag, az építési időt átugorjuk.",
+        "title": "Konténerkikötő építése"
+      },
+      "step2": {
+        "description": "Néhány hónapig tart, mire a gyár termelése és a szállítás beindul, ezért haladj előre az időben, és nézd meg a kikötő exporteredményeit. Zárd be, majd nyisd meg újra a konténerterminál adatlapját, és a „Rakodás” lapon megnézheted az export és az import adatait.",
+        "title": "Az élelmiszer-export ellenőrzése"
+      },
+      "step3": {
+        "description": "Most már van hol hajóval exportálni és importálni. Következő lépésként építsünk helyet a vasúti exporthoz és importhoz! Építs „Nemzetközi teherpályaudvar” létesítményt az út menti, sárga jelölővel ellátott telekre. A keleti határon a szomszéd országba vezető vágány és egy határ menti teherpályaudvar található.",
+        "title": "Nemzetközi teherpályaudvar építése"
+      },
+      "step4": {
+        "open": "Nyisd meg az ikonpanelen az „Utak, vasút, infrastruktúra” menüt, és a „Vasút” alatt válaszd a „Konténerrakodó peron” elemet.",
+        "place": "A nemzetközi teherpályaudvar északi oldalán, az állomással párhuzamosan fektess le egy peront. Bal kattintással tedd le a kezdőpontot a világoskék körben (nyugaton), a végpontot a sárga körben (keleten), majd a 3D nézetben jobb kattintással véglegesítsd az alakot. Állítsd a „Peron oldala” beállítást „Belső” értékre, ellenőrizd, hogy a peron az állomásépület felőli (déli) oldalra kerül, majd hagyd jóvá. Ha végeztél, nyomd meg a „Tovább” gombot.",
+        "title": "Peron építése az állomás mellé"
+      },
+      "step5": {
+        "description": "A „Vissza” gombbal térj vissza a listához, válaszd a „Vasúti vágány” elemet, és fektess le vágányt a peron keleti végétől a városon kívüli határ menti teherpályaudvar felől érkező vágány nyugati végéig.",
+        "title": "Vágány a határig"
+      },
+      "step6": {
+        "title": "Járműtelep építése",
+        "description": "Építs „Vasúti járműtelep” létesítményt a vágány menti, sárga jelölővel ellátott telekre. A „Tovább” gomb megnyomása után – mivel ez oktatóanyag – átugorjuk az építési időt, és a telep elkészül."
+      },
+      "step7": {
+        "title": "A járműtelep bekötése a fővonalba",
+        "description": "Fektess le bekötő vágányt a járműtelep keleti végén lévő csatlakozási ponttól a fővonalig. Ne derékszögben csatlakozz a fővonalba, hanem kelet felé haladva, kis szögben. Ha végeztél, nyomd meg a „Tovább” gombot."
+      },
+      "step8": {
+        "description": "Nyisd meg az ikonpanelen az „Utak, vasút, infrastruktúra” menüt, és az „Áram” alatti „Távvezeték” elemmel kösd össze a várostól keletre lévő naperőmű csatlakozási pontját a járműtelep csatlakozási pontjával.",
+        "title": "Áramellátás a járműtelepnek"
+      },
+      "step9": {
+        "description": "A „Tömegközlekedés” menüben nyomd meg a „+ Új vonal” gombot, és típusként válaszd a „Nemzetközi teherszállító vonal” lehetőséget. Helyezz el megállót a nemzetközi teherpályaudvar és a határ menti teherpályaudvar peronján, majd kattints az első megállóra a kör bezárásához, és indítsd el a vonalat. Az egyvágányú pályán a vonatok nem tudnak kitérni egymásnak, ezért a tervezett követési idő legyen 45 perc, hogy egy szerelvény meg tudja tenni az oda-vissza utat.",
+        "title": "A nemzetközi teherszállítási vonal indítása"
+      },
+      "step10": {
+        "description": "Haladj előre az időben, és figyeld meg, ahogy a tehervonatok elindulnak a nemzetközi teherszállítási vonalon. Néhány hónapig tart, mire a járműtelep munkaerőt vesz fel, beszerzi az anyagokat és előkészíti a járműveket.",
+        "title": "Indulnak a tehervonatok"
+      }
+    },
+    "highway": {
+      "title": "Építsünk autópályát!",
+      "description": "A város fejlődéséhez új útvonal kell a járműveknek. Ebben az oktatóanyagban megtanulod, hogyan építs a helyi utat felüljáróval keresztező autópályát, és hogyan alakíts ki felhajtókkal csomópontot.",
+      "step1": {
+        "title": "Keresztezés felüljáróval",
+        "open": "A középen futó helyi utat emelt autópályával keresztezzük. Nyisd meg az ikonpanelen az „Utak, vasút, infrastruktúra” menüt, és az „Autópályák” alatt válaszd a „Kétsávos autópálya” elemet.",
+        "start": "Kattints bal gombbal a világoskék körön belülre, hogy letedd az autópálya kezdőpontját. A kezdőpont a 7 m magas felüljáró helyéhez illeszkedik.",
+        "end": "Kattints bal gombbal a sárga körön belülre, hogy letedd a végpontot. Ez a helyi út túloldalán, szintén 7 m magasan illeszkedik.",
+        "confirm": "Az építési panel „Jóváhagyás” gombjával mentsd az utat, majd nyomd meg a „Tovább” gombot. Mivel ez oktatóanyag, az építési időt átugorjuk, és az autópálya azonnal elkészül."
+      },
+      "step2": {
+        "title": "Az autópálya elnevezése",
+        "description": "Az utakat névvel ellátva könnyebb kezelni őket. Az elkészült autópálya adatlapjának legtetején az „Út” mező jelenleg „Nincs (névtelen út)”, adj neki tetszőleges nevet."
+      },
+      "step3": {
+        "title": "Felhajtó építése",
+        "description": "Építsünk felhajtót a helyi úthoz! Úttípusként válaszd a „Felhajtó” lehetőséget, és a képernyőn látható sárga jelölőtől vezess egy szép ívben kanyarodó felhajtót az autópályáig."
+      },
+      "step4": {
+        "title": "A csomópont ellenőrzése",
+        "description": "A felhajtó közelében megjelenő „IC1” feliratra kattintva megnyithatod a csomópont adatlapját. Ellenőrizd, hogy a helyi út és az autópálya össze van-e kötve."
+      }
+    },
+    "mining": {
+      "title": "Bányásszunk nyersanyagot!",
+      "description": "A sziget mélyén értékes nyersanyagok rejlenek, de nincs mivel elszállítani őket. Ebben az oktatóanyagban megtanulod, hogyan építs ki bányát, teherszállító vasutat és kikötőt, hogy a kitermelt ércet elszállítsd és külföldre exportáld.",
+      "step1": {
+        "description": "Kapcsold be a természeti erőforrások megjelenítését, és nyisd meg a délkeleti érclelőhely adatlapját.",
+        "title": "Az érclelőhely megtekintése"
+      },
+      "step2": {
+        "description": "Építs „Bánya” létesítményt a délkeleti érclelőhelyen lévő sárga telekre. Mivel ez oktatóanyag, az építési időt átugorjuk.",
+        "title": "Bánya építése"
+      },
+      "step3": {
+        "description": "Építs „Ércberakodó állomás” létesítményt a bányától délkeletre lévő nagy, meglévő telekre. Az ércberakodó állomáson a bányában kitermelt ércet vonatokra lehet rakodni.",
+        "title": "Berakodó állomás a bánya mellett"
+      },
+      "step4": {
+        "description": "Építs „Érckirakodó állomás” létesítményt a kikötőtől délre lévő nagy, meglévő telekre. Az érckirakodó állomáson a vonattal érkező ércet le lehet rakodni és tovább lehet szállítani.",
+        "title": "Kirakodó állomás a kikötő közelében"
+      },
+      "step5": {
+        "description": "Építs „Ömlesztettáru-kikötő” létesítményt a part menti sárga telekre.",
+        "title": "Ömlesztettáru-kikötő építése"
+      },
+      "step6": {
+        "open": "A „Vasút” alatt válaszd az „Ércrakodó peron” elemet, és kösd össze a két-két jelölőt a berakodó állomás délnyugati és a kirakodó állomás déli oldalán. Mindkét peron a saját létesítménye felé nézzen.",
+        "loading": "A „Vasút” alatt válaszd az „Ércrakodó peron” elemet, és kösd össze a két-két jelölőt a berakodó állomás délnyugati és a kirakodó állomás déli oldalán. Mindkét peron a saját létesítménye felé nézzen.",
+        "unloading": "A „Vasút” alatt válaszd az „Ércrakodó peron” elemet, és kösd össze a két-két jelölőt a berakodó állomás délnyugati és a kirakodó állomás déli oldalán. Mindkét peron a saját létesítménye felé nézzen.",
+        "title": "Peronok építése az állomások mellé"
+      },
+      "step7": {
+        "town": "Fektess le teherszállító vágányt a kikötői peron keleti végétől – az út középső pontjától délre elhaladva – a hegyi peron északnyugati végéig. A vágány még nincs összekötve, ezt neked kell megépítened. Ívekkel igazítsd össze a haladási irányt, a hegyre felfutó szakaszon állítsd a „Terepkövetés” beállítást „Nincs követés” értékre, és addig igazítsd az alakot, amíg el nem tűnnek a piros emelkedő- és ívsugár-hibák. Köztes pontok hozzáadásával érd el, hogy minden szakasz legfeljebb 500 m legyen.",
+        "climb": "Fektess le teherszállító vágányt a kikötői peron keleti végétől – az út középső pontjától délre elhaladva – a hegyi peron északnyugati végéig. A vágány még nincs összekötve, ezt neked kell megépítened. Ívekkel igazítsd össze a haladási irányt, a hegyre felfutó szakaszon állítsd a „Terepkövetés” beállítást „Nincs követés” értékre, és addig igazítsd az alakot, amíg el nem tűnnek a piros emelkedő- és ívsugár-hibák. Köztes pontok hozzáadásával érd el, hogy minden szakasz legfeljebb 500 m legyen.",
+        "title": "A két állomás összekötése vasúttal"
+      },
+      "step8": {
+        "title": "Járműtelep építése",
+        "description": "Építs „Vasúti járműtelep” létesítményt a kikötőtől délnyugatra lévő meglévő telekre. Úgy fordítsd, hogy a keleti végén lévő csatlakozási ponttól vágányt lehessen vezetni a kikötői peronhoz."
+      },
+      "step9": {
+        "title": "A járműtelep bekötése a fővonalba",
+        "description": "Fektess le bekötő vágányt a telep keleti végén lévő talajszinti csatlakozási ponttól a kikötői peron nyugati végéig. Kis szögben, simán csatlakozz be."
+      },
+      "step10": {
+        "description": "Vezess távvezetéket a meglévő naperőmű csatlakozási pontjától a járműtelep keleti végén lévő közös csatlakozási pontig.",
+        "title": "Áramellátás a járműtelepnek"
+      },
+      "step11": {
+        "description": "A Tömegközlekedés → Új vonal → Ércszállító vonal menüben helyezz el megállót a hegyi és a kikötői érc-teherperonon, majd kattints az első megállóra a kör bezárásához. Az egyvágányú pályán a vonatok nem tudnak kitérni egymásnak, ezért a tervezett követési idő legyen 45 perc, hogy egy szerelvény meg tudja tenni az oda-vissza utat, végül hagyd jóvá.",
+        "title": "Az ércszállító vonal indítása"
+      },
+      "step12": {
+        "description": "Haladj előre az időben, hogy beinduljon a kitermelés, a rakodás, a vasúti szállítás, a lerakodás és az export. A járművek beszerzése és a szállítás beindulása néhány hónapig tart.",
+        "title": "Haladás az időben"
+      },
+      "step13": {
+        "description": "Haladj előre az időben, és a part menti ömlesztettáru-kikötő adatlapján ellenőrizd az érc beérkezését és exportját. A járművek beszerzése, a kitermelés és a szállítás néhány hónapig tart.",
+        "title": "Az ércexport ellenőrzése"
+      }
+    },
+    "tourism": {
+      "title": "Fejlesszük a turizmust!",
+      "description": "A sziget romjaihoz érkező utazókat nem várja sem kikötő, sem szállás, és buszjárat sincs számukra. Ebben az oktatóanyagban megtanulod, hogyan építs szállodát és utasterminált, hogyan hozz létre buszvonalat, és hogyan ellenőrizd a turisták érkezését, az éttermek bevételét és a busz kihasználtságát.",
+      "step1": {
+        "description": "Építs „Üdülőszálló” létesítményt az ókori romoktól nyugatra lévő, sárga jelölővel ellátott telekre. Mivel ez oktatóanyag, az építési időt átugorjuk.",
+        "title": "Szálloda építése a romok mellé"
+      },
+      "step2": {
+        "description": "A turisták fogadásához kikötő kell. Építs „Tengerjáró-terminál” létesítményt a kikötőben jelölt telekre.",
+        "title": "Utasterminál építése"
+      },
+      "step3": {
+        "description": "A turistáknak nincs saját autójuk, ezért ki kell építeni a tömegközlekedést. A „Tömegközlekedés” → „Új vonal” menüben válaszd a „Buszvonal” típust. A sárga jelölővel ellátott utakon helyezz el megállókat ebben a sorrendben: kikötő → lakóházak → romok → lakóházak, végül kattints a kikötői megállóra a kör bezárásához. A viteldíj legyen 0, a tervezett követési idő 1 perc, majd hagyd jóvá.",
+        "title": "Buszvonal a kikötő és a romok között"
+      },
+      "step4": {
+        "description": "Haladj előre az időben, és fogadd a turistákat. A létesítmények beindulása és a buszok beszerzése néhány hónapig tart.",
+        "title": "Haladás az időben"
+      },
+      "step5": {
+        "description": "Ellenőrizd a romok melletti étterem bevételét és a létrehozott buszvonal utasszámát. A lépés akkor teljesül, ha megérkeztek a turisták, az étterem bevétele meghaladja a kezdeti szintet, és a buszt használják. Ha kell, haladj tovább az időben.",
+        "title": "Bevétel és buszutasok ellenőrzése"
+      }
+    },
+    "intro": {
+      "controls": "Új polgármesterként arra kérünk, építs olyan várost, ahol a lakók biztonságban élhetnek. Ebben a városban még nincsenek otthonok az új lakóknak, és nincs áram- és vízellátás sem. Ebben az oktatóanyagban megismered a polgármester feladatait, az idő múlatását, a város állapotának leolvasását, valamint a gombok és a kamera kezelését, utána pedig végigjárod a városépítés menetét: utakat és telkeket készítesz elő, meghatározod egy kerület irányát, lakóházakat építesz, végül eljuttatod az áramot és a vizet.",
+      "scenario4": "A lakónegyedet és a munkahelyeket vasúttal kötnénk össze, de a tervezett nyomvonalon magánépületek és egy kórház áll. Ebben az oktatóanyagban megtanulod a telekvásárlást, a közlétesítmények elbontását, az utak fölötti emelt vasút építését, a peronok, az állomásépületek és a járműtelep építését, az ívek és emelkedők beállítását, végül az áramellátást és a vonal indítását.",
+      "trade": "Egy helyi élelmiszergyár azzal keresett meg, hogy külföldre is szeretné szállítani a termékeit. A városnak is jól jönne egy útvonal, amelyen a szükséges árukat külföldről hozhatja be. Ebben az oktatóanyagban megtanulod, hogyan exportálj élelmiszert kikötőn keresztül, és hogyan importálj árut a szomszédos országba vezető teherszállító vasúton.",
+      "highway": "Ahogy a város fejlődik, egyre több jármű szállít embereket és árut. Jó lenne már most kiépíteni egy másik útvonalat, hogy az átmenő forgalom ne a helyi utakat terhelje. Ebben az oktatóanyagban megtanulod, hogyan építs a helyi utat felüljáróval keresztező autópályát, és hogyan alakíts ki felhajtókkal csomópontot.",
+      "mining": "Ennek a szigetnek a mélyén értékes nyersanyagok rejlenek. Csakhogy nincs mivel elszállítani őket a hegyről a kikötőbe, így a sziget ipara nem tudja kihasználni ezt a kincset. Ebben az oktatóanyagban megtanulod, hogyan építs ki bányát, teherszállító vasutat és kikötőt, hogy a kitermelt ércet elszállítsd és külföldre exportáld.",
+      "tourism": "A sziget lakói szeretnék, ha minél többen látnák a szárazföld belsejében fekvő ókori romokat. Csakhogy nincs kikötő és szállás az utazóknak, és buszjárat sem visz a kikötőből a városba. Ebben az oktatóanyagban megtanulod, hogyan építs szállodát és utasterminált, hogyan hozz létre buszvonalat, és hogyan ellenőrizd a turisták érkezését, az éttermek bevételét és a busz kihasználtságát.",
+      "heading": "Kérés a polgármesterhez",
+      "windowTitle": "Oktatóanyag",
+      "marine": "Ennek az öböl partján fekvő városnak még nincs kikötője, és olajipari létesítményei sincsenek. Ebben az oktatóanyagban végigjárod a teljes folyamatot: feltöltéssel földet nyersz a tengertől és tartályhajó-mólót építesz, függőhidat emelsz az öböl bejárata fölé, a tenger alatti olajmezőből kitermelt nyersolajat csővezetéken szállítod és exportálod, végül komppal kötöd össze a távoli szigetet a várossal."
+    },
+    "marine": {
+      "title": "Hódítsuk meg a tengert!",
+      "description": "Ennek az öböl partján fekvő városnak még nincs kikötője, és olajipari létesítményei sincsenek. Ebben az oktatóanyagban végigjárod a teljes folyamatot: feltöltéssel földet nyersz a tengertől és tartályhajó-mólót építesz, függőhidat emelsz az öböl bejárata fölé, a tenger alatti olajmezőből kitermelt nyersolajat csővezetéken szállítod és exportálod, végül komppal kötöd össze a távoli szigetet a várossal.",
+      "step1": {
+        "title": "Tervezzünk tengerfeltöltést!",
+        "description": "A kikötőhöz olyan rakpart kell, ahol nagy hajók is kiköthetnek, valamint föld a létesítményeknek. Töltsük fel a tengert az öböl belső részén, hogy legyen hely a kikötőnek! Kattints a földmunka ikonra, bal kattintással jelöld ki sorban a négy sárga jelölőt a terület megrajzolásához, majd jobb kattintással zárd le. Ellenőrizd, hogy a költségbecslés típusa „Feltöltés”, majd hagyd jóvá a munkát."
+      },
+      "step2": {
+        "title": "Fejezzük be a feltöltést!",
+        "description": "Az „Indítás” gombbal haladj előre legalább egy hónapot, majd nyomd meg a „Tovább” gombot. Ebben a leckében nincs építőipari vállalkozó, ezért a „Tovább” gombbal átugorjuk a feltöltés hátralévő idejét. Ha elkészül, a tenger helyén szárazföld lesz, a tenger felőli széle pedig rakpart, ahol hajók köthetnek ki."
+      },
+      "step3": {
+        "title": "Vezessünk utat a feltöltött területre!",
+        "description": "Hiába épül kikötő vagy olajterminál a feltöltött területen, ha nincs útkapcsolata: az emberek nem jutnak el dolgozni, és az árut sem lehet szállítani. Vezess utat a város útjának végétől a feltöltött területig. Ebben a leckében az út a jóváhagyás után azonnal elkészül. Az építési panel megnyitásához kattints az ikonpanelen az „Utak, vasút, infrastruktúra” gombra."
+      },
+      "step4": {
+        "title": "Építsünk tartályhajó-mólót!",
+        "description": "A nyersolajat szállító tartályhajók nagy hajók, ezért kikötő csak ott épülhet, ahol a rakpart előtt elég mély a tenger. A feltöltött terület rakpartja előtt mély a víz, így alkalmas kikötőnek. Kattints az épület ikonra, a „Kikötők” kategóriában válaszd a „Tankhajó-rakpart” elemet, bal kattintással jelöld ki a helyét a rakparton lévő sárga körön belül, majd nyomd meg az építési panel „Jóváhagyás” gombját. A kikötő megépülésekor automatikusan létrejön egy összekötő hajóút a nyílt tengeri nagyhajós hajóútig, így a hajók be- és kifuthatnak. Ebben a leckében az építési időt átugorjuk."
+      },
+      "step5": {
+        "title": "Függőhíd az öböl bejáratánál",
+        "description": "Az öböl bejáratának két partján megszakad az autópálya. A bejárat 1,6 km széles, ezt pillérsoros hagyományos híddal nem lehet áthidalni, ezért kössük össze olyan függőhíddal, amely egyetlen nyílással nagy távolságot tud átívelni! A híd alatt nagyhajós hajóút halad, ezért olyan magasra kell építeni, hogy a hajók ne ütközzenek bele. Az autópálya végei a két parton már erre a magasságra vannak igazítva. Nyisd meg az ikonpanelen az „Utak, vasút, infrastruktúra” menüt, az „Autópályák” alatt válaszd a „Négysávos függőhíd” elemet, és húzd meg az északi végtől (világoskék kör) a déli végig (sárga kör). Jobb kattintással véglegesítsd az alakot, nyomd meg az építési panel „Jóváhagyás” gombját, majd a „Tovább” gombot."
+      },
+      "step6": {
+        "title": "Keressük meg a tenger alatti olajmezőt!",
+        "description": "Most a tenger kincseit fogjuk hasznosítani. Mielőtt olajterminált építenénk, nézzük meg, van-e olajmező a közeli tengerfenék alatt. A megjelenítési panel megnyitásához nyomd meg a vezérlőpulton a „Megjelenítés” gombot.",
+        "show": "A függőleges fülek közül válaszd a „Természeti erőforrások” fület, és kapcsold „Látható” állásba. Látni fogod, hogy az öböl tengerfeneke alatt olajmező terül el. Kattints a sárga jelölő közelében lévő olajmezőre, és nyisd meg az adatlapját."
+      },
+      "step7": {
+        "title": "Építsünk olajterminált!",
+        "description": "A tenger alatti olajmezőből kitermelt nyersolajat csővezeték juttatja el a parti olajterminálig, ahonnan a piacra kerül. Az olajterminált a rakpart mentén kell felépíteni, ahol a csővezeték bevezethető. Kattints az épület ikonra, a „Kikötők” kategóriában válaszd az „Olajvezeték-fogadóállomás” elemet, bal kattintással jelöld ki a helyét a rakparton lévő sárga körön belül, majd nyomd meg az építési panel „Jóváhagyás” gombját. Ebben a leckében az építési időt átugorjuk."
+      },
+      "step8": {
+        "title": "Építsünk olajfúró platformot!",
+        "description": "A nyersolajat kitermelő olajfúró platformot közvetlenül az olajmező fölött, a tengeren kell felépíteni. Kattints az épület ikonra, a „Mezőgazdaság és nyersanyagok” kategóriában válaszd a „Tengeri olajfúró platform” elemet, bal kattintással jelöld ki a helyét a tengeren lévő sárga körön belül, majd nyomd meg az építési panel „Jóváhagyás” gombját. Ebben a leckében az építési időt átugorjuk."
+      },
+      "step9": {
+        "title": "Kössük össze őket csővezetékkel!",
+        "description": "A platformon kitermelt nyersolajat tenger alatti csővezetéken juttassuk el az olajterminálig! Nyisd meg az ikonpanelen az „Utak, vasút, infrastruktúra” menüt, az „Olaj” alatt válaszd a „Tenger alatti olajvezeték” elemet, és húzd meg a platform csatlakozási pontjától az olajterminál csatlakozási pontjáig. Jóváhagyás után nyomd meg a „Tovább” gombot, és a csővezeték azonnal elkészül."
+      },
+      "step10": {
+        "title": "Exportáljuk a nyersolajat!",
+        "description": "Az olajterminál a beérkező nyersolajat eladja a piacon, a tartályhajó-móló pedig felvásárolja, és hajóval külföldre exportálja. Néhány hónap kell, mire összegyűlnek a dolgozók, és megindul az olaj értékesítése. Az „Indítás” gombbal haladj előre néhány hónapot, majd nyomd meg a „Tovább” gombot. Ha még nem volt export, haladj tovább egy kicsit, és nyomd meg újra."
+      },
+      "step11": {
+        "title": "Építsünk kompkikötőt!",
+        "description": "A távoli szigetről nem lehet átjutni a városba. Indítsunk kompjáratot, hogy a sziget lakói bejárhassanak a városba! Először építs kompkikötőt a város partján. Nyisd meg az ikonpanelen az „Utak, vasút, infrastruktúra” menüt, a „Hajóutak” alatt válaszd a „Kompkikötő” elemet, és húzd meg a partról (világoskék kör) a tenger fölé (sárga kör). Jobb kattintással véglegesítsd az alakot, nyomd meg az építési panel „Jóváhagyás” gombját, majd a „Tovább” gombot."
+      },
+      "step12": {
+        "title": "Jelöljük ki a komp hajóútját!",
+        "description": "Most rajzold meg a hajóutat, amelyen a komp a sziget kikötőjétől a város kikötőjéig halad. A hajóút nem vezethet át szárazföldön, ezért kerüld meg a sziget északi oldalát, haladj át az öböl bejáratánál álló függőhíd alatt, és fuss be az öbölbe – útközben bal kattintással helyezz el pontokat. A „Hajóutak” alatt válaszd a „Komphajóút” elemet, kösd össze a sziget kikötőjének végét a város kikötőjének végével, hagyd jóvá, majd nyomd meg a „Tovább” gombot."
+      },
+      "step13": {
+        "title": "Indítsuk el a kompvonalat!",
+        "description": "Végül hozd létre a hajóúton közlekedő komp vonalát. A Tömegközlekedés → Új vonal → Kompvonal menüben helyezz el megállót a sziget és a város kikötőjében, kattints az első megállóra a kör bezárásához, majd hagyd jóvá. Amint a vonal létrejön, az oktatóanyag teljesül. A hajók tényleges közlekedéséhez a hajókat bérbe adó javítódokkra is szükség lesz."
+      }
+    }
+  },
+  "tips": {
+    "startGame": "Játék indítása",
+    "nowLoading": "Now Loading...",
+    "startError": "Nem sikerült elindítani. Próbáld újra.",
+    "todaysTips": "Today's Tips",
+    "gotIt": "Bezárás",
+    "items": {
+      "tip1": {
+        "title": "A pénz körbejár",
+        "description": "A város építkezési kiadásai és a közlétesítmények bérköltségei a vállalatok és a háztartások bevételévé válnak, ami a vásárlásokat és a további termelést is táplálja. Pusztán az adók beszedésével nem pörög a gazdaság. Juttass költségvetést a szükséges szolgáltatásokra és felújításokra, és forgasd vissza a pénzt a városba!"
+      },
+      "tip2": {
+        "title": "A közbiztonság hosszú harca",
+        "description": "Azok a polgárok, akik rossz közbiztonságú környezetben nőnek fel, felnőttként is hajlamosabbak a bűnözésre. Folytasd a rendőri fellépést, és közben javítsd a környezetet, amelyben a gyerekek felnőnek. A közbiztonság gyökeres javításához legalább egy nemzedéknyi idő kell."
+      },
+      "tip3": {
+        "title": "Utat a tűzoltóknak!",
+        "description": "A tűzoltóság csak akkor segít, ha ki is ér a helyszínre. Hiába van tűzoltóállomás, ha túl messze van, vagy dugó van az odavezető úton, a kár csak nő. A költségvetés mellett a létesítmények elhelyezését és a helyszínre vezető utakat is gondold át."
+      },
+      "tip5": {
+        "title": "Rögös út",
+        "description": "A meredek lejtőkön átvezető utak megépítése sokkal megterhelőbb, mint a sík terepen. A térképen legrövidebb út nem mindig a legolcsóbb. Vesd össze a domborzatot és az építési költségbecslést, és fontold meg egy kis kerülő lehetőségét is."
+      },
+      "tip6": {
+        "title": "Tervezz előre!",
+        "description": "Ahogy nő a lakosság és a gyárak száma, úgy nő az áram- és a vízigény is. Ha csak a hiány jelentkezésekor kezdesz építkezni, várnod kell, amíg elkészül. Új kerület fejlesztése előtt ellenőrizd, van-e tartalék az ellátásban."
+      },
+      "tip7": {
+        "title": "Lassan járj, tovább érsz",
+        "description": "Magasabb sebességkorláttal gyorsabb a közlekedés, de nő a balesetveszély. Az éles kanyarokra is figyelni kell. Ahol sok a baleset, gondold át az út vonalvezetését és a sebességkorlátot."
+      },
+      "tip8": {
+        "title": "Befektetés a jövőbe",
+        "description": "A kórházak és a fejlett gyárak munkaerőhiányát nem oldja meg pusztán a népesség növekedése. Alakítsd ki az egyetemi szakokat és a felvételi keretszámokat úgy, hogy a szükséges területeken képzett szakembereket neveljenek, és a tervezésnél számolj a diplomáig tartó idővel is."
+      },
+      "tip9": {
+        "title": "Hosszú életre tervezve",
+        "description": "Ha elhanyagolod a felújítást, az épületek és az utak egyre jobban romlanak, végül összeomlanak. A tűzesetek és az összeomlások a polgárok hangulatát is rontják, ezért veszélyes csak új építkezésekre költeni. Hagyj pénzt a meglévő létesítmények felújítására és a tűzoltóságra is."
+      },
+      "tip10": {
+        "title": "Nagy tűzvész",
+        "description": "Ha az épületek túl sűrűn állnak, egyetlen épület tüze könnyen átterjed a szomszédokra. A tűzoltóság mellett az épületek közötti távolság biztosítása is a katasztrófavédelmet szolgálja."
+      },
+      "tip11": {
+        "title": "Ásni, ásni, ásni",
+        "description": "A bányák és olajkutak helyét a nyersanyagok eloszlásának ellenőrzése után válaszd ki. A folyamatos kitermeléssel a készlet fogy. A bányászatra épülő városnak arra is gondolnia kell, miből lesz munka és adóbevétel, ha a lelőhelyek kimerülnek."
+      },
+      "tip12": {
+        "title": "A város fejőstehene",
+        "description": "Ha a polgármester lakó- vagy kereskedelmi épületet épít, bérleti díjat szedhet a bérlőktől. Az üres helyiség nem hoz bevételt, ezért ellenőrizd, milyen funkcióra van kereslet, mennyi az üres helyiség a környéken, és milyen a helyszín."
+      },
+      "tip13": {
+        "title": "Fejjük meg őket",
+        "description": "Az adókulcsok nemcsak a város bevételét befolyásolják, hanem a vállalatok terheit és jövedelmezőségét is. Iparpolitikai eszközként is használhatod őket, például a fejleszteni kívánt iparág adóterheinek csökkentésével. Ha kevés az adóbevétel, mielőtt mindenhol egyformán emelnél, nézd meg az egyes ágazatok helyzetét."
+      },
+      "tip14": {
+        "title": "Mindig legyen B-terv",
+        "description": "Ha baleset vagy katasztrófa miatt leáll egy erőmű vagy távvezeték, a hatás átterjed az áramot használó gyárakra és a polgárok mindennapjaira is. A fontos infrastruktúránál az ellátó létesítményekből és a szállítási útvonalakból is legyen tartalék, hogy egyetlen meghibásodás ne bénítsa meg az egész várost."
+      },
+      "tip15": {
+        "title": "Otthont keresve",
+        "description": "Ha a belvárosban parlagon hagysz egy üres területet, az otthonukat elvesztett emberek odagyűlhetnek, és könnyen nyomornegyed alakulhat ki. Ha megfizethető lakbérű lakásokat biztosítasz, a lakók fokozatosan átköltöznek, és a nyomornegyed magától zsugorodni kezd."
+      },
+      "tip16": {
+        "title": "Ipari klaszterek",
+        "description": "Ha az azonos iparágak és az alapanyagaikat előállító iparágak egymás közelében vannak, az kedvező telephelyet teremt a termeléshez. Ahelyett, hogy szétszórnád a gyárakat a városban, gondold meg a kapcsolódó iparágak összevonását. A lakóövezetek közelében azonban ügyelj a zajra és a légszennyezésre is."
+      },
+      "tip17": {
+        "title": "Éjjel-nappal robotolva",
+        "description": "Ha a Szabályozás panelen meghosszabbítod a munkaidőt, ugyanannyi ember több termelést tud fenntartani. Ugyanakkor romlik az egészség, csökken a szabadidő, és visszaesik a szórakozásra fordított költés. Ha túl sok idő megy el a pénzkeresésre, nem marad idő elkölteni."
+      },
+      "tip18": {
+        "title": "Ingázási pokol",
+        "description": "A hosszú ingázás csökkenti a szabadidőt, és vele a szórakozásra fordított költést is. Gondold át a lakások és a munkahelyek közötti távolságot, valamint az ingázási útvonalak dugóit. A legpezsgőbb belváros is csak a vonatablakból látott táj annak, aki csak aludni jár haza."
+      },
+      "tip19": {
+        "title": "Gondolj a jövőre!",
+        "description": "A hosszú vonatok csak akkor közlekedhetnek, ha a vonal minden állomásának peronjára elférnek. A jövőbeli utasszám-növekedésre készülve már az állomások építésekor gondolj a peronok hosszára. Ha csak egy állomást hosszabbítasz meg, a rövidebb állomások továbbra is korlátot jelentenek."
+      },
+      "tip20": {
+        "title": "Szőnyeg alá söpörve",
+        "description": "A föld alá süllyesztett utak nem okoznak zajt és légszennyezést, így jó választást jelentenek a lakóövezetek lakókörnyezetének védelmére. Van, amit tényleg el lehet ásni."
+      },
+      "tip21": {
+        "title": "Felhőkarcolók árnyékában",
+        "description": "A magas épületek északi irányba árnyékot vetnek, és rontják a környék lakókörnyezetét. Figyelj az épületek magasságára és a köztük lévő távolságra is. A hegyek és más domborzati formák szintén árnyékot vetnek. Lehet, hogy a város jövője fényes, de a lába alatt koromsötét is lehet."
+      },
+      "tip22": {
+        "title": "Bérlet a kocsi helyett",
+        "description": "Ha a tömegközlekedéssel könnyen elérhetők a munkahelyek, az iskolák és az üzletek, a háztartások szívesebben választják az autó nélküli életet. Az autótartáson megspórolt pénzt pedig másra költhetik."
+      },
+      "tip23": {
+        "title": "Levegőt szállítunk",
+        "description": "A busz utasok nélkül is növeli az utak forgalmát. Ha túl sok járatot indítasz, a dugók elleni küzdelem visszafelé sülhet el. Az utasszám és a követési idő alapján gondold át, hány járatra van valóban szükség."
+      },
+      "tip24": {
+        "title": "A vakond nem fizet telekárat",
+        "description": "Egy bizonyos mélység alatt az alagút a fölötte lévő telkek megvásárlása nélkül is átvezethető. A sekély szakaszokon telekvásárlásra van szükség, ezért ellenőrizd a mélységet és a költségbecslést. Ha nehezek a tárgyalások, áss mélyebbre!"
+      },
+      "tip25": {
+        "title": "Ingázás a levegőben",
+        "description": "Hegyekben és meredek lejtőkön, ahol nehéz utat építeni, kötélpályával is kiépítheted a tömegközlekedést. Gondoskodj a beszállóhelyekhez vezető utakról és az átszállási kapcsolatokról is. Ha a földön túl nehéz a közlekedés, a polgárokat a levegőben is lógathatod."
+      },
+      "tip26": {
+        "title": "Dugó az áramhálózaton",
+        "description": "Hiába van tartalék termelési kapacitás, ha a távvezetékek kapacitása kevés, az áram nem jut el a fogyasztókhoz. Mielőtt újabb erőművet építenél, ellenőrizd a hiányt szenvedő kerület bekötését és az átviteli kapacitást. Lehet, hogy egy útközbeni gyenge távvezeték korlátozza az egész város ellátását."
+      },
+      "tip27": {
+        "title": "Sajnálatos baleset",
+        "description": "A fejlesztés útjában álló épületet balesetnek álcázva fel is robbanthatod. A polgárok hangulata azonban erősen romlik. Ha telket akarsz felszabadítani, mérlegeld a megvásárlás és a lebontás költségét, valamint azt, milyen nyomot hagy a városban az erőszakos megoldás."
+      },
+      "tip28": {
+        "title": "Irány a tenger!",
+        "description": "Ha kevés a szárazföld, feltöltéssel új területet nyerhetsz. Ahol a tengerfenék alatt nyersanyag rejlik, olajfúró platformot is építhetsz."
+      },
+      "tip29": {
+        "title": "Pirosjelzés-pokol",
+        "description": "Minél több a jelzőlámpás kereszteződés, annál több várakozási idő gyűlik össze a közlekedésben. A főutakon ne építs túl sok kereszteződést. Ha túl pedánsan rajzolod sűrűre az utcahálózatot, előbb megy le a nap, mint hogy egyszer is zöldet kapnál."
+      },
+      "tip30": {
+        "title": "Szép kilátás",
+        "description": "Minél magasabb ponton és minél magasabbra épül egy adótorony, annál nagyobb területet fed le. Ellenőrizd, nincs-e hegy vagy más akadály az adótorony és a lefedetlen területek között. A hegyen akkor sem hatol át a jel, ha lelkesen feltekered a teljesítményt."
+      },
+      "tip31": {
+        "title": "A tenger ajándéka",
+        "description": "Ha nincs a közelben vízforrás, a part menti tengervíz-sótalanító üzem is elláthatja vízzel a várost. Működéséhez azonban áram kell. A vízforrás után jöhet az áramforrás felkutatása."
+      },
+      "tip32": {
+        "title": "A bűnmegelőzés másik útja",
+        "description": "A munkanélküliség a közbiztonságot rontó tényezők egyike. Nemcsak több rendőrre van szükség, hanem munkahelyekre is, ahol a polgárok dolgozhatnak. Ha sok a munkanélküli, ellenőrizd az álláshelyek számát, a megkövetelt képzettséget, és azt is, hogy el lehet-e jutni a munkahelyekre."
+      },
+      "tip33": {
+        "title": "Majd a jövőbeli énem megoldja",
+        "description": "Az épületek és az utak az elkészülésük után is folyamatos felújítást igényelnek. Ha csak azért terjeszkedsz, mert ki tudod fizetni az építést, a jövőbeli költségvetést felemészti a fenntartás. A jövő polgármestere is te leszel."
+      },
+      "tip34": {
+        "title": "Vigyázat, túlszivattyúzás!",
+        "description": "A vízforrások idővel feltöltődnek, de ha a pótlódásnál többet szivattyúzol ki, a készlet fogy. Mielőtt nő a kereslet, gondoskodj más vízforrásokról is. Attól, hogy több a szivattyú, nem lesz több a víz."
+      },
+      "tip35": {
+        "title": "Ez nem hiba, hanem funkció",
+        "description": "Az utakat és az épületeket az építés megkezdése után nem lehet egykönnyen áthelyezni. Az építés jóváhagyása előtt ellenőrizd a tájolást, a csatlakozásokat és a körülöttük megmaradó területet. Bár a véletlenül görbére sikerült út is a város egyéniségévé válhat, ha megszokod."
+      },
+      "tip36": {
+        "title": "A polgármester mindent lát",
+        "description": "Ha egy gyalogosra vagy autóra kattintasz, felveheted a polgárt a követési listára. Akkor hasznos, ha kíváncsi vagy egy lakó életére. Nemcsak a városi statisztikákon keresztül, hanem egyetlen ember mindennapjain át is szemlélheted a várost."
+      },
+      "tip37": {
+        "title": "Alaperőművek",
+        "description": "A nap- és a szélerőművek termelése az időjárástól függ. Ha csak a jó időben elérhető ellátással számolsz, időjárás-változáskor hiány léphet fel. Kombináld őket az időjárástól kevésbé függő energiaforrásokkal, például hő- vagy atomerőművekkel."
+      },
+      "tip38": {
+        "title": "Jobb a nagyobb",
+        "description": "Vannak épületek, amelyek nem férnek el kis telken. Ha meg akarsz építeni egy létesítményt, a telkek felosztása előtt ellenőrizd, mekkora terület kell hozzá. Hiába van bőven szabad terület, ha csupa kis telekből áll, nagy épület nem fér el rajta."
+      },
+      "tip39": {
+        "title": "Ez a szolgáltatás nem ingyenes",
+        "description": "Az olyan közszolgáltatások, mint a szennyvízkezelés, a hulladékkezelés, a távközlés és az egészségügy, alapértelmezésként ingyenesek lehetnek. Díj megállapításával a működési költségek egy részét a felhasználókra háríthatod. Hogy barátságos árat szabsz, vagy borsos árcédulát, az a polgármesteren múlik."
+      },
+      "tip40": {
+        "title": "Másold, illeszd be, spórolj",
+        "description": "Ha a polgármester épületet épít, egy meglévő épületet is lemásolhat. Ha a típust és a szintek számát nem változtatod, és olyan telekre építed, amelyre az eredeti elfér, csökkentheted az építési költséget. Az utcakép egyhangú lesz, de a pénztárcádnak jót tesz."
+      },
+      "tip41": {
+        "title": "Csak a lakbér számít?",
+        "description": "A lakók új otthon választásakor összevetik a lakbért, a munkába és iskolába járás, valamint a bevásárlás terheit, a lakás minőségét és a lakókörnyezetet. A zaj, a légszennyezés, a közbiztonság és a napfény is számít. Az olcsó, de kényelmetlen lakást ritkán választják, a kényelmesnél pedig a háztartás költségvetéséhez illő lakbér és elegendő alapterület is kell."
+      },
+      "tip42": {
+        "title": "Zátonyra futni már késő",
+        "description": "A nagy kikötőknek, például a konténer-, az ömlesztettáru- és a tartályhajó-kikötőknek elegendő vízmélység kell. Az olyan partok, ahol a tengerfenék meredeken lejt, közel vannak a mély vízhez, így alkalmasak kikötőnek. Lapos, sekély partszakaszon is építhetsz kikötőt, ha feltöltéssel a mély vízig nyújtod a szárazföldet."
+      },
+      "tip43": {
+        "title": "Csak egy percre…",
+        "description": "Ha elszaporodik az utcai parkolás, lelassul a forgalom, és nő a balesetveszély. Építs parkolókat, hogy az utcára kiszoruló autóknak legyen helyük. A „csak egy percre” megállás végül az egész várost megállíthatja."
+      },
+      "tip44": {
+        "title": "Elszigetelt sziget a szárazföldön",
+        "description": "Úttól távol is lehet építeni, de minél messzebb van egy épület az úttól, annál rosszabb a megközelíthetősége. A gyárak és az üzletek lassabban jutnak alapanyaghoz, a lakóházak lakóinak pedig megnő az ingázás és a bevásárlás terhe. Az épületeket út mentén építsd, vagy vezess utat egészen a közelükig."
+      }
+    }
+  },
+  "hint": {
+    "buildingConstruction": "Egy telek kiválasztásával épületet tervezhetsz. A tervezéstől az építés befejezéséig némi idő eltelik.",
+    "parcelCreation": "A Ctrl lenyomásával megnyílik a körmenü, ahol kiválaszthatod a létrehozás módját, majd a 3D nézetben kattintva add meg a célt. Állítsd be a méreteket a panelen, és hagyd jóvá.",
+    "transitCreation": "Bal kattintással sorban helyezd el a megállókat, majd az első megállóra kattintva zárd be a kört. Egy szakasz húzásával köztes pontot adhatsz hozzá, egy pont húzásával áthelyezheted, jobb kattintással törölheted. Oda-vissza járatnál a visszaút megállóit is helyezd el. Ha egy már elhelyezett megállóra ismét rákattintasz, vagy egy megállót egy másikra húzol, a jármű ott újra megáll.",
+    "transitManagement": "A tömegközlekedési vonalak listája. Itt módosíthatod a viteldíjakat és a követési időt, illetve új vonalakat hozhatsz létre vagy törölhetsz. A viteldíj befolyásolja a lakók útvonalválasztását. A túl magas viteldíj csökkenti az utasszámot, és növeli az autótartást.",
+    "pathConstruction": "Utak és vágányok építése. Kattints a terepre a 3D nézetben. Bal kattintással csúcspontot adhatsz hozzá, jobb kattintással véglegesítheted az alakot, a csúcspontokat pedig húzással mozgathatod. A Ctrl nyomva tartásával megnyílik a beállítások menüje (íves/egyenes, illesztés). A 3/4 billentyűvel a töltés/bevágás magasságát változtathatod.",
+    "pathConstructionElevated": "Utak és vágányok építése. Kattints a terepre a 3D nézetben. Bal kattintással csúcspontot adhatsz hozzá, jobb kattintással véglegesítheted az alakot, a csúcspontokat pedig húzással mozgathatod. A Ctrl nyomva tartásával megnyílik a beállítások menüje (íves/egyenes, illesztés). A PageUp/PageDown vagy az 1/2 billentyűvel a magasságot, a 3/4 billentyűvel a töltés/bevágás magasságát változtathatod.",
+    "districtEdit": "Itt hozhatsz létre, bővíthetsz és vonhatsz össze „kerületeket”, amelyek a szabályozás és a statisztikák egységei. A 3D nézetben a Ctrl nyomva tartásával válthatsz az eszközök között. Létrehozás: bal kattintással egy útra új kerületet hozol létre a megjelenített színnel (a szín minden eszközválasztáskor változik). Bővítés: jobb kattintással válaszd ki a bővítendő kerületet, majd bal kattintással csatold hozzá az utakat. Összevonás: jobb kattintással válaszd ki a célkerületet, majd bal kattintással az összevonandó kerületet, és megnyílik a jóváhagyó panel. A kiválasztott kerület színe és neve az egérmutató mellett látható. A gomb ismételt megnyomásával kiléphetsz.",
+    "bulldozer": "Buldózer mód. Bal kattintással eltávolíthatod az üres telkeket, a tervezett épületeket, a tervezett utakat és a díszelemeket (a területre szórt díszelemek megerősítés után az egész területtel együtt törlődnek). A gomb ismételt megnyomásával kiléphetsz.",
+    "bulldozerInstant": "Buldózer mód. Bal kattintással megerősítés nélkül, azonnal törölheted az épületeket, az utakat, az üres telkeket és a díszelemeket. Az épületek a bennük lévő létesítményekkel és polgárokkal együtt tűnnek el, a terep pedig nem áll vissza (a városháza, a határátkelő és a tömegközlekedési szakaszok nem törölhetők; csak a területre szórt díszelemek törlődnek megerősítés után, az egész területtel együtt). A gomb ismételt megnyomásával kiléphetsz.",
+    "cityBudget": "Itt döntheted el, hogyan oszd el a következő időszakra az adókból és a működésből származó bevételt. Amikor az önkormányzat anyagokat vásárol az utak építéséhez vagy a közlétesítmények működtetéséhez, csak az itt meghatározott költségvetés keretein belül teheti. Ha a keret nem elegendő, a közlétesítmények dolgozóit el is bocsáthatják.",
+    "resourceEdit": "Természeti erőforrás-terület létrehozása. Válaszd ki az erőforrás típusát, majd kattints a terepre. Bal kattintással csúcspontot adhatsz hozzá, egy élre kattintva csúcspontot szúrhatsz be, jobb kattintással pedig csúcspontot törölhetsz. A csúcspontok húzással mozgathatók.",
+    "grading": "Bal kattintással helyezd el a csúcspontokat, jobb kattintással véglegesítsd a területet."
+  }
+}

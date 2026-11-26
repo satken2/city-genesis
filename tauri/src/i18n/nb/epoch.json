@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Dagens dato",
+    "afterDate": "Dato etter kjøring",
+    "epochCount": "Antall epoker",
+    "message": "Vil du avslutte arbeidet denne runden og la tiden gå?",
+    "yes": "Ja",
+    "no": "Nei",
+    "executing": "Kjører simulering …",
+    "errorSteamLimit": "Steam-autentiseringen kunne ikke bekreftes, så du kan ikke kjøre flere epoker. (Uten autentisering kan du spille opp til en befolkning på {{limit}}.)",
+    "errorAlreadyRunning": "En annen epoke kjører allerede. Prøv igjen når den er ferdig.",
+    "errorFailed": "Kunne ikke kjøre epoken: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "(epoker: {{count}})",
+    "sectionConstruction": "Byggestatus",
+    "kindPath": "Vei",
+    "kindBuilding": "Anlegg",
+    "kindProject": "Prosjekt",
+    "noItems": "Ingen",
+    "progressFormat": "{{before}} % → {{after}} %",
+    "completed": "Ferdigstilt",
+    "sectionStatistics": "Statistikk",
+    "sectionScore": "Poeng",
+    "scoreGain": "Plusspoeng",
+    "scoreLoss": "Minuspoeng",
+    "questState": {
+      "completed": "Fullført",
+      "active": "Pågår",
+      "locked": "Låst",
+      "failed": "Mislyktes"
+    },
+    "trendHint": "Utvikling de siste {{count}} epokene: {{trend}}",
+    "trend": {
+      "up": "Stigende",
+      "flat": "Stabil",
+      "down": "Synkende",
+      "none": "For lite historikk"
+    },
+    "statPopulation": "Befolkning",
+    "statTourists": "Turister",
+    "statGdp": "BNP",
+    "statPrice": "Prisnivå",
+    "statIncome": "Inntekt",
+    "statUnemployment": "Arbeidsledighet",
+    "statHealthcare": "Helsetilbud",
+    "statNutrition": "Ernæring",
+    "statLeisure": "Fritid og underholdning",
+    "statFire": "Branner",
+    "statTraffic": "Trafikkulykker",
+    "statCrime": "Kriminalitet",
+    "questCompleted": "Fullført!",
+    "questFailed": "Fristen er ute"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "Kartlegger transportnettet",
+      "prepare": "Forbereder perioden",
+      "transit": "Organiserer kollektivtransporten",
+      "market": "Handler varer",
+      "production": "Produserer og forbruker",
+      "commute": "Pendler til jobb og skole",
+      "growth": "Innbyggerne vokser opp",
+      "evaluate": "Vurderer byen",
+      "immigration": "Tar imot innflyttere",
+      "labor": "Leter etter jobb",
+      "spawn": "Nye butikker og bedrifter åpner",
+      "relocate": "Husholdninger flytter",
+      "construction": "Bygger bygninger",
+      "finance": "Gjør opp økonomien",
+      "plan": "Planlegger neste periode",
+      "incident": "Håndterer branner og ulykker",
+      "finalize": "Sammenstiller statistikk"
+    }
+  }
+}

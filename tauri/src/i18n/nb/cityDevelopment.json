@@ -1,0 +1,28 @@
+{
+  "cityDevelopment": {
+    "pattern": "Algoritme",
+    "roadVariants": "Veityper",
+    "patterns": {
+      "grid_1": "Rutenett 1",
+      "grid_2": "Rutenett 2",
+      "sprawl_1": "Byspredning 1",
+      "sprawl_2": "Byspredning 2",
+      "sprawl_3": "Byspredning 3",
+      "planned_city_1": "Planlagt by 1",
+      "split_1": "Oppdeling 1"
+    },
+    "spacing": "Veiavstand",
+    "blockLength": "Kvartalslengde",
+    "splitHint": "Ta med hele kvartaler som er omgitt av veier. Veier parallelt med kvartalets lange side legges med «Veiavstand» mellom seg, og tverrgående veier med «Kvartalslengde».",
+    "createParcels": "Opprett parseller",
+    "parcelArea": "Parsellareal",
+    "hint": "Hold Ctrl og dra med venstre museknapp for å male området som skal utvikles. Dra med venstre museknapp for å flytte kartet, og bruk musehjulet for å zoome.",
+    "clear": "Tøm",
+    "preview": "Forhåndsvis",
+    "previewing": "Beregner …",
+    "create": "Bekreft",
+    "creating": "Oppretter …",
+    "previewed": "Jevner terrenget litt ut i området {{area}} og kan planlegge veier: {{roads}}, parseller: {{parcels}} (forkastet: {{rejected}})",
+    "created": "Jevnet ut terrenget og planla veier: {{roads}}, parseller: {{parcels}} (forkastet: {{rejected}})"
+  }
+}

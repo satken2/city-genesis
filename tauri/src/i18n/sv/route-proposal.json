@@ -1,0 +1,14 @@
+{
+  "route_proposal": {
+    "title": "Föreslå dragning",
+    "mode": "Höjdläge",
+    "fixed": "Behåll de angivna punkternas höjd",
+    "adjust": "Justera höjden på mellanliggande punkter",
+    "help": "Tillgängligt när formen är fastställd. Start- och slutpunkt samt de angivna punkternas XZ-läge ligger fast.",
+    "searching": "Söker…",
+    "cancel": "Avbryt",
+    "undo": "Ångra förslaget",
+    "notFound": "Ingen dragning hittades.",
+    "failed": "Det gick inte att föreslå en dragning."
+  }
+}

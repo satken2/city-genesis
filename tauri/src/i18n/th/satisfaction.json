@@ -1,0 +1,10 @@
+{
+  "satisfaction": {
+    "exhausted": "หมดแรง",
+    "unhappy": "ไม่พอใจ",
+    "neutral": "ปกติ",
+    "happy": "พอใจ",
+    "delighted": "พอใจมาก",
+    "zero": "ไม่มีความพอใจเลย"
+  }
+}

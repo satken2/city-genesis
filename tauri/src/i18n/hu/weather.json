@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Időjárás",
+    "choose": "Időjárás kiválasztása",
+    "loading": "Időjárás lekérése…",
+    "unknown": "Ismeretlen",
+    "automatic": "{{weather}} (automatikus)",
+    "failed": "Nem sikerült módosítani az időjárást",
+    "names": {
+      "clear": "Derült",
+      "high_clouds": "Fátyolfelhős",
+      "fair": "Napos",
+      "broken_clouds": "Változóan felhős",
+      "overcast": "Borult",
+      "rain_clouds": "Esőfelhős",
+      "fog": "Köd",
+      "drizzle": "Szitálás",
+      "rain": "Eső",
+      "heavy_rain": "Heves eső",
+      "light_snow": "Gyenge havazás",
+      "snow": "Havazás",
+      "blizzard": "Hóvihar"
+    },
+    "epochClimate": "Korszak időjárása",
+    "temperature": "Hőmérséklet",
+    "precipitation": "Csapadék",
+    "sunlight": "Napsugárzás",
+    "windSpeed": "Szélsebesség"
+  }
+}

@@ -1,0 +1,77 @@
+{
+  "epochConfirm": {
+    "currentDate": "Jelenlegi dátum",
+    "afterDate": "Dátum a futtatás után",
+    "epochCount": "Korszakok száma",
+    "message": "Befejezed a kör teendőit, és előrelépteted az időt?",
+    "yes": "Igen",
+    "no": "Nem",
+    "executing": "Szimuláció fut…",
+    "errorSteamLimit": "A Steam-hitelesítés nem erősíthető meg, ezért több korszak nem futtatható. (Hitelesítés nélkül legfeljebb {{limit}} fős népességig lehet játszani.)",
+    "errorAlreadyRunning": "Már fut egy másik korszak. Ha véget ért, próbáld újra.",
+    "errorFailed": "Nem sikerült lefuttatni a korszakot: {{reason}}"
+  },
+  "epochResult": {
+    "epochCountSuffix": "({{count}} korszak lefuttatva)",
+    "sectionConstruction": "Építkezések",
+    "kindPath": "Út",
+    "kindBuilding": "Létesítmény",
+    "kindProject": "Projekt",
+    "noItems": "Nincs",
+    "progressFormat": "{{before}}% → {{after}}%",
+    "completed": "Elkészült",
+    "sectionStatistics": "Statisztika",
+    "sectionScore": "Pontszám",
+    "scoreGain": "Pluszpontok",
+    "scoreLoss": "Levonások",
+    "questState": {
+      "completed": "Teljesítve",
+      "active": "Folyamatban",
+      "locked": "Zárolva",
+      "failed": "Sikertelen"
+    },
+    "trendHint": "Az utolsó {{count}} korszak trendje: {{trend}}",
+    "trend": {
+      "up": "Emelkedő",
+      "flat": "Stagnáló",
+      "down": "Csökkenő",
+      "none": "Nincs elég előzmény"
+    },
+    "statPopulation": "Népesség",
+    "statTourists": "Turisták",
+    "statGdp": "GDP",
+    "statPrice": "Árszínvonal",
+    "statIncome": "Jövedelem",
+    "statUnemployment": "Munkanélküliség",
+    "statHealthcare": "Egészségügyi ellátottság",
+    "statNutrition": "Táplálkozási ellátottság",
+    "statLeisure": "Szórakozás, szabadidő",
+    "statFire": "Tűzesetek",
+    "statTraffic": "Közlekedési balesetek",
+    "statCrime": "Bűnözés",
+    "questCompleted": "Teljesítve!",
+    "questFailed": "Lejárt a határidő"
+  },
+  "epochProgress": {
+    "counter": "{{step}} ({{index}}/{{count}})",
+    "steps": {
+      "route": "A közlekedési hálózat feltérképezése",
+      "prepare": "Felkészülés az időszakra",
+      "transit": "A tömegközlekedés megszervezése",
+      "market": "Kereskedés az árukkal",
+      "production": "Termelés és fogyasztás",
+      "commute": "Munkába és iskolába járás",
+      "growth": "A polgárok felnőnek",
+      "evaluate": "A város értékelése",
+      "immigration": "Bevándorlók fogadása",
+      "labor": "Munkakeresés",
+      "spawn": "Új boltok és cégek nyílnak",
+      "relocate": "Költözések",
+      "construction": "Épületek építése",
+      "finance": "A pénzforgalom elszámolása",
+      "plan": "A következő időszak tervezése",
+      "incident": "Reagálás tüzekre és balesetekre",
+      "finalize": "Statisztikák összesítése"
+    }
+  }
+}

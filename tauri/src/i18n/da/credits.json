@@ -1,0 +1,15 @@
+{
+  "credits": {
+    "lead": "Spillet bruger nedenstående materialer. Navne på ophavspersoner og kilder, licensnavne og den kreditering, som licenserne kræver, er gengivet uændret.",
+    "empty": "Ingen poster.",
+    "requiredText": "Påkrævet kreditering",
+    "categories": {
+      "bgm": "Musik",
+      "sfx": "Lydeffekter",
+      "image": "Billeder og ikoner",
+      "font": "Skrifttyper",
+      "model": "3D-modeller",
+      "texture": "Teksturer"
+    }
+  }
+}

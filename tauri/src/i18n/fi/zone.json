@@ -1,0 +1,41 @@
+{
+  "zone": {
+    "titleWithId": "Kaupunginosa #{{id}}",
+    "color": "Kaupunginosan väri",
+    "colorUpdateFailed": "Kaupunginosan värin päivitys epäonnistui",
+    "basicInfo": "Perustiedot",
+    "area": "Pinta-ala",
+    "zonePopulation": "Asukasluku",
+    "daytimePopulation": "Päiväväestö",
+    "spaceAmount": "Tilojen käyttö",
+    "slotStarvationTitle": "Odottavalle kysynnälle ei voi rakentaa",
+    "slotStarvationWarning": "Vuokralainen ”{{tenant}}” tarvitsee vähintään {{required}} m2 tilaa yhdestä rakennuksesta, mutta tämän kaupunginosan tonteille voi rakentaa enintään {{max}} m2. Järjestä suurempi tontti.",
+    "restrictions": "Rakentamismääräykset",
+    "restrictionUpdateFailed": "Kaupunginosan määräysten päivitys epäonnistui",
+    "restrictionRequired": "Peittoaste, tehokkuusluku ja korkeus eivät voi olla tyhjiä",
+    "mergeConfirm": "”{{source}}” yhdistetään kaupunginosaan ”{{target}}”. Yhdistettävä kaupunginosa lakkaa olemasta, ja sen määräykset menetetään.",
+    "mergeAction": "Yhdistä",
+    "mergeFailed": "Kaupunginosien yhdistäminen epäonnistui (vain vierekkäiset kaupunginosat voi yhdistää)",
+    "mergeNoRequest": "Yhdistettävää kaupunginosaa ei ole valittu",
+    "edit": {
+      "toolHeading": "Toiminto",
+      "toolCreate": "Uusi kaupunginosa",
+      "toolExpand": "Laajenna kaupunginosaa",
+      "toolExpandZone": "Laajenna: {{name}}",
+      "modeHeading": "Valintatapa",
+      "modeBlock": "Kokonaiset korttelit",
+      "modeRoad": "Kadun puoli",
+      "hint": {
+        "create": {
+          "block": "Pidä Ctrl painettuna ja maalaa vetämällä katujen rajaamia kortteleita. Maalatut korttelit tontteineen muodostavat uuden kaupunginosan. Vedä siirtääksesi karttaa ja zoomaa rullalla.",
+          "road": "Pidä Ctrl painettuna ja maalaa vetämällä kadun toista puolta (puolet ajoradasta tai sen varren tontit). Kadun se puoli tontteineen muodostaa uuden kaupunginosan. Vedä siirtääksesi karttaa ja zoomaa rullalla."
+        },
+        "expand": {
+          "block": "Vie hiiri kaupunginosan päälle, pidä Ctrl painettuna ja maalaa vetämällä kortteleita. Ne liitetään tontteineen kyseiseen kaupunginosaan. Vedä siirtääksesi karttaa ja zoomaa rullalla.",
+          "road": "Vie hiiri kaupunginosan päälle, pidä Ctrl painettuna ja maalaa vetämällä kadun toista puolta (puolet ajoradasta tai sen varren tontit). Kadun se puoli liitetään tontteineen kyseiseen kaupunginosaan. Vedä siirtääksesi karttaa ja zoomaa rullalla."
+        }
+      },
+      "failed": "Kaupunginosaa ei voitu muuttaa."
+    }
+  }
+}

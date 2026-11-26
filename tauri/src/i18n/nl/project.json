@@ -1,0 +1,40 @@
+{
+  "tag": {
+    "label": "Bouwproject",
+    "none": "(geen tag)",
+    "createNew": "+ Nieuwe tag…",
+    "newPlaceholder": "Voer een tagnaam in",
+    "add": "Toevoegen",
+    "cancel": "Annuleren",
+    "saveFailed": "Tag opslaan mislukt",
+    "showObject": "Tonen in de 3D-weergave",
+    "hideObject": "Verbergen in de 3D-weergave"
+  },
+  "constructionProjects": {
+    "all": "Alle",
+    "empty": "Nog geen werkzaamheden. Kies een tag bij het plaatsen vanuit een bouwpaneel, of voeg er een toe in het detailpaneel van een openbare voorziening of weg die gepland of in aanbouw is. Zo bundel je werkzaamheden per project.",
+    "loadFailed": "Bouwprojecten laden mislukt",
+    "totalCost": "Geraamde bouwkosten",
+    "duration": "Resterende bouwtijd",
+    "progress": "Voortgang",
+    "progressValue": "{{done}} / {{total}} voltooid",
+    "monthsValue": "{{value}} mnd.",
+    "stalled": "Stilgevallen",
+    "stalledWarning": "{{count}} werkzaamheden komen niet vooruit omdat de bouwsnelheid 0 is (niet meegeteld in de bouwtijd).",
+    "done": "Voltooid",
+    "unnamed": "#{{id}}",
+    "showAll": "Alles weer tonen ({{count}})",
+    "showTag": "Dit project tonen in de 3D-weergave",
+    "hideTag": "Dit project verbergen in de 3D-weergave",
+    "showObject": "Tonen in de 3D-weergave",
+    "hideObject": "Verbergen in de 3D-weergave",
+    "deleteTag": "Tag verwijderen",
+    "confirmDeleteTag": "Tag “{{tag}}” verwijderen? De tag verdwijnt van de betreffende gebouwen en wegen (de werkzaamheden zelf blijven bestaan).",
+    "columns": {
+      "name": "Object",
+      "status": "Status",
+      "cost": "Resterende kosten",
+      "remaining": "Resterende bouwtijd"
+    }
+  }
+}

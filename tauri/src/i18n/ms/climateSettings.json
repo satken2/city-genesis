@@ -1,0 +1,15 @@
+{
+  "climateSettings": {
+    "title": "Tetapan iklim",
+    "name": "Nama iklim",
+    "probabilities": "Kebarangkalian cuaca bulanan",
+    "probabilityHint": "Seret sempadan warna ke kiri atau kanan untuk melaraskan. Cuaca 0% juga boleh ditetapkan dalam ruangan nilai di bawah.",
+    "month": "Bulan {{month}}",
+    "preset": "Pratetap iklim",
+    "current": "Tetapan semasa",
+    "chartHint": "Pilih item dalam petunjuk, kemudian seret titik bulanan ke atas atau ke bawah untuk melaraskan.",
+    "averageHint": "Suhu, hujan dan cahaya matahari ialah nilai purata bulanan. Nilai sebenar setiap epok berubah-ubah di sekitar purata ini.",
+    "apply": "Guna",
+    "chart": "Carta iklim bulanan"
+  }
+}

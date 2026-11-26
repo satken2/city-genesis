@@ -1,0 +1,30 @@
+{
+  "weather": {
+    "label": "Väder",
+    "choose": "Välj väder",
+    "loading": "Kontrollerar vädret…",
+    "unknown": "Okänt",
+    "automatic": "{{weather}} (auto)",
+    "failed": "Det gick inte att ändra vädret",
+    "names": {
+      "clear": "Klart",
+      "high_clouds": "Tunna moln",
+      "fair": "Soligt",
+      "broken_clouds": "Växlande molnighet",
+      "overcast": "Mulet",
+      "rain_clouds": "Regnmoln",
+      "fog": "Dimma",
+      "drizzle": "Duggregn",
+      "rain": "Regn",
+      "heavy_rain": "Kraftigt regn",
+      "light_snow": "Lätt snöfall",
+      "snow": "Snö",
+      "blizzard": "Snöstorm"
+    },
+    "epochClimate": "Fastställt klimat",
+    "temperature": "Temperatur",
+    "precipitation": "Nederbörd",
+    "sunlight": "Solinstrålning",
+    "windSpeed": "Vindhastighet"
+  }
+}

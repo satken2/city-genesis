@@ -1,0 +1,25 @@
+{
+  "drive": {
+    "title": "Lái xe",
+    "car": "Ô tô",
+    "rail": "Đường sắt và tuyến",
+    "running": "Phương tiện đang chạy",
+    "standard": "Xe con",
+    "commercial": "Xe thương mại",
+    "truck": "Xe tải",
+    "finishEditing": "Hãy kết thúc chỉnh sửa trước khi bắt đầu lái xe.",
+    "noLines": "Không có tuyến đường sắt nào đang hoạt động để đi.",
+    "pickRail": "Hãy nhấp vào đường ray của tuyến đã chọn.",
+    "pickRoad": "Hãy nhấp vào một con đường đang hoạt động.",
+    "pickVehicle": "Hãy nhấp vào ô tô, xe buýt hoặc tàu đang chạy (kéo để di chuyển bản đồ).",
+    "clickStart": "Chọn vị trí xuất phát (kéo để di chuyển bản đồ)",
+    "startSelected": "Đã chọn vị trí xuất phát. Sẽ khởi hành theo hướng mũi tên.",
+    "reverse": "Đảo hướng di chuyển",
+    "start": "Khởi hành",
+    "back": "Quay lại",
+    "close": "Kết thúc (Esc)",
+    "invalidStart": "Không thể bắt đầu tại vị trí này. Hãy chọn đường đi được hoặc đường ray của tuyến đang chọn.",
+    "invalidVehicle": "Không chọn được phương tiện. Hãy nhấp vào ô tô, xe buýt hoặc tàu đang chạy.",
+    "notReady": "Không thể khởi hành theo hướng này, hoặc khu vực xung quanh đang tải. Hãy đổi hướng hoặc vị trí, hoặc chờ một lát rồi thử lại."
+  }
+}
