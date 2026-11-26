@@ -566,6 +566,8 @@ namespace GeneratedModels
         public int usage_id;
         /// <summary>Water depth just beyond the quay (m). A port can be built only if the parcel meets or exceeds the port's required depth (berth_depth in agent_master). Returns 0 for non-coastal parcels.</summary>
         public float water_depth;
+        /// <summary>ID of the owner agent, either a private agent or the city government.</summary>
+        public int? owner_agent_id;
     }
 
     [Serializable]

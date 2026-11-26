@@ -5,7 +5,7 @@ import { createEnvironment } from "./environment";
 import { evaluate, execute, findPhase, resolve } from "./engine";
 import { acceptSnapshot, GUIDE_OBSERVE, GUIDE_QUERY, GUIDE_STATE } from "./bus";
 import { useMasterData } from "../contexts/MasterDataContext";
-import { HUD_EVENT_MODE_CHANGED, type HudMode } from "../components/hud/hudMode";
+import { useHudMode } from "../components/hud/hudMode";
 import { sendTutorialGuide } from "../utils/ipc";
 import type { Bindings, Environment, Facts, Phase, Snapshot } from "./model";
 
@@ -23,6 +23,14 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
   const [attempt, setAttempt] = useState(0);
   const checkRef = useRef<() => Promise<boolean>>(async () => false);
   const advanceRef = useRef<() => Promise<boolean>>(async () => false);
+  const hudMode = useHudMode();
+  const hudModeRef = useRef(hudMode);
+  const reconcileHudModeRef = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    hudModeRef.current = hudMode;
+    reconcileHudModeRef.current?.();
+  }, [hudMode]);
 
   useEffect(() => {
     if (!active || !saveId || !base || !definition || !master) { setReady(!definition); setTextKey(undefined); return; }
@@ -32,7 +40,8 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
     let stored: { bindings: Bindings; pendingCreates?: Record<string, boolean>; setupDone?: boolean };
     try { stored = JSON.parse(localStorage.getItem(key) ?? '{"bindings":{}}'); } catch { stored = { bindings: {} }; }
     stored.pendingCreates ??= {};
-    const facts: Facts = { windows: {}, pages: {} };
+    // 常駐モードはステップが切り替わっても有効なので、ステップ外の購読結果を参照する。
+    const facts: Facts = { windows: {}, pages: {}, get hudMode() { return hudModeRef.current ?? undefined; } };
     const passed = new Set<number>();
     const unlisten: (() => void)[] = [];
     let queue = Promise.resolve();
@@ -62,6 +71,7 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
       if (index < phaseIndex) for (const phase of step.phases.slice(index)) if (phase.until.type === "page") delete facts.pages![phase.until.id];
       if (index !== phaseIndex) await publish(index);
     };
+    reconcileHudModeRef.current = () => { queue = queue.then(reconcile).catch(fail); };
     async function subscribe<T>(event: string, handler: (payload: T) => void) {
       const stop = await listen<T>(event, e => handler(e.payload));
       if (disposed) stop(); else unlisten.push(stop);
@@ -114,10 +124,6 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
         if (data.window === "path_build" && !data.visible) { delete facts.pathVariant; delete facts.pathShape; }
         queue = queue.then(reconcile).catch(fail);
       });
-      await subscribe<{ mode: HudMode }>(HUD_EVENT_MODE_CHANGED, data => {
-        if (data.mode) facts.hudMode = data.mode; else delete facts.hudMode;
-        queue = queue.then(reconcile).catch(fail);
-      });
       await subscribe("graphic-reconnected", () => { if (current) void sendTutorialGuide(current).catch(fail); });
       await subscribe<{ request?: boolean }>(GUIDE_QUERY, payload => { if (payload.request && current) void emit(GUIDE_STATE, current).catch(fail); });
       env = await createEnvironment(base, saveId, stored.bindings, stored.pendingCreates!, facts, master, checkpoint, assertCurrent);
@@ -130,6 +136,7 @@ export function useTutorialGuide(active: boolean, scenario: string, stepNumber: 
       setReady(true);
     })().catch(fail);
     return () => {
+      reconcileHudModeRef.current = null;
       disposed = true; unlisten.forEach(stop => stop()); checkRef.current = async () => false; advanceRef.current = async () => false;
       const cleared: Snapshot = { active: false, runId, revision: (current?.revision ?? 0) + 1, saveId, scenario, stepId: "", phaseId: "", ui: idleUi, world: { mode: "observe" } };
       acceptSnapshot(cleared);

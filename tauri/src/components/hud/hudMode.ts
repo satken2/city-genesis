@@ -41,29 +41,33 @@ export function useHudMode(): HudMode {
 
   useEffect(() => {
     localListeners.add(setMode);
-    let unlistenMode: (() => void) | undefined;
-    let unlistenSession: (() => void) | undefined;
+    let disposed = false;
+    let sessionId: string | undefined;
+    const cleanup: (() => void)[] = [];
+    const keep = (stop: () => void) => {
+      if (disposed) stop();
+      else cleanup.push(stop);
+    };
 
     listen<{ mode: HudMode }>(HUD_EVENT_MODE_CHANGED, (event) => {
-      setMode(event.payload.mode);
+      if (!disposed) setMode(event.payload.mode);
     })
-      .then((fn) => {
-        unlistenMode = fn;
-      })
+      .then(keep)
       .catch(console.error);
 
-    listen<{ current_save_id: string | null }>("session-state", (event) => {
-      if (event.payload.current_save_id == null) setMode(null);
+    listen<{ current_save_id: string | null; session?: { session_id?: string } | null }>("session-state", (event) => {
+      if (disposed) return;
+      const nextSessionId = event.payload.session?.session_id;
+      if (event.payload.current_save_id == null || (sessionId !== undefined && nextSessionId !== sessionId)) setMode(null);
+      sessionId = nextSessionId;
     })
-      .then((fn) => {
-        unlistenSession = fn;
-      })
+      .then(keep)
       .catch(console.error);
 
     return () => {
+      disposed = true;
       localListeners.delete(setMode);
-      unlistenMode?.();
-      unlistenSession?.();
+      cleanup.forEach(stop => stop());
     };
   }, []);
 

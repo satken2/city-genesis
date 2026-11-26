@@ -132,6 +132,24 @@ await settle(() => emit("tutorial:window_visibility", { label: "resource", windo
 await settle(() => emit("tutorial:window_visibility", { label: "resource", window: "resource_detail", visible: false }));
 await settle(async () => { assert.equal(await guide!.check(), true, "the opened detail counts after it is closed"); });
 fixture.onAction = undefined;
+
+// 前のステップからブルドーザが有効なら、トグルを押し直さず次の案内に進める。
+const bulldozerStep = {
+  id: "test.bulldozer", legacyStep: 1000,
+  phases: [
+    { id: "enable", textKey: "test.enable", ui: { policy: "highlight", allow: [], highlight: [] }, world: { mode: "observe" }, until: { type: "hudMode", mode: "bulldozer" } },
+    { id: "enabled", textKey: "test.enabled", ui: { policy: "highlight", allow: [], highlight: [] }, world: { mode: "observe" }, until: { type: "ack" } },
+  ],
+} satisfies (typeof DEFINITIONS.controls.steps)[number];
+DEFINITIONS.controls.steps.push(bulldozerStep);
+await settle(() => emit("session-state", { current_save_id: "I", session: { session_id: "first-city" } }));
+await settle(() => emit("hud:mode_changed", { mode: "bulldozer" }));
+await settle(() => root.render(<Harness scenario="controls" step={1000} save="I" />));
+assert.equal(snapshot()?.phaseId, "enabled");
+await settle(() => emit("session-state", { current_save_id: "J", session: { session_id: "second-city" } }));
+await settle(() => root.render(<Harness scenario="controls" step={1000} save="J" />));
+assert.equal(snapshot()?.phaseId, "enable");
+DEFINITIONS.controls.steps.pop();
 await settle(() => root.unmount());
 assert.equal(snapshot()?.active, false);
 await browser.happyDOM.close();

@@ -1796,14 +1796,16 @@ public class ParcelManager : BaseApiDataManager, IVisualModeHandler
 
     /// <summary>
     /// Check whether the specified building type can be built on the parcel.
-    /// True only if both building regulations (allowed_bd_mask) and site requirements (parcel_type and berth water depth) are satisfied.
+    /// True only if both building regulations (allowed_bd_mask) and the selected site's requirements are satisfied.
     /// Prioritize the site requirements of the currently selected construction variant
     /// because identical bd_type values may distinguish land, coastal, and offshore locations (such as offshore wind farms).
     /// </summary>
     private bool IsBuildable(VisualParcelStats stats, int buildingTypeBit)
     {
-        if ((stats.allowed_bd_mask & buildingTypeBit) == 0) return false;
-        return BuildingPlanManager.ResolveSiteIncompatibility(stats.parcel_type, stats.water_depth, buildingTypeBit) == null;
+        // City hall uses the public-building placement rules, which permit city-owned sites regardless of the zoning mask.
+        if (BuildingPlanManager.SelectedVariant != Constants.VARIANT_CITY && (stats.allowed_bd_mask & buildingTypeBit) == 0)
+            return false;
+        return BuildingPlanManager.ResolveSiteIncompatibility(stats.parcel_type, stats.water_depth, buildingTypeBit, stats.owner_agent_id) == null;
     }
 
     /// <summary>

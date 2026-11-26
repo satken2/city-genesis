@@ -1165,10 +1165,13 @@ export function BuildingConstructionPanel({ apiBaseUrl, onClose, editAgentId, re
     appWindow
       .listen<{ parcel_id: number; reason: string; water_depth: number; berth_depth: number }>(IPC_EVENT_EDIT_BUILDING_INVALID_PARCEL, (event) => {
         const { reason, water_depth, berth_depth } = event.payload;
+        const message = reason === "insufficient_water_depth"
+          ? t("building_construction.directInvalid.insufficient_water_depth", berthDepthText(water_depth, berth_depth))
+          : reason === "not_city_land"
+            ? t("building_construction.directInvalid.not_city_land")
+            : t("building_construction.invalidParcel");
         showNotification({
-          message: reason === "insufficient_water_depth"
-            ? t("building_construction.directInvalid.insufficient_water_depth", berthDepthText(water_depth, berth_depth))
-            : t("building_construction.invalidParcel"),
+          message,
           durationMs: 3000,
         }).catch((err) => {
           console.error("[BuildingConstruction] showNotification failed:", err);

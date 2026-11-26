@@ -88,14 +88,14 @@ export function EmploymentInfoPanel({ agent }: EmploymentInfoPanelProps) {
             {t("employment.quota", "必要労働力")}
           </span>
           <span className="agent-detail-value">
-            {quotaCount.toFixed(2)} {t("education.people", "人")}
+            {quotaCount.toFixed(2)}
           </span>
 
           <span className="agent-detail-label">
             {t("employment.totalLabor", "雇用済み労働力")}
           </span>
           <span className="agent-detail-value">
-            {hiredCount.toFixed(2)} {t("education.people", "人")}
+            {hiredCount.toFixed(2)}
           </span>
         </div>
 
@@ -122,13 +122,7 @@ export function EmploymentInfoPanel({ agent }: EmploymentInfoPanelProps) {
                     ))}
                   </Pie>
                   {hasQuota && (
-                    <Tooltip
-                      contentStyle={TOOLTIP_STYLE}
-                      formatter={(value: any) => [
-                        `${Number(value).toFixed(2)} ${t("education.people", "人")}`,
-                        t("statistics.count", "人数"),
-                      ]}
-                    />
+                    <Tooltip contentStyle={TOOLTIP_STYLE} formatter={(value) => Number(value).toFixed(2)} />
                   )}
                 </PieChart>
               </ResponsiveContainer>

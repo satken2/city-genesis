@@ -5,7 +5,7 @@ use serde_json::{json, Value};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 use tauri::{
-    AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, Monitor, PhysicalPosition, Runtime, WebviewUrl,
+    AppHandle, Emitter, LogicalPosition, LogicalSize, Manager, Monitor, PhysicalPosition, PhysicalSize, Runtime, WebviewUrl,
     WebviewWindow, WebviewWindowBuilder,
 };
 
@@ -92,6 +92,22 @@ impl Placement {
             size,
             position: position.to_physical(scale),
         }
+    }
+
+    fn fit_to_monitor(self, monitor: Option<&Monitor>) -> Self {
+        let Some(monitor) = monitor else { return self };
+        let area = monitor.work_area();
+        self.fit_to_area(area.position, area.size, monitor.scale_factor())
+    }
+
+    fn fit_to_area(mut self, origin: PhysicalPosition<i32>, area: PhysicalSize<u32>, scale: f64) -> Self {
+        let available = area.to_logical::<f64>(scale);
+        self.size.width = self.size.width.clamp(1.0, available.width.max(1.0));
+        self.size.height = self.size.height.clamp(1.0, available.height.max(1.0));
+        let size = self.size.to_physical::<u32>(scale);
+        self.position.x = self.position.x.clamp(origin.x, origin.x + area.width.saturating_sub(size.width) as i32);
+        self.position.y = self.position.y.clamp(origin.y, origin.y + area.height.saturating_sub(size.height) as i32);
+        self
     }
 
     /// Move and resize a window. Set size after moving so conversion uses the
@@ -609,12 +625,22 @@ pub fn record_window_geometry(app: &AppHandle, state: &SharedState, label: &str,
 ///
 /// Docked layouts (LeftPanel/RightPanel/BottomCenter/LeftTop/RightTop)
 ///   derive position from monitor data; saved_geometry overrides size only.
-/// Free layout (Default) restores saved_geometry position and size as-is.
+/// Free layout (Default) restores saved_geometry position and size within the work area.
 ///   Otherwise, use width_ratio/height_ratio or definition.width/height for size
 ///   and place at payload.params.preferred_position or the destination monitor center.
 ///
 /// If no monitor is available, fall back to the definition's size at (0,0).
 fn compute_window_geometry(
+    definition: &WindowDefinition,
+    payload: &OpenWindowPayload,
+    saved_geometry: Option<WindowGeometry>,
+    target: &PopupTarget,
+) -> Placement {
+    requested_window_geometry(definition, payload, saved_geometry, target)
+        .fit_to_monitor(target.monitor.as_ref())
+}
+
+fn requested_window_geometry(
     definition: &WindowDefinition,
     payload: &OpenWindowPayload,
     saved_geometry: Option<WindowGeometry>,
@@ -762,7 +788,7 @@ fn compute_window_geometry(
             );
         }
     } else {
-        // Free placement: restore remembered position and size as-is when available.
+        // Free placement starts from the remembered client rectangle when available.
         if let Some(geo) = saved_geometry {
             return Placement {
                 size: LogicalSize::new(geo.width, geo.height),
@@ -788,8 +814,9 @@ fn compute_window_geometry(
         let centered = || match monitor {
             Some(monitor) => {
                 let scale = monitor.scale_factor();
-                let m_size = monitor.size().to_logical::<f64>(scale);
-                let m_pos = monitor.position().to_logical::<f64>(scale);
+                let area = monitor.work_area();
+                let m_size = area.size.to_logical::<f64>(scale);
+                let m_pos = area.position.to_logical::<f64>(scale);
                 LogicalPosition::new(
                     m_pos.x + (m_size.width - win_w) / 2.0,
                     m_pos.y + (m_size.height - bottom_reserved - win_h) / 2.0,
@@ -1487,8 +1514,9 @@ pub fn centered_on_monitor(monitor: Option<&Monitor>, width: f64, height: f64) -
     let position = match monitor {
         Some(monitor) => {
             let scale = monitor.scale_factor();
-            let m_size = monitor.size().to_logical::<f64>(scale);
-            let m_pos = monitor.position().to_logical::<f64>(scale);
+            let area = monitor.work_area();
+            let m_size = area.size.to_logical::<f64>(scale);
+            let m_pos = area.position.to_logical::<f64>(scale);
             LogicalPosition::new(
                 m_pos.x + (m_size.width - width) / 2.0,
                 m_pos.y + (m_size.height - height) / 2.0,
@@ -1496,7 +1524,7 @@ pub fn centered_on_monitor(monitor: Option<&Monitor>, width: f64, height: f64) -
         }
         None => LogicalPosition::new(0.0, 0.0),
     };
-    Placement::on_monitor(monitor, LogicalSize::new(width, height), position)
+    Placement::on_monitor(monitor, LogicalSize::new(width, height), position).fit_to_monitor(monitor)
 }
 
 /// Close parameter setup. Do nothing if absent.
@@ -1788,8 +1816,20 @@ pub fn reset_window_geometries(app: &AppHandle, state: &SharedState) -> Result<(
 
 #[cfg(test)]
 mod tests {
-    use super::{next_popup_monitor, resolve_popup_monitor, EDIT_MODE_WINDOW_TYPES};
+    use super::{next_popup_monitor, resolve_popup_monitor, Placement, EDIT_MODE_WINDOW_TYPES};
     use crate::messages::MutexGroups;
+    use tauri::{LogicalSize, PhysicalPosition, PhysicalSize};
+
+    #[test]
+    fn tall_popup_fits_scaled_work_area() {
+        let placement = Placement {
+            size: LogicalSize::new(640.0, 900.0),
+            position: PhysicalPosition::new(-1000, -20),
+        };
+        let fitted = placement.fit_to_area(PhysicalPosition::new(-1024, 30), PhysicalSize::new(1024, 720), 1.5);
+        assert_eq!(fitted.position, PhysicalPosition::new(-1000, 30));
+        assert_eq!(fitted.size, LogicalSize::new(640.0, 480.0));
+    }
 
     #[test]
     fn popup_monitor_follows_hud_unless_multi_display() {

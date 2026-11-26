@@ -8,6 +8,7 @@ public class VisualParcelStats : MonoBehaviour
 {
     public float land_price; // 0..10000
     public int allowed_bd_mask;
+    public int? owner_agent_id;
     // Parcel type: PARCEL_LAND / PARCEL_SHORE / PARCEL_WATER / PARCEL_RECLAIMED.
     // Used for physical compatibility checks against building types.
     public int parcel_type;
@@ -18,6 +19,7 @@ public class VisualParcelStats : MonoBehaviour
     {
         land_price = data.land_price;
         allowed_bd_mask = data.allowed_bd_mask;
+        owner_agent_id = data.owner_agent_id;
         parcel_type = data.parcel_type;
         water_depth = data.water_depth;
     }

@@ -10,6 +10,8 @@ Closed popups can remain hidden and be reused, so React unmounting does not mark
 
 Transparent WebViews also receive input, so persistent UI windows must fit their actual panel area. Common management handles placement across monitors and DPI settings; screens do not correct positions independently.
 
+Popup placement fits the window within the monitor work area or browser viewport so the title bar and content remain accessible.
+
 ## Shared state and data display
 
 Use common session, version, and play-mode state without duplicating retrieval or checks per screen. Follow [IPC principles](ipc.md) for editing and display synchronization. After a successful change affecting multiple windows, the changing side emits a global event and recipients refresh their displays.

@@ -48,6 +48,7 @@ public partial class BuildingPlanManager : MonoBehaviour
     /// <summary>Site reason codes shared with the backend (bd_mask_util) and sent to the UI in edit_building:invalid_parcel.</summary>
     public const string SITE_INCOMPATIBLE_PARCEL_TYPE = "incompatible_parcel_type";
     public const string SITE_INSUFFICIENT_WATER_DEPTH = "insufficient_water_depth";
+    public const string SITE_NOT_CITY_LAND = "not_city_land";
 
     // Construction values actually used (input values)
     private int currentFloors = 3;
@@ -341,7 +342,9 @@ public partial class BuildingPlanManager : MonoBehaviour
 
         // Reject locations using the same conditions as buildable parcel highlighting and warn the UI.
         // Calls without parcelData cannot be checked here; allow them through for backend validation.
-        string siteReason = parcelData != null ? ResolveSiteIncompatibility(parcelData.parcel_type, parcelData.water_depth, bdType) : null;
+        string siteReason = parcelData != null
+            ? ResolveSiteIncompatibility(parcelData.parcel_type, parcelData.water_depth, bdType, parcelData.owner_agent_id)
+            : null;
         if (siteReason != null)
         {
             Debug.Log($"BuildingPlanManager: 区画 {parcelId} (parcel_type={parcelData.parcel_type}, 水深={parcelData.water_depth:F1}m) はバリアント {agentVariant} の立地条件を満たしません({siteReason})。クリックを無視します。");
@@ -949,10 +952,13 @@ public partial class BuildingPlanManager : MonoBehaviour
 
     /// <summary>
     /// Why the building cannot stand on the parcel (SITE_* code), or null if it can. Same order and rule as the backend's
-    /// site_incompatibility: the parcel type must match, then the water depth just outside the quay must reach the berth depth.
+    /// site_incompatibility, with the city-hall ownership constraint when the owner and city IDs are available.
     /// </summary>
-    public static string ResolveSiteIncompatibility(int parcelType, float waterDepth, int bdType)
+    public static string ResolveSiteIncompatibility(int parcelType, float waterDepth, int bdType, int? ownerAgentId = null)
     {
+        if (SelectedVariant == Constants.VARIANT_CITY && ownerAgentId.HasValue
+            && CityInfoStore.CityAgentId is int cityAgentId && ownerAgentId.Value != cityAgentId)
+            return SITE_NOT_CITY_LAND;
         if (parcelType != ResolveRequiredParcelType(bdType)) return SITE_INCOMPATIBLE_PARCEL_TYPE;
         if (waterDepth < SelectedBerthDepth) return SITE_INSUFFICIENT_WATER_DEPTH;
         return null;

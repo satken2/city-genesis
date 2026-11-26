@@ -96,7 +96,7 @@ function appUrl(query = ""): string {
 
 function centeredOnMonitor(width: number, height: number): Placement {
   const m = host.monitor();
-  return { x: m.x + (m.width - width) / 2, y: m.y + (m.height - height) / 2, width, height };
+  return host.fitToViewport({ x: m.x + (m.width - width) / 2, y: m.y + (m.height - height) / 2, width, height }, m);
 }
 
 function hintbarPlacement(): Placement {
@@ -165,7 +165,7 @@ export function relayoutForViewport(): void {
   if (host.hasWindow("parameter-setup")) host.place("parameter-setup", centeredOnMonitor(PARAMETER_SETUP_WIDTH, PARAMETER_SETUP_HEIGHT));
   const notification = host.rect("notification");
   if (notification) host.place("notification", notificationPlacement(notification.height));
-  host.refitMaximized();
+  host.refitPopups();
 }
 
 /**

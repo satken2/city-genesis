@@ -547,6 +547,8 @@ export type ParcelSummary = {
   usage_id: number;
   /** Water depth just beyond the quay (m). A port can be built only if the parcel meets or exceeds the port's required depth (berth_depth in agent_master). Returns 0 for non-coastal parcels. */
   water_depth: number;
+  /** ID of the owner agent, either a private agent or the city government. */
+  owner_agent_id?: number;
 };
 
 export type ParcelData = {

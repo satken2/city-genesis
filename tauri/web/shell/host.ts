@@ -106,6 +106,17 @@ export function monitor(): Placement {
   return { x: 0, y: 0, width: layer.clientWidth || window.innerWidth, height: layer.clientHeight || window.innerHeight };
 }
 
+export function fitToViewport(placement: Placement, area = monitor()): Placement {
+  const width = Math.min(Math.max(placement.width, 1), Math.max(area.width, 1));
+  const height = Math.min(Math.max(placement.height, 1), Math.max(area.height, 1));
+  return {
+    width,
+    height,
+    x: area.x + Math.max(0, Math.min(placement.x - area.x, area.width - width)),
+    y: area.y + Math.max(0, Math.min(placement.y - area.y, area.height - height)),
+  };
+}
+
 export function createWindow(label: string, options: CreateOptions): void {
   const box = document.createElement("div");
   box.className = "shell-window";
@@ -174,7 +185,8 @@ export function setSize(label: string, width: number, height: number): void {
 export function moveBy(label: string, dx: number, dy: number): void {
   const entry = windows.get(label);
   if (!entry || entry.maximized) return;
-  setRect(entry, { ...entry.requested, x: entry.requested.x + dx, y: entry.requested.y + dy });
+  const { x, y } = arrangement ? entry.requested : entry.rect;
+  setRect(entry, { ...entry.requested, x: x + dx, y: y + dy });
 }
 
 /** ドラッグでの移動を終えたときに、位置の変化を一度だけ知らせる。 */
@@ -229,10 +241,11 @@ export function unmaximize(label: string): void {
   if (entry) entry.maximized = false;
 }
 
-/** 表示領域が変わったら、最大化中のウィンドウを合わせ直す。 */
-export function refitMaximized(): void {
+/** 表示領域が変わっても、ポップアップを操作できる範囲に収める。 */
+export function refitPopups(): void {
   for (const entry of windows.values()) {
     if (entry.maximized) setRect(entry, monitor());
+    else if (entry.label.startsWith("popup-")) setRect(entry, entry.requested);
   }
 }
 
@@ -296,7 +309,9 @@ function startResize(entry: HostWindow, edge: (typeof RESIZE_EDGES)[number], eve
 
 function setRect(entry: HostWindow, requested: Placement): void {
   entry.requested = { ...requested };
-  entry.rect = arrangement ? arrangement(entry.label, entry.requested) : { ...requested };
+  if (arrangement) entry.rect = arrangement(entry.label, entry.requested);
+  else if (entry.label.startsWith("popup-")) entry.rect = fitToViewport(requested);
+  else entry.rect = { ...requested };
   const { x, y, width, height } = entry.rect;
   entry.box.style.left = `${x}px`;
   entry.box.style.top = `${y}px`;

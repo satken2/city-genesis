@@ -38,6 +38,41 @@ public static class BuildingPlacementQA
     static bool Near(Vector3 a, Vector3 b) => (a - b).sqrMagnitude < .001f;
     static bool SameAngle(float a, float b) => Mathf.Abs(Mathf.DeltaAngle(a, b)) < .01f;
 
+    static void CheckCityHallOwnership(Component manager, IDictionary agentMaster)
+    {
+        var constants = source.GetType("Constants");
+        var cityVariant = (int)constants.GetField("VARIANT_CITY").GetValue(null);
+        var buildingType = (int)constants.GetField("BUILDING_PUBLIC").GetValue(null);
+        var landType = (int)constants.GetField("PARCEL_LAND").GetValue(null);
+        var cityHall = Activator.CreateInstance(source.GetType("MasterDataStore+AgentMasterItem"));
+        Set(cityHall, "bd_type", (int?)buildingType);
+        Set(cityHall, "parcel_type", (int?)landType);
+        agentMaster[cityVariant] = cityHall;
+        var cityAgent = source.GetType("CityInfoStore").GetProperty("CityAgentId");
+        cityAgent.GetSetMethod(true).Invoke(null, new object[] { 77 });
+        Call(manager, "SetBuildingVariant", cityVariant);
+        var parcel = Activator.CreateInstance(source.GetType("GeneratedModels.ParcelSummary"));
+        Set(parcel, "parcel_type", landType);
+        Set(parcel, "allowed_bd_mask", buildingType);
+        var parcels = Add("ParcelManager");
+        var stats = Add("VisualParcelStats");
+        int mode = (int)source.GetType("VisualModeParcel").GetField("FILTER_OTHER").GetValue(null);
+
+        Set(parcel, "owner_agent_id", (int?)78);
+        Call(stats, "InitFrom", parcel);
+        Check(Call(parcels, "ResolveDataVisColor", mode, stats, null, 42) == null, "private land is not highlighted for city hall");
+        Set(manager, "selectedParcelId", -1);
+        Call(manager, "OnParcelClick", 42, Vector3.zero, parcel);
+        Check((int)Get(manager, "selectedParcelId") == -1, "city hall does not select a private parcel");
+
+        Set(parcel, "owner_agent_id", (int?)77);
+        Call(stats, "InitFrom", parcel);
+        Check(Call(parcels, "ResolveDataVisColor", mode, stats, null, 42) != null, "city-owned land is highlighted for city hall");
+        Call(manager, "OnParcelClick", 42, Vector3.zero, parcel);
+        Check((int)Get(manager, "selectedParcelId") == 42, "city hall selects a city-owned parcel");
+        cityAgent.GetSetMethod(true).Invoke(null, new object[] { null });
+    }
+
     // Of the cursor's terrain-hover handling (OnTerrainHoverDirect), resolve only the position and snapping, excluding preview-mesh generation.
     static void Hover(object manager, Vector3 cursor)
     {
@@ -193,13 +228,13 @@ public static class BuildingPlacementQA
                 "panel resizing retains roadside front anchor");
             Check((float)Property(manager, "PlacementAngle") == 0, "roadside ignores manual rotation");
             int revision = (int)Get(manager, "placementRevision");
-            Call(manager, "OnUpdateShapeFromIpc", null, 999, new float[] { 888, 888 }, 0f, revision - 1);
+            Call(manager, "OnUpdateShapeFromIpc", null, 999, new float[] { 888, 888 }, 0f, revision - 1, null);
             Check((int)Get(manager, "currentFloors") == 1, "old preview is rejected before mutating state");
             Mode(manager, "Free");
-            Check((bool)Property(manager, "PlacementCommitted") && !(bool)Property(manager, "HasRoadAnchor"),
+            Check((bool)Get(manager, "directCommitted") && !(bool)Property(manager, "HasRoadAnchor"),
                 "mode switch keeps fixed position but removes road constraint");
             Call(manager, "ResetPlacementSelection", true);
-            Check(!(bool)Property(manager, "PlacementCommitted") && (float)Property(manager, "PlacementDepth") == 28,
+            Check(!(bool)Get(manager, "directCommitted") && (float)Property(manager, "PlacementDepth") == 28,
                 "reposition preserves dimensions");
             Command(manager, "{\"variant\":99999,\"width\":1000,\"depth\":-4}");
             Check((float)Property(manager, "PlacementWidth") == 500 && (float)Property(manager, "PlacementDepth") == 1,
@@ -213,6 +248,7 @@ public static class BuildingPlacementQA
             manager.GetType().GetProperty("DirectAllowed").SetValue(manager, false);
             Mode(manager, "Free");
             Check(Property(manager, "PlacementMode").ToString() == "Parcel", "copy placement cannot leave parcel mode");
+            CheckCityHallOwnership(manager, (IDictionary)Get(master, "agentMasterById"));
             Call(manager, "SetBuildingMode", false);
             Check(!(bool)Property(manager, "PlacementActive"), "ending construction disables placement controls");
             File.WriteAllText(report, $"PASS: {checks} Unity building placement state checks");
