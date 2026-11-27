@@ -2,6 +2,7 @@
  * Tauri のコマンドの実装。`src-tauri/src/lib.rs` の invoke_handler に並ぶコマンドを、同じ名前・引数・戻り値で受ける。
  * 引数の名前は Tauri と同じく JS 側の camelCase。失敗は共通のコードとパラメータで iframe へ返す。
  */
+import { advanceOpening, getOpeningStage } from "./opening";
 import { emit } from "./events";
 import { sendUiAction } from "./ipc";
 import { requestAppExit } from "./process";
@@ -105,6 +106,8 @@ const commands: Record<string, Command> = {
   resize_system_tray: (_caller, args) => resizeSystemTray(Number(args.width), Number(args.height)),
   resize_cockpit: (_caller, args) => resizeCockpit(Number(args.width), Number(args.height)),
   resize_citizen_voice: (_caller, args) => resizeCitizenVoice(Number(args.width), Number(args.height)),
+  get_opening_stage: getOpeningStage,
+  advance_opening: (_caller, args) => advanceOpening(Number(args.stage), args.skip === true),
   get_topmenu_state: () => ({ apiBaseUrl: state.apiBaseUrl }),
   switch_monitor: () => ({ monitorIndex: 0 }), // モニターは表示領域1枚なので、モニター1台の exe と同じ結果になる
   set_multi_display: (_caller, args) => {

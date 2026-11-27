@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Punteggio di governo (per nucleo familiare / massimo 2.0)",
     "menuCitizenList": "Elenco cittadini"
   },
+  "opening": {
+    "plain": "Guiderai la città che nascerà qui. Dove tracceresti la prima strada?",
+    "village": "Una strada e qualche casa. Per chi ci abita, è già un paese.",
+    "city": "Sta a te decidere che città crescerà qui.",
+    "skip": "Salta"
+  },
   "topmenu": {
     "minimize": "Riduci a icona",
     "coreConnectionFailed": "Connessione non riuscita",
@@ -167,10 +173,7 @@
     "options": "Opzioni",
     "quit": "Esci",
     "quitting": "Uscita in corso...",
-    "assetManager": "Gestione asset",
-    "firstLaunchTutorialConfirm": "Vuoi iniziare il tutorial?",
-    "firstLaunchTutorialYes": "Sì",
-    "firstLaunchTutorialNo": "No"
+    "assetManager": "Gestione asset"
   },
   "display": {
     "layerTerrain": "Terreno",

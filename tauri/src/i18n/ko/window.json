@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "시정 점수(1가구당 / 만점 2.0)",
     "menuCitizenList": "시민 목록"
   },
+  "opening": {
+    "plain": "이 들판에 세워질 도시의 시장은 바로 당신입니다. 첫 도로를 어디에 놓을까요?",
+    "village": "길 하나에 집 몇 채. 여기 사는 사람들에게는 벌써 하나의 마을입니다.",
+    "city": "앞으로 이곳에 어떤 도시를 세울지는 당신에게 달려 있습니다.",
+    "skip": "건너뛰기"
+  },
   "topmenu": {
     "minimize": "최소화",
     "coreConnectionFailed": "연결 실패",
@@ -167,10 +173,7 @@
     "options": "옵션",
     "quit": "종료",
     "quitting": "종료 중...",
-    "assetManager": "에셋 관리자",
-    "firstLaunchTutorialConfirm": "튜토리얼을 시작하시겠습니까?",
-    "firstLaunchTutorialYes": "예",
-    "firstLaunchTutorialNo": "아니요"
+    "assetManager": "에셋 관리자"
   },
   "display": {
     "layerTerrain": "지형",

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -10,46 +10,22 @@ import githubIcon from "../../assets/images/github.png";
 import assetManagerIcon from "../../assets/images/menu/display-building.svg";
 import settingIcon from "../../assets/images/setting.png";
 import "./TopMenu.css";
-import { GAME_VERIFIED, PLAY_MODE_TUTORIAL } from "../../constants";
-import { buildApiUrl, fetchApi } from "../../utils/api";
-import { requestConfirm, showNotice } from "../../utils/confirmDialog";
-import { resolveSupportedLanguage } from "../../utils/locale";
-import { saveError } from "../../utils/saves";
-import { loadAppSettings, saveAppSettings } from "../../utils/settings";
+import { GAME_VERIFIED } from "../../constants";
 import { CoreVersion, frontendVersion } from "../../utils/version";
 
-/** 初回起動確認で「はい」を選んだときに開始するチュートリアル(基本操作編)のID。 */
-const FIRST_LAUNCH_TUTORIAL_ID = "controls";
-
 type SessionStatePayload = {
-  current_save_id: string | null;
   session: Record<string, unknown> | null;
-  city?: Record<string, unknown>;
-  isLoading: boolean;
   coreVersion: string | null;
   backendConnected: boolean;
 };
 
-type SavesSummaryResponse = {
-  saves?: Record<string, unknown>;
-};
-
-type ProfileSummaryResponse = {
-  tutorials_cleared?: string[];
-  scenarios_cleared?: string[];
-  achievements?: string[];
-};
-
 export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const appWindow = useMemo(() => getCurrentWindow(), []);
   const [coreVersion, setCoreVersion] = useState<string | null>(null);
   const [backendConnected, setBackendConnected] = useState(false);
-  const [topMenuVisible, setTopMenuVisible] = useState(false);
-  const [promptingTutorial, setPromptingTutorial] = useState(false);
-  const firstLaunchCheckedRef = useRef(false);
   const coreAvailable = backendConnected && !!coreVersion;
-  const menuDisabled = !coreAvailable || promptingTutorial;
+  const menuDisabled = !coreAvailable;
   useEffect(() => {
     if (!apiBaseUrl) return;
     let active = true;
@@ -66,12 +42,7 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
   const [debugExecution, setDebugExecution] = useState(false);
   const [verified, setVerified] = useState<boolean | null>(null); // null (hidden) while session state is unavailable.
 
-  /**
-   * Receive `session-state` from Rust's session polling thread to control top menu visibility.
-   *
-   * Show while current_save_id is unset. Explicitly hide during game start/load (isLoading == true), when Tips is
-   * displayed.
-   */
+  // ウィンドウの表示順は起動演出とセッションを管理するシェルが決める。
   useEffect(() => {
     let unlisten: (() => void) | undefined;
     const connectionListener = appWindow.listen<{ connected: boolean }>("backend-connection", (event) => {
@@ -85,23 +56,6 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
         setDebugExecution((payload.session?.debug_execution as boolean) ?? false);
         const verificationStatus = payload.session?.verification_status;
         setVerified(typeof verificationStatus === "number" ? verificationStatus === GAME_VERIFIED : null);
-
-        // Hide the top menu while loading.
-        // Tips is in front; prevent the top menu from appearing over it.
-        if (payload.isLoading) {
-          setTopMenuVisible(false);
-          appWindow.hide().catch(() => {});
-          return;
-        }
-
-        const shouldShow = payload.current_save_id == null;
-        setTopMenuVisible(shouldShow);
-
-        if (shouldShow) {
-          appWindow.show().catch(() => {});
-        } else {
-          appWindow.hide().catch(() => {});
-        }
       })
       .then((fn) => {
         unlisten = fn;
@@ -112,87 +66,6 @@ export function TopMenu({ apiBaseUrl }: { apiBaseUrl: string }) {
       void connectionListener.then((stop) => stop());
     };
   }, [appWindow]);
-
-  /**
-   * 完全な初回起動時だけ、基本操作チュートリアルを開始するか確認する。
-   * 案内済みフラグ・既存セーブ・プレイヤープロフィールのいずれも空のときに一度だけ確認ポップアップを出し、
-   * 承諾されたら基本操作編("controls")を直接ロードする。
-   */
-  useEffect(() => {
-    if (!coreAvailable || !topMenuVisible || !apiBaseUrl || firstLaunchCheckedRef.current) return;
-    let cancelled = false;
-
-    const markPrompted = async () => {
-      const latest = await loadAppSettings();
-      if (!latest.first_launch_tutorial_prompted) {
-        await saveAppSettings({ ...latest, first_launch_tutorial_prompted: true });
-      }
-    };
-
-    const run = async () => {
-      try {
-        const settings = await loadAppSettings();
-        if (cancelled || firstLaunchCheckedRef.current) return;
-        if (settings.first_launch_tutorial_prompted) {
-          firstLaunchCheckedRef.current = true;
-          return;
-        }
-
-        const [savesRes, profileRes] = await Promise.all([
-          fetchApi<SavesSummaryResponse>(buildApiUrl(apiBaseUrl, "/api/v1/saves"), { cache: "reload" }),
-          fetchApi<ProfileSummaryResponse>(buildApiUrl(apiBaseUrl, "/api/v1/profile"), { cache: "reload" }),
-        ]);
-        if (cancelled || firstLaunchCheckedRef.current) return;
-        firstLaunchCheckedRef.current = true;
-
-        const hasExistingHistory =
-          Object.keys(savesRes.saves ?? {}).length > 0 ||
-          (profileRes.tutorials_cleared?.length ?? 0) > 0 ||
-          (profileRes.scenarios_cleared?.length ?? 0) > 0 ||
-          (profileRes.achievements?.length ?? 0) > 0;
-        if (hasExistingHistory) {
-          await markPrompted().catch(console.error);
-          return;
-        }
-
-        // ポップアップ表示前に案内済みとして保存し、応答前にアプリを閉じても2回目以降は再表示しない。
-        await markPrompted().catch(console.error);
-
-        const lang = resolveSupportedLanguage(settings.language || i18n.language);
-        const tFixed = i18n.getFixedT(lang);
-        setPromptingTutorial(true);
-        try {
-          const confirmed = await requestConfirm({
-            message: tFixed("topmenu.firstLaunchTutorialConfirm"),
-            confirmLabel: tFixed("topmenu.firstLaunchTutorialYes"),
-            cancelLabel: tFixed("topmenu.firstLaunchTutorialNo"),
-          });
-          if (!confirmed) return;
-
-          await invoke("create_session", {
-            acceptBalanceChange: true,
-            scenarioId: null,
-            language: lang,
-            groundCover: null,
-            assetPack: null,
-            playMode: PLAY_MODE_TUTORIAL,
-            tutorialId: FIRST_LAUNCH_TUTORIAL_ID,
-            introDialog: null,
-          });
-        } catch (error) {
-          console.error("[TopMenu] failed to start first-launch tutorial:", error);
-          await showNotice({ message: saveError(error, tFixed) || tFixed("newGame.startFailed") });
-        } finally {
-          setPromptingTutorial(false);
-        }
-      } catch (error) {
-        console.error("[TopMenu] first-launch tutorial check failed:", error);
-      }
-    };
-
-    void run();
-    return () => { cancelled = true; };
-  }, [apiBaseUrl, coreAvailable, i18n, topMenuVisible]);
 
   /**
    * New Game button handler.

@@ -93,6 +93,7 @@ pub struct AppState {
     /// Distinguish the first receipt (normal startup) to preserve windows
     /// such as load screens opened by users in the UI before Unity started.
     pub graphic_ready_seen: bool,
+    pub opening: crate::opening::Phase,
     /// Whether Graphic (Unity) is currently connected. Set by
     /// system:graphic_ready; cleared by system:graphic_stopped (normal exit or
     /// stopping Editor Play). Crashes do not clear it, but the restarted Unity's
@@ -158,6 +159,7 @@ impl SharedState {
             notification_generation: 0,
             hidden_lru: VecDeque::new(),
             graphic_ready_seen: false,
+            opening: crate::opening::Phase::Setup,
             graphic_connected: false,
             graphic_contract_error: None,
             graphic_version: None,

@@ -2,6 +2,7 @@ mod errors;
 use errors::ApiFailure;
 mod asset_manager;
 mod ipc;
+mod opening;
 mod messages;
 mod settings;
 mod state;
@@ -298,6 +299,9 @@ fn switch_monitor(app: tauri::AppHandle, state: tauri::State<'_, SharedState>, d
     })?;
 
     let monitor = monitors.get(new_index).ok_or("monitor index out of range")?;
+    if let Some(caption) = app.get_webview_window("opening-caption") {
+        opening::placement(Some(monitor)).apply(&caption);
+    }
     window::layout_hud_windows(&app, &monitors, new_index, None, None, None, None);
     if let Some(hintbar) = app.get_webview_window("hintbar") {
         hintbar_placement(Some(monitor)).apply(&hintbar);
@@ -513,9 +517,6 @@ async fn create_session(
         let error = ApiFailure::response(res).await;
         log::error!("[create_session] セッション作成失敗: {} {}", error.code, error.params);
         abort_initial_loading(&app, state.inner());
-        if let Some(topmenu) = app.get_webview_window("topmenu") {
-            let _ = topmenu.show();
-        }
         {
             let mut guard = state.lock();
             guard.is_loading = false;
@@ -577,9 +578,6 @@ async fn start_load_game(
         let error = ApiFailure::response(res).await;
         log::error!("[start_load_game] ロード失敗: {} {}", error.code, error.params);
         abort_initial_loading(&app, state.inner());
-        if let Some(topmenu) = app.get_webview_window("topmenu") {
-            let _ = topmenu.show();
-        }
         {
             let mut guard = state.lock();
             guard.is_loading = false;
@@ -1208,6 +1206,7 @@ fn begin_initial_loading(app: &tauri::AppHandle, state: &SharedState, needs_setu
         guard.tutorial_id = None;
         guard.intro_dialog = None;
     }
+    opening::hide_for_city(app, state);
     window::set_hud_visible(app, false);
     if let Some(hintbar) = app.get_webview_window("hintbar") { let _ = hintbar.hide(); }
     if let Some(tutorial) = app.get_webview_window("tutorial") { let _ = tutorial.hide(); }
@@ -1230,7 +1229,7 @@ fn abort_initial_loading(app: &tauri::AppHandle, state: &SharedState) {
         guard.last_session_id = None;
     }
     window::close_tips_window(app);
-    if let Some(topmenu) = app.get_webview_window("topmenu") { let _ = topmenu.show(); }
+    opening::show_menu(app, state);
 }
 
 /// game:start only starts rendering preparation. game:reveal allows the display to become visible.
@@ -1382,11 +1381,11 @@ fn return_to_topmenu(app: &tauri::AppHandle, state: &SharedState) {
     if let Some(hintbar) = app.get_webview_window("hintbar") { let _ = hintbar.hide(); }
     if let Some(tutorial) = app.get_webview_window("tutorial") { let _ = tutorial.hide(); }
     let _ = app.emit("tutorial:hide", ());
-    if let Some(topmenu) = app.get_webview_window("topmenu") { let _ = topmenu.show(); }
+    opening::show_menu(app, state);
     let _ = ipc::send_ui_action(state, "".into(), None, "game:end".into(), serde_json::json!({}));
 }
 
-/// session-state while the core is unreachable. The top menu shows itself and indicates connection failure on receipt.
+/// 接続断を画面に伝える。起動演出の表示順は接続状態と独立している。
 fn disconnected_session_state(api_base_url: &str, core_version: &Value) -> Value {
     serde_json::json!({
         "current_save_id": null,
@@ -1728,6 +1727,7 @@ pub fn run() {
     let mut launch = process::Launch::resolve();
     #[cfg(feature = "steam")]
     launch.core_env.extend(steam::init());
+    let ui_only = launch.ui_only;
     let shared_state = SharedState::new(load_registry(), load_mutex_groups(), launch);
     let setup_state = shared_state.clone();
     let event_state = shared_state.clone();
@@ -1780,8 +1780,7 @@ pub fn run() {
             let target_monitor = target_monitor.as_ref();
 
             // Create the top menu centered on target_monitor (the monitor matching
-            // monitor_index in settings, or the primary monitor). The first
-            // session-state shows it; display nothing while waiting for the core to start.
+            // monitor_index in settings, or the primary monitor). The opening controls its first reveal.
             let topmenu_builder = WebviewWindowBuilder::new(
                 app,
                 "topmenu",
@@ -1798,6 +1797,15 @@ pub fn run() {
                 false,
             )
                 .expect("failed to create topmenu window");
+
+            let first_launch = !loaded_settings.first_launch_presented;
+            if first_launch && !ui_only {
+                let caption = WebviewWindowBuilder::new(app, "opening-caption", WebviewUrl::App("index.html".into()))
+                    .title("City Genesis").decorations(false).transparent(true).shadow(false)
+                    .always_on_top(true).skip_taskbar(true).resizable(false);
+                window::build_placed(caption, opening::placement(target_monitor), false)
+                    .expect("failed to create opening caption");
+            }
 
             // Create four HUD windows on target_monitor: left icon panel, bottom-center
             // cockpit, bottom-right system tray, and bottom-left display tray. Initially
@@ -1866,6 +1874,7 @@ pub fn run() {
             )
             .expect("failed to create notification window");
 
+            opening::windows_ready(app.handle(), &setup_state, first_launch, ui_only)?;
             // Start the core and graphics, then begin verification and session monitoring once the
             // core is ready. This thread subsequently monitors child processes until the app exits.
             let app_handle = app.handle().clone();
@@ -1897,7 +1906,7 @@ pub fn run() {
                     WindowEvent::CloseRequested { api, .. } => {
                         let label = window.label().to_string();
                         match label.as_str() {
-                            "main" | "topmenu"
+                            "main" | "topmenu" | "opening-caption"
                             | window::LABEL_ICON_PANEL
                             | window::LABEL_COCKPIT
                             | window::LABEL_SYSTEM_TRAY
@@ -1979,6 +1988,8 @@ pub fn run() {
             resize_cockpit,
             resize_citizen_voice,
             get_topmenu_state,
+            opening::get_opening_stage,
+            opening::advance_opening,
             switch_monitor,
             set_multi_display,
             switch_popup_monitor,

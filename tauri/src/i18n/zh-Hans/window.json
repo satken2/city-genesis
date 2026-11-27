@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "施政评分（每户，满分2.0）",
     "menuCitizenList": "市民列表"
   },
+  "opening": {
+    "plain": "你将成为这片原野上第一座城市的市长。你会把第一条路修在哪里？",
+    "village": "一条路，几户人家。对住在这里的人来说，这已经是一座小镇了。",
+    "city": "这座城市以后会是什么模样，由你决定。",
+    "skip": "跳过"
+  },
   "topmenu": {
     "minimize": "最小化",
     "coreConnectionFailed": "连接失败",
@@ -167,10 +173,7 @@
     "options": "选项",
     "quit": "退出",
     "quitting": "正在退出...",
-    "assetManager": "素材管理器",
-    "firstLaunchTutorialConfirm": "要开始教程吗？",
-    "firstLaunchTutorialYes": "是",
-    "firstLaunchTutorialNo": "否"
+    "assetManager": "素材管理器"
   },
   "display": {
     "layerTerrain": "地形",

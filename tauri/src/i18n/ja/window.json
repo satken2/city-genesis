@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "施政スコア（1世帯あたり / 満点2.0）",
     "menuCitizenList": "市民リスト"
   },
+  "opening": {
+    "plain": "この原野に生まれる街の市長は、あなたです。最初の一本の道を、どこに通しましょうか。",
+    "village": "道が一本、家が数軒。ここで暮らす人にとっては、もう立派な街です。",
+    "city": "この先、ここにどんな街をつくるかは、あなた次第です。",
+    "skip": "スキップ"
+  },
   "topmenu": {
     "minimize": "最小化",
     "coreConnectionFailed": "接続失敗",
@@ -167,10 +173,7 @@
     "options": "オプション",
     "quit": "終了",
     "quitting": "終了中...",
-    "assetManager": "アセットマネージャー",
-    "firstLaunchTutorialConfirm": "チュートリアルを開始しますか？",
-    "firstLaunchTutorialYes": "はい",
-    "firstLaunchTutorialNo": "いいえ"
+    "assetManager": "アセットマネージャー"
   },
   "display": {
     "layerTerrain": "地形",

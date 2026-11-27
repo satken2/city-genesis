@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Pontuação de gestão (por domicílio / máximo 2.0)",
     "menuCitizenList": "Lista de cidadãos"
   },
+  "opening": {
+    "plain": "Você vai governar a cidade que nascerá aqui. Por onde passaria a primeira estrada?",
+    "village": "Uma estrada e algumas casas. Para quem mora aqui, isso já é um povoado.",
+    "city": "Você decide que tipo de cidade vai crescer aqui.",
+    "skip": "Pular"
+  },
   "topmenu": {
     "minimize": "Minimizar",
     "coreConnectionFailed": "Falha na conexão",
@@ -167,10 +173,7 @@
     "options": "Opções",
     "quit": "Sair",
     "quitting": "Saindo...",
-    "assetManager": "Gerenciador de assets",
-    "firstLaunchTutorialConfirm": "Deseja iniciar o tutorial?",
-    "firstLaunchTutorialYes": "Sim",
-    "firstLaunchTutorialNo": "Não"
+    "assetManager": "Gerenciador de assets"
   },
   "display": {
     "layerTerrain": "Terreno",

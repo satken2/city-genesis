@@ -3,6 +3,7 @@
  * 運び方だけが違い、MMF の代わりに同じページで動く Unity の jslib(`Assets/Plugins/WebGL/GenesisWebIpc.jslib`)と
  * `globalThis.__genesisGraphicBridge` を通して受け渡す。
  */
+import { openingGraphicReady, openingShown } from "./opening";
 import { DEVELOPMENT } from "./config";
 import { emit, emitTo } from "./events";
 import { requestAppExit } from "./process";
@@ -190,6 +191,9 @@ async function handleIncomingMessage(envelope: Envelope): Promise<void> {
       }
       break;
     }
+    case "opening:shown":
+      openingShown(payload?.stage);
+      break;
     case "system:graphic_ready":
       onGraphicReady(payload);
       break;
@@ -240,6 +244,7 @@ function onGraphicReady(payload: Record<string, unknown> | null): void {
       console.error("[ipc] 初期ロードを始められません", error);
     }
   }
+  openingGraphicReady();
   reassertTopmost();
   emit("graphic-reconnected", payload);
 }

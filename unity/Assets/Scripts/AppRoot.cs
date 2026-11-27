@@ -85,6 +85,8 @@ public class AppRoot : MonoBehaviour
         // whenever Tauri automatically restarts Unity after a crash.
         // Tauri clears popups only on the second and subsequent notifications
         // (after a crash restart). The first notification leaves loading screens and other ongoing user interactions open.
+        // The first compatible handshake also releases the opening UI over the player window.
+        while (!Application.isEditor && !UnityEngine.Rendering.SplashScreen.isFinished) yield return null;
         do {
             yield return BackendCompatibility.Verify();
             IpcClient.Instance?.EmitGraphicReady();

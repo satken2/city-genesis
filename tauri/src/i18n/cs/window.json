@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Hodnocení správy (na domácnost / maximum 2,0)",
     "menuCitizenList": "Seznam občanů"
   },
+  "opening": {
+    "plain": "Stanete se starostou města, které tu vyroste. Kudy povede první silnice?",
+    "village": "Jedna silnice a pár domů. Pro lidi, kteří tu žijí, už je to vesnice.",
+    "city": "Je na vás, jaké město tu vyroste.",
+    "skip": "Přeskočit"
+  },
   "topmenu": {
     "minimize": "Minimalizovat",
     "coreConnectionFailed": "Připojení selhalo",
@@ -167,10 +173,7 @@
     "options": "Možnosti",
     "quit": "Ukončit",
     "quitting": "Ukončuje se…",
-    "assetManager": "Správce assetů",
-    "firstLaunchTutorialConfirm": "Chcete spustit tutoriál?",
-    "firstLaunchTutorialYes": "Ano",
-    "firstLaunchTutorialNo": "Ne"
+    "assetManager": "Správce assetů"
   },
   "display": {
     "layerTerrain": "Terén",

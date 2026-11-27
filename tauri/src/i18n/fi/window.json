@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Hallintopisteet (kotitaloutta kohden, enintään 2,0)",
     "menuCitizenList": "Kaupunkilaisluettelo"
   },
+  "opening": {
+    "plain": "Sinusta tulee tänne syntyvän kaupungin pormestari. Mihin rakentaisit ensimmäisen tien?",
+    "village": "Yksi tie ja muutama talo. Täällä asuville ihmisille tämä on jo kylä.",
+    "city": "Sinä päätät, millainen kaupunki tänne kasvaa.",
+    "skip": "Ohita"
+  },
   "topmenu": {
     "minimize": "Pienennä",
     "coreConnectionFailed": "Yhteys epäonnistui",
@@ -167,10 +173,7 @@
     "options": "Asetukset",
     "quit": "Lopeta",
     "quitting": "Lopetetaan…",
-    "assetManager": "Sisällönhallinta",
-    "firstLaunchTutorialConfirm": "Haluatko aloittaa opetusohjelman?",
-    "firstLaunchTutorialYes": "Kyllä",
-    "firstLaunchTutorialNo": "Ei"
+    "assetManager": "Sisällönhallinta"
   },
   "display": {
     "layerTerrain": "Maasto",

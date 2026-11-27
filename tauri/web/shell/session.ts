@@ -8,6 +8,7 @@ import { emit } from "./events";
 import * as host from "./host";
 import { sendUiAction } from "./ipc";
 import { apiBase, fetchWithTimeout, sleep } from "./net";
+import { hideOpeningForCity, showMenu } from "./opening";
 import { requestAppExit } from "./process";
 import { state } from "./state";
 import { checkFrontendVersion, coreInfo, coreInfoReady, prepareGraphic, validateLoad, verifyCore } from "./version";
@@ -96,6 +97,7 @@ function observeBackend(success: boolean): boolean {
  * チュートリアル窓は表示中ずっと開いている都市を案内し続けるので、ここで隠し、新しいセッションが教材のときだけ showGameControls が出し直す。
  */
 export function beginInitialLoading(needsSetup: boolean): void {
+  hideOpeningForCity();
   cancelEpochPresentation();
   state.loadingId += 1;
   state.isLoading = true;
@@ -128,7 +130,7 @@ function abortInitialLoading(): void {
   // 既存のセッションが残っていれば、次の監視で描画を作り直して復帰する。
   state.lastSessionId = null;
   closeTipsWindow();
-  host.show("topmenu");
+  showMenu();
 }
 
 /** game:start は描画の準備だけを始めさせる。表示の解禁は game:reveal で行う。 */
@@ -185,7 +187,7 @@ function returnToTopmenu(): void {
   host.hide("hintbar");
   host.hide("tutorial");
   emit("tutorial:hide", null);
-  host.show("topmenu");
+  showMenu();
   try {
     sendUiAction("", null, "game:end", {});
   } catch {
@@ -414,8 +416,6 @@ async function postSessionStart(url: string, what: string): Promise<void> {
   if (!response.ok) {
     console.error(`[${what}] 失敗: ${response.status}`);
     abortInitialLoading();
-    host.show("topmenu");
-    state.isLoading = false;
     await requireApiSuccess(response);
   }
   state.backendLoadComplete = true;

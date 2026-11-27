@@ -1,0 +1,57 @@
+{
+  "terrain": {"resolution": 129, "size": 1024, "belowSea": 10, "span": 106},
+  "rivers": [{"id": "opening", "polygon": {"type": "Polygon", "coordinates": [[[0, 419], [212, 435], [372, 469], [452, 457], [527, 453], [647, 476], [817, 446], [1024, 465], [1024, 487], [817, 468], [647, 498], [527, 475], [452, 479], [372, 491], [212, 457], [0, 441], [0, 419]]]}, "profile": [[0, 2.5, 430], [212, 2.5, 446], [372, 2.5, 480], [452, 2.5, 468], [527, 2.5, 464], [647, 2.5, 487], [817, 2.5, 457], [1024, 2.5, 476]]}],
+  "agents": {
+    "2000": {"bd_type": 2, "model_type": 2, "height_per_floor": 3.5, "default_width": 15.0, "default_height": 15.0, "building_shape": 1},
+    "2001": {"bd_type": 1, "model_type": 1, "height_per_floor": 3.0, "default_width": 20.0, "default_height": 20.0, "draw_floor": true, "building_shape": 2},
+    "2003": {"bd_type": 4, "model_type": 1, "height_per_floor": 3.5, "default_width": 12.0, "default_height": 10.0, "draw_floor": true, "building_shape": 5},
+    "2007": {"bd_type": 1, "model_type": 1, "height_per_floor": 3.0, "default_width": 30.0, "default_height": 30.0, "draw_floor": true, "building_shape": 2}
+  },
+  "paths": {
+    "221": {"type": 1, "width": 12.0, "model_type": "default", "lanes": 2, "sidewalk_width": 2.5, "side_width": 0.5, "wall_width": 0.0, "center_width": 0.0, "tree_spacing": 20, "height": 5.0, "frontage_allowed": true, "follow_terrain": true},
+    "231": {"type": 1, "width": 24.0, "model_type": "default", "lanes": 4, "sidewalk_width": 3.0, "side_width": 0.5, "wall_width": 0.0, "center_width": 0.0, "tree_spacing": 20, "height": 5.0, "frontage_allowed": true, "follow_terrain": true}
+  },
+  "stages": [
+    {},
+    {
+      "nodes": [{"node_id": 2, "type": 1, "position": [332, 0, 516]}, {"node_id": 3, "type": 1, "position": [692, 0, 516]}],
+      "paths": [{"path_id": 1, "status": 1, "version": 1, "path_type": 1, "path_variant": 221, "width": 12.0, "follow_terrain": 1, "start_node_id": 2, "end_node_id": 3, "start_point": [332, 0, 516], "end_point": [692, 0, 516], "street_tree_type": 1}],
+      "buildings": [
+        {"agent_id": 1, "version": 1, "status": 1, "variant": 2000, "bd_type": 2, "floors": 1, "center_point": [451, 503], "polygon": [[-7.5, -7.5], [7.5, -7.5], [7.5, 7.5], [-7.5, 7.5]], "visual_variant": 0.37, "visual_variant2": 0.59, "visual_variant3": 0.71},
+        {"agent_id": 2, "version": 1, "status": 1, "variant": 2000, "bd_type": 2, "floors": 2, "center_point": [472, 530], "polygon": [[-7.5, -7.5], [7.5, -7.5], [7.5, 7.5], [-7.5, 7.5]], "visual_variant": 0.74, "visual_variant2": 0.18, "visual_variant3": 0.42},
+        {"agent_id": 3, "version": 1, "status": 1, "variant": 2000, "bd_type": 2, "floors": 1, "center_point": [494, 503], "polygon": [[-7.5, -7.5], [7.5, -7.5], [7.5, 7.5], [-7.5, 7.5]], "visual_variant": 0.11, "visual_variant2": 0.77, "visual_variant3": 0.13},
+        {"agent_id": 4, "version": 1, "status": 1, "variant": 2000, "bd_type": 2, "floors": 2, "center_point": [516, 529], "polygon": [[-7.5, -7.5], [7.5, -7.5], [7.5, 7.5], [-7.5, 7.5]], "visual_variant": 0.48, "visual_variant2": 0.36, "visual_variant3": 0.84},
+        {"agent_id": 5, "version": 1, "status": 1, "variant": 2003, "bd_type": 4, "floors": 1, "center_point": [537, 504], "polygon": [[-6.0, -5.0], [6.0, -5.0], [6.0, 5.0], [-6.0, 5.0]], "visual_variant": 0.85, "visual_variant2": 0.95, "visual_variant3": 0.55},
+        {"agent_id": 6, "version": 1, "status": 1, "variant": 2000, "bd_type": 2, "floors": 1, "center_point": [557, 529], "polygon": [[-7.5, -7.5], [7.5, -7.5], [7.5, 7.5], [-7.5, 7.5]], "visual_variant": 0.22, "visual_variant2": 0.54, "visual_variant3": 0.26}
+      ]
+    },
+    {
+      "nodes": [{"node_id": 4, "type": 1, "position": [332, 0, 586]}, {"node_id": 5, "type": 1, "position": [692, 0, 586]}],
+      "paths": [{"path_id": 2, "status": 1, "version": 1, "path_type": 1, "path_variant": 231, "width": 24.0, "follow_terrain": 1, "start_node_id": 4, "end_node_id": 5, "start_point": [332, 0, 586], "end_point": [692, 0, 586], "street_tree_type": 1}],
+      "buildings": [
+        {"agent_id": 7, "version": 1, "status": 1, "variant": 2003, "bd_type": 4, "floors": 1, "center_point": [392, 565], "polygon": [[-6.0, -5.0], [6.0, -5.0], [6.0, 5.0], [-6.0, 5.0]], "visual_variant": 0.59, "visual_variant2": 0.13, "visual_variant3": 0.97},
+        {"agent_id": 8, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 4, "center_point": [399, 531], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.96, "visual_variant2": 0.72, "visual_variant3": 0.68},
+        {"agent_id": 9, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 8, "center_point": [399, 608], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.33, "visual_variant2": 0.31, "visual_variant3": 0.39},
+        {"agent_id": 10, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 5, "center_point": [413, 563], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.7, "visual_variant2": 0.9, "visual_variant3": 0.1},
+        {"agent_id": 11, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 5, "center_point": [428, 531], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.07, "visual_variant2": 0.49, "visual_variant3": 0.81},
+        {"agent_id": 12, "version": 1, "status": 1, "variant": 2003, "bd_type": 4, "floors": 1, "center_point": [433, 503], "polygon": [[-6.0, -5.0], [6.0, -5.0], [6.0, 5.0], [-6.0, 5.0]], "visual_variant": 0.44, "visual_variant2": 0.08, "visual_variant3": 0.52},
+        {"agent_id": 13, "version": 1, "status": 1, "variant": 2007, "bd_type": 1, "floors": 13, "center_point": [438, 610], "polygon": [[-15.0, -15.0], [15.0, -15.0], [15.0, 15.0], [-15.0, 15.0]], "visual_variant": 0.81, "visual_variant2": 0.67, "visual_variant3": 0.23},
+        {"agent_id": 14, "version": 1, "status": 1, "variant": 2007, "bd_type": 1, "floors": 11, "center_point": [447, 561], "polygon": [[-15.0, -15.0], [15.0, -15.0], [15.0, 15.0], [-15.0, 15.0]], "visual_variant": 0.18, "visual_variant2": 0.26, "visual_variant3": 0.94},
+        {"agent_id": 15, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 10, "center_point": [477, 606], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.55, "visual_variant2": 0.85, "visual_variant3": 0.65},
+        {"agent_id": 16, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 8, "center_point": [481, 565], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.92, "visual_variant2": 0.44, "visual_variant3": 0.36},
+        {"agent_id": 17, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 6, "center_point": [507, 565], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.29, "visual_variant2": 0.03, "visual_variant3": 0.07},
+        {"agent_id": 18, "version": 1, "status": 1, "variant": 2007, "bd_type": 1, "floors": 21, "center_point": [514, 611], "polygon": [[-15.0, -15.0], [15.0, -15.0], [15.0, 15.0], [-15.0, 15.0]], "visual_variant": 0.66, "visual_variant2": 0.62, "visual_variant3": 0.78},
+        {"agent_id": 19, "version": 1, "status": 1, "variant": 2007, "bd_type": 1, "floors": 14, "center_point": [541, 560], "polygon": [[-15.0, -15.0], [15.0, -15.0], [15.0, 15.0], [-15.0, 15.0]], "visual_variant": 0.03, "visual_variant2": 0.21, "visual_variant3": 0.49},
+        {"agent_id": 20, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 8, "center_point": [549, 605], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.4, "visual_variant2": 0.8, "visual_variant3": 0.2},
+        {"agent_id": 21, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 8, "center_point": [572, 565], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.77, "visual_variant2": 0.39, "visual_variant3": 0.91},
+        {"agent_id": 22, "version": 1, "status": 1, "variant": 2003, "bd_type": 4, "floors": 1, "center_point": [575, 503], "polygon": [[-6.0, -5.0], [6.0, -5.0], [6.0, 5.0], [-6.0, 5.0]], "visual_variant": 0.14, "visual_variant2": 0.98, "visual_variant3": 0.62},
+        {"agent_id": 23, "version": 1, "status": 1, "variant": 2007, "bd_type": 1, "floors": 16, "center_point": [586, 611], "polygon": [[-15.0, -15.0], [15.0, -15.0], [15.0, 15.0], [-15.0, 15.0]], "visual_variant": 0.51, "visual_variant2": 0.57, "visual_variant3": 0.33},
+        {"agent_id": 24, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 5, "center_point": [591, 531], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.88, "visual_variant2": 0.16, "visual_variant3": 0.04},
+        {"agent_id": 25, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 6, "center_point": [598, 565], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.25, "visual_variant2": 0.75, "visual_variant3": 0.75},
+        {"agent_id": 26, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 4, "center_point": [620, 531], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.62, "visual_variant2": 0.34, "visual_variant3": 0.46},
+        {"agent_id": 27, "version": 1, "status": 1, "variant": 2001, "bd_type": 1, "floors": 5, "center_point": [624, 606], "polygon": [[-10.0, -10.0], [10.0, -10.0], [10.0, 10.0], [-10.0, 10.0]], "visual_variant": 0.99, "visual_variant2": 0.93, "visual_variant3": 0.17},
+        {"agent_id": 28, "version": 1, "status": 1, "variant": 2007, "bd_type": 1, "floors": 10, "center_point": [634, 561], "polygon": [[-15.0, -15.0], [15.0, -15.0], [15.0, 15.0], [-15.0, 15.0]], "visual_variant": 0.36, "visual_variant2": 0.52, "visual_variant3": 0.88}
+      ]
+    }
+  ]
+}

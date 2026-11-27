@@ -336,6 +336,11 @@ public class IpcClient : MonoBehaviour
 
             switch (action)
             {
+                case "opening:stage":
+                    int stage = GetParamInt(payload, "stage");
+                    if (stage >= -1 && stage <= 2) StartCoroutine(PresentOpeningStage(stage));
+                    break;
+
                 case "tutorial:apply":
                     TutorialRuntime.ApplyFromIpc(GetParamsDictionary(payload));
                     break;
@@ -797,6 +802,7 @@ public class IpcClient : MonoBehaviour
                     break;
 
                 case "session:reset":
+                    OpeningMovie.Close();
                     TutorialRuntime.Clear();
                     EpochExecuting = false;
                     epochPresentationId = null;
@@ -857,6 +863,7 @@ public class IpcClient : MonoBehaviour
                     break;
 
                 case "game:loading":
+                    OpeningMovie.Close();
                     GameStateManager.Instance?.BeginLoading();
                     OnGameLoading?.Invoke();
                     break;
@@ -1808,6 +1815,16 @@ public class IpcClient : MonoBehaviour
         SendEnvelope("game:loaded", new Dictionary<string, object> { { "loading_id", loadingId } });
     }
 
+    // Acknowledge after the camera has had a frame to draw. Tauri owns the captions and page turns.
+    private System.Collections.IEnumerator PresentOpeningStage(int stage)
+    {
+        if (stage < 0) OpeningMovie.Close();
+        else if (GameStateManager.Instance == null || !GameStateManager.Instance.IsGameStarted()) yield return OpeningMovie.Show(stage);
+        else yield break;
+        yield return null;
+        SendEnvelope("opening:shown", new Dictionary<string, object> { ["stage"] = stage });
+    }
+
     /// <summary>
     /// Sends system:graphic_ready.
     /// Notifies Tauri when Unity starts, both initial launch and automatic restart after a crash.
@@ -1816,6 +1833,7 @@ public class IpcClient : MonoBehaviour
     /// </summary>
     public void EmitGraphicReady()
     {
+        if (!Application.isEditor && !UnityEngine.Rendering.SplashScreen.isFinished) return;
         SendEnvelope("system:graphic_ready", new Dictionary<string, object> {
             { "frontend_version", FrontendVersion.Version },
             { "ipc_contract_version", FrontendVersion.IpcContract },

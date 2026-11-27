@@ -105,6 +105,13 @@ function hintbarPlacement(): Placement {
   return { x: m.x + (m.width - width) / 2, y: m.y + 4, width, height: HINTBAR_HEIGHT };
 }
 
+function openingPlacement(): Placement {
+  const m = host.monitor();
+  const width = Math.min(m.width * 0.88, 1080);
+  const height = Math.min(m.height, Math.max(155, Math.min(230, m.height * 0.32)));
+  return host.fitToViewport({ x: m.x + (m.width - width) / 2, y: m.y + m.height - height - 24, width, height }, m);
+}
+
 function tutorialPlacement(): Placement {
   const m = host.monitor();
   const width = m.width * 0.55;
@@ -140,6 +147,9 @@ export function createStartupWindows(hud: HudWindowSpec[] = DESKTOP_HUD, hintbar
     visible: false,
     title: "City Genesis",
   });
+  if (!loadSettings().first_launch_presented) {
+    host.createWindow("opening-caption", { url: appUrl(), placement: openingPlacement(), visible: false, title: "City Genesis" });
+  }
   hudLabels = hud.map((spec) => spec.label);
   for (const { label, title, width, height, page } of hud) {
     host.createWindow(label, { url: page ?? appUrl(), placement: { x: 0, y: 0, width, height }, visible: false, title });
@@ -160,6 +170,7 @@ export function relayoutForViewport(): void {
   layoutHudWindows(null, null);
   if (host.hasWindow("topmenu")) host.place("topmenu", centeredOnMonitor(TOPMENU_WIDTH, TOPMENU_HEIGHT));
   if (host.hasWindow("hintbar")) host.place("hintbar", hintbarPlacement());
+  if (host.hasWindow("opening-caption")) host.place("opening-caption", openingPlacement());
   if (host.hasWindow("tutorial")) host.place("tutorial", tutorialPlacement());
   if (host.hasWindow("tips")) host.place("tips", centeredOnMonitor(TIPS_WIDTH, TIPS_HEIGHT));
   if (host.hasWindow("parameter-setup")) host.place("parameter-setup", centeredOnMonitor(PARAMETER_SETUP_WIDTH, PARAMETER_SETUP_HEIGHT));

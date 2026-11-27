@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Pontuação de governação (por agregado familiar / máximo 2,0)",
     "menuCitizenList": "Lista de cidadãos"
   },
+  "opening": {
+    "plain": "Vais governar a cidade que aqui nascerá. Por onde traçarias a primeira estrada?",
+    "village": "Uma estrada e algumas casas. Para quem aqui vive, isto já é uma aldeia.",
+    "city": "Tu decides que cidade vai crescer aqui.",
+    "skip": "Saltar"
+  },
   "topmenu": {
     "minimize": "Minimizar",
     "coreConnectionFailed": "Falha na ligação",
@@ -167,10 +173,7 @@
     "options": "Opções",
     "quit": "Sair",
     "quitting": "A sair…",
-    "assetManager": "Gestor de recursos",
-    "firstLaunchTutorialConfirm": "Pretende iniciar o tutorial?",
-    "firstLaunchTutorialYes": "Sim",
-    "firstLaunchTutorialNo": "Não"
+    "assetManager": "Gestor de recursos"
   },
   "display": {
     "layerTerrain": "Terreno",

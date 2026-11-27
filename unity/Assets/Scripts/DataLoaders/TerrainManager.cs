@@ -715,7 +715,7 @@ public partial class TerrainManager : BaseApiDataManager
     /// </summary>
     /// <param name="verticalSpan">World height span (m) corresponding to local Y 0–1 (= terrainSize.y)</param>
     /// <param name="belowSeaSpan">Vertical span (m) allocated below sea level (= <see cref="SeaFloorDepthSpan"/>)</param>
-    private static float[,] ConvertFloat16BinaryToHeights(byte[] rawBytes, int rows, int cols, float verticalSpan, float belowSeaSpan)
+    internal static float[,] ConvertFloat16BinaryToHeights(byte[] rawBytes, int rows, int cols, float verticalSpan, float belowSeaSpan)
     {
         int count = rows * cols;
         int expectedBytes = count * 2;
@@ -2081,19 +2081,25 @@ public partial class TerrainManager : BaseApiDataManager
     /// </summary>
     private Terrain CreateTerrainTile(Vector2Int cellIndex, TerrainData tData)
     {
-        GameObject terrainGO = Terrain.CreateTerrainGameObject(tData);
-        Transform container = GetContainer("Terrains");
-        if (container != null) terrainGO.transform.SetParent(container);
-
-        terrainGO.name = $"Terrain_{cellIndex.x}_{cellIndex.y}";
-        terrainGO.layer = LayerMask.NameToLayer("Ground");
-
-        // Lower base Y by SeaFloorDepthSpan. Heightmap normalization includes the same offset,
-        // so worldY = base Y + normalized×terrainSize.y = actual elevation. Sea level (elevation 0)
-        // renders at worldY=0, seabeds at worldY<0 (down to -SeaFloorDepthSpan).
         Vector3 pos = new Vector3(cellIndex.x * terrainSize.x, -SeaFloorDepthSpan, cellIndex.y * terrainSize.z);
-        terrainGO.transform.position = pos;
+        Terrain terrainComp = CreateRenderedTile(tData, GetContainer("Terrains"), pos, $"Terrain_{cellIndex.x}_{cellIndex.y}");
+        GameObject terrainGO = terrainComp.gameObject;
+        terrainGO.layer = LayerMask.NameToLayer("Ground");
+        terrainGO.AddComponent<TerrainInputHandler>();
 
+        var vmo = terrainGO.AddComponent<VisualModeObject>();
+        vmo.objectType = InputObjectType.TERRAIN;
+        terrainGO.AddComponent<VisualTerrainObject>();
+        return terrainComp;
+    }
+
+    // ゲームのセルと起動演出で、同じ高さマップの描画設定・地表材質を使う。
+    internal Terrain CreateRenderedTile(TerrainData tData, Transform parent, Vector3 position, string tileName)
+    {
+        GameObject terrainGO = Terrain.CreateTerrainGameObject(tData);
+        terrainGO.name = tileName;
+        terrainGO.transform.SetParent(parent, false);
+        terrainGO.transform.position = position;
         Terrain terrainComp = terrainGO.GetComponent<Terrain>();
         terrainComp.drawInstanced = true;
         terrainComp.heightmapPixelError = LocalConstants.TERRAIN_HEIGHTMAP_PIXEL_ERROR;
@@ -2108,12 +2114,6 @@ public partial class TerrainManager : BaseApiDataManager
         terrainComp.basemapDistance = 100000f;
 
         ApplyTerrainMaterial(terrainComp, tData);
-
-        terrainGO.AddComponent<TerrainInputHandler>();
-
-        var vmo = terrainGO.AddComponent<VisualModeObject>();
-        vmo.objectType = InputObjectType.TERRAIN;
-        terrainGO.AddComponent<VisualTerrainObject>();
         return terrainComp;
     }
 

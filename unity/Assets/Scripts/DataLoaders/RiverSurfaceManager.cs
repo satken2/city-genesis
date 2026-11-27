@@ -63,7 +63,6 @@ public class RiverSurfaceManager : MonoBehaviour
     private Texture2D riverMaskTex;
 
     private readonly List<GameObject> riverObjects = new List<GameObject>();
-    private readonly List<Mesh> riverMeshes = new List<Mesh>();
     private Material riverMaterial;
     // Response text the current RiverStore, water objects, and mask were built from; null when none is applied.
     private string appliedJson;
@@ -130,7 +129,11 @@ public class RiverSurfaceManager : MonoBehaviour
         Material mat = ResolveRiverMaterial();
         foreach (var river in RiverStore.Rivers)
         {
-            BuildOneRiver(river, mat);
+            GameObject surface = CreateSurface(river, transform, mat);
+            if (surface == null) continue;
+            surface.tag = "SeaObject";
+            surface.AddComponent<VisualSeaObject>();
+            riverObjects.Add(surface);
         }
         BuildRiverMask(mat);
         Debug.Log($"RiverSurfaceManager: 川の水面を{riverObjects.Count}本生成しました。");
@@ -290,8 +293,6 @@ public class RiverSurfaceManager : MonoBehaviour
     {
         foreach (var go in riverObjects) if (go != null) Destroy(go);
         riverObjects.Clear();
-        foreach (var m in riverMeshes) if (m != null) Destroy(m);
-        riverMeshes.Clear();
     }
 
     /// <summary>
@@ -327,7 +328,7 @@ public class RiverSurfaceManager : MonoBehaviour
     }
 
     /// <summary>Create one river's grid surface mesh and GameObject.</summary>
-    private void BuildOneRiver(RiverRecord river, Material mat)
+    internal GameObject CreateSurface(RiverRecord river, Transform parent, Material mat = null)
     {
         int w = river.GridW, h = river.GridH;
         float step = river.GridStep;
@@ -362,7 +363,7 @@ public class RiverSurfaceManager : MonoBehaviour
                 triangles.Add(b); triangles.Add(c); triangles.Add(d);
             }
         }
-        if (triangles.Count < 3) return;
+        if (triangles.Count < 3) return null;
 
         Mesh mesh = new Mesh { name = $"RiverSurfaceMesh_{river.Id}" };
         if (vertices.Count > 65000) mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
@@ -371,17 +372,14 @@ public class RiverSurfaceManager : MonoBehaviour
         mesh.SetTriangles(triangles, 0);
         mesh.RecalculateNormals();
         mesh.RecalculateBounds();
-        riverMeshes.Add(mesh);
 
         GameObject go = new GameObject($"RiverSurface_{river.Id}");
-        go.transform.SetParent(transform);
+        go.transform.SetParent(parent, false);
         go.transform.position = Vector3.zero;
         go.AddComponent<MeshFilter>().sharedMesh = mesh;
-        go.AddComponent<MeshRenderer>().sharedMaterial = mat;
-        // Like sea surfaces, allow hiding water with terrain transparency/hidden modes.
-        go.tag = "SeaObject";
-        go.AddComponent<VisualSeaObject>();
-        riverObjects.Add(go);
+        go.AddComponent<MeshRenderer>().sharedMaterial = mat ?? ResolveRiverMaterial();
+        go.AddComponent<TerrainTileResources>().Own(mesh);
+        return go;
     }
 
     [System.Serializable]

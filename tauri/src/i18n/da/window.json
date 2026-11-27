@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Forvaltningsscore (pr. husstand / maks. 2,0)",
     "menuCitizenList": "Borgerliste"
   },
+  "opening": {
+    "plain": "Du bliver borgmester i den by, der skal vokse frem her. Hvor ville du anlægge den første vej?",
+    "village": "En vej og en håndfuld huse. For dem, der bor her, er det allerede en landsby.",
+    "city": "Det er op til dig, hvilken by der vokser frem her.",
+    "skip": "Spring over"
+  },
   "topmenu": {
     "minimize": "Minimer",
     "coreConnectionFailed": "Forbindelsen mislykkedes",
@@ -167,10 +173,7 @@
     "options": "Indstillinger",
     "quit": "Afslut",
     "quitting": "Afslutter…",
-    "assetManager": "Assetadministration",
-    "firstLaunchTutorialConfirm": "Vil du starte tutorialen?",
-    "firstLaunchTutorialYes": "Ja",
-    "firstLaunchTutorialNo": "Nej"
+    "assetManager": "Assetadministration"
   },
   "display": {
     "layerTerrain": "Terræn",

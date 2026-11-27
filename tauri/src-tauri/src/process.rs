@@ -37,6 +37,7 @@ const CREATE_NO_WINDOW: u32 = 0x0800_0000;
 /// Connection endpoint and child executables determined at startup.
 pub struct Launch {
     pub api_base_url: String,
+    pub ui_only: bool,
     core: Option<(PathBuf, u16)>,
     graphic: Option<PathBuf>,
     /// Environment variables for the core: store-managed folders (DLC and Workshop) supplied by store integration.
@@ -57,7 +58,13 @@ impl Launch {
             Some((_, port)) => format!("http://127.0.0.1:{port}"),
             None => std::env::var("GENESIS_UI_API_BASE_URL").unwrap_or_else(|_| EXTERNAL_CORE_URL.into()),
         };
-        Self { api_base_url, core, graphic: existing(GRAPHIC_EXE), core_env: Vec::new() }
+        let ui_only = cfg!(all(debug_assertions, dev)) && std::env::args().any(|arg| arg == "--ui-only");
+        let graphic = if ui_only {
+            None
+        } else {
+            existing(GRAPHIC_EXE)
+        };
+        Self { api_base_url, ui_only, core, graphic, core_env: Vec::new() }
     }
 }
 
@@ -65,7 +72,7 @@ impl Launch {
 impl Launch {
     /// Launch configuration that only connects to the specified endpoint without starting children (for tests).
     pub fn connect_only(api_base_url: String) -> Self {
-        Self { api_base_url, core: None, graphic: None, core_env: Vec::new() }
+        Self { api_base_url, ui_only: true, core: None, graphic: None, core_env: Vec::new() }
     }
 }
 

@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Skor tata kelola (per rumah tangga / maksimum 2,0)",
     "menuCitizenList": "Daftar warga"
   },
+  "opening": {
+    "plain": "Anda akan menjadi wali kota dari kota yang akan tumbuh di sini. Di mana Anda akan membangun jalan pertama?",
+    "village": "Satu jalan dan beberapa rumah. Bagi orang yang tinggal di sini, sebuah desa sudah terbentuk.",
+    "city": "Anda yang menentukan seperti apa kota ini kelak.",
+    "skip": "Lewati"
+  },
   "topmenu": {
     "minimize": "Perkecil",
     "coreConnectionFailed": "Gagal terhubung",
@@ -167,10 +173,7 @@
     "options": "Opsi",
     "quit": "Keluar",
     "quitting": "Menutup...",
-    "assetManager": "Pengelola aset",
-    "firstLaunchTutorialConfirm": "Mulai tutorial?",
-    "firstLaunchTutorialYes": "Ya",
-    "firstLaunchTutorialNo": "Tidak"
+    "assetManager": "Pengelola aset"
   },
   "display": {
     "layerTerrain": "Medan",

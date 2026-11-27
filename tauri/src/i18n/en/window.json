@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Governance score (per household, max 2.0)",
     "menuCitizenList": "Citizen list"
   },
+  "opening": {
+    "plain": "You will be the mayor of the city that grows here. Where would you lay the first road?",
+    "village": "One road and a handful of homes. To the people who live here, this is already a town.",
+    "city": "What kind of city grows here next is up to you.",
+    "skip": "Skip"
+  },
   "topmenu": {
     "minimize": "Minimize",
     "coreConnectionFailed": "Connection failed",
@@ -167,10 +173,7 @@
     "options": "Options",
     "quit": "Quit",
     "quitting": "Quitting...",
-    "assetManager": "Asset Manager",
-    "firstLaunchTutorialConfirm": "Would you like to start the tutorial?",
-    "firstLaunchTutorialYes": "Yes",
-    "firstLaunchTutorialNo": "No"
+    "assetManager": "Asset Manager"
   },
   "display": {
     "layerTerrain": "Terrain",

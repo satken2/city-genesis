@@ -11,6 +11,7 @@
 import { WINDOW_LABEL_ATTRIBUTE } from "../shared/shellApi";
 import { emitTo, removeListenersOf } from "../shell/events";
 import { makeEnvelope, type Envelope } from "../shell/ipc";
+import { startWithoutOpening } from "../shell/opening";
 import { markGraphicLoaded } from "../shell/process";
 import { definition } from "../shell/version";
 import { DEBUG_FRAME_PAGE, LABEL_DEBUG_MAP } from "./labels";
@@ -82,6 +83,7 @@ export async function startMapGraphic(element: HTMLElement): Promise<void> {
   container = element;
   bridge = (globalThis as unknown as { __genesisGraphicBridge: GraphicBridge }).__genesisGraphicBridge;
   bridge.attach(receive);
+  startWithoutOpening();
   send("system:graphic_ready", { ...definition(), core_compatible: true });
   markGraphicLoaded();
 }

@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Verwaltungswertung (pro Haushalt / Höchstwert 2,0)",
     "menuCitizenList": "Bürgerliste"
   },
+  "opening": {
+    "plain": "Du wirst die Stadt regieren, die hier entsteht. Wo würdest du die erste Straße anlegen?",
+    "village": "Eine Straße und ein paar Häuser. Für die Menschen, die hier leben, ist das schon ein Dorf.",
+    "city": "Du entscheidest, was für eine Stadt hier wächst.",
+    "skip": "Überspringen"
+  },
   "topmenu": {
     "minimize": "Minimieren",
     "coreConnectionFailed": "Verbindung fehlgeschlagen",
@@ -167,10 +173,7 @@
     "options": "Optionen",
     "quit": "Beenden",
     "quitting": "Wird beendet …",
-    "assetManager": "Asset-Manager",
-    "firstLaunchTutorialConfirm": "Möchten Sie das Tutorial starten?",
-    "firstLaunchTutorialYes": "Ja",
-    "firstLaunchTutorialNo": "Nein"
+    "assetManager": "Asset-Manager"
   },
   "display": {
     "layerTerrain": "Gelände",

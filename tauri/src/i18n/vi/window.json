@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Điểm quản trị (mỗi hộ gia đình / tối đa 2,0)",
     "menuCitizenList": "Danh sách công dân"
   },
+  "opening": {
+    "plain": "Bạn sẽ là thị trưởng của thành phố hình thành ở đây. Bạn sẽ mở con đường đầu tiên ở đâu?",
+    "village": "Một con đường và vài mái nhà. Với những người sống ở đây, thế là đã thành một ngôi làng.",
+    "city": "Thành phố này mai sau sẽ ra sao là do bạn quyết định.",
+    "skip": "Bỏ qua"
+  },
   "topmenu": {
     "minimize": "Thu nhỏ",
     "coreConnectionFailed": "Kết nối thất bại",
@@ -167,10 +173,7 @@
     "options": "Tùy chọn",
     "quit": "Thoát",
     "quitting": "Đang thoát…",
-    "assetManager": "Trình quản lý tài nguyên",
-    "firstLaunchTutorialConfirm": "Bạn có muốn bắt đầu phần hướng dẫn không?",
-    "firstLaunchTutorialYes": "Có",
-    "firstLaunchTutorialNo": "Không"
+    "assetManager": "Trình quản lý tài nguyên"
   },
   "display": {
     "layerTerrain": "Địa hình",

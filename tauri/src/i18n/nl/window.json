@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Bestuursscore (per huishouden, max. 2,0)",
     "menuCitizenList": "Burgerlijst"
   },
+  "opening": {
+    "plain": "Jij wordt de burgemeester van de stad die hier zal ontstaan. Waar zou je de eerste weg aanleggen?",
+    "village": "Eén weg en een paar huizen. Voor de mensen die hier wonen is het al een dorp.",
+    "city": "Jij bepaalt wat voor stad hier groeit.",
+    "skip": "Overslaan"
+  },
   "topmenu": {
     "minimize": "Minimaliseren",
     "coreConnectionFailed": "Verbinding mislukt",
@@ -167,10 +173,7 @@
     "options": "Opties",
     "quit": "Afsluiten",
     "quitting": "Afsluiten…",
-    "assetManager": "Assetbeheer",
-    "firstLaunchTutorialConfirm": "Wil je de tutorial starten?",
-    "firstLaunchTutorialYes": "Ja",
-    "firstLaunchTutorialNo": "Nee"
+    "assetManager": "Assetbeheer"
   },
   "display": {
     "layerTerrain": "Terrein",

@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Оценка управления (на домохозяйство / максимум 2.0)",
     "menuCitizenList": "Список граждан"
   },
+  "opening": {
+    "plain": "Вы возглавите город, который здесь появится. Где бы вы проложили первую дорогу?",
+    "village": "Одна дорога и несколько домов. Для тех, кто здесь живёт, это уже посёлок.",
+    "city": "Каким станет этот город, решать вам.",
+    "skip": "Пропустить"
+  },
   "topmenu": {
     "minimize": "Свернуть",
     "coreConnectionFailed": "Ошибка подключения",
@@ -167,10 +173,7 @@
     "options": "Параметры",
     "quit": "Выход",
     "quitting": "Выход...",
-    "assetManager": "Менеджер ассетов",
-    "firstLaunchTutorialConfirm": "Начать обучение?",
-    "firstLaunchTutorialYes": "Да",
-    "firstLaunchTutorialNo": "Нет"
+    "assetManager": "Менеджер ассетов"
   },
   "display": {
     "layerTerrain": "Рельеф",

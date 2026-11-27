@@ -1402,6 +1402,7 @@ pub fn on_window_destroyed(app: &AppHandle, state: &SharedState, label: &str) {
     if label == "main"
         || HUD_WINDOW_LABELS.contains(&label)
         || label == "topmenu"
+        || label == "opening-caption"
         || label == "notification"
         || label == "hintbar"
         || label == "tutorial"

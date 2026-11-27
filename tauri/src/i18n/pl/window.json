@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Ocena zarządzania (na gospodarstwo domowe / maks. 2.0)",
     "menuCitizenList": "Lista obywateli"
   },
+  "opening": {
+    "plain": "To ty staniesz na czele miasta, które tu powstanie. Gdzie wytyczysz pierwszą drogę?",
+    "village": "Jedna droga i kilka domów. Dla ludzi, którzy tu mieszkają, to już osada.",
+    "city": "To od ciebie zależy, jakie miasto tu wyrośnie.",
+    "skip": "Pomiń"
+  },
   "topmenu": {
     "minimize": "Minimalizuj",
     "coreConnectionFailed": "Błąd połączenia",
@@ -167,10 +173,7 @@
     "options": "Opcje",
     "quit": "Wyjdź",
     "quitting": "Zamykanie...",
-    "assetManager": "Menedżer zasobów",
-    "firstLaunchTutorialConfirm": "Czy chcesz rozpocząć samouczek?",
-    "firstLaunchTutorialYes": "Tak",
-    "firstLaunchTutorialNo": "Nie"
+    "assetManager": "Menedżer zasobów"
   },
   "display": {
     "layerTerrain": "Teren",

@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "施政評分（每戶，滿分2.0）",
     "menuCitizenList": "市民清單"
   },
+  "opening": {
+    "plain": "你將成為這片原野上新城市的市長。你會把第一條路蓋在哪裡？",
+    "village": "一條路，幾戶人家。對住在這裡的人來說，這已經是一座小鎮了。",
+    "city": "這座城市將來會是什麼模樣，由你決定。",
+    "skip": "略過"
+  },
   "topmenu": {
     "minimize": "最小化",
     "coreConnectionFailed": "連線失敗",
@@ -167,10 +173,7 @@
     "options": "選項",
     "quit": "結束",
     "quitting": "結束中...",
-    "assetManager": "素材管理器",
-    "firstLaunchTutorialConfirm": "要開始教學嗎？",
-    "firstLaunchTutorialYes": "是",
-    "firstLaunchTutorialNo": "否"
+    "assetManager": "素材管理器"
   },
   "display": {
     "layerTerrain": "地形",

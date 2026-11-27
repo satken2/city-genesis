@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "درجة الحوكمة (لكل أسرة / الحد الأقصى 2.0)",
     "menuCitizenList": "قائمة المواطنين"
   },
+  "opening": {
+    "plain": "ستتولى رئاسة بلدية المدينة التي ستنشأ هنا. أين ستمد أول طريق؟",
+    "village": "طريق واحد وبضعة بيوت. في نظر من يسكنون هنا، هذه قرية بالفعل.",
+    "city": "أنت من يقرر أي مدينة ستنشأ هنا.",
+    "skip": "تخطَّ"
+  },
   "topmenu": {
     "minimize": "تصغير",
     "coreConnectionFailed": "فشل الاتصال",
@@ -167,10 +173,7 @@
     "options": "الخيارات",
     "quit": "خروج",
     "quitting": "جارٍ الخروج...",
-    "assetManager": "مدير الأصول",
-    "firstLaunchTutorialConfirm": "هل تريد بدء الدرس التعليمي؟",
-    "firstLaunchTutorialYes": "نعم",
-    "firstLaunchTutorialNo": "لا"
+    "assetManager": "مدير الأصول"
   },
   "display": {
     "layerTerrain": "التضاريس",

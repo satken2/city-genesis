@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Score de gouvernance (par ménage, maximum 2,0)",
     "menuCitizenList": "Liste des citoyens"
   },
+  "opening": {
+    "plain": "Vous serez à la tête de la ville qui naîtra ici. Où traceriez-vous la toute première route ?",
+    "village": "Une route, quelques maisons. Pour celles et ceux qui y vivent, c’est déjà un village.",
+    "city": "À vous de décider quelle ville grandira ici.",
+    "skip": "Passer"
+  },
   "topmenu": {
     "minimize": "Réduire",
     "coreConnectionFailed": "Échec de connexion",
@@ -167,10 +173,7 @@
     "options": "Options",
     "quit": "Quitter",
     "quitting": "Fermeture...",
-    "assetManager": "Gestionnaire de ressources",
-    "firstLaunchTutorialConfirm": "Voulez-vous commencer le tutoriel ?",
-    "firstLaunchTutorialYes": "Oui",
-    "firstLaunchTutorialNo": "Non"
+    "assetManager": "Gestionnaire de ressources"
   },
   "display": {
     "layerTerrain": "Terrain",

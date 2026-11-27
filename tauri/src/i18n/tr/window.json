@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Yönetim puanı (hane başına / tam puan 2.0)",
     "menuCitizenList": "Vatandaş listesi"
   },
+  "opening": {
+    "plain": "Burada kurulacak şehrin belediye başkanı siz olacaksınız. İlk yolu nereden geçirirdiniz?",
+    "village": "Bir yol ve birkaç ev. Burada yaşayanlar için burası şimdiden bir kasaba.",
+    "city": "Burada nasıl bir şehrin yükseleceğine siz karar vereceksiniz.",
+    "skip": "Atla"
+  },
   "topmenu": {
     "minimize": "Simge durumuna küçült",
     "coreConnectionFailed": "Bağlantı başarısız",
@@ -167,10 +173,7 @@
     "options": "Seçenekler",
     "quit": "Çıkış",
     "quitting": "Çıkılıyor...",
-    "assetManager": "Varlık yöneticisi",
-    "firstLaunchTutorialConfirm": "Eğitimi başlatmak ister misiniz?",
-    "firstLaunchTutorialYes": "Evet",
-    "firstLaunchTutorialNo": "Hayır"
+    "assetManager": "Varlık yöneticisi"
   },
   "display": {
     "layerTerrain": "Arazi",

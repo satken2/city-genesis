@@ -2486,7 +2486,7 @@ public class BuildingManager : BaseApiDataManager
     /// Used on tier changes or terrain-following regeneration after dynamic terrain updates.
     /// </param>
     /// <param name="drawLod">Render LOD (Normal / Close). CreateFarBuildingObject handles Far.</param>
-    private void CreateOrUpdateBuildingObject(BuildingSummary buildingData, bool isDynamic, bool forceRebuild = false, DrawLod drawLod = DrawLod.Normal)
+    internal void CreateOrUpdateBuildingObject(BuildingSummary buildingData, bool isDynamic, bool forceRebuild = false, DrawLod drawLod = DrawLod.Normal)
     {
         using var scope = createDetailedMarker.Auto();
         if (drawLod == DrawLod.Far || drawLod == DrawLod.Hidden) drawLod = DrawLod.Normal;

@@ -15,7 +15,7 @@ export interface AppSettings {
   citizen_voice_visible: boolean;
   multi_display: boolean;
   popup_monitor_index: number;
-  first_launch_tutorial_prompted: boolean;
+  first_launch_presented: boolean;
   epoch_interval_minutes: number;
 }
 
@@ -32,7 +32,7 @@ function defaults(): AppSettings {
     citizen_voice_visible: true,
     multi_display: false,
     popup_monitor_index: 0,
-    first_launch_tutorial_prompted: false,
+    first_launch_presented: false,
     epoch_interval_minutes: 10,
   };
 }
@@ -55,7 +55,7 @@ function normalize(raw: unknown): AppSettings {
     citizen_voice_visible: pick("citizen_voice_visible", (v) => typeof v === "boolean"),
     multi_display: pick("multi_display", (v) => typeof v === "boolean"),
     popup_monitor_index: pick("popup_monitor_index", isNumber),
-    first_launch_tutorial_prompted: pick("first_launch_tutorial_prompted", (v) => typeof v === "boolean"),
+    first_launch_presented: value.first_launch_presented === true || value.first_launch_tutorial_prompted === true,
     epoch_interval_minutes: pick("epoch_interval_minutes", isNumber),
   };
 }

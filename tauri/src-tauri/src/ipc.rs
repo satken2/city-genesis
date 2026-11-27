@@ -716,6 +716,11 @@ pub async fn handle_incoming_message(
                 guard.graphic_load_ready = true;
             }
         }
+        "opening:shown" => {
+            if let Some(stage) = envelope.payload["stage"].as_i64() {
+                crate::opening::shown(&app, &state, stage);
+            }
+        }
         "system:graphic_ready" => {
             // A newly started Unity instance is not in fly or capture mode; restore UI hidden by the previous instance.
             window::set_ui_cloaked(&app, false);
@@ -773,6 +778,7 @@ pub async fn handle_incoming_message(
                     }
                 });
             }
+            crate::opening::graphic_ready(&app, &state)?;
             // Unity brings itself to the foreground on startup, which can send the UI behind it.
             window::reassert_topmost(&app);
             let _ = app.emit("graphic-reconnected", envelope.payload);

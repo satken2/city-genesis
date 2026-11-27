@@ -60,7 +60,7 @@ public class LoadingOverlay : MonoBehaviour
     {
         if (GameStateManager.Instance != null)
         {
-            bool shouldShow = !GameStateManager.Instance.IsWorldVisible;
+            bool shouldShow = !OpeningMovie.IsVisible && !GameStateManager.Instance.IsWorldVisible;
             if (shouldShow && _canvasGroup.alpha < 0.01f)
             {
                 Debug.LogWarning($"LoadingOverlay: alpha should be 1 but is {_canvasGroup.alpha}. GameState={GameStateManager.Instance.CurrentState}");
@@ -90,7 +90,7 @@ public class LoadingOverlay : MonoBehaviour
     /// </summary>
     private void SyncVisibility()
     {
-        bool shouldShow = GameStateManager.Instance == null || !GameStateManager.Instance.IsWorldVisible;
+        bool shouldShow = !OpeningMovie.IsVisible && (GameStateManager.Instance == null || !GameStateManager.Instance.IsWorldVisible);
         float targetAlpha = shouldShow ? 1f : 0f;
         if (_canvasGroup.alpha != targetAlpha)
         {

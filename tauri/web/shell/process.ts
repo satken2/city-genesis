@@ -2,6 +2,7 @@
  * グラフィック(Unity)の起動とアプリの終了。exe の `src-tauri/src/process.rs` に当たる。
  * exe は Unity を子プロセスとして起動するが、ブラウザ版は同じページの canvas に Unity の Web ビルドを読み込む。
  */
+import { startWithoutOpening } from "./opening";
 import { GRAPHIC_BUILD_URL } from "./config";
 import * as host from "./host";
 import { sendUiAction } from "./ipc";
@@ -65,6 +66,7 @@ export async function startGraphic(canvas: HTMLCanvasElement): Promise<void> {
   } catch (error) {
     console.error("[graphic] Unity を起動できません", error);
   } finally {
+    if (!unityInstance) startWithoutOpening();
     resolveGraphicLoaded();
   }
 }

@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Оцінка врядування (на одне домогосподарство / максимум 2,0)",
     "menuCitizenList": "Список містян"
   },
+  "opening": {
+    "plain": "Ви очолите місто, яке тут постане. Де б ви проклали першу дорогу?",
+    "village": "Одна дорога й кілька будинків. Для тих, хто тут живе, це вже селище.",
+    "city": "Яким стане це місто, вирішувати вам.",
+    "skip": "Пропустити"
+  },
   "topmenu": {
     "minimize": "Згорнути",
     "coreConnectionFailed": "Помилка з'єднання",
@@ -167,10 +173,7 @@
     "options": "Параметри",
     "quit": "Вийти",
     "quitting": "Вихід...",
-    "assetManager": "Менеджер ресурсів",
-    "firstLaunchTutorialConfirm": "Почати навчання?",
-    "firstLaunchTutorialYes": "Так",
-    "firstLaunchTutorialNo": "Ні"
+    "assetManager": "Менеджер ресурсів"
   },
   "display": {
     "layerTerrain": "Рельєф",

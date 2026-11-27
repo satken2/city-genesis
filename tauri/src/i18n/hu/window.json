@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Városvezetési pontszám (háztartásonként / maximum 2,0)",
     "menuCitizenList": "Polgárlista"
   },
+  "opening": {
+    "plain": "Te leszel az itt születő város polgármestere. Merre vezetne az első út?",
+    "village": "Egy út és néhány ház. Az itt élőknek ez már egy falu.",
+    "city": "Rajtad áll, milyen város nő itt fel.",
+    "skip": "Kihagyás"
+  },
   "topmenu": {
     "minimize": "Kis méret",
     "coreConnectionFailed": "Sikertelen kapcsolódás",
@@ -167,10 +173,7 @@
     "options": "Beállítások",
     "quit": "Kilépés",
     "quitting": "Kilépés…",
-    "assetManager": "Eszközkezelő",
-    "firstLaunchTutorialConfirm": "Elindítod az oktatóanyagot?",
-    "firstLaunchTutorialYes": "Igen",
-    "firstLaunchTutorialNo": "Nem"
+    "assetManager": "Eszközkezelő"
   },
   "display": {
     "layerTerrain": "Terep",

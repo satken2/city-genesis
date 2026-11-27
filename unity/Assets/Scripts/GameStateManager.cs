@@ -140,6 +140,7 @@ public class GameStateManager : MonoBehaviour
     {
         var newState = started ? GameState.Game : GameState.Menu;
         if (currentState == newState) return;
+        if (started) OpeningMovie.Close();
         currentState = newState;
         this.savedataId = savedataId;
         OnStateChanged?.Invoke(currentState);

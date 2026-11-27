@@ -25,6 +25,8 @@ WebView CORS and CSP are browser restrictions, distinct from Rust and Unity HTTP
 
 On desktop, Tauri is the entry point and launches and monitors the bundled core and Unity as children. It establishes the core connection before launching Unity and checks [compatibility](compatibility.md) before gameplay communication. Development can also connect to an externally launched core or Unity Editor.
 
+Unity signals readiness after the splash screen finishes. Tauri waits for this signal before showing the startup UI. On first launch, Unity draws the bundled landscape and city layout with the same terrain tile, river surface, road and building renderers used in play. The opening requires no city session. Tauri presents the captions and controls progression. The main menu appears after the opening and directly after the splash on subsequent launches. For UI-only development, pass `--ui-only` to Tauri.
+
 The launcher supplies endpoints. `GENESIS_API_PORT` specifies the core's listening port; `--api-base-url` specifies Unity's endpoint; `GENESIS_UI_API_BASE_URL` directs Tauri to an external core.
 
 Actions stop during connection loss. Restarted Unity reloads the city from the core. Tauri centralizes application shutdown regardless of its origin and requests shutdown of processes it launched. The core is given time to finish ongoing work and saving. On shutdown the core writes an emergency autosave of the open city, except when the player quit after a confirmation stating that progress is not autosaved; Tauri tells the core so, and it does not save.

@@ -93,6 +93,7 @@ import { Cockpit } from "./components/hud/Cockpit";
 import { SystemTray } from "./components/hud/SystemTray";
 import { CitizenVoice } from "./components/hud/CitizenVoice";
 import { DisplayTray } from "./components/hud/DisplayTray";
+import { OpeningCaption } from "./components/topmenu/OpeningCaption";
 import { TopMenu } from "./components/topmenu/TopMenu";
 import { extraWindow } from "./extraWindows";
 import { ParameterSetupWindow } from "./components/parameter-setup/ParameterSetupWindow";
@@ -112,14 +113,14 @@ const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_
 
 function App() {
   const { t } = useTranslation();
-  useAppDisplaySettings();
+  const displaySettingsReady = useAppDisplaySettings();
   const appWindow = useMemo(() => getCurrentWindow(), []);
   const [context, setContext] = useState<WindowContext | null>(null);
   const [apiBaseUrl, setApiBaseUrl] = useState<string>("");
   const [backendConnected, setConnection] = useState(true);
   const [queryState, setQueryState] = useState<QueryState>({ status: "idle" });
   const [actionState, setActionState] = useState<string>("");
-  const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "display-tray" | "citizen-voice" | "extra" | "topmenu" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
+  const [windowKind, setWindowKind] = useState<"host" | "icon-panel" | "cockpit" | "system-tray" | "display-tray" | "citizen-voice" | "extra" | "topmenu" | "opening-caption" | "popup" | "notification" | "hintbar" | "parameter-setup" | "tutorial" | "tips">("host");
 
   useEffect(() => {
     let disposed = false;
@@ -146,6 +147,8 @@ function App() {
         setWindowKind("display-tray");
       } else if (label === "citizen-voice") {
         setWindowKind("citizen-voice");
+      } else if (label === "opening-caption") {
+        setWindowKind("opening-caption");
       } else if (label === "topmenu") {
         setWindowKind("topmenu");
 
@@ -174,7 +177,7 @@ function App() {
       // Windows outside window-registry popups (HUD panels, top menu, notifications, Tips, hint bar, tutorial,
       // initial setup, and entry-point-registered windows) are created directly by the shell and have no context.
       const contextlessLabels = [
-        "main", "icon-panel", "cockpit", "system-tray", "display-tray", "citizen-voice", "topmenu",
+        "main", "icon-panel", "cockpit", "system-tray", "display-tray", "citizen-voice", "topmenu", "opening-caption",
         "notification", "tips", "hintbar", "tutorial", "parameter-setup",
       ];
       if (!contextlessLabels.includes(label) && !extraWindow(label)) {
@@ -320,14 +323,16 @@ function App() {
 
   configureBackendRequests(apiBaseUrl);
   const ExtraWindow = extraWindow(appWindow.label);
-  const connectionBlocked = !backendConnected && windowKind !== "topmenu" && windowKind !== "system-tray"
+  const connectionBlocked = !backendConnected && windowKind !== "topmenu" && windowKind !== "opening-caption" && windowKind !== "system-tray"
     && !["settings", "credits"].includes(context?.window_type ?? "");
 
   return (
     <MasterDataProvider apiBaseUrl={apiBaseUrl} connected={backendConnected}>
       <div className="connection-content" {...(connectionBlocked ? { inert: "" } : {})}>
       <TutorialLayer windowType={context?.window_type ?? windowKind} entity={context?.entity?.id} />
-      {windowKind === "topmenu" ? (
+      {windowKind === "opening-caption" ? (
+        displaySettingsReady && <OpeningCaption />
+      ) : windowKind === "topmenu" ? (
         <TopMenu apiBaseUrl={apiBaseUrl} />
       ) : windowKind === "icon-panel" ? (
         <IconPanel />

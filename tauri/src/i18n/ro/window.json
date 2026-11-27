@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Scor de guvernare (pe gospodărie / maxim 2,0)",
     "menuCitizenList": "Lista cetățenilor"
   },
+  "opening": {
+    "plain": "Vei fi primarul orașului care se va naște aici. Pe unde ai trasa primul drum?",
+    "village": "Un drum și câteva case. Pentru oamenii care trăiesc aici, acesta e deja un sat.",
+    "city": "Tu hotărăști ce fel de oraș va crește aici.",
+    "skip": "Sari peste"
+  },
   "topmenu": {
     "minimize": "Minimizează",
     "coreConnectionFailed": "Conexiune eșuată",
@@ -167,10 +173,7 @@
     "options": "Opțiuni",
     "quit": "Ieșire",
     "quitting": "Se închide…",
-    "assetManager": "Manager de conținut",
-    "firstLaunchTutorialConfirm": "Vrei să începi tutorialul?",
-    "firstLaunchTutorialYes": "Da",
-    "firstLaunchTutorialNo": "Nu"
+    "assetManager": "Manager de conținut"
   },
   "display": {
     "layerTerrain": "Teren",

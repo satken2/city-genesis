@@ -263,6 +263,27 @@ public class MasterDataStore : MonoBehaviour
 	private Dictionary<int, ParcelTypeItem> parcelTypesById = new Dictionary<int, ParcelTypeItem>();
 	private Dictionary<int, AgentTypeItem> agentTypesById = new Dictionary<int, AgentTypeItem>();
 
+	// 起動演出の同期メッシュ生成だけに同梱の描画定義を渡す。コルーチンへ戻る前に都市側の参照を復元する。
+	internal void WithRenderingMasters(Dictionary<int, AgentMasterItem> agents, Dictionary<int, PathMasterItem> paths, Action render)
+	{
+		var previousAgents = agentMasterById;
+		var previousPaths = pathMasterById;
+		bool initialized = IsInitialized;
+		try
+		{
+			agentMasterById = agents;
+			pathMasterById = paths;
+			IsInitialized = true;
+			render();
+		}
+		finally
+		{
+			agentMasterById = previousAgents;
+			pathMasterById = previousPaths;
+			IsInitialized = initialized;
+		}
+	}
+
 	private void Awake()
 	{
 		if (Instance != null && Instance != this)

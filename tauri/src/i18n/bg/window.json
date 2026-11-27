@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Оценка на управлението (на домакинство, максимум 2,0)",
     "menuCitizenList": "Списък на гражданите"
   },
+  "opening": {
+    "plain": "Вие ще бъдете кмет на града, който ще се роди тук. Откъде ще прокарате първия път?",
+    "village": "Един път и няколко къщи. За хората, които живеят тук, това вече е село.",
+    "city": "От вас зависи какъв град ще израсне тук.",
+    "skip": "Пропускане"
+  },
   "topmenu": {
     "minimize": "Минимизирай",
     "coreConnectionFailed": "Неуспешна връзка",
@@ -167,10 +173,7 @@
     "options": "Опции",
     "quit": "Изход",
     "quitting": "Излизане…",
-    "assetManager": "Мениджър на ресурси",
-    "firstLaunchTutorialConfirm": "Искате ли да започнете обучението?",
-    "firstLaunchTutorialYes": "Да",
-    "firstLaunchTutorialNo": "Не"
+    "assetManager": "Мениджър на ресурси"
   },
   "display": {
     "layerTerrain": "Релеф",

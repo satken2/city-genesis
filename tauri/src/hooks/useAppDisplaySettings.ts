@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
 import { isSupportedLanguage } from "../utils/locale";
@@ -6,7 +6,8 @@ import { setCurrencyUnit } from "../utils/money";
 import { loadAppSettings, type AppSettings } from "../utils/settings";
 
 /** 各 WebView で言語と通貨単位を復元・同期する。再取得中に受けた更新を古い設定で戻さない。 */
-export function useAppDisplaySettings(): void {
+export function useAppDisplaySettings(): boolean {
+  const [ready, setReady] = useState(false);
   const { i18n } = useTranslation();
   const currentLanguage = useRef(i18n.language);
   currentLanguage.current = i18n.language;
@@ -15,26 +16,31 @@ export function useAppDisplaySettings(): void {
   useEffect(() => {
     let disposed = false;
     let receivedUpdate = false;
-    const apply = (settings: AppSettings) => {
+    const apply = async (settings: AppSettings) => {
       if (disposed) return;
       setCurrencyUnit(settings.currency_unit);
       const language = settings.language;
       if (isSupportedLanguage(language) && language !== currentLanguage.current) {
         currentLanguage.current = language;
-        void changeLanguage(language);
+        await changeLanguage(language);
       }
+      if (!disposed) setReady(true);
     };
     const unlisten = listen<AppSettings>("settings-updated", (event) => {
       receivedUpdate = true;
-      apply(event.payload);
+      void apply(event.payload).catch(console.error);
     });
     void unlisten.then(() => loadAppSettings()).then((settings) => {
-      if (!receivedUpdate) apply(settings);
-    }).catch(console.error);
+      if (!receivedUpdate) return apply(settings);
+    }).catch((error) => {
+      console.error(error);
+      if (!disposed) setReady(true);
+    });
 
     return () => {
       disposed = true;
       void unlisten.then((fn) => fn());
     };
   }, [changeLanguage]);
+  return ready;
 }

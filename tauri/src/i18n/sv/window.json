@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Förvaltningspoäng (per hushåll, max 2,0)",
     "menuCitizenList": "Medborgarlista"
   },
+  "opening": {
+    "plain": "Du blir borgmästare i staden som ska växa fram här. Var skulle du dra den första vägen?",
+    "village": "En väg och några hus. För dem som bor här är det redan en by.",
+    "city": "Vilken sorts stad som växer fram här är upp till dig.",
+    "skip": "Hoppa över"
+  },
   "topmenu": {
     "minimize": "Minimera",
     "coreConnectionFailed": "Anslutningen misslyckades",
@@ -167,10 +173,7 @@
     "options": "Alternativ",
     "quit": "Avsluta",
     "quitting": "Avslutar…",
-    "assetManager": "Resurshanterare",
-    "firstLaunchTutorialConfirm": "Vill du starta handledningen?",
-    "firstLaunchTutorialYes": "Ja",
-    "firstLaunchTutorialNo": "Nej"
+    "assetManager": "Resurshanterare"
   },
   "display": {
     "layerTerrain": "Terräng",

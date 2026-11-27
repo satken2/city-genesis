@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Skor tadbir urus (setiap isi rumah / maks. 2.0)",
     "menuCitizenList": "Senarai warga kota"
   },
+  "opening": {
+    "plain": "Anda akan menjadi datuk bandar bagi bandar yang bakal terbina di sini. Di manakah anda akan membina jalan pertama?",
+    "village": "Sebatang jalan dan beberapa buah rumah. Bagi penduduknya, tempat ini sudah menjadi sebuah kampung.",
+    "city": "Anda yang menentukan rupa bandar yang bakal berkembang di sini.",
+    "skip": "Langkau"
+  },
   "topmenu": {
     "minimize": "Minimumkan",
     "coreConnectionFailed": "Sambungan gagal",
@@ -167,10 +173,7 @@
     "options": "Pilihan",
     "quit": "Keluar",
     "quitting": "Sedang keluar...",
-    "assetManager": "Pengurus aset",
-    "firstLaunchTutorialConfirm": "Mulakan tutorial?",
-    "firstLaunchTutorialYes": "Ya",
-    "firstLaunchTutorialNo": "Tidak"
+    "assetManager": "Pengurus aset"
   },
   "display": {
     "layerTerrain": "Rupa bumi",

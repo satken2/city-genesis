@@ -1,0 +1,46 @@
+.opening-caption {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(12px, 2vw, 26px) clamp(18px, 4vw, 48px);
+  color: #faf7ee;
+  background: rgba(18, 29, 34, 0.95);
+  border: 1px solid #85968e;
+}
+
+.opening-caption-text {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 0;
+  font-size: clamp(20px, 1.9rem, 32px);
+  line-height: 1.45;
+  text-align: start;
+}
+
+.opening-caption-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 8px;
+}
+
+.opening-caption-actions button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.opening-skip {
+  border: 0;
+  padding: 6px 0;
+  color: #d2dbd6;
+  background: transparent;
+}
+
+.opening-next {
+  padding: 6px 1.5rem;
+  color: #162721;
+  background: #eeeede;
+  border: 1px solid #fff;
+}

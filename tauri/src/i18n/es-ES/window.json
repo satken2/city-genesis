@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Puntuación de gestión (por hogar, máximo 2.0)",
     "menuCitizenList": "Lista de ciudadanos"
   },
+  "opening": {
+    "plain": "Vas a gobernar la ciudad que nacerá aquí. ¿Por dónde trazarías la primera calle?",
+    "village": "Una calle y unas cuantas casas. Para quienes viven aquí, esto ya es un pueblo.",
+    "city": "Tú decides en qué clase de ciudad se convertirá.",
+    "skip": "Saltar"
+  },
   "topmenu": {
     "minimize": "Minimizar",
     "coreConnectionFailed": "Error de conexión",
@@ -167,10 +173,7 @@
     "options": "Opciones",
     "quit": "Salir",
     "quitting": "Saliendo...",
-    "assetManager": "Administrador de recursos",
-    "firstLaunchTutorialConfirm": "¿Quieres iniciar el tutorial?",
-    "firstLaunchTutorialYes": "Sí",
-    "firstLaunchTutorialNo": "No"
+    "assetManager": "Administrador de recursos"
   },
   "display": {
     "layerTerrain": "Terreno",

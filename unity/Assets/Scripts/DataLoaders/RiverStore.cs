@@ -288,7 +288,7 @@ public static class RiverStore
         }
     }
 
-    private static RiverRecord Parse(JToken item)
+    internal static RiverRecord Parse(JToken item)
     {
         if (item == null) return null;
         var rec = new RiverRecord { Id = item["id"]?.ToString() ?? "" };

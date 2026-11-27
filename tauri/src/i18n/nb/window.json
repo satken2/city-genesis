@@ -159,6 +159,12 @@
     "scoreMeterTooltip": "Styringspoeng (per husholdning / maks. 2,0)",
     "menuCitizenList": "Innbyggerliste"
   },
+  "opening": {
+    "plain": "Du blir ordfører i byen som skal vokse fram her. Hvor ville du lagt den første veien?",
+    "village": "Én vei og noen få hus. For dem som bor her, er det allerede en landsby.",
+    "city": "Hva slags by som vokser fram her, er opp til deg.",
+    "skip": "Hopp over"
+  },
   "topmenu": {
     "minimize": "Minimer",
     "coreConnectionFailed": "Tilkobling mislyktes",
@@ -167,10 +173,7 @@
     "options": "Innstillinger",
     "quit": "Avslutt",
     "quitting": "Avslutter …",
-    "assetManager": "Ressursbehandler",
-    "firstLaunchTutorialConfirm": "Vil du starte opplæringen?",
-    "firstLaunchTutorialYes": "Ja",
-    "firstLaunchTutorialNo": "Nei"
+    "assetManager": "Ressursbehandler"
   },
   "display": {
     "layerTerrain": "Terreng",
