@@ -595,15 +595,6 @@ pub async fn handle_incoming_message(
         "edit_transit:update_points" => {
             let _ = app.emit("edit_transit:update_points", envelope.payload);
         }
-        "edit_zone:selected" => {
-            let _ = app.emit("edit_zone:selected", envelope.payload);
-        }
-        "edit_zone:request_merge" => {
-            // Forward the source and destination chosen by the district editing mode's merge tool to the UI. Because
-            // merging irreversibly removes a district, Unity waits for the district detail panel's confirmation
-            // button rather than submitting (the icon panel opens the destination district's detail window on receipt).
-            let _ = app.emit("edit_zone:request_merge", envelope.payload);
-        }
         "edit_prop:update_instances" => {
             let _ = app.emit("edit_prop:update_instances", envelope.payload);
         }

@@ -6,7 +6,7 @@ $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 if (!$UnityExe) {
     [xml]$projectXml = Get-Content -LiteralPath $project -Raw
-    $coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' }
+    $coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' } | Select-Object -First 1
     $editorRoot = $coreReference.HintPath -replace '[\\/]Data[\\/].*$', ''
     $UnityExe = Join-Path $editorRoot 'Unity.exe'
 }

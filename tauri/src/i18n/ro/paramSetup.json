@@ -99,14 +99,6 @@
         "label": "Ponderea timpului de deplasare la alegerea locuinței",
         "desc": "La alegerea locuinței, cât cântărește fiecare minut de drum dus-întors la muncă, la școală și la cumpărături, ca multiplu al salariului mediu din oraș. La 1 se evaluează exact la nivelul salariului. Cu cât e mai mare, cu atât sunt preferate locuințele apropiate de locul de muncă și de magazine."
       },
-      "AVERAGE_WAGE": {
-        "label": "Salariu mediu (valoare de referință)",
-        "desc": "Salariul mediu de referință la începutul simulării."
-      },
-      "AVERAGE_RENT": {
-        "label": "Chirie medie (valoare de referință)",
-        "desc": "Chiria medie de referință la începutul simulării (pe zi și pe m²)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Partea dividendelor proporțională cu averea",
         "desc": "Partea din dividende distribuită proporțional cu lichiditățile fiecărei gospodării. Restul se împarte în mod egal tuturor gospodăriilor. 0 = totul în mod egal, 1 = totul proporțional cu lichiditățile."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Rata de amortizare a echipamentelor",
         "desc": "Rata cu care se amortizează în fiecare epocă stocul de capital provenit din investițiile în echipamente."
-      },
-      "WORK_HOURS": {
-        "label": "Ore de muncă pe zi (h)",
-        "desc": "Numărul standard de ore pe care un cetățean le lucrează într-o zi."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Vârsta de începere a educației de bază",
@@ -149,10 +137,6 @@
         "label": "Raport de eficiență a dărâmării",
         "desc": "De câte ori este mai eficientă dărâmarea decât o construcție nouă (multiplicator)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Probabilitate anuală de bază a prăbușirii",
-        "desc": "Probabilitatea anuală de bază ca o clădire cu durabilitatea 0,5 să se prăbușească."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Parametrul de formă Weibull al prăbușirii",
         "desc": "Cu cât e mai mare, cu atât probabilitatea de prăbușire crește mai brusc în apropierea duratei de viață proiectate."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Multiplicator de îmbătrânire fără întreținere",
         "desc": "Cât de repede îmbătrânește o clădire sau un traseu care nu primește deloc întreținere curentă, ca multiplu al îmbătrânirii cu întreținere completă. Variază liniar de la 1 până la această valoare, în funcție de partea de întreținere neprimită."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Probabilitate anuală de bază a intrării în reparații",
-        "desc": "Probabilitatea anuală de bază ca o clădire eligibilă să intre efectiv în reparații."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Datorie inițială de construcție (per m²)",
-        "desc": "Datoria inițială de construcție per m² de suprafață desfășurată a clădirii (rezerve negative)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Coeficient de zgomot al traficului rutier",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Viteza pietonilor (km/h)",
         "desc": "Viteza de deplasare a pietonilor. Se folosește la calculul costurilor de căutare a itinerariilor."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Distanța de accelerare a vehiculelor (m)",
-        "desc": "Distanța pe care accelerează autovehiculele. Influențează calculul vitezei pe drumurile scurte."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Ore de funcționare a drumului pe zi (h)",

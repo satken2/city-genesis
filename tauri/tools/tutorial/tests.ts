@@ -220,7 +220,7 @@ for (const mutate of [
   check((await now()).ui.highlight, ["zone_edit.tool:create", "zone_edit.mode:road"], "the new-district tool and the street-side brush are highlighted");
   editor.facts.windows.zone.visible = false;
   check((await now()).id, "enter", "closing the zone editor rewinds");
-  check(await evaluate({ type: "hudMode", mode: "district" }, editor), false, "hudMode is false in the normal state");
+  check(await evaluate({ type: "hudMode", mode: "bulldozer" }, editor), false, "hudMode is false in the normal state");
   for (const target of ["parcel.mode:along_path", "parcel.confirm", "building.back", "building.cancel", "building.confirm"]) {
     const d = roadLesson(); d.steps[0].phases[0].ui.highlight.push(target); validateDefinition(d); checks++;
   }

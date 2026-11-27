@@ -99,14 +99,6 @@
         "label": "Gewichtung der Wegezeit bei der Wohnungswahl",
         "desc": "Wie stark bei der Wohnungswahl jede Minute für Hin- und Rückweg zu Arbeit, Schule und Einkauf als Belastung zählt, als Vielfaches des durchschnittlichen Lohns der Stadt. 1 entspricht genau dem Lohn. Je größer, desto eher werden Wohnungen nahe Arbeitsplätzen und Geschäften gewählt."
       },
-      "AVERAGE_WAGE": {
-        "label": "Durchschnittslohn (Basiswert)",
-        "desc": "Basiswert des Durchschnittslohns zu Beginn der Simulation."
-      },
-      "AVERAGE_RENT": {
-        "label": "Durchschnittsmiete (Basiswert)",
-        "desc": "Basiswert der Durchschnittsmiete zu Beginn der Simulation (pro Tag und m²)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Vermögensabhängiger Anteil der Dividenden",
         "desc": "Anteil der Dividenden, der proportional zu den liquiden Mitteln der Haushalte ausgeschüttet wird. Der Rest wird gleichmäßig auf alle Haushalte verteilt. 0 = alles gleichmäßig, 1 = alles proportional zu den liquiden Mitteln."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Abschreibungsrate für Anlagen",
         "desc": "Abschreibungsrate des Kapitalstocks aus Anlageinvestitionen pro Epoche."
-      },
-      "WORK_HOURS": {
-        "label": "Tägliche Arbeitszeit (h)",
-        "desc": "Standardzahl der Stunden, die ein Bürger pro Tag arbeitet."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Alter bei Beginn der Grundbildung",
@@ -149,10 +137,6 @@
         "label": "Effizienzverhältnis beim Abreißen",
         "desc": "Wie viel effizienter das Abreißen im Vergleich zum Neubau ist (Faktor)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Jährliche Grundwahrscheinlichkeit für Einsturz",
-        "desc": "Jährliche Grundwahrscheinlichkeit, dass ein Gebäude mit Haltbarkeit 0.5 einstürzt."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Weibull-Formparameter der Einsturzwahrscheinlichkeit",
         "desc": "Je größer, desto stärker steigt die Einsturzwahrscheinlichkeit gegen Ende der Nutzungsdauer an."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Alterungsfaktor bei fehlendem Unterhalt",
         "desc": "Alterungsgeschwindigkeit von Gebäuden und Trassen ohne jeden laufenden Unterhalt, als Vielfaches der Alterung mit Unterhalt. Je nach Anteil des fehlenden Unterhalts ändert sie sich linear von 1 bis zu diesem Wert."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Jährliche Grundwahrscheinlichkeit für Reparaturbeginn",
-        "desc": "Jährliche Grundwahrscheinlichkeit, dass ein reparaturbedürftiges Gebäude tatsächlich repariert wird."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Anfängliche Bauschulden (pro m²)",
-        "desc": "Anfängliche Bauschulden pro m² Gesamtgeschossfläche eines Gebäudes (negative liquide Mittel)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Lärmkoeffizient des Straßenverkehrs",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Gehgeschwindigkeit (km/h)",
         "desc": "Bewegungsgeschwindigkeit von Fußgängern. Wird zur Berechnung der Routenkosten verwendet."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Beschleunigungsstrecke von Autos (m)",
-        "desc": "Strecke, die Autos zum Beschleunigen benötigen. Beeinflusst die Geschwindigkeitsberechnung auf kurzen Straßen."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Tägliche Betriebszeit der Straßen (h)",

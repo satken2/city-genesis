@@ -1379,31 +1379,34 @@ public class RoadPath : IPathMeshGenerator
             UnityLog.If(LocalConstants.UNITY_LOG_ROAD, "[RoadPath] 柱: height_editable=false/地下パス/spacing未指定のためスキップ");
         }
 
-        // Output overall generation summary.
-        int totalChildren = container.transform.childCount;
-        int rendererCount = 0;
-        int meshFilterCount = 0;
-        int totalVerts = 0;
-        for (int ci = 0; ci < totalChildren; ci++)
+        // Output overall generation summary only when verbose road logging is enabled.
+        if (LocalConstants.UNITY_LOG_ROAD)
         {
-            Transform child = container.transform.GetChild(ci);
-            MeshFilter mf = child.GetComponent<MeshFilter>();
-            if (mf != null && mf.sharedMesh != null)
+            int totalChildren = container.transform.childCount;
+            int rendererCount = 0;
+            int meshFilterCount = 0;
+            int totalVerts = 0;
+            for (int ci = 0; ci < totalChildren; ci++)
             {
-                meshFilterCount++;
-                totalVerts += mf.sharedMesh.vertexCount;
+                Transform child = container.transform.GetChild(ci);
+                MeshFilter mf = child.GetComponent<MeshFilter>();
+                if (mf != null && mf.sharedMesh != null)
+                {
+                    meshFilterCount++;
+                    totalVerts += mf.sharedMesh.vertexCount;
+                }
+                // SplineMesh creates child meshes; inspect nested descendants too.
+                MeshFilter[] childMfs = child.GetComponentsInChildren<MeshFilter>(true);
+                MeshRenderer[] childMrs = child.GetComponentsInChildren<MeshRenderer>(true);
+                if (childMfs.Length > 0) meshFilterCount += childMfs.Length;
+                if (childMrs.Length > 0) rendererCount += childMrs.Length;
+                foreach (var cmf in childMfs)
+                {
+                    if (cmf.sharedMesh != null) totalVerts += cmf.sharedMesh.vertexCount;
+                }
             }
-            // SplineMesh creates child meshes; inspect nested descendants too.
-            MeshFilter[] childMfs = child.GetComponentsInChildren<MeshFilter>(true);
-            MeshRenderer[] childMrs = child.GetComponentsInChildren<MeshRenderer>(true);
-            if (childMfs.Length > 0) meshFilterCount += childMfs.Length;
-            if (childMrs.Length > 0) rendererCount += childMrs.Length;
-            foreach (var cmf in childMfs)
-            {
-                if (cmf.sharedMesh != null) totalVerts += cmf.sharedMesh.vertexCount;
-            }
+            UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] --- 道路パーツ生成完了 --- 子オブジェクト数={totalChildren}, MeshFilter={meshFilterCount}, Renderer={rendererCount}, 総頂点数={totalVerts}");
         }
-        UnityLog.If(LocalConstants.UNITY_LOG_ROAD, () => $"[RoadPath] --- 道路パーツ生成完了 --- 子オブジェクト数={totalChildren}, MeshFilter={meshFilterCount}, Renderer={rendererCount}, 総頂点数={totalVerts}");
     }
 
     /// <summary>

@@ -134,15 +134,20 @@ fn verify(client: &Client, base: &str) {
         };
         user.cancel_authentication_ticket(ticket);
         match result {
-            Ok(response) if response.status().is_success() => {
-                log::info!("[steam] チケットを検証しました");
-                return;
+            Ok(response) => {
+                let status = response.status();
+                // Drain the response body before dropping so Windows/asyncio does not log ConnectionResetError (WinError 10054).
+                let _ = response.bytes();
+                if status.is_success() {
+                    log::info!("[steam] チケットを検証しました");
+                    return;
+                }
+                if matches!(status.as_u16(), 401 | 403) {
+                    log::warn!("[steam] チケットが拒否されました。未認証のまま続行します");
+                    return;
+                }
+                log::warn!("[steam] 検証に失敗しました (HTTP {status}) ({attempt}/{MAX_ATTEMPTS})");
             }
-            Ok(response) if matches!(response.status().as_u16(), 401 | 403) => {
-                log::warn!("[steam] チケットが拒否されました。未認証のまま続行します");
-                return;
-            }
-            Ok(response) => log::warn!("[steam] 検証に失敗しました (HTTP {}) ({attempt}/{MAX_ATTEMPTS})", response.status()),
             Err(error) => log::warn!("[steam] 検証に失敗しました: {error} ({attempt}/{MAX_ATTEMPTS})"),
         }
         std::thread::sleep(backoff);
@@ -159,7 +164,11 @@ fn wait_for_core(http: &reqwest::blocking::Client, base: &str) -> bool {
             .get(format!("{base}/api/v1/sessions"))
             .send()
             .ok()
-            .is_some_and(|response| response.status().is_success() && response.bytes().is_ok());
+            .is_some_and(|response| {
+                let ok = response.status().is_success();
+                let drained = response.bytes().is_ok();
+                ok && drained
+            });
         if responded {
             return true;
         }
@@ -207,11 +216,18 @@ pub fn sync_achievements(api_base_url: String) {
 }
 
 fn send_profile_achievements(client: &Client, http: &reqwest::blocking::Client, base: &str) {
-    let profile = http
+    let profile: Result<serde_json::Value, String> = http
         .get(format!("{base}/api/v1/profile"))
         .send()
-        .and_then(|response| response.error_for_status())
-        .and_then(|response| response.json::<serde_json::Value>());
+        .map_err(|e| e.to_string())
+        .and_then(|response| {
+            let status = response.status();
+            let bytes = response.bytes().map_err(|e| e.to_string())?;
+            if !status.is_success() {
+                return Err(format!("HTTP {status}"));
+            }
+            serde_json::from_slice(&bytes).map_err(|e| e.to_string())
+        });
     let names: Vec<String> = match profile {
         Ok(profile) => profile["achievements"]
             .as_array()

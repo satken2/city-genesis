@@ -35,7 +35,10 @@ public sealed class CityDataCache : MonoBehaviour
     /// travel times, or the city's GENERAL_PARAMS until they first arrive.
     /// </summary>
     public static float ActiveHoursPerDay => Instance != null && Instance.MotionActiveHours > 0
-        ? Instance.MotionActiveHours : MasterDataStore.Instance.GeneralParams.PATH_ACTIVE_HOURS;
+        ? Instance.MotionActiveHours
+        : (MasterDataStore.Instance != null && MasterDataStore.Instance.GeneralParams != null
+            ? MasterDataStore.Instance.GeneralParams.PATH_ACTIVE_HOURS
+            : 15f);
 
     /// <summary>IDs per request of the list APIs' ids query.</summary>
     public const int IdsPerRequest = 500;

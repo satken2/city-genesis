@@ -99,14 +99,6 @@
         "label": "Vekt på reisetid ved boligvalg",
         "desc": "Når en husholdning velger bolig: hvor tungt hvert minutt tur–retur til jobb, skole og butikk teller, som et multiplum av byens gjennomsnittslønn. 1 betyr verdsatt til lønnen. Jo høyere, desto oftere velges boliger nær arbeidsplasser og butikker."
       },
-      "AVERAGE_WAGE": {
-        "label": "Gjennomsnittslønn (utgangsverdi)",
-        "desc": "Referanseverdi for gjennomsnittslønnen ved simuleringsstart."
-      },
-      "AVERAGE_RENT": {
-        "label": "Gjennomsnittlig husleie (utgangsverdi)",
-        "desc": "Referanseverdi for gjennomsnittlig husleie ved simuleringsstart (per dag per m²)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Formuesbasert andel av utbytte",
         "desc": "Andelen av utbyttet som fordeles i forhold til husholdningenes likvide midler. Resten deles likt mellom alle husholdninger. 0 betyr alt likt, 1 betyr alt i forhold til likvide midler."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Avskrivningssats for utstyr",
         "desc": "Hvor mye kapitalbeholdningen fra utstyrsinvesteringer avskrives hver epoke."
-      },
-      "WORK_HOURS": {
-        "label": "Arbeidstimer per dag (t)",
-        "desc": "Vanlig antall timer en innbygger arbeider per dag."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Skolestartalder",
@@ -149,10 +137,6 @@
         "label": "Rivingseffektivitet",
         "desc": "Hvor mye mer effektivt riving er enn nybygging (faktor)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Årlig grunnsannsynlighet for sammenstyrtning",
-        "desc": "Grunnsannsynligheten per år for at en bygning med holdbarhet 0,5 styrter sammen."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Weibull-formparameter for sammenstyrtning",
         "desc": "Jo høyere verdi, desto brattere stiger sannsynligheten for sammenstyrtning nær den forventede levetiden."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Aldringsfaktor uten vedlikehold",
         "desc": "Hvor raskt en bygning eller trasé eldes når den ikke får noe løpende vedlikehold, som et multiplum av aldringen med fullt vedlikehold. Verdien går lineært fra 1 til denne verdien etter hvor stor andel av vedlikeholdet som uteble."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Årlig grunnsannsynlighet for reparasjon",
-        "desc": "Grunnsannsynligheten per år for at en bygning som trenger reparasjon, faktisk blir reparert."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Startgjeld for bygging (per m²)",
-        "desc": "Startgjeld for bygging per m² bruttoareal (negative reserver)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Støykoeffisient for veitrafikk",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Ganghastighet (km/h)",
         "desc": "Fotgjengernes hastighet. Brukes til å beregne rutekostnader."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Akselerasjonsstrekning for biler (m)",
-        "desc": "Strekningen en bil bruker på å akselerere. Påvirker hastighetsberegningen på korte veier."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Veiens driftstimer per dag (t)",

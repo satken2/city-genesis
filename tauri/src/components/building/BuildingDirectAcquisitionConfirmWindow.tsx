@@ -7,7 +7,7 @@
  * requires_acquisition=True). Acquisition details are in `params.extra.pendingAcquisition`.
  *
  * Automatic city government acquisition/demolition of private land/buildings is irreversible,
- * so require confirmation before committing, as for district merging in ZoneMergeConfirmWindow.
+ * so require confirmation before committing.
  * OK emits the cross-window event "building_direct:acquisition_confirmed"; the construction
  * panel commits with consent (POST /buildings/direct or POST /buildings + acknowledge_acquisition).
  *

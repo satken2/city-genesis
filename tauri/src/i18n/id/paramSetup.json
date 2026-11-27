@@ -99,14 +99,6 @@
         "label": "Bobot waktu perjalanan dalam memilih tempat tinggal",
         "desc": "Saat memilih tempat tinggal, setiap 1 menit waktu pulang-pergi untuk bekerja, sekolah, dan belanja dianggap sebagai beban senilai berapa kali upah rata-rata kota. 1 berarti sama dengan upah. Makin besar, makin mudah terpilih tempat tinggal yang dekat dengan tempat kerja dan toko."
       },
-      "AVERAGE_WAGE": {
-        "label": "Upah rata-rata (nilai acuan)",
-        "desc": "Upah rata-rata acuan saat simulasi dimulai."
-      },
-      "AVERAGE_RENT": {
-        "label": "Sewa rata-rata (nilai acuan)",
-        "desc": "Sewa rata-rata acuan saat simulasi dimulai (per m² per hari)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Porsi dividen sebanding aset",
         "desc": "Porsi dividen yang dibagikan sebanding dengan kas setiap rumah tangga. Sisanya dibagi rata ke semua rumah tangga. 0 berarti seluruhnya dibagi rata, 1 berarti seluruhnya sebanding dengan kas."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Tingkat penyusutan peralatan",
         "desc": "Tingkat penyusutan per siklus terhadap stok modal dari investasi peralatan."
-      },
-      "WORK_HOURS": {
-        "label": "Jam kerja per hari (jam)",
-        "desc": "Jumlah jam kerja standar warga per hari."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Usia mulai pendidikan dasar",
@@ -149,10 +137,6 @@
         "label": "Rasio efisiensi pembongkaran",
         "desc": "Seberapa efisien pembongkaran dibandingkan pembangunan baru (pengali)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Probabilitas tahunan dasar keruntuhan",
-        "desc": "Probabilitas dasar bangunan dengan daya tahan 0.5 runtuh dalam satu tahun."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Parameter bentuk Weibull probabilitas keruntuhan",
         "desc": "Makin besar, probabilitas keruntuhan makin melonjak di sekitar akhir umur pakai."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Pengali penuaan saat kurang pemeliharaan",
         "desc": "Kecepatan penuaan bangunan atau jalur yang sama sekali tidak mendapat pemeliharaan rutin. Dinyatakan sebagai kelipatan dari kecepatan saat mendapat pemeliharaan, dan berubah secara linear dari 1 hingga nilai ini sesuai porsi pemeliharaan yang tidak diterima."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Probabilitas tahunan dasar mulai perbaikan",
-        "desc": "Probabilitas tahunan dasar bangunan yang perlu diperbaiki benar-benar mulai diperbaiki."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Utang pembangunan awal (per m²)",
-        "desc": "Utang pembangunan awal per 1 m² luas lantai total bangunan (kas negatif)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Koefisien kebisingan lalu lintas jalan",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Kecepatan pejalan kaki (km/jam)",
         "desc": "Kecepatan berjalan kaki. Digunakan dalam perhitungan biaya pencarian rute perjalanan."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Jarak akselerasi mobil (m)",
-        "desc": "Jarak yang digunakan mobil untuk berakselerasi. Memengaruhi perhitungan kecepatan di jalan pendek."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Jam aktif jalan per hari (jam)",

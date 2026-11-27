@@ -609,9 +609,16 @@ export function usePathConstruction(
  * and placement method settings into the next placement. When switching methods, restart with the new method
  * because the placed points have different meanings.
  */
-  const continuePlacement = useCallback((method: number = buildMethod) => {
+  const continuePlacement = useCallback((
+    method: number = buildMethod,
+    options?: { resetSpacing?: boolean },
+  ) => {
     if (selectedVariant === null) return;
     const variantData = masterData?.paths?.[selectedVariant];
+    const nextSpacingDelta = options?.resetSpacing ? 0 : trackSpacingDelta;
+    if (options?.resetSpacing) {
+      setTrackSpacingDelta(0);
+    }
     setSelectedNodeIndex(-1);
     setNodes([]);
     setRawPoints([]);
@@ -637,14 +644,14 @@ export function usePathConstruction(
       initial_embankment_height: embankmentHeight,
       initial_curved: curveMode === "curved",
       initial_follow_terrain: followTerrain,
-      lateral_offsets: lateralOffsetsForVariant(selectedVariant),
+      lateral_offsets: lateralOffsetsForVariant(selectedVariant, nextSpacingDelta),
       travel_directions: travelDirectionsForVariant(selectedVariant),
       build_method: method,
       grid_divisions: gridDivisions,
     }).catch((err) => {
       console.error("[usePathConstruction] sendChangeState (continue) failed:", err);
     });
-  }, [selectedVariant, masterData, pathId, houseEnds, passageMode, platformSide, height, embankmentHeight, curveMode, followTerrain, lateralOffsetsForVariant, travelDirectionsForVariant, buildMethod, gridDivisions]);
+  }, [selectedVariant, masterData, pathId, houseEnds, passageMode, platformSide, height, embankmentHeight, curveMode, followTerrain, lateralOffsetsForVariant, travelDirectionsForVariant, buildMethod, gridDivisions, trackSpacingDelta]);
 
   /** Switch placement methods and ask Unity to restart placement with the new method. */
   const changeBuildMethod = useCallback((method: number) => {

@@ -99,14 +99,6 @@
         "label": "Matka-ajan paino asunnon valinnassa",
         "desc": "Asuntoa valitessa: kuinka raskaasti jokainen työ-, koulu- ja ostosmatkojen edestakaiseen matkaan kuluva minuutti painaa, kerrottuna kaupungin keskipalkalla. Arvolla 1 minuutti on palkan arvoinen. Suuremmat arvot suosivat asuntoja lähellä työpaikkoja ja kauppoja."
       },
-      "AVERAGE_WAGE": {
-        "label": "Keskipalkka (perusarvo)",
-        "desc": "Keskipalkan perusarvo simulaation alussa."
-      },
-      "AVERAGE_RENT": {
-        "label": "Keskivuokra (perusarvo)",
-        "desc": "Keskivuokran perusarvo simulaation alussa (päivässä neliömetriä kohden)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Osinkojen varallisuussidonnainen osuus",
         "desc": "Osuus osingoista, joka jaetaan kotitalouksien rahavarojen suhteessa. Loput jaetaan tasan kaikille kotitalouksille. 0 = kaikki tasan, 1 = kaikki rahavarojen suhteessa."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Laitteiden poistoaste",
         "desc": "Kuinka paljon laiteinvestointien pääomakanta arvoaan menettää joka kausi."
-      },
-      "WORK_HOURS": {
-        "label": "Päivittäinen työaika (h)",
-        "desc": "Kaupunkilaisen tavallinen työtuntimäärä päivässä."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Perusopetuksen aloitusikä",
@@ -149,10 +137,6 @@
         "label": "Raivauksen tehokkuuskerroin",
         "desc": "Kuinka paljon tehokkaampaa raivaus on uudisrakentamiseen verrattuna (kerroin)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Sortumisen perustodennäköisyys vuodessa",
-        "desc": "Todennäköisyys, jolla rakennus, jonka kestävyys on 0,5, sortuu vuoden aikana."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Sortumisen Weibull-muotoparametri",
         "desc": "Mitä suurempi arvo, sitä jyrkemmin sortumisen todennäköisyys kasvaa käyttöiän lähestyessä loppuaan."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Vanhenemiskerroin ilman ylläpitoa",
         "desc": "Kuinka nopeasti rakennus tai väylä vanhenee, kun se ei saa lainkaan päivittäistä ylläpitoa, kerrottuna täyden ylläpidon vanhenemisnopeudella. Kerroin muuttuu lineaarisesti arvosta 1 tähän arvoon sen mukaan, kuinka suuri osa ylläpidosta jää saamatta."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Korjaukseen siirtymisen perustodennäköisyys vuodessa",
-        "desc": "Vuotuinen perustodennäköisyys, jolla korjattavaksi soveltuva rakennus todella siirtyy korjaukseen."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Alkuperäinen rakennusvelka (per m²)",
-        "desc": "Rakennuksen alkuperäinen rakennusvelka kerrosalan neliömetriä kohden (negatiiviset varat)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Tieliikenteen melukerroin",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Kävelynopeus (km/h)",
         "desc": "Jalankulkijoiden nopeus. Käytetään reittihaun kustannusten laskennassa."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Autojen kiihdytysmatka (m)",
-        "desc": "Matka, jonka autot tarvitsevat kiihdyttämiseen. Vaikuttaa nopeuden laskentaan lyhyillä teillä."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Teiden päivittäinen käyttöaika (h)",

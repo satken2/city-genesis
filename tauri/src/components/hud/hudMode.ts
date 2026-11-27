@@ -1,9 +1,8 @@
 /**
- * Persistent HUD modes (bulldozer and district editing), shared across windows
+ * Persistent HUD mode (bulldozer), shared across windows
  *
- * Bulldozer toggles from the cockpit. `district` represents Unity's 3D district editing mode; currently no UI
- * enables it, since districts are edited in `zone_edit`.
- * Persistent modes occupy Unity's rendering state and cannot be active together. Synchronize a single state
+ * Bulldozer toggles from the cockpit.
+ * Persistent modes occupy Unity's rendering state. Synchronize a single state
  * across all HUD windows using Tauri's global `hud:mode_changed` event as the source of truth.
  *
  * The component initiating a mode change handles its side effects (`STATE_*` to Unity, hint text, session
@@ -15,8 +14,8 @@
 import { useEffect, useState } from "react";
 import { emit, listen } from "@tauri-apps/api/event";
 
-/** Mutually exclusive persistent mode. null is normal state with both modes off. */
-export type HudMode = "bulldozer" | "district" | null;
+/** Persistent HUD mode. null is normal state with the mode off. */
+export type HudMode = "bulldozer" | null;
 
 export const HUD_EVENT_MODE_CHANGED = "hud:mode_changed";
 
@@ -34,7 +33,7 @@ export async function setHudMode(mode: HudMode): Promise<void> {
 
 /**
  * Subscribe to the current persistent mode.
- * Reset when the session disconnects, as Unity restarts in STATE_NORMAL.
+ * Reset when the city changes or the session disconnects, as Unity starts in STATE_NORMAL.
  */
 export function useHudMode(): HudMode {
   const [mode, setMode] = useState<HudMode>(null);

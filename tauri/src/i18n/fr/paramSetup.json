@@ -99,14 +99,6 @@
         "label": "Poids du temps de trajet dans le choix du logement",
         "desc": "Lors du choix d'un logement, poids de chaque minute d'aller-retour pour le travail, l'école et les courses, en multiple du salaire moyen de la ville. À 1, valorisée au salaire. Plus la valeur est élevée, plus les logements proches du travail et des commerces sont privilégiés."
       },
-      "AVERAGE_WAGE": {
-        "label": "Salaire moyen (valeur de référence)",
-        "desc": "Salaire moyen de référence au début de la simulation."
-      },
-      "AVERAGE_RENT": {
-        "label": "Loyer moyen (valeur de référence)",
-        "desc": "Loyer moyen de référence au début de la simulation (par m² et par jour)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Part des dividendes proportionnelle au patrimoine",
         "desc": "Part des dividendes répartie au prorata de l'épargne de chaque ménage. Le reste est partagé à parts égales entre tous les ménages. 0 = tout à parts égales, 1 = tout au prorata de l'épargne."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Taux d'amortissement des équipements",
         "desc": "Taux d'amortissement par époque du capital investi en équipements."
-      },
-      "WORK_HOURS": {
-        "label": "Heures de travail quotidiennes (h)",
-        "desc": "Nombre d'heures standard travaillées par habitant et par jour."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Âge d'entrée dans l'enseignement primaire",
@@ -149,10 +137,6 @@
         "label": "Efficacité relative de la démolition",
         "desc": "À quel point démolir est plus efficace que construire à neuf (multiplicateur)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Probabilité annuelle de base d'effondrement",
-        "desc": "Probabilité de base qu'un bâtiment de durabilité 0,5 s'effondre en un an."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Paramètre de forme de Weibull pour l'effondrement",
         "desc": "Plus il est élevé, plus la probabilité d'effondrement croît brutalement près de la fin de vie."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Multiplicateur de vieillissement sans entretien",
         "desc": "Vitesse de vieillissement d'un bâtiment ou d'une voie qui ne reçoit aucun entretien courant, en multiple de son vieillissement avec un entretien complet. Elle varie linéairement de 1 à cette valeur selon la part d'entretien non reçue."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Probabilité annuelle de base d'entrée en réparation",
-        "desc": "Probabilité annuelle de base qu'un bâtiment candidat entre effectivement en réparation."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Dette initiale de construction (par m²)",
-        "desc": "Dette initiale de construction par m² de surface de plancher (trésorerie négative)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Coefficient de bruit du trafic routier",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Vitesse des piétons (km/h)",
         "desc": "Vitesse de déplacement des piétons. Utilisée pour le calcul du coût des itinéraires."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Distance d'accélération des automobiles (m)",
-        "desc": "Distance utilisée par les automobiles pour accélérer. Influe sur le calcul de vitesse sur les routes courtes."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Heures d'exploitation quotidiennes des routes (h)",

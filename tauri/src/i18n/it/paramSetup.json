@@ -99,14 +99,6 @@
         "label": "Peso del tempo di spostamento nella scelta della casa",
         "desc": "Nella scelta della casa, quanto pesa ogni minuto di andata e ritorno per lavoro, scuola e acquisti, come multiplo del salario medio della città. Con 1 vale quanto il salario. Valori più alti favoriscono le case vicine a luoghi di lavoro e negozi."
       },
-      "AVERAGE_WAGE": {
-        "label": "Salario medio (valore di riferimento)",
-        "desc": "Salario medio di riferimento all'inizio della simulazione."
-      },
-      "AVERAGE_RENT": {
-        "label": "Affitto medio (valore di riferimento)",
-        "desc": "Affitto medio di riferimento all'inizio della simulazione (al giorno per m²)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Quota dei dividendi proporzionale alla ricchezza",
         "desc": "Quota dei dividendi distribuita in proporzione alle disponibilità liquide di ciascun nucleo familiare. Il resto viene diviso in parti uguali tra tutti i nuclei. 0 = tutto in parti uguali, 1 = tutto in proporzione alle disponibilità liquide."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Tasso di ammortamento degli impianti",
         "desc": "Tasso di ammortamento per epoca dello stock di capitale derivante dagli investimenti in impianti."
-      },
-      "WORK_HOURS": {
-        "label": "Ore di lavoro giornaliere (h)",
-        "desc": "Numero standard di ore che un cittadino lavora al giorno."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Età di inizio dell'istruzione di base",
@@ -149,10 +137,6 @@
         "label": "Rapporto di efficienza della demolizione",
         "desc": "Quanto è efficiente la demolizione rispetto a una nuova costruzione (moltiplicatore)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Probabilità annua di crollo di base",
-        "desc": "Probabilità annua di base che crolli un edificio con durabilità 0.5."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Parametro di forma di Weibull per il crollo",
         "desc": "Più è alto, più la probabilità di crollo aumenta bruscamente in prossimità della vita utile."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Moltiplicatore di invecchiamento senza manutenzione",
         "desc": "Velocità con cui invecchia un edificio o un tracciato che non riceve alcuna manutenzione ordinaria, espressa come multiplo dell'invecchiamento con manutenzione completa. Varia linearmente da 1 a questo valore in base alla quota di manutenzione non ricevuta."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Probabilità annua di base di avvio delle riparazioni",
-        "desc": "Probabilità annua di base che un edificio da riparare entri effettivamente in riparazione."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Debito iniziale di costruzione (per m²)",
-        "desc": "Debito iniziale di costruzione per m² di superficie lorda dell'edificio (disponibilità liquide negative)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Coefficiente di rumore del traffico stradale",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Velocità dei pedoni (km/h)",
         "desc": "Velocità di spostamento dei pedoni. Usata nel calcolo dei costi per la ricerca dei percorsi."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Distanza di accelerazione dei veicoli (m)",
-        "desc": "Distanza che un'auto usa per accelerare. Influisce sul calcolo della velocità sulle strade brevi."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Ore di attività giornaliere delle strade (h)",

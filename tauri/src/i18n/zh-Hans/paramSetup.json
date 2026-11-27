@@ -99,14 +99,6 @@
         "label": "选择住所时的出行时间权重",
         "desc": "选择住所时，将通勤、上学和购物往返的每1分钟视为城市平均工资的几倍负担。1表示按工资计算。数值越大，越倾向于选择靠近工作地点和商店的住所。"
       },
-      "AVERAGE_WAGE": {
-        "label": "平均工资（基准值）",
-        "desc": "模拟开始时的基准平均工资。"
-      },
-      "AVERAGE_RENT": {
-        "label": "平均房租（基准值）",
-        "desc": "模拟开始时的基准平均房租（每日每平方米）。"
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "分红按资产比例分配比率",
         "desc": "分红中按各家庭现金存款比例分配的比例。其余部分平均分给所有家庭。0为全部平均，1为全部按现金存款比例。"
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "设备折旧率",
         "desc": "设备投资资本存量每纪元的折旧率。"
-      },
-      "WORK_HOURS": {
-        "label": "每日劳动时间（h）",
-        "desc": "市民每日工作的标准小时数。"
       },
       "ELEMENTARY_START_AGE": {
         "label": "初等教育开始年龄",
@@ -149,10 +137,6 @@
         "label": "拆除效率比",
         "desc": "拆除相较于新建的效率倍率。"
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "倒塌基准年概率",
-        "desc": "耐久度0.5的建筑在1年内倒塌的基准概率。"
-      },
       "COLLAPSE_SHAPE": {
         "label": "倒塌概率韦伯形状参数",
         "desc": "数值越大，在使用年限附近倒塌概率上升越急剧。"
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "缺乏养护时的老化倍率",
         "desc": "完全得不到日常养护的建筑或路径老化的速度，以得到养护时的倍数表示。按未得到养护的比例，从1倍线性变化到此值。"
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "进入修缮的基准年概率",
-        "desc": "修缮对象建筑实际进入修缮的基准年概率。"
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "初始建设负债（每m²）",
-        "desc": "建筑每1平方米建筑面积的初始建设负债（负的现金存款）。"
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "道路交通噪音系数",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "行人速度（km/h）",
         "desc": "行人的移动速度。用于计算路径搜索成本。"
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "汽车加速距离（m）",
-        "desc": "汽车加速所用的距离。影响短道路的速度计算。"
       },
       "PATH_ACTIVE_HOURS": {
         "label": "道路每日运行时间（h）",

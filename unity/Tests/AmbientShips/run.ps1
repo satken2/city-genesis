@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 & (Join-Path $PSScriptRoot '../BuildRuntime.ps1')
 [xml]$projectXml = Get-Content -LiteralPath "$unityRoot/Assembly-CSharp.csproj" -Raw
-$coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' }
+$coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' } | Select-Object -First 1
 $editorRoot = $coreReference.HintPath -replace '[\\/]Data[\\/].*$', ''
 if (!$QaRoot) { $QaRoot = Join-Path $unityRoot 'Temp/AmbientShipsQA' }
 New-Item -ItemType Directory -Path "$QaRoot/Assets/Editor", "$QaRoot/Assets/Models/Props", "$QaRoot/ProjectSettings", "$QaRoot/Packages" -Force | Out-Null

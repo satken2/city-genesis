@@ -252,7 +252,8 @@ public class VisualModeHandler : MonoBehaviour
             // Process one batch of objects.
             for (int j = i; j < endIndex; j++)
             {
-                if (objects[j] != null)
+                // Skip destroyed UnityEngine.Object instances queued before the yield to avoid MissingReferenceException.
+                if (objects[j] != null && !(objects[j] is UnityEngine.Object unityObj && unityObj == null))
                 {
                     objects[j].ApplyVisualMode(mode);
                     processedCount++;

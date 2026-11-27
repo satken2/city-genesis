@@ -998,6 +998,17 @@ public static class PreviewQA
         itemType.GetField("base_height").SetValue(item, baseHeight);
         itemType.GetField("pillar_spacing").SetValue(item, spacing);
         dict[variant] = item;
+        var modelManagerType = asm.GetType("ModelManager");
+        var modelManagerObj = new GameObject("PowerLineModelManager");
+        var modelManager = modelManagerObj.AddComponent(modelManagerType);
+        modelManagerType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, modelManager);
+        var modelCache = (IDictionary)modelManagerType.GetField("_modelCache", flags).GetValue(modelManager);
+        // Supply a 1 m cube whose base sits at local y=0 as the tower prefab so GenerateTower instantiates a visual mesh at each support.
+        var towerPrefab = new GameObject("TowerPrefab");
+        var towerMeshObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        towerMeshObj.transform.SetParent(towerPrefab.transform, false);
+        towerMeshObj.transform.localPosition = new Vector3(0f, 0.5f, 0f);
+        modelCache["Models/Paths/p" + variant + "/pillar_cap"] = towerPrefab;
         var type = asm.GetType("RoadPlanManager");
         var manager = new GameObject("PowerLineManager").AddComponent(type);
         void Set(string name, object value) => type.GetField(name, flags).SetValue(manager, value);
@@ -1035,12 +1046,14 @@ public static class PreviewQA
                 var renderPoints = type.GetMethod("GetRenderPoints", flags).Invoke(manager, null);
                 type.GetMethod("UpdatePreviewSections", flags).Invoke(manager, new[] { renderPoints });
 
-                // In an environment without prefabs, each power tower is rendered as one FarPowerTower mesh.
+                // PowerLinePath places each tower prefab under a TowerVisual child of PowerSupport.
                 var root = (GameObject)rendererType.GetField("currentPreviewObject", flags).GetValue(sections.GetValue(0));
                 Require(root != null, label + "power line preview was not generated");
                 var towers = new List<Bounds>();
                 foreach (var meshFilter in root.GetComponentsInChildren<MeshFilter>(true))
-                    if (meshFilter.name == "FarPowerTower") towers.Add(WorldBounds(meshFilter));
+                    if (meshFilter.transform.parent != null && meshFilter.transform.parent.parent != null
+                        && meshFilter.transform.parent.parent.name == "TowerVisual")
+                        towers.Add(WorldBounds(meshFilter));
                 // Power towers stand at each anchor and are spaced no farther apart than pillar_spacing in each section. If the waypoints are not followed, neither their count nor their positions will match.
                 int expected = 1;
                 for (int i = 1; i < route.Length; i++)
@@ -1066,6 +1079,9 @@ public static class PreviewQA
         {
             rendererType.GetMethod("ResetPreview").Invoke(renderer, null);
             dict.Remove(variant);
+            modelManagerType.GetField("<Instance>k__BackingField", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, null);
+            UnityEngine.Object.DestroyImmediate(towerPrefab);
+            UnityEngine.Object.DestroyImmediate(modelManagerObj);
             UnityEngine.Object.DestroyImmediate(manager.gameObject);
             UnityEngine.Object.DestroyImmediate(terrain);
             UnityEngine.Object.DestroyImmediate(data);

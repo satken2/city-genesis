@@ -99,14 +99,6 @@
         "label": "Peso do tempo de deslocamento na escolha da moradia",
         "desc": "Ao escolher a moradia, quanto pesa cada minuto de ida e volta ao trabalho, à escola e às compras, como múltiplo do salário médio da cidade. 1 = valor igual ao salário. Quanto maior, mais se preferem moradias perto do trabalho e das lojas."
       },
-      "AVERAGE_WAGE": {
-        "label": "Salário médio (valor de referência)",
-        "desc": "Salário médio de referência no início da simulação."
-      },
-      "AVERAGE_RENT": {
-        "label": "Aluguel médio (valor de referência)",
-        "desc": "Aluguel médio de referência no início da simulação (por m² por dia)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Parcela dos dividendos proporcional à riqueza",
         "desc": "Parcela dos dividendos distribuída em proporção ao caixa disponível de cada domicílio. O restante é dividido igualmente entre todos os domicílios. 0 = tudo igual; 1 = tudo proporcional ao caixa disponível."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Taxa de depreciação de equipamentos",
         "desc": "Taxa de depreciação, a cada época, do estoque de capital gerado pelo investimento em equipamentos."
-      },
-      "WORK_HOURS": {
-        "label": "Jornada diária de trabalho (h)",
-        "desc": "Número padrão de horas que um cidadão trabalha por dia."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Idade de início da educação básica",
@@ -149,10 +137,6 @@
         "label": "Eficiência relativa da demolição",
         "desc": "Quanto a demolição é mais eficiente que uma construção nova (multiplicador)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Probabilidade anual base de desabamento",
-        "desc": "Probabilidade anual base de desabamento de um edifício com durabilidade 0.5."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Parâmetro de forma de Weibull do desabamento",
         "desc": "Quanto maior, mais a probabilidade de desabamento sobe bruscamente perto do fim da vida útil."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Multiplicador de desgaste sem manutenção",
         "desc": "Velocidade de desgaste de um edifício ou via que não recebe nenhuma manutenção cotidiana, como múltiplo do desgaste com manutenção completa. Varia linearmente de 1 até este valor conforme a parcela de manutenção não recebida."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Probabilidade anual base de entrar em reparo",
-        "desc": "Probabilidade anual base de um edifício elegível de fato entrar em reparo."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Dívida inicial de construção (por m²)",
-        "desc": "Dívida inicial de construção por m² de área construída total do edifício (caixa disponível negativo)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Coeficiente de ruído do tráfego rodoviário",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Velocidade dos pedestres (km/h)",
         "desc": "Velocidade de caminhada dos pedestres. Usada no cálculo do custo da busca de rotas."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Distância de aceleração dos veículos (m)",
-        "desc": "Distância usada para a aceleração dos carros. Afeta o cálculo de velocidade em vias curtas."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Horas de operação das vias por dia (h)",

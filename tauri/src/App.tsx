@@ -24,7 +24,6 @@ const ParcelDetailPanel = lazy(() => import("./components/parcel/ParcelDetailPan
 const ZoneDetailPanel = lazy(() => import("./components/zone/ZoneDetailPanel").then(m => ({ default: m.ZoneDetailPanel })));
 const ZoneEditWindow = lazy(() => import("./components/zone/ZoneEditWindow").then(m => ({ default: m.ZoneEditWindow })));
 const IntersectionDetailPanel = lazy(() => import("./components/intersection/IntersectionDetailPanel").then(m => ({ default: m.IntersectionDetailPanel })));
-const ZoneMergeConfirmWindow = lazy(() => import("./components/zone/ZoneMergeConfirmWindow").then(m => ({ default: m.ZoneMergeConfirmWindow })));
 const ConfirmDialogWindow = lazy(() => import("./components/common/ConfirmDialogWindow").then(m => ({ default: m.ConfirmDialogWindow })));
 const BuildingDirectAcquisitionConfirmWindow = lazy(() => import("./components/building/BuildingDirectAcquisitionConfirmWindow").then(m => ({ default: m.BuildingDirectAcquisitionConfirmWindow })));
 const PathConstructionPanel = lazy(() => import("./components/path/PathConstructionPanel").then(m => ({ default: m.PathConstructionPanel })));
@@ -81,7 +80,6 @@ const AgentCreationPanel = lazy(() => import("./components/scenario/AgentCreatio
 // EpochReport is used only as a type; use a type-only import to exclude its implementation from the bundle.
 import type { EpochReport } from "./components/taskbar/EpochResultWindow";
 import type { ExpansionProposal } from "./components/development/CityExpansionProposalWindow";
-import type { PendingZoneMerge } from "./components/zone/ZoneMergeConfirmWindow";
 import type { PendingDirectAcquisition } from "./components/building/BuildingDirectAcquisitionConfirmWindow";
 import type { InfoDialogContent } from "./components/common/InfoDialogWindow";
 import type { VoiceRemark } from "./components/citizen/citizenVoiceRemark";
@@ -108,7 +106,7 @@ import { MasterDataProvider } from "./contexts/MasterDataContext";
  * Window types with dedicated panels. Render these with dedicated components instead of the generic JSON
  * display.
  */
-const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "zone_merge", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_list", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "city_insignia", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "achievement_unlocked", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "city_development", "city_expansion_proposal", "agent_creation"]);
+const SPECIALIZED_PANEL_TYPES = new Set(["agent_detail", "parcel_detail", "zone_detail", "intersection_detail", "building_direct_acquisition", "confirm_dialog", "path_build", "path_shape_editor", "path_detail", "path_rebuild", "city_budget", "public_facilities", "transit_management", "transit_creation", "transit_detail", "road_detail", "settings", "credits", "asset_manager", "citizen_detail", "citizen_list", "top_page", "building_construction", "building_appearance", "parcel_creation", "save_load", "save_list", "scenario_manager", "scenario_tools", "scenario_sign", "scenario_metadata", "new_game", "city_government", "city_insignia", "climate_settings", "climate_effects", "system_stats", "resource_detail", "resource_edit", "prop_placement", "grading", "achievements", "city_regulation", "city_statistics", "display_options", "epoch_confirm", "city_notifications", "construction_projects", "epoch_result", "quest_complete", "achievement_unlocked", "info_dialog", "terrain_editor", "terrain_3d_preview", "property_edit", "quest_edit", "city_map", "zone_edit", "city_development", "city_expansion_proposal", "agent_creation"]);
 
 
 function App() {
@@ -431,16 +429,6 @@ function App() {
                 apiBaseUrl={context.api_base_url}
                 pathTemplate={context.definition.fetch!.path_template}
                 initialEntityId={context.entity?.id ?? ""}
-              />
-            ) : context.window_type === "zone_merge" ? (
-              <ZoneMergeConfirmWindow
-                apiBaseUrl={context.api_base_url}
-                pendingMerge={
-                  (context.params as Record<string, unknown> | null)?.extra
-                    ? ((context.params as Record<string, unknown>).extra as Record<string, unknown>).pendingMerge as PendingZoneMerge | undefined
-                    : undefined
-                }
-                onClose={closeWindow}
               />
             ) : context.window_type === "confirm_dialog" ? (
               <ConfirmDialogWindow

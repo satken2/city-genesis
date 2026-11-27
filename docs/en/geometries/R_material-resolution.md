@@ -6,13 +6,13 @@ These conventions assign material instances to generated faces. [Building](F_bui
 
 Modeled components use their prefab materials. Faces without shape parts, including roofs, ground panels, gables, quays, and open-space surfaces, take material-only inputs such as `ceil`, `floor`, `generic-wall`, and `site_*`.
 
-Common faces independent of parts use shared materials looked up by name: default `BuildingMaterial`, foundation concrete `COMMON_CONCRETE`, site soil `ConstructionDirt`, and collapse rubble and sand `CollapsedRubble` and `CollapsedSand`, with `CollapsedRubbleBurned` and `CollapsedSandBurned` for fire damage, and rebar of broken columns `CollapsedRebar`. `BuildingMaterial` is the final fallback, so building meshes never lack a material. A material looked up by name comes from the asset pack when it has one with that name, and otherwise from directly under `Assets/Resources/` ([asset packs](X_asset-packs.md)).
+Common faces independent of parts use shared materials looked up by name: default `BuildingMaterial`, foundation concrete `COMMON_CONCRETE`, construction site `ConstructionMaterial` (for buildings; `ConstructionDirt` takes precedence when present) and `ConstructionPathDirt` (for paths), and collapse rubble and sand `CollapsedRubble` and `CollapsedSand`, with `CollapsedRubbleBurned` and `CollapsedSandBurned` for fire damage, and rebar of broken columns `CollapsedRebar`. `BuildingMaterial` is the final fallback, so building meshes never lack a material. A material looked up by name comes from the asset pack when it has one with that name, and otherwise from directly under `Assets/Resources/` ([asset packs](X_asset-packs.md)).
 
 Ground panels alone may be omitted. They apply only to buildings with master `draw_floor`; if no `floor` part exists, omit the panel instead of using a default material. This avoids unnecessary slabs under tile-based facilities. Station building exclusive-area ground follows the same `floor` availability rule.
 
 ## Buildings and paths
 
-Buildings resolve part materials to the first instance read for each name and shader, sharing it across all buildings without cloning. They are not replaced by materials looked up by name. Each building combines into one mesh and groups faces by material instance to reduce draws, so same-named faces from parts in different files combine.
+Buildings unify part materials to the first instance read for each name and shader during mesh combination, and at render time create one shared depth-offset copy per original material and share it across all buildings (exterior parts keep their original materials as-is). They are not replaced by materials looked up by name. Each building combines into one mesh and groups faces by material instance to reduce draws, so same-named faces from parts in different files combine.
 
 Paths always use a shared pool keyed by material name. A same-named material looked up by name takes precedence. Otherwise the pool clones the part material and shifts render order one step later to avoid Z-fighting, sharing one instance per name. Intersection and sidewalk joins also use this pool instead of prefab materials directly.
 

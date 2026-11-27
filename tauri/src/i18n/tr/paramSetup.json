@@ -99,14 +99,6 @@
         "label": "Konut seçiminde yolculuk süresinin ağırlığı",
         "desc": "Konut seçerken işe, okula ve alışverişe gidiş-dönüşte harcanan her 1 dakikanın, şehrin ortalama ücretinin kaç katı bir yük sayılacağı. 1 ise ücretle aynıdır. Büyüdükçe iş yerlerine ve dükkânlara yakın konutlar daha çok tercih edilir."
       },
-      "AVERAGE_WAGE": {
-        "label": "Ortalama ücret (referans değer)",
-        "desc": "Simülasyon başlangıcındaki referans ortalama ücret."
-      },
-      "AVERAGE_RENT": {
-        "label": "Ortalama kira (referans değer)",
-        "desc": "Simülasyon başlangıcındaki referans ortalama kira (günlük, m² başına)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Temettünün varlıkla orantılı payı",
         "desc": "Temettülerin, hanelerin nakit varlıklarıyla orantılı olarak dağıtılan payı. Kalanı tüm hanelere eşit dağıtılır. 0 ise tamamı eşit, 1 ise tamamı nakit varlıklarla orantılı dağıtılır."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Ekipman amortisman oranı",
         "desc": "Ekipman yatırımından oluşan sermaye stokunun her dönemki amortisman oranı."
-      },
-      "WORK_HOURS": {
-        "label": "Günlük çalışma süresi (sa)",
-        "desc": "Bir vatandaşın günde çalıştığı standart saat sayısı."
       },
       "ELEMENTARY_START_AGE": {
         "label": "İlköğretime başlama yaşı",
@@ -149,10 +137,6 @@
         "label": "Yıkım verimliliği oranı",
         "desc": "Yıkımın yeni inşaata göre ne kadar verimli olduğu (çarpan)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Çökme için temel yıllık olasılık",
-        "desc": "Dayanıklılığı 0.5 olan bir binanın bir yıl içinde çökmesinin temel olasılığı."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Çökme olasılığı Weibull şekil parametresi",
         "desc": "Büyüdükçe kullanım ömrüne yaklaşıldığında çökme olasılığı hızla artar."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Bakımsızlıkta eskime çarpanı",
         "desc": "Hiç günlük bakım alamayan bina ve güzergâhların eskime hızı. Bakım alındığındaki hızın katı olarak ifade edilir ve alınamayan bakım payına göre 1 kattan bu değere kadar doğrusal olarak değişir."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Onarıma geçiş için temel yıllık olasılık",
-        "desc": "Onarım gereken bir binanın fiilen onarıma girmesinin temel yıllık olasılığı."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Başlangıç inşaat borcu (m² başına)",
-        "desc": "Binanın toplam kat alanının her m²'si için başlangıç inşaat borcu (negatif nakit varlık)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Karayolu trafiği gürültü katsayısı",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Yaya hızı (km/sa)",
         "desc": "Yayaların yürüme hızı. Rota arama maliyetinin hesaplanmasında kullanılır."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Araç hızlanma mesafesi (m)",
-        "desc": "Araçların hızlanmak için kullandığı mesafe. Kısa yollardaki hız hesaplamasını etkiler."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Yolun günlük faaliyet süresi (sa)",

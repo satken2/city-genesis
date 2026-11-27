@@ -19,12 +19,10 @@ import { RegulationSection } from "../RegulationForm";
 /**
  * Allowlisted path_type IDs supporting speed limits
  *
- * Eligible types are roads carrying cars (streets/highways) and underlying paths carrying public transport
- * vehicles (tracks/monorails).
- * Exclude sidewalks, which use pedestrian speed parameters. LRT on pedestrian roads uses the variant's default
- * speed limit, with individual overrides available in path details.
- * People movers use variant-specific cruising speeds. Public transport section paths, infrastructure, and
- * station buildings have no traversal time and are excluded.
+ * Eligible types are roads carrying cars (streets and highways).
+ * Exclude tracks/monorails, sidewalks, LRT on pedestrian roads, people movers, public transport section paths,
+ * infrastructure, and station buildings; tracks/monorails and LRT use their variant default speed limits
+ * (with individual overrides available in path details).
  *
  * Use an allowlist so adding a path type to master data cannot silently expose an ineffective setting.
  */

@@ -99,14 +99,6 @@
         "label": "Restidens vikt vid val av bostad",
         "desc": "När hushåll väljer bostad: hur tungt varje minut av resor fram och tillbaka till arbete, skola och affärer väger, som en multipel av stadens genomsnittslön. 1 betyder lika mycket som lönen. Högre värden gynnar bostäder nära arbetsplatser och affärer."
       },
-      "AVERAGE_WAGE": {
-        "label": "Genomsnittslön (referens)",
-        "desc": "Referensvärde för genomsnittslönen när simuleringen startar."
-      },
-      "AVERAGE_RENT": {
-        "label": "Genomsnittshyra (referens)",
-        "desc": "Referensvärde för genomsnittshyran när simuleringen startar (per dag och m²)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Förmögenhetsbaserad andel av utdelningar",
         "desc": "Andel av utdelningarna som fördelas i proportion till hushållens likvida medel. Resten delas lika mellan alla hushåll. 0 betyder allt lika, 1 betyder allt i proportion till likvida medel."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Avskrivningstakt för utrustning",
         "desc": "Hur stor del av kapitalet från utrustningsinvesteringar som skrivs av varje epok."
-      },
-      "WORK_HOURS": {
-        "label": "Arbetstid per dag (h)",
-        "desc": "Normalt antal timmar som en medborgare arbetar per dag."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Ålder vid skolstart",
@@ -149,10 +137,6 @@
         "label": "Rivningens effektivitet",
         "desc": "Hur mycket effektivare rivning är jämfört med nybyggnation (faktor)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Grundsannolikhet för ras per år",
-        "desc": "Grundsannolikheten att en byggnad med hållbarhet 0,5 rasar under ett år."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Formparameter (Weibull) för ras",
         "desc": "Ju högre värde, desto brantare ökar rasrisken när den tekniska livslängden närmar sig."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Åldrandefaktor utan underhåll",
         "desc": "Hur snabbt en byggnad eller sträckning åldras när den inte får något löpande underhåll alls, som en multipel av åldrandet med fullt underhåll. Faktorn ökar linjärt från 1 till det här värdet med den andel underhåll som uteblir."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Grundsannolikhet för reparation per år",
-        "desc": "Grundsannolikheten per år att en byggnad som behöver repareras faktiskt börjar repareras."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Initial byggskuld (per m²)",
-        "desc": "Initial byggskuld per m² total våningsyta (negativa reserver)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Bullerkoefficient för vägtrafik",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Gånghastighet (km/h)",
         "desc": "Fotgängarnas hastighet. Används för att beräkna kostnaden för resvägar."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Fordonens accelerationssträcka (m)",
-        "desc": "Sträckan som fordon behöver för att accelerera. Påverkar hastighetsberäkningen på korta vägar."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Vägarnas aktiva timmar per dag (h)",

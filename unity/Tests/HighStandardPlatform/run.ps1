@@ -4,7 +4,7 @@ $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 & (Join-Path $unityRoot 'Tests/BuildRuntime.ps1')
 if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 [xml]$projectXml = Get-Content -LiteralPath "$unityRoot/Assembly-CSharp.csproj" -Raw
-$coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' }
+$coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' } | Select-Object -First 1
 $editorRoot = $coreReference.HintPath -replace '[\\/]Data[\\/].*$', ''
 $qaRoot = Join-Path $unityRoot 'Temp/HighStandardPlatformQA'
 New-Item -ItemType Directory -Force -Path "$qaRoot/Assets/Editor", "$qaRoot/Assets/Models/Paths/p462", "$qaRoot/Packages", "$qaRoot/ProjectSettings" | Out-Null

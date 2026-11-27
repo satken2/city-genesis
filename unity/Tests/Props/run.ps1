@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
 [xml]$projectXml = Get-Content -LiteralPath $project -Raw
-$coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' }
+$coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' } | Select-Object -First 1
 $editorRoot = $coreReference.HintPath -replace '[\\/]Data[\\/].*$', ''
 $unityExe = Join-Path $editorRoot 'Unity.exe'
 $qaRoot = Join-Path $unityRoot 'Temp/PropsUnityQA'
@@ -20,7 +20,7 @@ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'ForestQA.cs') -Destination "$qa
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Resources/Shaders" -Force | Out-Null
 New-Item -ItemType Directory -Path "$qaRoot/Assets/Shaders" -Force | Out-Null
 Copy-Item -LiteralPath "$unityRoot/Assets/Shaders/ForestCoverage.hlsl", "$unityRoot/Assets/Shaders/Foliage.hlsl" -Destination "$qaRoot/Assets/Shaders" -Force
-foreach ($name in @('TerrainSurfaceAppearance.hlsl', 'DepthOffsetTerrainLitMacroVariation.hlsl', 'TerrainCliffRock.hlsl', 'TerrainRiverBank.hlsl', 'UltraFarTerrainSink.hlsl')) {
+foreach ($name in @('TerrainSurfaceAppearance.hlsl', 'DepthOffsetTerrainLitMacroVariation.hlsl', 'TerrainCliffRock.hlsl', 'TerrainRiverBank.hlsl', 'UltraFarTerrainSink.hlsl', 'TerrainTunnelCut.hlsl', 'TerrainTunnelCutPasses.hlsl')) {
     Copy-Item -LiteralPath "$unityRoot/Assets/Shaders/$name" -Destination "$qaRoot/Assets/Shaders" -Force
 }
 Copy-Item -LiteralPath "$unityRoot/Assets/Resources/Shaders/DepthOffsetTerrainLit.shader" -Destination "$qaRoot/Assets/Resources/Shaders" -Force

@@ -12,7 +12,7 @@ export type Condition =
   | { type: "window"; window: string; target?: string }
   | { type: "pathVariant"; value: Value }
   | { type: "pathPoints"; count: number; phase?: string }
-  | { type: "hudMode"; mode: "district" | "bulldozer" }
+  | { type: "hudMode"; mode: "bulldozer" }
   | { type: "entity"; resource: Resource; where: Match[]; bind?: string; target?: string }
   | { type: "budgetRatio"; category: string; min: number }
   | { type: "connected"; from: string; to: string; terminal: string; where: Match[] };
@@ -44,8 +44,8 @@ export type Facts = {
   windows: Record<string, { window: string; visible: boolean; entity?: number }>;
   pathVariant?: number;
   pathShape?: { selected_points: number[][]; phase: string; is_curved?: boolean };
-  /** Persistent HUD mode (district editing/bulldozer). Unset in normal state. */
-  hudMode?: "district" | "bulldozer";
+  /** Persistent HUD mode (bulldozer). Unset in normal state. */
+  hudMode?: "bulldozer";
   /** Pages advanced through Next (`page` condition IDs). Reset to empty when restarting a step. */
   pages?: Record<string, boolean>;
 };

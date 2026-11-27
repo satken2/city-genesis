@@ -19,7 +19,7 @@ $railDest="$qaRoot/Assets/Models/Paths/p421"
 New-Item -ItemType Directory -Force -Path $railDest | Out-Null
 Copy-Item "$unityRoot/Assets/Models/Paths/p421/*.fbx*" $railDest -Force
 [xml]$projectXml=Get-Content "$unityRoot/Assembly-CSharp.csproj" -Raw
-$coreReference=$projectXml.Project.ItemGroup.Reference | Where-Object {$_.Include -eq 'UnityEngine.CoreModule'}
+$coreReference=$projectXml.Project.ItemGroup.Reference | Where-Object {$_.Include -eq 'UnityEngine.CoreModule'} | Select-Object -First 1
 $editorRoot=$coreReference.HintPath -replace '[\\/]Data[\\/].*$',''
 $process=Start-Process -FilePath "$editorRoot/Unity.exe" -ArgumentList @('-batchmode','-projectPath',('"'+$qaRoot+'"'),'-executeMethod','PowerLinesQA.Run','-sourceRoot',('"'+$unityRoot+'"'),'-logFile',('"'+$qaRoot+'/qa.log"')) -WindowStyle Hidden -PassThru
 if(!$process.WaitForExit(240000)){Stop-Process -Id $process.Id; throw 'Power line QA timed out'}

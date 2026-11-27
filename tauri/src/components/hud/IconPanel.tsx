@@ -16,10 +16,8 @@ import { PLAY_MODE_SCENARIO, PLAY_MODE_READ_ONLY } from "../../constants";
 
 import { Fragment, useCallback, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
-import { listen } from "@tauri-apps/api/event";
 import { useTranslation } from "react-i18next";
 
-import { IPC_EVENT_EDIT_ZONE_REQUEST_MERGE } from "../../utils/ipc";
 import { setHintbarText } from "../../utils/hintbar";
 import {
   MENU_ICONS,
@@ -71,44 +69,6 @@ export function IconPanel() {
     observer.observe(element);
     return () => observer.disconnect();
   }, [visible]);
-
-  /**
-   * Handle Unity's district merge request after source and target districts are selected in its 3D district
-   * editing mode, opening `zone_merge` for confirmation. There is currently no UI entry point to that mode, but
-   * this handler remains paired with Unity's mode.
-   *
-   * District editing is a persistent mode without its own window, so Unity cannot open a window directly. This
-   * persistent icon panel relays the request.
-   * Opening a window after emitting an event would miss the panel's subscription; pass merge details through
-   * window context as `params.extra.pendingMerge` instead.
-   */
-  useEffect(() => {
-    const unlistenPromise = listen<{
-      target_zone_id?: number;
-      target_zone_name?: string;
-      source_zone_id?: number;
-      source_zone_name?: string;
-    }>(IPC_EVENT_EDIT_ZONE_REQUEST_MERGE, (event) => {
-      const payload = event.payload ?? {};
-      if (!payload.target_zone_id || !payload.source_zone_id) return;
-      void invoke("open_registered_window", {
-        windowType: "zone_merge",
-        params: {
-          extra: {
-            pendingMerge: {
-              targetZoneId: payload.target_zone_id,
-              targetZoneName: payload.target_zone_name ?? "",
-              sourceZoneId: payload.source_zone_id,
-              sourceZoneName: payload.source_zone_name ?? "",
-            },
-          },
-        },
-      }).catch(console.error);
-    });
-    return () => {
-      void unlistenPromise.then((unlisten) => unlisten());
-    };
-  }, []);
 
   const handleIconClick = useCallback(
     async (icon: HudIconDef) => {

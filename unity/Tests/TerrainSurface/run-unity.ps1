@@ -5,7 +5,7 @@ $project = Join-Path $unityRoot 'Assembly-CSharp.csproj'
 & (Join-Path $PSScriptRoot "../BuildRuntime.ps1")
 if (!$UnityExe) {
     [xml]$projectXml = Get-Content -LiteralPath $project -Raw
-    $coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' }
+    $coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' } | Select-Object -First 1
     $editorRoot = $coreReference.HintPath -replace '[\\/]Data[\\/].*$', ''
     $UnityExe = Join-Path $editorRoot 'Unity.exe'
 }

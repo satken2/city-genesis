@@ -99,14 +99,6 @@
         "label": "Trọng số thời gian đi lại khi chọn nhà",
         "desc": "Khi chọn nhà, mỗi phút đi về để đi làm, đi học và mua sắm được tính là gánh nặng bằng bao nhiêu lần mức lương trung bình của thành phố. 1 là đúng bằng mức lương. Càng lớn thì nhà gần nơi làm việc và cửa hàng càng được ưu tiên."
       },
-      "AVERAGE_WAGE": {
-        "label": "Lương trung bình (giá trị chuẩn)",
-        "desc": "Mức lương trung bình chuẩn khi bắt đầu mô phỏng."
-      },
-      "AVERAGE_RENT": {
-        "label": "Tiền thuê trung bình (giá trị chuẩn)",
-        "desc": "Tiền thuê trung bình chuẩn khi bắt đầu mô phỏng (mỗi m² mỗi ngày)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Phần cổ tức theo tài sản",
         "desc": "Phần cổ tức được chia theo tỷ lệ tiền mặt của từng hộ gia đình. Phần còn lại chia đều cho mọi hộ. 0 là chia đều toàn bộ, 1 là chia toàn bộ theo tiền mặt."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Tỷ lệ khấu hao thiết bị",
         "desc": "Tỷ lệ khấu hao mỗi kỳ của vốn tích lũy từ đầu tư thiết bị."
-      },
-      "WORK_HOURS": {
-        "label": "Giờ làm việc mỗi ngày (h)",
-        "desc": "Số giờ làm việc tiêu chuẩn của một công dân mỗi ngày."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Tuổi bắt đầu giáo dục phổ thông",
@@ -149,10 +137,6 @@
         "label": "Hệ số hiệu quả giải tỏa",
         "desc": "Giải tỏa hiệu quả gấp bao nhiêu lần so với xây mới (hệ số nhân)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Xác suất sập cơ bản mỗi năm",
-        "desc": "Xác suất cơ bản để một tòa nhà có độ bền 0,5 bị sập trong một năm."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Tham số hình dạng Weibull của xác suất sập",
         "desc": "Càng lớn thì xác suất sập tăng vọt càng mạnh khi gần hết tuổi thọ thiết kế."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Hệ số xuống cấp khi thiếu duy tu",
         "desc": "Tốc độ xuống cấp của tòa nhà hoặc đường dẫn hoàn toàn không được duy tu thường xuyên, tính bằng bội số so với khi được duy tu đầy đủ. Giá trị thay đổi tuyến tính từ 1 đến giá trị này theo phần duy tu bị thiếu."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Xác suất bắt đầu sửa chữa cơ bản mỗi năm",
-        "desc": "Xác suất cơ bản mỗi năm để một tòa nhà cần sửa chữa thực sự bắt đầu được sửa."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Nợ xây dựng ban đầu (mỗi m²)",
-        "desc": "Nợ xây dựng ban đầu trên mỗi m² tổng diện tích sàn của tòa nhà (reserves âm)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Hệ số tiếng ồn giao thông đường bộ",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Tốc độ người đi bộ (km/h)",
         "desc": "Tốc độ di chuyển của người đi bộ, dùng để tính chi phí khi tìm lộ trình."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Quãng tăng tốc của ô tô (m)",
-        "desc": "Quãng đường ô tô dùng để tăng tốc. Ảnh hưởng đến cách tính tốc độ trên đường ngắn."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Số giờ hoạt động của đường mỗi ngày (h)",

@@ -99,14 +99,6 @@
         "label": "Pemberat masa perjalanan dalam memilih kediaman",
         "desc": "Semasa memilih kediaman, setiap minit perjalanan pergi balik ke tempat kerja, sekolah dan kedai dikira sebagai beban sebanyak berapa kali ganda gaji purata bandar. 1 bermaksud sama dengan gaji. Lebih tinggi, lebih cenderung memilih kediaman berhampiran tempat kerja dan kedai."
       },
-      "AVERAGE_WAGE": {
-        "label": "Gaji purata (nilai asas)",
-        "desc": "Gaji purata asas semasa simulasi bermula."
-      },
-      "AVERAGE_RENT": {
-        "label": "Sewa purata (nilai asas)",
-        "desc": "Sewa purata asas semasa simulasi bermula (sehari bagi setiap m²)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Bahagian dividen ikut kekayaan",
         "desc": "Bahagian dividen yang diagihkan mengikut kadar wang tunai setiap isi rumah. Bakinya dibahagi sama rata kepada semua isi rumah. 0 bermaksud semuanya sama rata, 1 bermaksud semuanya mengikut wang tunai."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Kadar susut nilai peralatan",
         "desc": "Kadar susut nilai stok modal daripada pelaburan peralatan bagi setiap epok."
-      },
-      "WORK_HOURS": {
-        "label": "Waktu kerja sehari (jam)",
-        "desc": "Bilangan jam standard warga kota bekerja dalam sehari."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Umur mula pendidikan asas",
@@ -149,10 +137,6 @@
         "label": "Nisbah kecekapan perobohan",
         "desc": "Sejauh mana perobohan lebih cekap berbanding pembinaan baharu (gandaan)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Kadar tahunan asas runtuh",
-        "desc": "Kebarangkalian asas bangunan dengan ketahanan 0.5 runtuh dalam setahun."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Parameter bentuk Weibull bagi runtuhan",
         "desc": "Lebih tinggi, kebarangkalian runtuh meningkat mendadak menjelang tamat jangka hayat reka bentuk."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Gandaan penuaan tanpa penyelenggaraan",
         "desc": "Kelajuan bangunan atau jajaran menjadi usang apabila langsung tidak menerima penyelenggaraan harian, dinyatakan sebagai gandaan berbanding penuaan dengan penyelenggaraan penuh. Nilainya berubah secara linear dari 1 hingga nilai ini mengikut bahagian penyelenggaraan yang tidak diterima."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Kebarangkalian tahunan asas mula dibaiki",
-        "desc": "Kebarangkalian asas tahunan bangunan yang layak benar-benar mula dibaiki."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Hutang pembinaan awal (setiap m²)",
-        "desc": "Hutang pembinaan awal bagi setiap m² keluasan lantai kasar bangunan (rizab negatif)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Pekali bunyi bising lalu lintas jalan",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Kelajuan pejalan kaki (km/h)",
         "desc": "Kelajuan berjalan kaki yang digunakan untuk mengira kos rute."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Jarak pecutan kenderaan (m)",
-        "desc": "Jarak yang diperlukan oleh kenderaan untuk memecut. Mempengaruhi pengiraan kelajuan di jalan pendek."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Waktu aktif jalan sehari (jam)",

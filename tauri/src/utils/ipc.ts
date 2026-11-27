@@ -307,26 +307,6 @@ export async function sendBuildingPlacementCommand(variant: number, command: {
 export const IPC_EVENT_BUILDING_PLACEMENT_STATE = "edit_building:placement_state";
 
 /**
- * `edit_building.update_direct_params`
- * Synchronize rectangle width/depth, rotation, and floors with Unity in direct placement mode. Unity draws a
- * cursor-following rectangle ghost from these parameters. Send on variant selection and each value change, both
- * before and after fixing the position.
- */
-export async function sendEditBuildingUpdateDirectParams(
-  width: number,
-  depth: number,
-  angle: number,
-  floors: number,
-): Promise<void> {
-  await invoke("send_window_action", {
-    windowType: "building_construction",
-    entity: null,
-    action: "edit_building:update_direct_params",
-    params: { width, depth, angle, floors },
-  });
-}
-
-/**
  * `edit_building.update_floors`
  * Change building floor count during construction mode.
  */
@@ -507,21 +487,6 @@ export async function sendEditParcelFinishShapeEdit(): Promise<void> {
     entity: null,
     action: "edit_parcel:finish_shape_edit",
     params: {},
-  });
-}
-
-/**
- * `edit_zone:finish_merge`
- * Return UI confirmation/cancellation of district merging to Unity. merged=true means POST
- * /api/v1/zones/{id}/merge succeeded; Unity refetches districts/roads to display the result. merged=false
- * cancels only pending confirmation, retaining district editing mode.
- */
-export async function sendEditZoneFinishMerge(merged: boolean): Promise<void> {
-  await invoke("send_window_action", {
-    windowType: "zone_merge",
-    entity: null,
-    action: "edit_zone:finish_merge",
-    params: { merged: merged ? 1 : 0 },
   });
 }
 
@@ -1549,17 +1514,6 @@ export const IPC_EVENT_MAP_PINS = "world:map_pins";
 
 /** The edited polygon changed in parcel shape editing mode. */
 export const IPC_EVENT_EDIT_PARCEL_UPDATE_SHAPE = "edit_parcel:update_shape";
-
-/** Selected district changed in district editing mode (Unity → UI). zone_id=0 means no selection. */
-export const IPC_EVENT_EDIT_ZONE_SELECTED = "edit_zone:selected";
-
-/**
- * District merge source/destination selected (Unity → UI). Payload: { target_zone_id, target_zone_name,
- * source_zone_id, source_zone_name }. Since merging irreversibly removes a district, Unity does not submit. The
- * icon panel opens zone_merge, a small confirmation-only window; the UI submits from its confirmation button and
- * returns the result through sendEditZoneFinishMerge.
- */
-export const IPC_EVENT_EDIT_ZONE_REQUEST_MERGE = "edit_zone:request_merge";
 
 /** An object was selected in the 3D view. */
 export const IPC_EVENT_WORLD_SELECT_OBJECT = "world:select_object";

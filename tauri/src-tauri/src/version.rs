@@ -74,7 +74,13 @@ pub async fn core_info(state: &SharedState) -> Result<Value, String> {
     cache.get_or_try_init(|| async {
         let response = reqwest::Client::new().get(format!("{}/api/v1/system/version", base.trim_end_matches('/')))
             .timeout(Duration::from_secs(10)).send().await.map_err(|e| e.to_string())?;
-        response.error_for_status().map_err(|e| e.to_string())?.json().await.map_err(|e| e.to_string())
+        let status = response.status();
+        // Read the body even on error statuses so the socket closes cleanly without triggering WinError 10054 on the core.
+        let bytes = response.bytes().await.map_err(|e| e.to_string())?;
+        if !status.is_success() {
+            return Err(format!("HTTP {status}"));
+        }
+        serde_json::from_slice(&bytes).map_err(|e| e.to_string())
     }).await.cloned()
 }
 

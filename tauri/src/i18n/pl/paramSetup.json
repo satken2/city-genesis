@@ -99,14 +99,6 @@
         "label": "Waga czasu dojazdów przy wyborze mieszkania",
         "desc": "Jak duże obciążenie przy wyborze mieszkania stanowi każda minuta podróży w obie strony do pracy, szkoły i na zakupy – jako wielokrotność średniej płacy w mieście. 1 oznacza wartość równą płacy. Im wyższa wartość, tym chętniej wybierane są mieszkania blisko miejsc pracy i sklepów."
       },
-      "AVERAGE_WAGE": {
-        "label": "Średnia płaca (wartość bazowa)",
-        "desc": "Bazowa średnia płaca na początku symulacji."
-      },
-      "AVERAGE_RENT": {
-        "label": "Średni czynsz (wartość bazowa)",
-        "desc": "Bazowy średni czynsz na początku symulacji (za 1 m² na dzień)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Część dywidend proporcjonalna do majątku",
         "desc": "Część dywidend rozdzielana proporcjonalnie do środków pieniężnych gospodarstw domowych. Reszta jest dzielona równo między wszystkie gospodarstwa. 0 = całość po równo, 1 = całość proporcjonalnie do środków pieniężnych."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Stopa amortyzacji wyposażenia",
         "desc": "Stopa, w jakiej kapitał z inwestycji w wyposażenie amortyzuje się w każdej epoce."
-      },
-      "WORK_HOURS": {
-        "label": "Dzienny czas pracy (h)",
-        "desc": "Standardowa liczba godzin pracy obywatela dziennie."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Wiek rozpoczęcia edukacji podstawowej",
@@ -149,10 +137,6 @@
         "label": "Współczynnik wydajności wyburzania",
         "desc": "Ile razy wydajniejsze jest wyburzanie w porównaniu z nową budową (mnożnik)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Bazowe roczne prawdopodobieństwo zawalenia",
-        "desc": "Bazowe roczne prawdopodobieństwo zawalenia się budynku o trwałości 0.5."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Parametr kształtu Weibulla dla zawaleń",
         "desc": "Im wyższa wartość, tym gwałtowniej rośnie prawdopodobieństwo zawalenia pod koniec okresu użytkowania."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Mnożnik starzenia przy braku utrzymania",
         "desc": "Jak szybko starzeje się budynek lub trasa infrastruktury, która w ogóle nie otrzymuje bieżącego utrzymania – jako wielokrotność starzenia przy pełnym utrzymaniu. Mnożnik zmienia się liniowo od 1 do tej wartości w zależności od tego, jakiej części utrzymania zabrakło."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Bazowe roczne prawdopodobieństwo rozpoczęcia naprawy",
-        "desc": "Bazowe roczne prawdopodobieństwo, że budynek kwalifikujący się do naprawy faktycznie rozpocznie naprawę."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Początkowy dług budowlany (na m²)",
-        "desc": "Początkowy dług budowlany na 1 m² całkowitej powierzchni kondygnacji budynku (ujemne środki pieniężne)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Współczynnik hałasu ruchu drogowego",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Prędkość pieszych (km/h)",
         "desc": "Prędkość poruszania się pieszych. Używana do obliczania kosztów wyszukiwania tras przejazdu."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Droga przyspieszania samochodów (m)",
-        "desc": "Odległość, na której samochody przyspieszają. Wpływa na obliczanie prędkości na krótkich drogach."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Dzienny czas użytkowania drogi (h)",

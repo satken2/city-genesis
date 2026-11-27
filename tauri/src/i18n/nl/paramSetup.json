@@ -99,14 +99,6 @@
         "label": "Gewicht reistijd bij woningkeuze",
         "desc": "Hoe zwaar elke minuut heen-en-weer reizen naar werk, school en winkels weegt bij het kiezen van een woning, als veelvoud van het gemiddelde loon in de stad. Bij 1 telt het als het loon zelf. Hoe hoger, hoe vaker woningen dicht bij werk en winkels worden gekozen."
       },
-      "AVERAGE_WAGE": {
-        "label": "Gemiddeld loon (basiswaarde)",
-        "desc": "Gemiddeld referentieloon bij de start van de simulatie."
-      },
-      "AVERAGE_RENT": {
-        "label": "Gemiddelde huur (basiswaarde)",
-        "desc": "Gemiddelde referentiehuur bij de start van de simulatie (per dag per m²)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Vermogensgebonden deel dividend",
         "desc": "Deel van het dividend dat naar verhouding van de liquide middelen van huishoudens wordt uitgekeerd. De rest wordt gelijk over alle huishoudens verdeeld. 0 = alles gelijk, 1 = alles naar verhouding van de liquide middelen."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Afschrijving bedrijfsmiddelen",
         "desc": "Percentage waarmee de kapitaalvoorraad uit investeringen elk tijdvak wordt afgeschreven."
-      },
-      "WORK_HOURS": {
-        "label": "Werkuren per dag (h)",
-        "desc": "Standaard aantal uren dat een burger per dag werkt."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Beginleeftijd basisonderwijs",
@@ -149,10 +137,6 @@
         "label": "Efficiëntie van slopen",
         "desc": "Hoeveel efficiënter slopen is dan nieuwbouw (factor)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Basiskans op instorting per jaar",
-        "desc": "Basiskans dat een gebouw met duurzaamheid 0.5 binnen een jaar instort."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Weibull-vormparameter instorting",
         "desc": "Hoe hoger, hoe sterker de kans op instorting stijgt rond het einde van de levensduur."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Verouderingsfactor zonder onderhoud",
         "desc": "Hoe snel een gebouw of tracé veroudert zonder enig dagelijks onderhoud, als veelvoud van de veroudering met volledig onderhoud. De factor loopt lineair van 1 tot deze waarde, naar verhouding van het onderhoud dat uitblijft."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Basiskans op herstel per jaar",
-        "desc": "Basiskans per jaar dat een gebouw dat herstel nodig heeft, daadwerkelijk in herstel gaat."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Initiële bouwschuld (per m²)",
-        "desc": "Initiële bouwschuld per m² bruto vloeroppervlak van een gebouw (negatieve reserves)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Geluidscoëfficiënt wegverkeer",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Loopsnelheid (km/h)",
         "desc": "Loopsnelheid die wordt gebruikt om routekosten te berekenen."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Optrekafstand voertuigen (m)",
-        "desc": "Afstand die voertuigen nodig hebben om op te trekken. Beïnvloedt de snelheid op korte wegen."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Actieve uren van wegen per dag (h)",

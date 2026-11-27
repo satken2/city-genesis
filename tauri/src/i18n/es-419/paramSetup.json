@@ -99,14 +99,6 @@
         "label": "Peso del tiempo de viaje al elegir vivienda",
         "desc": "Al elegir vivienda, cuánto pesa cada minuto de los viajes de ida y vuelta al trabajo, la escuela y las compras, como múltiplo del salario promedio de la ciudad. Con 1, se valora al salario. Cuanto mayor, más se prefieren las viviendas cerca del trabajo y las tiendas."
       },
-      "AVERAGE_WAGE": {
-        "label": "Salario promedio (valor de referencia)",
-        "desc": "Salario promedio de referencia al iniciar la simulación."
-      },
-      "AVERAGE_RENT": {
-        "label": "Alquiler promedio (valor de referencia)",
-        "desc": "Alquiler promedio de referencia al iniciar la simulación (por m² y por día)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Proporción de dividendos según el patrimonio",
         "desc": "Parte de los dividendos que se reparte en proporción a los ahorros de cada hogar. El resto se divide en partes iguales entre todos los hogares. 0 = todo en partes iguales, 1 = todo según los ahorros."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Tasa de depreciación del equipo",
         "desc": "Tasa de depreciación por época sobre el stock de capital invertido en equipo."
-      },
-      "WORK_HOURS": {
-        "label": "Horas de trabajo diarias (h)",
-        "desc": "Horas estándar que trabaja un ciudadano al día."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Edad de inicio de la educación básica",
@@ -149,10 +137,6 @@
         "label": "Eficiencia relativa de la demolición",
         "desc": "Cuánto más eficiente es demoler que construir de nuevo (multiplicador)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Probabilidad anual base de derrumbe",
-        "desc": "Probabilidad base de que un edificio con durabilidad 0.5 se derrumbe en un año."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Parámetro de forma de Weibull del derrumbe",
         "desc": "Cuanto mayor, más rápido crece la probabilidad de derrumbe cerca del fin de la vida útil."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Multiplicador de envejecimiento sin mantenimiento",
         "desc": "Velocidad a la que envejece un edificio o una vía que no recibe ningún mantenimiento diario, como múltiplo de su envejecimiento con mantenimiento completo. Varía linealmente de 1 a este valor según la parte del mantenimiento que no recibe."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Probabilidad anual base de entrar en reparación",
-        "desc": "Probabilidad anual base de que un edificio candidato entre efectivamente en reparación."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Deuda inicial de construcción (por m²)",
-        "desc": "Deuda inicial de construcción por cada m² de superficie construida (reservas negativas)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Coeficiente de ruido del tránsito vial",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Velocidad peatonal (km/h)",
         "desc": "Velocidad de desplazamiento de los peatones. Se usa para calcular el costo de las rutas."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Distancia de aceleración de los automóviles (m)",
-        "desc": "Distancia que emplean los automóviles para acelerar. Afecta el cálculo de velocidad en calles cortas."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Horas diarias de operación de las calles (h)",

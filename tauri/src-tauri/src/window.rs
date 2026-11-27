@@ -1195,18 +1195,6 @@ pub fn close_window_by_label(app: &AppHandle, state: &SharedState, label: &str) 
                 "edit_connector:hide".to_string(),
                 json!({}),
             );
-        } else if wt == "zone_merge" {
-            // If district merge confirmation closes without confirmation
-            // or cancellation, cancel Unity's pending confirmation. The
-            // window only hides awaiting reuse and React does not unmount;
-            // leaving cleanup to the panel would leave the merge pending.
-            let _ = ipc::send_ui_action(
-                state,
-                wt.clone(),
-                None,
-                "edit_zone:finish_merge".to_string(),
-                json!({ "merged": 0 }),
-            );
         } else if wt == "parcel_detail" {
             // When the parcel detail panel closes, clear road access display and
             // expansion previews, and release the parcel outline display preset.

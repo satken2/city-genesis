@@ -2,7 +2,7 @@ $ErrorActionPreference = 'Stop'
 $unityRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 & (Join-Path $unityRoot 'Tests/BuildRuntime.ps1')
 [xml]$projectXml = Get-Content -LiteralPath (Join-Path $unityRoot 'Assembly-CSharp.csproj') -Raw
-$coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' }
+$coreReference = $projectXml.Project.ItemGroup.Reference | Where-Object { $_.Include -eq 'UnityEngine.CoreModule' } | Select-Object -First 1
 $editorRoot = $coreReference.HintPath -replace '[\\/]Data[\\/].*$', ''
 $unityExe = Join-Path $editorRoot 'Unity.exe'
 $qaRoot = Join-Path $unityRoot 'Temp/RoadPreviewQA'

@@ -120,8 +120,6 @@ const BROADCAST_EVENTS = new Set([
   "edit_resource:update_shape",
   "edit_grading:update_shape",
   "edit_transit:update_points",
-  "edit_zone:selected",
-  "edit_zone:request_merge",
   "edit_prop:update_instances",
   "edit_prop:update_shape",
   "edit_prop:placement_settings",

@@ -258,8 +258,9 @@ export function PathConstructionPanel({ apiBaseUrl, onClose, editPathId }: PathC
         await sendChangeDisplay("road", "default", null, ["plan"]);
         onClose();
       } else {
-        // New placement: retain the selected variant and prepare the next path in continuous placement mode.
-        pathConstruction.continuePlacement();
+        // New placement: retain the selected variant and prepare the next path in continuous placement mode,
+        // resetting track spacing back to the variant default.
+        pathConstruction.continuePlacement(undefined, { resetSpacing: true });
         setIsConfirming(false);
         void showNotification({
           message: t("path_construction.placedContinue"),

@@ -99,14 +99,6 @@
         "label": "Peso do tempo de deslocação na escolha da casa",
         "desc": "Ao escolher casa, quanto pesa cada minuto das deslocações de ida e volta para o trabalho, a escola e as compras, expresso como múltiplo do salário médio da cidade. Com 1, vale o próprio salário. Quanto maior, mais se preferem casas perto dos locais de trabalho e das lojas."
       },
-      "AVERAGE_WAGE": {
-        "label": "Salário médio (valor de referência)",
-        "desc": "Salário médio de referência no início da simulação."
-      },
-      "AVERAGE_RENT": {
-        "label": "Renda média (valor de referência)",
-        "desc": "Renda média de referência no início da simulação (por dia e por m²)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Parte dos dividendos proporcional à riqueza",
         "desc": "Parte dos dividendos distribuída em proporção à liquidez de cada agregado familiar. O resto é repartido por igual entre todos os agregados. Com 0, tudo é repartido por igual; com 1, tudo em proporção à liquidez."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Taxa de amortização dos equipamentos",
         "desc": "Taxa a que o capital acumulado com o investimento em equipamentos se deprecia em cada época."
-      },
-      "WORK_HOURS": {
-        "label": "Horas de trabalho por dia (h)",
-        "desc": "Número padrão de horas que um cidadão trabalha por dia."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Idade de início do ensino básico",
@@ -149,10 +137,6 @@
         "label": "Rácio de eficiência da demolição",
         "desc": "Quanto a demolição é mais eficiente do que a construção nova (multiplicador)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Probabilidade anual base de colapso",
-        "desc": "Probabilidade anual base de colapso de um edifício com durabilidade 0,5."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Parâmetro de forma de Weibull do colapso",
         "desc": "Quanto maior, mais a probabilidade de colapso dispara perto do fim da vida útil."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Multiplicador de envelhecimento sem manutenção",
         "desc": "Rapidez com que envelhece um edifício ou traçado que não recebe nenhuma manutenção corrente, como múltiplo do envelhecimento com manutenção completa. Varia de forma linear entre 1 e este valor consoante a parte da manutenção que ficou por receber."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Probabilidade anual base de entrada em reparação",
-        "desc": "Probabilidade anual base de um edifício elegível entrar efetivamente em reparação."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Dívida inicial de construção (por m²)",
-        "desc": "Dívida inicial de construção por m² de área bruta de construção do edifício (reservas negativas)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Coeficiente de ruído do tráfego rodoviário",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Velocidade dos peões (km/h)",
         "desc": "Velocidade a pé dos peões, usada no cálculo do custo dos percursos."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Distância de aceleração dos veículos (m)",
-        "desc": "Distância que os automóveis usam para acelerar. Afeta o cálculo da velocidade em estradas curtas."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Horas de utilização diária das estradas (h)",

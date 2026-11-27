@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { ZoneDetailPanel } from "../../src/components/zone/ZoneDetailPanel";
-import { ZoneMergeConfirmWindow } from "../../src/components/zone/ZoneMergeConfirmWindow";
 import { ZoneEditWindow } from "../../src/components/zone/ZoneEditWindow";
 import { ROAD_COLOR_PALETTE, PLAY_MODE_NORMAL } from "../../src/constants";
 import { state } from "../scenarios/mock-runtime";
@@ -153,23 +152,5 @@ assert.ok(container.textContent?.includes("zone.colorUpdateFailed"));
 checkNotification(3);
 await act(async () => { root.unmount(); });
 console.log("PASS: district color, name and restrictions notify Unity; legacy management state is absent; failed/unchanged saves do not");
-
-globalThis.fetch = async () => Response.json({ code: "ZONE_SIZE_ERROR", message: "Too large" }, { status: 400 });
-const mergeContainer = document.createElement("div");
-document.body.append(mergeContainer);
-const mergeRoot = createRoot(mergeContainer);
-let closed = false;
-const beforeMerge = state.calls.length;
-await act(async () => {
-  mergeRoot.render(<ZoneMergeConfirmWindow apiBaseUrl="http://test" pendingMerge={{
-    targetZoneId: 7, targetZoneName: "Target", sourceZoneId: 8, sourceZoneName: "Source",
-  }} onClose={() => { closed = true; }} />);
-});
-await act(async () => { mergeContainer.querySelector<HTMLButtonElement>(".zone-merge-confirm-btn")!.click(); });
-assert.ok(mergeContainer.textContent?.includes("errors.ZONE_SIZE_ERROR"));
-assert.equal(closed, false);
-assert.equal(state.calls.length, beforeMerge);
-await act(async () => { mergeRoot.unmount(); });
-console.log("PASS: oversized merge shows the size error without closing or reloading Unity");
 
 await import("./road-brush-tests");

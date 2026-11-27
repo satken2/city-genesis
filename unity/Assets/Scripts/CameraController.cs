@@ -453,9 +453,15 @@ public partial class CameraController : MonoBehaviour
             ["camera"] = BuildCameraStatePayload()
         };
         bool failed = false;
-        yield return ApiClient.Patch("/city/", payload, null, (code, message) => failed = true);
+        long statusCode = 0;
+        yield return ApiClient.Patch("/city/", payload, null, (code, message) =>
+        {
+            failed = true;
+            statusCode = code;
+        });
         syncInFlight = false;
-        if (failed && syncEnabled)
+        // Do not retry HTTP 403 (e.g., read-only mode), where camera writes are permanently forbidden.
+        if (failed && syncEnabled && statusCode != 403)
         {
             // Space retries after failures to avoid rapid requests during transient session-switch errors.
             syncDirty = true;

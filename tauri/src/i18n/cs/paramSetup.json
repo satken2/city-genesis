@@ -99,14 +99,6 @@
         "label": "Váha doby cesty při výběru bydlení",
         "desc": "Jak velkou zátěž při výběru bydlení představuje každá minuta cesty tam a zpět do práce, do školy a na nákup, vyjádřeno jako násobek průměrné mzdy ve městě. 1 = ocenění přesně mzdou. Čím vyšší, tím spíš se volí bydlení blízko pracovišť a obchodů."
       },
-      "AVERAGE_WAGE": {
-        "label": "Průměrná mzda (výchozí)",
-        "desc": "Referenční průměrná mzda na začátku simulace."
-      },
-      "AVERAGE_RENT": {
-        "label": "Průměrný nájem (výchozí)",
-        "desc": "Referenční průměrný nájem na začátku simulace (za den a m²)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Podíl dividend úměrný majetku",
         "desc": "Podíl dividend, který se rozděluje úměrně hotovosti domácností. Zbytek se dělí rovným dílem mezi všechny domácnosti. 0 = vše rovným dílem, 1 = vše úměrně hotovosti."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Míra odpisů zařízení",
         "desc": "Míra, jakou se kapitál z investic do zařízení odepisuje každou epochu."
-      },
-      "WORK_HOURS": {
-        "label": "Denní pracovní doba (h)",
-        "desc": "Standardní počet hodin, které občan denně odpracuje."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Věk zahájení základního vzdělávání",
@@ -149,10 +137,6 @@
         "label": "Poměr efektivity zbourání",
         "desc": "Kolikrát efektivnější je zbourání oproti nové výstavbě (násobek)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Základní roční pravděpodobnost zřícení",
-        "desc": "Základní pravděpodobnost, že se budova s životností 0,5 během jednoho roku zřítí."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Weibullův parametr tvaru pro zřícení",
         "desc": "Čím vyšší, tím prudčeji roste pravděpodobnost zřícení v blízkosti projektované životnosti."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Násobek stárnutí bez údržby",
         "desc": "Jak rychle stárne budova nebo liniová stavba, která nedostává vůbec žádnou běžnou údržbu, vyjádřeno jako násobek stárnutí při plné údržbě. Podle podílu chybějící údržby se mění lineárně od 1 do této hodnoty."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Základní roční pravděpodobnost zahájení oprav",
-        "desc": "Základní roční pravděpodobnost, že budova určená k opravě se skutečně začne opravovat."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Počáteční dluh za výstavbu (na m²)",
-        "desc": "Počáteční dluh za výstavbu na 1 m² celkové podlahové plochy budovy (záporné rezervy)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Koeficient hluku silniční dopravy",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Rychlost chůze (km/h)",
         "desc": "Rychlost pohybu chodců. Používá se při výpočtu nákladů trasy."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Rozjezdová dráha vozidel (m)",
-        "desc": "Vzdálenost, na které vozidla zrychlují. Ovlivňuje výpočet rychlosti na krátkých silnicích."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Denní provozní doba silnic (h)",

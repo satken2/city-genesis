@@ -560,8 +560,6 @@ export function closeWindowByLabel(label: string): void {
     }
   } else if (windowType === "agent_detail") {
     sendQuietly(windowType, "edit_connector:hide", {});
-  } else if (windowType === "zone_merge") {
-    sendQuietly(windowType, "edit_zone:finish_merge", { merged: 0 });
   } else if (windowType === "parcel_detail") {
     sendQuietly(windowType, "parcel:hide_front_path", {});
     sendQuietly(windowType, "edit_parcel:update_preview", { mode: "merge", preview_polygons: [], original_polygon: null });

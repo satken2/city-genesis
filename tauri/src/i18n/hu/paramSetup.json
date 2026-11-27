@@ -99,14 +99,6 @@
         "label": "Utazási idő súlya a lakásválasztásban",
         "desc": "Lakásválasztáskor a munkába, iskolába és vásárolni járás oda-vissza útjának minden perce a városi átlagbér hányszorosának megfelelő tehernek számít. 1 esetén éppen a bérrel egyenlő. Minél nagyobb, annál inkább a munkahelyhez és üzletekhez közeli lakásokat választják."
       },
-      "AVERAGE_WAGE": {
-        "label": "Átlagbér (alapérték)",
-        "desc": "A szimuláció kezdetén érvényes átlagbér-alapérték."
-      },
-      "AVERAGE_RENT": {
-        "label": "Átlagos lakbér (alapérték)",
-        "desc": "A szimuláció kezdetén érvényes átlagos lakbér-alapérték (naponta, m²-enként)."
-      },
       "DIVIDEND_ASSET_PROPORTIONAL_RATIO": {
         "label": "Osztalék vagyonarányos része",
         "desc": "Az osztaléknak az a része, amelyet a háztartások pénzeszközeivel arányosan osztanak szét. A maradékot minden háztartás egyenlő arányban kapja. 0 esetén minden egyenlően, 1 esetén minden a pénzeszközök arányában oszlik meg."
@@ -114,10 +106,6 @@
       "INVESTMENT_DEPRECIATION_RATE": {
         "label": "Eszközök értékcsökkenési rátája",
         "desc": "A beruházásokból származó tőkeállomány korszakonkénti értékcsökkenési rátája."
-      },
-      "WORK_HOURS": {
-        "label": "Napi munkaidő (h)",
-        "desc": "A polgárok napi szokásos munkaóráinak száma."
       },
       "ELEMENTARY_START_AGE": {
         "label": "Alapfokú oktatás kezdőkora",
@@ -149,10 +137,6 @@
         "label": "Lebontás hatékonysági aránya",
         "desc": "Hányszor hatékonyabb a lebontás az új építéshez képest (szorzó)."
       },
-      "COLLAPSE_BASE_RATE": {
-        "label": "Összeomlás éves alapvalószínűsége",
-        "desc": "Egy 0,5-ös tartósságú épület összeomlásának éves alapvalószínűsége."
-      },
       "COLLAPSE_SHAPE": {
         "label": "Összeomlási valószínűség Weibull-alakparamétere",
         "desc": "Minél nagyobb, annál meredekebben nő az összeomlás valószínűsége a tervezett élettartam közelében."
@@ -164,14 +148,6 @@
       "UPKEEP_NEGLECT_AGING_FACTOR": {
         "label": "Elöregedési szorzó fenntartás nélkül",
         "desc": "Milyen gyorsan öregszik az az épület vagy nyomvonal, amely semmilyen napi fenntartást nem kap, a teljes fenntartás melletti öregedés többszöröseként. A meg nem kapott fenntartás arányában 1 és ezen érték között lineárisan változik."
-      },
-      "MAINTENANCE_BASE_PROB_ANNUAL": {
-        "label": "Felújítás megkezdésének éves alapvalószínűsége",
-        "desc": "Annak éves alapvalószínűsége, hogy egy felújításra szoruló épület ténylegesen felújításba kerül."
-      },
-      "INITIAL_CONSTRUCTION_DEBT_PER_M2": {
-        "label": "Kezdeti építési adósság (m²-enként)",
-        "desc": "Az épület teljes szintterületének minden m²-ére jutó kezdeti építési adósság (negatív tartalék)."
       },
       "NOISE_ROAD_TRAFFIC_COEFF": {
         "label": "Közúti forgalom zajtényezője",
@@ -208,10 +184,6 @@
       "PEDESTRIAN_SPEED": {
         "label": "Gyalogos sebesség (km/h)",
         "desc": "A gyalogosok haladási sebessége. Az útvonalkeresés költségszámításához használjuk."
-      },
-      "PATH_KASOKU_LENGTH": {
-        "label": "Gépjárművek gyorsulási távolsága (m)",
-        "desc": "A gépjárművek gyorsulásához szükséges távolság. A rövid utakon érvényes sebesség számítását befolyásolja."
       },
       "PATH_ACTIVE_HOURS": {
         "label": "Utak napi üzemideje (h)",
