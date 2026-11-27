@@ -3,7 +3,7 @@
  *
  * Combines the most frequently used information and controls:
  * [common tools] [public service adequacy] [city name/date / realized climate / score/budget] [alerts] [epoch
- * countdown / stop time / start now].
+ * countdown / start now].
  *
  * - Tracking list: open citizens added through Track in the citizen panel. This persistent window also shows
  *   notifications explaining why a citizen could not be identified after clicking a car or pedestrian in the
@@ -29,8 +29,9 @@
  * - Unstarted work: while the city has planned works that have not started or works on hold awaiting the order to
  *   start, a yellow band extends the panel upward with both counts. Click to open construction projects, whose
  *   "All" card lists them. The counts come with the shared session state, so they follow orders within one poll.
- * - Epoch countdown: time until the next epoch starts by itself (`useEpochClock`), with two small buttons of the same
- *   height: stop/resume time, and start now (opens the confirmation as before, where several epochs can be chosen).
+ * - Epoch countdown: time until the next epoch starts by itself (`useEpochClock`). Click the countdown itself to
+ *   stop/resume time (outlined in yellow while stopped), with a small start-now button beside it of the same height
+ *   (opens the confirmation as before, where several epochs can be chosen).
  *   An epoch started by the countdown goes through the same checks as start now, and stops time when it cannot run.
  * - Epoch execution: from start until the simulation returns, an overlay covering the whole panel shows the core's
  *   progress (`epoch:progress_visible` from Rust). Afterwards the panel stays dimmed until the results close.
@@ -479,21 +480,16 @@ export function Cockpit() {
         </button>
 
         <div className="cockpit-epoch">
-          <span className="cockpit-epoch-time" title={t("taskbar.epochRemaining")}>
-            <EpochCountdown clock={clock} />
-          </span>
           <button
-            className="cockpit-epoch-btn"
+            className={`cockpit-epoch-time${stopped ? " cockpit-epoch-time--stopped" : ""}`}
             type="button"
-            title={t(stopped ? "taskbar.epochResume" : "taskbar.epochStop")}
-            aria-label={t(stopped ? "taskbar.epochResume" : "taskbar.epochStop")}
+            title={`${t("taskbar.epochRemaining")} — ${t(stopped ? "taskbar.epochResume" : "taskbar.epochStop")}`}
+            aria-label={`${t("taskbar.epochRemaining")} — ${t(stopped ? "taskbar.epochResume" : "taskbar.epochStop")}`}
             aria-pressed={stopped}
             disabled={isLocked}
             onClick={toggleStopped}
           >
-            <svg viewBox="0 0 16 16" className="cockpit-epoch-icon" aria-hidden="true">
-              {stopped ? <path d="M4 2.5v11l9-5.5z" /> : <path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z" />}
-            </svg>
+            <EpochCountdown clock={clock} />
           </button>
           <button
             id="execute"

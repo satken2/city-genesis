@@ -172,6 +172,7 @@ public sealed class WeatherQaHost : MonoBehaviour
         // Time
         var clock = new WeatherClock();
         Check(clock.Current == WeatherClock.Stage.Day && Mathf.Approximately(clock.Phase, WeatherClock.MorningPhase), "clock starts in the morning");
+        Check(clock.Elevation > 3f && clock.Elevation < 10f, "a cycle starts with a low morning sun that still lights the city");
         clock.Advance(100f, false);
         Check(clock.Stopped && !clock.Running && Mathf.Approximately(clock.Phase, WeatherClock.MorningPhase), "time stays stopped until the UI starts it");
         Check(Mathf.Approximately(WeatherClock.ElevationAt(0.5f), WeatherClock.MaxElevation) && WeatherClock.ElevationAt(0f) == 0f, "noon is highest, sunrise on the horizon");
@@ -219,7 +220,7 @@ public sealed class WeatherQaHost : MonoBehaviour
         clock.RequestDawn();
         Check(clock.Advance(0f, true) && clock.Phase < 0f && clock.FadeAlpha == 1f, "weather boundary is still black and below the horizon");
         Check(!clock.Advance(WeatherClock.FadeSeconds, true), "dawn boundary is emitted only once");
-        clock.Advance(WeatherClock.SunsetSeconds, false);
+        clock.Advance(WeatherClock.SunriseSeconds, false);
         Check(clock.Current == WeatherClock.Stage.Day && clock.FadeAlpha == 0f && clock.Darkness == 0f, "paused presentation reaches morning");
         float heldMorning = clock.Phase;
         clock.Advance(100f, false);
@@ -560,6 +561,9 @@ public sealed class WeatherQaHost : MonoBehaviour
         }
         controller.SelectWeather(Index("clear"), true, true);
         controller.Clock.StartMorning();
+        yield return Frames(8);
+        Check(sun.intensity > 0f && sun.intensity < WeatherPreset.All[Index("clear")].Intensity, "low morning sun is weaker");
+        Capture(camera, "t_cycle_start");
         controller.Clock.Step(-1.4f);
         yield return Frames(8);
         Capture(camera, "t_sunrise");

@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// Rendering time doubles as the epoch countdown: one cycle runs from morning to the low evening sun, and the next epoch
+/// Rendering time doubles as the epoch countdown: one cycle runs from the low morning sun to the low evening sun, and the next epoch
 /// starts there (the UI sets the cycle length and whether time is stopped). Night is never shown during play; the sun
 /// sets only after an epoch's calculation finishes, so the city stays viewable while it runs: the evening holds during the
 /// calculation, sunset and darkness follow it, and closing the results brings sunrise and the next cycle's morning.
@@ -16,7 +16,7 @@ public sealed class WeatherClock
     public const float FadeSeconds = 0.5f;
     public const float DuskSeconds = SunsetSeconds + FadeSeconds;
     public const float DawnSeconds = SunriseSeconds + FadeSeconds;
-    public const float MorningPhase = 0.12f;      // Start of a cycle, about 1.5 hours after sunrise.
+    public const float MorningPhase = 0.03f;      // Start of a cycle: low morning sun (about 5 degrees), symmetric with EveningPhase.
     public const float MaxElevation = 55f;        // Noon sun elevation (degrees).
     public const float BelowHorizon = 0.02f;      // Below-horizon travel after sunset/before sunrise, as a fraction of daytime duration.
     public const float LowestElevation = -6f;     // Lowest below-horizon elevation (degrees).

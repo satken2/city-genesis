@@ -243,7 +243,7 @@
 
 /* ─── Epoch countdown ─── */
 
-/* 次のエポックまでの残り時間と、同じ高さの小さな2つのボタン(時間を止める・今すぐ開始)。 */
+/* 次のエポックまでの残り時間(クリックで時間を停止・再開、停止中は黄色い枠)と、同じ高さの今すぐ開始ボタン。 */
 .cockpit-epoch {
   display: flex;
   align-items: center;
@@ -258,6 +258,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 2px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.3);
   color: var(--flat-text);
@@ -265,17 +266,43 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.cockpit-epoch-time:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.cockpit-epoch-time:active {
+  transform: scale(0.96);
+}
+
+.cockpit-epoch-time:focus-visible {
+  outline: 2px solid #9bcef9;
+  outline-offset: 1px;
+}
+
+.cockpit-epoch-time:disabled {
+  opacity: 0.3;
+  pointer-events: none;
+  filter: grayscale(100%);
+  cursor: not-allowed;
+}
+
+.cockpit-epoch-time--stopped {
+  border-color: var(--flat-warn);
 }
 
 .cockpit-epoch-btn {
-  width: 28px;
+  width: 52px;
   height: 36px;
   padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   background: linear-gradient(135deg, #1a5fb4, #1c71d8);
   color: #f6fbff;
   cursor: pointer;
@@ -299,14 +326,8 @@
   cursor: not-allowed;
 }
 
-.cockpit-epoch-icon {
-  width: 14px;
-  height: 14px;
-  fill: currentColor;
-}
-
 .cockpit-epoch-img {
-  width: 24px;
+  width: 28px;
   height: auto;
   pointer-events: none;
 }
