@@ -70,99 +70,106 @@
         "description": "Vi har flyttet kameraet til østkanten av byen. Området du kan bruke til by, er dette rektangelet der det finnes detaljert terreng, og kameraet kan heller ikke forlate det. Det var alt om skjermen og kontrollene. Nå skal vi lage et nytt boligområde på ordentlig. Trykk på «Neste»."
       },
       "step9": {
+        "title": "La byen vokse av seg selv",
+        "run": "La først tiden gå. Trykk på «Start» i cockpiten én gang.",
+        "result": "Tiden har gått. Lukk resultatvinduet når du har sett på resultatet.",
+        "proposal": "Når færre enn 10 % av parsellene du kan bygge på er ledige, foreslår byen ved slutten av en epoke å bygge ut veinettet. På kartet er linjene nye veier og rutene parsellene som lages når veiene er ferdige. Sjekk den beregnede kostnaden, og trykk deretter på «OK» for å godkjenne forslaget.",
+        "explain": "Godkjente veier får statusen «Bygging planlagt». Når de er ferdige, lages det parseller langs dem, og innbyggere og bedrifter begynner å sette opp bygninger. Du trenger ikke vente på et forslag: Du kan også male et område med «Automatisk byutvikling» i ikonpanelet for å bygge ut byen. Nå skal du bygge en vei med egne hender. Trykk på «Neste»."
+      },
+      "step10": {
         "title": "Forleng veien",
         "description": "Nå skal vi bygge et boligområde som kan ta imot nye beboere. Boliger og arbeidsplasser er til liten nytte uten vei: folk kommer seg ikke frem og tilbake, og varer kommer ikke frem. Begynn med å forlenge byens øst–vest-gate mot vest, så du får en vei inn til det nye boligområdet. Trykk på «Vei, jernbane og infrastruktur» i ikonpanelet for å åpne byggepanelet.",
         "confirm": "Langs en vei deles landet opp i parseller når veien er ferdig. Under «Parseller langs veien ved ferdigstillelse» i byggepanelet kan du velge størrelsen på parsellene for hver side av veien. Velg ut fra hvilke bygninger du vil ha: små parseller passer for boliger, store for fabrikker og gårder. Denne veien skal gå til et boligområde, så la innstillingen stå. Trykk på «Bekreft» i byggepanelet for å lagre, og trykk deretter på «Neste»."
       },
-      "step10": {
+      "step11": {
         "title": "Fullfør veien",
         "description": "Veien har fortsatt statusen «Bygging planlagt». En planlagt vei kan ikke brukes; først når arbeidet er ferdig, kan folk og biler ferdes på den. Trykk på «Start» i cockpiten 2–3 ganger for å la tiden gå, og vent til veien er ferdig. Mens arbeidet pågår, koster det byggepenger hver måned.",
         "description_week": "Veien har fortsatt statusen «Bygging planlagt». En planlagt vei kan ikke brukes; først når arbeidet er ferdig, kan folk og biler ferdes på den. Trykk på «Start» i cockpiten 2–3 ganger for å la tiden gå, og vent til veien er ferdig. Mens arbeidet pågår, koster det byggepenger hver uke."
       },
-      "step11": {
+      "step12": {
         "title": "Parsellene er klare",
         "description": "Veien er ferdig, og det er laget parseller langs den. Bygninger kan bare stå på parseller, og fordi parsellen grenser til veien, kan folk og varer komme til og fra. Vil du legge til parseller langs en eksisterende vei, gjør du det med «Parseller» i ikonpanelet."
       },
-      "step12": {
+      "step13": {
         "title": "Opprett en bydel",
         "description": "Før du bygger, bør du bestemme hva denne gaten skal bli. Uten en plan kan det dukke opp en fabrikk rett ved siden av boligene. Slike retningslinjer bestemmer du per bydel. Bydeler tildeles vei for vei, og en parsell hører til bydelen til veien den grenser mot. Trykk på «Bydeler» i ikonpanelet for å åpne vinduet «Rediger bydeler», så ser du at hele byen nå er én bydel.",
         "create": "Bruk utvalgsmetoden «Gateside». Bytt verktøy til «Opprett ny bydel», hold inne Ctrl og dra langs veien du forlenget. Begge sidene av veien du maler, blir en ny bydel sammen med parsellene som grenser til dem."
       },
-      "step13": {
+      "step14": {
         "title": "Bydelen er opprettet",
         "description": "Den nye gaten er nå skilt ut fra sentrum som en egen bydel. Du kan følge med på befolkning og priser per bydel og bestemme hvilke bygninger som får bygges, slik at hvert område utvikler seg på den måten som passer det. Når du har sett på det, lukker du vinduet «Rediger bydeler»."
       },
-      "step14": {
+      "step15": {
         "title": "Åpne bydelsdetaljene",
         "description": "Nå skal vi gjøre den nye bydelen til et boligområde. Vis bydelene med ikonet nederst til venstre på skjermen, og klikk på etiketten til bydelen du nettopp laget, for å åpne detaljene."
       },
-      "step15": {
+      "step16": {
         "title": "Gjør den til et boligområde",
         "description": "Med byggereguleringen nederst i panelet velger du hvilke bygninger som kan bygges på parsellene i bydelen. Her vil vi ha et rolig boligområde, så klikk på alle bygningene unntatt «Leilighetsbygg» og «Enebolig» for å slå dem av."
       },
-      "step16": {
+      "step17": {
         "title": "Sjekk en parsell",
         "description": "Reguleringen du bestemmer for en bydel, gjelder alle parsellene i den. Klikk på parsellen med den gule markøren for å åpne parselldetaljene."
       },
-      "step17": {
+      "step18": {
         "title": "Reguleringen er tatt i bruk",
         "description": "Nederst i parsellpanelet ser du at bydelens regulering, som bare tillater «Leilighetsbygg» og «Enebolig», gjelder her. Nå kan det bare bygges boliger langs denne gaten. I stedet for å stille inn parsellene én og én bestemmer du retningen for bydelen, så følger hele gaten den."
       },
-      "step18": {
+      "step19": {
         "title": "Bygg boliger",
         "description": "Nå er det tid for å skaffe boliger. Vanligvis bygger private aktører boliger automatisk når folk vil bo her, men kommunale boliger dekker raskt et underskudd. Her skal vi bygge et kommunalt leilighetsbygg. Trykk på «Bygging» i ikonpanelet.",
         "select": "Velg «Leilighetsbygg» i kategorien «Bolig», klikk på en valgfri parsell i den nye bydelen som byggested, og trykk på «Bekreft»."
       },
-      "step19": {
+      "step20": {
         "title": "Fullfør boligene",
         "description": "Akkurat som veier kan bygninger ikke tas i bruk bare fordi de er planlagt. Et leilighetsbygg tar over et halvt år å bli ferdig. Trykk på «Start» for å la tiden gå, og vent til det er ferdig."
       },
-      "step20": {
+      "step21": {
         "title": "Sjekk om strømmen kommer frem",
         "description": "Et hjem er ikke nok – folk trenger også strøm og vann. Denne byen har verken kraftverk eller vannforsyning ennå. Klikk på leilighetsbygget med den gule markøren, der byens folk bor, for å åpne detaljene. Velg en av leietakerne i fanen «Bygning», og åpne fanen «Tilbud, etterspørsel og handel»: der ser du at anskaffet mengde «Strøm» er 0."
       },
-      "step21": {
+      "step22": {
         "title": "Bygg et solkraftverk",
         "description": "For å levere strøm trenger du først et kraftverk som produserer den. Bygg et «Solkraftverk» på parsellen med den gule markøren. Vanligvis tar det tid før det er ferdig, men siden dette er opplæringen, hoppes byggetiden over."
       },
-      "step22": {
+      "step23": {
         "title": "Bygg en transformatorstasjon",
         "description": "Høyspent strøm fra et kraftverk kan ikke brukes i husholdningene som den er. En transformatorstasjon gjør den om til strøm som hjemmene kan bruke, og fordeler den til bygningene rundt som er knyttet til den via vei. Bygg en «Transformatorstasjon» på parsellen med den gule markøren nær leilighetsbygget."
       },
-      "step23": {
+      "step24": {
         "title": "Koble til med kraftledning",
         "description": "Selv om kraftverket og transformatorstasjonen ligger et stykke fra hverandre, henger de sammen så lenge strømmen har en vei å gå. Åpne «Vei, jernbane og infrastruktur» i ikonpanelet, velg «Kraftledning» under «Strøm», og trekk en ledning fra tilkoblingspunktet på solkraftverket til tilkoblingspunktet på transformatorstasjonen. Kobler du punktene sammen i en rett linje, holder det med én strekning."
       },
-      "step24": {
+      "step25": {
         "title": "Sjekk strømforsyningen",
         "description": "Når alt er koblet sammen, må du sjekke at strømmen faktisk flyter. Trykk på «Start» for å la tiden gå, klikk på transformatorstasjonen for å åpne detaljene, og kontroller i fanen «Tilbud, etterspørsel og handel» at mottatt mengde «Høyspent strøm» ikke er 0. Det kan ta noen måneder før kraftverket kommer i gang og strømmen kommer frem."
       },
-      "step25": {
+      "step26": {
         "title": "Strømmen har nådd hjemmene",
         "description": "Åpne fanen «Tilbud, etterspørsel og handel» for en leietaker i detaljene for leilighetsbygget, slik du gjorde først, og sjekk at anskaffet mengde «Strøm» ikke lenger er 0. Det kan ta en måned eller to til før strømmen når husholdningene. Produser den i et kraftverk, frakt den i kraftledninger og fordel den fra en transformatorstasjon – først når alle tre henger sammen, kommer strømmen frem til hjemmene."
       },
-      "step26": {
+      "step27": {
         "title": "Finn en vannkilde",
         "description": "Neste steg er vann. Vannet i springen er grunnvann som pumpes opp og sendes til byen. Finn først ut hvor det er mulig å pumpe opp vann. Trykk på «Visning» i cockpiten for å åpne visningspanelet.",
         "show": "Velg «Naturressurser» blant de loddrette fanene, og sett den til «Vis». Vannkildene vises i lyseblått på kartet. Klikk på vannkilden med den gule markøren for å åpne detaljene."
       },
-      "step27": {
+      "step28": {
         "title": "Bygg en grunnvannspumpe",
         "description": "En grunnvannspumpe henter opp vann fra grunnen, så den må bygges der det finnes en vannkilde. Den trenger også strøm og arbeidere for å gå, og det er derfor vi la inn strøm først. Bygg en «Grunnvannspumpe» på parsellen med den gule markøren over vannkilden. Siden dette er opplæringen, hoppes byggetiden over."
       },
-      "step28": {
+      "step29": {
         "title": "Bygg en vannpumpestasjon",
         "description": "Oppumpet vann kan ikke leveres til husholdningene som det er. På samme måte som en transformatorstasjon fordeler strøm, fordeler en vannpumpestasjon vann til bygningene rundt som er knyttet til den via vei. Bygg en «Vannpumpestasjon» på parsellen med den gule markøren nær leilighetsbygget."
       },
-      "step29": {
+      "step30": {
         "title": "Koble til med vannledning",
         "description": "Du trenger en ledning som frakter vannet fra grunnvannspumpen til vannpumpestasjonen. Åpne «Vei, jernbane og infrastruktur» i ikonpanelet, velg «Vannledning» under «Vann», og legg den fra tilkoblingspunktet på grunnvannspumpen til tilkoblingspunktet på vannpumpestasjonen. Legg den i en vid bue rundt østsiden, så den ikke kommer i konflikt med veiene og kraftledningen."
       },
-      "step30": {
+      "step31": {
         "title": "Sjekk vannforsyningen",
         "description": "Trykk på «Start» for å la tiden gå, klikk på vannpumpestasjonen for å åpne detaljene, og kontroller i fanen «Tilbud, etterspørsel og handel» at mottatt mengde «Høytrykksvann» ikke er 0. Det kan ta noen måneder før det kommer arbeidere til grunnvannspumpen og vannet kommer frem."
       },
-      "step31": {
+      "step32": {
         "title": "Grunnlaget for byen er på plass",
         "description": "Vannet har nådd vannpumpestasjonen, så nå kan også hjemmene rundt den bruke vann fra springen. Legg veier, klargjør parseller, bestem retningen for hver bydel, bygg boliger og sørg for strøm og vann – det er grunnflyten i byggingen av en by. Trykk på «Neste» for å fullføre opplæringen i grunnleggende kontroller."
       }

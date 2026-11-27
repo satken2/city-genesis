@@ -70,99 +70,106 @@
         "description": "Movimos la cámara al extremo este de la ciudad. El área que puedes usar como ciudad es este rectángulo donde existe terreno detallado, y la cámara tampoco puede salir de él. Eso es todo sobre la pantalla y los controles. Ahora vamos a crear de verdad un nuevo barrio residencial. Pulsa «Siguiente»."
       },
       "step9": {
+        "title": "Deja que la ciudad crezca sola",
+        "run": "Primero, hagamos avanzar el tiempo. Pulsa «Iniciar» en el panel de mando para avanzar el tiempo una sola vez.",
+        "result": "El tiempo avanzó. Después de revisar los resultados, cierra la ventana de resultados.",
+        "proposal": "Cuando quedan menos del 10 % de parcelas libres donde se puede construir, la ciudad propone ampliar la red vial al final de una época. En el mapa, las líneas son calles nuevas y los cuadros son las parcelas que se crearán cuando se terminen las calles. Revisa el costo estimado y pulsa «Aceptar» para aprobar la propuesta.",
+        "explain": "Las calles aprobadas pasan a «Construcción planeada». Al terminarse, aparecen parcelas a lo largo de ellas, y los residentes y las empresas empiezan a levantar edificios. No hace falta esperar una propuesta: también puedes pintar una zona con «Desarrollo urbano automático» en el panel de iconos para ampliar la ciudad. Ahora, construyamos una calle con tus propias manos. Pulsa «Siguiente»."
+      },
+      "step10": {
         "title": "Prolonguemos la calle",
         "description": "Ahora crearemos un barrio residencial para recibir a nuevos habitantes. Las viviendas y los lugares de trabajo no sirven si no hay calles que los conecten: la gente no puede ir y venir y las mercancías no llegan. Primero, prolonga hacia el oeste la calle este-oeste del pueblo para abrir el camino al nuevo barrio. Pulsa «Calles, ferrocarril e infraestructura» en el panel de iconos para abrir el panel de construcción.",
         "confirm": "El terreno a lo largo de una calle se divide en parcelas cuando la calle se termina. En «Parcelas junto a la calle al terminarla», en el panel de construcción, puedes elegir el tamaño de cada parcela para el lado izquierdo y el derecho. Decide según los edificios que quieras recibir: las parcelas pequeñas sirven para viviendas y las grandes, para fábricas y granjas. Esta calle será residencial, así que déjalo como está. Confirma en el panel de construcción para guardar la carretera y luego pulsa «Siguiente»."
       },
-      "step10": {
+      "step11": {
         "title": "Terminemos la calle",
         "description": "La calle todavía está en «Construcción planeada». Una calle planeada aún no se puede usar: las personas y los coches solo pueden circular cuando termina la obra. Pulsa 2 o 3 veces «Iniciar» en el panel de mando para avanzar el tiempo y espera a que se complete. Mientras dura la obra se paga un costo de construcción cada mes.",
         "description_week": "La calle todavía está en «Construcción planeada». Una calle planeada aún no se puede usar: las personas y los coches solo pueden circular cuando termina la obra. Pulsa 2 o 3 veces «Iniciar» en el panel de mando para avanzar el tiempo y espera a que se complete. Mientras dura la obra se paga un costo de construcción cada semana."
       },
-      "step11": {
+      "step12": {
         "title": "Ya hay parcelas",
         "description": "La calle está terminada y a lo largo de ella se crearon parcelas. Los edificios solo pueden levantarse sobre parcelas, y una parcela que da a una calle permite la entrada y salida de personas y mercancías. Para añadir parcelas junto a una calle existente, usa «Parcelas» en el panel de iconos."
       },
-      "step12": {
+      "step13": {
         "title": "Creemos un distrito",
         "description": "Antes de construir, decide en qué quieres convertir esta calle. Sin un plan, podría levantarse una fábrica justo al lado de las viviendas. Ese tipo de plan se decide por «Distritos». Los distritos se asignan calle por calle, y cada parcela pertenece al distrito de la calle a la que da. Pulsa «Distritos» en el panel de iconos para abrir la ventana Editar distritos: ahora todo el pueblo es un solo distrito.",
         "create": "Usa el modo de pintura «Lado de calle». Cambia la herramienta a «Crear distrito nuevo», mantén pulsada la tecla Ctrl y arrastra sobre la calle que prolongaste. Los dos lados de la calle que pintes, con las parcelas que dan a ellos, pasarán a ser un distrito nuevo."
       },
-      "step13": {
+      "step14": {
         "title": "El distrito quedó dividido",
         "description": "Separaste la nueva calle del centro del pueblo como un distrito propio. Puedes consultar la población y los precios por distrito y decidir qué edificios se pueden construir, para que cada zona crezca de la forma que le conviene. Cuando lo hayas comprobado, cierra la ventana Editar distritos."
       },
-      "step14": {
+      "step15": {
         "title": "Abramos el detalle del distrito",
         "description": "Convirtamos el nuevo distrito en zona residencial. Muestra los distritos con el icono de la esquina inferior izquierda de la pantalla y haz clic en la etiqueta del distrito que acabas de crear para abrir su detalle."
       },
-      "step15": {
+      "step16": {
         "title": "Hagámoslo residencial",
         "description": "En la normativa de construcción, en la parte baja del panel, eliges qué edificios pueden levantarse en las parcelas de este distrito. Aquí queremos un lugar tranquilo para vivir, así que haz clic en todos los edificios salvo «Vivienda colectiva» y «Casa unifamiliar» para desactivarlos."
       },
-      "step16": {
+      "step17": {
         "title": "Revisemos una parcela",
         "description": "La normativa de un distrito se aplica a todas sus parcelas. Haz clic en la parcela del marcador amarillo para abrir su detalle."
       },
-      "step17": {
+      "step18": {
         "title": "La normativa se aplicó",
         "description": "En la parte baja del panel de la parcela se refleja la normativa del distrito que solo permite «Vivienda colectiva» y «Casa unifamiliar». Ahora en esta calle solo se pueden construir viviendas. En lugar de configurar las parcelas una por una, basta con decidir la orientación del distrito para que toda la calle la siga."
       },
-      "step18": {
+      "step19": {
         "title": "Construyamos viviendas",
         "description": "Ahora prepararemos viviendas. Normalmente el sector privado las construye automáticamente cuando hay gente que quiere vivir aquí, pero la vivienda pública que construye la ciudad cubre rápido la falta de viviendas. Construyamos aquí una vivienda colectiva pública. Pulsa «Construcción» en el panel de iconos.",
         "select": "Elige «Edificio de apartamentos» en la categoría «Vivienda», haz clic en cualquier parcela del nuevo distrito como sitio de obra y confirma."
       },
-      "step19": {
+      "step20": {
         "title": "Terminemos las viviendas",
         "description": "Igual que la calle, un edificio planeado todavía no se puede habitar. Una vivienda colectiva tarda más de medio año en terminarse. Pulsa «Iniciar» para avanzar el tiempo y espera a que se complete."
       },
-      "step20": {
+      "step21": {
         "title": "Revisemos la electricidad",
         "description": "Tener vivienda no basta para vivir: también hacen falta electricidad y agua. Este pueblo todavía no tiene central eléctrica ni agua potable. Haz clic en la vivienda colectiva del marcador amarillo, donde vive la gente del pueblo, para abrir su detalle, elige uno de los inquilinos en la pestaña «Edificio» y abre su pestaña «Oferta, demanda y comercio»: comprobarás que la cantidad obtenida de electricidad es 0."
       },
-      "step21": {
+      "step22": {
         "title": "Construyamos un parque solar",
         "description": "Para llevar electricidad, primero hace falta una central que la genere. Construye un «Parque solar» en la parcela del marcador amarillo. Normalmente tarda en terminarse, pero como es un tutorial, se omitirá el plazo de obra."
       },
-      "step22": {
+      "step23": {
         "title": "Construyamos una subestación",
         "description": "La electricidad de alto voltaje de la central no puede usarse tal cual en los hogares. La subestación la convierte en electricidad de uso doméstico y la reparte a los edificios de alrededor conectados por calle. Construye una «Subestación eléctrica» en la parcela del marcador amarillo, cerca de la vivienda colectiva."
       },
-      "step23": {
+      "step24": {
         "title": "Conectemos con una línea de transmisión",
         "description": "Aunque la central y la subestación estén separadas, una ruta para la electricidad las une. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos, elige «Línea de transmisión eléctrica» en «Electricidad» y traza la línea desde el terminal de conexión del parque solar hasta el de la subestación. Basta con una sola línea recta entre los terminales."
       },
-      "step24": {
+      "step25": {
         "title": "Comprobemos el suministro eléctrico",
         "description": "Una vez conectadas, comprueba que la electricidad fluye de verdad. Pulsa «Iniciar» para avanzar el tiempo, haz clic en la subestación para abrir su detalle y, en la pestaña «Oferta, demanda y comercio», confirma que la cantidad recibida de electricidad de alto voltaje no sea 0. La central puede tardar unos meses en ponerse en marcha y en que llegue la electricidad."
       },
-      "step25": {
+      "step26": {
         "title": "La electricidad llegó a los hogares",
         "description": "Desde el detalle de la vivienda colectiva, abre como al principio la pestaña «Oferta, demanda y comercio» de un inquilino y comprueba que la cantidad obtenida de electricidad ya no sea 0. Puede tardar uno o dos meses más en llegar a los hogares. Generarla en la central, transportarla por la línea y repartirla desde la subestación: solo cuando las tres partes están conectadas llega la electricidad a los hogares."
       },
-      "step26": {
+      "step27": {
         "title": "Busquemos una fuente de agua",
         "description": "Ahora el agua potable. El agua del grifo es agua subterránea que se bombea y se envía al pueblo. Primero averigua dónde se puede bombear agua. Pulsa «Visualización» en el panel de mando para abrir el panel.",
         "show": "Elige «Recursos naturales» en las pestañas verticales y cambia a «Visible». Las fuentes de agua aparecen en azul claro en el mapa. Haz clic en la fuente de agua del marcador amarillo para abrir su detalle."
       },
-      "step27": {
+      "step28": {
         "title": "Construyamos una bomba de agua subterránea",
         "description": "La bomba de agua subterránea extrae agua del subsuelo, así que debe construirse donde hay una fuente de agua. Además necesita electricidad y trabajadores para funcionar; por eso llevamos primero la electricidad. Construye una «Bomba de agua subterránea» en la parcela del marcador amarillo, sobre la fuente de agua. Como es un tutorial, se omitirá el plazo de obra."
       },
-      "step28": {
+      "step29": {
         "title": "Construyamos una estación de bombeo",
         "description": "El agua bombeada no puede entregarse tal cual a los hogares. Igual que la subestación reparte la electricidad, la estación de bombeo reparte el agua a los edificios de alrededor conectados por calle. Construye una «Estación de bombeo de agua» en la parcela del marcador amarillo, cerca de la vivienda colectiva."
       },
-      "step29": {
+      "step30": {
         "title": "Conectemos con una tubería",
         "description": "Hace falta una tubería que lleve el agua de la bomba subterránea a la estación de bombeo. Abre «Calles, ferrocarril e infraestructura» en el panel de iconos, elige «Tubería de aducción de agua» en «Agua» y tiéndela desde el terminal de conexión de la bomba hasta el de la estación de bombeo. Para que no choque con las calles ni con la línea de transmisión, rodea ampliamente por el lado este."
       },
-      "step30": {
+      "step31": {
         "title": "Comprobemos el suministro de agua",
         "description": "Pulsa «Iniciar» para avanzar el tiempo, haz clic en la estación de bombeo para abrir su detalle y, en la pestaña «Oferta, demanda y comercio», confirma que la cantidad recibida de agua a alta presión no sea 0. Pueden pasar unos meses hasta que la bomba subterránea reúna trabajadores y llegue el agua."
       },
-      "step31": {
+      "step32": {
         "title": "Las bases están listas",
         "description": "El agua llegó a la estación de bombeo, así que los hogares de alrededor ya pueden usar agua corriente. Trazar calles, preparar parcelas, decidir la orientación de cada distrito, construir viviendas y llevar electricidad y agua: ese es el flujo básico para construir una ciudad. Pulsa «Siguiente» para terminar el tutorial de controles básicos."
       }

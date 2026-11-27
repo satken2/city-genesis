@@ -46,7 +46,7 @@ type GrowthPlan = {
 
 type GrowthResult = {
   path_ids: number[];
-  parcel_ids: number[];
+  parcels: number; // 道路の竣工時にできる区画の件数
   rejected: Record<string, number>;
   blocks_added: number;
 };
@@ -168,7 +168,7 @@ export function useAutoGrowthWorkflow({
       const summary = t("cityDevelopment.autoGrowth.created", {
         blocks: result.blocks_added,
         roads: result.path_ids.length,
-        parcels: result.parcel_ids.length,
+        parcels: result.parcels,
         rejected,
       });
       setMessage(withReasons(summary, result.rejected));

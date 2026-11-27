@@ -70,99 +70,106 @@
         "description": "A câmara foi levada para o extremo leste da cidade. A área que pode usar para a cidade é este retângulo onde existe terreno detalhado, e a câmara também não pode sair dele. Terminámos a explicação do ecrã e dos controlos. A seguir, vamos criar mesmo um novo bairro residencial. Clique em «Seguinte»."
       },
       "step9": {
+        "title": "Deixe a cidade crescer sozinha",
+        "run": "Primeiro, vamos avançar no tempo. Clique uma vez em «Iniciar» no painel de comando.",
+        "result": "O tempo avançou. Depois de ver os resultados, feche a janela de resultados.",
+        "proposal": "Quando menos de 10% dos lotes edificáveis estão livres, a cidade propõe alargar a rede viária no fim de uma época. No mapa, as linhas são as estradas novas e os quadrados são os lotes criados quando as estradas estiverem concluídas. Verifique o custo estimado e clique em «OK» para aprovar a proposta.",
+        "explain": "As estradas aprovadas passam a «Construção planeada». Quando estiverem concluídas, surgem lotes ao longo delas, e os moradores e as empresas começam a erguer edifícios. Não é preciso esperar por uma proposta: também pode pintar uma área com «Desenvolvimento urbano automático» no painel de ícones para expandir a cidade. Agora, vamos construir uma estrada pelas suas próprias mãos. Clique em «Seguinte»."
+      },
+      "step10": {
         "title": "Prolongue a estrada",
         "description": "A partir daqui, vai criar de facto um bairro residencial para receber novos moradores. Sem estradas que os liguem, nem a habitação nem os locais de trabalho servem de nada: as pessoas não circulam e as mercadorias não chegam. Comece por prolongar para oeste a rua que atravessa a vila de leste a oeste, abrindo caminho para o novo bairro. Clique em «Estradas, ferrovia e infraestruturas» no painel de ícones para abrir o painel de construção.",
         "confirm": "O terreno ao longo de uma estrada é dividido em lotes quando a estrada fica concluída. A dimensão de cada lote escolhe-se para cada lado da estrada em «Lotes junto à estrada criados na conclusão», no painel de construção. Decida conforme os edifícios que quer receber: lotes mais pequenos para habitação, lotes maiores para fábricas ou terrenos agrícolas. Como esta estrada se destina a um bairro residencial, deixe como está. Clique em «Confirmar» no painel de construção para guardar e depois clique em «Seguinte»."
       },
-      "step10": {
+      "step11": {
         "title": "Conclua a estrada",
         "description": "A estrada ainda está em «Construção planeada». Um plano não basta: só quando a obra termina é que pessoas e veículos podem passar. Clique 2 ou 3 vezes em «Iniciar» no painel de comando para avançar no tempo e aguarde a conclusão. Enquanto a obra decorre, os custos de construção são cobrados todos os meses.",
         "description_week": "A estrada ainda está em «Construção planeada». Um plano não basta: só quando a obra termina é que pessoas e veículos podem passar. Clique 2 ou 3 vezes em «Iniciar» no painel de comando para avançar no tempo e aguarde a conclusão. Enquanto a obra decorre, os custos de construção são cobrados todas as semanas."
       },
-      "step11": {
+      "step12": {
         "title": "Os lotes estão criados",
         "description": "A estrada está concluída e foram criados lotes ao longo dela. Os edifícios só podem ser construídos em lotes, e é por o lote dar para a estrada que pessoas e mercadorias podem entrar e sair. Para acrescentar lotes ao longo de uma estrada existente, use «Lotes» no painel de ícones."
       },
-      "step12": {
+      "step13": {
         "title": "Crie um bairro",
         "description": "Antes de construir, decida em que tipo de lugar quer transformar esta rua. Sem uma orientação definida, pode surgir uma fábrica mesmo ao lado das casas. A orientação de cada local define-se por «Bairro». Os bairros atribuem-se estrada a estrada, e cada lote pertence ao bairro da estrada para a qual dá. Clique em «Bairros» no painel de ícones para abrir a janela «Editar bairros»: vai ver que, para já, toda a vila forma um único bairro.",
         "create": "Use o modo de seleção «Lado da rua». Mude a ferramenta para «Criar novo bairro», mantenha Ctrl premido e arraste ao longo da estrada que prolongou. Os dois lados da estrada pintada, com os lotes que lhes dão frente, passam a formar um novo bairro."
       },
-      "step13": {
+      "step14": {
         "title": "O bairro foi dividido",
         "description": "A nova rua ficou separada do centro da vila, como um bairro próprio. Como pode ver a população e os preços de cada bairro e decidir que edifícios se podem lá construir, cada zona pode crescer da forma que mais lhe convém. Depois de verificar, feche a janela «Editar bairros»."
       },
-      "step14": {
+      "step15": {
         "title": "Abra os detalhes do bairro",
         "description": "Vamos configurar o novo bairro como zona residencial. Mostre os bairros com o ícone no canto inferior esquerdo do ecrã e clique na etiqueta do bairro que acabou de criar para abrir os respetivos detalhes."
       },
-      "step15": {
+      "step16": {
         "title": "Defina-o como residencial",
         "description": "Nos regulamentos de construção, na parte inferior do painel, escolhe os edifícios que podem ser construídos nos lotes deste bairro. Aqui queremos uma zona residencial tranquila, por isso clique em todos os edifícios exceto «Prédio de apartamentos» e «Moradia» para os desativar."
       },
-      "step16": {
+      "step17": {
         "title": "Verifique um lote",
         "description": "Os regulamentos definidos no bairro aplicam-se a todos os lotes desse bairro. Clique no lote com o marcador amarelo para abrir os respetivos detalhes."
       },
-      "step17": {
+      "step18": {
         "title": "Os regulamentos foram aplicados",
         "description": "Na parte inferior do painel do lote, vê-se o regulamento definido no bairro, que só permite «Prédio de apartamentos» e «Moradia». A partir de agora, nos lotes desta rua só se pode construir habitação. Não é preciso configurar lote a lote: basta definir a orientação do bairro para que toda a rua a siga."
       },
-      "step18": {
+      "step19": {
         "title": "Construa habitação",
         "description": "Chegou a hora de preparar habitação. Normalmente, quando há quem queira viver na cidade, o setor privado constrói habitação automaticamente; mas se o município construir habitação pública, a falta de casas resolve-se logo. Vamos construir aqui um prédio de apartamentos público. Clique em «Construção» no painel de ícones.",
         "select": "Escolha «Prédio de apartamentos» na categoria «Habitação», clique num lote à sua escolha no novo bairro para definir o local da obra e clique em «Confirmar»."
       },
-      "step19": {
+      "step20": {
         "title": "Conclua a habitação",
         "description": "Tal como as estradas, os edifícios não podem ser habitados só por estarem planeados. Um prédio de apartamentos demora mais de meio ano a ficar concluído. Avance no tempo com «Iniciar» e aguarde a conclusão."
       },
-      "step20": {
+      "step21": {
         "title": "Verifique se a eletricidade chega",
         "description": "Ter casa não basta: sem eletricidade nem água não há vida possível. Esta vila ainda não tem central elétrica nem abastecimento de água. Clique no prédio de apartamentos com o marcador amarelo, onde vivem os habitantes da vila, para abrir os detalhes; escolha um dos ocupantes no separador «Edifício» e abra o separador «Oferta, procura e comércio»: vai ver que a «Quantidade obtida» de «Eletricidade» é 0."
       },
-      "step21": {
+      "step22": {
         "title": "Construa uma central solar",
         "description": "Para levar eletricidade às casas, primeiro é preciso uma central que a produza. Construa uma «Central solar» no lote com o marcador amarelo. Normalmente a obra demora algum tempo, mas, como isto é um tutorial, a duração da obra é ignorada e a central fica logo concluída."
       },
-      "step22": {
+      "step23": {
         "title": "Construa uma subestação",
         "description": "A eletricidade de alta tensão produzida pela central não pode ser usada diretamente pelas casas. A subestação converte-a em eletricidade de uso doméstico e distribui-a pelos edifícios em redor ligados por estrada. Construa uma «Subestação» no lote com o marcador amarelo, perto do prédio de apartamentos."
       },
-      "step23": {
+      "step24": {
         "title": "Ligue com uma linha elétrica",
         "description": "Mesmo que a central e a subestação fiquem afastadas, basta um caminho para a eletricidade para ficarem ligadas. Abra «Estradas, ferrovia e infraestruturas» no painel de ícones, escolha «Linha elétrica» em «Eletricidade» e trace uma linha desde o ponto de ligação da central solar até ao ponto de ligação da subestação. Se ligar os pontos em linha reta, basta um único troço."
       },
-      "step24": {
+      "step25": {
         "title": "Verifique o abastecimento de eletricidade",
         "description": "Depois de ligar, confirme que a eletricidade está mesmo a passar. Avance no tempo com «Iniciar», clique na subestação para abrir os detalhes e, no separador «Oferta, procura e comércio», confirme que a «Quantidade recebida» de «Eletricidade de alta tensão» não é 0. Pode demorar alguns meses até a central arrancar e a eletricidade chegar."
       },
-      "step25": {
+      "step26": {
         "title": "A eletricidade chegou às casas",
         "description": "Nos detalhes do prédio de apartamentos, abra o separador «Oferta, procura e comércio» de um ocupante, tal como da primeira vez, e confirme que a «Quantidade obtida» de «Eletricidade» já não é 0. Pode ser preciso avançar mais 1 ou 2 meses até a eletricidade chegar às casas. Produzir na central, transportar pela linha elétrica, distribuir na subestação: só com estes três elos ligados é que a eletricidade chega às casas."
       },
-      "step26": {
+      "step27": {
         "title": "Procure uma fonte de água",
         "description": "Agora, a água. A água da rede é água subterrânea bombeada e enviada para a vila. Comece por descobrir onde é possível bombear água. Clique em «Vista» no painel de comando para abrir o painel de vista.",
         "show": "Nos separadores verticais, escolha «Recursos naturais» e mude para «Visível». As fontes de água aparecem no mapa a azul-claro. Clique na fonte de água com o marcador amarelo para abrir os detalhes."
       },
-      "step27": {
+      "step28": {
         "title": "Construa uma bomba de água subterrânea",
         "description": "A bomba de água subterrânea extrai água do subsolo, por isso tem de ser construída onde houver uma fonte de água. Para funcionar, também precisa de eletricidade e de trabalhadores, e foi por isso que tratámos primeiro da eletricidade. Construa uma «Bomba de água subterrânea» no lote com o marcador amarelo, sobre a fonte de água. Como isto é um tutorial, a duração da obra é ignorada."
       },
-      "step28": {
+      "step29": {
         "title": "Construa uma estação elevatória",
         "description": "A água extraída não pode ser distribuída diretamente às casas. Tal como a subestação distribui a eletricidade, a estação elevatória distribui a água pelos edifícios em redor ligados por estrada. Construa uma «Estação elevatória» no lote com o marcador amarelo, perto do prédio de apartamentos."
       },
-      "step29": {
+      "step30": {
         "title": "Ligue com uma conduta",
         "description": "É preciso uma conduta para levar a água extraída pela bomba de água subterrânea até à estação elevatória. Abra «Estradas, ferrovia e infraestruturas» no painel de ícones, escolha «Conduta adutora» em «Água» e trace-a desde o ponto de ligação da bomba de água subterrânea até ao ponto de ligação da estação elevatória. Para não interferir com as estradas e a linha elétrica, faça um desvio largo pelo lado leste."
       },
-      "step30": {
+      "step31": {
         "title": "Verifique o abastecimento de água",
         "description": "Avance no tempo com «Iniciar», clique na estação elevatória para abrir os detalhes e, no separador «Oferta, procura e comércio», confirme que a «Quantidade recebida» de «Água de alta pressão» não é 0. Pode demorar alguns meses até a bomba de água subterrânea reunir trabalhadores e a água chegar."
       },
-      "step31": {
+      "step32": {
         "title": "As bases da cidade estão lançadas",
         "description": "A água chegou à estação elevatória, por isso as casas em redor já podem usar a água da rede. Traçar estradas, preparar lotes, definir a orientação dos bairros, construir habitação e levar eletricidade e água: este é o processo básico da construção de uma cidade. Clique em «Seguinte» para concluir o tutorial de controlos básicos."
       }

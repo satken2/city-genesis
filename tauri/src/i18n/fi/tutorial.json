@@ -70,99 +70,106 @@
         "description": "Kamera on nyt siirretty kaupungin itäreunalle. Kaupunkia voi rakentaa vain tämän nelikulmion sisälle, jonne on luotu yksityiskohtainen maasto. Kamerakaan ei pääse rajan ulkopuolelle. Näytön ja ohjauksen esittely päättyy tähän. Seuraavaksi rakennat oikean uuden asuinalueen. Paina ”Seuraava”."
       },
       "step9": {
+        "title": "Anna kaupungin kasvaa itsestään",
+        "run": "Anna ensin ajan edetä. Paina ohjaamon ”Aloita”-painiketta yhden kerran.",
+        "result": "Aika on edennyt. Kun olet katsonut tulokset, sulje tulosikkuna.",
+        "proposal": "Kun rakennettavista tonteista alle 10 % on vapaana, kaupunki ehdottaa kauden lopussa tieverkon laajentamista. Kartalla viivat ovat uusia teitä ja neliöt tontteja, jotka syntyvät teiden valmistuessa. Tarkista arvioidut kustannukset ja hyväksy ehdotus painamalla ”OK”.",
+        "explain": "Hyväksytyt tiet saavat tilan ”Rakentaminen suunniteltu”. Kun ne valmistuvat, niiden varrelle syntyy tontteja, ja asukkaat ja yritykset alkavat rakentaa. Ehdotusta ei tarvitse odottaa: voit myös maalata alueen kuvakepaneelin toiminnolla ”Kaupungin automaattinen kehitys” ja laajentaa kaupunkia. Seuraavaksi rakennat tien omin käsin. Paina ”Seuraava”."
+      },
+      "step10": {
         "title": "Jatka tietä",
         "description": "Nyt rakennat asuinalueen, jolle uudet asukkaat voivat muuttaa. Ilman tieyhteyttä ihmiset eivät pääse kotien ja työpaikkojen välillä, eivätkä tavarat kulje. Jatka ensin kaupungin itä–länsisuuntaista katua länteen ja rakenna tie asuinalueelle. Avaa rakennuspaneeli painamalla kuvakepaneelin ”Tiet, raiteet ja infra” -painiketta.",
         "confirm": "Tien varren maa jaetaan tonteiksi, kun tie valmistuu. Tontin koon voi valita rakennuspaneelin kohdasta ”Valmistuessa luotavat tienvarsitontit” erikseen tien kummallekin puolelle. Valitse koko sen mukaan, millaisia rakennuksia haluat: asuinalueelle pienehköt tontit, tehtaille ja maatiloille suuret. Nyt alueesta tulee asuinalue, joten jätä asetus ennalleen. Tallenna painamalla rakennuspaneelin ”Vahvista”-painiketta ja paina sitten ”Seuraava”."
       },
-      "step10": {
+      "step11": {
         "title": "Rakenna tie valmiiksi",
         "description": "Tie on vielä tilassa ”Rakentaminen suunniteltu”. Pelkkä suunnitelma ei ole käyttökelpoinen, vaan ihmiset ja autot pääsevät kulkemaan vasta, kun työ on valmis. Anna ajan edetä painamalla ohjaamon ”Aloita”-painiketta 2–3 kertaa ja odota, että tie valmistuu. Rakennustyöt maksavat joka kuukausi.",
         "description_week": "Tie on vielä tilassa ”Rakentaminen suunniteltu”. Pelkkä suunnitelma ei ole käyttökelpoinen, vaan ihmiset ja autot pääsevät kulkemaan vasta, kun työ on valmis. Anna ajan edetä painamalla ohjaamon ”Aloita”-painiketta 2–3 kertaa ja odota, että tie valmistuu. Rakennustyöt maksavat joka viikko."
       },
-      "step11": {
+      "step12": {
         "title": "Tontit ovat valmiit",
         "description": "Tie on valmis, ja sen varrelle on syntynyt tontteja. Rakennuksia voi rakentaa vain tonteille, ja koska tontit ovat tien varrella, ihmiset ja tavarat pääsevät niille. Jos haluat lisätä tontteja olemassa olevan tien varrelle, luo ne kuvakepaneelin ”Tontit”-painikkeella."
       },
-      "step12": {
+      "step13": {
         "title": "Luo kaupunginosa",
         "description": "Päätä ennen rakentamista, millaiseksi paikaksi tämä katu kasvaa. Ilman linjausta tehdas voi nousta aivan asuintalon viereen. Paikkakohtaiset linjaukset tehdään kaupunginosittain. Kaupunginosa määritetään teittäin, ja tontti kuuluu sen tien kaupunginosaan, jonka varrella se on. Avaa kaupunginosaeditori painamalla kuvakepaneelin ”Kaupunginosat”-painiketta. Huomaat, että koko kaupunki on nyt yhtä kaupunginosaa.",
         "create": "Valitse valintatavaksi ”Kadun puoli”. Vaihda toiminnoksi ”Uusi kaupunginosa” ja vedä Ctrl-näppäin painettuna jatkamasi tien päältä. Tien molemmat puolet ja niiden varren tontit muodostavat uuden kaupunginosan."
       },
-      "step13": {
+      "step14": {
         "title": "Kaupunginosa on jaettu",
         "description": "Uusi katu on nyt eri kaupunginosaa kuin kaupungin keskusta. Voit tarkastella väestöä ja hintatasoa kaupunginosittain ja päättää sallituista rakennuksista, joten voit rakentaa kuhunkin paikkaan sopivaa kaupunkia. Kun olet katsonut, sulje kaupunginosaeditori."
       },
-      "step14": {
+      "step15": {
         "title": "Avaa kaupunginosan tiedot",
         "description": "Määritä uusi kaupunginosa asuinalueeksi. Tuo kaupunginosat näkyviin näytön vasemman alakulman kuvakkeesta, napsauta äsken luomasi kaupunginosan nimeä ja avaa kaupunginosan tiedot."
       },
-      "step15": {
+      "step16": {
         "title": "Tee alueesta asuinalue",
         "description": "Paneelin alaosan rakentamismääräyksistä valitset, millaisia rakennuksia kaupunginosan tonteille saa rakentaa. Tästä halutaan rauhallinen asuinalue, joten poista käytöstä napsauttamalla kaikki rakennukset paitsi ”Kerrostalo” ja ”Omakotitalo”."
       },
-      "step16": {
+      "step17": {
         "title": "Tarkista tontti",
         "description": "Kaupunginosalle asetetut määräykset koskevat kaikkia sen tontteja. Napsauta keltaisella merkillä merkittyä tonttia ja avaa sen tiedot."
       },
-      "step17": {
+      "step18": {
         "title": "Määräykset ovat voimassa",
         "description": "Tonttipaneelin alaosassa näkyy kaupunginosalle asetettu määräys, joka sallii vain ”Kerrostalon” ja ”Omakotitalon”. Tämän kadun tonteille voi nyt rakentaa vain asuntoja. Tontteja ei tarvitse määrittää yksitellen: kun linjaat kaupunginosan, koko katu noudattaa linjausta."
       },
-      "step18": {
+      "step19": {
         "title": "Rakenna asuntoja",
         "description": "Hanki nyt asunnot. Yleensä yksityiset rakentavat asuntoja automaattisesti, kun asukkaita on tulossa, mutta rakentamalla kunnallisia asuntoja kaupunki voi korjata asuntopulan heti. Rakenna nyt kunnallinen kerrostalo. Paina kuvakepaneelin ”Rakentaminen”-painiketta.",
         "select": "Valitse ”Asuminen”-luokasta ”Kerrostalo”, valitse rakennuspaikaksi mikä tahansa uuden kaupunginosan tontti napsauttamalla ja paina ”Vahvista”."
       },
-      "step19": {
+      "step20": {
         "title": "Rakenna asunnot valmiiksi",
         "description": "Kuten tiehenkään, rakennukseen ei voi muuttaa pelkän suunnitelman perusteella. Kerrostalon valmistuminen kestää yli puoli vuotta. Anna ajan edetä ”Aloita”-painikkeella ja odota, että talo valmistuu."
       },
-      "step20": {
+      "step21": {
         "title": "Tarkista, tuleeko sähköä",
         "description": "Asunto ei riitä, jos sähköä ja vettä ei tule. Kaupungissa ei ole vielä voimalaitosta eikä vesihuoltoa. Napsauta keltaisella merkillä merkittyä kerrostaloa, jossa kaupunkilaiset asuvat, ja avaa sen tiedot. Valitse ”Rakennustiedot”-välilehdeltä yksi vuokralainen ja avaa ”Kysyntä, tarjonta ja kauppa” -välilehti. Näet, että saatu sähkömäärä on 0."
       },
-      "step21": {
+      "step22": {
         "title": "Rakenna aurinkovoimala",
         "description": "Sähkön jakeluun tarvitaan ensin voimalaitos, joka tuottaa sähköä. Rakenna ”Aurinkovoimala” keltaisella merkillä merkitylle tontille. Tavallisesti valmistuminen vie aikaa, mutta opetusohjelmassa rakennusaika ohitetaan."
       },
-      "step22": {
+      "step23": {
         "title": "Rakenna sähköasema",
         "description": "Voimalaitoksen tuottamaa suurjännitesähköä ei voi sellaisenaan käyttää kodeissa. Sähköasema muuntaa sen kotitalouksille sopivaksi ja jakaa sen tieyhteyden päässä oleviin ympäröiviin rakennuksiin. Rakenna ”Sähköasema” kerrostalon lähellä olevalle keltaisella merkillä merkitylle tontille."
       },
-      "step23": {
+      "step24": {
         "title": "Yhdistä voimalinjalla",
         "description": "Vaikka voimalaitos ja sähköasema ovat erillään, ne voi yhdistää, kun sähkölle on reitti. Avaa kuvakepaneelin ”Tiet, raiteet ja infra”, valitse ”Sähkö”-kohdasta ”Voimalinja” ja vedä linja aurinkovoimalan liitäntäpisteestä sähköaseman liitäntäpisteeseen. Kun yhdistät pisteet suoraan, linja syntyy yhdellä vedolla."
       },
-      "step24": {
+      "step25": {
         "title": "Tarkista sähkönjakelu",
         "description": "Tarkista yhdistämisen jälkeen, että sähköä todella kulkee. Anna ajan edetä ”Aloita”-painikkeella, napsauta sähköasemaa ja avaa sen tiedot. Tarkista ”Kysyntä, tarjonta ja kauppa” -välilehdeltä, että vastaanotettu suurjännitesähkö ei ole 0. Voimalaitoksen käynnistymiseen ja sähkön perillemenoon voi kulua useita kuukausia."
       },
-      "step25": {
+      "step26": {
         "title": "Sähkö on kodeissa",
         "description": "Avaa kerrostalon tiedoista vuokralaisen ”Kysyntä, tarjonta ja kauppa” -välilehti samoin kuin aiemmin ja tarkista, että saatu sähkömäärä ei ole enää 0. Joskus aikaa on annettava edetä vielä 1–2 kuukautta, ennen kuin sähkö on kodeissa. Voimalaitos tuottaa, voimalinja siirtää ja sähköasema jakaa. Vasta kun kaikki kolme on yhdistetty, sähkö tulee kotiin."
       },
-      "step26": {
+      "step27": {
         "title": "Etsi vesilähde",
         "description": "Seuraavaksi vesihuolto. Vesijohtovesi pumpataan maan alta ja johdetaan kaupunkiin. Selvitä ensin, mistä vettä voi pumpata. Avaa näkymäpaneeli painamalla ohjaamon ”Näkymä”-painiketta.",
         "show": "Valitse pystysuorista välilehdistä ”Luonnonvarat” ja vaihda asetukseksi ”Näytä”. Vesilähteet näkyvät kartalla vaaleansinisinä. Napsauta keltaisella merkillä merkittyä vesilähdettä ja avaa sen tiedot."
       },
-      "step27": {
+      "step28": {
         "title": "Rakenna pohjavesipumppu",
         "description": "Pohjavesipumppu pumppaa vettä maan alta, joten se on rakennettava vesilähteen kohdalle. Toimiakseen se tarvitsee myös sähköä ja työntekijöitä, ja siksi sähkö vedettiin ensin. Rakenna ”Pohjavesipumppu” vesilähteen päällä olevalle keltaisella merkillä merkitylle tontille. Opetusohjelmassa rakennusaika ohitetaan."
       },
-      "step28": {
+      "step29": {
         "title": "Rakenna vesipumppaamo",
         "description": "Pumpattua vettä ei voi sellaisenaan jakaa kotitalouksiin. Samaan tapaan kuin sähköasema jakaa sähköä, vesipumppaamo jakaa vettä tieyhteyden päässä oleviin ympäröiviin rakennuksiin. Rakenna ”Vesipumppaamo” kerrostalon lähellä olevalle keltaisella merkillä merkitylle tontille."
       },
-      "step29": {
+      "step30": {
         "title": "Yhdistä siirtovesijohdolla",
         "description": "Pohjavesipumpun pumppaama vesi tarvitsee putken, jota pitkin se kulkee vesipumppaamolle. Avaa kuvakepaneelin ”Tiet, raiteet ja infra”, valitse ”Vesi”-kohdasta ”Siirtovesijohto” ja vedä putki pohjavesipumpun liitäntäpisteestä vesipumppaamon liitäntäpisteeseen. Kierrä laajasti itäpuolelta, jotta putki ei osu teihin tai voimalinjoihin."
       },
-      "step30": {
+      "step31": {
         "title": "Tarkista vedenjakelu",
         "description": "Anna ajan edetä ”Aloita”-painikkeella, napsauta vesipumppaamoa ja avaa sen tiedot. Tarkista ”Kysyntä, tarjonta ja kauppa” -välilehdeltä, että vastaanotettu runkovesi ei ole 0. Ennen kuin pohjavesipumppu saa työntekijät ja vesi tulee perille, voi kulua useita kuukausia."
       },
-      "step31": {
+      "step32": {
         "title": "Kaupunkirakentamisen perusteet hallussa",
         "description": "Vesi on tullut vesipumppaamolle, joten ympäröivissä kodeissa voi nyt käyttää vesijohtovettä. Rakenna tie, valmistele tontit, linjaa kaupunginosa, rakenna asunnot ja tuo sähkö ja vesi. Tämä on kaupunkirakentamisen perusrunko. Suorita perusohjauksen opetusohjelma loppuun painamalla ”Seuraava”."
       }

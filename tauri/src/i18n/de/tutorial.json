@@ -70,99 +70,106 @@
         "description": "Wir haben die Kamera an den Ostrand der Stadt bewegt. Als Stadt nutzbar ist nur dieser rechteckige Bereich, für den detailliertes Gelände erstellt wurde. Auch die Kamera kann diese Grenze nicht verlassen. Damit sind die Erklärungen zu Bildschirm und Bedienung abgeschlossen. Als Nächstes legen Sie tatsächlich ein neues Wohngebiet an. Klicken Sie auf „Weiter“."
       },
       "step9": {
+        "title": "Die Stadt von selbst wachsen lassen",
+        "run": "Lassen Sie zuerst die Zeit voranschreiten. Klicken Sie im Cockpit einmal auf „Start“.",
+        "result": "Die Zeit ist vorangeschritten. Schließen Sie das Ergebnisfenster, nachdem Sie die Ergebnisse geprüft haben.",
+        "proposal": "Wenn weniger als 10 % der bebaubaren Grundstücke frei sind, schlägt die Stadt am Ende einer Epoche vor, das Straßennetz zu erweitern. Auf der Karte sind die Linien neue Straßen und die Vierecke die Grundstücke, die bei Fertigstellung der Straßen entstehen. Prüfen Sie die geschätzten Kosten und klicken Sie dann auf „OK“, um den Vorschlag anzunehmen.",
+        "explain": "Angenommene Straßen erhalten den Status „Bau geplant“. Sobald sie fertig sind, entstehen an ihnen Grundstücke, und Einwohner und Unternehmen beginnen zu bauen. Sie müssen nicht auf einen Vorschlag warten: Sie können auch mit „Automatische Stadtentwicklung“ im Symbolfeld einen Bereich bemalen, um die Stadt zu erweitern. Als Nächstes bauen Sie selbst eine Straße. Klicken Sie auf „Weiter“."
+      },
+      "step10": {
         "title": "Die Straße verlängern",
         "description": "Ab jetzt legen Sie tatsächlich ein Wohngebiet an, das neue Einwohner aufnimmt. Weder Wohnungen noch Arbeitsstätten nützen etwas, wenn sie nicht durch Straßen verbunden sind: Menschen können nicht kommen und gehen, und Güter kommen nicht an. Verlängern Sie zuerst die Ost-West-Straße des Ortes nach Westen, um einen Weg zum Wohngebiet zu schaffen. Klicken Sie in der Symbolleiste auf „Straßen, Bahnen und Infrastruktur“, um das Baupanel zu öffnen.",
         "confirm": "Das Land entlang einer Straße wird bei ihrer Fertigstellung in Grundstücke aufgeteilt. Die Größe eines Grundstücks können Sie im Baupanel unter „Bei Fertigstellung angelegte Grundstücke entlang der Straße“ für die linke und die rechte Straßenseite getrennt wählen. Entscheiden Sie danach, welche Gebäude Sie ansiedeln möchten: für Wohngebiete eher kleine Grundstücke, für Fabriken oder Ackerland große. Da hier ein Wohngebiet entstehen soll, lassen Sie die Einstellung unverändert. Klicken Sie im Baupanel auf „Bestätigen“, um zu speichern, und dann auf die Schaltfläche „Weiter“."
       },
-      "step10": {
+      "step11": {
         "title": "Die Straße fertigstellen",
         "description": "Die Straße hat noch den Status „Bau geplant“. Eine nur geplante Straße kann noch nicht genutzt werden; erst wenn die Bauarbeiten abgeschlossen sind, können Menschen und Autos sie befahren. Klicken Sie im Cockpit 2–3 Mal auf „Start“, um die Zeit voranschreiten zu lassen, und warten Sie auf die Fertigstellung. Während der Bauarbeiten fallen jeden Monat Baukosten an.",
         "description_week": "Die Straße hat noch den Status „Bau geplant“. Eine nur geplante Straße kann noch nicht genutzt werden; erst wenn die Bauarbeiten abgeschlossen sind, können Menschen und Autos sie befahren. Klicken Sie im Cockpit 2–3 Mal auf „Start“, um die Zeit voranschreiten zu lassen, und warten Sie auf die Fertigstellung. Während der Bauarbeiten fallen jede Woche Baukosten an."
       },
-      "step11": {
+      "step12": {
         "title": "Grundstücke sind entstanden",
         "description": "Die Straße ist fertig, und entlang der Straße sind Grundstücke entstanden. Gebäude können nur auf Grundstücken errichtet werden, und weil ein Grundstück an einer Straße liegt, können Menschen und Güter es erreichen und verlassen. Wenn Sie entlang einer bestehenden Straße weitere Grundstücke anlegen möchten, nutzen Sie „Grundstücke“ in der Symbolleiste."
       },
-      "step12": {
+      "step13": {
         "title": "Einen Stadtbezirk anlegen",
         "description": "Bevor Sie Gebäude errichten, legen Sie fest, wozu sich diese Straße entwickeln soll. Ohne Leitlinie könnte direkt neben den Wohnhäusern eine Fabrik entstehen. Leitlinien für einzelne Gegenden legen Sie pro „Stadtbezirk“ fest. Stadtbezirke werden Straße für Straße festgelegt, und ein Grundstück gehört zum Stadtbezirk der Straße, an der es liegt. Klicken Sie in der Symbolleiste auf „Stadtbezirke“, um das Fenster zur Bearbeitung der Stadtbezirke zu öffnen: Sie sehen, dass der ganze Ort derzeit ein einziger Stadtbezirk ist.",
         "create": "Stellen Sie die Malmethode auf „Straßenseiten“. Wechseln Sie zum Werkzeug „Neuen Stadtbezirk anlegen“ und fahren Sie bei gedrückter Strg-Taste die verlängerte Straße nach. Beide Seiten der nachgefahrenen Straße und die daran liegenden Grundstücke werden zu einem neuen Stadtbezirk."
       },
-      "step13": {
+      "step14": {
         "title": "Stadtbezirk aufgeteilt",
         "description": "Die neue Straße gehört jetzt zu einem anderen Stadtbezirk als das Ortszentrum. Pro Stadtbezirk können Sie Einwohnerzahl und Preisniveau gesammelt prüfen und festlegen, welche Gebäude gebaut werden dürfen – so entwickelt sich jede Gegend so, wie es zu ihr passt. Wenn Sie alles geprüft haben, schließen Sie das Fenster zur Bearbeitung der Stadtbezirke."
       },
-      "step14": {
+      "step15": {
         "title": "Details des Stadtbezirks öffnen",
         "description": "Richten Sie den neuen Stadtbezirk als Wohngebiet ein. Blenden Sie mit dem Symbol unten links am Bildschirm die Stadtbezirke ein, klicken Sie auf die Beschriftung des Stadtbezirks, den Sie gerade angelegt haben, und öffnen Sie seine Details."
       },
-      "step15": {
+      "step16": {
         "title": "Als Wohngebiet festlegen",
         "description": "In den Bauvorschriften im unteren Teil des Panels wählen Sie, welche Gebäude auf den Grundstücken dieses Stadtbezirks gebaut werden dürfen. Hier soll ein ruhiges Wohngebiet entstehen. Klicken Sie deshalb alle Gebäude außer „Mehrfamilienhaus“ und „Einfamilienhaus“ an, um sie zu deaktivieren."
       },
-      "step16": {
+      "step17": {
         "title": "Ein Grundstück prüfen",
         "description": "Die im Stadtbezirk festgelegten Vorschriften gelten für alle Grundstücke dieses Stadtbezirks. Klicken Sie auf das Grundstück mit der gelben Markierung, um seine Details zu öffnen."
       },
-      "step17": {
+      "step18": {
         "title": "Die Vorschriften wurden übernommen",
         "description": "Im unteren Teil des Grundstückspanels sehen Sie, dass die im Stadtbezirk festgelegte Vorschrift übernommen wurde, die nur „Mehrfamilienhaus“ und „Einfamilienhaus“ zulässt. Damit dürfen auf den Grundstücken an dieser Straße nur noch Wohnhäuser gebaut werden. Sie müssen nicht jedes Grundstück einzeln einstellen: Legen Sie die Leitlinie im Stadtbezirk fest, folgt ihr die ganze Straße."
       },
-      "step18": {
+      "step19": {
         "title": "Wohnhäuser bauen",
         "description": "Jetzt sorgen Sie für Wohnraum. Normalerweise baut der private Sektor Wohnhäuser automatisch, wenn Menschen hier wohnen möchten. Baut die Stadt jedoch selbst Wohnungen, lässt sich ein Mangel an Wohnraum sofort beheben. Bauen Sie hier ein städtisches Mehrfamilienhaus. Klicken Sie in der Symbolleiste auf „Bau“.",
         "select": "Wählen Sie in der Kategorie „Wohnen“ das „Mehrfamilienhaus“, klicken Sie auf ein beliebiges Grundstück im neuen Stadtbezirk, um es als Bauplatz festzulegen, und klicken Sie dann auf „Bestätigen“."
       },
-      "step19": {
+      "step20": {
         "title": "Das Wohnhaus fertigstellen",
         "description": "Genau wie bei Straßen gilt auch bei Gebäuden: Was nur geplant ist, kann man noch nicht nutzen. Ein Mehrfamilienhaus braucht bis zur Fertigstellung mehr als ein halbes Jahr. Lassen Sie die Zeit mit „Start“ voranschreiten und warten Sie auf die Fertigstellung."
       },
-      "step20": {
+      "step21": {
         "title": "Prüfen, ob Strom ankommt",
         "description": "Eine Wohnung allein reicht zum Leben nicht, wenn weder Strom noch Wasser ankommen. In diesem Ort gibt es noch kein Kraftwerk und keine Wasserversorgung. Klicken Sie auf das Mehrfamilienhaus mit der gelben Markierung, in dem die Menschen des Ortes wohnen, um seine Details zu öffnen. Wählen Sie im Reiter „Gebäudeinfo“ einen der Mieter aus und öffnen Sie dann den Reiter „Angebot, Nachfrage & Handel“: Dort sehen Sie, dass die bezogene Strommenge 0 beträgt."
       },
-      "step21": {
+      "step22": {
         "title": "Ein Solarkraftwerk bauen",
         "description": "Um Strom zu liefern, braucht es zuerst ein Kraftwerk, das ihn erzeugt. Bauen Sie auf dem Grundstück mit der gelben Markierung ein „Solarkraftwerk“. Normalerweise dauert die Fertigstellung eine Weile, aber da dies ein Tutorial ist, wird die Bauzeit übersprungen und das Kraftwerk sofort fertiggestellt."
       },
-      "step22": {
+      "step23": {
         "title": "Ein Umspannwerk bauen",
         "description": "Den Hochspannungsstrom eines Kraftwerks können Haushalte nicht direkt nutzen. Das Umspannwerk wandelt ihn in haushaltstauglichen Strom um und verteilt ihn an die umliegenden Gebäude, die über Straßen verbunden sind. Bauen Sie auf dem Grundstück mit der gelben Markierung in der Nähe des Mehrfamilienhauses ein „Umspannwerk“."
       },
-      "step23": {
+      "step24": {
         "title": "Mit einer Stromleitung verbinden",
         "description": "Auch wenn Kraftwerk und Umspannwerk weit auseinanderliegen, sind sie verbunden, sobald es einen Weg für den Strom gibt. Öffnen Sie in der Symbolleiste „Straßen, Bahnen und Infrastruktur“, wählen Sie unter „Strom“ die „Hochspannungsleitung“ und ziehen Sie eine Leitung vom Anschluss des Solarkraftwerks zum Anschluss des Umspannwerks. Wenn Sie die Anschlüsse geradlinig verbinden, genügt eine einzige Leitung."
       },
-      "step24": {
+      "step25": {
         "title": "Die Stromversorgung prüfen",
         "description": "Prüfen Sie nach dem Verbinden, ob wirklich Strom fließt. Lassen Sie die Zeit mit „Start“ voranschreiten, klicken Sie auf das Umspannwerk, um seine Details zu öffnen, und prüfen Sie im Reiter „Angebot, Nachfrage & Handel“, dass die aufgenommene Menge an Hochspannungsstrom nicht 0 ist. Bis das Kraftwerk den Betrieb aufnimmt und der Strom ankommt, können einige Monate vergehen."
       },
-      "step25": {
+      "step26": {
         "title": "Der Strom erreicht die Haushalte",
         "description": "Öffnen Sie in den Details des Mehrfamilienhauses wie beim ersten Mal den Reiter „Angebot, Nachfrage & Handel“ eines Mieters und prüfen Sie, dass die bezogene Strommenge nicht mehr 0 ist. Unter Umständen müssen Sie die Zeit noch 1–2 Monate voranschreiten lassen, bis der Strom die Haushalte erreicht. Im Kraftwerk erzeugen, über Stromleitungen transportieren, im Umspannwerk verteilen: Erst wenn diese drei verbunden sind, kommt der Strom in den Haushalten an."
       },
-      "step26": {
+      "step27": {
         "title": "Eine Wasserquelle suchen",
         "description": "Als Nächstes ist die Wasserversorgung an der Reihe. Leitungswasser wird aus dem Untergrund hochgepumpt und in den Ort geleitet. Finden Sie zuerst heraus, wo sich Wasser hochpumpen lässt. Klicken Sie im Cockpit auf „Anzeige“, um das Anzeigepanel zu öffnen.",
         "show": "Wählen Sie in den senkrecht angeordneten Reitern „Natürliche Ressourcen“ und schalten Sie auf „Eingeblendet“ um. Wasserquellen werden auf der Karte hellblau dargestellt. Klicken Sie auf die Wasserquelle mit der gelben Markierung, um ihre Details zu öffnen."
       },
-      "step27": {
+      "step28": {
         "title": "Eine Grundwasserpumpe bauen",
         "description": "Eine Grundwasserpumpe fördert Wasser aus dem Untergrund und muss daher an einem Ort mit Wasserquelle gebaut werden. Für den Betrieb braucht sie außerdem Strom und Arbeitskräfte – deshalb haben wir zuerst den Strom angeschlossen. Bauen Sie auf dem Grundstück mit der gelben Markierung über der Wasserquelle eine „Grundwasserpumpe“. Da dies ein Tutorial ist, wird die Bauzeit übersprungen."
       },
-      "step28": {
+      "step29": {
         "title": "Ein Wasserpumpwerk bauen",
         "description": "Das hochgepumpte Wasser lässt sich nicht direkt an die Haushalte verteilen. So wie das Umspannwerk den Strom verteilt, verteilt das Wasserpumpwerk das Wasser an die umliegenden Gebäude, die über Straßen verbunden sind. Bauen Sie auf dem Grundstück mit der gelben Markierung in der Nähe des Mehrfamilienhauses ein „Wasserpumpwerk“."
       },
-      "step29": {
+      "step30": {
         "title": "Mit einer Fernwasserleitung verbinden",
         "description": "Sie brauchen eine Leitung, die das von der Grundwasserpumpe geförderte Wasser zum Wasserpumpwerk transportiert. Öffnen Sie in der Symbolleiste „Straßen, Bahnen und Infrastruktur“, wählen Sie unter „Wasser“ die „Fernwasserleitung“ und verlegen Sie die Leitung vom Anschluss der Grundwasserpumpe zum Anschluss des Wasserpumpwerks. Damit sie nicht mit Straßen und der Stromleitung kollidiert, verlegen Sie sie in einem weiten Bogen über die Ostseite."
       },
-      "step30": {
+      "step31": {
         "title": "Die Wasserversorgung prüfen",
         "description": "Lassen Sie die Zeit mit „Start“ voranschreiten, klicken Sie auf das Wasserpumpwerk, um seine Details zu öffnen, und prüfen Sie im Reiter „Angebot, Nachfrage & Handel“, dass die aufgenommene Menge an Hochdruckwasser nicht 0 ist. Bis sich bei der Grundwasserpumpe Arbeitskräfte einfinden und das Wasser ankommt, können einige Monate vergehen."
       },
-      "step31": {
+      "step32": {
         "title": "Die Grundlagen des Städtebaus sind geschafft",
         "description": "Das Wasser hat das Wasserpumpwerk erreicht, also können nun auch die umliegenden Haushalte Leitungswasser nutzen. Straßen anlegen, Grundstücke vorbereiten, Leitlinien für Stadtbezirke festlegen, Wohnraum bauen sowie Strom und Wasser liefern: Das ist der grundlegende Ablauf des Städtebaus. Klicken Sie auf „Weiter“, um das Tutorial „Grundlagen der Bedienung“ abzuschließen."
       }

@@ -70,99 +70,106 @@
         "description": "Przenieśliśmy kamerę na wschodni skraj miasta. Jako miasto możesz wykorzystać tylko ten prostokątny obszar, na którym przygotowano szczegółowy teren. Kamera też nie może wyjść poza tę granicę. To koniec objaśnień ekranu i sterowania. Teraz spróbujmy stworzyć nowe osiedle mieszkaniowe. Naciśnij „Dalej”."
       },
       "step9": {
+        "title": "Niech miasto rozrasta się samo",
+        "run": "Najpierw przesuńmy czas. Naciśnij raz „Start” w kokpicie.",
+        "result": "Czas się przesunął. Po sprawdzeniu wyników zamknij okno wyników.",
+        "proposal": "Gdy wolnych działek pod zabudowę jest mniej niż 10%, miasto pod koniec epoki proponuje rozbudowę sieci dróg. Na mapie linie to nowe drogi, a kwadraty to działki, które powstaną po ukończeniu dróg. Sprawdź szacowany koszt i naciśnij „OK”, aby zatwierdzić propozycję.",
+        "explain": "Zatwierdzone drogi otrzymują status „Budowa w planach”. Po ich ukończeniu wzdłuż nich powstają działki, a mieszkańcy i firmy zaczynają stawiać budynki. Nie musisz czekać na propozycję: możesz też zamalować obszar w „Automatyczna rozbudowa miasta” na panelu ikon, aby rozbudować miasto. Teraz zbuduj drogę własnymi rękami. Naciśnij „Dalej”."
+      },
+      "step10": {
         "title": "Przedłuż drogę",
         "description": "Teraz w praktyce stworzysz osiedle mieszkaniowe, które przyjmie nowych mieszkańców. Jeśli domy i miejsca pracy nie są połączone drogą, ludzie nie mogą się przemieszczać, a towary nie docierają. Najpierw przedłuż w kierunku zachodnim ulicę, która biegnie przez miasteczko ze wschodu na zachód, aby utworzyć dojazd do osiedla. Naciśnij „Drogi, kolej i infrastruktura” w panelu ikon, aby otworzyć panel budowy.",
         "confirm": "Teren wzdłuż drogi zostanie podzielony na działki, gdy droga będzie ukończona. Wielkość pojedynczej działki możesz wybrać osobno dla lewej i prawej strony drogi w opcji „Działki przydrożne tworzone po ukończeniu” w panelu budowy. Decyduj zależnie od tego, jakie budynki chcesz przyciągnąć: na osiedle mieszkaniowe mniejsze działki, na fabryki lub pola uprawne – większe. Tym razem powstanie tu osiedle mieszkaniowe, więc zostaw ustawienie bez zmian. Naciśnij „Zatwierdź” w panelu budowy, aby zapisać drogę, a potem naciśnij przycisk „Dalej”."
       },
-      "step10": {
+      "step11": {
         "title": "Ukończ drogę",
         "description": "Droga ma wciąż status „Budowa w planach”. Zaplanowanej drogi nie można jeszcze używać – ludzie i samochody mogą z niej korzystać dopiero po zakończeniu prac. Naciśnij 2–3 razy „Start” w kokpicie, aby przesunąć czas, i poczekaj na ukończenie. W trakcie prac co miesiąc ponosisz koszty budowy.",
         "description_week": "Droga ma wciąż status „Budowa w planach”. Zaplanowanej drogi nie można jeszcze używać – ludzie i samochody mogą z niej korzystać dopiero po zakończeniu prac. Naciśnij 2–3 razy „Start” w kokpicie, aby przesunąć czas, i poczekaj na ukończenie. W trakcie prac co tydzień ponosisz koszty budowy."
       },
-      "step11": {
+      "step12": {
         "title": "Powstały działki",
         "description": "Droga jest gotowa, a wzdłuż niej powstały działki. Budynki można stawiać tylko na działkach, a dzięki temu, że działka przylega do drogi, mogą do niej docierać ludzie i towary. Jeśli chcesz dodać działki wzdłuż istniejącej drogi, utworzysz je przyciskiem „Działki” w panelu ikon."
       },
-      "step12": {
+      "step13": {
         "title": "Utwórz dzielnicę",
         "description": "Zanim zaczniesz budować, zdecyduj, czym ma się stać ta ulica. Bez planu tuż obok domów może wyrosnąć fabryka. Zasady dla poszczególnych miejsc ustala się w ramach „dzielnic”. Dzielnice przypisuje się do dróg, a działka należy do dzielnicy drogi, przy której leży. Naciśnij „Dzielnice” w panelu ikon, aby otworzyć okno edycji dzielnic – zobaczysz, że obecnie całe miasteczko stanowi jedną dzielnicę.",
         "create": "Jako sposób malowania wybierz opcję „Strona ulicy”. Przełącz narzędzie na „Utwórz nową dzielnicę”, a następnie, przytrzymując Ctrl, przeciągnij po przedłużonej drodze. Obie strony zamalowanej drogi wraz z przylegającymi do niej działkami staną się nową dzielnicą."
       },
-      "step13": {
+      "step14": {
         "title": "Dzielnica została wydzielona",
         "description": "Nowa ulica stanowi teraz dzielnicę odrębną od centrum miasteczka. Dla każdej dzielnicy możesz sprawdzać łącznie liczbę ludności i ceny, a także decydować, jakie budynki mogą tam powstawać, dzięki czemu każde miejsce rozwija się w odpowiedni dla siebie sposób. Gdy wszystko sprawdzisz, zamknij okno edycji dzielnic."
       },
-      "step14": {
+      "step15": {
         "title": "Otwórz szczegóły dzielnicy",
         "description": "Teraz przeznaczmy nową dzielnicę pod zabudowę mieszkaniową. Włącz wyświetlanie dzielnic ikoną w lewym dolnym rogu ekranu, kliknij etykietę utworzonej przed chwilą dzielnicy i otwórz jej szczegóły."
       },
-      "step15": {
+      "step16": {
         "title": "Przeznacz ją pod zabudowę mieszkaniową",
         "description": "W przepisach budowlanych na dole panelu wybierasz, jakie budynki wolno stawiać na działkach tej dzielnicy. Ma tu powstać spokojne osiedle mieszkaniowe, więc kliknij wszystkie budynki poza pozycjami „Budynek wielorodzinny” i „Dom jednorodzinny”, aby je wyłączyć."
       },
-      "step16": {
+      "step17": {
         "title": "Sprawdź działkę",
         "description": "Przepisy ustalone dla dzielnicy obowiązują na wszystkich jej działkach. Kliknij działkę z żółtym znacznikiem, aby otworzyć jej szczegóły."
       },
-      "step17": {
+      "step18": {
         "title": "Przepisy obowiązują",
         "description": "Na dole panelu działki widać, że obowiązują ustalone dla dzielnicy przepisy, które dopuszczają wyłącznie „Budynek wielorodzinny” i „Dom jednorodzinny”. Od teraz na działkach przy tej ulicy mogą powstawać tylko budynki mieszkalne. Nie musisz ustawiać działek po kolei – wystarczy ustalić kierunek dla dzielnicy, a cała ulica będzie się do niego stosować."
       },
-      "step18": {
+      "step19": {
         "title": "Zbuduj mieszkania",
         "description": "Czas zapewnić mieszkania. Zwykle, gdy są chętni do zamieszkania, budynki mieszkalne stawia automatycznie sektor prywatny, ale jeśli miasto zbuduje mieszkania komunalne, szybko uzupełni ich niedobór. Tutaj zbudujemy komunalny budynek wielorodzinny. Naciśnij „Budowa” w panelu ikon.",
         "select": "W kategorii „Mieszkalne” wybierz „Kompleks mieszkaniowy”, kliknij dowolną działkę w nowej dzielnicy, aby wskazać miejsce budowy, i naciśnij „Zatwierdź”."
       },
-      "step19": {
+      "step20": {
         "title": "Ukończ budowę mieszkań",
         "description": "Podobnie jak w przypadku dróg, w samym zaplanowanym budynku nie da się jeszcze zamieszkać. Budowa budynku wielorodzinnego trwa ponad pół roku. Przesuwaj czas przyciskiem „Start” i poczekaj na ukończenie."
       },
-      "step20": {
+      "step21": {
         "title": "Sprawdź, czy dociera prąd",
         "description": "Same mieszkania nie wystarczą – bez prądu i wody nie da się żyć. W tym miasteczku nie ma jeszcze ani elektrowni, ani wodociągu. Kliknij budynek wielorodzinny z żółtym znacznikiem, w którym żyją mieszkańcy miasteczka, aby otworzyć jego szczegóły. Na karcie „Informacje o budynku” wybierz jednego z najemców, a następnie otwórz kartę „Podaż, popyt i handel” – zobaczysz, że ilość pozyskanej energii elektrycznej wynosi 0."
       },
-      "step21": {
+      "step22": {
         "title": "Zbuduj elektrownię słoneczną",
         "description": "Aby dostarczać prąd, najpierw potrzebujesz elektrowni, która go wytworzy. Zbuduj obiekt „Elektrownia słoneczna” na działce z żółtym znacznikiem. Normalnie budowa trwa pewien czas, ale ponieważ to samouczek, czas budowy zostanie pominięty."
       },
-      "step22": {
+      "step23": {
         "title": "Zbuduj podstację",
         "description": "Prądu wysokiego napięcia z elektrowni nie można bezpośrednio używać w domach. Podstacja przetwarza go na prąd do użytku domowego i rozprowadza do okolicznych budynków połączonych drogami. Zbuduj obiekt „Podstacja elektroenergetyczna” na działce z żółtym znacznikiem w pobliżu budynku wielorodzinnego."
       },
-      "step23": {
+      "step24": {
         "title": "Połącz linią energetyczną",
         "description": "Nawet jeśli elektrownia i podstacja są od siebie oddalone, połączy je trasa przesyłu prądu. Otwórz „Drogi, kolej i infrastruktura” w panelu ikon, w kategorii „Energia elektryczna” wybierz pozycję „Linia wysokiego napięcia” i poprowadź linię od przyłącza elektrowni słonecznej do przyłącza podstacji. Jeśli połączysz przyłącza w linii prostej, wystarczy jeden odcinek."
       },
-      "step24": {
+      "step25": {
         "title": "Sprawdź dostawy prądu",
         "description": "Po podłączeniu sprawdź, czy prąd naprawdę płynie. Przesuń czas przyciskiem „Start”, kliknij podstację, aby otworzyć jej szczegóły, i na karcie „Podaż, popyt i handel” sprawdź, czy ilość odebranej energii elektrycznej wysokiego napięcia jest większa od 0. Uruchomienie elektrowni i dotarcie prądu może potrwać kilka miesięcy."
       },
-      "step25": {
+      "step26": {
         "title": "Prąd dotarł do domów",
         "description": "W szczegółach budynku wielorodzinnego otwórz kartę „Podaż, popyt i handel” najemcy, tak jak za pierwszym razem, i sprawdź, czy ilość pozyskanej energii elektrycznej nie wynosi już 0. Aby prąd dotarł do domów, może być konieczne przesunięcie czasu o kolejne 1–2 miesiące. Wytworzyć w elektrowni, przesłać linią energetyczną, rozprowadzić z podstacji – dopiero gdy te trzy ogniwa są połączone, prąd dociera do domów."
       },
-      "step26": {
+      "step27": {
         "title": "Znajdź źródło wody",
         "description": "Teraz pora na wodociąg. Woda w wodociągu to woda podziemna, którą się wypompowuje i przesyła do miasteczka. Najpierw sprawdź, gdzie można ją pompować. Naciśnij „Widok” w kokpicie, aby otworzyć panel widoku.",
         "show": "Na pionowych kartach wybierz „Zasoby naturalne” i przełącz na „Widoczne”. Źródła wody są oznaczone na mapie kolorem jasnoniebieskim. Kliknij źródło wody z żółtym znacznikiem, aby otworzyć jego szczegóły."
       },
-      "step27": {
+      "step28": {
         "title": "Zbuduj pompę wód podziemnych",
         "description": "Pompa wód podziemnych wydobywa wodę spod ziemi, dlatego trzeba ją zbudować tam, gdzie jest źródło wody. Do działania potrzebuje też prądu i pracowników – właśnie dlatego najpierw doprowadziliśmy prąd. Zbuduj obiekt „Pompa wód podziemnych” na działce z żółtym znacznikiem nad źródłem wody. Ponieważ to samouczek, czas budowy zostanie pominięty."
       },
-      "step28": {
+      "step29": {
         "title": "Zbuduj przepompownię wody",
         "description": "Wypompowanej wody nie można rozprowadzić bezpośrednio do domów. Tak jak podstacja rozprowadza prąd, przepompownia wody rozprowadza wodę do okolicznych budynków połączonych drogami. Zbuduj obiekt „Przepompownia wody” na działce z żółtym znacznikiem w pobliżu budynku wielorodzinnego."
       },
-      "step29": {
+      "step30": {
         "title": "Połącz rurociągiem",
         "description": "Potrzebny jest rurociąg, który doprowadzi wodę z pompy wód podziemnych do przepompowni. Otwórz „Drogi, kolej i infrastruktura” w panelu ikon, w kategorii „Wodociągi” wybierz pozycję „Magistrala wodociągowa” i poprowadź rurociąg od przyłącza pompy wód podziemnych do przyłącza przepompowni. Aby nie kolidował z drogami i linią energetyczną, poprowadź go szerokim łukiem po wschodniej stronie."
       },
-      "step30": {
+      "step31": {
         "title": "Sprawdź dostawy wody",
         "description": "Przesuń czas przyciskiem „Start”, kliknij przepompownię wody, aby otworzyć jej szczegóły, i na karcie „Podaż, popyt i handel” sprawdź, czy ilość odebranej wody pod wysokim ciśnieniem jest większa od 0. Zanim do pompy wód podziemnych zgłoszą się pracownicy i woda dotrze na miejsce, może minąć kilka miesięcy."
       },
-      "step31": {
+      "step32": {
         "title": "Podstawy budowy miasta opanowane",
         "description": "Woda dotarła do przepompowni, więc okoliczne domy mogą już korzystać z wodociągu. Wytyczenie dróg, przygotowanie działek, ustalenie zasad dla dzielnic, budowa mieszkań i doprowadzenie prądu oraz wody – tak wygląda podstawowy przebieg budowy miasta. Naciśnij „Dalej”, aby ukończyć samouczek „Podstawy obsługi”."
       }

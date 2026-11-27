@@ -17,7 +17,7 @@ const settle = async (fn: () => void | Promise<void>) => {
   await act(async () => { await new Promise(r => setTimeout(r, 10)); });
 };
 const observation = async (data: object) => { const current = snapshot()!; await settle(() => emit(GUIDE_OBSERVE, { runId: current.runId, revision: current.revision, ...data })); };
-await settle(() => root.render(<Harness scenario="controls" step={9} />));
+await settle(() => root.render(<Harness scenario="controls" step={10} />));
 assert.equal(guide!.ready, true, JSON.stringify({ guide, snapshot: snapshot() })); assert.equal(snapshot()?.phaseId, "open");
 await observation({ label: "road", window: "path_build", visible: true, pathVariant: 201 });
 assert.equal(snapshot()?.phaseId, "variant");
@@ -35,7 +35,7 @@ await observation({ pathShape: { selected_points: [], phase: "placing" } });
 assert.equal(snapshot()?.phaseId, "confirm");
 await settle(async () => { assert.equal(await guide!.check(), true); });
 const former = snapshot()!;
-await settle(() => root.render(<Harness scenario="controls" step={9} save="B" />));
+await settle(() => root.render(<Harness scenario="controls" step={10} save="B" />));
 assert.equal(snapshot()?.phaseId, "open");
 await settle(() => emit(GUIDE_OBSERVE, { runId: former.runId, revision: former.revision, savedPaths: [999] }));
 assert.equal(JSON.parse(localStorage.getItem("tutorial_runtime_v1:controls:B")!).bindings["controls.road"], undefined);
@@ -48,7 +48,7 @@ await settle(() => guide!.retry());
 assert.equal(guide!.failed, false); assert.equal(guide!.ready, true); assert.equal(fixture.actions, 2);
 assert.deepEqual(snapshot()?.world.camera, DEFINITIONS.tourism.steps[0].phases[0].world.camera, "phase camera reaches the snapshot");
 // 地区編集ウィンドウの開閉で段階とカメラが動く。
-await settle(() => root.render(<Harness scenario="controls" step={12} save="D" />));
+await settle(() => root.render(<Harness scenario="controls" step={13} save="D" />));
 assert.equal(snapshot()?.phaseId, "enter");
 const overview = snapshot()!.world.camera;
 await settle(() => emit("tutorial:window_visibility", { label: "zone", window: "zone_edit", visible: true }));
@@ -59,7 +59,7 @@ assert.equal(snapshot()?.phaseId, "enter");
 // 建て終えてパネルが閉じても、達成条件を満たしていれば「次へ」で進める(案内は最終段階のまま)。
 localStorage.setItem("tutorial_runtime_v1:controls:E", JSON.stringify({ bindings: { "support.housing.building": { kind: "agents", id: 30 } }, setupDone: true }));
 fixture.records.set("buildings:31", { agent_id: 31, variant: 2001, status: 3 });
-await settle(() => root.render(<Harness scenario="controls" step={18} save="E" />));
+await settle(() => root.render(<Harness scenario="controls" step={19} save="E" />));
 await observation({ label: "construction", window: "building_construction", visible: false });
 assert.equal(snapshot()?.phaseId, "select");
 await settle(async () => { assert.equal(await guide!.check(), true); });
@@ -67,7 +67,7 @@ await settle(async () => { assert.equal(await guide!.check(), true); });
 fixture.records.set("tutorial:1", { id: 1, checks: { grid: false } });
 fixture.onAction = () => { fixture.records.set("tutorial:1", { id: 1, checks: { grid: true } }); };
 fixture.actions = 0;
-await settle(() => root.render(<Harness scenario="controls" step={23} save="F" />));
+await settle(() => root.render(<Harness scenario="controls" step={24} save="F" />));
 assert.equal(snapshot()?.phaseId, "open");
 await settle(async () => { assert.equal(await guide!.check(), true); });
 assert.ok(fixture.actions >= 1, "the commissioning action ran before the completion check");
@@ -121,7 +121,7 @@ await settle(() => emit("tutorial:window_visibility", { label: "display", window
 assert.equal(snapshot()?.phaseId, "modes", "closing the panel keeps the reached stage");
 await settle(async () => { assert.equal(await guide!.check(), true); });
 // 水源の段階: 資源を表示して表示パネルを閉じても戻らず、開いた資源の詳細を閉じてからでも「次へ」で進める。
-await settle(() => root.render(<Harness scenario="controls" step={26} save="I" />));
+await settle(() => root.render(<Harness scenario="controls" step={27} save="I" />));
 assert.equal(snapshot()?.phaseId, "open");
 await settle(() => emit("tutorial:window_visibility", { label: "display", window: "display_options", visible: true }));
 assert.equal(snapshot()?.phaseId, "show");

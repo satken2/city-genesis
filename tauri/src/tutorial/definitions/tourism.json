@@ -494,7 +494,14 @@
             "equals": true
           }
         ]
-      }
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "tourism",
+          "action": "expansion_proposals_on"
+        }
+      ]
     }
   ]
 }

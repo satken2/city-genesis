@@ -621,6 +621,13 @@
             "window": "intersection_detail"
           }
         }
+      ],
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "highway",
+          "action": "expansion_proposals_on"
+        }
       ]
     }
   ]

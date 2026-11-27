@@ -1606,7 +1606,14 @@
             "equals": true
           }
         ]
-      }
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "mining",
+          "action": "expansion_proposals_on"
+        }
+      ]
     }
   ]
 }

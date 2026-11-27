@@ -70,99 +70,106 @@
         "description": "Am mutat camera la marginea de est a orașului. Pentru oraș poți folosi doar suprafața din interiorul acestui pătrat, unde relieful este generat în detaliu. Nici camera nu poate ieși dincolo de această limită. Cu asta am terminat explicațiile despre ecran și comenzi. Acum hai să creăm un cartier rezidențial nou. Apasă „Următorul”."
       },
       "step9": {
+        "title": "Lasă orașul să crească singur",
+        "run": "Mai întâi, hai să dăm timpul înainte. Apasă o singură dată „Start” în cockpit.",
+        "result": "Timpul a avansat. După ce verifici rezultatele, închide fereastra cu rezultate.",
+        "proposal": "Când rămân mai puțin de 10% parcele libre pe care se poate construi, orașul propune la sfârșitul unei epoci extinderea rețelei de drumuri. Pe hartă, liniile sunt drumurile noi, iar pătratele sunt parcelele create când drumurile sunt finalizate. Verifică costul estimat, apoi apasă „OK” ca să aprobi propunerea.",
+        "explain": "Drumurile aprobate trec în „Construcție planificată”. După finalizare, de-a lungul lor apar parcele, iar locuitorii și firmele încep să ridice clădiri. Nu trebuie să aștepți o propunere: poți și să colorezi o zonă cu „Dezvoltare automată a orașului” din panoul de pictograme ca să extinzi orașul. Acum, hai să construim un drum cu mâna ta. Apasă „Următorul”."
+      },
+      "step10": {
         "title": "Prelungește drumul",
         "description": "Acum vei crea efectiv un cartier rezidențial pentru noii locuitori. Fără drumuri care să le lege, locuințele și locurile de muncă nu folosesc la nimic: oamenii nu pot circula, iar mărfurile nu ajung. Mai întâi prelungește spre vest strada est-vest a orașului, ca să deschizi drumul spre noul cartier. Apasă „Drumuri, căi ferate și infrastructură” pe panoul cu pictograme ca să deschizi panoul de construcție.",
         "confirm": "Terenul de-a lungul drumului se împarte în parcele când drumul e finalizat. În panoul de construcție, la „Parcele de-a lungul drumului create la finalizare”, poți alege mărimea parcelelor separat pentru partea stângă și cea dreaptă. Alege după tipul de clădiri pe care le vrei: parcele mai mici pentru locuințe, parcele mari pentru fabrici sau ferme. De data asta faci un cartier rezidențial, așa că lasă setarea cum e. Apasă „Confirmă” în panoul de construcție ca să salvezi, apoi apasă butonul „Următorul”."
       },
-      "step10": {
+      "step11": {
         "title": "Finalizează drumul",
         "description": "Drumul este încă în starea „Construcție planificată”. Un drum doar planificat nu poate fi folosit: oamenii și mașinile circulă pe el abia după terminarea lucrărilor. Apasă de 2–3 ori „Start” în cockpit ca să dai timpul înainte și așteaptă finalizarea. Pe durata lucrărilor plătești costuri de construcție în fiecare lună.",
         "description_week": "Drumul este încă în starea „Construcție planificată”. Un drum doar planificat nu poate fi folosit: oamenii și mașinile circulă pe el abia după terminarea lucrărilor. Apasă de 2–3 ori „Start” în cockpit ca să dai timpul înainte și așteaptă finalizarea. Pe durata lucrărilor plătești costuri de construcție în fiecare săptămână."
       },
-      "step11": {
+      "step12": {
         "title": "Au apărut parcelele",
         "description": "Drumul e gata, iar de-a lungul lui au apărut parcele. Clădirile se pot construi doar pe parcele, iar pentru că parcelele dau în drum, oamenii și mărfurile pot intra și ieși. Dacă vrei să adaugi parcele de-a lungul unui drum existent, le poți crea din „Parcele” pe panoul cu pictograme."
       },
-      "step12": {
+      "step13": {
         "title": "Creează un cartier",
         "description": "Înainte de a construi, hotărăște ce vrei să devină strada aceasta. Fără o politică, s-ar putea ridica o fabrică chiar lângă locuințe. Politicile pentru fiecare zonă se stabilesc la nivel de „cartier”. Cartierele se atribuie pe drumuri, iar o parcelă aparține cartierului drumului la care dă. Apasă „Cartiere” pe panoul cu pictograme ca să deschizi fereastra de editare a cartierelor: vei vedea că acum tot orașul e un singur cartier.",
         "create": "Alege modul de selecție „Pe latură de stradă”. Comută unealta pe „Creează un cartier nou”, ține apăsat Ctrl și trage de-a lungul drumului pe care l-ai prelungit. Ambele laturi ale drumului colorat, împreună cu parcelele care dau în el, devin un cartier nou."
       },
-      "step13": {
+      "step14": {
         "title": "Cartierul a fost separat",
         "description": "Noua stradă a fost separată într-un cartier diferit de centrul orașului. Pentru fiecare cartier poți urmări populația și prețurile sau poți stabili ce clădiri se pot construi, așa că poți dezvolta orașul potrivit fiecărui loc. După ce te-ai uitat, închide fereastra de editare a cartierelor."
       },
-      "step14": {
+      "step15": {
         "title": "Deschide detaliile cartierului",
         "description": "Acum setează noul cartier ca zonă rezidențială. Afișează cartierele cu pictograma din stânga jos a ecranului, fă clic pe eticheta cartierului creat adineauri și deschide detaliile lui."
       },
-      "step15": {
+      "step16": {
         "title": "Fă din el un cartier rezidențial",
         "description": "În reglementările de construcție din partea de jos a panoului alegi ce clădiri pot fi ridicate pe parcelele cartierului. Aici vrei o zonă rezidențială liniștită, așa că fă clic pe toate clădirile în afară de „Bloc de locuințe” și „Casă individuală” ca să le dezactivezi."
       },
-      "step16": {
+      "step17": {
         "title": "Verifică parcelele",
         "description": "Reglementările stabilite pentru cartier se aplică tuturor parcelelor din el. Fă clic pe parcela cu marcaj galben ca să-i deschizi detaliile."
       },
-      "step17": {
+      "step18": {
         "title": "Reglementarea a fost aplicată",
         "description": "În partea de jos a panoului parcelei vezi reglementarea cartierului, care permite doar „Bloc de locuințe” și „Casă individuală”. Acum pe parcelele acestei străzi se pot construi doar locuințe. Nu trebuie să setezi parcelele una câte una: dacă stabilești politica la nivel de cartier, toată strada o urmează."
       },
-      "step18": {
+      "step19": {
         "title": "Construiește locuințe",
         "description": "E momentul să asiguri locuințe. De obicei, locuințele sunt construite automat de sectorul privat când există oameni care vor să locuiască aici, dar dacă orașul construiește locuințe publice, lipsa e acoperită imediat. Aici vei construi un bloc de locuințe public. Apasă „Construcție” pe panoul cu pictograme.",
         "select": "Din categoria „Rezidențial” alege „Bloc de locuințe”, fă clic pe orice parcelă din noul cartier ca să o alegi drept amplasament și apasă „Confirmă”."
       },
-      "step19": {
+      "step20": {
         "title": "Finalizează locuințele",
         "description": "Ca și drumurile, clădirile doar planificate nu pot fi încă locuite. Un bloc de locuințe are nevoie de peste jumătate de an până la finalizare. Dă timpul înainte cu „Start” și așteaptă să fie gata."
       },
-      "step20": {
+      "step21": {
         "title": "Verifică dacă ajunge curentul",
         "description": "Locuința singură nu ajunge: fără curent și apă nu se poate trăi. Orașul nu are încă nici centrală electrică, nici alimentare cu apă. Fă clic pe blocul de locuințe cu marcaj galben, unde locuiesc oamenii orașului, ca să-i deschizi detaliile. Alege unul dintre chiriași în fila „Informații despre clădire”, apoi deschide fila „Cerere, ofertă și tranzacții”: vei vedea că la energie electrică cantitatea obținută este 0."
       },
-      "step21": {
+      "step22": {
         "title": "Construiește o centrală solară",
         "description": "Ca să aduci curent, ai nevoie mai întâi de o centrală care să-l producă. Construiește o „Centrală solară” pe parcela cu marcaj galben. În mod normal construcția durează, dar fiind tutorial, durata lucrărilor e sărită și centrala e gata imediat."
       },
-      "step22": {
+      "step23": {
         "title": "Construiește o stație de transformare",
         "description": "Curentul de înaltă tensiune produs de centrală nu poate fi folosit așa cum e în locuințe. Stația de transformare îl transformă în curent pentru consumatorii casnici și îl distribuie clădirilor din jur legate prin drumuri. Construiește o „Stație de transformare” pe parcela cu marcaj galben de lângă blocul de locuințe."
       },
-      "step23": {
+      "step24": {
         "title": "Leagă-le cu o linie electrică",
         "description": "Chiar dacă centrala și stația de transformare sunt departe una de alta, le leagă o cale pe care circulă curentul. Deschide „Drumuri, căi ferate și infrastructură” de pe panoul cu pictograme, alege „Linie electrică” din „Electricitate” și trage o linie de la punctul de racord al centralei solare până la punctul de racord al stației de transformare. Dacă legi punctele în linie dreaptă, o tragi dintr-o singură bucată."
       },
-      "step24": {
+      "step25": {
         "title": "Verifică alimentarea cu energie",
         "description": "După ce le-ai legat, verifică dacă trece într-adevăr curentul. Dă timpul înainte cu „Start”, fă clic pe stația de transformare ca să-i deschizi detaliile și verifică în fila „Cerere, ofertă și tranzacții” că la „Electricitate de înaltă tensiune” cantitatea primită nu este 0. Pot trece câteva luni până când centrala pornește și curentul ajunge."
       },
-      "step25": {
+      "step26": {
         "title": "Curentul a ajuns în locuințe",
         "description": "Din detaliile blocului de locuințe, deschide ca la început fila „Cerere, ofertă și tranzacții” a unui chiriaș și verifică dacă la „Electricitate” cantitatea obținută nu mai este 0. Uneori trebuie să mai avansezi 1–2 luni până ajunge curentul în locuințe. Centrala îl produce, linia electrică îl transportă, stația de transformare îl distribuie: abia când toate trei sunt legate, curentul ajunge în case."
       },
-      "step26": {
+      "step27": {
         "title": "Caută o sursă de apă",
         "description": "Urmează apa. Apa de la robinet este apă subterană pompată la suprafață și trimisă în oraș. Mai întâi află unde se poate pompa apă. Apasă „Afișare” în cockpit ca să deschizi panoul de afișare.",
         "show": "Din filele verticale alege „Resurse naturale” și comută pe „Afișează”. Sursele de apă apar pe hartă cu albastru deschis. Fă clic pe sursa de apă cu marcaj galben ca să-i deschizi detaliile."
       },
-      "step27": {
+      "step28": {
         "title": "Construiește o pompă de apă subterană",
         "description": "Pompa de apă subterană scoate apa din pământ, așa că trebuie construită acolo unde există o sursă de apă. Ca să funcționeze are nevoie și de curent și de muncitori – de aceea am adus întâi curentul. Construiește o „Pompă de apă subterană” pe parcela cu marcaj galben de deasupra sursei de apă. Fiind tutorial, durata lucrărilor e sărită."
       },
-      "step28": {
+      "step29": {
         "title": "Construiește o stație de pompare a apei",
         "description": "Apa pompată nu poate fi distribuită așa cum e locuințelor. Așa cum stația de transformare distribuie curentul, stația de pompare a apei duce apa la clădirile din jur legate prin drumuri. Construiește o „Stație de pompare a apei” pe parcela cu marcaj galben de lângă blocul de locuințe."
       },
-      "step29": {
+      "step30": {
         "title": "Leagă-le cu o conductă de apă",
         "description": "Ai nevoie de o conductă care să ducă apa de la pompa de apă subterană la stația de pompare. Deschide „Drumuri, căi ferate și infrastructură” de pe panoul cu pictograme, alege „Conductă de aducțiune” din „Apă” și trage conducta de la punctul de racord al pompei de apă subterană până la punctul de racord al stației de pompare. Ca să nu intre în conflict cu drumurile și linia electrică, ocolește larg prin partea de est."
       },
-      "step30": {
+      "step31": {
         "title": "Verifică alimentarea cu apă",
         "description": "Dă timpul înainte cu „Start”, fă clic pe stația de pompare a apei ca să-i deschizi detaliile și verifică în fila „Cerere, ofertă și tranzacții” că la „Apă de înaltă presiune” cantitatea primită nu este 0. Pot trece câteva luni până se strâng muncitori la pompa de apă subterană și ajunge apa."
       },
-      "step31": {
+      "step32": {
         "title": "Ai învățat bazele construirii orașului",
         "description": "Apa a ajuns la stația de pompare, așa că și locuințele din jur au acum apă curentă. Tragi drumuri, pregătești parcele, stabilești politica cartierului, construiești locuințe și aduci curent și apă: acesta e fluxul de bază al construirii orașului. Apasă „Următorul” ca să închei tutorialul de comenzi de bază."
       }

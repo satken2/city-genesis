@@ -70,99 +70,106 @@
         "description": "Nous avons déplacé la caméra vers le bord est de la ville. La zone utilisable comme ville est ce rectangle où existe un terrain détaillé, et la caméra ne peut pas en sortir non plus. C'est tout pour l'écran et les commandes. Passons maintenant à la création d'un vrai quartier résidentiel. Appuyez sur « Suivant »."
       },
       "step9": {
+        "title": "Laisser la ville s’étendre toute seule",
+        "run": "Commençons par faire avancer le temps. Appuyez une seule fois sur « Démarrer » dans le cockpit.",
+        "result": "Le temps a avancé. Après avoir consulté les résultats, fermez la fenêtre des résultats.",
+        "proposal": "Quand moins de 10 % des parcelles constructibles sont libres, la ville propose d’étendre le réseau routier à la fin d’une époque. Sur la carte, les lignes sont les nouvelles routes et les carrés sont les parcelles créées à l’achèvement des routes. Vérifiez le coût estimé, puis appuyez sur « OK » pour approuver la proposition.",
+        "explain": "Les routes approuvées passent au statut « Construction planifiée ». Une fois achevées, des parcelles apparaissent le long de leur tracé, et les habitants et les entreprises commencent à y construire. Inutile d’attendre une proposition : vous pouvez aussi peindre une zone avec « Développement urbain automatique » dans le panneau d’icônes pour étendre la ville. Maintenant, construisons une route de vos propres mains. Appuyez sur « Suivant »."
+      },
+      "step10": {
         "title": "Prolongeons la route",
         "description": "Créons maintenant un quartier résidentiel pour accueillir de nouveaux habitants. Logements et lieux de travail ne servent à rien sans routes pour les relier : les gens ne peuvent pas circuler et les marchandises n’arrivent pas. Prolongez d’abord vers l’ouest la rue est-ouest de la ville pour ouvrir l’accès au nouveau quartier. Appuyez sur « Routes, voies ferrées et infrastructures » dans le panneau d’icônes pour ouvrir le panneau de construction.",
         "confirm": "Le terrain le long d’une route est découpé en parcelles quand la route est achevée. Dans « Parcelles en bordure créées à l'achèvement » du panneau de construction, vous choisissez la taille de chaque parcelle pour les côtés gauche et droit. Décidez selon les bâtiments que vous voulez accueillir : de petites parcelles pour l’habitat, de grandes pour les usines et les fermes. Cette route desservira un quartier résidentiel, laissez donc le réglage tel quel. Confirmez dans le panneau de construction pour enregistrer la route, puis appuyez sur « Suivant »."
       },
-      "step10": {
+      "step11": {
         "title": "Terminons la route",
         "description": "La route est encore au statut « Construction planifiée ». Une route planifiée n’est pas encore utilisable : piétons et voitures ne peuvent l’emprunter qu’une fois les travaux terminés. Appuyez 2 ou 3 fois sur « Démarrer » dans le cockpit pour faire avancer le temps et attendez son achèvement. Pendant les travaux, un coût de construction est prélevé chaque mois.",
         "description_week": "La route est encore au statut « Construction planifiée ». Une route planifiée n’est pas encore utilisable : piétons et voitures ne peuvent l’emprunter qu’une fois les travaux terminés. Appuyez 2 ou 3 fois sur « Démarrer » dans le cockpit pour faire avancer le temps et attendez son achèvement. Pendant les travaux, un coût de construction est prélevé chaque semaine."
       },
-      "step11": {
+      "step12": {
         "title": "Les parcelles sont prêtes",
         "description": "La route est achevée et des parcelles ont été créées le long de celle-ci. Les bâtiments ne peuvent s’élever que sur des parcelles, et une parcelle qui borde une route permet aux personnes et aux marchandises d’entrer et de sortir. Pour ajouter des parcelles le long d’une route existante, utilisez « Parcelles » dans le panneau d’icônes."
       },
-      "step12": {
+      "step13": {
         "title": "Créons un quartier",
         "description": "Avant de construire, décidez de ce que doit devenir cette rue. Sans orientation, une usine pourrait s’installer juste à côté des logements. Ces orientations se décident par « Quartiers ». Les quartiers se définissent route par route, et une parcelle appartient au quartier de la route qu’elle borde. Appuyez sur « Quartiers » dans le panneau d’icônes pour ouvrir la fenêtre Modifier les quartiers : pour l’instant, toute la ville forme un seul quartier.",
         "create": "Utilisez le mode de peinture « Côté de rue ». Passez l’outil sur « Créer un quartier », maintenez Ctrl et faites glisser le long de la route prolongée. Les deux côtés de la route peinte, avec les parcelles qui les bordent, deviennent un nouveau quartier."
       },
-      "step13": {
+      "step14": {
         "title": "Le quartier est découpé",
         "description": "Vous avez séparé la nouvelle rue du centre-ville en un quartier à part. Vous pouvez consulter la population et les prix par quartier et choisir les bâtiments autorisés, pour que chaque secteur se développe comme il lui convient. Une fois vérifié, fermez la fenêtre Modifier les quartiers."
       },
-      "step14": {
+      "step15": {
         "title": "Ouvrons le détail du quartier",
         "description": "Faisons du nouveau quartier une zone résidentielle. Affichez les quartiers avec l’icône en bas à gauche de l’écran, puis cliquez sur l’étiquette du quartier que vous venez de créer pour ouvrir son détail."
       },
-      "step15": {
+      "step16": {
         "title": "Réservons-le à l’habitat",
         "description": "La réglementation de construction, en bas du panneau, choisit les bâtiments autorisés sur les parcelles de ce quartier. Nous voulons ici un endroit calme où vivre : cliquez sur tous les bâtiments sauf « Logement collectif » et « Maison individuelle » pour les désactiver."
       },
-      "step16": {
+      "step17": {
         "title": "Vérifions une parcelle",
         "description": "La réglementation d’un quartier s’applique à toutes ses parcelles. Cliquez sur la parcelle au repère jaune pour ouvrir son détail."
       },
-      "step17": {
+      "step18": {
         "title": "La réglementation est appliquée",
         "description": "En bas du panneau de la parcelle, vous voyez la réglementation du quartier qui n’autorise que « Logement collectif » et « Maison individuelle ». Désormais, seuls des logements peuvent être construits dans cette rue. Plutôt que de régler les parcelles une à une, il suffit de fixer l’orientation du quartier pour que toute la rue la suive."
       },
-      "step18": {
+      "step19": {
         "title": "Construisons des logements",
         "description": "Préparons maintenant des logements. D’ordinaire, le secteur privé en construit automatiquement quand des gens veulent s’installer, mais les logements publics construits par la ville comblent rapidement une pénurie. Construisons ici un logement collectif public. Appuyez sur « Construction » dans le panneau d’icônes.",
         "select": "Choisissez « Immeuble résidentiel » dans la catégorie « Logement », cliquez sur n’importe quelle parcelle du nouveau quartier comme site de chantier, puis validez."
       },
-      "step19": {
+      "step20": {
         "title": "Terminons les logements",
         "description": "Comme la route, un bâtiment planifié n’est pas encore habitable. Un logement collectif demande plus de six mois de travaux. Appuyez sur « Démarrer » pour faire avancer le temps et attendez son achèvement."
       },
-      "step20": {
+      "step21": {
         "title": "Vérifions l’électricité",
         "description": "Un logement ne suffit pas pour vivre : il faut aussi de l’électricité et de l’eau. Cette ville n’a encore ni centrale électrique ni eau courante. Cliquez sur le logement collectif au repère jaune, où vivent les habitants, pour ouvrir son détail, choisissez l’un des occupants dans l’onglet « Bâtiment », puis ouvrez son onglet « Offre, demande et échanges » : vous verrez que la quantité obtenue d’électricité est de 0."
       },
-      "step21": {
+      "step22": {
         "title": "Construisons une centrale solaire",
         "description": "Pour apporter l’électricité, il faut d’abord une centrale pour la produire. Construisez une « Centrale solaire » sur la parcelle au repère jaune. Normalement, l’achèvement prend du temps, mais comme il s’agit d’un tutoriel, la durée du chantier est ignorée."
       },
-      "step22": {
+      "step23": {
         "title": "Construisons une sous-station",
         "description": "L’électricité haute tension d’une centrale ne peut pas être utilisée telle quelle dans les foyers. La sous-station la convertit en électricité domestique et la distribue aux bâtiments voisins reliés par la route. Construisez une « Sous-station électrique » sur la parcelle au repère jaune, près du logement collectif."
       },
-      "step23": {
+      "step24": {
         "title": "Raccordons par une ligne électrique",
         "description": "Même si la centrale et la sous-station sont éloignées, un chemin pour l’électricité les relie. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Ligne électrique haute tension » sous « Électricité », et tracez une ligne de la borne de raccordement de la centrale solaire à celle de la sous-station. Une seule ligne droite entre les bornes suffit."
       },
-      "step24": {
+      "step25": {
         "title": "Vérifions l’alimentation électrique",
         "description": "Une fois raccordées, vérifiez que l’électricité circule vraiment. Appuyez sur « Démarrer » pour faire avancer le temps, cliquez sur la sous-station pour ouvrir son détail et, dans l’onglet « Offre, demande et échanges », vérifiez que la quantité reçue d’électricité haute tension n’est pas nulle. Il peut falloir quelques mois pour que la centrale démarre et que l’électricité arrive."
       },
-      "step25": {
+      "step26": {
         "title": "L’électricité arrive dans les foyers",
         "description": "Depuis le détail du logement collectif, ouvrez comme au début l’onglet « Offre, demande et échanges » d’un occupant et vérifiez que la quantité obtenue d’électricité n’est plus nulle. Il peut falloir encore un ou deux mois pour qu’elle atteigne les foyers. Produire à la centrale, transporter par la ligne, distribuer depuis la sous-station : ce n’est que lorsque les trois sont reliés que l’électricité arrive dans les foyers."
       },
-      "step26": {
+      "step27": {
         "title": "Cherchons une source d’eau",
         "description": "Passons à l’eau. L’eau du robinet est de l’eau souterraine pompée puis envoyée en ville. Cherchez d’abord où l’on peut pomper de l’eau. Appuyez sur « Affichage » dans le cockpit pour ouvrir le panneau.",
         "show": "Choisissez « Ressources naturelles » dans les onglets verticaux et passez sur « Affiché ». Les sources d’eau apparaissent en bleu clair sur la carte. Cliquez sur la source d’eau au repère jaune pour ouvrir son détail."
       },
-      "step27": {
+      "step28": {
         "title": "Construisons une pompe à eau souterraine",
         "description": "Une pompe à eau souterraine puise l’eau du sous-sol : elle doit donc être construite là où se trouve une source d’eau. Elle a aussi besoin d’électricité et de main-d’œuvre pour fonctionner, c’est pourquoi nous avons d’abord amené l’électricité. Construisez une « Pompe à eau souterraine » sur la parcelle au repère jaune, au-dessus de la source d’eau. Comme il s’agit d’un tutoriel, la durée du chantier est ignorée."
       },
-      "step28": {
+      "step29": {
         "title": "Construisons une station de pompage",
         "description": "L’eau pompée ne peut pas être distribuée telle quelle aux foyers. Comme la sous-station distribue l’électricité, la station de pompage distribue l’eau aux bâtiments voisins reliés par la route. Construisez une « Station de pompage d'eau » sur la parcelle au repère jaune, près du logement collectif."
       },
-      "step29": {
+      "step30": {
         "title": "Raccordons par une conduite",
         "description": "Il faut une conduite pour amener l’eau de la pompe souterraine à la station de pompage. Ouvrez « Routes, voies ferrées et infrastructures » dans le panneau d’icônes, choisissez « Conduite d'eau principale » sous « Eau », et posez-la de la borne de raccordement de la pompe à celle de la station de pompage. Pour éviter les routes et la ligne électrique, faites un large détour par l’est."
       },
-      "step30": {
+      "step31": {
         "title": "Vérifions l’alimentation en eau",
         "description": "Appuyez sur « Démarrer » pour faire avancer le temps, cliquez sur la station de pompage pour ouvrir son détail et, dans l’onglet « Offre, demande et échanges », vérifiez que la quantité reçue d’eau sous haute pression n’est pas nulle. Il peut falloir quelques mois pour que la pompe souterraine trouve des travailleurs et que l’eau arrive."
       },
-      "step31": {
+      "step32": {
         "title": "Les bases sont en place",
         "description": "L’eau est arrivée à la station de pompage : les foyers alentour peuvent désormais utiliser l’eau courante. Tracer des routes, préparer des parcelles, fixer l’orientation de chaque quartier, construire des logements, puis apporter l’électricité et l’eau : voilà le déroulement de base de l’aménagement d’une ville. Appuyez sur « Suivant » pour terminer le tutoriel des commandes de base."
       }

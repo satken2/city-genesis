@@ -70,99 +70,106 @@
         "description": "Kamera sudah dipindahkan ke ujung timur kota. Area yang bisa digunakan sebagai kota adalah bagian dalam persegi ini, tempat medan detail telah dibuat. Kamera juga tidak bisa keluar dari batas ini. Sekian penjelasan tentang layar dan kontrol. Selanjutnya, mari langsung mencoba membuat kawasan perumahan baru. Tekan “Berikutnya”, ya."
       },
       "step9": {
+        "title": "Biarkan kota berkembang sendiri",
+        "run": "Pertama, mari majukan waktu. Tekan “Mulai” di kokpit satu kali saja.",
+        "result": "Waktu sudah maju. Setelah memeriksa hasilnya, tutup jendela hasil.",
+        "proposal": "Jika kavling kosong yang bisa dibangun tinggal kurang dari 10%, kota akan mengusulkan perluasan jaringan jalan di akhir siklus. Di peta, garis adalah jalan baru dan kotak adalah kavling yang terbentuk saat jalan selesai. Periksa perkiraan biayanya, lalu tekan “OK” untuk menyetujui usulan.",
+        "explain": "Jalan yang disetujui berstatus “Pembangunan direncanakan”. Setelah selesai, kavling terbentuk di sepanjang jalan, lalu warga dan perusahaan mulai mendirikan bangunan. Kamu tidak perlu menunggu usulan: kamu juga bisa mewarnai area dengan “Pengembangan kota otomatis” di panel ikon untuk memperluas kota. Berikutnya, mari membangun jalan dengan tanganmu sendiri. Tekan “Berikutnya”."
+      },
+      "step10": {
         "title": "Perpanjang jalan",
         "description": "Sekarang, mari membuat kawasan perumahan untuk menyambut penduduk baru. Tempat tinggal maupun tempat kerja yang tidak terhubung oleh jalan tidak bisa didatangi orang, dan barang pun tidak bisa sampai. Pertama, perpanjang jalan timur-barat kota ke arah barat untuk membuka jalan menuju kawasan perumahan. Tekan “Jalan, rel, dan infrastruktur” di panel ikon untuk membuka panel konstruksi.",
         "confirm": "Lahan di sepanjang jalan akan dibagi menjadi kavling saat jalan selesai dibangun. Luas setiap kavling dapat dipilih untuk sisi kiri dan kanan jalan di “Kavling tepi jalan yang dibuat saat selesai” pada panel konstruksi. Tentukan berdasarkan bangunan yang ingin Anda hadirkan: kavling yang lebih kecil untuk perumahan, kavling yang luas untuk pabrik atau lahan pertanian. Kali ini kita akan membuat kawasan perumahan, jadi biarkan seperti apa adanya. Tekan “Konfirmasi” di panel konstruksi untuk menyimpan, lalu tekan tombol “Berikutnya”."
       },
-      "step10": {
+      "step11": {
         "title": "Selesaikan jalan",
         "description": "Jalan ini masih berstatus “Pembangunan direncanakan”. Jalan yang baru direncanakan belum bisa digunakan; orang dan kendaraan baru bisa melintas setelah pekerjaannya selesai. Tekan “Mulai” di kokpit 2–3 kali untuk memajukan waktu, lalu tunggu hingga jalan selesai. Selama pembangunan, biaya konstruksi dikenakan setiap bulan.",
         "description_week": "Jalan ini masih berstatus “Pembangunan direncanakan”. Jalan yang baru direncanakan belum bisa digunakan; orang dan kendaraan baru bisa melintas setelah pekerjaannya selesai. Tekan “Mulai” di kokpit 2–3 kali untuk memajukan waktu, lalu tunggu hingga jalan selesai. Selama pembangunan, biaya konstruksi dikenakan setiap minggu."
       },
-      "step11": {
+      "step12": {
         "title": "Kavling telah terbentuk",
         "description": "Jalan telah selesai, dan kavling terbentuk di sepanjang jalan. Bangunan hanya dapat didirikan di atas kavling, dan karena kavling menghadap jalan, orang dan barang dapat keluar masuk. Untuk menambah kavling di sepanjang jalan yang sudah ada, gunakan “Kavling” di panel ikon."
       },
-      "step12": {
+      "step13": {
         "title": "Buat distrik",
         "description": "Sebelum mendirikan bangunan, tentukan dulu akan menjadi tempat seperti apa jalan ini. Tanpa arahan, pabrik bisa saja berdiri tepat di sebelah rumah. Arahan untuk setiap tempat ditentukan per “Distrik”. Distrik ditetapkan per jalan, dan kavling masuk ke distrik dari jalan yang dihadapinya. Tekan “Distrik” di panel ikon untuk membuka jendela edit distrik, dan Anda akan melihat bahwa saat ini seluruh kota masih menjadi satu distrik.",
         "create": "Atur cara pewarnaan ke “Per sisi jalan”. Ganti alat ke “Buat distrik baru”, lalu sambil menahan tombol Ctrl, telusuri jalan yang tadi diperpanjang. Kedua sisi jalan yang ditelusuri, beserta kavling yang menghadapnya, akan menjadi distrik baru."
       },
-      "step13": {
+      "step14": {
         "title": "Distrik berhasil dipisah",
         "description": "Jalan baru ini berhasil dipisahkan menjadi distrik tersendiri, terpisah dari pusat kota. Anda dapat memeriksa jumlah penduduk dan harga per distrik, serta menentukan bangunan yang boleh didirikan, sehingga pembangunan kota dapat disesuaikan dengan setiap tempat. Setelah memeriksanya, tutup jendela edit distrik."
       },
-      "step14": {
+      "step15": {
         "title": "Buka detail distrik",
         "description": "Mari atur distrik baru ini menjadi kawasan perumahan. Tampilkan distrik dengan ikon di kiri bawah layar, lalu klik label distrik yang baru saja Anda buat untuk membuka detailnya."
       },
-      "step15": {
+      "step16": {
         "title": "Jadikan kawasan perumahan",
         "description": "Dengan peraturan bangunan di bagian bawah panel, Anda dapat memilih bangunan yang boleh didirikan di kavling distrik ini. Kita ingin tempat ini menjadi kawasan perumahan yang tenang, jadi klik semua bangunan selain “Apartemen” dan “Rumah” untuk menonaktifkannya."
       },
-      "step16": {
+      "step17": {
         "title": "Periksa kavling",
         "description": "Peraturan yang ditetapkan untuk distrik berlaku pada semua kavling di distrik tersebut. Klik kavling dengan penanda kuning untuk membuka detail kavling."
       },
-      "step17": {
+      "step18": {
         "title": "Peraturan telah diterapkan",
         "description": "Di bagian bawah panel kavling, terlihat bahwa peraturan distrik yang hanya mengizinkan “Apartemen” dan “Rumah” telah diterapkan. Kini, kavling di jalan ini hanya dapat didirikan perumahan. Tanpa perlu mengatur kavling satu per satu, cukup tentukan arahan di distrik, maka seluruh jalan akan mengikutinya."
       },
-      "step18": {
+      "step19": {
         "title": "Bangun perumahan",
         "description": "Akhirnya, saatnya menyediakan tempat tinggal. Biasanya, perumahan dibangun otomatis oleh swasta jika ada orang yang ingin tinggal, tetapi jika kota membangun perumahan milik kota, kekurangan tempat tinggal dapat segera teratasi. Di sini, mari bangun apartemen milik kota. Tekan “Konstruksi” di panel ikon.",
         "select": "Pilih “Kompleks apartemen” dari kategori “Perumahan”, klik kavling mana saja di distrik baru sebagai lokasi pembangunan, lalu tekan “Konfirmasi”."
       },
-      "step19": {
+      "step20": {
         "title": "Selesaikan perumahan",
         "description": "Sama seperti jalan, bangunan yang baru direncanakan belum bisa ditinggali. Apartemen butuh lebih dari setengah tahun hingga selesai. Majukan waktu dengan “Mulai” dan tunggu hingga selesai."
       },
-      "step20": {
+      "step21": {
         "title": "Periksa apakah listrik sudah sampai",
         "description": "Meskipun ada tempat tinggal, kehidupan tidak dapat berjalan tanpa listrik dan air. Kota ini belum memiliki pembangkit listrik maupun air bersih. Klik apartemen dengan penanda kuning, tempat warga kota tinggal, untuk membuka detailnya. Pilih salah satu penyewa di tab “Info bangunan”, lalu buka tab “Pasar & transaksi”. Di sana Anda dapat memastikan bahwa jumlah listrik yang diperoleh adalah 0."
       },
-      "step21": {
+      "step22": {
         "title": "Bangun pembangkit listrik tenaga surya",
         "description": "Untuk mengalirkan listrik, pertama-tama dibutuhkan pembangkit listrik yang menghasilkannya. Bangun “Pembangkit listrik tenaga surya” di kavling dengan penanda kuning. Biasanya butuh waktu hingga selesai, tetapi karena ini tutorial, durasi pembangunan dilewati dan bangunan langsung selesai."
       },
-      "step22": {
+      "step23": {
         "title": "Bangun gardu induk",
         "description": "Listrik tegangan tinggi yang dihasilkan pembangkit tidak dapat langsung digunakan oleh rumah tangga. Gardu induklah yang mengubahnya menjadi listrik yang dapat digunakan rumah tangga dan mendistribusikannya ke bangunan di sekitarnya yang terhubung oleh jalan. Bangun “Gardu induk” di kavling dengan penanda kuning di dekat apartemen."
       },
-      "step23": {
+      "step24": {
         "title": "Hubungkan dengan saluran listrik",
         "description": "Meskipun pembangkit listrik dan gardu induk berjauhan, keduanya dapat terhubung jika ada jalur untuk mengalirkan listrik. Buka “Jalan, rel, dan infrastruktur” di panel ikon, pilih “Saluran listrik tegangan tinggi” di “Listrik”, lalu tarik saluran dari titik sambung pembangkit listrik tenaga surya ke titik sambung gardu induk. Jika kedua titik sambung dihubungkan lurus, cukup satu tarikan."
       },
-      "step24": {
+      "step25": {
         "title": "Periksa pasokan listrik",
         "description": "Setelah terhubung, pastikan listrik benar-benar mengalir. Majukan waktu dengan “Mulai”, klik gardu induk untuk membuka detailnya, lalu di tab “Pasar & transaksi” pastikan jumlah listrik tegangan tinggi yang diterima bukan 0. Butuh beberapa bulan hingga pembangkit mulai beroperasi dan listrik sampai."
       },
-      "step25": {
+      "step26": {
         "title": "Listrik telah sampai ke rumah tangga",
         "description": "Dari detail apartemen, buka tab “Pasar & transaksi” milik penyewa seperti saat pertama kali memeriksa, lalu pastikan jumlah listrik yang diperoleh sudah bukan 0. Terkadang waktu perlu dimajukan 1–2 bulan lagi hingga listrik sampai ke rumah tangga. Dihasilkan di pembangkit, dialirkan lewat saluran listrik, lalu didistribusikan oleh gardu induk. Hanya jika ketiganya terhubung, listrik dapat sampai ke rumah tangga."
       },
-      "step26": {
+      "step27": {
         "title": "Cari sumber air",
         "description": "Berikutnya adalah air bersih. Air bersih diperoleh dengan memompa air tanah lalu mengalirkannya ke kota. Pertama, cari tahu di mana lokasi yang airnya dapat dipompa. Tekan “Tampilan” di kokpit untuk membuka panel tampilan.",
         "show": "Pilih “Sumber daya alam” dari tab yang berjajar vertikal, lalu ubah ke “Ditampilkan”. Sumber air ditandai dengan warna biru muda di peta. Klik sumber air dengan penanda kuning untuk membuka detailnya."
       },
-      "step27": {
+      "step28": {
         "title": "Bangun pompa air tanah",
         "description": "Pompa air tanah adalah fasilitas untuk memompa air dari bawah tanah, sehingga harus dibangun di tempat yang memiliki sumber air. Untuk beroperasi, pompa ini juga membutuhkan listrik dan pekerja; itulah sebabnya listrik dialirkan lebih dulu. Bangun “Pompa air tanah” di kavling dengan penanda kuning di atas sumber air. Karena ini tutorial, durasi pembangunan dilewati."
       },
-      "step28": {
+      "step29": {
         "title": "Bangun stasiun pompa air",
         "description": "Air yang dipompa tidak dapat langsung dibagikan ke rumah tangga. Sama seperti gardu induk mendistribusikan listrik, stasiun pompa air mendistribusikan air ke bangunan di sekitarnya yang terhubung oleh jalan. Bangun “Stasiun pompa air” di kavling dengan penanda kuning di dekat apartemen."
       },
-      "step29": {
+      "step30": {
         "title": "Hubungkan dengan pipa air baku",
         "description": "Diperlukan pipa untuk mengalirkan air yang dipompa oleh pompa air tanah ke stasiun pompa air. Buka “Jalan, rel, dan infrastruktur” di panel ikon, pilih “Pipa air baku” di “Air bersih”, lalu pasang pipa dari titik sambung pompa air tanah ke titik sambung stasiun pompa air. Agar tidak berbenturan dengan jalan atau saluran listrik, pasang pipa dengan memutar lebar ke sisi timur."
       },
-      "step30": {
+      "step31": {
         "title": "Periksa pasokan air",
         "description": "Majukan waktu dengan “Mulai”, klik stasiun pompa air untuk membuka detailnya, lalu di tab “Pasar & transaksi” pastikan jumlah air bertekanan tinggi yang diterima bukan 0. Butuh beberapa bulan hingga pekerja berkumpul di pompa air tanah dan air sampai."
       },
-      "step31": {
+      "step32": {
         "title": "Dasar pembangunan kota sudah siap",
         "description": "Air telah sampai ke stasiun pompa air, sehingga rumah tangga di sekitarnya kini dapat menggunakan air bersih. Membangun jalan, menyiapkan kavling, menentukan arahan distrik, mendirikan tempat tinggal, serta mengalirkan listrik dan air: inilah alur dasar pembangunan kota. Tekan “Berikutnya” untuk menyelesaikan tutorial Kontrol Dasar."
       }

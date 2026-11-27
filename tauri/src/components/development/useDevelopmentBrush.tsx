@@ -40,7 +40,7 @@ type DevelopmentPlan = {
 /** コアの create_city_development の戻り値 */
 type DevelopmentResult = {
   path_ids: number[];
-  parcel_ids: number[];
+  parcels: number; // 道路の竣工時にできる区画の件数
   rejected: Record<string, number>;
 };
 
@@ -161,7 +161,7 @@ export function useDevelopmentBrush(
       const rejected = rejectedTotal(result.rejected);
       const summary = t("cityDevelopment.created", {
         roads: result.path_ids.length,
-        parcels: result.parcel_ids.length,
+        parcels: result.parcels,
         rejected,
       });
       setMessage(withReasons(summary, result.rejected));

@@ -70,99 +70,106 @@
         "description": "We moved the camera to the east edge of the city. The area you can use as a city is this rectangle where detailed terrain exists, and the camera cannot leave it either. That's all for the screen and controls. Next, let's actually create a new residential area. Press “Next”."
       },
       "step9": {
+        "title": "Let the City Expand Itself",
+        "run": "First, let's advance time. Press “Start” in the cockpit to advance time just once.",
+        "result": "Time has advanced. After reviewing the results, close the results window.",
+        "proposal": "When fewer than 10% of the parcels you can build on are vacant, the city proposes expanding the road network at the end of an epoch. On the map, the lines are new roads and the squares are the parcels made when the roads are completed. Check the estimated cost, then press “OK” to approve the proposal.",
+        "explain": "Approved roads become “Construction Planned”. Once they are completed, parcels appear along them, and residents and businesses start putting up buildings. You don't have to wait for a proposal: you can also paint an area with “Automatic City Development” on the icon panel to expand the city. Next, let's build a road with your own hands. Press “Next”."
+      },
+      "step10": {
         "title": "Extend the Road",
         "description": "Now let's build a residential area to welcome new residents. Homes and workplaces are no use unless roads connect them: people can't come and go, and goods can't arrive. First, extend the town’s east–west street to the west to open a way into the new neighborhood. Press “Roads, Rail & Infrastructure” on the icon panel to open the construction panel.",
         "confirm": "The land along a road is divided into parcels when the road is completed. In “Roadside parcels made on completion” in the construction panel, you can choose the size of each parcel for the left and right sides of the road. Decide by the kind of buildings you want: smaller parcels suit housing, while larger ones suit factories and farms. This road is for a residential area, so leave it as it is. Confirm in the construction panel to save the road, then press \"Next\"."
       },
-      "step10": {
+      "step11": {
         "title": "Complete the Road",
         "description": "The road is still “Construction Planned”. A planned road can't be used yet — people and cars can only use it once the work is finished. Press “Start” in the cockpit 2–3 times to advance time and wait for it to be completed. Construction costs money every month while it is underway.",
         "description_week": "The road is still “Construction Planned”. A planned road can't be used yet — people and cars can only use it once the work is finished. Press “Start” in the cockpit 2–3 times to advance time and wait for it to be completed. Construction costs money every week while it is underway."
       },
-      "step11": {
+      "step12": {
         "title": "Parcels Created",
         "description": "The road is complete, and parcels have been created along it. Buildings can only stand on parcels, and a parcel facing a road lets people and goods come and go. To add parcels along an existing road, use “Land Parcels” on the icon panel."
       },
-      "step12": {
+      "step13": {
         "title": "Create a District",
         "description": "Before building, decide what this street should become. Without a plan, a factory might go up right next to the homes. Such plans are made per “District”. Districts are assigned road by road, and a parcel belongs to the district of the road it faces. Press “District” on the icon panel to open the Edit Districts window: right now the whole town is a single district.",
         "create": "Use the “Street Side” brush. Switch the tool to “Create New District”, hold Ctrl and drag along the road you extended. Both sides of the road you paint, along with the parcels facing them, become a new district."
       },
-      "step13": {
+      "step14": {
         "title": "District Created",
         "description": "You've separated the new street from the town center as its own district. You can check population and prices per district and decide which buildings may be built there, so each area can grow in the way that suits it. Once you've checked it, close the Edit Districts window."
       },
-      "step14": {
+      "step15": {
         "title": "Open District Details",
         "description": "Let's make the new district a residential area. Show the districts with the icon at the bottom left of the screen, then click the label of the district you just created to open its details."
       },
-      "step15": {
+      "step16": {
         "title": "Make It Residential",
         "description": "The building regulations near the bottom of the panel choose which buildings may be built on this district's parcels. We want a calm place to live here, so click every building other than “Apartment” and “House” to disable them."
       },
-      "step16": {
+      "step17": {
         "title": "Check a Parcel",
         "description": "A district's regulations apply to every parcel in it. Click the parcel with the yellow marker to open its details."
       },
-      "step17": {
+      "step18": {
         "title": "Regulation Applied",
         "description": "Near the bottom of the parcel panel, you can see the district's regulation allowing only “Apartment” and “House”. Now only homes can be built on this street. Instead of setting parcels one by one, deciding a district's direction makes the whole street follow it."
       },
-      "step18": {
+      "step19": {
         "title": "Build Homes",
         "description": "Now let's provide homes. Housing is normally built automatically by the private sector when people want to live here, but public housing built by the city quickly makes up for a shortage. Let's build a public apartment building here. Press “Construction” on the icon panel.",
         "select": "Choose “Apartment Complex” in the “Residential” category, click any parcel in the new district as the site, and confirm."
       },
-      "step19": {
+      "step20": {
         "title": "Complete the Homes",
         "description": "Like roads, buildings can't be lived in just because they're planned. An apartment building takes more than half a year to finish. Press “Start” to advance time and wait for it to be completed."
       },
-      "step20": {
+      "step21": {
         "title": "Check for Electricity",
         "description": "Homes alone don't make a life: people also need electricity and water. This town has no power plant and no water supply yet. Click the apartment building with the yellow marker, where the townspeople live, to open its details, pick one of the tenants in the “Building Info” tab, then open its “Supply, Demand & Trade” tab: you can confirm that the Acquired amount of Electricity is 0."
       },
-      "step21": {
+      "step22": {
         "title": "Build a Solar Power Plant",
         "description": "To deliver electricity, you first need a power plant to generate it. Build a “Solar Power Plant” on the parcel with the yellow marker. It would normally take time to complete, but since this is a tutorial, the construction period is skipped."
       },
-      "step22": {
+      "step23": {
         "title": "Build a Substation",
         "description": "The high-voltage electricity from a power plant can't be used by households as it is. A substation converts it into power homes can use and distributes it to the surrounding buildings connected by road. Build an “Electrical Substation” on the parcel with the yellow marker near the apartment building."
       },
-      "step23": {
+      "step24": {
         "title": "Connect with a Power Line",
         "description": "Even when the power plant and the substation are apart, a route for the electricity connects them. Open “Roads, Rail & Infrastructure” on the icon panel, choose “Power Transmission Line” under “Electricity”, and draw a line from the solar power plant's connection terminal to the substation's terminal. A straight line between the terminals does it in one go."
       },
-      "step24": {
+      "step25": {
         "title": "Confirm the Power Supply",
         "description": "Once connected, make sure electricity is really flowing. Press “Start” to advance time, click the substation to open its details, and in the “Supply, Demand & Trade” tab check that the Received amount of High-Voltage Electricity isn't 0. It may take a few months for the plant to start up and the power to arrive."
       },
-      "step25": {
+      "step26": {
         "title": "Power Reaches Homes",
         "description": "From the apartment building's details, open a tenant's “Supply, Demand & Trade” tab as you did at first, and check that the Acquired amount of Electricity is no longer 0. It may take another month or two to reach households. Generate it at a power plant, carry it over power lines, distribute it from a substation — only when all three are connected does electricity reach homes."
       },
-      "step26": {
+      "step27": {
         "title": "Find a Water Source",
         "description": "Next is water. Tap water is groundwater pumped up and sent to the town. First, find out where water can be pumped. Press “View” in the cockpit to open the View panel.",
         "show": "Choose “Natural Resources” from the vertical tabs and switch it to “Visible”. Water sources appear in light blue on the map. Click the water source with the yellow marker to open its details."
       },
-      "step27": {
+      "step28": {
         "title": "Build a Groundwater Pump",
         "description": "A groundwater pump draws water up from underground, so it must be built where there is a water source. It also needs electricity and workers to run, which is why we brought in power first. Build a “Groundwater Well Pump” on the parcel with the yellow marker on top of the water source. Since this is a tutorial, the construction period is skipped."
       },
-      "step28": {
+      "step29": {
         "title": "Build a Water Pumping Station",
         "description": "Pumped water can't be handed to households as it is. Just as a substation distributes electricity, a water pumping station delivers water to the surrounding buildings connected by road. Build a “Water Pumping Station” on the parcel with the yellow marker near the apartment building."
       },
-      "step29": {
+      "step30": {
         "title": "Connect with a Pipe",
         "description": "You need a pipe to carry the water from the groundwater pump to the pumping station. Open “Roads, Rail & Infrastructure” on the icon panel, choose “Water Aqueduct Pipe” under “Water”, and lay it from the groundwater pump's connection terminal to the pumping station's terminal. To keep it clear of the roads and the power line, take a wide detour around the east side."
       },
-      "step30": {
+      "step31": {
         "title": "Confirm the Water Supply",
         "description": "Press “Start” to advance time, click the water pumping station to open its details, and in the “Supply, Demand & Trade” tab check that the Received amount of High-Pressure Water isn't 0. It may take a few months for workers to gather at the groundwater pump and for the water to arrive."
       },
-      "step31": {
+      "step32": {
         "title": "The Basics Are in Place",
         "description": "Water has reached the pumping station, so homes around it can now use tap water. Lay roads, prepare parcels, decide each district's direction, build homes, and bring in electricity and water — that is the basic flow of city building. Press “Next” to finish the Basic Controls tutorial."
       }

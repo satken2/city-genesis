@@ -70,99 +70,106 @@
         "description": "Camera đã được đưa đến rìa phía đông của thành phố. Phần có thể dùng làm thành phố là vùng hình vuông có địa hình chi tiết này, và camera cũng không thể ra ngoài ranh giới đó. Phần giới thiệu màn hình và thao tác đến đây là hết. Tiếp theo, hãy thử tạo một khu dân cư mới nhé. Nhấn “Tiếp theo” nào."
       },
       "step9": {
+        "title": "Để thành phố tự mở rộng",
+        "run": "Trước tiên, hãy cho thời gian trôi. Nhấn “Bắt đầu” trên buồng lái đúng một lần.",
+        "result": "Thời gian đã trôi. Xem xong kết quả thì hãy đóng cửa sổ kết quả.",
+        "proposal": "Khi số lô đất trống có thể xây dựng còn dưới 10%, thành phố sẽ đề xuất mở rộng mạng lưới đường vào cuối kỳ. Trên bản đồ, các đường kẻ là đường mới, còn các ô vuông là lô đất sẽ hình thành khi đường hoàn công. Kiểm tra chi phí ước tính rồi nhấn “OK” để phê duyệt đề xuất.",
+        "explain": "Các tuyến đường được phê duyệt sẽ chuyển sang “Đã lên kế hoạch xây dựng”. Khi hoàn công, lô đất sẽ hình thành dọc theo đường, rồi cư dân và doanh nghiệp bắt đầu xây nhà. Bạn không cần chờ đề xuất: bạn cũng có thể tô một khu vực bằng “Tự động phát triển đô thị” trên bảng biểu tượng để mở rộng thành phố. Tiếp theo, hãy tự tay làm một con đường nhé. Nhấn “Tiếp”."
+      },
+      "step10": {
         "title": "Kéo dài con đường",
         "description": "Từ đây, bạn sẽ thực sự tạo một khu dân cư để đón cư dân mới. Nhà ở hay nơi làm việc mà không được nối bằng đường thì người không qua lại được, hàng hóa cũng không đến được. Trước tiên, hãy kéo dài con phố đông – tây của thị trấn về phía tây để làm lối vào khu dân cư. Nhấn “Đường, đường sắt và hạ tầng” trên bảng biểu tượng để mở bảng xây dựng.",
         "confirm": "Đất dọc theo đường sẽ được chia thành lô đất khi con đường hoàn công. Diện tích mỗi lô có thể chọn riêng cho từng bên đường tại mục “Lô đất ven đường tạo khi hoàn công” trong bảng xây dựng. Hãy quyết định theo loại tòa nhà muốn đón: khu dân cư thì lô nhỏ, nhà máy hay đất nông nghiệp thì lô rộng. Lần này là khu dân cư nên cứ giữ nguyên. Nhấn “Xác nhận” trong bảng xây dựng để lưu, rồi nhấn nút “Tiếp”."
       },
-      "step10": {
+      "step11": {
         "title": "Hoàn thành con đường",
         "description": "Con đường vẫn đang ở trạng thái “Đã lên kế hoạch xây dựng”. Chỉ lập kế hoạch thì chưa dùng được; phải thi công xong thì người và xe mới qua lại được. Hãy nhấn “Bắt đầu” trên buồng lái 2–3 lần để cho thời gian trôi và chờ đường hoàn công. Trong thời gian thi công, mỗi tháng đều tốn chi phí xây dựng.",
         "description_week": "Con đường vẫn đang ở trạng thái “Đã lên kế hoạch xây dựng”. Chỉ lập kế hoạch thì chưa dùng được; phải thi công xong thì người và xe mới qua lại được. Hãy nhấn “Bắt đầu” trên buồng lái 2–3 lần để cho thời gian trôi và chờ đường hoàn công. Trong thời gian thi công, mỗi tuần đều tốn chi phí xây dựng."
       },
-      "step11": {
+      "step12": {
         "title": "Đã có lô đất",
         "description": "Con đường đã hoàn công và các lô đất đã hình thành dọc theo đường. Tòa nhà chỉ có thể xây trên lô đất, và nhờ lô đất giáp đường mà người và hàng hóa có thể ra vào. Khi muốn thêm lô đất dọc theo con đường có sẵn, bạn có thể tạo bằng “Lô đất” trên bảng biểu tượng."
       },
-      "step12": {
+      "step13": {
         "title": "Tạo khu vực",
         "description": "Trước khi xây tòa nhà, hãy quyết định con phố này sẽ phát triển thành nơi như thế nào. Nếu không có định hướng, nhà máy có thể mọc ngay cạnh nhà ở. Định hướng cho từng nơi được đặt theo đơn vị “khu vực”. Khu vực được đặt theo từng con đường, và lô đất thuộc khu vực của con đường mà nó giáp mặt. Nhấn “Khu vực” trên bảng biểu tượng để mở cửa sổ chỉnh sửa khu vực, bạn sẽ thấy hiện cả thị trấn đang là một khu vực duy nhất.",
         "create": "Chọn cách tô “Theo bên đường”. Chuyển công cụ sang “Tạo khu vực mới”, rồi giữ phím Ctrl và vẽ dọc theo con đường vừa kéo dài. Hai bên con đường đã vẽ cùng các lô đất giáp với nó sẽ trở thành khu vực mới."
       },
-      "step13": {
+      "step14": {
         "title": "Đã chia khu vực",
         "description": "Con phố mới đã được tách thành một khu vực riêng với trung tâm thị trấn. Vì có thể xem tổng hợp dân số, giá cả hay quyết định loại tòa nhà được xây theo từng khu vực, bạn có thể xây dựng thành phố phù hợp với từng nơi. Xem xong, hãy đóng cửa sổ chỉnh sửa khu vực."
       },
-      "step14": {
+      "step15": {
         "title": "Mở chi tiết khu vực",
         "description": "Hãy thiết lập để khu vực mới thành khu dân cư. Dùng biểu tượng ở góc dưới bên trái màn hình để hiện khu vực, nhấp vào nhãn của khu vực vừa tạo để mở chi tiết khu vực."
       },
-      "step15": {
+      "step16": {
         "title": "Chọn làm khu dân cư",
         "description": "Trong phần quy định xây dựng ở phía dưới bảng, bạn có thể chọn loại tòa nhà được xây trên các lô đất của khu vực này. Vì muốn nơi đây là khu dân cư yên bình, hãy nhấp để tắt tất cả các loại tòa nhà trừ “Chung cư” và “Nhà riêng”."
       },
-      "step16": {
+      "step17": {
         "title": "Kiểm tra lô đất",
         "description": "Quy định đặt cho khu vực sẽ áp dụng cho tất cả lô đất trong khu vực đó. Hãy nhấp vào lô đất có điểm đánh dấu màu vàng để mở chi tiết lô đất."
       },
-      "step17": {
+      "step18": {
         "title": "Quy định đã được áp dụng",
         "description": "Nhìn xuống phía dưới bảng lô đất, bạn sẽ thấy quy định chỉ cho phép “Chung cư” và “Nhà riêng” mà bạn đặt cho khu vực đã được áp dụng. Giờ đây, các lô đất trên con phố này chỉ có thể xây nhà ở. Không cần thiết lập từng lô, chỉ cần đặt định hướng cho khu vực là cả con phố sẽ theo định hướng đó."
       },
-      "step18": {
+      "step19": {
         "title": "Xây nhà ở",
         "description": "Đã đến lúc chuẩn bị chỗ ở. Thông thường, khi có người muốn đến sống, khu vực tư nhân sẽ tự động xây nhà ở; nhưng nếu thành phố xây nhà ở công, tình trạng thiếu nhà sẽ được bù đắp ngay. Ở đây, hãy xây một chung cư công. Nhấn “Xây dựng” trên bảng biểu tượng.",
         "select": "Chọn “Chung cư” trong nhóm “Nhà ở”, nhấp vào một lô đất tùy ý trong khu vực mới để chọn làm nơi xây dựng, rồi nhấn “Xác nhận”."
       },
-      "step19": {
+      "step20": {
         "title": "Hoàn thành nhà ở",
         "description": "Cũng như đường, tòa nhà chỉ mới được quy hoạch thì chưa thể ở. Chung cư cần hơn nửa năm để hoàn công. Hãy nhấn “Bắt đầu” để cho thời gian trôi và chờ hoàn công."
       },
-      "step20": {
+      "step21": {
         "title": "Kiểm tra xem điện đã đến chưa",
         "description": "Có nhà ở mà không có điện, nước thì cuộc sống không thể vận hành. Thị trấn này vẫn chưa có nhà máy điện lẫn hệ thống cấp nước. Hãy nhấp vào chung cư có điểm đánh dấu màu vàng nơi người dân đang sống để mở chi tiết, chọn một bên thuê trong thẻ “Thông tin tòa nhà”, rồi mở thẻ “Cung cầu và giao dịch”; bạn sẽ thấy lượng điện nhận được đang là 0."
       },
-      "step21": {
+      "step22": {
         "title": "Xây nhà máy điện mặt trời",
         "description": "Muốn đưa điện đến, trước hết cần có nhà máy điện để tạo ra điện. Hãy xây “Nhà máy điện mặt trời” trên lô đất có điểm đánh dấu màu vàng. Bình thường cần thời gian để hoàn công, nhưng vì đây là phần hướng dẫn nên thời gian thi công sẽ được bỏ qua."
       },
-      "step22": {
+      "step23": {
         "title": "Xây trạm biến áp",
         "description": "Điện cao thế do nhà máy điện tạo ra chưa thể dùng ngay trong gia đình. Trạm biến áp sẽ chuyển nó thành điện dùng cho gia đình và phân phối đến các tòa nhà xung quanh được nối bằng đường. Hãy xây “Trạm biến áp” trên lô đất có điểm đánh dấu màu vàng gần chung cư."
       },
-      "step23": {
+      "step24": {
         "title": "Nối bằng đường dây điện",
         "description": "Dù nhà máy điện và trạm biến áp cách xa nhau, chỉ cần có đường dẫn điện là chúng sẽ được nối với nhau. Mở “Đường, đường sắt và hạ tầng” trên bảng biểu tượng, chọn “Đường dây điện” trong mục “Điện”, rồi kéo dây từ điểm đấu nối của nhà máy điện mặt trời đến điểm đấu nối của trạm biến áp. Nếu nối thẳng hai điểm đấu nối, bạn chỉ cần kéo một đường."
       },
-      "step24": {
+      "step25": {
         "title": "Kiểm tra việc cấp điện",
         "description": "Nối xong rồi, hãy kiểm tra xem điện có thực sự chạy không. Nhấn “Bắt đầu” để cho thời gian trôi, nhấp vào trạm biến áp để mở chi tiết, rồi kiểm tra trong thẻ “Cung cầu và giao dịch” rằng lượng điện cao thế nhận vào khác 0. Có thể mất vài tháng để nhà máy điện bắt đầu hoạt động và điện đến nơi."
       },
-      "step25": {
+      "step26": {
         "title": "Điện đã đến từng nhà",
         "description": "Từ chi tiết chung cư, mở thẻ “Cung cầu và giao dịch” của bên thuê như lần kiểm tra đầu tiên, và xác nhận lượng điện nhận được đã khác 0. Đôi khi cần cho thời gian trôi thêm 1–2 tháng nữa thì điện mới đến các hộ gia đình. Nhà máy điện tạo ra điện, đường dây điện truyền tải, trạm biến áp phân phối. Chỉ khi cả ba được nối với nhau, điện mới đến được từng nhà."
       },
-      "step26": {
+      "step27": {
         "title": "Tìm nguồn nước",
         "description": "Tiếp theo là nước máy. Nước máy được bơm từ nước ngầm lên rồi đưa vào thị trấn. Trước hết, hãy tìm xem nơi nào có thể bơm nước lên. Nhấn “Hiển thị” trên buồng lái để mở bảng hiển thị.",
         "show": "Chọn “Tài nguyên thiên nhiên” trong các thẻ xếp dọc, rồi chuyển sang “Hiện”. Những chỗ màu xanh nhạt trên bản đồ là nguồn nước. Hãy nhấp vào nguồn nước có điểm đánh dấu màu vàng để mở chi tiết."
       },
-      "step27": {
+      "step28": {
         "title": "Xây trạm bơm nước ngầm",
         "description": "Trạm bơm nước ngầm là cơ sở bơm nước dưới lòng đất lên, nên phải xây ở nơi có nguồn nước. Để vận hành còn cần điện và người làm, đó là lý do ta đưa điện đến trước. Hãy xây “Trạm bơm nước ngầm” trên lô đất có điểm đánh dấu màu vàng nằm trên nguồn nước. Vì đây là phần hướng dẫn nên thời gian thi công sẽ được bỏ qua."
       },
-      "step28": {
+      "step29": {
         "title": "Xây trạm bơm cấp nước",
         "description": "Nước bơm lên chưa thể phân phối ngay cho các hộ gia đình. Cũng như trạm biến áp phân phối điện, trạm bơm cấp nước sẽ phân phối nước đến các tòa nhà xung quanh được nối bằng đường. Hãy xây “Trạm bơm cấp nước” trên lô đất có điểm đánh dấu màu vàng gần chung cư."
       },
-      "step29": {
+      "step30": {
         "title": "Nối bằng ống dẫn nước",
         "description": "Cần có đường ống để đưa nước từ trạm bơm nước ngầm đến trạm bơm cấp nước. Mở “Đường, đường sắt và hạ tầng” trên bảng biểu tượng, chọn “Ống dẫn nước” trong mục “Cấp nước”, rồi kéo ống từ điểm đấu nối của trạm bơm nước ngầm đến điểm đấu nối của trạm bơm cấp nước. Để không vướng vào đường và đường dây điện, hãy vòng rộng sang phía đông khi đặt ống."
       },
-      "step30": {
+      "step31": {
         "title": "Kiểm tra việc cấp nước",
         "description": "Nhấn “Bắt đầu” để cho thời gian trôi, nhấp vào trạm bơm cấp nước để mở chi tiết, rồi kiểm tra trong thẻ “Cung cầu và giao dịch” rằng lượng nước cao áp nhận vào khác 0. Có thể mất vài tháng để trạm bơm nước ngầm tuyển đủ người làm và nước đến nơi."
       },
-      "step31": {
+      "step32": {
         "title": "Đã nắm được những điều cơ bản",
         "description": "Nước đã đến trạm bơm cấp nước, nên các hộ gia đình xung quanh cũng có thể dùng nước máy. Làm đường, chuẩn bị lô đất, đặt định hướng cho khu vực, xây nhà ở, rồi đưa điện và nước đến. Đó là trình tự cơ bản của việc xây dựng thành phố. Nhấn “Tiếp theo” để hoàn tất phần hướng dẫn thao tác cơ bản."
       }

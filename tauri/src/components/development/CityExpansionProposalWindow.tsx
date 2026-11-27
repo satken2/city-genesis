@@ -237,6 +237,7 @@ export function CityExpansionProposalWindow({ apiBaseUrl, proposal, onClose }: P
           <button
             type="button"
             className="expansion-proposal__primary"
+            data-guide="expansion.apply"
             disabled={busy}
             onClick={() => void handleApply()}
           >

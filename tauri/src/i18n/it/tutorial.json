@@ -70,99 +70,106 @@
         "description": "Abbiamo spostato la telecamera all'estremità est della città. L'area utilizzabile per la città è questo rettangolo, dove è stato generato il terreno dettagliato. Nemmeno la telecamera può uscire da questo confine. La spiegazione dello schermo e dei comandi finisce qui. Ora proviamo a creare davvero una nuova zona residenziale. Premi “Avanti”."
       },
       "step9": {
+        "title": "Lascia che la città cresca da sola",
+        "run": "Per prima cosa facciamo avanzare il tempo. Premi una sola volta “Avvia” nel cockpit.",
+        "result": "Il tempo è avanzato. Dopo aver controllato i risultati, chiudi la finestra dei risultati.",
+        "proposal": "Quando i lotti edificabili liberi scendono sotto il 10%, alla fine di un’epoca la città propone di ampliare la rete stradale. Sulla mappa le linee sono le nuove strade e i quadrati sono i lotti che nasceranno al completamento delle strade. Controlla il costo stimato, poi premi “OK” per approvare la proposta.",
+        "explain": "Le strade approvate passano a “Costruzione pianificata”. Una volta completate, lungo di esse nascono lotti e residenti e aziende iniziano a costruire edifici. Non serve aspettare una proposta: puoi anche dipingere un’area con “Sviluppo automatico della città” nel pannello delle icone per espandere la città. Ora costruiamo una strada con le tue mani. Premi “Avanti”."
+      },
+      "step10": {
         "title": "Prolunga la strada",
         "description": "Da qui in poi creerai davvero una zona residenziale per accogliere nuovi residenti. Se case e luoghi di lavoro non sono collegati da strade, le persone non possono spostarsi e le merci non arrivano. Per prima cosa prolunga verso ovest la via che attraversa la cittadina da est a ovest, così da aprire la strada verso la zona residenziale. Premi “Strade, ferrovie e infrastrutture” nel pannello delle icone per aprire il pannello di costruzione.",
         "confirm": "Il terreno lungo la strada viene suddiviso in lotti quando la strada è completata. Nel pannello di costruzione, in “Lotti lungo la strada creati al completamento”, puoi scegliere la dimensione dei lotti separatamente per il lato sinistro e il lato destro della strada. Decidi in base agli edifici che vuoi accogliere: lotti piccoli per una zona residenziale, lotti ampi per fabbriche o terreni agricoli. Questa volta sarà una zona residenziale, quindi lascia tutto com'è. Premi “Conferma” nel pannello di costruzione per salvare, poi premi il pulsante “Avanti”."
       },
-      "step10": {
+      "step11": {
         "title": "Completa la strada",
         "description": "La strada è ancora in stato “Costruzione pianificata”. Una strada solo pianificata non si può usare: persone e veicoli possono passare solo quando i lavori sono finiti. Premi 2-3 volte “Avvia” nel cockpit per far avanzare il tempo e attendi il completamento. Finché i lavori sono in corso, si pagano costi di costruzione ogni mese.",
         "description_week": "La strada è ancora in stato “Costruzione pianificata”. Una strada solo pianificata non si può usare: persone e veicoli possono passare solo quando i lavori sono finiti. Premi 2-3 volte “Avvia” nel cockpit per far avanzare il tempo e attendi il completamento. Finché i lavori sono in corso, si pagano costi di costruzione ogni settimana."
       },
-      "step11": {
+      "step12": {
         "title": "I lotti sono pronti",
         "description": "La strada è completata e lungo di essa sono stati creati i lotti. Gli edifici si possono costruire solo sui lotti, e il fatto che un lotto si affacci su una strada permette a persone e merci di entrare e uscire. Se vuoi aggiungere lotti lungo una strada esistente, puoi crearli con “Lotti” nel pannello delle icone."
       },
-      "step12": {
+      "step13": {
         "title": "Crea un quartiere",
         "description": "Prima di costruire, decidi che cosa dovrà diventare questa via. Senza un indirizzo preciso, una fabbrica potrebbe sorgere proprio accanto alle case. L'indirizzo di ogni zona si stabilisce a livello di “Quartiere”. I quartieri si assegnano strada per strada e ogni lotto appartiene al quartiere della strada su cui si affaccia. Premi “Quartieri” nel pannello delle icone per aprire la finestra di modifica dei quartieri: vedrai che per ora l'intera cittadina è un unico quartiere.",
         "create": "Come modalità di pittura scegli “Per lato di strada”. Passa allo strumento “Crea nuovo quartiere” e, tenendo premuto Ctrl, trascina lungo la strada che hai prolungato. Entrambi i lati della strada tracciata e i lotti che vi si affacciano diventano un nuovo quartiere."
       },
-      "step13": {
+      "step14": {
         "title": "Hai diviso il quartiere",
         "description": "Hai separato la nuova via dal centro della cittadina, assegnandola a un quartiere diverso. Per ogni quartiere puoi controllare popolazione e prezzi o decidere quali edifici si possono costruire, così puoi sviluppare ogni zona nel modo più adatto. Dopo aver controllato, chiudi la finestra di modifica dei quartieri."
       },
-      "step14": {
+      "step15": {
         "title": "Apri i dettagli del quartiere",
         "description": "Rendiamo residenziale il nuovo quartiere. Mostra i quartieri con l'icona in basso a sinistra dello schermo, poi clicca sull'etichetta del quartiere appena creato per aprirne i dettagli."
       },
-      "step15": {
+      "step16": {
         "title": "Fanne una zona residenziale",
         "description": "Nelle norme edilizie, nella parte bassa del pannello, puoi scegliere quali edifici si possono costruire sui lotti di questo quartiere. Qui vogliamo una zona residenziale tranquilla, quindi clicca su tutti gli edifici tranne “Condominio” e “Casa unifamiliare” per disattivarli."
       },
-      "step16": {
+      "step17": {
         "title": "Controlla un lotto",
         "description": "Le norme stabilite per il quartiere valgono per tutti i suoi lotti. Clicca sul lotto con il segnalino giallo per aprirne i dettagli."
       },
-      "step17": {
+      "step18": {
         "title": "Le norme sono state applicate",
         "description": "Nella parte bassa del pannello del lotto vedrai applicata la norma del quartiere che consente solo “Condominio” e “Casa unifamiliare”. Ora sui lotti di questa via si possono costruire solo abitazioni. Non serve impostare i lotti uno per uno: basta decidere l'indirizzo del quartiere e tutta la via lo segue."
       },
-      "step18": {
+      "step19": {
         "title": "Costruisci le abitazioni",
         "description": "È il momento di preparare le abitazioni. Di solito le case vengono costruite automaticamente dai privati quando c'è chi vuole abitarci, ma se il comune costruisce case popolari può coprire subito la carenza di alloggi. Qui costruiamo un complesso residenziale pubblico. Premi “Costruzione” nel pannello delle icone.",
         "select": "Nella categoria “Residenziale” scegli “Complesso residenziale”, clicca su un lotto qualsiasi del nuovo quartiere per sceglierlo come luogo di costruzione, poi premi “Conferma”."
       },
-      "step19": {
+      "step20": {
         "title": "Completa le abitazioni",
         "description": "Come le strade, anche gli edifici non sono abitabili finché sono solo pianificati. Un complesso residenziale richiede più di sei mesi per essere completato. Fai avanzare il tempo con “Avvia” e attendi il completamento."
       },
-      "step20": {
+      "step21": {
         "title": "Verifica che arrivi l'elettricità",
         "description": "Anche con una casa, senza elettricità e acqua non si può vivere. In questa cittadina non ci sono ancora né centrali elettriche né acquedotto. Clicca sul complesso residenziale con il segnalino giallo, dove vivono gli abitanti della cittadina, per aprirne i dettagli; scegli uno degli inquilini nella scheda “Edificio”, poi apri la scheda “Domanda, offerta e scambi”: vedrai che la quantità di elettricità ottenuta è 0."
       },
-      "step21": {
+      "step22": {
         "title": "Costruisci una centrale solare",
         "description": "Per portare l'elettricità serve innanzitutto una centrale che la produca. Costruisci una “Centrale solare” sul lotto con il segnalino giallo. Normalmente servirebbe tempo per completarla, ma dato che è un tutorial il tempo di costruzione viene saltato."
       },
-      "step22": {
+      "step23": {
         "title": "Costruisci una sottostazione",
         "description": "L'elettricità ad alta tensione prodotta dalla centrale non può essere usata così com'è nelle abitazioni. La sottostazione la trasforma in elettricità per uso domestico e la distribuisce agli edifici circostanti collegati dalla strada. Costruisci una “Sottostazione elettrica” sul lotto con il segnalino giallo vicino al complesso residenziale."
       },
-      "step23": {
+      "step24": {
         "title": "Collega con una linea elettrica",
         "description": "Anche se la centrale e la sottostazione sono distanti, basta un percorso per l'elettricità a collegarle. Apri “Strade, ferrovie e infrastrutture” nel pannello delle icone, scegli “Linea elettrica ad alta tensione” in “Elettricità” e traccia una linea dal punto di allaccio della centrale solare a quello della sottostazione. Se colleghi i due punti in linea retta, basta un solo tratto."
       },
-      "step24": {
+      "step25": {
         "title": "Verifica la fornitura di elettricità",
         "description": "Una volta fatto il collegamento, verifica che l'elettricità scorra davvero. Fai avanzare il tempo con “Avvia”, clicca sulla sottostazione per aprirne i dettagli e controlla nella scheda “Domanda, offerta e scambi” che la quantità ricevuta di elettricità ad alta tensione non sia 0. Possono servire alcuni mesi perché la centrale entri in funzione e l'elettricità arrivi."
       },
-      "step25": {
+      "step26": {
         "title": "L'elettricità arriva nelle case",
         "description": "Dai dettagli del complesso residenziale apri, come la prima volta, la scheda “Domanda, offerta e scambi” di un inquilino e controlla che la quantità di elettricità ottenuta non sia più 0. A volte servono altri 1-2 mesi perché arrivi nelle case. Produrla nella centrale, trasportarla con la linea elettrica, distribuirla con la sottostazione: solo quando questi tre elementi sono collegati l'elettricità arriva nelle case."
       },
-      "step26": {
+      "step27": {
         "title": "Trova una fonte d'acqua",
         "description": "Ora passiamo all'acqua. L'acqua del rubinetto viene pompata dal sottosuolo e inviata alla cittadina. Per prima cosa scopri dove si può pompare l'acqua. Premi “Visualizzazione” nel cockpit per aprire il pannello di visualizzazione.",
         "show": "Dalle schede verticali scegli “Risorse naturali” e impostala su “Visibile”. Le fonti d'acqua sono indicate in azzurro sulla mappa. Clicca sulla fonte d'acqua con il segnalino giallo per aprirne i dettagli."
       },
-      "step27": {
+      "step28": {
         "title": "Costruisci un impianto di pompaggio delle acque sotterranee",
         "description": "L'impianto di pompaggio delle acque sotterranee estrae l'acqua dal sottosuolo, quindi va costruito dove c'è una fonte d'acqua. Per funzionare ha bisogno anche di elettricità e di lavoratori: per questo abbiamo portato prima l'elettricità. Costruisci un “Impianto di pompaggio delle acque sotterranee” sul lotto con il segnalino giallo sopra la fonte d'acqua. Dato che è un tutorial, il tempo di costruzione viene saltato."
       },
-      "step28": {
+      "step29": {
         "title": "Costruisci una stazione di pompaggio dell'acqua",
         "description": "L'acqua estratta non può essere distribuita alle abitazioni così com'è. Come la sottostazione distribuisce l'elettricità, la stazione di pompaggio distribuisce l'acqua agli edifici circostanti collegati dalla strada. Costruisci una “Stazione di pompaggio dell’acqua” sul lotto con il segnalino giallo vicino al complesso residenziale."
       },
-      "step29": {
+      "step30": {
         "title": "Collega con una condotta",
         "description": "Serve una condotta che porti l'acqua estratta dall'impianto di pompaggio delle acque sotterranee fino alla stazione di pompaggio. Apri “Strade, ferrovie e infrastrutture” nel pannello delle icone, scegli “Condotta idrica principale” in “Acqua” e posa la condotta dal punto di allaccio dell'impianto di pompaggio delle acque sotterranee a quello della stazione di pompaggio. Per non interferire con le strade e la linea elettrica, falla passare con un ampio giro sul lato est."
       },
-      "step30": {
+      "step31": {
         "title": "Verifica la fornitura d'acqua",
         "description": "Fai avanzare il tempo con “Avvia”, clicca sulla stazione di pompaggio per aprirne i dettagli e controlla nella scheda “Domanda, offerta e scambi” che la quantità ricevuta di acqua ad alta pressione non sia 0. Possono servire alcuni mesi perché i lavoratori arrivino all'impianto di pompaggio delle acque sotterranee e l'acqua giunga a destinazione."
       },
-      "step31": {
+      "step32": {
         "title": "Le basi sono pronte",
         "description": "L'acqua è arrivata alla stazione di pompaggio, quindi anche le case vicine possono usare l'acquedotto. Tracciare le strade, preparare i lotti, decidere l'indirizzo dei quartieri, costruire le abitazioni, portare elettricità e acqua: questo è il flusso di base per costruire una città. Premi “Avanti” per completare il tutorial sui comandi di base."
       }

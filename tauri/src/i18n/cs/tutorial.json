@@ -70,99 +70,106 @@
         "description": "Kamera se přesunula k východnímu okraji města. Jako město lze využít jen tento obdélník, ve kterém je vytvořen podrobný terén, a kamera ho také nemůže opustit. Tím končí popis obrazovky a ovládání. Teď si vyzkoušíte založit novou obytnou čtvrť. Stiskněte „Další“."
       },
       "step9": {
+        "title": "Nechte město růst samo",
+        "run": "Nejprve posuňte čas. Stiskněte v kokpitu jednou „Spustit“.",
+        "result": "Čas se posunul. Až si prohlédnete výsledky, zavřete okno s výsledky.",
+        "proposal": "Když je volných parcel k zastavění méně než 10 %, navrhne město na konci epochy rozšíření silniční sítě. Na mapě jsou čáry nové silnice a čtverce parcely, které vzniknou po dokončení silnic. Zkontrolujte odhadované náklady a stisknutím „OK“ návrh schvalte.",
+        "explain": "Schválené silnice získají stav „Plánovaná výstavba“. Po dokončení podél nich vzniknou parcely a obyvatelé a firmy začnou stavět budovy. Na návrh čekat nemusíte: můžete také vybarvit oblast pomocí „Automatický rozvoj města“ na panelu ikon a město rozšířit. Teď postavíte silnici vlastníma rukama. Stiskněte „Další“."
+      },
+      "step10": {
         "title": "Prodlužte silnici",
         "description": "Teď postavíte obytnou oblast pro nové obyvatele. Bydlení ani pracoviště nejsou k ničemu, pokud je nespojují silnice: lidé se nedostanou tam a zpět a zboží nedorazí. Nejprve prodlužte hlavní ulici, která vede městem z východu na západ, dál na západ, aby vznikla cesta do nové čtvrti. Stiskněte na panelu ikon „Silnice, železnice a infrastruktura“ a otevřete stavební panel.",
         "confirm": "Pozemky podél silnice se po jejím dokončení rozdělí na parcely. Velikost parcel můžete ve stavebním panelu v části „Parcely podél silnice vytvořené po dokončení“ zvolit zvlášť pro levou a pravou stranu silnice. Rozhodněte se podle toho, jaké budovy chcete přilákat: pro bydlení se hodí menší parcely, pro továrny a farmy větší. Tato silnice povede do obytné oblasti, takže nastavení ponechte. Silnici uložte tlačítkem „Potvrdit“ ve stavebním panelu a pak stiskněte „Další“."
       },
-      "step10": {
+      "step11": {
         "title": "Dokončete silnici",
         "description": "Silnice je zatím ve stavu „Plánovaná výstavba“. Pouze naplánovanou silnici nelze používat – lidé a auta po ní mohou jezdit až po dokončení prací. Stiskněte v kokpitu 2–3krát „Spustit“, posuňte tak čas a počkejte na dokončení. Během stavby se každý měsíc platí stavební náklady.",
         "description_week": "Silnice je zatím ve stavu „Plánovaná výstavba“. Pouze naplánovanou silnici nelze používat – lidé a auta po ní mohou jezdit až po dokončení prací. Stiskněte v kokpitu 2–3krát „Spustit“, posuňte tak čas a počkejte na dokončení. Během stavby se každý týden platí stavební náklady."
       },
-      "step11": {
+      "step12": {
         "title": "Parcely jsou vytvořeny",
         "description": "Silnice je hotová a podél ní vznikly parcely. Budovy mohou stát jen na parcelách, a protože parcela sousedí se silnicí, mohou se k ní dostat lidé i zboží. Chcete-li přidat parcely podél existující silnice, použijte na panelu ikon „Parcely“."
       },
-      "step12": {
+      "step13": {
         "title": "Vytvořte čtvrť",
         "description": "Než začnete stavět, rozhodněte, čím se má tato ulice stát. Bez jasného zaměření by mohla hned vedle domů vyrůst továrna. Zaměření jednotlivých míst se určuje po „čtvrtích“. Čtvrti se přiřazují po silnicích a parcela patří do čtvrti silnice, ke které přiléhá. Stiskněte na panelu ikon „Čtvrti“ a otevřete okno Úprava čtvrtí: uvidíte, že celé město teď tvoří jedinou čtvrť.",
         "create": "Jako způsob výběru zvolte „Strana ulice“. Přepněte nástroj na „Vytvořit novou čtvrť“, podržte klávesu Ctrl a táhněte po prodloužené silnici. Obě strany silnice, po které táhnete, se i s přiléhajícími parcelami stanou novou čtvrtí."
       },
-      "step13": {
+      "step14": {
         "title": "Čtvrť je vytvořena",
         "description": "Novou ulici se podařilo oddělit od centra města jako samostatnou čtvrť. V každé čtvrti můžete souhrnně sledovat počet obyvatel a ceny a určovat, jaké budovy se v ní smějí stavět, takže se každé místo může rozvíjet tak, jak mu to sluší. Až si to prohlédnete, zavřete okno Úprava čtvrtí."
       },
-      "step14": {
+      "step15": {
         "title": "Otevřete detail čtvrti",
         "description": "Nastavte novou čtvrť jako obytnou. Ikonou vlevo dole na obrazovce zobrazte čtvrti, klikněte na popisek nově vytvořené čtvrti a otevřete její detail."
       },
-      "step15": {
+      "step16": {
         "title": "Určete ji jako obytnou",
         "description": "Ve stavebních regulacích v dolní části panelu vyberete, jaké budovy se mohou na parcelách této čtvrti stavět. Tady chceme klidné místo k bydlení, proto kliknutím zakažte všechny budovy kromě „Bytový dům“ a „Rodinný dům“."
       },
-      "step16": {
+      "step17": {
         "title": "Prohlédněte si parcelu",
         "description": "Regulace určené ve čtvrti platí pro všechny její parcely. Klikněte na parcelu se žlutou značkou a otevřete její detail."
       },
-      "step17": {
+      "step18": {
         "title": "Regulace se uplatnila",
         "description": "V dolní části panelu parcely vidíte, že se uplatnila regulace čtvrti povolující jen „Bytový dům“ a „Rodinný dům“. Na této ulici se teď mohou stavět jen obytné domy. Parcely nemusíte nastavovat jednu po druhé – stačí určit zaměření čtvrti a celá ulice se jím bude řídit."
       },
-      "step18": {
+      "step19": {
         "title": "Postavte bydlení",
         "description": "Konečně zajistíte bydlení. Obytné domy obvykle staví soukromý sektor automaticky, pokud tu chtějí lidé bydlet, ale obecní byty postavené městem nedostatek bydlení rychle vyřeší. Postavte tu obecní bytový dům. Stiskněte na panelu ikon „Stavba“.",
         "select": "V kategorii „Bydlení“ vyberte „Bytový dům“, klikněte na libovolnou parcelu v nové čtvrti jako místo stavby a stiskněte „Potvrdit“."
       },
-      "step19": {
+      "step20": {
         "title": "Dokončete bydlení",
         "description": "Stejně jako u silnic se v budově nedá bydlet jen proto, že je naplánovaná. Bytový dům se staví déle než půl roku. Posuňte čas tlačítkem „Spustit“ a počkejte na dokončení."
       },
-      "step20": {
+      "step21": {
         "title": "Ověřte, zda dorazila elektřina",
         "description": "Bez elektřiny a vody se ani v novém bytě žít nedá. Toto město zatím nemá elektrárnu ani vodovod. Klikněte na bytový dům se žlutou značkou, kde bydlí místní obyvatelé, a otevřete jeho detail. Na kartě „Budova“ vyberte jednoho z nájemců a otevřete jeho kartu „Nabídka, poptávka a obchod“: uvidíte, že položka „Získáno“ u elektřiny je 0."
       },
-      "step21": {
+      "step22": {
         "title": "Postavte solární elektrárnu",
         "description": "Aby mohla elektřina dorazit, potřebujete nejprve elektrárnu, která ji vyrobí. Postavte na parcele se žlutou značkou budovu „Solární elektrárna“. Normálně by stavba nějakou dobu trvala, ale protože jde o tutoriál, doba výstavby se přeskočí."
       },
-      "step22": {
+      "step23": {
         "title": "Postavte rozvodnu",
         "description": "Vysokonapěťovou elektřinu z elektrárny nemohou domácnosti použít přímo. Rozvodna ji převádí na elektřinu pro domácnosti a rozvádí ji do okolních budov napojených silnicí. Postavte budovu „Rozvodna“ na parcele se žlutou značkou poblíž bytového domu."
       },
-      "step23": {
+      "step24": {
         "title": "Propojte je elektrickým vedením",
         "description": "I když jsou elektrárna a rozvodna od sebe daleko, propojí je cesta, po které elektřina poteče. Otevřete na panelu ikon „Silnice, železnice a infrastruktura“, v části „Elektřina“ zvolte „Elektrické vedení“ a veďte ho od přípojného bodu solární elektrárny k přípojnému bodu rozvodny. Pokud body spojíte rovnou čarou, stačí jedno vedení."
       },
-      "step24": {
+      "step25": {
         "title": "Ověřte dodávku elektřiny",
         "description": "Po propojení ověřte, že elektřina opravdu teče. Posuňte čas tlačítkem „Spustit“, klikněte na rozvodnu, otevřete její detail a na kartě „Nabídka, poptávka a obchod“ zkontrolujte, že „Přijaté množství“ vysokonapěťové elektřiny není 0. Než se elektrárna rozběhne a elektřina dorazí, může to trvat několik měsíců."
       },
-      "step25": {
+      "step26": {
         "title": "Elektřina dorazila do domácností",
         "description": "V detailu bytového domu otevřete stejně jako na začátku kartu „Nabídka, poptávka a obchod“ některého nájemce a zkontrolujte, že položka „Získáno“ u elektřiny už není 0. Než elektřina dorazí do domácností, může být potřeba posunout čas ještě o měsíc či dva. Elektrárna elektřinu vyrobí, vedení ji přenese a rozvodna ji rozvede – teprve když jsou propojeny všechny tři, dorazí elektřina do domácností."
       },
-      "step26": {
+      "step27": {
         "title": "Najděte vodní zdroj",
         "description": "Teď přijde na řadu voda. Voda z vodovodu se čerpá z podzemí a posílá do města. Nejprve zjistěte, kde se dá voda čerpat. Stiskněte v kokpitu „Zobrazení“ a otevřete panel zobrazení.",
         "show": "Na svislých kartách vyberte „Přírodní zdroje“ a přepněte na „Zobrazit“. Vodní zdroje jsou na mapě vyznačeny světle modře. Klikněte na vodní zdroj se žlutou značkou a otevřete jeho detail."
       },
-      "step27": {
+      "step28": {
         "title": "Postavte čerpadlo podzemní vody",
         "description": "Čerpadlo podzemní vody čerpá vodu z podzemí, a proto musí stát tam, kde je vodní zdroj. K provozu potřebuje také elektřinu a pracovníky – proto jsme nejdřív zavedli elektřinu. Postavte „Čerpadlo podzemní vody“ na parcele se žlutou značkou nad vodním zdrojem. Protože jde o tutoriál, doba výstavby se přeskočí."
       },
-      "step28": {
+      "step29": {
         "title": "Postavte vodárenskou čerpací stanici",
         "description": "Načerpanou vodu nelze domácnostem rozvádět přímo. Podobně jako rozvodna rozvádí elektřinu, vodárenská čerpací stanice rozvádí vodu do okolních budov napojených silnicí. Postavte budovu „Vodárenská čerpací stanice“ na parcele se žlutou značkou poblíž bytového domu."
       },
-      "step29": {
+      "step30": {
         "title": "Propojte je přivaděčem",
         "description": "K dopravě vody z čerpadla podzemní vody do čerpací stanice potřebujete potrubí. Otevřete na panelu ikon „Silnice, železnice a infrastruktura“, v části „Voda“ zvolte „Vodovodní přivaděč“ a veďte ho od přípojného bodu čerpadla podzemní vody k přípojnému bodu čerpací stanice. Aby nekolidoval se silnicemi a elektrickým vedením, veďte ho velkým obloukem po východní straně."
       },
-      "step30": {
+      "step31": {
         "title": "Ověřte dodávku vody",
         "description": "Posuňte čas tlačítkem „Spustit“, klikněte na vodárenskou čerpací stanici, otevřete její detail a na kartě „Nabídka, poptávka a obchod“ zkontrolujte, že „Přijaté množství“ tlakové vody není 0. Než se u čerpadla podzemní vody sejdou pracovníci a voda dorazí, může to trvat několik měsíců."
       },
-      "step31": {
+      "step32": {
         "title": "Základy budování města jsou hotové",
         "description": "Voda dorazila do vodárenské čerpací stanice, takže ji teď mohou používat i okolní domácnosti. Postavit silnice, připravit parcely, určit zaměření čtvrtí, postavit bydlení a zavést elektřinu a vodu – to je základní postup při budování města. Stiskněte „Další“ a dokončete tutoriál Základní ovládání."
       }

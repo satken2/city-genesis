@@ -70,99 +70,106 @@
         "description": "Vi har flyttet kameraet til byens østlige kant. Det område, du kan bruge til byen, er dette rektangel, hvor der findes detaljeret terræn, og kameraet kan heller ikke komme uden for det. Det var alt om skærmen og styringen. Nu skal du anlægge et rigtigt nyt boligområde. Tryk på »Næste«."
       },
       "step9": {
+        "title": "Lad byen vokse af sig selv",
+        "run": "Lad først tiden gå. Tryk på »Start« i cockpittet én gang.",
+        "result": "Tiden er gået. Luk resultatvinduet, når du har set resultatet.",
+        "proposal": "Når færre end 10 % af de parceller, du kan bygge på, er ledige, foreslår byen ved slutningen af en epoke at udbygge vejnettet. På kortet er stregerne nye veje, og firkanterne er de parceller, der laves, når vejene er færdige. Tjek de anslåede omkostninger, og tryk derefter på »OK« for at godkende forslaget.",
+        "explain": "Godkendte veje får status »Byggeri planlagt«. Når de er færdige, opstår der parceller langs dem, og indbyggere og virksomheder begynder at opføre bygninger. Du behøver ikke vente på et forslag: Du kan også male et område med »Automatisk byudvikling« i ikonpanelet for at udvide byen. Nu skal du selv anlægge en vej. Tryk på »Næste«."
+      },
+      "step10": {
         "title": "Forlæng vejen",
         "description": "Nu skal du anlægge et boligområde, der kan tage imod nye indbyggere. Boliger og arbejdspladser er ingenting værd uden veje imellem dem: Folk kan ikke komme frem og tilbage, og varerne kan ikke nå frem. Forlæng først byens øst-vest-gående gade mod vest, så der bliver vej ind til det nye kvarter. Tryk på »Veje, jernbane og infrastruktur« i ikonpanelet for at åbne byggepanelet.",
         "confirm": "Jorden langs en vej bliver delt op i parceller, når vejen er færdig. Under »Parceller langs vejen ved færdiggørelse« i byggepanelet kan du vælge parcellernes størrelse for hver side af vejen. Vælg ud fra, hvilke bygninger du gerne vil have: Små parceller passer til boliger, store til fabrikker og landbrug. Denne vej skal føre til et boligområde, så lad indstillingen være. Tryk på »Bekræft« i byggepanelet for at gemme vejen, og tryk derefter på »Næste«."
       },
-      "step10": {
+      "step11": {
         "title": "Gør vejen færdig",
         "description": "Vejen står stadig som »Byggeri planlagt«. En planlagt vej kan ikke bruges endnu – folk og biler kan først køre på den, når arbejdet er færdigt. Tryk på »Start« i cockpittet 2–3 gange for at lade tiden gå, og vent på, at den bliver færdig. Byggeriet koster penge hver måned, så længe det står på.",
         "description_week": "Vejen står stadig som »Byggeri planlagt«. En planlagt vej kan ikke bruges endnu – folk og biler kan først køre på den, når arbejdet er færdigt. Tryk på »Start« i cockpittet 2–3 gange for at lade tiden gå, og vent på, at den bliver færdig. Byggeriet koster penge hver uge, så længe det står på."
       },
-      "step11": {
+      "step12": {
         "title": "Parcellerne er klar",
         "description": "Vejen er færdig, og der er opstået parceller langs den. Bygninger kan kun opføres på parceller, og når en parcel ligger ud til en vej, kan folk og varer komme til og fra. Vil du tilføje parceller langs en eksisterende vej, kan du gøre det med »Parceller« i ikonpanelet."
       },
-      "step12": {
+      "step13": {
         "title": "Opret en bydel",
         "description": "Før der bygges, så beslut, hvad denne gade skal udvikle sig til. Uden en plan kan der dukke en fabrik op lige ved siden af boligerne. Den slags retningslinjer fastlægges pr. »Bydel«. Bydele tildeles vej for vej, og en parcel hører til den bydel, som vejen ud for den tilhører. Tryk på »Bydele« i ikonpanelet for at åbne vinduet »Rediger bydele«: Lige nu er hele byen én bydel.",
         "create": "Brug valgmetoden »Vejside«. Skift værktøjet til »Opret ny bydel«, hold Ctrl nede, og træk hen ad den vej, du har forlænget. Begge sider af den vej, du maler, og parcellerne ud til den bliver til en ny bydel."
       },
-      "step13": {
+      "step14": {
         "title": "Bydelen er oprettet",
         "description": "Den nye gade er nu skilt ud fra bymidten som sin egen bydel. Du kan følge befolkning og priser pr. bydel og bestemme, hvilke bygninger der må opføres, så hvert område kan udvikle sig på den måde, der passer til det. Luk vinduet »Rediger bydele«, når du har set det."
       },
-      "step14": {
+      "step15": {
         "title": "Åbn bydelens detaljer",
         "description": "Nu skal den nye bydel gøres til et boligområde. Vis bydelene med ikonet nederst til venstre på skærmen, og klik på navnet på den bydel, du lige har oprettet, for at åbne dens detaljer."
       },
-      "step15": {
+      "step16": {
         "title": "Gør den til et boligområde",
         "description": "Med byggebestemmelserne nederst i panelet vælger du, hvilke bygninger der må opføres på bydelens parceller. Her skal være et roligt sted at bo, så klik på alle bygninger undtagen »Etageboliger« og »Enfamiliehuse« for at slå dem fra."
       },
-      "step16": {
+      "step17": {
         "title": "Tjek en parcel",
         "description": "Bydelens bestemmelser gælder for alle dens parceller. Klik på parcellen med den gule markør for at åbne dens detaljer."
       },
-      "step17": {
+      "step18": {
         "title": "Bestemmelserne er overført",
         "description": "Nederst i parcelpanelet kan du se bydelens bestemmelse, som kun tillader »Etageboliger« og »Enfamiliehuse«. Nu kan der kun bygges boliger på denne gade. I stedet for at indstille parcellerne én ad gangen kan du give bydelen en retning, så hele gaden følger den."
       },
-      "step18": {
+      "step19": {
         "title": "Byg boliger",
         "description": "Nu skal der skaffes boliger. Normalt bygger private boliger af sig selv, når folk gerne vil bo her, men almene boliger opført af kommunen kan hurtigt afhjælpe mangel på boliger. Her skal du bygge en almen etageboligblok. Tryk på »Byggeri« i ikonpanelet.",
         "select": "Vælg »Etageboligblok« i kategorien »Bolig«, klik på en vilkårlig parcel i den nye bydel som byggegrund, og tryk på »Bekræft«."
       },
-      "step19": {
+      "step20": {
         "title": "Gør boligerne færdige",
         "description": "Ligesom veje kan bygninger ikke bebos, bare fordi de er planlagt. En etageboligblok tager mere end et halvt år at bygge. Tryk på »Start« for at lade tiden gå, og vent på, at den bliver færdig."
       },
-      "step20": {
+      "step21": {
         "title": "Tjek, om der er el",
         "description": "En bolig er ikke nok til et liv – folk har også brug for el og vand. Byen har endnu hverken kraftværk eller vandforsyning. Klik på etageboligblokken med den gule markør, hvor byens folk bor, for at åbne dens detaljer. Vælg en af lejerne under fanen »Bygning«, og åbn så fanen »Udbud, efterspørgsel og handel«: Her kan du se, at den opnåede mængde el er 0."
       },
-      "step21": {
+      "step22": {
         "title": "Byg et solcelleanlæg",
         "description": "For at levere el skal du først have et kraftværk, der producerer den. Byg et »Solcellepark« på parcellen med den gule markør. Normalt tager det tid at bygge, men da det er en tutorial, springes byggetiden over."
       },
-      "step22": {
+      "step23": {
         "title": "Byg en transformerstation",
         "description": "Højspændingsstrømmen fra et kraftværk kan ikke bruges direkte i husstandene. En transformerstation omdanner den til strøm, som boligerne kan bruge, og fordeler den til de omkringliggende bygninger, der er forbundet med vej. Byg en »Transformerstation« på parcellen med den gule markør ved etageboligblokken."
       },
-      "step23": {
+      "step24": {
         "title": "Forbind med en elledning",
         "description": "Selv om kraftværket og transformerstationen ligger langt fra hinanden, kan de forbindes, hvis strømmen har en vej at løbe ad. Åbn »Veje, jernbane og infrastruktur« i ikonpanelet, vælg »Elledning« under »El«, og træk en ledning fra solcelleanlæggets tilslutningspunkt til transformerstationens tilslutningspunkt. Forbinder du punkterne i en lige linje, klares det med én ledning."
       },
-      "step24": {
+      "step25": {
         "title": "Bekræft elforsyningen",
         "description": "Når forbindelsen er lavet, så tjek, at strømmen faktisk løber. Tryk på »Start« for at lade tiden gå, klik på transformerstationen for at åbne dens detaljer, og tjek under fanen »Udbud, efterspørgsel og handel«, at den modtagne mængde højspænding ikke er 0. Det kan tage et par måneder, før kraftværket kommer i gang, og strømmen når frem."
       },
-      "step25": {
+      "step26": {
         "title": "Strømmen er nået ud til boligerne",
         "description": "Åbn ligesom før en lejers fane »Udbud, efterspørgsel og handel« fra etageboligblokkens detaljer, og tjek, at den opnåede mængde el ikke længere er 0. Det kan tage endnu en måned eller to, før strømmen når ud til husstandene. Producér den på et kraftværk, før den gennem elledninger, og fordel den fra en transformerstation – først når alle tre er forbundet, når strømmen ud til boligerne."
       },
-      "step26": {
+      "step27": {
         "title": "Find en vandkilde",
         "description": "Nu er det vandets tur. Vandet i hanerne er grundvand, der pumpes op og sendes ud til byen. Find først ud af, hvor der kan pumpes vand op. Tryk på »Visning« i cockpittet for at åbne visningspanelet.",
         "show": "Vælg »Naturressourcer« blandt de lodrette faner, og skift til »Vis«. Vandkilder vises med lyseblåt på kortet. Klik på vandkilden med den gule markør for at åbne dens detaljer."
       },
-      "step27": {
+      "step28": {
         "title": "Byg en grundvandspumpe",
         "description": "En grundvandspumpe henter vand op fra undergrunden og skal derfor bygges, hvor der er en vandkilde. Den skal også bruge el og arbejdskraft for at køre, og derfor fik vi strømmen frem først. Byg en »Grundvandspumpe« på parcellen med den gule markør oven på vandkilden. Da det er en tutorial, springes byggetiden over."
       },
-      "step28": {
+      "step29": {
         "title": "Byg et vandværk",
         "description": "Oppumpet vand kan ikke leveres direkte til husstandene. Ligesom en transformerstation fordeler el, fordeler et vandværk vand til de omkringliggende bygninger, der er forbundet med vej. Byg et »Vandværk« på parcellen med den gule markør ved etageboligblokken."
       },
-      "step29": {
+      "step30": {
         "title": "Forbind med en vandledning",
         "description": "Der skal en ledning til at føre vandet fra grundvandspumpen til vandværket. Åbn »Veje, jernbane og infrastruktur« i ikonpanelet, vælg »Vandledning« under »Vand«, og læg den fra grundvandspumpens tilslutningspunkt til vandværkets tilslutningspunkt. Tag en stor omvej mod øst, så den ikke kommer i vejen for vejene og elledningen."
       },
-      "step30": {
+      "step31": {
         "title": "Bekræft vandforsyningen",
         "description": "Tryk på »Start« for at lade tiden gå, klik på vandværket for at åbne dets detaljer, og tjek under fanen »Udbud, efterspørgsel og handel«, at den modtagne mængde råvand ikke er 0. Det kan tage et par måneder, før der kommer arbejdere til grundvandspumpen, og vandet når frem."
       },
-      "step31": {
+      "step32": {
         "title": "Grundstenene er lagt",
         "description": "Vandet er nået frem til vandværket, så boligerne omkring det kan nu bruge vand fra hanen. Anlæg veje, klargør parceller, giv bydelene en retning, byg boliger, og før el og vand frem – det er den grundlæggende gang i at bygge en by. Tryk på »Næste« for at afslutte tutorialen om grundlæggende styring."
       }

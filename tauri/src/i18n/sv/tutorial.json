@@ -70,99 +70,106 @@
         "description": "Nu har vi flyttat kameran till stadens östra kant. Det du kan använda som stad är den här rektangeln, där detaljerad terräng finns, och kameran kan inte heller lämna den. Det var allt om skärmen och styrningen. Nu ska vi anlägga ett nytt bostadsområde på riktigt. Tryck på ”Nästa”."
       },
       "step9": {
+        "title": "Låt staden växa av sig själv",
+        "run": "Låt först tiden gå. Tryck på ”Start” i cockpiten en enda gång.",
+        "result": "Tiden har gått. Stäng resultatfönstret när du har tittat på resultatet.",
+        "proposal": "När färre än 10 % av de bebyggbara tomterna är lediga föreslår staden i slutet av en epok att vägnätet byggs ut. På kartan är linjerna nya vägar och rutorna de tomter som skapas när vägarna är färdiga. Kontrollera den beräknade kostnaden och tryck sedan på ”OK” för att godkänna förslaget.",
+        "explain": "Godkända vägar får statusen ”Bygge planerat”. När de är färdiga skapas tomter längs dem, och invånare och företag börjar uppföra byggnader. Du behöver inte vänta på ett förslag: du kan också måla ett område med ”Automatisk stadsutveckling” i ikonpanelen för att bygga ut staden. Nu ska du bygga en väg med egna händer. Tryck på ”Nästa”."
+      },
+      "step10": {
         "title": "Förläng vägen",
         "description": "Nu ska du bygga ett bostadsområde där nya invånare kan flytta in. Bostäder och arbetsplatser är till ingen nytta om de inte är förbundna med vägar – då kan människor inte ta sig fram och varor kommer inte fram. Börja med att förlänga stadens öst-västliga gata västerut, så att det blir en väg in till bostadsområdet. Tryck på ”Vägar, järnväg och infrastruktur” i ikonpanelen för att öppna byggpanelen.",
         "confirm": "Marken längs en väg delas in i tomter när vägen är färdigställd. Under ”Tomter längs vägen när den är klar” i byggpanelen kan du välja tomternas storlek för vägens vänstra och högra sida. Välj efter vilka byggnader du vill locka hit: mindre tomter passar bostäder, större passar fabriker och jordbruk. Det här ska bli ett bostadsområde, så låt inställningen vara som den är. Tryck på ”Bekräfta” i byggpanelen för att spara och tryck sedan på ”Nästa”."
       },
-      "step10": {
+      "step11": {
         "title": "Färdigställ vägen",
         "description": "Vägen har fortfarande statusen ”Bygge planerat”. En planerad väg kan inte användas – först när bygget är klart kan människor och bilar ta sig fram. Tryck på ”Start” i cockpiten 2–3 gånger för att låta tiden gå och vänta tills vägen är färdig. Bygget kostar pengar varje månad så länge det pågår.",
         "description_week": "Vägen har fortfarande statusen ”Bygge planerat”. En planerad väg kan inte användas – först när bygget är klart kan människor och bilar ta sig fram. Tryck på ”Start” i cockpiten 2–3 gånger för att låta tiden gå och vänta tills vägen är färdig. Bygget kostar pengar varje vecka så länge det pågår."
       },
-      "step11": {
+      "step12": {
         "title": "Tomterna är klara",
         "description": "Vägen är färdig och tomter har skapats längs den. Byggnader kan bara uppföras på tomter, och eftersom tomten ligger mot en väg kan människor och varor komma och gå. Vill du lägga till tomter längs en befintlig väg gör du det med ”Tomter” i ikonpanelen."
       },
-      "step12": {
+      "step13": {
         "title": "Skapa en stadsdel",
         "description": "Innan något byggs ska du bestämma vad den här gatan ska bli. Utan en inriktning kan det dyka upp en fabrik alldeles intill bostäderna. Inriktningen för olika platser bestäms per stadsdel. Stadsdelar tilldelas väg för väg, och en tomt hör till samma stadsdel som vägen den ligger mot. Tryck på ”Stadsdelar” i ikonpanelen för att öppna fönstret ”Redigera stadsdelar”. Där ser du att hela staden just nu är en enda stadsdel.",
         "create": "Välj markeringssättet ”Gatusida”. Byt verktyg till ”Skapa ny stadsdel”, håll ned Ctrl och dra längs vägen du förlängde. Båda sidorna av vägen du målar, och tomterna som ligger mot den, blir en ny stadsdel."
       },
-      "step13": {
+      "step14": {
         "title": "Stadsdelen är skapad",
         "description": "Den nya gatan är nu en egen stadsdel, skild från stadskärnan. Du kan följa befolkning och priser per stadsdel och bestämma vilka byggnader som får uppföras där, så att varje område kan utvecklas på det sätt som passar det. När du har tittat färdigt, stäng fönstret ”Redigera stadsdelar”."
       },
-      "step14": {
+      "step15": {
         "title": "Öppna stadsdelens detaljer",
         "description": "Nu ska vi göra den nya stadsdelen till ett bostadsområde. Visa stadsdelarna med ikonen längst ned till vänster på skärmen och klicka på etiketten för stadsdelen du nyss skapade för att öppna dess detaljer."
       },
-      "step15": {
+      "step16": {
         "title": "Gör det till ett bostadsområde",
         "description": "Med byggreglerna längre ned i panelen väljer du vilka byggnader som får uppföras på stadsdelens tomter. Här vill vi ha ett lugnt bostadsområde, så klicka på alla byggnader utom ”Flerbostadshus” och ”Villa” för att stänga av dem."
       },
-      "step16": {
+      "step17": {
         "title": "Kontrollera en tomt",
         "description": "Reglerna du bestämmer för en stadsdel gäller alla tomter i den. Klicka på tomten med den gula markören för att öppna tomtens detaljer."
       },
-      "step17": {
+      "step18": {
         "title": "Reglerna gäller",
         "description": "Längre ned i tomtpanelen ser du att stadsdelens regel, som bara tillåter ”Flerbostadshus” och ”Villa”, gäller här. Nu kan bara bostäder byggas längs den här gatan. Du behöver inte ställa in tomterna en och en – när stadsdelen har en inriktning följer hela gatan den."
       },
-      "step18": {
+      "step19": {
         "title": "Bygg bostäder",
         "description": "Nu är det dags att skapa bostäder. Normalt bygger den privata sektorn bostäder automatiskt när folk vill bo här, men om staden bygger allmännyttiga bostäder kan en bostadsbrist åtgärdas snabbt. Här bygger vi ett allmännyttigt flerbostadshus. Tryck på ”Bygg” i ikonpanelen.",
         "select": "Välj ”Flerbostadshus” i kategorin ”Bostäder”, klicka på valfri tomt i den nya stadsdelen för att välja byggplats och tryck på ”Bekräfta”."
       },
-      "step19": {
+      "step20": {
         "title": "Färdigställ bostäderna",
         "description": "Precis som vägar går byggnader inte att bo i bara för att de är planerade. Ett flerbostadshus tar mer än ett halvår att bygga. Tryck på ”Start” för att låta tiden gå och vänta tills det är färdigt."
       },
-      "step20": {
+      "step21": {
         "title": "Kontrollera att elen når fram",
         "description": "Det räcker inte med bostäder – utan el och vatten fungerar inte vardagen. Staden har ännu varken kraftverk eller vattenförsörjning. Klicka på flerbostadshuset med den gula markören, där stadens invånare bor, för att öppna detaljerna. Välj en av hyresgästerna på fliken ”Byggnad” och öppna sedan fliken ”Utbud, efterfrågan och handel”. Där ser du att den erhållna mängden el är 0."
       },
-      "step21": {
+      "step22": {
         "title": "Bygg ett solkraftverk",
         "description": "För att leverera el behövs först ett kraftverk som producerar den. Bygg ett ”Solkraftverk” på tomten med den gula markören. Normalt tar det tid att bygga färdigt, men eftersom det här är en handledning hoppar vi över byggtiden."
       },
-      "step22": {
+      "step23": {
         "title": "Bygg en transformatorstation",
         "description": "Högspänningselen från ett kraftverk kan inte användas av hushållen som den är. En transformatorstation omvandlar den till el som hushållen kan använda och fördelar den till byggnaderna runt omkring som är anslutna via väg. Bygg en ”Transformatorstation” på tomten med den gula markören nära flerbostadshuset."
       },
-      "step23": {
+      "step24": {
         "title": "Anslut med en kraftledning",
         "description": "Även om kraftverket och transformatorstationen ligger långt ifrån varandra kopplas de ihop så länge elen har en väg att färdas. Öppna ”Vägar, järnväg och infrastruktur” i ikonpanelen, välj ”Kraftledning” under ”El” och dra en ledning från solkraftverkets anslutningspunkt till transformatorstationens anslutningspunkt. Drar du en rak linje mellan punkterna räcker det med en enda ledning."
       },
-      "step24": {
+      "step25": {
         "title": "Kontrollera elförsörjningen",
         "description": "När allt är anslutet, kontrollera att elen verkligen flödar. Tryck på ”Start” för att låta tiden gå, klicka på transformatorstationen för att öppna detaljerna och kontrollera på fliken ”Utbud, efterfrågan och handel” att den mottagna mängden högspänningsel inte är 0. Det kan ta några månader innan kraftverket kommer igång och elen når fram."
       },
-      "step25": {
+      "step26": {
         "title": "Elen har nått hemmen",
         "description": "Öppna flerbostadshusets detaljer och sedan en hyresgästs flik ”Utbud, efterfrågan och handel”, precis som första gången, och kontrollera att den erhållna mängden el inte längre är 0. Det kan behövas ytterligare en eller två månader innan elen når hushållen. Kraftverket producerar, kraftledningen transporterar och transformatorstationen fördelar – först när alla tre hänger ihop når elen hemmen."
       },
-      "step26": {
+      "step27": {
         "title": "Hitta en vattentäkt",
         "description": "Nu är det vattnets tur. Kranvattnet är grundvatten som pumpas upp och skickas ut i staden. Ta först reda på var det går att pumpa upp vatten. Tryck på ”Visning” i cockpiten för att öppna visningspanelen.",
         "show": "Välj ”Naturresurser” bland de lodräta flikarna och byt till ”Synlig”. Vattentäkterna visas i ljusblått på kartan. Klicka på vattentäkten med den gula markören för att öppna dess detaljer."
       },
-      "step27": {
+      "step28": {
         "title": "Bygg en grundvattenpump",
         "description": "En grundvattenpump pumpar upp vatten ur marken och måste därför byggas där det finns en vattentäkt. Den behöver också el och personal för att gå, och det är därför vi drog fram elen först. Bygg en ”Grundvattenpump” på tomten med den gula markören ovanpå vattentäkten. Eftersom det här är en handledning hoppar vi över byggtiden."
       },
-      "step28": {
+      "step29": {
         "title": "Bygg en vattenpumpstation",
         "description": "Uppumpat vatten kan inte fördelas till hushållen som det är. Precis som transformatorstationen fördelar el levererar en vattenpumpstation vatten till byggnaderna runt omkring som är anslutna via väg. Bygg en ”Vattenpumpstation” på tomten med den gula markören nära flerbostadshuset."
       },
-      "step29": {
+      "step30": {
         "title": "Anslut med en vattenledning",
         "description": "Det behövs en ledning som för vattnet från grundvattenpumpen till vattenpumpstationen. Öppna ”Vägar, järnväg och infrastruktur” i ikonpanelen, välj ”Vattenledning” under ”Vatten” och dra ledningen från grundvattenpumpens anslutningspunkt till vattenpumpstationens anslutningspunkt. Dra den i en vid båge runt östra sidan så att den inte korsar vägarna och kraftledningen."
       },
-      "step30": {
+      "step31": {
         "title": "Kontrollera vattenförsörjningen",
         "description": "Tryck på ”Start” för att låta tiden gå, klicka på vattenpumpstationen för att öppna detaljerna och kontrollera på fliken ”Utbud, efterfrågan och handel” att den mottagna mängden högtrycksvatten inte är 0. Det kan ta några månader innan grundvattenpumpen får personal och vattnet når fram."
       },
-      "step31": {
+      "step32": {
         "title": "Grunderna är på plats",
         "description": "Vattnet har nått vattenpumpstationen, så hemmen runt omkring kan nu använda kranvatten. Dra vägar, förbered tomter, bestäm stadsdelens inriktning, bygg bostäder och se till att el och vatten når fram – så ser grunderna i stadsbyggandet ut. Tryck på ”Nästa” för att avsluta handledningen om grunderna."
       }

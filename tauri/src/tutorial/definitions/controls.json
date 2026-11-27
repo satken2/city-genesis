@@ -709,15 +709,167 @@
             "type": "ack"
           }
         }
+      ],
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "controls",
+          "action": "expansion_proposals_on"
+        }
+      ]
+    },
+    {
+      "id": "controls.expansion",
+      "legacyStep": 9,
+      "phases": [
+        {
+          "id": "run",
+          "textKey": "tutorial.controls.step9.run",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.execute"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                240,
+                0,
+                -30
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "epoch_result"
+          }
+        },
+        {
+          "id": "result",
+          "textKey": "tutorial.controls.step9.result",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": []
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                240,
+                0,
+                -30
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "window",
+            "window": "city_expansion_proposal"
+          }
+        },
+        {
+          "id": "proposal",
+          "textKey": "tutorial.controls.step9.proposal",
+          "ui": {
+            "policy": "strict",
+            "allow": [
+              "expansion.apply",
+              "hud.execute"
+            ],
+            "highlight": [
+              "expansion.apply"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                240,
+                0,
+                -30
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "entity",
+            "resource": "paths",
+            "where": [
+              {
+                "field": "left_lot_area",
+                "greaterThan": 0
+              },
+              {
+                "field": "status",
+                "oneOf": [
+                  {
+                    "$constant": "STATUS_SCHEDULED_CONSTRUCTION"
+                  },
+                  {
+                    "$constant": "STATUS_CONSTRUCTING"
+                  },
+                  {
+                    "$constant": "STATUS_ACTIVE"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "explain",
+          "textKey": "tutorial.controls.step9.explain",
+          "ui": {
+            "policy": "highlight",
+            "allow": [],
+            "highlight": [
+              "hud.city_development"
+            ]
+          },
+          "world": {
+            "mode": "observe",
+            "camera": {
+              "target": [
+                240,
+                0,
+                -30
+              ],
+              "distance": 520,
+              "yaw": 0,
+              "pitch": 55
+            }
+          },
+          "until": {
+            "type": "ack"
+          }
+        }
+      ],
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "controls",
+          "action": "expansion_proposals_off"
+        }
       ]
     },
     {
       "id": "controls.road",
-      "legacyStep": 9,
+      "legacyStep": 10,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.controls.step9.description",
+          "textKey": "tutorial.controls.step10.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1025,7 +1177,7 @@
         },
         {
           "id": "confirm",
-          "textKey": "tutorial.controls.step9.confirm",
+          "textKey": "tutorial.controls.step10.confirm",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1136,11 +1288,11 @@
     },
     {
       "id": "controls.road_active",
-      "legacyStep": 10,
+      "legacyStep": 11,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step10.description",
+          "textKey": "tutorial.controls.step11.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -1182,11 +1334,11 @@
     },
     {
       "id": "controls.parcels",
-      "legacyStep": 11,
+      "legacyStep": 12,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step11.description",
+          "textKey": "tutorial.controls.step12.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -1225,11 +1377,11 @@
     },
     {
       "id": "controls.zone_split",
-      "legacyStep": 12,
+      "legacyStep": 13,
       "phases": [
         {
           "id": "enter",
-          "textKey": "tutorial.controls.step12.description",
+          "textKey": "tutorial.controls.step13.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -1257,7 +1409,7 @@
         },
         {
           "id": "create",
-          "textKey": "tutorial.controls.step12.create",
+          "textKey": "tutorial.controls.step13.create",
           "ui": {
             "policy": "highlight",
             "allow": [
@@ -1313,11 +1465,11 @@
     },
     {
       "id": "controls.zone_explain",
-      "legacyStep": 13,
+      "legacyStep": 14,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step13.description",
+          "textKey": "tutorial.controls.step14.description",
           "ui": {
             "policy": "highlight",
             "allow": [
@@ -1346,11 +1498,11 @@
     },
     {
       "id": "controls.zone_detail",
-      "legacyStep": 14,
+      "legacyStep": 15,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step14.description",
+          "textKey": "tutorial.controls.step15.description",
           "ui": {
             "policy": "highlight",
             "allow": [
@@ -1380,11 +1532,11 @@
     },
     {
       "id": "controls.regulation",
-      "legacyStep": 15,
+      "legacyStep": 16,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step15.description",
+          "textKey": "tutorial.controls.step16.description",
           "ui": {
             "policy": "highlight",
             "allow": [
@@ -1429,11 +1581,11 @@
     },
     {
       "id": "controls.parcel_detail",
-      "legacyStep": 16,
+      "legacyStep": 17,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step16.description",
+          "textKey": "tutorial.controls.step17.description",
           "ui": {
             "policy": "highlight",
             "allow": [
@@ -1470,11 +1622,11 @@
     },
     {
       "id": "controls.regulation_summary",
-      "legacyStep": 17,
+      "legacyStep": 18,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step17.description",
+          "textKey": "tutorial.controls.step18.description",
           "ui": {
             "policy": "highlight",
             "allow": [
@@ -1503,11 +1655,11 @@
     },
     {
       "id": "controls.home",
-      "legacyStep": 18,
+      "legacyStep": 19,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.controls.step18.description",
+          "textKey": "tutorial.controls.step19.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1537,7 +1689,7 @@
         },
         {
           "id": "select",
-          "textKey": "tutorial.controls.step18.select",
+          "textKey": "tutorial.controls.step19.select",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1608,11 +1760,11 @@
     },
     {
       "id": "controls.home_active",
-      "legacyStep": 19,
+      "legacyStep": 20,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step19.description",
+          "textKey": "tutorial.controls.step20.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -1654,11 +1806,11 @@
     },
     {
       "id": "controls.house",
-      "legacyStep": 20,
+      "legacyStep": 21,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step20.description",
+          "textKey": "tutorial.controls.step21.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -1692,11 +1844,11 @@
     },
     {
       "id": "controls.solar",
-      "legacyStep": 21,
+      "legacyStep": 22,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.controls.step21.description",
+          "textKey": "tutorial.controls.step22.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1733,7 +1885,7 @@
         },
         {
           "id": "select",
-          "textKey": "tutorial.controls.step21.description",
+          "textKey": "tutorial.controls.step22.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1798,11 +1950,11 @@
     },
     {
       "id": "controls.substation",
-      "legacyStep": 22,
+      "legacyStep": 23,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.controls.step22.description",
+          "textKey": "tutorial.controls.step23.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1839,7 +1991,7 @@
         },
         {
           "id": "select",
-          "textKey": "tutorial.controls.step22.description",
+          "textKey": "tutorial.controls.step23.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1904,11 +2056,11 @@
     },
     {
       "id": "controls.powerline",
-      "legacyStep": 23,
+      "legacyStep": 24,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.controls.step23.description",
+          "textKey": "tutorial.controls.step24.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1950,7 +2102,7 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.controls.step23.description",
+          "textKey": "tutorial.controls.step24.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -1996,7 +2148,7 @@
         },
         {
           "id": "draw",
-          "textKey": "tutorial.controls.step23.description",
+          "textKey": "tutorial.controls.step24.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2069,11 +2221,11 @@
     },
     {
       "id": "controls.power_received",
-      "legacyStep": 24,
+      "legacyStep": 25,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step24.description",
+          "textKey": "tutorial.controls.step25.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -2119,11 +2271,11 @@
     },
     {
       "id": "controls.power_home",
-      "legacyStep": 25,
+      "legacyStep": 26,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step25.description",
+          "textKey": "tutorial.controls.step26.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -2159,11 +2311,11 @@
     },
     {
       "id": "controls.water_source",
-      "legacyStep": 26,
+      "legacyStep": 27,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.controls.step26.description",
+          "textKey": "tutorial.controls.step27.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -2198,7 +2350,7 @@
         },
         {
           "id": "show",
-          "textKey": "tutorial.controls.step26.show",
+          "textKey": "tutorial.controls.step27.show",
           "ui": {
             "policy": "highlight",
             "allow": [
@@ -2238,11 +2390,11 @@
     },
     {
       "id": "controls.groundwater",
-      "legacyStep": 27,
+      "legacyStep": 28,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.controls.step27.description",
+          "textKey": "tutorial.controls.step28.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2279,7 +2431,7 @@
         },
         {
           "id": "select",
-          "textKey": "tutorial.controls.step27.description",
+          "textKey": "tutorial.controls.step28.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2344,11 +2496,11 @@
     },
     {
       "id": "controls.water_pump",
-      "legacyStep": 28,
+      "legacyStep": 29,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.controls.step28.description",
+          "textKey": "tutorial.controls.step29.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2385,7 +2537,7 @@
         },
         {
           "id": "select",
-          "textKey": "tutorial.controls.step28.description",
+          "textKey": "tutorial.controls.step29.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2450,11 +2602,11 @@
     },
     {
       "id": "controls.pipeline",
-      "legacyStep": 29,
+      "legacyStep": 30,
       "phases": [
         {
           "id": "open",
-          "textKey": "tutorial.controls.step29.description",
+          "textKey": "tutorial.controls.step30.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2496,7 +2648,7 @@
         },
         {
           "id": "variant",
-          "textKey": "tutorial.controls.step29.description",
+          "textKey": "tutorial.controls.step30.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2542,7 +2694,7 @@
         },
         {
           "id": "draw",
-          "textKey": "tutorial.controls.step29.description",
+          "textKey": "tutorial.controls.step30.description",
           "ui": {
             "policy": "strict",
             "allow": [
@@ -2615,11 +2767,11 @@
     },
     {
       "id": "controls.water_received",
-      "legacyStep": 30,
+      "legacyStep": 31,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step30.description",
+          "textKey": "tutorial.controls.step31.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -2665,11 +2817,11 @@
     },
     {
       "id": "controls.summary",
-      "legacyStep": 31,
+      "legacyStep": 32,
       "phases": [
         {
           "id": "perform",
-          "textKey": "tutorial.controls.step31.description",
+          "textKey": "tutorial.controls.step32.description",
           "ui": {
             "policy": "highlight",
             "allow": [],
@@ -2698,6 +2850,13 @@
           "until": {
             "type": "ack"
           }
+        }
+      ],
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "controls",
+          "action": "expansion_proposals_on"
         }
       ]
     }

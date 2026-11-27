@@ -70,99 +70,106 @@
         "description": "We hebben de camera naar de oostrand van de stad verplaatst. Je kunt als stad alleen dit rechthoekige gebied gebruiken waar gedetailleerd terrein is, en ook de camera kan er niet buiten. Dat was alles over het scherm en de bediening. Nu ga je echt een nieuwe woonwijk aanleggen. Klik op “Volgende”."
       },
       "step9": {
+        "title": "Laat de stad zelf groeien",
+        "run": "Laten we eerst de tijd laten lopen. Klik één keer op “Starten” in de cockpit.",
+        "result": "De tijd is verstreken. Sluit het resultatenvenster nadat je de resultaten hebt bekeken.",
+        "proposal": "Als minder dan 10% van de bebouwbare percelen vrij is, stelt de stad aan het eind van een tijdvak voor om het wegennet uit te breiden. Op de kaart zijn de lijnen nieuwe wegen en de vierkanten de percelen die ontstaan wanneer de wegen zijn opgeleverd. Controleer de geschatte kosten en klik op “OK” om het voorstel goed te keuren.",
+        "explain": "Goedgekeurde wegen krijgen de status “Bouw gepland”. Zodra ze klaar zijn, ontstaan er percelen langs de weg en beginnen inwoners en bedrijven te bouwen. Je hoeft niet op een voorstel te wachten: je kunt ook een gebied inkleuren met “Automatische stadsontwikkeling” in het pictogrampaneel om de stad uit te breiden. Laten we nu zelf een weg aanleggen. Klik op “Volgende”."
+      },
+      "step10": {
         "title": "Verleng de weg",
         "description": "Vanaf hier leg je echt een woonwijk aan voor nieuwe inwoners. Woningen en werkplekken hebben weinig zin zonder wegen ertussen: mensen kunnen niet heen en weer en goederen komen niet aan. Verleng eerst de oost-weststraat van het dorp naar het westen, zodat er een weg naar de nieuwe woonwijk komt. Klik in het pictogrammenpaneel op “Wegen, spoor en infrastructuur” om het bouwpaneel te openen.",
         "confirm": "De grond langs een weg wordt in percelen verdeeld zodra de weg is opgeleverd. Bij “Percelen langs de weg na oplevering” in het bouwpaneel kies je voor de linker- en rechterkant van de weg apart hoe groot elk perceel wordt. Laat dat afhangen van de gebouwen die je er wilt hebben: kleinere percelen voor woningen, grotere voor fabrieken en landbouw. Deze weg is voor een woonwijk, dus laat de instelling zoals ze is. Klik in het bouwpaneel op “Bevestigen” om de weg op te slaan en klik daarna op “Volgende”."
       },
-      "step10": {
+      "step11": {
         "title": "Maak de weg af",
         "description": "De weg heeft nog de status “Bouw gepland”. Een geplande weg kun je nog niet gebruiken: pas als het werk klaar is, kunnen mensen en auto’s erover. Klik 2 à 3 keer op “Starten” in de cockpit om de tijd te laten lopen en wacht tot de weg is opgeleverd. Zolang er gebouwd wordt, kost dat elke maand geld.",
         "description_week": "De weg heeft nog de status “Bouw gepland”. Een geplande weg kun je nog niet gebruiken: pas als het werk klaar is, kunnen mensen en auto’s erover. Klik 2 à 3 keer op “Starten” in de cockpit om de tijd te laten lopen en wacht tot de weg is opgeleverd. Zolang er gebouwd wordt, kost dat elke week geld."
       },
-      "step11": {
+      "step12": {
         "title": "De percelen zijn klaar",
         "description": "De weg is opgeleverd en langs de weg zijn percelen ontstaan. Gebouwen kunnen alleen op percelen staan, en doordat een perceel aan een weg ligt, kunnen mensen en goederen er komen en gaan. Wil je percelen toevoegen langs een bestaande weg, gebruik dan “Percelen” in het pictogrammenpaneel."
       },
-      "step12": {
+      "step13": {
         "title": "Maak een wijk",
         "description": "Bepaal voordat je gaat bouwen wat er van deze straat moet worden. Zonder plan kan er zomaar een fabriek naast de woningen verrijzen. Zo’n koers bepaal je per “wijk”. Wijken worden per weg ingesteld, en een perceel hoort bij de wijk van de weg waaraan het ligt. Klik in het pictogrammenpaneel op “Wijken” om het venster “Wijken bewerken” te openen: je ziet dat het hele dorp nu nog één wijk is.",
         "create": "Kies als selectiemethode “Straatkant”. Zet het gereedschap op “Nieuwe wijk maken”, houd Ctrl ingedrukt en sleep over de weg die je hebt verlengd. Beide kanten van de weg waarover je sleept worden samen met de percelen eraan een nieuwe wijk."
       },
-      "step13": {
+      "step14": {
         "title": "De wijk is gesplitst",
         "description": "De nieuwe straat is nu een eigen wijk, los van het dorpscentrum. Per wijk kun je bevolking en prijzen bekijken en bepalen welke gebouwen er mogen komen, zodat elk gebied zich ontwikkelt op een manier die erbij past. Sluit het venster “Wijken bewerken” als je het hebt bekeken."
       },
-      "step14": {
+      "step15": {
         "title": "Open de wijkgegevens",
         "description": "Maak van de nieuwe wijk een woonwijk. Toon de wijken met het pictogram linksonder in beeld en klik op het label van de wijk die je net hebt gemaakt om de wijkgegevens te openen."
       },
-      "step15": {
+      "step16": {
         "title": "Maak er een woonwijk van",
         "description": "Met de bouwvoorschriften onder in het paneel kies je welke gebouwen op de percelen van deze wijk mogen komen. Dit moet een rustige plek om te wonen worden, dus klik alle gebouwen behalve “Appartementengebouw” en “Eengezinswoning” aan om ze uit te schakelen."
       },
-      "step16": {
+      "step17": {
         "title": "Bekijk een perceel",
         "description": "De voorschriften van een wijk gelden voor alle percelen in die wijk. Klik op het perceel met de gele markering om de perceelgegevens te openen."
       },
-      "step17": {
+      "step18": {
         "title": "De voorschriften zijn doorgevoerd",
         "description": "Onder in het perceelpaneel zie je dat het voorschrift van de wijk is doorgevoerd: alleen “Appartementengebouw” en “Eengezinswoning” zijn toegestaan. In deze straat kunnen nu alleen nog woningen komen. Je hoeft percelen dus niet één voor één in te stellen: bepaal de koers van een wijk en de hele straat volgt."
       },
-      "step18": {
+      "step19": {
         "title": "Bouw woningen",
         "description": "Nu zorg je voor woningen. Normaal bouwen particulieren vanzelf woningen als er mensen zijn die hier willen wonen, maar met sociale huurwoningen van de gemeente vul je een woningtekort meteen aan. Bouw hier een gemeentelijk appartementengebouw. Klik in het pictogrammenpaneel op “Bouwen”.",
         "select": "Kies in de categorie “Wonen” het “Appartementengebouw”, klik op een perceel naar keuze in de nieuwe wijk als bouwplaats en klik op “Bevestigen”."
       },
-      "step19": {
+      "step20": {
         "title": "Maak de woningen af",
         "description": "Net als bij wegen kun je in een gepland gebouw nog niet wonen. Een appartementengebouw is pas na meer dan een halfjaar klaar. Laat de tijd lopen met “Starten” en wacht tot het is opgeleverd."
       },
-      "step20": {
+      "step21": {
         "title": "Controleer of er stroom is",
         "description": "Met alleen een woning kom je er niet: zonder stroom en water valt er niet te leven. Dit dorp heeft nog geen elektriciteitscentrale en geen waterleiding. Klik op het appartementengebouw met de gele markering, waar de dorpelingen wonen, om de gegevens te openen. Kies op het tabblad “Gebouwgegevens” een van de huurders en open dan het tabblad “Vraag, aanbod en handel”: je ziet dat de verkregen hoeveelheid elektriciteit 0 is."
       },
-      "step21": {
+      "step22": {
         "title": "Bouw een zonnepark",
         "description": "Om stroom te leveren heb je eerst een centrale nodig die stroom opwekt. Bouw een “Zonnepark” op het perceel met de gele markering. Normaal duurt het even voordat zo’n park klaar is, maar omdat dit een tutorial is, wordt de bouwtijd overgeslagen."
       },
-      "step22": {
+      "step23": {
         "title": "Bouw een onderstation",
         "description": "De hoogspanningsstroom uit een centrale kunnen huishoudens niet direct gebruiken. Een onderstation zet die om in stroom voor huishoudens en verdeelt hem over de gebouwen in de buurt die via de weg verbonden zijn. Bouw een “Onderstation” op het perceel met de gele markering vlak bij het appartementengebouw."
       },
-      "step23": {
+      "step24": {
         "title": "Verbind met een hoogspanningsleiding",
         "description": "Ook als de centrale en het onderstation ver uit elkaar liggen, zijn ze verbonden zodra er een verbinding is waarlangs de stroom kan lopen. Open “Wegen, spoor en infrastructuur” in het pictogrammenpaneel, kies onder “Elektriciteit” de “Hoogspanningsleiding” en trek een lijn van het aansluitpunt van het zonnepark naar het aansluitpunt van het onderstation. Met een rechte lijn tussen de aansluitpunten ben je in één keer klaar."
       },
-      "step24": {
+      "step25": {
         "title": "Controleer de stroomvoorziening",
         "description": "Controleer na het aansluiten of er echt stroom loopt. Laat de tijd lopen met “Starten”, klik op het onderstation om de gegevens te openen en kijk op het tabblad “Vraag, aanbod en handel” of de ontvangen hoeveelheid hoogspanningsstroom niet 0 is. Het kan een paar maanden duren voordat de centrale draait en de stroom aankomt."
       },
-      "step25": {
+      "step26": {
         "title": "De huizen hebben stroom",
         "description": "Open net als de eerste keer via de gegevens van het appartementengebouw het tabblad “Vraag, aanbod en handel” van een huurder en controleer of de verkregen hoeveelheid elektriciteit niet meer 0 is. Soms moet je nog een à twee maanden verder voordat de stroom bij de huishoudens aankomt. Opwekken in een centrale, transporteren via hoogspanningsleidingen en verdelen vanuit een onderstation: pas als die drie verbonden zijn, komt de stroom bij de mensen thuis."
       },
-      "step26": {
+      "step27": {
         "title": "Zoek een waterbron",
         "description": "Nu het water. Leidingwater is grondwater dat wordt opgepompt en naar het dorp gestuurd. Zoek eerst uit waar je water kunt oppompen. Klik in de cockpit op “Weergave” om het weergavepaneel te openen.",
         "show": "Kies bij de verticale tabbladen “Natuurlijke hulpbronnen” en zet die op “Tonen”. Waterbronnen zie je in lichtblauw op de kaart. Klik op de waterbron met de gele markering om de gegevens te openen."
       },
-      "step27": {
+      "step28": {
         "title": "Bouw een grondwaterpomp",
         "description": "Een grondwaterpomp pompt water uit de grond op en moet dus op een plek met een waterbron staan. Om te draaien heeft hij ook stroom en personeel nodig; daarom hebben we eerst de stroom aangelegd. Bouw een “Grondwaterpomp” op het perceel met de gele markering boven de waterbron. Omdat dit een tutorial is, wordt de bouwtijd overgeslagen."
       },
-      "step28": {
+      "step29": {
         "title": "Bouw een waterpompstation",
         "description": "Opgepompt water kun je niet zomaar aan huishoudens leveren. Zoals een onderstation stroom verdeelt, levert een waterpompstation water aan de gebouwen in de buurt die via de weg verbonden zijn. Bouw een “Waterpompstation” op het perceel met de gele markering vlak bij het appartementengebouw."
       },
-      "step29": {
+      "step30": {
         "title": "Verbind met een waterleiding",
         "description": "Je hebt een leiding nodig die het water van de grondwaterpomp naar het waterpompstation brengt. Open “Wegen, spoor en infrastructuur” in het pictogrammenpaneel, kies onder “Water” de “Waterleiding” en leg die van het aansluitpunt van de grondwaterpomp naar het aansluitpunt van het waterpompstation. Maak een ruime omweg langs de oostkant, zodat de leiding niet in de weg zit van de wegen en de hoogspanningsleiding."
       },
-      "step30": {
+      "step31": {
         "title": "Controleer de watervoorziening",
         "description": "Laat de tijd lopen met “Starten”, klik op het waterpompstation om de gegevens te openen en kijk op het tabblad “Vraag, aanbod en handel” of de ontvangen hoeveelheid hogedrukwater niet 0 is. Het kan een paar maanden duren voordat er genoeg personeel bij de grondwaterpomp werkt en het water aankomt."
       },
-      "step31": {
+      "step32": {
         "title": "De basis staat",
         "description": "Het water heeft het waterpompstation bereikt, dus de huishoudens in de buurt hebben nu ook leidingwater. Wegen aanleggen, percelen klaarmaken, de koers van wijken bepalen, woningen bouwen en stroom en water leveren: zo gaat stadsbouw in de basis. Klik op “Volgende” om de tutorial Basisbediening af te ronden."
       }

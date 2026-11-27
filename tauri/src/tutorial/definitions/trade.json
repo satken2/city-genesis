@@ -1280,7 +1280,14 @@
             "equals": true
           }
         ]
-      }
+      },
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "trade",
+          "action": "expansion_proposals_on"
+        }
+      ]
     }
   ]
 }

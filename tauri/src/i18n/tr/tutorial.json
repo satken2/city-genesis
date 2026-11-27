@@ -70,99 +70,106 @@
         "description": "Kamerayı şehrin doğu ucuna taşıdık. Şehir olarak kullanabileceğiniz alan, ayrıntılı arazinin oluşturulduğu bu dikdörtgen alanın içidir. Kamera da bu sınırın dışına çıkamaz. Ekran ve kontrollerle ilgili açıklamalar bu kadar. Şimdi sıra gerçekten yeni bir konut bölgesi kurmakta. “İleri” düğmesine basın."
       },
       "step9": {
+        "title": "Şehir kendi kendine büyüsün",
+        "run": "Önce zamanı ilerletelim. Kokpitteki “Başlat” düğmesine bir kez basarak zamanı yalnızca bir kez ilerletin.",
+        "result": "Zaman ilerledi. Sonuçları inceledikten sonra sonuç penceresini kapatın.",
+        "proposal": "İnşa edilebilir boş parsellerin oranı %10’un altına düşünce şehir, bir dönemin sonunda yol ağını genişletmeyi önerir. Haritadaki çizgiler yeni yollar, kareler ise yollar tamamlandığında oluşacak parsellerdir. Tahmini maliyeti kontrol edin ve öneriyi onaylamak için “Tamam” düğmesine basın.",
+        "explain": "Onaylanan yollar “İnşaat planlandı” durumuna geçer. Tamamlandıklarında boylarınca parseller oluşur ve sakinler ile şirketler bina yapmaya başlar. Öneriyi beklemeniz gerekmez: Simge panelindeki “Otomatik şehir geliştirme” ile bir alanı boyayarak da şehri genişletebilirsiniz. Şimdi kendi elinizle bir yol yapalım. “İleri” düğmesine basın."
+      },
+      "step10": {
         "title": "Yolu uzatın",
         "description": "Şimdi yeni sakinleri karşılayacak bir konut bölgesi kuracağız. Konutlar ve iş yerleri yollarla bağlı değilse insanlar gidip gelemez, mallar da ulaşamaz. Önce kasabanın doğu-batı yönündeki caddesini batıya doğru uzatarak konut bölgesine giden yolu açın. İnşaat panelini açmak için simge panelindeki “Yol, demiryolu ve altyapı” düğmesine basın.",
         "confirm": "Yol boyundaki arazi, yol tamamlandığında parsellere ayrılır. Bir parselin büyüklüğünü inşaat panelindeki “Tamamlandığında oluşturulacak yol kenarı parselleri” ayarından yolun sağı ve solu için ayrı ayrı seçebilirsiniz. Konut bölgesi için küçük, fabrika veya tarım arazisi için geniş parseller gibi, hangi binaları istediğinize göre karar verin. Bu kez konut bölgesi yapacağımız için ayarı olduğu gibi bırakın. İnşaat panelindeki “Onayla” düğmesine basıp kaydettikten sonra “İleri” düğmesine basın."
       },
-      "step10": {
+      "step11": {
         "title": "Yolu tamamlayın",
         "description": "Yolun durumu hâlâ “İnşaat planlandı”. Yalnızca planlanmış bir yol kullanılamaz; insanlar ve araçlar ancak inşaat bittiğinde geçebilir. Kokpitteki “Başlat” düğmesine 2-3 kez basarak zamanı ilerletin ve yolun tamamlanmasını bekleyin. İnşaat süresince her ay inşaat maliyeti ödenir.",
         "description_week": "Yolun durumu hâlâ “İnşaat planlandı”. Yalnızca planlanmış bir yol kullanılamaz; insanlar ve araçlar ancak inşaat bittiğinde geçebilir. Kokpitteki “Başlat” düğmesine 2-3 kez basarak zamanı ilerletin ve yolun tamamlanmasını bekleyin. İnşaat süresince her hafta inşaat maliyeti ödenir."
       },
-      "step11": {
+      "step12": {
         "title": "Parseller oluşturuldu",
         "description": "Yol tamamlandı ve yol boyunca parseller oluştu. Binalar yalnızca parsellerin üzerine yapılabilir; parseller yola baktığı için insanlar ve mallar girip çıkabilir. Mevcut bir yol boyuna parsel eklemek istediğinizde simge panelindeki “Parseller” düğmesinden oluşturabilirsiniz."
       },
-      "step12": {
+      "step13": {
         "title": "Mahalle oluşturun",
         "description": "Bina yapmadan önce bu caddeyi nasıl bir yere dönüştüreceğinize karar verin. Bir politika belirlemezseniz konutların hemen yanına fabrika yapılabilir. Yerlere göre politikalar “Mahalle” birimiyle belirlenir. Mahalleler yol yol atanır; parseller baktıkları yolun mahallesine dahil olur. Simge panelindeki “Mahalleler” düğmesine basıp mahalle düzenleme penceresini açtığınızda şu anda tüm kasabanın tek bir mahalle olduğunu görürsünüz.",
         "create": "Boyama yöntemi olarak “Yol kenarı” seçeneğini seçin. Aracı “Yeni mahalle oluştur” olarak değiştirin ve Ctrl tuşunu basılı tutarak uzattığınız yolun üzerinden geçin. Üzerinden geçtiğiniz yolun iki yakası ve bu yola bakan parseller yeni mahalle olur."
       },
-      "step13": {
+      "step14": {
         "title": "Mahalle ayrıldı",
         "description": "Yeni caddeyi kasaba merkezinden ayrı bir mahalle hâline getirdiniz. Her mahallenin nüfusunu ve fiyatlarını topluca görebilir, yapılabilecek binaları belirleyebilirsiniz; böylece her yere uygun bir şehir kurabilirsiniz. Kontrol ettikten sonra mahalle düzenleme penceresini kapatın."
       },
-      "step14": {
+      "step15": {
         "title": "Mahalle ayrıntılarını açın",
         "description": "Yeni mahalleyi konut bölgesi olarak ayarlayalım. Ekranın sol altındaki simgeyle mahalleleri görüntüleyin, az önce oluşturduğunuz mahallenin etiketine tıklayarak ayrıntılarını açın."
       },
-      "step15": {
+      "step16": {
         "title": "Konut bölgesi yapın",
         "description": "Panelin alt kısmındaki yapı yönetmelikleriyle bu mahallenin parsellerine yapılabilecek binaları seçebilirsiniz. Burayı huzurlu bir konut bölgesi yapmak istediğimiz için “Apartman” ve “Müstakil ev” dışındaki tüm binalara tıklayarak devre dışı bırakın."
       },
-      "step16": {
+      "step17": {
         "title": "Bir parseli inceleyin",
         "description": "Mahallede belirlediğiniz yönetmelikler o mahalledeki tüm parsellere uygulanır. Sarı işaretli parsele tıklayarak parsel ayrıntılarını açın."
       },
-      "step17": {
+      "step18": {
         "title": "Yönetmelikler uygulandı",
         "description": "Parsel panelinin alt kısmına bakın: mahallede belirlediğiniz, yalnızca “Apartman” ve “Müstakil ev” binalarına izin veren yönetmelik uygulanmış. Artık bu caddedeki parsellere yalnızca konut yapılabilir. Parselleri tek tek ayarlamanıza gerek yok; mahalle için bir politika belirlediğinizde bütün cadde o politikaya uyar."
       },
-      "step18": {
+      "step19": {
         "title": "Konut inşa edin",
         "description": "Sıra konut sağlamaya geldi. Konutları normalde, oturmak isteyen insanlar olduğunda özel sektör kendiliğinden inşa eder; ancak belediye konutu inşa ederek konut açığını hemen kapatabilirsiniz. Burada belediyeye ait bir apartman inşa edelim. Simge panelindeki “İnşaat” düğmesine basın.",
         "select": "“Konut” kategorisinden “Konut sitesi” seçeneğini seçin, yeni mahalledeki parsellerden istediğinize tıklayarak inşaat yeri olarak belirleyin ve “Onayla” düğmesine basın."
       },
-      "step19": {
+      "step20": {
         "title": "Konutu tamamlayın",
         "description": "Yollarda olduğu gibi binalarda da yalnızca planlamak yetmez; içinde henüz oturulamaz. Bir apartmanın tamamlanması altı aydan uzun sürer. “Başlat” ile zamanı ilerletip binanın tamamlanmasını bekleyin."
       },
-      "step20": {
+      "step21": {
         "title": "Elektriğin gelip gelmediğini kontrol edin",
         "description": "Konut olsa bile elektrik ve su gelmezse yaşam sürdürülemez. Bu kasabada henüz ne enerji santrali ne de su şebekesi var. Kasaba halkının yaşadığı, sarı işaretli apartmana tıklayarak ayrıntılarını açın; “Bina bilgileri” sekmesinden bir kiracı seçip “Arz, talep ve ticaret” sekmesini açtığınızda edinilen elektrik miktarının 0 olduğunu görebilirsiniz."
       },
-      "step21": {
+      "step22": {
         "title": "Güneş enerjisi santrali inşa edin",
         "description": "Elektrik ulaştırmak için önce elektriği üretecek bir santral gerekir. Sarı işaretli parsele bir “güneş enerjisi santrali” inşa edin. Normalde tamamlanması zaman alır, ancak bu bir eğitim olduğu için inşaat süresi atlanarak santral hemen tamamlanacak."
       },
-      "step22": {
+      "step23": {
         "title": "Trafo merkezi inşa edin",
         "description": "Santralin ürettiği yüksek gerilimli elektrik evlerde olduğu gibi kullanılamaz. Bunu evlerde kullanılabilecek elektriğe dönüştürüp yolla bağlı çevredeki binalara dağıtan tesis trafo merkezidir. Apartmanın yakınındaki sarı işaretli parsele bir “Trafo merkezi” inşa edin."
       },
-      "step23": {
+      "step24": {
         "title": "Elektrik hattıyla bağlayın",
         "description": "Santral ile trafo merkezi birbirinden uzak olsa bile elektriği taşıyacak bir güzergâh olursa bağlanırlar. Simge panelinde “Yol, demiryolu ve altyapı” düğmesine basın, “Elektrik” altından “Yüksek gerilim hattı” seçeneğini seçin ve güneş enerjisi santralinin bağlantı noktasından trafo merkezinin bağlantı noktasına bir hat çekin. Bağlantı noktalarını düz bir çizgiyle birleştirirseniz hattı tek seferde çekebilirsiniz."
       },
-      "step24": {
+      "step25": {
         "title": "Elektrik arzını kontrol edin",
         "description": "Bağladıktan sonra elektriğin gerçekten akıp akmadığını kontrol edin. “Başlat” ile zamanı ilerletin, trafo merkezine tıklayarak ayrıntılarını açın ve “Arz, talep ve ticaret” sekmesinde alınan yüksek gerilimli elektrik miktarının 0 olmadığını doğrulayın. Santralin çalışmaya başlayıp elektriğin ulaşması birkaç ay sürebilir."
       },
-      "step25": {
+      "step26": {
         "title": "Elektrik evlere ulaştı",
         "description": "Apartmanın ayrıntılarından, ilk kontrol ettiğinizde olduğu gibi bir kiracının “Arz, talep ve ticaret” sekmesini açın ve edinilen elektrik miktarının artık 0 olmadığını doğrulayın. Elektriğin evlere ulaşması için zamanı 1-2 ay daha ilerletmeniz gerekebilir. Santralde üretmek, elektrik hatlarıyla taşımak, trafo merkezinde dağıtmak: elektrik ancak bu üçü birbirine bağlandığında evlere ulaşır."
       },
-      "step26": {
+      "step27": {
         "title": "Su kaynağı bulun",
         "description": "Sırada su var. Şebeke suyu, yeraltındaki suyun pompalanıp kasabaya gönderilmesiyle sağlanır. Önce suyun pompalanabileceği yerleri bulalım. Kokpitteki “Görünüm” düğmesine basarak görünüm panelini açın.",
         "show": "Dikey sıralanmış sekmelerden “Doğal kaynaklar” sekmesini seçin ve “Görünür” olarak değiştirin. Haritada açık maviyle gösterilen yerler su kaynaklarıdır. Sarı işaretli su kaynağına tıklayarak ayrıntılarını açın."
       },
-      "step27": {
+      "step28": {
         "title": "Yeraltı suyu pompası inşa edin",
         "description": "Yeraltı suyu pompası yeraltındaki suyu çeken bir tesis olduğundan su kaynağı olan bir yere inşa edilmelidir. Çalışması için elektrik ve çalışan da gerekir; önce elektriği getirmemizin nedeni budur. Su kaynağının üzerindeki sarı işaretli parsele bir “Yeraltı suyu pompa istasyonu” inşa edin. Bu bir eğitim olduğu için inşaat süresi atlanacak."
       },
-      "step28": {
+      "step29": {
         "title": "Su pompa istasyonu inşa edin",
         "description": "Pompalanan su evlere olduğu gibi dağıtılamaz. Trafo merkezinin elektriği dağıtması gibi, su pompa istasyonu da yolla bağlı çevredeki binalara su dağıtır. Apartmanın yakınındaki sarı işaretli parsele bir “Su pompa istasyonu” inşa edin."
       },
-      "step29": {
+      "step30": {
         "title": "Su iletim hattıyla bağlayın",
         "description": "Yeraltı suyu pompasının çektiği suyu su pompa istasyonuna taşıyacak bir boru hattı gerekir. Simge panelinde “Yol, demiryolu ve altyapı” düğmesine basın, “Su” altından “Ana su iletim hattı” seçeneğini seçin ve yeraltı suyu pompasının bağlantı noktasından su pompa istasyonunun bağlantı noktasına boru hattını çekin. Yollar ve elektrik hattıyla çakışmaması için hattı doğu tarafından geniş bir dolambaçla döşeyin."
       },
-      "step30": {
+      "step31": {
         "title": "Su arzını kontrol edin",
         "description": "“Başlat” ile zamanı ilerletin, su pompa istasyonuna tıklayarak ayrıntılarını açın ve “Arz, talep ve ticaret” sekmesinde alınan yüksek basınçlı su miktarının 0 olmadığını doğrulayın. Yeraltı suyu pompasına çalışanların gelmesi ve suyun ulaşması birkaç ay sürebilir."
       },
-      "step31": {
+      "step32": {
         "title": "Şehir kurmanın temelleri tamam",
         "description": "Su pompa istasyonuna su ulaştığı için çevredeki evler de artık şebeke suyunu kullanabilir. Yol döşemek, parsel hazırlamak, mahallenin politikasını belirlemek, konut inşa etmek, elektrik ve su ulaştırmak: şehir kurmanın temel akışı budur. “İleri” düğmesine basarak temel kontroller eğitimini tamamlayın."
       }

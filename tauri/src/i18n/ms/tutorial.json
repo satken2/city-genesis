@@ -70,99 +70,106 @@
         "description": "Kamera telah dialihkan ke hujung timur bandar. Kawasan yang boleh digunakan sebagai bandar ialah segi empat ini, tempat rupa bumi terperinci tersedia, dan kamera juga tidak boleh keluar dari sempadan ini. Itu sahaja penerangan tentang skrin dan kawalan. Seterusnya, mari kita bina kawasan kediaman baharu. Tekan “Seterusnya”."
       },
       "step9": {
+        "title": "Biarkan bandar berkembang sendiri",
+        "run": "Mula-mula, mari majukan masa. Tekan “Mula” di kokpit sekali sahaja.",
+        "result": "Masa telah maju. Selepas menyemak hasil, tutup tetingkap hasil.",
+        "proposal": "Apabila lot kosong yang boleh dibina tinggal kurang daripada 10%, bandar akan mencadangkan peluasan rangkaian jalan pada akhir epok. Pada peta, garisan ialah jalan baharu dan petak ialah lot yang terhasil apabila jalan siap. Semak anggaran kos, kemudian tekan “OK” untuk meluluskan cadangan.",
+        "explain": "Jalan yang diluluskan berstatus “Pembinaan dirancang”. Apabila siap, lot terhasil di sepanjang jalan, dan penduduk serta syarikat mula mendirikan bangunan. Anda tidak perlu menunggu cadangan: anda juga boleh mewarnakan kawasan dengan “Pembangunan bandar automatik” pada panel ikon untuk meluaskan bandar. Seterusnya, mari bina jalan dengan tangan anda sendiri. Tekan “Seterusnya”."
+      },
+      "step10": {
         "title": "Panjangkan jalan",
         "description": "Sekarang, mari bina kawasan kediaman untuk menyambut penduduk baharu. Kediaman dan tempat kerja tidak berguna jika tidak dihubungkan oleh jalan: orang tidak dapat berulang-alik dan barangan tidak dapat sampai. Mula-mula, panjangkan jalan timur-barat pekan ini ke arah barat untuk membuka laluan ke kawasan kediaman baharu. Tekan “Jalan, kereta api & infrastruktur” pada panel ikon untuk membuka panel pembinaan.",
         "confirm": "Tanah di sepanjang jalan dibahagikan kepada lot apabila jalan itu siap dibina. Dalam “Lot tepi jalan yang dicipta apabila siap” pada panel pembinaan, anda boleh memilih saiz setiap lot bagi sisi kiri dan kanan jalan. Tentukan mengikut jenis bangunan yang ingin anda terima: lot kecil sesuai untuk kediaman, manakala lot besar sesuai untuk kilang dan ladang. Jalan ini untuk kawasan kediaman, jadi biarkan seperti sedia ada. Tekan “Sahkan” pada panel pembinaan untuk menyimpan, kemudian tekan butang “Seterusnya”."
       },
-      "step10": {
+      "step11": {
         "title": "Siapkan jalan",
         "description": "Jalan itu masih “Pembinaan dirancang”. Jalan yang baru dirancang belum boleh digunakan; orang dan kereta hanya boleh melaluinya selepas kerja pembinaan selesai. Tekan “Mula” di kokpit 2-3 kali untuk memajukan masa dan tunggu sehingga siap. Kos pembinaan dikenakan setiap bulan selagi kerja sedang berjalan.",
         "description_week": "Jalan itu masih “Pembinaan dirancang”. Jalan yang baru dirancang belum boleh digunakan; orang dan kereta hanya boleh melaluinya selepas kerja pembinaan selesai. Tekan “Mula” di kokpit 2-3 kali untuk memajukan masa dan tunggu sehingga siap. Kos pembinaan dikenakan setiap minggu selagi kerja sedang berjalan."
       },
-      "step11": {
+      "step12": {
         "title": "Lot telah dicipta",
         "description": "Jalan telah siap, dan lot telah dicipta di sepanjangnya. Bangunan hanya boleh didirikan di atas lot, dan lot yang menghadap jalan membolehkan orang dan barangan keluar masuk. Untuk menambah lot di sepanjang jalan sedia ada, gunakan “Lot tanah” pada panel ikon."
       },
-      "step12": {
+      "step13": {
         "title": "Cipta daerah",
         "description": "Sebelum membina, tentukan dahulu hala tuju jalan ini. Tanpa hala tuju, kilang mungkin didirikan betul-betul di sebelah rumah. Hala tuju setiap tempat ditentukan mengikut unit “Daerah”. Daerah ditetapkan mengikut jalan, dan lot termasuk dalam daerah jalan yang dihadapinya. Tekan “Daerah” pada panel ikon untuk membuka tetingkap suntingan daerah; anda akan dapati seluruh pekan kini ialah satu daerah sahaja.",
         "create": "Gunakan kaedah pemilihan “Mengikut sisi jalan”. Tukar alat kepada “Cipta daerah baharu”, kemudian tahan kekunci Ctrl dan seret di sepanjang jalan yang anda panjangkan tadi. Kedua-dua sisi jalan yang diwarnakan, bersama lot yang menghadapnya, akan menjadi daerah baharu."
       },
-      "step13": {
+      "step14": {
         "title": "Daerah telah dipisahkan",
         "description": "Jalan baharu telah dipisahkan daripada pusat pekan sebagai daerah tersendiri. Anda boleh menyemak penduduk dan harga mengikut daerah serta menentukan bangunan yang boleh dibina di situ, jadi setiap kawasan boleh dibangunkan mengikut kesesuaiannya. Selepas menyemaknya, tutup tetingkap suntingan daerah."
       },
-      "step14": {
+      "step15": {
         "title": "Buka butiran daerah",
         "description": "Mari tetapkan daerah baharu ini sebagai kawasan kediaman. Paparkan daerah dengan ikon di bahagian kiri bawah skrin, kemudian klik label daerah yang baru anda cipta untuk membuka butirannya."
       },
-      "step15": {
+      "step16": {
         "title": "Jadikan kawasan kediaman",
         "description": "Peraturan bangunan di bahagian bawah panel menentukan bangunan yang boleh dibina di atas lot dalam daerah ini. Kita mahu kawasan ini menjadi tempat tinggal yang tenang, jadi klik semua bangunan selain “Pangsapuri” dan “Rumah sesebuah” untuk menyahaktifkannya."
       },
-      "step16": {
+      "step17": {
         "title": "Semak lot",
         "description": "Peraturan yang ditetapkan untuk daerah dikenakan pada semua lot dalam daerah itu. Klik lot yang bertanda kuning untuk membuka butirannya."
       },
-      "step17": {
+      "step18": {
         "title": "Peraturan telah dikenakan",
         "description": "Di bahagian bawah panel lot, anda dapat melihat peraturan daerah yang hanya membenarkan “Pangsapuri” dan “Rumah sesebuah”. Kini hanya kediaman boleh dibina di lot sepanjang jalan ini. Anda tidak perlu menetapkan lot satu per satu; apabila hala tuju daerah ditentukan, seluruh jalan akan mengikutinya."
       },
-      "step18": {
+      "step19": {
         "title": "Bina kediaman",
         "description": "Kini tiba masanya menyediakan tempat tinggal. Biasanya, kediaman dibina secara automatik oleh pihak swasta apabila ada orang yang ingin tinggal di sini, tetapi perumahan awam yang dibina oleh kerajaan tempatan dapat menampung kekurangan tempat tinggal dengan segera. Mari bina pangsapuri awam di sini. Tekan “Pembinaan” pada panel ikon.",
         "select": "Pilih “Pangsapuri” dalam kategori “Kediaman”, klik mana-mana lot dalam daerah baharu sebagai tapak pembinaan, kemudian tekan “Sahkan”."
       },
-      "step19": {
+      "step20": {
         "title": "Siapkan kediaman",
         "description": "Sama seperti jalan, bangunan yang baru dirancang belum boleh didiami. Pangsapuri mengambil masa lebih setengah tahun untuk siap. Tekan “Mula” untuk memajukan masa dan tunggu sehingga siap."
       },
-      "step20": {
+      "step21": {
         "title": "Semak bekalan elektrik",
         "description": "Tempat tinggal sahaja tidak mencukupi jika elektrik dan air tidak sampai. Pekan ini belum mempunyai stesen jana kuasa mahupun bekalan air. Klik pangsapuri bertanda kuning, tempat penduduk pekan tinggal, untuk membuka butirannya. Pilih salah satu penyewa dalam tab “Maklumat bangunan”, kemudian buka tab “Permintaan, penawaran dan dagangan”; anda akan dapati jumlah elektrik yang diperoleh ialah 0."
       },
-      "step21": {
+      "step22": {
         "title": "Bina stesen jana kuasa solar",
         "description": "Untuk membekalkan elektrik, anda memerlukan stesen jana kuasa untuk menjananya terlebih dahulu. Bina “Stesen jana kuasa solar” di lot bertanda kuning. Biasanya pembinaan mengambil masa, tetapi kerana ini tutorial, tempoh pembinaan dilangkau."
       },
-      "step22": {
+      "step23": {
         "title": "Bina pencawang elektrik",
         "description": "Elektrik voltan tinggi dari stesen jana kuasa tidak boleh digunakan terus oleh isi rumah. Pencawang elektrik menukarnya kepada elektrik yang boleh digunakan di rumah dan mengagihkannya kepada bangunan sekitar yang dihubungkan oleh jalan. Bina “Pencawang elektrik” di lot bertanda kuning berhampiran pangsapuri."
       },
-      "step23": {
+      "step24": {
         "title": "Sambungkan dengan talian elektrik",
         "description": "Walaupun stesen jana kuasa dan pencawang elektrik berjauhan, keduanya boleh disambungkan jika ada laluan untuk elektrik. Buka “Jalan, kereta api & infrastruktur” pada panel ikon, pilih “Talian elektrik” di bawah “Elektrik”, dan tarik talian dari titik sambungan stesen jana kuasa solar ke titik sambungan pencawang elektrik. Garisan lurus antara kedua-dua titik sambungan sudah memadai."
       },
-      "step24": {
+      "step25": {
         "title": "Sahkan bekalan elektrik",
         "description": "Selepas disambungkan, pastikan elektrik benar-benar mengalir. Tekan “Mula” untuk memajukan masa, klik pencawang elektrik untuk membuka butirannya, dan dalam tab “Permintaan, penawaran dan dagangan”, pastikan jumlah elektrik voltan tinggi yang diterima bukan 0. Stesen jana kuasa mungkin mengambil masa beberapa bulan untuk mula beroperasi dan elektrik untuk sampai."
       },
-      "step25": {
+      "step26": {
         "title": "Elektrik sampai ke rumah",
         "description": "Dari butiran pangsapuri, buka tab “Permintaan, penawaran dan dagangan” bagi seorang penyewa seperti yang anda lakukan tadi, dan pastikan jumlah elektrik yang diperoleh bukan 0 lagi. Mungkin perlu sebulan dua lagi sebelum elektrik sampai ke isi rumah. Jana di stesen jana kuasa, salurkan melalui talian elektrik, agihkan dari pencawang elektrik — hanya apabila ketiga-tiganya bersambung barulah elektrik sampai ke rumah."
       },
-      "step26": {
+      "step27": {
         "title": "Cari sumber air",
         "description": "Seterusnya ialah bekalan air. Air paip diperoleh dengan mengepam air bawah tanah dan menyalurkannya ke pekan. Mula-mula, cari tempat air boleh dipam. Tekan “Paparan” di kokpit untuk membuka panel paparan.",
         "show": "Pilih “Sumber asli” daripada tab menegak dan tukar kepada “Papar”. Sumber air ditunjukkan dengan warna biru muda pada peta. Klik sumber air bertanda kuning untuk membuka butirannya."
       },
-      "step27": {
+      "step28": {
         "title": "Bina pam air bawah tanah",
         "description": "Pam air bawah tanah ialah kemudahan yang mengepam air dari bawah tanah, jadi ia mesti dibina di tempat yang mempunyai sumber air. Ia juga memerlukan elektrik dan pekerja untuk beroperasi; itulah sebabnya elektrik disambungkan dahulu. Bina “Pam air bawah tanah” di lot bertanda kuning di atas sumber air. Kerana ini tutorial, tempoh pembinaan dilangkau."
       },
-      "step28": {
+      "step29": {
         "title": "Bina stesen pam air",
         "description": "Air yang dipam tidak boleh diagihkan terus kepada isi rumah. Sama seperti pencawang elektrik mengagihkan elektrik, stesen pam air menyalurkan air kepada bangunan sekitar yang dihubungkan oleh jalan. Bina “Stesen pam air” di lot bertanda kuning berhampiran pangsapuri."
       },
-      "step29": {
+      "step30": {
         "title": "Sambungkan dengan paip penyalur air",
         "description": "Anda memerlukan paip untuk membawa air dari pam air bawah tanah ke stesen pam air. Buka “Jalan, kereta api & infrastruktur” pada panel ikon, pilih “Paip penyalur air” di bawah “Bekalan air”, dan pasang paip dari titik sambungan pam air bawah tanah ke titik sambungan stesen pam air. Supaya tidak bertembung dengan jalan dan talian elektrik, pasang paip dengan melencong jauh ke sebelah timur."
       },
-      "step30": {
+      "step31": {
         "title": "Sahkan bekalan air",
         "description": "Tekan “Mula” untuk memajukan masa, klik stesen pam air untuk membuka butirannya, dan dalam tab “Permintaan, penawaran dan dagangan”, pastikan jumlah air tekanan tinggi yang diterima bukan 0. Mungkin perlu beberapa bulan sebelum pekerja berkumpul di pam air bawah tanah dan air sampai."
       },
-      "step31": {
+      "step32": {
         "title": "Asas pembinaan bandar sudah sedia",
         "description": "Air telah sampai ke stesen pam air, jadi rumah di sekitarnya kini boleh menggunakan air paip. Bina jalan, sediakan lot, tentukan hala tuju daerah, bina kediaman, dan salurkan elektrik serta air — itulah aliran asas pembinaan bandar. Tekan “Seterusnya” untuk menamatkan tutorial kawalan asas."
       }

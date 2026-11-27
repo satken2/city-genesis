@@ -2592,6 +2592,13 @@
             "type": "ack"
           }
         }
+      ],
+      "afterCheck": [
+        {
+          "type": "scenarioAction",
+          "scenario": "scenario4",
+          "action": "expansion_proposals_on"
+        }
       ]
     }
   ]

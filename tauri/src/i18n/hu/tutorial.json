@@ -70,99 +70,106 @@
         "description": "A kamerát a város keleti szélére vittük. Városként csak ezt a téglalap alakú területet használhatod, ahol részletes terep készült, és a kamera sem léphet ki ebből a határból. Ennyit a képernyőről és a kezelésről. Most pedig hozzunk létre egy új lakóterületet! Nyomd meg a „Tovább” gombot."
       },
       "step9": {
+        "title": "Hadd nőjön a város magától",
+        "run": "Először léptessük az időt. Nyomd meg egyszer a műszerfalon az „Indítás” gombot.",
+        "result": "Telt az idő. Miután átnézted az eredményeket, zárd be az eredményablakot.",
+        "proposal": "Ha a beépíthető telkeknek kevesebb mint 10%-a szabad, a város a korszak végén javasolja az úthálózat bővítését. A térképen a vonalak az új utak, a négyzetek pedig az utak elkészültekor létrejövő telkek. Ellenőrizd a becsült költséget, majd az „OK” gombbal hagyd jóvá a javaslatot.",
+        "explain": "A jóváhagyott utak „Építés tervezve” állapotba kerülnek. Amikor elkészülnek, mentük telkek jönnek létre, és a lakók meg a vállalatok elkezdenek építkezni. Nem kell javaslatra várnod: az ikonpanel „Automatikus városfejlesztés” funkciójával egy területet befestve is bővítheted a várost. Most saját kezűleg építünk utat. Nyomd meg a „Tovább” gombot."
+      },
+      "step10": {
         "title": "Az út meghosszabbítása",
         "description": "Most építsünk egy lakóterületet, ahol új lakókat fogadhatunk! A lakások és a munkahelyek semmit sem érnek, ha nem köti össze őket út: az emberek nem tudnak közlekedni, és az áruk sem érkeznek meg. Először hosszabbítsuk meg nyugat felé a település kelet–nyugati utcáját, hogy legyen út az új lakóterülethez. Nyomd meg az ikonpanelen az „Utak, vasút, infrastruktúra” gombot az építési panel megnyitásához.",
         "confirm": "Az út menti földterület az út elkészülésekor telkekre oszlik. Az építési panel „Elkészüléskor létrehozott út menti telkek” beállításánál az út bal és jobb oldalára külön megadhatod a telkek méretét. Aszerint dönts, milyen épületeket vársz: lakásokhoz a kisebb, gyárakhoz és farmokhoz a nagyobb telkek valók. Ez az út lakóterülethez vezet, ezért hagyd így. A mentéshez nyomd meg az építési panel „Jóváhagyás” gombját, majd a „Tovább” gombot."
       },
-      "step10": {
+      "step11": {
         "title": "Az út befejezése",
         "description": "Az út állapota egyelőre „Építés tervezve”. A tervezett utat még nem lehet használni: emberek és autók csak a munkák befejezése után közlekedhetnek rajta. Nyomd meg a műszerfalon 2–3 alkalommal az „Indítás” gombot az idő léptetéséhez, és várd meg, amíg elkészül. Az építkezés ideje alatt minden hónapban építési költség terheli a várost.",
         "description_week": "Az út állapota egyelőre „Építés tervezve”. A tervezett utat még nem lehet használni: emberek és autók csak a munkák befejezése után közlekedhetnek rajta. Nyomd meg a műszerfalon 2–3 alkalommal az „Indítás” gombot az idő léptetéséhez, és várd meg, amíg elkészül. Az építkezés ideje alatt minden héten építési költség terheli a várost."
       },
-      "step11": {
+      "step12": {
         "title": "Elkészültek a telkek",
         "description": "Az út elkészült, és mentén telkek jöttek létre. Épület csak telekre épülhet, és mivel a telek az útra néz, az emberek és az áruk ki-be járhatnak. Ha egy meglévő út mentén szeretnél telkeket létrehozni, azt az ikonpanel „Telkek” gombjával teheted meg."
       },
-      "step12": {
+      "step13": {
         "title": "Kerület létrehozása",
         "description": "Mielőtt építkeznénk, döntsük el, mi legyen ebből az utcából. Ha nincs terv, könnyen épülhet gyár közvetlenül a házak mellé. A helyenkénti irányt kerületenként határozzuk meg. A kerületeket utanként kell kijelölni, a telek pedig annak az útnak a kerületéhez tartozik, amelyre néz. Nyomd meg az ikonpanelen a „Kerületek” gombot a „Kerületek szerkesztése” ablak megnyitásához: látni fogod, hogy most az egész település egyetlen kerület.",
         "create": "A kijelölés módja legyen „Utcaoldal”. Állítsd a műveletet „Új kerület létrehozása” értékre, majd a Ctrl billentyűt nyomva tartva húzd végig az egeret a meghosszabbított úton. Az út mindkét oldala és az oda néző telkek új kerületté válnak."
       },
-      "step13": {
+      "step14": {
         "title": "A kerület elkülönült",
         "description": "Az új utcát sikerült külön kerületbe választani a településközponttól. Kerületenként összesítve ellenőrizheted a népességet és az árakat, és meghatározhatod, milyen épületek épülhetnek ott, így minden környék a hozzá illő módon fejlődhet. Ha megnézted, zárd be a „Kerületek szerkesztése” ablakot."
       },
-      "step14": {
+      "step15": {
         "title": "A kerület adatainak megnyitása",
         "description": "Állítsuk be az új kerületet lakóterületnek. A képernyő bal alsó sarkában lévő ikonnal jelenítsd meg a kerületeket, majd kattints az előbb létrehozott kerület feliratára az adatlap megnyitásához."
       },
-      "step15": {
+      "step16": {
         "title": "Legyen lakóterület",
         "description": "A panel alsó részén lévő építési szabályozásnál választhatod ki, milyen épületek épülhetnek a kerület telkein. Itt nyugodt lakókörnyéket szeretnénk, ezért kattints a „Társasház” és a „Családi ház” kivételével az összes épületre, hogy letiltsd őket."
       },
-      "step16": {
+      "step17": {
         "title": "Egy telek ellenőrzése",
         "description": "A kerületben meghatározott szabályozás a kerület összes telkére érvényes. Kattints a sárga jelölővel ellátott telekre, és nyisd meg az adatlapját."
       },
-      "step17": {
+      "step18": {
         "title": "A szabályozás érvénybe lépett",
         "description": "A telek panelje alján látható, hogy érvényben van a kerületben megadott szabályozás, amely csak „Társasház” és „Családi ház” építését engedi. Így ebben az utcában már csak lakóházak épülhetnek. Nem kell egyenként beállítani a telkeket: ha a kerületnek megadod az irányt, az egész utca ahhoz igazodik."
       },
-      "step18": {
+      "step19": {
         "title": "Lakások építése",
         "description": "Végre lakásokról gondoskodunk. Lakóházat általában a magánszektor épít automatikusan, ha vannak, akik ide szeretnének költözni, de ha a város önkormányzati lakásokat épít, azonnal enyhítheti a lakáshiányt. Építsünk most egy önkormányzati társasházat! Nyomd meg az ikonpanelen az „Építés” gombot.",
         "select": "A „Lakóépületek” kategóriában válaszd a „Társasház” épületet, kattints az új kerület egyik tetszőleges telkére építési helyként, és nyomd meg az „Építés jóváhagyása” gombot."
       },
-      "step19": {
+      "step20": {
         "title": "A lakások befejezése",
         "description": "Az épületekbe – akárcsak az utakra – nem lehet beköltözni pusztán attól, hogy megtervezted őket. Egy társasház több mint fél év alatt készül el. Az „Indítás” gombbal léptesd az időt, és várd meg, amíg elkészül."
       },
-      "step20": {
+      "step21": {
         "title": "Van-e áram?",
         "description": "Lakás önmagában még nem elég az élethez: áram és víz is kell. Ebben a településben még nincs sem erőmű, sem vízellátás. Kattints a sárga jelölővel ellátott társasházra, ahol a település lakói élnek, és nyisd meg az adatlapját. Az „Épület adatai” lapon válassz ki egy bérlőt, majd nyisd meg a „Kereslet, kínálat, kereskedelem” lapot: láthatod, hogy az áram „Megszerzett” értéke 0."
       },
-      "step21": {
+      "step22": {
         "title": "Napelemes erőmű építése",
         "description": "Az áram eljuttatásához először olyan erőmű kell, amely megtermeli. Építs „Naperőmű” létesítményt a sárga jelölővel ellátott telekre. Az építés rendes esetben időbe telik, de mivel ez oktatóanyag, az építési időt átugorjuk."
       },
-      "step22": {
+      "step23": {
         "title": "Transzformátorállomás építése",
         "description": "Az erőmű által termelt nagyfeszültségű áramot a háztartások nem tudják közvetlenül használni. Az alállomás alakítja át háztartási árammá, és osztja el az úttal összekötött környező épületek között. Építs „Alállomás” létesítményt a társasház közelében lévő, sárga jelölővel ellátott telekre."
       },
-      "step23": {
+      "step24": {
         "title": "Bekötés távvezetékkel",
         "description": "Ha az erőmű és az alállomás távol is van egymástól, az áram eljuthat egyiktől a másikig, ha van út számára. Nyisd meg az ikonpanelen az „Utak, vasút, infrastruktúra” menüt, válaszd az „Áram” csoportban a „Távvezeték” elemet, és húzz vezetéket a naperőmű csatlakozási pontjától az alállomás csatlakozási pontjáig. Ha egyenesen kötöd össze a csatlakozási pontokat, egyetlen vezetékkel megoldható."
       },
-      "step24": {
+      "step25": {
         "title": "Az áramellátás ellenőrzése",
         "description": "Bekötés után győződj meg róla, hogy tényleg folyik az áram. Az „Indítás” gombbal léptesd az időt, kattints az alállomásra az adatlapja megnyitásához, és a „Kereslet, kínálat, kereskedelem” lapon ellenőrizd, hogy a nagyfeszültségű áram fogadott mennyisége nem 0. Néhány hónapba is beletelhet, mire az erőmű beindul, és megérkezik az áram."
       },
-      "step25": {
+      "step26": {
         "title": "Az áram eljutott az otthonokba",
         "description": "Nyisd meg a társasház adatlapján – ugyanúgy, mint először – egy bérlő „Kereslet, kínálat, kereskedelem” lapját, és ellenőrizd, hogy az áram „Megszerzett” értéke már nem 0. Előfordulhat, hogy még egy-két hónapot léptetni kell, mire a háztartásokig is eljut. Az erőmű megtermeli, a távvezeték elszállítja, az alállomás elosztja: az áram csak akkor jut el az otthonokba, ha mindhárom össze van kötve."
       },
-      "step26": {
+      "step27": {
         "title": "Vízforrás keresése",
         "description": "Most jöjjön a vízellátás. A vezetékes víz a föld alól kiszivattyúzott talajvíz, amelyet a településre juttatunk. Először derítsük ki, hol lehet vizet kiszivattyúzni. Nyomd meg a műszerfalon a „Nézet” gombot a nézetpanel megnyitásához.",
         "show": "A függőlegesen sorakozó lapok közül válaszd a „Természeti erőforrások” lapot, és állítsd „Látható” értékre. A térképen világoskékkel jelölt területek a vízforrások. Kattints a sárga jelölővel ellátott vízforrásra az adatlapja megnyitásához."
       },
-      "step27": {
+      "step28": {
         "title": "Talajvízszivattyú építése",
         "description": "A talajvízszivattyú a föld alól szivattyúzza fel a vizet, ezért vízforrás fölé kell építeni. Működéséhez áram és munkaerő is kell – ezért vezettük be előbb az áramot. Építs „Talajvízszivattyú” létesítményt a vízforrás fölötti, sárga jelölővel ellátott telekre. Mivel ez oktatóanyag, az építési időt átugorjuk."
       },
-      "step28": {
+      "step29": {
         "title": "Vízellátó szivattyútelep építése",
         "description": "A felszivattyúzott vizet nem lehet közvetlenül eljuttatni a háztartásokhoz. Ahogy az alállomás az áramot, úgy osztja el a vízellátó szivattyútelep a vizet az úttal összekötött környező épületek között. Építs „Vízellátó szivattyútelep” létesítményt a társasház közelében lévő, sárga jelölővel ellátott telekre."
       },
-      "step29": {
+      "step30": {
         "title": "Bekötés vízvezetékkel",
         "description": "Kell egy vezeték, amely a talajvízszivattyúból a vízellátó szivattyútelephez szállítja a vizet. Nyisd meg az ikonpanelen az „Utak, vasút, infrastruktúra” menüt, válaszd a „Víz” csoportban a „Vízvezeték” elemet, és fektesd le a talajvízszivattyú csatlakozási pontjától a vízellátó szivattyútelep csatlakozási pontjáig. Hogy ne ütközzön az utakkal és a távvezetékkel, nagy ívben kerüld meg keleti irányból."
       },
-      "step30": {
+      "step31": {
         "title": "A vízellátás ellenőrzése",
         "description": "Az „Indítás” gombbal léptesd az időt, kattints a vízellátó szivattyútelepre az adatlapja megnyitásához, és a „Kereslet, kínálat, kereskedelem” lapon ellenőrizd, hogy a nagynyomású víz fogadott mennyisége nem 0. Néhány hónapba is beletelhet, mire a talajvízszivattyúhoz elég dolgozó érkezik, és megjön a víz."
       },
-      "step31": {
+      "step32": {
         "title": "Megvannak az alapok",
         "description": "A víz eljutott a vízellátó szivattyútelephez, így a környező háztartásokban is lesz vezetékes víz. Utat építeni, telkeket előkészíteni, megszabni a kerületek irányát, lakásokat építeni, áramot és vizet juttatni el – ez a városépítés alapvető menete. Nyomd meg a „Tovább” gombot az alapokat bemutató oktatóanyag befejezéséhez."
       }
